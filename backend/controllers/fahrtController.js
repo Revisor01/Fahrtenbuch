@@ -57,8 +57,8 @@ exports.exportToExcel = async (req, res) => {
     
     // Aufteilen der Daten in Gruppen von genau 22 Zeilen
     const chunkedData = [];
-    for (let i = 0; i < formattedData.length; i += 22) {
-      chunkedData.push(formattedData.slice(i, i + 22));
+    for (let i = 0; i < formattedData.length; i += 23) {
+      chunkedData.push(formattedData.slice(i, i + 23));
     }
     
     // Pfad zur Vorlage
