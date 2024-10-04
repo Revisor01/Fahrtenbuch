@@ -116,6 +116,7 @@ function AppProvider({ children }) {
       const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
       if (response.status === 201) {
         fetchFahrten();
+        fetchMonthlyData(); // Aktualisiere die monatliche Übersicht
       } else {
         console.error('Unerwarteter Statuscode beim Hinzufügen der Fahrt:', response.status);
       }
@@ -182,21 +183,6 @@ function AppProvider({ children }) {
       setMonthlyData(data);
     } catch (error) {
       console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
-    }
-  };
-  
-  const addFahrt = async (fahrt, retries = 3) => {
-    try {
-      console.log('Sending fahrt data:', fahrt);
-      const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
-      if (response.status === 201) {
-        fetchFahrten();
-        fetchMonthlyData(); // Aktualisiere die monatliche Übersicht
-      } else {
-        console.error('Unerwarteter Statuscode beim Hinzufügen der Fahrt:', response.status);
-      }
-    } catch (error) {
-      // ... Fehlerbehandlung ...
     }
   };
   
