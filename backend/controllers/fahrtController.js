@@ -78,16 +78,25 @@ exports.exportToExcel = async (req, res) => {
       // Einfügen der Daten in die Vorlage
       chunk.forEach((row, rowIndex) => {
         const [datum, vonOrt, nachOrt, anlass, kilometer] = row;
-        XLSX.utils.sheet_add_aoa(worksheet, [[
-          datum,
-          ,,,, // Leere Zellen für B, C, D, E
-          vonOrt,
-          , // Leere Zelle für F
-          nachOrt,
-          anlass,
-          ,, // Leere Zellen für I, J
-          kilometer
-        ]], { origin: `A${rowIndex + 8}`, cellStyles: true });
+        const rowNumber = rowIndex + 8;
+        
+        // Datum
+        if (worksheet[`A${rowNumber}`]) worksheet[`A${rowNumber}`].v = datum;
+        
+        // Von
+        if (worksheet[`E${rowNumber}`]) worksheet[`E${rowNumber}`].v = vonOrt;
+        
+        // Nach
+        if (worksheet[`G${rowNumber}`]) worksheet[`G${rowNumber}`].v = nachOrt;
+        
+        // Anlass
+        if (worksheet[`H${rowNumber}`]) worksheet[`H${rowNumber}`].v = anlass;
+        
+        // Kilometer
+        if (worksheet[`K${rowNumber}`]) {
+          worksheet[`K${rowNumber}`].v = kilometer;
+          worksheet[`K${rowNumber}`].t = 'n'; // Setze den Typ auf Nummer
+        }
       });
       
       return workbook;
@@ -96,7 +105,12 @@ exports.exportToExcel = async (req, res) => {
     // Generieren der Excel-Dateien
     const files = workbooks.map((wb, index) => {
       const fileName = `fahrtenabrechnung_${type}_${year}_${month}_${index + 1}.xlsx`;
-      const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx', cellStyles: true });
+      const buffer = XLSX.write(wb, { 
+        type: 'buffer', 
+        bookType: 'xlsx', 
+        cellStyles: true,
+        compression: true 
+      });
       return { fileName, buffer };
     });
     
@@ -126,7 +140,6 @@ exports.exportToExcel = async (req, res) => {
     res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
   }
 };
-
 
 exports.createFahrt = async (req, res) => {
   try {
