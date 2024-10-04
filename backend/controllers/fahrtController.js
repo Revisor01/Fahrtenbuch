@@ -2,7 +2,7 @@ const Fahrt = require('../models/Fahrt');
 const { getDistance, calculateAutoSplit } = require('../utils/distanceCalculator');
 const ExcelJS = require('exceljs');
 const path = require('path');
-const fs = require('fs');
+const JSZip = require('jszip');
 
 exports.exportToExcel = async (req, res) => {
   try {
@@ -32,33 +32,49 @@ exports.exportToExcel = async (req, res) => {
       return `${day}. ${month}`;
     };
     
-    // Formatieren der Daten für Excel
+    // Formatieren und Sortieren der Daten für Excel
     const formattedData = filteredFahrten.flatMap(fahrt => {
       if (fahrt.autosplit) {
         return fahrt.details
         .filter(detail => detail.abrechnung === type)
-        .map(detail => [
-          formatDate(fahrt.datum),
-          detail.von_ort_adresse || detail.von_ort_name,
-          detail.nach_ort_adresse || detail.nach_ort_name,
-          fahrt.anlass,
-          Math.round(detail.kilometer)
-        ]);
+        .map(detail => ({
+          datum: new Date(fahrt.datum),
+          formattedDatum: formatDate(fahrt.datum),
+          vonOrt: detail.von_ort_adresse || detail.von_ort_name,
+          nachOrt: detail.nach_ort_adresse || detail.nach_ort_name,
+          anlass: fahrt.anlass,
+          kilometer: Math.round(detail.kilometer)
+        }));
       } else {
-        return [[
-          formatDate(fahrt.datum),
-          fahrt.von_ort_adresse || fahrt.von_ort_name || fahrt.einmaliger_von_ort,
-          fahrt.nach_ort_adresse || fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
-          fahrt.anlass,
-          Math.round(fahrt.kilometer)
-        ]];
+        return [{
+          datum: new Date(fahrt.datum),
+          formattedDatum: formatDate(fahrt.datum),
+          vonOrt: fahrt.von_ort_adresse || fahrt.von_ort_name || fahrt.einmaliger_von_ort,
+          nachOrt: fahrt.nach_ort_adresse || fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
+          anlass: fahrt.anlass,
+          kilometer: Math.round(fahrt.kilometer)
+        }];
       }
-    });
+    }).sort((a, b) => a.datum - b.datum);
     
     // Aufteilen der Daten in Gruppen von genau 22 Zeilen
     const chunkedData = [];
-    for (let i = 0; i < formattedData.length; i += 23) {
-      chunkedData.push(formattedData.slice(i, i + 23));
+    for (let i = 0; i < formattedData.length; i += 22) {
+      chunkedData.push(formattedData.slice(i, i + 22));
+    }
+    
+    // Wenn die letzte Gruppe weniger als 22 Einträge hat, fülle sie auf
+    if (chunkedData.length > 0 && chunkedData[chunkedData.length - 1].length < 22) {
+      const lastChunk = chunkedData[chunkedData.length - 1];
+      while (lastChunk.length < 22) {
+        lastChunk.push({
+          formattedDatum: '',
+          vonOrt: '',
+          nachOrt: '',
+          anlass: '',
+          kilometer: ''
+        });
+      }
     }
     
     // Pfad zur Vorlage
@@ -77,14 +93,13 @@ exports.exportToExcel = async (req, res) => {
       
       // Einfügen der Daten in die Vorlage
       chunk.forEach((row, rowIndex) => {
-        const [datum, vonOrt, nachOrt, anlass, kilometer] = row;
         const excelRow = worksheet.getRow(rowIndex + 8);
         
-        excelRow.getCell('A').value = datum;
-        excelRow.getCell('E').value = vonOrt;
-        excelRow.getCell('G').value = nachOrt;
-        excelRow.getCell('H').value = anlass;
-        excelRow.getCell('K').value = kilometer;
+        excelRow.getCell('A').value = row.formattedDatum;
+        excelRow.getCell('E').value = row.vonOrt;
+        excelRow.getCell('G').value = row.nachOrt;
+        excelRow.getCell('H').value = row.anlass;
+        excelRow.getCell('K').value = row.kilometer;
         
         // Behalten Sie die Formatierung bei und setzen Sie die Schriftgröße für den Anlass
         ['A', 'E', 'G', 'H', 'K'].forEach(col => {
@@ -95,18 +110,6 @@ exports.exportToExcel = async (req, res) => {
           }
         });
       });
-      
-      // Leere Zeilen bis 29 mit Formatierung füllen
-      for (let i = chunk.length; i < 22; i++) {
-        const excelRow = worksheet.getRow(i + 8);
-        ['A', 'E', 'G', 'H', 'K'].forEach(col => {
-          const cell = excelRow.getCell(col);
-          cell.style = { ...worksheet.getCell(`${col}8`).style };
-          if (col === 'H') {
-            cell.font = { ...cell.font, size: 10 };
-          }
-        });
-      }
       
       return workbook;
     }));
@@ -126,7 +129,6 @@ exports.exportToExcel = async (req, res) => {
     }
     
     // Wenn mehrere Dateien, erstellen Sie ein Zip-Archiv
-    const JSZip = require('jszip');
     const zip = new JSZip();
     
     files.forEach(file => {
