@@ -55,7 +55,7 @@ exports.exportToExcel = async (req, res) => {
       }
     });
     
-    // Aufteilen der Daten in Gruppen von maximal 22 Zeilen (29 - 8 + 1)
+    // Aufteilen der Daten in Gruppen von genau 22 Zeilen
     const chunkedData = [];
     for (let i = 0; i < formattedData.length; i += 22) {
       chunkedData.push(formattedData.slice(i, i + 22));
@@ -86,12 +86,27 @@ exports.exportToExcel = async (req, res) => {
         excelRow.getCell('H').value = anlass;
         excelRow.getCell('K').value = kilometer;
         
-        // Behalten Sie die Formatierung bei
+        // Behalten Sie die Formatierung bei und setzen Sie die Schriftgröße für den Anlass
         ['A', 'E', 'G', 'H', 'K'].forEach(col => {
           const cell = excelRow.getCell(col);
           cell.style = { ...worksheet.getCell(`${col}8`).style };
+          if (col === 'H') {
+            cell.font = { ...cell.font, size: 10 };
+          }
         });
       });
+      
+      // Leere Zeilen bis 29 mit Formatierung füllen
+      for (let i = chunk.length; i < 22; i++) {
+        const excelRow = worksheet.getRow(i + 8);
+        ['A', 'E', 'G', 'H', 'K'].forEach(col => {
+          const cell = excelRow.getCell(col);
+          cell.style = { ...worksheet.getCell(`${col}8`).style };
+          if (col === 'H') {
+            cell.font = { ...cell.font, size: 10 };
+          }
+        });
+      }
       
       return workbook;
     }));
