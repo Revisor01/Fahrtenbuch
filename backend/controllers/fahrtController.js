@@ -1,7 +1,8 @@
 const Fahrt = require('../models/Fahrt');
 const { getDistance, calculateAutoSplit } = require('../utils/distanceCalculator');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 const path = require('path');
+const fs = require('fs');
 
 exports.exportToExcel = async (req, res) => {
   try {
@@ -22,7 +23,7 @@ exports.exportToExcel = async (req, res) => {
       }
     });
     
-    // Funktion zur Formatierung des Datum
+    // Funktion zur Formatierung des Datums
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       const day = date.getDate().toString().padStart(2, '0');
@@ -64,55 +65,43 @@ exports.exportToExcel = async (req, res) => {
     const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
     
     // Erstellen der Workbooks basierend auf der Vorlage
-    const workbooks = chunkedData.map((chunk, index) => {
-      // Lesen der Vorlage
-      const workbook = XLSX.readFile(templatePath, { cellStyles: true });
-      const sheetName = 'monatliche Abrechnung';
-      let worksheet = workbook.Sheets[sheetName];
+    const workbooks = await Promise.all(chunkedData.map(async (chunk, index) => {
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(templatePath);
+      
+      const worksheet = workbook.getWorksheet('monatliche Abrechnung');
       
       if (!worksheet) {
-        console.error(`Blatt "${sheetName}" nicht gefunden in der Vorlage.`);
-        throw new Error(`Blatt "${sheetName}" nicht gefunden in der Vorlage.`);
+        throw new Error('Worksheet "monatliche Abrechnung" nicht gefunden');
       }
       
       // Einfügen der Daten in die Vorlage
       chunk.forEach((row, rowIndex) => {
         const [datum, vonOrt, nachOrt, anlass, kilometer] = row;
-        const rowNumber = rowIndex + 8;
+        const excelRow = worksheet.getRow(rowIndex + 8);
         
-        // Datum
-        if (worksheet[`A${rowNumber}`]) worksheet[`A${rowNumber}`].v = datum;
+        excelRow.getCell('A').value = datum;
+        excelRow.getCell('E').value = vonOrt;
+        excelRow.getCell('G').value = nachOrt;
+        excelRow.getCell('H').value = anlass;
+        excelRow.getCell('K').value = kilometer;
         
-        // Von
-        if (worksheet[`E${rowNumber}`]) worksheet[`E${rowNumber}`].v = vonOrt;
-        
-        // Nach
-        if (worksheet[`G${rowNumber}`]) worksheet[`G${rowNumber}`].v = nachOrt;
-        
-        // Anlass
-        if (worksheet[`H${rowNumber}`]) worksheet[`H${rowNumber}`].v = anlass;
-        
-        // Kilometer
-        if (worksheet[`K${rowNumber}`]) {
-          worksheet[`K${rowNumber}`].v = kilometer;
-          worksheet[`K${rowNumber}`].t = 'n'; // Setze den Typ auf Nummer
-        }
+        // Behalten Sie die Formatierung bei
+        ['A', 'E', 'G', 'H', 'K'].forEach(col => {
+          const cell = excelRow.getCell(col);
+          cell.style = { ...worksheet.getCell(`${col}8`).style };
+        });
       });
       
       return workbook;
-    });
+    }));
     
     // Generieren der Excel-Dateien
-    const files = workbooks.map((wb, index) => {
+    const files = await Promise.all(workbooks.map(async (wb, index) => {
       const fileName = `fahrtenabrechnung_${type}_${year}_${month}_${index + 1}.xlsx`;
-      const buffer = XLSX.write(wb, { 
-        type: 'buffer', 
-        bookType: 'xlsx', 
-        cellStyles: true,
-        compression: true 
-      });
+      const buffer = await wb.xlsx.writeBuffer();
       return { fileName, buffer };
-    });
+    }));
     
     // Wenn nur eine Datei, senden Sie sie direkt
     if (files.length === 1) {
