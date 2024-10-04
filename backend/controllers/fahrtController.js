@@ -58,16 +58,30 @@ exports.exportToExcel = async (req, res) => {
     const workbooks = chunkedData.map((chunk, index) => {
       // Lesen der Vorlage
       const workbook = XLSX.readFile(templatePath);
-      const worksheet = workbook.Sheets['Blatt2'];
+      
+      // Überprüfen Sie, ob 'Blatt2' existiert, sonst verwenden Sie das erste verfügbare Blatt
+      const sheetName = workbook.SheetNames.includes('Blatt2') ? 'Blatt2' : workbook.SheetNames[0];
+      let worksheet = workbook.Sheets[sheetName];
+      
+      // Wenn das Arbeitsblatt nicht existiert, erstellen Sie ein neues
+      if (!worksheet) {
+        worksheet = XLSX.utils.aoa_to_sheet([]);
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      }
       
       // Einfügen der Daten in die Vorlage
       chunk.forEach((row, rowIndex) => {
         const [datum, vonOrt, nachOrt, anlass, kilometer] = row;
-        worksheet[`A${rowIndex + 8}`] = { v: datum, t: 's' };
-        worksheet[`E${rowIndex + 8}`] = { v: vonOrt, t: 's' };
-        worksheet[`G${rowIndex + 8}`] = { v: nachOrt, t: 's' };
-        worksheet[`H${rowIndex + 8}`] = { v: anlass, t: 's' };
-        worksheet[`K${rowIndex + 8}`] = { v: kilometer, t: 'n' };
+        XLSX.utils.sheet_add_aoa(worksheet, [[
+          datum,
+          ,,,, // Leere Zellen für B, C, D, E
+          vonOrt,
+          , // Leere Zelle für F
+          nachOrt,
+          anlass,
+          ,, // Leere Zellen für I, J
+          kilometer
+        ]], { origin: `A${rowIndex + 8}` });
       });
       
       return workbook;
