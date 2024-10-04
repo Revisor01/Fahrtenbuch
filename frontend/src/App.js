@@ -859,6 +859,23 @@ function FahrtenListe() {
     });
   };
   
+  const exportToExcel = async (type) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/fahrten/export/${type}/${selectedYear}/${selectedMonth.split('-')[1]}`, {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `fahrtenabrechnung_${type}_${selectedYear}_${selectedMonth.split('-')[1]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (error) {
+      console.error('Fehler beim Exportieren nach Excel:', error);
+      alert('Fehler beim Exportieren nach Excel. Bitte versuchen Sie es später erneut.');
+    }
+  };
   
   const handleSave = async () => {
     try {
@@ -1175,6 +1192,12 @@ function FahrtenListe() {
     </button>
     <button onClick={() => exportToCSV('gemeinde')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
     Export Gemeinde CSV
+    </button>
+    <button onClick={() => exportToExcel('kirchenkreis')} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
+    Export Kirchenkreis Excel
+    </button>
+    <button onClick={() => exportToExcel('gemeinde')} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
+    Export Gemeinde Excel
     </button>
     </div>
     </div>

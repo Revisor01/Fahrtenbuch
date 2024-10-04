@@ -1,5 +1,111 @@
 const Fahrt = require('../models/Fahrt');
 const { getDistance, calculateAutoSplit } = require('../utils/distanceCalculator');
+const XLSX = require('xlsx');
+const path = require('path');
+
+exports.exportToExcel = async (req, res) => {
+  try {
+    const { year, month, type } = req.params;
+    const userId = req.user.id;
+    
+    // Abrufen der Fahrten für den angegebenen Monat
+    const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
+    
+    // Filtern der Fahrten basierend auf dem Typ (Gemeinde oder Kirchenkreis)
+    const filteredFahrten = fahrten.filter(fahrt => {
+      if (type === 'gemeinde') {
+        return fahrt.abrechnung === 'Gemeinde' || 
+        (fahrt.autosplit && fahrt.details.some(detail => detail.abrechnung === 'Gemeinde'));
+      } else if (type === 'kirchenkreis') {
+        return fahrt.abrechnung === 'Kirchenkreis' || 
+        (fahrt.autosplit && fahrt.details.some(detail => detail.abrechnung === 'Kirchenkreis'));
+      }
+    });
+    
+    // Formatieren der Daten für Excel
+    const formattedData = filteredFahrten.flatMap(fahrt => {
+      if (fahrt.autosplit) {
+        return fahrt.details
+        .filter(detail => detail.abrechnung === type)
+        .map(detail => [
+          new Date(fahrt.datum).toLocaleDateString('de-DE'),
+          detail.von_ort_name,
+          detail.nach_ort_name,
+          fahrt.anlass,
+          detail.kilometer
+        ]);
+      } else {
+        return [[
+          new Date(fahrt.datum).toLocaleDateString('de-DE'),
+          fahrt.von_ort_name || fahrt.einmaliger_von_ort,
+          fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
+          fahrt.anlass,
+          fahrt.kilometer
+        ]];
+      }
+    });
+    
+    // Aufteilen der Daten in Gruppen von maximal 22 Zeilen (29 - 8 + 1)
+    const chunkedData = [];
+    for (let i = 0; i < formattedData.length; i += 22) {
+      chunkedData.push(formattedData.slice(i, i + 22));
+    }
+    
+    // Pfad zur Vorlage
+    const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
+    
+    // Erstellen der Workbooks basierend auf der Vorlage
+    const workbooks = chunkedData.map((chunk, index) => {
+      // Lesen der Vorlage
+      const workbook = XLSX.readFile(templatePath);
+      const worksheet = workbook.Sheets['Blatt2'];
+      
+      // Einfügen der Daten in die Vorlage
+      chunk.forEach((row, rowIndex) => {
+        const [datum, vonOrt, nachOrt, anlass, kilometer] = row;
+        worksheet[`A${rowIndex + 8}`] = { v: datum, t: 's' };
+        worksheet[`E${rowIndex + 8}`] = { v: vonOrt, t: 's' };
+        worksheet[`G${rowIndex + 8}`] = { v: nachOrt, t: 's' };
+        worksheet[`H${rowIndex + 8}`] = { v: anlass, t: 's' };
+        worksheet[`K${rowIndex + 8}`] = { v: kilometer, t: 'n' };
+      });
+      
+      return workbook;
+    });
+    
+    // Generieren der Excel-Dateien
+    const files = workbooks.map((wb, index) => {
+      const fileName = `fahrtenabrechnung_${type}_${year}_${month}_${index + 1}.xlsx`;
+      const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+      return { fileName, buffer };
+    });
+    
+    // Wenn nur eine Datei, senden Sie sie direkt
+    if (files.length === 1) {
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=${files[0].fileName}`);
+      return res.send(files[0].buffer);
+    }
+    
+    // Wenn mehrere Dateien, erstellen Sie ein Zip-Archiv
+    const JSZip = require('jszip');
+    const zip = new JSZip();
+    
+    files.forEach(file => {
+      zip.file(file.fileName, file.buffer);
+    });
+    
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+    
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename=fahrtenabrechnung_${type}_${year}_${month}.zip`);
+    res.send(zipBuffer);
+    
+  } catch (error) {
+    console.error('Fehler beim Exportieren nach Excel:', error);
+    res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
+  }
+};
 
 exports.createFahrt = async (req, res) => {
   try {
