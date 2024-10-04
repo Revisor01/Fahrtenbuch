@@ -16,9 +16,9 @@ exports.exportToExcel = async (req, res) => {
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const fullYear = date.getFullYear();
-      return `${day}.${month}.${fullYear}`;
+      const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+      const monthName = monthNames[date.getMonth()];
+      return `${day}. ${monthName}`;
     };
     
     // Formatieren und Filtern der Daten für Excel
@@ -85,11 +85,7 @@ exports.exportToExcel = async (req, res) => {
       chunk.forEach((row, rowIndex) => {
         const excelRow = worksheet.getRow(rowIndex + 8);
         
-        // Datum einfügen und Formatierung beibehalten
-        const dateCell = excelRow.getCell('A');
-        dateCell.value = row.formattedDatum;
-        dateCell.numFmt = dateCell.numFmt || 'dd.mm.yyyy'; // Behalte vorhandene Formatierung oder setze auf 'dd.mm.yyyy'
-        
+        excelRow.getCell('A').value = row.formattedDatum;
         excelRow.getCell('E').value = row.vonOrt;
         excelRow.getCell('G').value = row.nachOrt;
         excelRow.getCell('H').value = row.anlass;

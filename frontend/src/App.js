@@ -864,13 +864,20 @@ function FahrtenListe() {
       const response = await axios.get(`${API_BASE_URL}/fahrten/export/${type}/${selectedYear}/${selectedMonth.split('-')[1]}`, {
         responseType: 'blob'
       });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      
+      const contentType = response.headers['content-type'];
+      const contentDisposition = response.headers['content-disposition'];
+      const filenameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/i);
+      const filename = filenameMatch ? filenameMatch[1] : `fahrtenabrechnung_${type}_${selectedYear}_${selectedMonth.split('-')[1]}`;
+      
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: contentType }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `fahrtenabrechnung_${type}_${selectedYear}_${selectedMonth.split('-')[1]}.xlsx`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Fehler beim Exportieren nach Excel:', error);
       alert('Fehler beim Exportieren nach Excel. Bitte versuchen Sie es später erneut.');
