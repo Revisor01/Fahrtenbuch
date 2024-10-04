@@ -759,7 +759,7 @@ function FahrtForm() {
   );
 }
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
@@ -805,6 +805,18 @@ function FahrtenListe() {
     }
   };
   
+  
+  const handleDelete = async (id) => {
+    if (window.confirm('Sind Sie sicher, dass Sie diese Fahrt löschen möchten?')) {
+      try {
+        await deleteFahrt(id);
+        fetchFahrten();
+        fetchMonthlyData(); // Aktualisiere die monatliche Übersicht nach dem Löschen
+      } catch (error) {
+        console.error('Fehler beim Löschen der Fahrt:', error);
+      }
+    }
+  };
   
   const handleEditChange = async (field, value) => {
     const updatedFahrt = { ...editingFahrt, [field]: value };
@@ -865,6 +877,7 @@ function FahrtenListe() {
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
       fetchFahrten();
+      fetchMonthlyData();
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
     }
@@ -1109,7 +1122,7 @@ function FahrtenListe() {
         {!fahrt.autosplit && (
           <button onClick={() => handleEdit(fahrt)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">Bearbeiten</button>
         )}
-        <button onClick={() => deleteFahrt(fahrt.id)} className="bg-red-500 text-white px-2 py-1 rounded text-xs">Löschen</button>
+        <button onClick={() => handleDelete(fahrt.id)} className="bg-red-500 text-white px-2 py-1 rounded text-xs">Löschen</button>
         {fahrt.autosplit ? (
           <button onClick={() => toggleFahrtDetails(fahrt.id)} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
           {expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
