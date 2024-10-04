@@ -29,16 +29,16 @@ exports.exportToExcel = async (req, res) => {
         .filter(detail => detail.abrechnung === type)
         .map(detail => [
           new Date(fahrt.datum).toLocaleDateString('de-DE'),
-          detail.von_ort_name,
-          detail.nach_ort_name,
+          detail.von_ort_adresse || detail.von_ort_name,
+          detail.nach_ort_adresse || detail.nach_ort_name,
           fahrt.anlass,
           detail.kilometer
         ]);
       } else {
         return [[
           new Date(fahrt.datum).toLocaleDateString('de-DE'),
-          fahrt.von_ort_name || fahrt.einmaliger_von_ort,
-          fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
+          fahrt.von_ort_adresse || fahrt.von_ort_name || fahrt.einmaliger_von_ort,
+          fahrt.nach_ort_adresse || fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
           fahrt.anlass,
           fahrt.kilometer
         ]];
@@ -57,16 +57,13 @@ exports.exportToExcel = async (req, res) => {
     // Erstellen der Workbooks basierend auf der Vorlage
     const workbooks = chunkedData.map((chunk, index) => {
       // Lesen der Vorlage
-      const workbook = XLSX.readFile(templatePath);
-      
-      // Überprüfen Sie, ob 'Blatt2' existiert, sonst verwenden Sie das erste verfügbare Blatt
-      const sheetName = workbook.SheetNames.includes('Blatt2') ? 'Blatt2' : workbook.SheetNames[0];
+      const workbook = XLSX.readFile(templatePath, { cellStyles: true });
+      const sheetName = 'monatliche Abrechnung';
       let worksheet = workbook.Sheets[sheetName];
       
-      // Wenn das Arbeitsblatt nicht existiert, erstellen Sie ein neues
       if (!worksheet) {
-        worksheet = XLSX.utils.aoa_to_sheet([]);
-        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+        console.error(`Blatt "${sheetName}" nicht gefunden in der Vorlage.`);
+        throw new Error(`Blatt "${sheetName}" nicht gefunden in der Vorlage.`);
       }
       
       // Einfügen der Daten in die Vorlage
@@ -81,7 +78,7 @@ exports.exportToExcel = async (req, res) => {
           anlass,
           ,, // Leere Zellen für I, J
           kilometer
-        ]], { origin: `A${rowIndex + 8}` });
+        ]], { origin: `A${rowIndex + 8}`, cellStyles: true });
       });
       
       return workbook;
@@ -90,7 +87,7 @@ exports.exportToExcel = async (req, res) => {
     // Generieren der Excel-Dateien
     const files = workbooks.map((wb, index) => {
       const fileName = `fahrtenabrechnung_${type}_${year}_${month}_${index + 1}.xlsx`;
-      const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+      const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx', cellStyles: true });
       return { fileName, buffer };
     });
     
