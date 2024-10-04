@@ -16,9 +16,9 @@ exports.exportToExcel = async (req, res) => {
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       const day = date.getDate().toString().padStart(2, '0');
-      const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-      const month = monthNames[date.getMonth()];
-      return `${day}. ${month}`;
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const fullYear = date.getFullYear();
+      return `${day}.${month}.${fullYear}`;
     };
     
     // Formatieren und Filtern der Daten für Excel
@@ -85,7 +85,11 @@ exports.exportToExcel = async (req, res) => {
       chunk.forEach((row, rowIndex) => {
         const excelRow = worksheet.getRow(rowIndex + 8);
         
-        excelRow.getCell('A').value = row.formattedDatum;
+        // Datum einfügen und Formatierung beibehalten
+        const dateCell = excelRow.getCell('A');
+        dateCell.value = row.formattedDatum;
+        dateCell.numFmt = dateCell.numFmt || 'dd.mm.yyyy'; // Behalte vorhandene Formatierung oder setze auf 'dd.mm.yyyy'
+        
         excelRow.getCell('E').value = row.vonOrt;
         excelRow.getCell('G').value = row.nachOrt;
         excelRow.getCell('H').value = row.anlass;
@@ -111,7 +115,7 @@ exports.exportToExcel = async (req, res) => {
       return { fileName, buffer };
     }));
     
-    // Wenn nur eine Datei, senden Sie sie direkt
+    // Wenn nur eine Datei, senden Sie sie direkt als XLSX
     if (files.length === 1) {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=${files[0].fileName}`);
