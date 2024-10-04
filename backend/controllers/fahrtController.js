@@ -22,7 +22,7 @@ exports.exportToExcel = async (req, res) => {
       }
     });
     
-    // Funktion zur Formatierung des Datums
+    // Funktion zur Formatierung des Datum
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       const day = date.getDate().toString().padStart(2, '0');
