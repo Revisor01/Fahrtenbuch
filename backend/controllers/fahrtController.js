@@ -12,17 +12,6 @@ exports.exportToExcel = async (req, res) => {
     // Abrufen der Fahrten für den angegebenen Monat
     const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
     
-    // Filtern der Fahrten basierend auf dem Typ (Gemeinde oder Kirchenkreis)
-    const filteredFahrten = fahrten.filter(fahrt => {
-      if (type === 'gemeinde') {
-        return fahrt.abrechnung === 'Gemeinde' || 
-        (fahrt.autosplit && fahrt.details.some(detail => detail.abrechnung === 'Gemeinde'));
-      } else if (type === 'kirchenkreis') {
-        return fahrt.abrechnung === 'Kirchenkreis' || 
-        (fahrt.autosplit && fahrt.details.some(detail => detail.abrechnung === 'Kirchenkreis'));
-      }
-    });
-    
     // Funktion zur Formatierung des Datums
     const formatDate = (dateString) => {
       const date = new Date(dateString);
@@ -32,11 +21,11 @@ exports.exportToExcel = async (req, res) => {
       return `${day}. ${month}`;
     };
     
-    // Formatieren und Sortieren der Daten für Excel
-    const formattedData = filteredFahrten.flatMap(fahrt => {
+    // Formatieren und Filtern der Daten für Excel
+    const formattedData = fahrten.flatMap(fahrt => {
       if (fahrt.autosplit) {
         return fahrt.details
-        .filter(detail => detail.abrechnung === type)
+        .filter(detail => detail.abrechnung.toLowerCase() === type)
         .map(detail => ({
           datum: new Date(fahrt.datum),
           formattedDatum: formatDate(fahrt.datum),
@@ -45,7 +34,7 @@ exports.exportToExcel = async (req, res) => {
           anlass: fahrt.anlass,
           kilometer: Math.round(detail.kilometer)
         }));
-      } else {
+      } else if (fahrt.abrechnung.toLowerCase() === type) {
         return [{
           datum: new Date(fahrt.datum),
           formattedDatum: formatDate(fahrt.datum),
@@ -55,6 +44,7 @@ exports.exportToExcel = async (req, res) => {
           kilometer: Math.round(fahrt.kilometer)
         }];
       }
+      return [];
     }).sort((a, b) => a.datum - b.datum);
     
     // Aufteilen der Daten in Gruppen von genau 22 Zeilen
