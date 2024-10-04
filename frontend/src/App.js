@@ -445,7 +445,7 @@ function DistanzForm() {
 }
 
 function FahrtForm() {
-  const { orte, addFahrt } = useContext(AppContext);
+  const { orte, addFahrt, fetchMonthlyData } = useContext(AppContext);
   const [vonOrtTyp, setVonOrtTyp] = useState('gespeichert');
   const [nachOrtTyp, setNachOrtTyp] = useState('gespeichert');
   const [showAutosplitInfo, setShowAutosplitInfo] = useState(false);
