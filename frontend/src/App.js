@@ -11,6 +11,7 @@ function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [orte, setOrte] = useState([]);
+  const [monthlyData, setMonthlyData] = useState([]);
   const [distanzen, setDistanzen] = useState([]);
   const [fahrten, setFahrten] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
@@ -150,6 +151,55 @@ function AppProvider({ children }) {
     }
   };
   
+  const fetchMonthlyData = async () => {
+    try {
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
+      const promises = [];
+      
+      for (let i = 0; i < 24; i++) {
+        const date = new Date(currentYear, currentMonth - i, 1);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        promises.push(axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`));
+      }
+      
+      const responses = await Promise.all(promises);
+      const data = responses
+      .map((response, index) => {
+        const date = new Date(currentYear, currentMonth - index, 1);
+        return {
+          yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
+          monthName: date.toLocaleString('default', { month: 'long' }),
+          year: date.getFullYear(),
+          kirchenkreisErstattung: response.data.summary.kirchenkreisErstattung,
+          gemeindeErstattung: response.data.summary.gemeindeErstattung
+        };
+      })
+      .filter(month => month.kirchenkreisErstattung > 0 || month.gemeindeErstattung > 0);
+      
+      setMonthlyData(data);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
+    }
+  };
+  
+  const addFahrt = async (fahrt, retries = 3) => {
+    try {
+      console.log('Sending fahrt data:', fahrt);
+      const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
+      if (response.status === 201) {
+        fetchFahrten();
+        fetchMonthlyData(); // Aktualisiere die monatliche Übersicht
+      } else {
+        console.error('Unerwarteter Statuscode beim Hinzufügen der Fahrt:', response.status);
+      }
+    } catch (error) {
+      // ... Fehlerbehandlung ...
+    }
+  };
+  
   const updateOrt = async (id, ort) => {
     try {
       console.log('Sending update request for Ort:', id, ort); // Überprüfen, was gesendet wird
@@ -206,7 +256,7 @@ function AppProvider({ children }) {
     <AppContext.Provider value={{ 
       isLoggedIn, login, logout, token, updateFahrt, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
-      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt
+      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData
     }}>
     {children}
     </AppContext.Provider>
@@ -536,6 +586,7 @@ function FahrtForm() {
       setNachOrtTyp('gespeichert');
       setKalkulierteStrecke(null);
       setAddRueckfahrt(false);
+      fetchMonthlyData();
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Fahrt(en):', error);
       // Hier könnten Sie eine Benutzerbenachrichtigung hinzufügen
@@ -560,7 +611,7 @@ function FahrtForm() {
     required
     />
     </div>
-    <div className="w-64 px-2 text-sm mb-2">
+    <div className="w-48 px-2 text-sm mb-2">
     <select value={vonOrtTyp} onChange={(e) => setVonOrtTyp(e.target.value)} className="w-full p-2 border rounded mb-1">
     <option value="gespeichert">Gespeicherter Ort</option>
     <option value="einmalig">Einmaliger Ort</option>
@@ -586,7 +637,7 @@ function FahrtForm() {
       />
     )}
     </div>
-    <div className="w-64 px-2 text-sm mb-2">
+    <div className="w-48 px-2 text-sm mb-2">
     <select value={nachOrtTyp} onChange={(e) => setNachOrtTyp(e.target.value)} className="w-full p-2 border rounded mb-1">
     <option value="gespeichert">Gespeicherter Ort</option>
     <option value="einmalig">Einmaliger Ort</option>
@@ -612,7 +663,7 @@ function FahrtForm() {
       />
     )}
     </div>
-    <div className="w-40 px-2 text-sm flex items-center">
+    <div className="w-32 px-2 text-sm flex items-center">
     <label className="flex items-center">
     <input
     type="checkbox"
@@ -641,7 +692,7 @@ function FahrtForm() {
     )}
     </div>
     </div>
-    <div className="w-40 px-2 text-sm flex items-center">
+    <div className="w-32 px-2 text-sm flex items-center">
     <label className="flex items-center">
     <input
     type="checkbox"
@@ -1156,46 +1207,12 @@ function FahrtenListe() {
 }
 
 function MonthlyOverview() {
-  const [monthlyData, setMonthlyData] = useState([]);
+  const { monthlyData, fetchMonthlyData } = useContext(AppContext);
   
   useEffect(() => {
     fetchMonthlyData();
   }, []);
   
-  const fetchMonthlyData = async () => {
-    try {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth();
-      const promises = [];
-      
-      // Hole Daten für die letzten 24 Monate
-      for (let i = 0; i < 24; i++) {
-        const date = new Date(currentYear, currentMonth - i, 1);
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1; // JavaScript Monate sind 0-indiziert
-        promises.push(axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`));
-      }
-      
-      const responses = await Promise.all(promises);
-      const data = responses
-      .map((response, index) => {
-        const date = new Date(currentYear, currentMonth - index, 1);
-        return {
-          yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
-          monthName: date.toLocaleString('default', { month: 'long' }),
-          year: date.getFullYear(),
-          kirchenkreisErstattung: response.data.summary.kirchenkreisErstattung,
-          gemeindeErstattung: response.data.summary.gemeindeErstattung
-        };
-      })
-      .filter(month => month.kirchenkreisErstattung > 0 || month.gemeindeErstattung > 0);
-      
-      setMonthlyData(data);
-    } catch (error) {
-      console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
-    }
-  };
   const calculateYearTotal = () => {
     return monthlyData.reduce((total, month) => {
       total.kirchenkreis += month.kirchenkreisErstattung;
