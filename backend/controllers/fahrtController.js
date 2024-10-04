@@ -22,25 +22,34 @@ exports.exportToExcel = async (req, res) => {
       }
     });
     
+    // Funktion zur Formatierung des Datums
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      const day = date.getDate().toString().padStart(2, '0');
+      const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+      const month = monthNames[date.getMonth()];
+      return `${day}. ${month}`;
+    };
+    
     // Formatieren der Daten für Excel
     const formattedData = filteredFahrten.flatMap(fahrt => {
       if (fahrt.autosplit) {
         return fahrt.details
         .filter(detail => detail.abrechnung === type)
         .map(detail => [
-          new Date(fahrt.datum).toLocaleDateString('de-DE'),
+          formatDate(fahrt.datum),
           detail.von_ort_adresse || detail.von_ort_name,
           detail.nach_ort_adresse || detail.nach_ort_name,
           fahrt.anlass,
-          detail.kilometer
+          Math.round(detail.kilometer)
         ]);
       } else {
         return [[
-          new Date(fahrt.datum).toLocaleDateString('de-DE'),
+          formatDate(fahrt.datum),
           fahrt.von_ort_adresse || fahrt.von_ort_name || fahrt.einmaliger_von_ort,
           fahrt.nach_ort_adresse || fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
           fahrt.anlass,
-          fahrt.kilometer
+          Math.round(fahrt.kilometer)
         ]];
       }
     });
@@ -117,6 +126,7 @@ exports.exportToExcel = async (req, res) => {
     res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
   }
 };
+
 
 exports.createFahrt = async (req, res) => {
   try {
