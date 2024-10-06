@@ -1608,6 +1608,7 @@ function App() {
 
 function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, setIsProfileModalOpen } = useContext(AppContext);
+  const [isProfileModalOpen] = useState(false);
   
   useEffect(() => {
     const checkTokenExpiration = () => {
