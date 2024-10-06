@@ -245,7 +245,7 @@ function AppProvider({ children }) {
       isLoggedIn, login, logout, token, updateFahrt, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData,
-      setIsProfileModalOpen
+      setIsProfileModalOpen, isProfileModalOpen
     }}>
     {children}
     </AppContext.Provider>
@@ -1637,6 +1637,7 @@ function AppContent() {
     <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
     <div className="flex space-x-2">
     <button 
+    console.log('Profil button clicked');
     onClick={() => setIsProfileModalOpen(true)} 
     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full-mobile"
     >
