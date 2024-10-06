@@ -1607,8 +1607,7 @@ function App() {
 }
 
 function AppContent() {
-  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, setIsProfileModalOpen } = useContext(AppContext);
-  const [isProfileModalOpen] = useState(false);
+  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen } = useContext(AppContext);
   
   useEffect(() => {
     const checkTokenExpiration = () => {
