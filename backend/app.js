@@ -4,6 +4,7 @@ const cors = require('cors');
 const orteRoutes = require('./routes/orte');
 const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
+const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth'); // Neue Zeile
 const authMiddleware = require('./middleware/authMiddleware'); // Neue Zeile
 const util = require('util');
@@ -41,6 +42,7 @@ app.use('/api/auth', authRoutes); // Neue Zeile
 app.use('/api/orte', authMiddleware, orteRoutes);
 app.use('/api/fahrten', authMiddleware, fahrtenRoutes);
 app.use('/api/distanzen', authMiddleware, distanzenRoutes);
+app.use('/api/profile', authMiddleware, profileRoutes);
 
 const PORT = process.env.PORT || 5000;
 

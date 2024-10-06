@@ -2,10 +2,11 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import axios from 'axios';
 import './index.css';
 import './App.css';
+import ProfileModal from './ProfileModal';
 
 const API_BASE_URL = '/api';
 
-const AppContext = createContext();
+export const AppContext = createContext();
 
 function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -14,6 +15,7 @@ function AppProvider({ children }) {
   const [monthlyData, setMonthlyData] = useState([]);
   const [distanzen, setDistanzen] = useState([]);
   const [fahrten, setFahrten] = useState([]);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
@@ -242,7 +244,8 @@ function AppProvider({ children }) {
     <AppContext.Provider value={{ 
       isLoggedIn, login, logout, token, updateFahrt, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
-      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData
+      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData,
+      setIsProfileModalOpen
     }}>
     {children}
     </AppContext.Provider>
@@ -1604,7 +1607,8 @@ function App() {
 }
 
 function AppContent() {
-  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout } = useContext(AppContext);
+  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, setIsProfileModalOpen } = useContext(AppContext);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -1632,12 +1636,20 @@ function AppContent() {
     <div className="container mx-auto p-4">
     <div className="flex flex-col-mobile justify-between items-center mb-8">
     <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
+    <div className="flex space-x-2">
+    <button 
+    onClick={() => setIsProfileModalOpen(true)} 
+    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full-mobile"
+    >
+    Profil
+    </button>
     <button 
     onClick={logout} 
     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full-mobile"
     >
     Logout
     </button>
+    </div>
     </div>
     <div className="grid grid-cols-1 gap-4 mb-8">
     <FahrtForm />
@@ -1648,6 +1660,7 @@ function AppContent() {
     <OrteListe />
     <DistanzenListe />
     <MonthlyOverview />
+    <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     </div>
   );
 }
