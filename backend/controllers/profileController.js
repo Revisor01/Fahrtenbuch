@@ -22,16 +22,20 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   const { email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis } = req.body;
   
+  console.log('Received profile update request:', { email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis });
+  console.log('User ID:', req.user.id);
+  
   try {
-    await db.execute(
+    const result = await db.execute(
       'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE email = VALUES(email), full_name = VALUES(full_name), iban = VALUES(iban), kirchengemeinde = VALUES(kirchengemeinde), kirchspiel = VALUES(kirchspiel), kirchenkreis = VALUES(kirchenkreis)',
       [req.user.id, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
     );
-
+    console.log('Database operation result:', result);
+    
     res.json({ message: 'Profil erfolgreich aktualisiert' });
   } catch (error) {
-    console.error('Fehler beim Aktualisieren des Profils:', error);
-    res.status(500).json({ message: 'Serverfehler beim Aktualisieren des Profils' });
+    console.error('Detaillierter Fehler beim Aktualisieren des Profils:', error);
+    res.status(500).json({ message: 'Serverfehler beim Aktualisieren des Profils', error: error.message });
   }
 };
 

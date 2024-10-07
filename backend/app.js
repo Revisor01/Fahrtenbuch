@@ -42,7 +42,7 @@ app.use('/api/auth', authRoutes); // Neue Zeile
 app.use('/api/orte', authMiddleware, orteRoutes);
 app.use('/api/fahrten', authMiddleware, fahrtenRoutes);
 app.use('/api/distanzen', authMiddleware, distanzenRoutes);
-app.use('/api/profile', authMiddleware, profileRoutes);
+app.use('/api/profile', profileRoutes);
 
 const PORT = process.env.PORT || 5000;
 
