@@ -24,11 +24,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Fehlerbehandlungs-Middleware
 app.use((err, req, res, next) => {
-  console.error('Error occurred:');
-  detailedLog(err);
-  res.status(500).json({ message: 'Ein Fehler ist aufgetreten', error: err.message });
+  console.error('Error occurred:', err);
+  res.status(500).json({ 
+    message: 'Ein Fehler ist aufgetreten', 
+    error: err.message,
+    stack: err.stack 
+  });
 });
 
 app.use(cors({

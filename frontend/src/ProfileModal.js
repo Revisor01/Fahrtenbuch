@@ -2,15 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from './App';
 
-app.use((err, req, res, next) => {
-  console.error('Error occurred:', err);
-  res.status(500).json({ 
-    message: 'Ein Fehler ist aufgetreten', 
-    error: err.message,
-    stack: err.stack 
-  });
-});
-
 function ProfileModal({ isOpen, onClose }) {
   const { token } = useContext(AppContext);
   const [profile, setProfile] = useState({});
