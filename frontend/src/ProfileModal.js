@@ -2,6 +2,15 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from './App';
 
+app.use((err, req, res, next) => {
+  console.error('Error occurred:', err);
+  res.status(500).json({ 
+    message: 'Ein Fehler ist aufgetreten', 
+    error: err.message,
+    stack: err.stack 
+  });
+});
+
 function ProfileModal({ isOpen, onClose }) {
   const { token } = useContext(AppContext);
   const [profile, setProfile] = useState({});
@@ -30,12 +39,13 @@ function ProfileModal({ isOpen, onClose }) {
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     try {
+      console.log('Sending profile update:', profile);
       await axios.put('/api/profile', profile, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessage('Profil erfolgreich aktualisiert');
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Profils:', error);
+      console.error('Fehler beim Aktualisieren des Profils:', error.response?.data || error);
       setMessage('Fehler beim Aktualisieren des Profils');
     }
   };
