@@ -57,6 +57,10 @@
   input, select {
     font-size: 0.875rem;
   }
+  input {
+    height: 1.69rem;
+  }
+  
   
   button {
     padding: 0.5rem 1rem;

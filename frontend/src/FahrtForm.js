@@ -8,6 +8,7 @@ function FahrtForm() {
   const [showAutosplitInfo, setShowAutosplitInfo] = useState(false);
   const [showRueckfahrtInfo, setShowRueckfahrtInfo] = useState(false);
   const [showKilometerWarning, setShowKilometerWarning] = useState(false);
+  const [isKilometerLocked, setIsKilometerLocked] = useState(false);
   const [formData, setFormData] = useState({
     datum: '',
     vonOrtId: '',
@@ -39,8 +40,25 @@ function FahrtForm() {
   useEffect(() => {
     if (kalkulierteStrecke !== null) {
       setFormData(prev => ({ ...prev, manuelleKilometer: kalkulierteStrecke.toString() }));
+      setIsKilometerLocked(true);
     }
   }, [kalkulierteStrecke]);
+  
+  const handleKilometerFocus = () => {
+    if (kalkulierteStrecke !== null && isKilometerLocked) {
+      setShowKilometerWarning(true);
+    }
+  };
+  
+  const handleManuelleKilometerChange = (e) => {
+    setFormData(prev => ({ ...prev, manuelleKilometer: e.target.value }));
+    setIsKilometerLocked(false);
+  };
+  
+  const unlockKilometerField = () => {
+    setIsKilometerLocked(false);
+    setShowKilometerWarning(false);
+  };
   
   const fetchKalkulierteStrecke = async (vonOrtId, nachOrtId, isAutosplit) => {
     try {
@@ -286,19 +304,19 @@ function FahrtForm() {
     value={formData.anlass}
     onChange={handleChange}
     placeholder="Anlass"
-    className="w-40 p-1 border rounded text-sm"
+    className="w-62 p-1 border rounded text-sm"
     required
     />
     <input
     type="number"
     name="manuelleKilometer"
     value={formData.manuelleKilometer}
-    onChange={handleChange}
+    onChange={handleManuelleKilometerChange}
     onFocus={handleKilometerFocus}
     placeholder="km"
     className="w-20 p-1 border rounded text-sm"
     required={useEinmaligenVonOrt || useEinmaligenNachOrt}
-    disabled={formData.autosplit}
+    disabled={formData.autosplit || (isKilometerLocked && !useEinmaligenVonOrt && !useEinmaligenNachOrt)}
     />
     <select
     name="abrechnung"
@@ -329,7 +347,7 @@ function FahrtForm() {
       <p>Es existiert bereits eine berechnete Strecke. Möchten Sie wirklich manuell Kilometer eintragen?</p>
       <div className="mt-4 flex justify-end space-x-2">
       <button 
-      onClick={() => setShowKilometerWarning(false)} 
+      onClick={unlockKilometerField} 
       className="px-4 py-2 bg-blue-500 text-white rounded"
       >
       Ja
