@@ -389,6 +389,48 @@ exports.getMonthlySummary = async (req, res) => {
   }
 };
 
+exports.addMitfahrer = async (req, res) => {
+  try {
+    const { fahrtId } = req.params;
+    const { name, arbeitsstaette, richtung } = req.body;
+    const mitfahrerId = await Mitfahrer.create(fahrtId, name, arbeitsstaette, richtung);
+    res.status(201).json({ id: mitfahrerId, message: 'Mitfahrer erfolgreich hinzugefügt' });
+  } catch (error) {
+    console.error('Fehler beim Hinzufügen des Mitfahrers:', error);
+    res.status(500).json({ message: 'Fehler beim Hinzufügen des Mitfahrers', error: error.message });
+  }
+};
+
+exports.updateMitfahrer = async (req, res) => {
+  try {
+    const { fahrtId, mitfahrerId } = req.params;
+    const { name, arbeitsstaette, richtung } = req.body;
+    const updated = await Mitfahrer.update(mitfahrerId, name, arbeitsstaette, richtung);
+    if (updated) {
+      res.status(200).json({ message: 'Mitfahrer erfolgreich aktualisiert' });
+    } else {
+      res.status(404).json({ message: 'Mitfahrer nicht gefunden' });
+    }
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren des Mitfahrers:', error);
+    res.status(500).json({ message: 'Fehler beim Aktualisieren des Mitfahrers', error: error.message });
+  }
+};
+
+exports.deleteMitfahrer = async (req, res) => {
+  try {
+    const { fahrtId, mitfahrerId } = req.params;
+    const deleted = await Mitfahrer.delete(mitfahrerId);
+    if (deleted) {
+      res.status(200).json({ message: 'Mitfahrer erfolgreich gelöscht' });
+    } else {
+      res.status(404).json({ message: 'Mitfahrer nicht gefunden' });
+    }
+  } catch (error) {
+    console.error('Fehler beim Löschen des Mitfahrers:', error);
+    res.status(500).json({ message: 'Fehler beim Löschen des Mitfahrers', error: error.message });
+  }
+};
 
 exports.getYearSummary = async (req, res) => {
   try {
