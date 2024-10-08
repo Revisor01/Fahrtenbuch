@@ -7,6 +7,7 @@ function FahrtForm() {
   const { orte, addFahrt, fetchMonthlyData } = useContext(AppContext);
   const [showAutosplitInfo, setShowAutosplitInfo] = useState(false);
   const [showRueckfahrtInfo, setShowRueckfahrtInfo] = useState(false);
+  const [showKilometerWarning, setShowKilometerWarning] = useState(false);
   const [formData, setFormData] = useState({
     datum: '',
     vonOrtId: '',
@@ -27,13 +28,6 @@ function FahrtForm() {
   const API_BASE_URL = '/api';
 
   useEffect(() => {
-    const dienstort = orte.find(ort => ort.ist_dienstort);
-    if (dienstort) {
-      setFormData(prev => ({ ...prev, vonOrtId: dienstort.id.toString() }));
-    }
-  }, [orte]);
-
-  useEffect(() => {
     if (formData.vonOrtId && formData.nachOrtId && !useEinmaligenVonOrt && !useEinmaligenNachOrt) {
       fetchKalkulierteStrecke(formData.vonOrtId, formData.nachOrtId, formData.autosplit);
     } else {
@@ -41,7 +35,13 @@ function FahrtForm() {
       setAutosplitInfo({ kirchenkreis: 0, gemeinde: 0 });
     }
   }, [formData.vonOrtId, formData.nachOrtId, formData.autosplit, useEinmaligenVonOrt, useEinmaligenNachOrt]);
-
+  
+  useEffect(() => {
+    if (kalkulierteStrecke !== null) {
+      setFormData(prev => ({ ...prev, manuelleKilometer: kalkulierteStrecke.toString() }));
+    }
+  }, [kalkulierteStrecke]);
+  
   const fetchKalkulierteStrecke = async (vonOrtId, nachOrtId, isAutosplit) => {
     try {
       if (isAutosplit) {
@@ -66,22 +66,29 @@ function FahrtForm() {
       setAutosplitInfo({ kirchenkreis: 0, gemeinde: 0 });
     }
   };
-
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-
     if (name === 'autosplit') {
       setFormData(prev => ({
         ...prev,
+        [name]: checked,
         abrechnung: checked ? 'Autosplit' : 'Gemeinde'
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
       }));
     }
   };
-
+  
+  const handleKilometerFocus = () => {
+    if (kalkulierteStrecke !== null && !formData.autosplit) {
+      setShowKilometerWarning(true);
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -282,47 +289,62 @@ function FahrtForm() {
     className="w-40 p-1 border rounded text-sm"
     required
     />
-    <div className="w-20 relative">
     <input
     type="number"
     name="manuelleKilometer"
     value={formData.manuelleKilometer}
     onChange={handleChange}
+    onFocus={handleKilometerFocus}
     placeholder="km"
-    className="w-full p-1 border rounded text-sm"
+    className="w-20 p-1 border rounded text-sm"
     required={useEinmaligenVonOrt || useEinmaligenNachOrt}
+    disabled={formData.autosplit}
     />
-    {kalkulierteStrecke !== null && !(useEinmaligenVonOrt || useEinmaligenNachOrt) && (
-      <span className="absolute right-0 bottom-0 text-xs text-gray-500 pr-2 pb-1">
-      Kalk: {kalkulierteStrecke} km
-      </span>
-    )}
-    </div>
-    {!formData.autosplit && (
-      <select
-      name="abrechnung"
-      value={formData.abrechnung}
-      onChange={handleChange}
-      className="w-32 p-1 border rounded text-sm"
-      required={!formData.autosplit}
-      >
-      <option value="">Abrechnung</option>
-      <option value="Kirchenkreis">Kirchenkreis</option>
-      <option value="Gemeinde">Gemeinde</option>
-      </select>
-    )}
+    <select
+    name="abrechnung"
+    value={formData.abrechnung}
+    onChange={handleChange}
+    className="w-32 p-1 border rounded text-sm"
+    disabled={formData.autosplit}
+    >
+    <option value="Kirchenkreis">Kirchenkreis</option>
+    <option value="Gemeinde">Gemeinde</option>
+    <option value="Autosplit">Autosplit</option>
+    </select>
     <div className="flex-grow"></div>
     <button type="submit" className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Hinzufügen</button>
     </form>
-    {kalkulierteStrecke !== null && (
-      <div className="mt-2 bg-gray-200 p-2 rounded">
-      <p className="text-sm font-semibold">Kalkulierte Strecke: {kalkulierteStrecke} km</p>
-      {formData.autosplit && (
-        <div className="text-sm">
-        <p>Kirchenkreis: {autosplitInfo.kirchenkreis} km</p>
-        <p>Gemeinde: {autosplitInfo.gemeinde} km</p>
-        </div>
-      )}
+    <div className="mt-2 text-sm">{kalkulierteStrecke !== null ? `Kalkulierte Strecke: ${kalkulierteStrecke} km` : ''}</div>
+    {formData.autosplit && kalkulierteStrecke !== null && (
+      <div className="mt-2 text-sm">
+      <p>Aufteilung:</p>
+      <p>Kirchenkreis: {autosplitInfo.kirchenkreis} km</p>
+      <p>Gemeinde: {autosplitInfo.gemeinde} km</p>
+      </div>
+    )}
+    
+    {showKilometerWarning && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-4 rounded">
+      <p>Es existiert bereits eine berechnete Strecke. Möchten Sie wirklich manuell Kilometer eintragen?</p>
+      <div className="mt-4 flex justify-end space-x-2">
+      <button 
+      onClick={() => setShowKilometerWarning(false)} 
+      className="px-4 py-2 bg-blue-500 text-white rounded"
+      >
+      Ja
+      </button>
+      <button 
+      onClick={() => {
+        setShowKilometerWarning(false);
+        setFormData(prev => ({ ...prev, manuelleKilometer: kalkulierteStrecke.toString() }));
+      }} 
+      className="px-4 py-2 bg-gray-300 rounded"
+      >
+      Nein
+      </button>
+      </div>
+      </div>
       </div>
     )}
     </div>
