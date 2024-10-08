@@ -25,21 +25,28 @@ exports.updateProfile = async (req, res) => {
   console.log('Received profile update request:', { email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis });
   console.log('User ID:', req.user.id);
   
-  // Konvertieren Sie undefined Werte zu null
-  const safeFullName = fullName === undefined ? null : fullName;
-  const safeIban = iban === undefined ? null : iban;
-  const safeKirchengemeinde = kirchengemeinde === undefined ? null : kirchengemeinde;
-  const safeKirchspiel = kirchspiel === undefined ? null : kirchspiel;
-  const safeKirchenkreis = kirchenkreis === undefined ? null : kirchenkreis;
-  
   try {
-    const result = await db.execute(
-      'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE email = VALUES(email), full_name = VALUES(full_name), iban = VALUES(iban), kirchengemeinde = VALUES(kirchengemeinde), kirchspiel = VALUES(kirchspiel), kirchenkreis = VALUES(kirchenkreis)',
-      [req.user.id, email, safeFullName, safeIban, safeKirchengemeinde, safeKirchspiel, safeKirchenkreis]
-    );
+    // Prüfen, ob ein Profil für diesen Benutzer bereits existiert
+    const [existingProfile] = await db.execute('SELECT * FROM user_profiles WHERE user_id = ?', [req.user.id]);
+    
+    let result;
+    if (existingProfile.length > 0) {
+      // Profil aktualisieren
+      result = await db.execute(
+        'UPDATE user_profiles SET email = ?, full_name = ?, iban = ?, kirchengemeinde = ?, kirchspiel = ?, kirchenkreis = ? WHERE user_id = ?',
+        [email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis, req.user.id]
+      );
+    } else {
+      // Neues Profil erstellen
+      result = await db.execute(
+        'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [req.user.id, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
+      );
+    }
+    
     console.log('Database operation result:', result);
     
-    res.json({ message: 'Profil erfolgreich aktualisiert' });
+    res.json({ message: 'Profil erfolgreich aktualisiert', isNewProfile: existingProfile.length === 0 });
   } catch (error) {
     console.error('Detaillierter Fehler beim Aktualisieren des Profils:', error);
     res.status(500).json({ 

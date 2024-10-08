@@ -9,6 +9,7 @@ function ProfileModal({ isOpen, onClose }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
   
   useEffect(() => {
     if (isOpen) {
@@ -22,6 +23,9 @@ function ProfileModal({ isOpen, onClose }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile(response.data);
+      if (Object.keys(response.data).length > 0) {
+        setShowConfirmation(true);
+      }
     } catch (error) {
       console.error('Fehler beim Abrufen des Profils:', error);
     }
@@ -34,10 +38,13 @@ function ProfileModal({ isOpen, onClose }) {
         Object.entries(profile).map(([key, value]) => [key, value === undefined ? null : value])
       );
       console.log('Sending profile update:', cleanProfile);
-      await axios.put('/api/profile', cleanProfile, {
+      const response = await axios.put('/api/profile', cleanProfile, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessage('Profil erfolgreich aktualisiert');
+      setMessage(response.data.message);
+      if (response.data.isNewProfile) {
+        setShowConfirmation(false);
+      }
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Profils:', error.response?.data || error);
       setMessage('Fehler beim Aktualisieren des Profils');
@@ -67,6 +74,27 @@ function ProfileModal({ isOpen, onClose }) {
       setMessage('Fehler beim Ändern des Passworts');
     }
   };
+  
+  const ConfirmationOverlay = ({ message, onConfirm, onCancel }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-lg">
+    <p className="mb-4">{message}</p>
+    <div className="flex justify-end space-x-2">
+    <button onClick={onCancel} className="px-4 py-2 bg-gray-300 rounded">Abbrechen</button>
+    <button onClick={onConfirm} className="px-4 py-2 bg-blue-500 text-white rounded">Bestätigen</button>
+    </div>
+    </div>
+    </div>
+  );
+  
+  const MessageOverlay = ({ message, onClose }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-lg">
+    <p className="mb-4">{message}</p>
+    <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded">OK</button>
+    </div>
+    </div>
+  );
   
   if (!isOpen) return null;
   
@@ -170,9 +198,25 @@ function ProfileModal({ isOpen, onClose }) {
     </button>
     </div>
     </div>
+    {showConfirmation && (
+      <ConfirmationOverlay 
+      message="Es existieren bereits Profildaten. Möchten Sie diese überschreiben?"
+      onConfirm={handleProfileUpdate}
+      onCancel={() => setShowConfirmation(false)}
+      />
+    )}
+    
+    {message && (
+      <MessageOverlay 
+      message={message}
+      onClose={() => setMessage('')}
+      />
+    )}
     </div>
     </div>
   );
 }
+
+export default ProfileModal;
 
 export default ProfileModal;
