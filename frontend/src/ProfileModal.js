@@ -9,7 +9,7 @@ function ProfileModal({ isOpen, onClose }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   
   useEffect(() => {
     if (isOpen) {
@@ -23,9 +23,6 @@ function ProfileModal({ isOpen, onClose }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile(response.data);
-      if (Object.keys(response.data).length > 0) {
-        setShowConfirmation(true);
-      }
     } catch (error) {
       console.error('Fehler beim Abrufen des Profils:', error);
     }
@@ -41,13 +38,12 @@ function ProfileModal({ isOpen, onClose }) {
       const response = await axios.put('/api/profile', cleanProfile, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessage(response.data.message);
-      if (response.data.isNewProfile) {
-        setShowConfirmation(false);
-      }
+      setMessage('Profil erfolgreich aktualisiert');
+      setShowMessage(true);
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Profils:', error.response?.data || error);
       setMessage('Fehler beim Aktualisieren des Profils');
+      setShowMessage(true);
     }
   };
   
@@ -55,6 +51,7 @@ function ProfileModal({ isOpen, onClose }) {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       setMessage('Neue Passwörter stimmen nicht überein');
+      setShowMessage(true);
       return;
     }
     try {
@@ -66,30 +63,23 @@ function ProfileModal({ isOpen, onClose }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessage('Passwort erfolgreich geändert');
+      setShowMessage(true);
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
       console.error('Fehler beim Ändern des Passworts:', error);
       setMessage('Fehler beim Ändern des Passworts');
+      setShowMessage(true);
     }
   };
   
-  const ConfirmationOverlay = ({ message, onConfirm, onCancel }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div className="bg-white p-6 rounded-lg">
-    <p className="mb-4">{message}</p>
-    <div className="flex justify-end space-x-2">
-    <button onClick={onCancel} className="px-4 py-2 bg-gray-300 rounded">Abbrechen</button>
-    <button onClick={onConfirm} className="px-4 py-2 bg-blue-500 text-white rounded">Bestätigen</button>
-    </div>
-    </div>
-    </div>
-  );
-  
   const MessageOverlay = ({ message, onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div className="bg-white p-6 rounded-lg">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" onClick={onClose}>
+    <div className="bg-white p-6 rounded-lg relative" onClick={e => e.stopPropagation()}>
+    <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+    &#x2715;
+    </button>
     <p className="mb-4">{message}</p>
     <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded">OK</button>
     </div>
@@ -99,8 +89,11 @@ function ProfileModal({ isOpen, onClose }) {
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={onClose}>
+    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+    <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+    &#x2715;
+    </button>
     <div className="mt-3 text-center">
     <h3 className="text-lg leading-6 font-medium text-gray-900">Profil</h3>
     <div className="mt-2 px-7 py-3">
@@ -148,9 +141,8 @@ function ProfileModal({ isOpen, onClose }) {
     className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
     />
     <button type="submit" className="mt-4 w-full bg-blue-500 text-white p-2 rounded-md">Profil aktualisieren</button>
-  
-            </form>
-            <form onSubmit={handlePasswordChange} className="mt-4">
+    </form>
+    <form onSubmit={handlePasswordChange} className="mt-4">
               <input
                 type="password"
                 placeholder="Altes Passwort"
@@ -172,47 +164,30 @@ function ProfileModal({ isOpen, onClose }) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
               />
-              <button type="submit" className="mt-4 w-full bg-green-500 text-white p-2 rounded-md">Passwort ändern</button>
-            </form>
-          </div>
-          {profile.wohnort && (
-            <p className="text-sm text-gray-500">Heimatort: {profile.wohnort_adresse}</p>
-          )}
-          {!profile.wohnort && (
-            <p className="text-sm text-red-500">Bitte Heimatort festlegen</p>
-          )}
-          {profile.dienstort && (
-            <p className="text-sm text-gray-500">Dienstort: {profile.dienstort_adresse}</p>
-          )}
-          {!profile.dienstort && (
-            <p className="text-sm text-red-500">Bitte Dienstort festlegen</p>
-          )}
-          {message && <p className="mt-2 text-sm text-blue-500">{message}</p>}
-          <div className="items-center px-4 py-3">
-            <button
-    id="ok-btn"
-    className="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-    onClick={onClose}
-    >
-    Schließen
-    </button>
+    <button type="submit" className="mt-4 w-full bg-green-500 text-white p-2 rounded-md">Passwort ändern</button>
+    </form>
     </div>
-    </div>
-    {showConfirmation && (
-      <ConfirmationOverlay 
-      message="Es existieren bereits Profildaten. Möchten Sie diese überschreiben?"
-      onConfirm={handleProfileUpdate}
-      onCancel={() => setShowConfirmation(false)}
-      />
+    {profile.wohnort && (
+      <p className="text-sm text-gray-500">Heimatort: {profile.wohnort_adresse}</p>
     )}
+    {!profile.wohnort && (
+      <p className="text-sm text-red-500">Bitte Heimatort festlegen</p>
+    )}
+    {profile.dienstort && (
+      <p className="text-sm text-gray-500">Dienstort: {profile.dienstort_adresse}</p>
+    )}
+    {!profile.dienstort && (
+      <p className="text-sm text-red-500">Bitte Dienstort festlegen</p>
+    )}
+    </div>
+    </div>
     
-    {message && (
+    {showMessage && (
       <MessageOverlay 
       message={message}
-      onClose={() => setMessage('')}
+      onClose={() => setShowMessage(false)}
       />
     )}
-    </div>
     </div>
   );
 }
