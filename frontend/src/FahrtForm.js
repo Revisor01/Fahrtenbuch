@@ -357,13 +357,13 @@ function FahrtForm() {
     <button
     type="button"
     onClick={() => setShowMitfahrerModal(true)}
-    className="bg-green-500 text-white px-4 py-2 rounded text-sm"
+    className="bg-green-500 text-white px-2 py-1 rounded text-sm"
     >
     Mitfahrer hinzufügen
     </button>
     <div className="flex flex-wrap mt-2">
     {mitfahrer.map((person, index) => (
-      <div key={index} className="flex items-center bg-blue-100 rounded-full px-3 py-1 text-sm font-semibold text-blue-700 mr-2 mb-2">
+      <div key={index} className="flex items-center bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700 mr-2 mb-2">
       <span title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}>
       👤 {person.name}
       </span>
