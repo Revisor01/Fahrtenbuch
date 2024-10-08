@@ -449,6 +449,8 @@ function DistanzForm() {
 
 function FahrtForm() {
   const { orte, addFahrt, fetchMonthlyData } = useContext(AppContext);
+  const [vonOrtTyp, setVonOrtTyp] = useState('gespeichert');
+  const [nachOrtTyp, setNachOrtTyp] = useState('gespeichert');
   const [showAutosplitInfo, setShowAutosplitInfo] = useState(false);
   const [showRueckfahrtInfo, setShowRueckfahrtInfo] = useState(false);
   const [formData, setFormData] = useState({
@@ -761,8 +763,8 @@ function FahrtForm() {
     </div>
   );
 }
-  
-  function FahrtenListe() {
+
+function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
