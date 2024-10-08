@@ -218,5 +218,3 @@ function ProfileModal({ isOpen, onClose }) {
 }
 
 export default ProfileModal;
-
-export default ProfileModal;
