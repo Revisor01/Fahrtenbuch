@@ -5,6 +5,7 @@ import { AppContext } from './App';
 function ProfileModal({ isOpen, onClose }) {
   const { token } = useContext(AppContext);
   const [profile, setProfile] = useState({});
+  const [originalProfile, setOriginalProfile] = useState({});
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [oldPassword, setOldPassword] = useState('');
@@ -14,6 +15,8 @@ function ProfileModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       fetchProfile();
+    } else {
+      resetPasswordFields();
     }
   }, [isOpen]);
   
@@ -22,36 +25,50 @@ function ProfileModal({ isOpen, onClose }) {
       const response = await axios.get('/api/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProfile(response.data);
+      const profileData = {
+        ...response.data,
+        fullName: response.data.full_name
+      };
+      setProfile(profileData);
+      setOriginalProfile(profileData);
     } catch (error) {
       console.error('Fehler beim Abrufen des Profils:', error);
+      showErrorMessage('Fehler beim Abrufen des Profils');
     }
   };
   
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
+    if (JSON.stringify(profile) === JSON.stringify(originalProfile)) {
+      showErrorMessage('Keine Änderungen vorgenommen');
+      return;
+    }
     try {
-      const cleanProfile = Object.fromEntries(
-        Object.entries(profile).map(([key, value]) => [key, value === undefined ? null : value])
+      const cleanProfile = {
+        ...profile,
+        full_name: profile.fullName,
+      };
+      delete cleanProfile.fullName;
+      
+      const cleanedProfile = Object.fromEntries(
+        Object.entries(cleanProfile).map(([key, value]) => [key, value === undefined ? null : value])
       );
-      console.log('Sending profile update:', cleanProfile);
-      const response = await axios.put('/api/profile', cleanProfile, {
+      
+      await axios.put('/api/profile', cleanedProfile, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessage('Profil erfolgreich aktualisiert');
-      setShowMessage(true);
+      showSuccessMessage('Profil erfolgreich aktualisiert');
+      setOriginalProfile(profile);
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Profils:', error.response?.data || error);
-      setMessage('Fehler beim Aktualisieren des Profils');
-      setShowMessage(true);
+      console.error('Fehler beim Aktualisieren des Profils:', error);
+      showErrorMessage('Fehler beim Aktualisieren des Profils');
     }
   };
   
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setMessage('Neue Passwörter stimmen nicht überein');
-      setShowMessage(true);
+      showErrorMessage('Neue Passwörter stimmen nicht überein');
       return;
     }
     try {
@@ -62,20 +79,32 @@ function ProfileModal({ isOpen, onClose }) {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessage('Passwort erfolgreich geändert');
-      setShowMessage(true);
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      showSuccessMessage('Passwort erfolgreich geändert');
+      resetPasswordFields();
     } catch (error) {
       console.error('Fehler beim Ändern des Passworts:', error);
-      setMessage('Fehler beim Ändern des Passworts');
-      setShowMessage(true);
+      showErrorMessage(error.response?.data?.message || 'Fehler beim Ändern des Passworts');
     }
   };
   
+  const resetPasswordFields = () => {
+    setOldPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+  
+  const showSuccessMessage = (msg) => {
+    setMessage(msg);
+    setShowMessage(true);
+  };
+  
+  const showErrorMessage = (msg) => {
+    setMessage(msg);
+    setShowMessage(true);
+  };
+  
   const MessageOverlay = ({ message, onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
     <div className="bg-white p-6 rounded-lg relative" onClick={e => e.stopPropagation()}>
     <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
     &#x2715;
@@ -143,27 +172,27 @@ function ProfileModal({ isOpen, onClose }) {
     <button type="submit" className="mt-4 w-full bg-blue-500 text-white p-2 rounded-md">Profil aktualisieren</button>
     </form>
     <form onSubmit={handlePasswordChange} className="mt-4">
-              <input
-                type="password"
-                placeholder="Altes Passwort"
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
-              />
-              <input
-                type="password"
-                placeholder="Neues Passwort"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
-              />
-              <input
-                type="password"
-                placeholder="Neues Passwort bestätigen"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
-              />
+    <input
+    type="password"
+    placeholder="Altes Passwort"
+    value={oldPassword}
+    onChange={(e) => setOldPassword(e.target.value)}
+    className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
+    />
+    <input
+    type="password"
+    placeholder="Neues Passwort"
+    value={newPassword}
+    onChange={(e) => setNewPassword(e.target.value)}
+    className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
+    />
+    <input
+    type="password"
+    placeholder="Neues Passwort bestätigen"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
+    />
     <button type="submit" className="mt-4 w-full bg-green-500 text-white p-2 rounded-md">Passwort ändern</button>
     </form>
     </div>
