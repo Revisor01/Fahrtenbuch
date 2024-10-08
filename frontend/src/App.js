@@ -95,7 +95,10 @@ function AppProvider({ children }) {
     try {
       const [year, month] = selectedMonth.split('-');
       const response = await axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`);
-      setFahrten(response.data.fahrten);
+      setFahrten(response.data.fahrten.map(fahrt => ({
+        ...fahrt,
+        mitfahrer: fahrt.mitfahrer || [] // Stellen Sie sicher, dass mitfahrer immer ein Array ist
+      })));
       setGesamtKirchenkreis(response.data.summary.kirchenkreisErstattung || 0);
       setGesamtGemeinde(response.data.summary.gemeindeErstattung || 0);
     } catch (error) {
@@ -807,16 +810,20 @@ function FahrtenListe() {
     )}
     </td>
     <td className="border px-2 py-1 text-sm">
-    {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
-      <span
-      key={index}
-      className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
-      title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
-      onClick={() => handleEditMitfahrer(fahrt.id, person)}
-      >
-      👤 {person.name}
-      </span>
-    ))}
+    {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 ? (
+      fahrt.mitfahrer.map((person, index) => (
+        <span
+        key={index}
+        className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
+        title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
+        onClick={() => handleEditMitfahrer(fahrt.id, person)}
+        >
+        👤 {person.name}
+        </span>
+      ))
+    ) : (
+      <span className="text-gray-400">Keine Mitfahrer</span>
+    )}
     </td>
     <td className="border px-2 py-1 text-sm">
     {!detail && (

@@ -325,6 +325,11 @@ exports.getMonthlyReport = async (req, res) => {
     
     const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
     
+    // Fügen Sie hier die Mitfahrer-Daten hinzu
+    for (let fahrt of fahrten) {
+      fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
+    }
+    
     const erstattungssatz = 0.30;  // 0,30 € pro km
     let kirchenkreisSum = 0;
     let gemeindeSum = 0;
