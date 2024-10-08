@@ -20,9 +20,9 @@ exports.getProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis } = req.body;
+  const { email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis } = req.body;
   
-  console.log('Received profile update request:', { email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis });
+  console.log('Received profile update request:', req.body);
   console.log('User ID:', req.user.id);
   
   try {
@@ -34,19 +34,19 @@ exports.updateProfile = async (req, res) => {
       // Profil aktualisieren
       result = await db.execute(
         'UPDATE user_profiles SET email = ?, full_name = ?, iban = ?, kirchengemeinde = ?, kirchspiel = ?, kirchenkreis = ? WHERE user_id = ?',
-        [email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis, req.user.id]
+        [email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis, req.user.id]
       );
     } else {
       // Neues Profil erstellen
       result = await db.execute(
         'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [req.user.id, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
+        [req.user.id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis]
       );
     }
     
     console.log('Database operation result:', result);
     
-    res.json({ message: 'Profil erfolgreich aktualisiert', isNewProfile: existingProfile.length === 0 });
+    res.json({ message: 'Profil erfolgreich aktualisiert' });
   } catch (error) {
     console.error('Detaillierter Fehler beim Aktualisieren des Profils:', error);
     res.status(500).json({ 
@@ -59,29 +59,31 @@ exports.updateProfile = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   const { oldPassword, newPassword, confirmPassword } = req.body;
-
+  
   if (newPassword !== confirmPassword) {
     return res.status(400).json({ message: 'Neue Passwörter stimmen nicht überein' });
   }
-
+  
   try {
-    const [user] = await db.execute('SELECT * FROM users WHERE id = ?', [req.user.id]);
-
-    if (user.length === 0) {
+    const [users] = await db.execute('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    
+    if (users.length === 0) {
       return res.status(404).json({ message: 'Benutzer nicht gefunden' });
     }
-
-    const isMatch = await bcrypt.compare(oldPassword, user[0].password);
-
+    
+    const user = users[0];
+    
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    
     if (!isMatch) {
       return res.status(400).json({ message: 'Altes Passwort ist falsch' });
     }
-
+    
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
-
+    
     await db.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
-
+    
     res.json({ message: 'Passwort erfolgreich geändert' });
   } catch (error) {
     console.error('Fehler beim Ändern des Passworts:', error);

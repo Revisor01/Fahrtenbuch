@@ -39,51 +39,48 @@ function ProfileModal({ isOpen, onClose }) {
   
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    if (JSON.stringify(profile) === JSON.stringify(originalProfile)) {
-      showErrorMessage('Keine Änderungen vorgenommen');
-      return;
-    }
     try {
-      const cleanProfile = {
-        ...profile,
-        full_name: profile.fullName,
-      };
-      delete cleanProfile.fullName;
+      const cleanProfile = { ...profile };
+      delete cleanProfile.wohnort;
+      delete cleanProfile.wohnort_adresse;
+      delete cleanProfile.dienstort;
+      delete cleanProfile.dienstort_adresse;
+      delete cleanProfile.username;
       
-      const cleanedProfile = Object.fromEntries(
-        Object.entries(cleanProfile).map(([key, value]) => [key, value === undefined ? null : value])
-      );
-      
-      await axios.put('/api/profile', cleanedProfile, {
+      const response = await axios.put('/api/profile', cleanProfile, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      showSuccessMessage('Profil erfolgreich aktualisiert');
-      setOriginalProfile(profile);
+      setMessage(response.data.message);
+      setShowMessage(true);
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Profils:', error);
-      showErrorMessage('Fehler beim Aktualisieren des Profils');
+      setMessage(error.response?.data?.message || 'Fehler beim Aktualisieren des Profils');
+      setShowMessage(true);
     }
   };
   
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      showErrorMessage('Neue Passwörter stimmen nicht überein');
+      setMessage('Neue Passwörter stimmen nicht überein');
+      setShowMessage(true);
       return;
     }
     try {
-      await axios.put('/api/profile/change-password', {
+      const response = await axios.put('/api/profile/change-password', {
         oldPassword,
         newPassword,
         confirmPassword
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      showSuccessMessage('Passwort erfolgreich geändert');
+      setMessage(response.data.message);
+      setShowMessage(true);
       resetPasswordFields();
     } catch (error) {
       console.error('Fehler beim Ändern des Passworts:', error);
-      showErrorMessage(error.response?.data?.message || 'Fehler beim Ändern des Passworts');
+      setMessage(error.response?.data?.message || 'Fehler beim Ändern des Passworts');
+      setShowMessage(true);
     }
   };
   
