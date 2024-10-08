@@ -48,12 +48,6 @@ function FahrtForm() {
     }
   }, [kalkulierteStrecke]);
   
-  const handleKilometerFocus = () => {
-    if (kalkulierteStrecke !== null && isKilometerLocked) {
-      setShowKilometerWarning(true);
-    }
-  };
-  
   const handleManuelleKilometerChange = (e) => {
     setFormData(prev => ({ ...prev, manuelleKilometer: e.target.value }));
     setIsKilometerLocked(false);
