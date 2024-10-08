@@ -46,7 +46,7 @@ exports.updateProfile = async (req, res) => {
     
     console.log('Database operation result:', result);
     
-    res.json({ message: 'Profil erfolgreich aktualisiert' });
+    res.json({ message: 'Profil erfolgreich aktualisiert.' });
   } catch (error) {
     console.error('Detaillierter Fehler beim Aktualisieren des Profils:', error);
     res.status(500).json({ 
@@ -84,7 +84,7 @@ exports.changePassword = async (req, res) => {
     
     await db.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
     
-    res.json({ message: 'Passwort erfolgreich geändert' });
+    res.json({ message: 'Passwort erfolgreich geändert.' });
   } catch (error) {
     console.error('Fehler beim Ändern des Passworts:', error);
     res.status(500).json({ message: 'Serverfehler beim Ändern des Passworts' });

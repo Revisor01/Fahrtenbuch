@@ -449,8 +449,6 @@ function DistanzForm() {
 
 function FahrtForm() {
   const { orte, addFahrt, fetchMonthlyData } = useContext(AppContext);
-  const [vonOrtTyp, setVonOrtTyp] = useState('gespeichert');
-  const [nachOrtTyp, setNachOrtTyp] = useState('gespeichert');
   const [showAutosplitInfo, setShowAutosplitInfo] = useState(false);
   const [showRueckfahrtInfo, setShowRueckfahrtInfo] = useState(false);
   const [formData, setFormData] = useState({
@@ -467,6 +465,8 @@ function FahrtForm() {
   const [kalkulierteStrecke, setKalkulierteStrecke] = useState(null);
   const [addRueckfahrt, setAddRueckfahrt] = useState(false);
   const [useEinmaligeOrte, setUseEinmaligeOrte] = useState(false);
+  const [useEinmaligenVonOrt, setUseEinmaligenVonOrt] = useState(false);
+  const [useEinmaligenNachOrt, setUseEinmaligenNachOrt] = useState(false);
   
   useEffect(() => {
     if (vonOrtTyp === 'einmalig' || nachOrtTyp === 'einmalig') {
@@ -586,85 +586,96 @@ function FahrtForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
-    <div>
-    <h2 className="text-lg font-semibold mb-2">Fahrt hinzufügen</h2>
-    <form onSubmit={handleSubmit} className="p-4 bg-gray-100 rounded-lg">
-    <div className="flex flex-wrap items-center -mx-2">
-    <div className="w-40 px-2 text-sm mb-2">
+    <div className="p-4 bg-gray-100 rounded-lg">
+    <h2 className="text-lg font-semibold mb-4">Fahrt hinzufügen</h2>
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-center space-x-2 bg-gray-100 p-2 rounded-lg">
     <input
     type="date"
     name="datum"
     value={formData.datum}
     onChange={handleChange}
-    className="w-full p-2 border rounded"
+    className="w-32 p-1 border rounded text-sm"
     required
     />
+    <div className="w-40">
+    <div className="flex items-center mb-1">
+    <input
+    type="checkbox"
+    checked={useEinmaligenVonOrt}
+    onChange={(e) => setUseEinmaligenVonOrt(e.target.checked)}
+    className="mr-2"
+    />
+    <span className="text-sm">Einmaliger Von-Ort</span>
     </div>
-    <div className="w-48 px-2 text-sm mb-2">
-    <select value={vonOrtTyp} onChange={(e) => setVonOrtTyp(e.target.value)} className="w-full p-2 border rounded mb-1">
-    <option value="gespeichert">Gespeicherter Ort</option>
-    <option value="einmalig">Einmaliger Ort</option>
-    </select>
-    {vonOrtTyp === 'gespeichert' ? (
-      <select
-      name="vonOrtId"
-      value={formData.vonOrtId}
-      onChange={handleChange}
-      className="w-full p-2 border rounded"
-      >
-      <option value="">Von Ort auswählen</option>
-      {renderOrteOptions(orte)}
-      </select>
-    ) : (
+    {useEinmaligenVonOrt ? (
       <input
       type="text"
       name="einmaligerVonOrt"
       value={formData.einmaligerVonOrt}
       onChange={handleChange}
-      placeholder="Einmaliger Von-Ort"
-      className="w-full p-2 border rounded"
+      placeholder="Von (einmalig)"
+      className="w-full p-1 border rounded text-sm"
+      required
       />
-    )}
-    </div>
-    <div className="w-48 px-2 text-sm mb-2">
-    <select value={nachOrtTyp} onChange={(e) => setNachOrtTyp(e.target.value)} className="w-full p-2 border rounded mb-1">
-    <option value="gespeichert">Gespeicherter Ort</option>
-    <option value="einmalig">Einmaliger Ort</option>
-    </select>
-    {nachOrtTyp === 'gespeichert' ? (
+    ) : (
       <select
-      name="nachOrtId"
-      value={formData.nachOrtId}
+      name="vonOrtId"
+      value={formData.vonOrtId}
       onChange={handleChange}
-      className="w-full p-2 border rounded"
+      className="w-full p-1 border rounded text-sm"
+      required
       >
-      <option value="">Nach Ort auswählen</option>
+      <option value="">Von</option>
       {renderOrteOptions(orte)}
       </select>
-    ) : (
+    )}
+    </div>
+    <div className="w-40">
+    <div className="flex items-center mb-1">
+    <input
+    type="checkbox"
+    checked={useEinmaligenNachOrt}
+    onChange={(e) => setUseEinmaligenNachOrt(e.target.checked)}
+    className="mr-2"
+    />
+    <span className="text-sm">Einmaliger Nach-Ort</span>
+    </div>
+    {useEinmaligenNachOrt ? (
       <input
       type="text"
       name="einmaligerNachOrt"
       value={formData.einmaligerNachOrt}
       onChange={handleChange}
-      placeholder="Einmaliger Nach-Ort"
-      className="w-full p-2 border rounded"
+      placeholder="Nach (einmalig)"
+      className="w-full p-1 border rounded text-sm"
+      required
       />
+    ) : (
+      <select
+      name="nachOrtId"
+      value={formData.nachOrtId}
+      onChange={handleChange}
+      className="w-full p-1 border rounded text-sm"
+      required
+      >
+      <option value="">Nach</option>
+      {renderOrteOptions(orte)}
+      </select>
     )}
     </div>
-    <div className="w-32 px-2 text-sm flex items-center">
+    <div className="flex items-center space-x-2">
     <label className="flex items-center">
     <input
     type="checkbox"
     name="autosplit"
     checked={formData.autosplit}
     onChange={handleChange}
-    className="mr-2"
-    disabled={vonOrtTyp === 'einmalig' || nachOrtTyp === 'einmalig'}
+    className="mr-1"
+    disabled={useEinmaligenVonOrt || useEinmaligenNachOrt}
     />
-    <span>Autosplit</span>
+    <span className="text-sm">via Dienstort</span>
     </label>
-    <div className="relative ml-2">
+    <div className="relative">
     <button
     type="button"
     className="text-blue-500 hover:text-blue-700"
@@ -680,18 +691,16 @@ function FahrtForm() {
       </div>
     )}
     </div>
-    </div>
-    <div className="w-32 px-2 text-sm flex items-center">
     <label className="flex items-center">
     <input
     type="checkbox"
     checked={addRueckfahrt}
     onChange={(e) => setAddRueckfahrt(e.target.checked)}
-    className="mr-2"
+    className="mr-1"
     />
-    <span>Rückfahrt</span>
+    <span className="text-sm">Rückfahrt</span>
     </label>
-    <div className="relative ml-2">
+    <div className="relative">
     <button
     type="button"
     className="text-blue-500 hover:text-blue-700"
@@ -708,60 +717,52 @@ function FahrtForm() {
     )}
     </div>
     </div>
-    <div className="w-48 px-2 text-sm">
     <input
     type="text"
     name="anlass"
     value={formData.anlass}
     onChange={handleChange}
     placeholder="Anlass"
-    className="w-full p-2 border rounded"
+    className="w-40 p-1 border rounded text-sm"
     required
     />
-    </div>
-    <div className="w-32 px-2 text-sm">
-    <div className="relative">
+    <div className="w-20 relative">
     <input
     type="number"
     name="manuelleKilometer"
     value={formData.manuelleKilometer}
     onChange={handleChange}
-    placeholder="Kilometer"
-    className="w-full p-2 border rounded"
-    required={useEinmaligeOrte}
+    placeholder="km"
+    className="w-full p-1 border rounded text-sm"
+    required={useEinmaligenVonOrt || useEinmaligenNachOrt}
     />
-    {kalkulierteStrecke !== null && !useEinmaligeOrte && (
+    {kalkulierteStrecke !== null && !(useEinmaligenVonOrt || useEinmaligenNachOrt) && (
       <span className="absolute right-0 bottom-0 text-xs text-gray-500 pr-2 pb-1">
       Kalk: {kalkulierteStrecke} km
       </span>
     )}
     </div>
-    </div>
     {!formData.autosplit && (
-      <div className="w-40 px-2 text-sm">
       <select
       name="abrechnung"
       value={formData.abrechnung}
       onChange={handleChange}
-      className="w-full p-2 border rounded"
+      className="w-32 p-1 border rounded text-sm"
       required={!formData.autosplit}
       >
       <option value="">Abrechnung</option>
       <option value="Kirchenkreis">Kirchenkreis</option>
       <option value="Gemeinde">Gemeinde</option>
       </select>
-      </div>
     )}
     <div className="flex-grow"></div>
-    <div className="w-32 px-2 text-sm">
-    <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded">Hinzufügen</button>
-    </div>
-    </div>
+    <button type="submit" className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Hinzufügen</button>
     </form>
     </div>
   );
 }
-function FahrtenListe() {
+  
+  function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());

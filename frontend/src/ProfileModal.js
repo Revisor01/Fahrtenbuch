@@ -33,7 +33,7 @@ function ProfileModal({ isOpen, onClose }) {
       setOriginalProfile(profileData);
     } catch (error) {
       console.error('Fehler beim Abrufen des Profils:', error);
-      showErrorMessage('Fehler beim Abrufen des Profils');
+      showErrorMessage('Fehler beim Abrufen des Profils.');
     }
   };
   
@@ -54,7 +54,7 @@ function ProfileModal({ isOpen, onClose }) {
       setShowMessage(true);
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Profils:', error);
-      setMessage(error.response?.data?.message || 'Fehler beim Aktualisieren des Profils');
+      setMessage(error.response?.data?.message || 'Fehler beim Aktualisieren des Profils.');
       setShowMessage(true);
     }
   };
@@ -62,7 +62,7 @@ function ProfileModal({ isOpen, onClose }) {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setMessage('Neue Passwörter stimmen nicht überein');
+      setMessage('Neue Passwörter stimmen nicht überein.');
       setShowMessage(true);
       return;
     }
@@ -79,7 +79,7 @@ function ProfileModal({ isOpen, onClose }) {
       resetPasswordFields();
     } catch (error) {
       console.error('Fehler beim Ändern des Passworts:', error);
-      setMessage(error.response?.data?.message || 'Fehler beim Ändern des Passworts');
+      setMessage(error.response?.data?.message || 'Fehler beim Ändern des Passworts.');
       setShowMessage(true);
     }
   };
