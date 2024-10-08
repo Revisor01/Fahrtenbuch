@@ -352,15 +352,16 @@ function FahrtForm() {
     <option value="Gemeinde">Gemeinde</option>
     <option value="Autosplit">Autosplit</option>
     </select>
-    
-    <div className="w-full mt-4">
     <button
     type="button"
     onClick={() => setShowMitfahrerModal(true)}
     className="bg-green-500 text-white px-2 py-1 rounded text-sm"
     >
-    Mitfahrer hinzufügen
+    Mitfahrer:in hinzufügen
     </button>
+    <div className="flex-grow"></div>
+    <button type="submit" className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Hinzufügen</button>
+    <div className="w-full mt-4">
     <div className="flex flex-wrap mt-2">
     {mitfahrer.map((person, index) => (
       <div key={index} className="flex items-center bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700 mr-2 mb-2">
@@ -385,8 +386,6 @@ function FahrtForm() {
     ))}
     </div>
     </div>
-    <div className="flex-grow"></div>
-    <button type="submit" className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Hinzufügen</button>
     </form>
     <div className="mt-2 text-sm">{kalkulierteStrecke !== null ? `Kalkulierte Strecke: ${kalkulierteStrecke} km` : ''}</div>
     {formData.autosplit && kalkulierteStrecke !== null && (

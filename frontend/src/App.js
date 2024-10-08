@@ -909,7 +909,7 @@ function FahrtenListe() {
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('anlass')}>Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('kilometer')}>Kilometer {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('abrechnung')}>Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium">Mitfahrer</th>
+    <th className="border px-2 py-1 text-sm font-medium">Mitfahrer:innen</th>
     <th className="border px-2 py-1 text-sm font-medium">Aktionen</th>
     </tr>
     </thead>
