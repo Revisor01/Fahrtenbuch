@@ -121,7 +121,7 @@ function AppProvider({ children }) {
       const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
       if (response.status === 201) {
         fetchFahrten();
-        fetchMonthlyData(); // Aktualisiere die monatliche Übersicht
+        fetchMonthlyData();
       } else {
         console.error('Unerwarteter Statuscode beim Hinzufügen der Fahrt:', response.status);
       }
@@ -132,7 +132,7 @@ function AppProvider({ children }) {
       }
       if (retries > 0 && error.response && error.response.data.code === 'ER_LOCK_DEADLOCK') {
         console.log(`Wiederhole Hinzufügen der Fahrt. Verbleibende Versuche: ${retries - 1}`);
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Warte 1 Sekunde vor dem nächsten Versuch
+        await new Promise(resolve => setTimeout(resolve, 1000));
         return addFahrt(fahrt, retries - 1);
       }
       throw error;

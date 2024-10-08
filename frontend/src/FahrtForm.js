@@ -122,7 +122,8 @@ function FahrtForm() {
       anlass: formData.anlass,
       kilometer: formData.manuelleKilometer ? parseFloat(formData.manuelleKilometer) : kalkulierteStrecke,
       autosplit: formData.autosplit,
-      abrechnung: formData.abrechnung
+      abrechnung: formData.abrechnung,
+      mitfahrer: mitfahrer  // Fügen Sie die Mitfahrer-Daten hinzu
     };
     
     try {
@@ -135,7 +136,8 @@ function FahrtForm() {
           nachOrtId: fahrtData.vonOrtId,
           einmaligerVonOrt: fahrtData.einmaligerNachOrt,
           einmaligerNachOrt: fahrtData.einmaligerVonOrt,
-          anlass: `Rückfahrt: ${fahrtData.anlass}`
+          anlass: `Rückfahrt: ${fahrtData.anlass}`,
+          mitfahrer: mitfahrer.map(m => ({...m, richtung: m.richtung === 'hin' ? 'rueck' : (m.richtung === 'rueck' ? 'hin' : 'hin_rueck')}))
         };
         await addFahrt(rueckfahrtData);
       }
