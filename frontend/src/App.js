@@ -5,6 +5,7 @@ import './App.css';
 import ProfileModal from './ProfileModal';
 import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
+import MitfahrerModal from './MitfahrerModal';
 
 const API_BASE_URL = '/api';
 
@@ -411,6 +412,7 @@ function DistanzForm() {
 function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
+  const [editingMitfahrer, setEditingMitfahrer] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
@@ -652,6 +654,27 @@ function FahrtenListe() {
   
   const formatValue = (value) => value === 0 ? null : value;
   
+  const handleEditMitfahrer = (fahrtId, mitfahrer) => {
+    setEditingMitfahrer({ fahrtId, ...mitfahrer });
+  };
+  
+  const handleSaveMitfahrer = async (updatedMitfahrer) => {
+    try {
+      const fahrt = fahrten.find(f => f.id === editingMitfahrer.fahrtId);
+      const updatedMitfahrerList = fahrt.mitfahrer.map(m => 
+        m.id === editingMitfahrer.id ? updatedMitfahrer : m
+      );
+      await updateFahrt(editingMitfahrer.fahrtId, {
+        ...fahrt,
+        mitfahrer: updatedMitfahrerList
+      });
+      setEditingMitfahrer(null);
+      fetchFahrten();
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Mitfahrers:', error);
+    }
+  };
+  
   const renderFahrtRow = (fahrt, detail = null) => (
     <tr key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} className={
       detail ? "bg-gray-50" : 
@@ -784,6 +807,18 @@ function FahrtenListe() {
     )}
     </td>
     <td className="border px-2 py-1 text-sm">
+    {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
+      <span
+      key={index}
+      className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
+      title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
+      onClick={() => handleEditMitfahrer(fahrt.id, person)}
+      >
+      👤 {person.name}
+      </span>
+    ))}
+    </td>
+    <td className="border px-2 py-1 text-sm">
     {!detail && (
       <div className="flex space-x-1">
       {editingFahrt?.id === fahrt.id ? (
@@ -867,7 +902,7 @@ function FahrtenListe() {
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('anlass')}>Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('kilometer')}>Kilometer {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('abrechnung')}>Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium">Aktion</th>
+    <th className="border px-2 py-1 text-sm font-medium">Mitfahrer</th>
     </tr>
     </thead>
     <tbody>
@@ -881,6 +916,13 @@ function FahrtenListe() {
     ))}
     </tbody>
     </table>
+    {editingMitfahrer && (
+      <MitfahrerModal
+      onClose={() => setEditingMitfahrer(null)}
+      onSave={handleSaveMitfahrer}
+      initialData={editingMitfahrer}
+      />
+    )}
     </div>
   );
 }

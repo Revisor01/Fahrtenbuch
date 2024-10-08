@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from './App';
 import { renderOrteOptions } from './utils';
+import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 
 function FahrtForm() {
   const { orte, addFahrt, fetchMonthlyData } = useContext(AppContext);
   const [showAutosplitInfo, setShowAutosplitInfo] = useState(false);
+  const [mitfahrer, setMitfahrer] = useState([]);
+  const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
+  const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
   const [showRueckfahrtInfo, setShowRueckfahrtInfo] = useState(false);
   const [showKilometerWarning, setShowKilometerWarning] = useState(false);
   const [isKilometerLocked, setIsKilometerLocked] = useState(false);
@@ -160,10 +164,33 @@ function FahrtForm() {
       setAutosplitInfo({ kirchenkreis: 0, gemeinde: 0 });
       setAddRueckfahrt(false);
       fetchMonthlyData();
+      setMitfahrer([]);
     } catch (error) {
-      console.error('Fehler beim Hinzufügen der Fahrt(en):', error);
+      console.error('Fehler beim Hinzufügen der Fahrt:', error);
       alert('Fehler beim Hinzufügen der Fahrt. Bitte versuchen Sie es erneut.');
     }
+  };
+  
+  const handleAddMitfahrer = (newMitfahrer) => {
+    if (editingMitfahrerIndex !== null) {
+      const updatedMitfahrer = [...mitfahrer];
+      updatedMitfahrer[editingMitfahrerIndex] = newMitfahrer;
+      setMitfahrer(updatedMitfahrer);
+      setEditingMitfahrerIndex(null);
+    } else {
+      setMitfahrer([...mitfahrer, newMitfahrer]);
+    }
+    setShowMitfahrerModal(false);
+  };
+  
+  const handleEditMitfahrer = (index) => {
+    setEditingMitfahrerIndex(index);
+    setShowMitfahrerModal(true);
+  };
+  
+  const handleDeleteMitfahrer = (index) => {
+    const updatedMitfahrer = mitfahrer.filter((_, i) => i !== index);
+    setMitfahrer(updatedMitfahrer);
   };
 
   return (
@@ -329,6 +356,39 @@ function FahrtForm() {
     <option value="Gemeinde">Gemeinde</option>
     <option value="Autosplit">Autosplit</option>
     </select>
+    
+    <div className="w-full mt-4">
+    <button
+    type="button"
+    onClick={() => setShowMitfahrerModal(true)}
+    className="bg-green-500 text-white px-4 py-2 rounded text-sm"
+    >
+    Mitfahrer hinzufügen
+    </button>
+    <div className="flex flex-wrap mt-2">
+    {mitfahrer.map((person, index) => (
+      <div key={index} className="flex items-center bg-blue-100 rounded-full px-3 py-1 text-sm font-semibold text-blue-700 mr-2 mb-2">
+      <span title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}>
+      👤 {person.name}
+      </span>
+      <button
+      type="button"
+      onClick={() => handleEditMitfahrer(index)}
+      className="ml-2 text-blue-500 hover:text-blue-700"
+      >
+      ✏️
+      </button>
+      <button
+      type="button"
+      onClick={() => handleDeleteMitfahrer(index)}
+      className="ml-2 text-red-500 hover:text-red-700"
+      >
+      ❌
+      </button>
+      </div>
+    ))}
+    </div>
+    </div>
     <div className="flex-grow"></div>
     <button type="submit" className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Hinzufügen</button>
     </form>
@@ -340,7 +400,16 @@ function FahrtForm() {
       <p>Gemeinde: {autosplitInfo.gemeinde} km</p>
       </div>
     )}
-    
+    {showMitfahrerModal && (
+      <MitfahrerModal
+      onClose={() => {
+        setShowMitfahrerModal(false);
+        setEditingMitfahrerIndex(null);
+      }}
+      onSave={handleAddMitfahrer}
+      initialData={editingMitfahrerIndex !== null ? mitfahrer[editingMitfahrerIndex] : null}
+      />
+    )}
     {showKilometerWarning && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded">

@@ -1,4 +1,5 @@
 const Fahrt = require('../models/Fahrt');
+const Mitfahrer = require('../models/Mitfahrer');
 const { getDistance, calculateAutoSplit } = require('../utils/distanceCalculator');
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -149,7 +150,8 @@ exports.createFahrt = async (req, res) => {
       autosplit, 
       abrechnung,
       einmaligerVonOrt,
-      einmaligerNachOrt
+      einmaligerNachOrt,
+      mitfahrer
     } = req.body;
     const userId = req.user.id;
     
@@ -197,6 +199,12 @@ exports.createFahrt = async (req, res) => {
     console.log('Details for autosplit:', details);
     
     const id = await Fahrt.create(fahrtData, details, userId);
+    if (mitfahrer && mitfahrer.length > 0) {
+      for (const person of mitfahrer) {
+        await Mitfahrer.create(id, person.name, person.arbeitsstaette, person.richtung);
+      }
+    }
+    
     res.status(201).json({ id, message: 'Fahrt erfolgreich erstellt' });
   } catch (error) {
     console.error('Fehler beim Erstellen der Fahrt:', error);
@@ -217,7 +225,8 @@ exports.updateFahrt = async (req, res) => {
       manuelleKilometer, 
       abrechnung, 
       autosplit, 
-      datum 
+      datum,
+      mitfahrer
     } = req.body;
     const userId = req.user.id;
     
@@ -248,6 +257,13 @@ exports.updateFahrt = async (req, res) => {
     
     const updated = await Fahrt.update(id, updateData, userId);
     if (updated) {
+      // Lösche vorhandene Mitfahrer und füge neue hinzu
+      await Mitfahrer.deleteByFahrtId(id);
+      if (mitfahrer && mitfahrer.length > 0) {
+        for (const person of mitfahrer) {
+          await Mitfahrer.create(id, person.name, person.arbeitsstaette, person.richtung);
+        }
+      }
       res.status(200).json({ message: 'Fahrt erfolgreich aktualisiert' });
     } else {
       res.status(404).json({ message: 'Fahrt nicht gefunden' });
@@ -273,7 +289,8 @@ exports.getFahrtById = async (req, res) => {
     const userId = req.user.id;
     const fahrt = await Fahrt.findById(req.params.id, userId);
     if (fahrt) {
-      res.status(200).json(fahrt);
+      const mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
+      res.status(200).json({ ...fahrt, mitfahrer });
     } else {
       res.status(404).json({ message: 'Fahrt nicht gefunden' });
     }
