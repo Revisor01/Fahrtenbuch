@@ -4,12 +4,10 @@ const db = require('../config/database');
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
-  console.log('Login attempt:', { username, password });
+  console.log('Login attempt:', { username });
   
   try {
-    // Benutzer in der Datenbank suchen
     const [users] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
-    console.log('Database query result:', users);
     
     if (users.length === 0) {
       console.log('User not found');
@@ -18,8 +16,7 @@ exports.login = async (req, res) => {
     
     const user = users[0];
     
-    // Direkter Passwortvergleich (nicht sicher!)
-    const isMatch = password === user.password;
+    const isMatch = await bcrypt.compare(password, user.password);
     console.log('Password match:', isMatch);
     
     if (!isMatch) {
@@ -27,7 +24,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
     }
     
-    // JWT Token erstellen
     const token = jwt.sign(
       { id: user.id, username: user.username },
       process.env.JWT_SECRET,
@@ -41,6 +37,7 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: 'Serverfehler beim Login' });
   }
 };
+
 // Optional: Registrierungsfunktion
 exports.register = async (req, res) => {
   const { username, password } = req.body;
