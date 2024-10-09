@@ -36,3 +36,8 @@ jobs:
         file: ./frontend/Dockerfile
         push: true
         tags: revisoren/fahrtenbuch-app:latest
+        
+    - name: Update Service via Webhook
+      uses: newarifrh/portainer-service-webhook@v1
+      with:
+        webhook_url: ${{ secrets.WEBHOOK_URL }}
