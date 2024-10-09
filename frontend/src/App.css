@@ -31,6 +31,21 @@
   color: #61dafb;
 }
 
+.fahrten-table th,
+.fahrten-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fahrten-table .datum-col { width: 100px; }
+.fahrten-table .ort-col { width: 150px; }
+.fahrten-table .anlass-col { width: 200px; }
+.fahrten-table .kilometer-col { width: 80px; }
+.fahrten-table .abrechnung-col { width: 120px; }
+.fahrten-table .mitfahrer-col { width: 150px; }
+.fahrten-table .aktionen-col { width: 200px; }
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

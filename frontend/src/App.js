@@ -565,6 +565,7 @@ function FahrtenListe() {
   const getMonthSummary = () => {
     let kirchenkreisSum = 0;
     let gemeindeSum = 0;
+    let mitfahrerSum = 0;
     
     fahrten.forEach((fahrt) => {
       if (fahrt.autosplit) {
@@ -575,12 +576,16 @@ function FahrtenListe() {
       } else if (fahrt.abrechnung === 'Gemeinde') {
         gemeindeSum += (fahrt.kilometer || 0) * 0.3;
       }
+      if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
+        mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
+      }
     });
     
     return {
       kirchenkreis: kirchenkreisSum.toFixed(2),
       gemeinde: gemeindeSum.toFixed(2),
-      gesamt: (kirchenkreisSum + gemeindeSum).toFixed(2)
+      mitfahrer: mitfahrerSum.toFixed(2),
+      gesamt: (kirchenkreisSum + gemeindeSum + mitfahrerSum).toFixed(2)
     };
   };
   
@@ -661,22 +666,36 @@ function FahrtenListe() {
     setEditingMitfahrer({ fahrtId, ...mitfahrer });
   };
   
+  const handleAddMitfahrer = (fahrtId) => {
+    setEditingMitfahrer({ fahrtId, isNew: true });
+  };
+  
+  const handleDeleteMitfahrer = async (fahrtId, mitfahrerId) => {
+    if (window.confirm('Möchten Sie diesen Mitfahrer wirklich löschen?')) {
+      try {
+        await axios.delete(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer/${mitfahrerId}`);
+        fetchFahrten();
+      } catch (error) {
+        console.error('Fehler beim Löschen des Mitfahrers:', error);
+      }
+    }
+  };
+  
+  // Modifizieren Sie die handleSaveMitfahrer Funktion
   const handleSaveMitfahrer = async (updatedMitfahrer) => {
     try {
-      const fahrt = fahrten.find(f => f.id === editingMitfahrer.fahrtId);
-      const updatedMitfahrerList = fahrt.mitfahrer.map(m => 
-        m.id === editingMitfahrer.id ? updatedMitfahrer : m
-      );
-      await updateFahrt(editingMitfahrer.fahrtId, {
-        ...fahrt,
-        mitfahrer: updatedMitfahrerList
-      });
+      if (updatedMitfahrer.isNew) {
+        await axios.post(`${API_BASE_URL}/fahrten/${updatedMitfahrer.fahrtId}/mitfahrer`, updatedMitfahrer);
+      } else {
+        await axios.put(`${API_BASE_URL}/fahrten/${updatedMitfahrer.fahrtId}/mitfahrer/${updatedMitfahrer.id}`, updatedMitfahrer);
+      }
       setEditingMitfahrer(null);
       fetchFahrten();
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Mitfahrers:', error);
+      console.error('Fehler beim Speichern des Mitfahrers:', error);
     }
   };
+
   
   const renderFahrtRow = (fahrt, detail = null) => (
     <tr key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} className={
@@ -809,20 +828,22 @@ function FahrtenListe() {
       detail ? detail.abrechnung : fahrt.abrechnung
     )}
     </td>
-    <td className="border px-2 py-1 text-sm">
+    <td className="border px-2 py-1 text-sm w-48 align-top">
     {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 ? (
-      fahrt.mitfahrer.map((person, index) => (
+      <div className="flex flex-col">
+      {fahrt.mitfahrer.map((person, index) => (
         <span
         key={index}
-        className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
+        className="mb-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
         title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
         onClick={() => handleEditMitfahrer(fahrt.id, person)}
         >
         👤 {person.name}
         </span>
-      ))
+      ))}
+      </div>
     ) : (
-      <span className="text-gray-400">Keine Mitfahrer</span>
+      <span className="text-gray-400">Keine Mitfahrer:innen</span>
     )}
     </td>
     <td className="border px-2 py-1 text-sm">
@@ -900,17 +921,17 @@ function FahrtenListe() {
     </button>
     </div>
     </div>
-    <table className="w-full border-collapse text-left">
+    <table className="w-full border-collapse text-left fahrten-table">
     <thead>
     <tr className="bg-gray-200">
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('datum')}>Datum {sortConfig.key === 'datum' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('von_ort_name')}>Von {sortConfig.key === 'von_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('nach_ort_name')}>Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('anlass')}>Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('kilometer')}>Kilometer {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('abrechnung')}>Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium">Mitfahrer:innen</th>
-    <th className="border px-2 py-1 text-sm font-medium">Aktionen</th>
+    <th className="border px-2 py-1 text-sm font-medium cursor-pointer datum-col" onClick={() => requestSort('datum')}>Datum {sortConfig.key === 'datum' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
+    <th className="border px-2 py-1 text-sm font-medium cursor-pointer ort-col" onClick={() => requestSort('von_ort_name')}>Von {sortConfig.key === 'von_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
+    <th className="border px-2 py-1 text-sm font-medium cursor-pointer ort-col" onClick={() => requestSort('nach_ort_name')}>Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
+    <th className="border px-2 py-1 text-sm font-medium cursor-pointer anlass-col" onClick={() => requestSort('anlass')}>Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
+    <th className="border px-2 py-1 text-sm font-medium cursor-pointer kilometer-col" onClick={() => requestSort('kilometer')}>Kilometer {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
+    <th className="border px-2 py-1 text-sm font-medium cursor-pointer abrechnung-col" onClick={() => requestSort('abrechnung')}>Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
+    <th className="border px-2 py-1 text-sm font-medium mitfahrer-col">Mitfahrer</th>
+    <th className="border px-2 py-1 text-sm font-medium aktionen-col">Aktionen</th>
     </tr>
     </thead>
     <tbody>
