@@ -695,13 +695,13 @@ function FahrtenListe() {
   
   const renderMitfahrer = (fahrt) => {
     if (!fahrt.mitfahrer || fahrt.mitfahrer.length === 0) {
-      return <span className="text-gray-400">Keine Mitfahrer:innen</span>;
+      return <span className="text-gray-400"></span>;
     }
     
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
     
     return (
-      <div className="flex flex-col">
+      <div className="mitfahrer-container">
       {fahrt.mitfahrer.map((person, index) => {
         const shouldDisplay = 
         (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
@@ -710,20 +710,13 @@ function FahrtenListe() {
         if (!shouldDisplay) return null;
         
         return (
-          <div key={index} className="flex items-center mb-1">
+          <div key={index} className="mitfahrer-item">
           <span
-          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1"
+          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
           title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
-          onClick={() => handleEditMitfahrer(fahrt.id, person)}
           >
           👤 {person.name}
           </span>
-          <button
-          onClick={() => handleDeleteMitfahrer(fahrt.id,person.id)}
-          className="text-red-500 hover:text-red-700 text-xs"
-          >
-          ❌
-          </button>
           </div>
         );
       })}
@@ -875,13 +868,35 @@ function FahrtenListe() {
     )}
     </td>
     <td className="border px-2 py-1 text-sm w-48 align-top">
-    {renderMitfahrer(fahrt)}
-    <button
-    onClick={() => handleAddMitfahrer(fahrt.id)}
-    className="mt-1 bg-green-500 text-white px-2 py-1 rounded text-xs"
-    >
-    + Mitfahrer:in
-    </button>
+    {editingFahrt?.id === fahrt.id ? (
+      <div className="mitfahrer-container">
+      {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
+        <div key={index} className="mitfahrer-item">
+        <span
+        className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
+        title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
+        onClick={() => handleEditMitfahrer(fahrt.id, person)}
+        >
+        👤 {person.name}
+        </span>
+        <button
+        onClick={() => handleDeleteMitfahrer(fahrt.id, person.id)}
+        className="text-red-500 hover:text-red-700 text-xs"
+        >
+        ❌
+        </button>
+        </div>
+      ))}
+      <button
+      onClick={() => handleAddMitfahrer(fahrt.id)}
+      className="mt-1 bg-green-500 text-white px-2 py-1 rounded text-xs add-mitfahrer-button"
+      >
+      +
+      </button>
+      </div>
+    ) : (
+      renderMitfahrer(fahrt)
+    )}
     </td>
     <td className="border px-2 py-1 text-sm">
     {!detail && (
