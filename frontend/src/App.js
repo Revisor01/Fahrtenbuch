@@ -1429,13 +1429,13 @@ function AppContent() {
     <div className="flex space-x-2">
     <button
     onClick={() => setShowOrteModal(true)}
-    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
     >
     Orte
     </button>
     <button
     onClick={() => setShowDistanzenModal(true)}
-    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
     >
     Distanzen
     </button>

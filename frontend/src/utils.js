@@ -5,22 +5,22 @@ export const organizeOrte = (orte) => {
   const sonstige = orte.filter(ort => !ort.ist_dienstort && !ort.ist_wohnort && !ort.ist_kirchspiel)
     .sort((a, b) => a.name.localeCompare(b.name));
   
-  return { dienstort, wohnort, kirchspiele, sonstige };
+  return { wohnort, dienstort, kirchspiele, sonstige };
 };
 
 export const renderOrteOptions = (orte) => {
-  const { dienstort, wohnort, kirchspiele, sonstige } = organizeOrte(orte);
+  const { wohnort, dienstort, kirchspiele, sonstige } = organizeOrte(orte);
   
   return (
     <>
+      {wohnort && (
+        <optgroup label="Wohnort">
+        <option value={wohnort.id}>{wohnort.name}</option>
+        </optgroup>
+      )}
       {dienstort && (
         <optgroup label="Dienstort">
           <option value={dienstort.id}>{dienstort.name}</option>
-        </optgroup>
-      )}
-      {wohnort && (
-        <optgroup label="Wohnort">
-          <option value={wohnort.id}>{wohnort.name}</option>
         </optgroup>
       )}
       {kirchspiele.length > 0 && (
