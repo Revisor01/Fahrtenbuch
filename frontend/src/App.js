@@ -1397,6 +1397,8 @@ function App() {
 
 function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen } = useContext(AppContext);
+  const [showOrteModal, setShowOrteModal] = useState(false);
+  const [showDistanzenModal, setShowDistanzenModal] = useState(false);
   
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -1426,6 +1428,18 @@ function AppContent() {
     <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
     <div className="flex space-x-2">
     <button
+    onClick={() => setShowOrteModal(true)}
+    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    >
+    Orte
+    </button>
+    <button
+    onClick={() => setShowDistanzenModal(true)}
+    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+    >
+    Distanzen
+    </button>
+    <button
     onClick={() => setIsProfileModalOpen(true)}
     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full-mobile"
     >
@@ -1441,17 +1455,46 @@ function AppContent() {
     </div>
     <div className="grid grid-cols-1 gap-4 mb-8">
     <FahrtForm />
-    <OrtForm />
-    <DistanzForm />
     </div>
     <FahrtenListe />
-    <OrteListe />
-    <DistanzenListe />
     <MonthlyOverview />
     <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+    
+    {showOrteModal && (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setShowOrteModal(false)}>
+      <div className="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+      <h2 className="text-2xl font-bold mb-4">Orte</h2>
+      <OrtForm />
+      <OrteListe />
+      <button
+      onClick={() => setShowOrteModal(false)}
+      className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+      >
+      Schließen
+      </button>
+      </div>
+      </div>
+    )}
+    
+    {showDistanzenModal && (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setShowDistanzenModal(false)}>
+      <div className="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+      <h2 className="text-2xl font-bold mb-4">Distanzen</h2>
+      <DistanzForm />
+      <DistanzenListe />
+      <button
+      onClick={() => setShowDistanzenModal(false)}
+      className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+      >
+      Schließen
+      </button>
+      </div>
+      </div>
+    )}
     </div>
   );
 }
 
 export default App;
+  
   
