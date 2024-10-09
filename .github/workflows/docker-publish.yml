@@ -40,9 +40,4 @@ jobs:
     - name: Update Service via Webhook Backend
       uses: newarifrh/portainer-service-webhook@v1
       with:
-        webhook_url: https://docker.godsapp.de/api/webhooks/2a3d1669-8617-461d-a03e-912e8a65b12f
-        
-    - name: Update Service via Webhook Frontend
-      uses: newarifrh/portainer-service-webhook@v1
-      with:
-        webhook_url: https://docker.godsapp.de/api/webhooks/18ed45d6-6228-462d-8644-ecce7438debf
+        webhook_url: https://docker.godsapp.de/api/stacks/webhooks/416b7561-cc59-4624-8fc3-daefca2ccea4

@@ -333,6 +333,7 @@ exports.getMonthlyReport = async (req, res) => {
     const erstattungssatz = 0.30;  // 0,30 € pro km
     let kirchenkreisSum = 0;
     let gemeindeSum = 0;
+    let mitfahrerSum = 0;
     
     const report = fahrten.map((fahrt) => {
       let kirchenkreisKm = 0;
@@ -350,6 +351,10 @@ exports.getMonthlyReport = async (req, res) => {
         kirchenkreisKm = fahrt.kilometer;
       } else if (fahrt.abrechnung === 'Gemeinde') {
         gemeindeKm = fahrt.kilometer;
+      }
+      
+      if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
+        mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
       }
       
       kirchenkreisSum += kirchenkreisKm * erstattungssatz;
@@ -371,7 +376,8 @@ exports.getMonthlyReport = async (req, res) => {
       summary: {
         kirchenkreisErstattung: kirchenkreisSum,
         gemeindeErstattung: gemeindeSum,
-        gesamtErstattung: kirchenkreisSum + gemeindeSum
+        mitfahrerErstattung: mitfahrerSum,
+        gesamtErstattung: kirchenkreisSum + gemeindeSum + mitfahrerSum
       }
     });
   } catch (error) {

@@ -183,10 +183,11 @@ function AppProvider({ children }) {
           monthName: date.toLocaleString('default', { month: 'long' }),
           year: date.getFullYear(),
           kirchenkreisErstattung: response.data.summary.kirchenkreisErstattung,
-          gemeindeErstattung: response.data.summary.gemeindeErstattung
+          gemeindeErstattung: response.data.summary.gemeindeErstattung,
+          mitfahrerErstattung: response.data.summary.mitfahrerErstattung || 0 // Fügen Sie dies hinzu
         };
       })
-      .filter(month => month.kirchenkreisErstattung > 0 || month.gemeindeErstattung > 0);
+      .filter(month => month.kirchenkreisErstattung > 0 || month.gemeindeErstattung > 0 || month.mitfahrerErstattung > 0);
       
       setMonthlyData(data);
     } catch (error) {
@@ -1022,9 +1023,11 @@ function MonthlyOverview() {
     return monthlyData.reduce((total, month) => {
       total.kirchenkreis += month.kirchenkreisErstattung;
       total.gemeinde += month.gemeindeErstattung;
+      total.mitfahrer += month.mitfahrerErstattung || 0; // Fügen Sie dies hinzu
       return total;
-    }, { kirchenkreis: 0, gemeinde: 0 });
+    }, { kirchenkreis: 0, gemeinde: 0, mitfahrer: 0 });
   };
+
   
   const yearTotal = calculateYearTotal();
   
