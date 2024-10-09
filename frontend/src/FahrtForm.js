@@ -234,8 +234,6 @@ function FahrtForm() {
       </select>
     )}
     </div>
-    
-    {/* Nach-Ort Auswahl */}
     <div className="w-40">
     <label className="flex items-center mb-1 cursor-pointer">
     <input

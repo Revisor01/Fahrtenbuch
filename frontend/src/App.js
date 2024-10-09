@@ -745,7 +745,7 @@ function FahrtenListe() {
     <td className="border px-2 py-1">
     {editingFahrt?.id === fahrt.id ? (
       <div>
-      <div className="flex items-center mb-1">
+      <label className="flex items-center mb-1 cursor-pointer">
       <input
       type="checkbox"
       checked={editingFahrt.vonOrtTyp === 'einmalig'}
@@ -758,7 +758,7 @@ function FahrtenListe() {
       className="mr-2"
       />
       <span className="text-sm">Einmaliger Von-Ort</span>
-      </div>
+      </label>
       {editingFahrt.vonOrtTyp === 'gespeichert' ? (
         <select
         value={editingFahrt.von_ort_id || ''}
@@ -1034,10 +1034,11 @@ function MonthlyOverview() {
     <table className="w-full border-collapse text-left">
     <thead>
     <tr className="bg-gray-200">
-    <th className="border px-2 py-1 text-sm font-medium">Monat</th>
-    <th className="border px-2 py-1 text-sm font-medium">Kirchenkreis</th>
-    <th className="border px-2 py-1 text-sm font-medium">Gemeinde</th>
-    <th className="border px-2 py-1 text-sm font-medium">Gesamt</th>
+    <th className="border px-2 py-1 text-sm font-medium w-1/5">Monat</th>
+    <th className="border px-2 py-1 text-sm font-medium w-1/5">Kirchenkreis</th>
+    <th className="border px-2 py-1 text-sm font-medium w-1/5">Gemeinde</th>
+    <th className="border px-2 py-1 text-sm font-medium w-1/5">Mitfahrer</th>
+    <th className="border px-2 py-1 text-sm font-medium w-1/5">Gesamt</th>
     </tr>
     </thead>
     <tbody>
@@ -1046,21 +1047,22 @@ function MonthlyOverview() {
       <td className="border px-2 py-1 text-sm">{`${month.monthName} ${month.year}`}</td>
       <td className="border px-2 py-1 text-sm">{month.kirchenkreisErstattung.toFixed(2)} €</td>
       <td className="border px-2 py-1 text-sm">{month.gemeindeErstattung.toFixed(2)} €</td>
-      <td className="border px-2 py-1 text-sm">{(month.kirchenkreisErstattung + month.gemeindeErstattung).toFixed(2)} €</td>
+      <td className="border px-2 py-1 text-sm">{month.mitfahrerErstattung.toFixed(2)} €</td>
+      <td className="border px-2 py-1 text-sm">{(month.kirchenkreisErstattung + month.gemeindeErstattung + month.mitfahrerErstattung).toFixed(2)} €</td>
       </tr>
     ))}
     <tr className="font-bold bg-gray-100">
     <td className="border px-2 py-1 text-sm">Jahresgesamt</td>
     <td className="border px-2 py-1 text-sm">{yearTotal.kirchenkreis.toFixed(2)} €</td>
     <td className="border px-2 py-1 text-sm">{yearTotal.gemeinde.toFixed(2)} €</td>
-    <td className="border px-2 py-1 text-sm">{(yearTotal.kirchenkreis + yearTotal.gemeinde).toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{yearTotal.mitfahrer.toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{(yearTotal.kirchenkreis + yearTotal.gemeinde + yearTotal.mitfahrer).toFixed(2)} €</td>
     </tr>
     </tbody>
     </table>
     </div>
   );
 }
-
 
 function OrteListe() {
   const { orte, updateOrt, deleteOrt } = useContext(AppContext);
