@@ -37,7 +37,12 @@ jobs:
         push: true
         tags: revisoren/fahrtenbuch-app:latest
         
-    - name: Update Service via Webhook
+    - name: Update Service via Webhook Backend
       uses: newarifrh/portainer-service-webhook@v1
       with:
-        webhook_url: ${{ secrets.WEBHOOK_URL }}
+        webhook_url: https://docker.godsapp.de/api/webhooks/2a3d1669-8617-461d-a03e-912e8a65b12f
+        
+    - name: Update Service via Webhook Frontend
+      uses: newarifrh/portainer-service-webhook@v1
+      with:
+        webhook_url: https://docker.godsapp.de/api/webhooks/18ed45d6-6228-462d-8644-ecce7438debf
