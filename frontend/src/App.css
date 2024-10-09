@@ -69,6 +69,13 @@
   align-self: flex-start;
 }
 
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  height: 32px; /* oder ein anderer konsistenter Wert */
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

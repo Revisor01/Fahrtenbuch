@@ -875,6 +875,7 @@ function FahrtenListe() {
         <span
         className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
         onClick={() => handleEditMitfahrer(fahrt.id, person)}
+        title={`${person.arbeitsstaette} - ${person.richtung}`}
         >
         👤 {person.name}
         <button

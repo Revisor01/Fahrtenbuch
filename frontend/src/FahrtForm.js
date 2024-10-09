@@ -202,7 +202,7 @@ function FahrtForm() {
     required
     />
     <div className="w-40">
-    <div className="flex items-center mb-1">
+    <label className="flex items-center mb-1 cursor-pointer">
     <input
     type="checkbox"
     checked={useEinmaligenVonOrt}
@@ -210,7 +210,7 @@ function FahrtForm() {
     className="mr-2"
     />
     <span className="text-sm">Einmaliger Von-Ort</span>
-    </div>
+    </label>
     {useEinmaligenVonOrt ? (
       <input
       type="text"
@@ -218,7 +218,7 @@ function FahrtForm() {
       value={formData.einmaligerVonOrt}
       onChange={handleChange}
       placeholder="Von (einmalig)"
-      className="w-full p-1 border rounded text-sm"
+      className="w-full p-1 border rounded text-sm h-8"
       required
       />
     ) : (
@@ -226,7 +226,7 @@ function FahrtForm() {
       name="vonOrtId"
       value={formData.vonOrtId}
       onChange={handleChange}
-      className="w-full p-1 border rounded text-sm"
+      className="w-full p-1 border rounded text-sm h-8"
       required
       >
       <option value="">Von</option>
@@ -234,8 +234,10 @@ function FahrtForm() {
       </select>
     )}
     </div>
+    
+    {/* Nach-Ort Auswahl */}
     <div className="w-40">
-    <div className="flex items-center mb-1">
+    <label className="flex items-center mb-1 cursor-pointer">
     <input
     type="checkbox"
     checked={useEinmaligenNachOrt}
@@ -243,7 +245,7 @@ function FahrtForm() {
     className="mr-2"
     />
     <span className="text-sm">Einmaliger Nach-Ort</span>
-    </div>
+    </label>
     {useEinmaligenNachOrt ? (
       <input
       type="text"
@@ -251,7 +253,7 @@ function FahrtForm() {
       value={formData.einmaligerNachOrt}
       onChange={handleChange}
       placeholder="Nach (einmalig)"
-      className="w-full p-1 border rounded text-sm"
+      className="w-full p-1 border rounded text-sm h-8"
       required
       />
     ) : (
@@ -259,7 +261,7 @@ function FahrtForm() {
       name="nachOrtId"
       value={formData.nachOrtId}
       onChange={handleChange}
-      className="w-full p-1 border rounded text-sm"
+      className="w-full p-1 border rounded text-sm h-8"
       required
       >
       <option value="">Nach</option>
