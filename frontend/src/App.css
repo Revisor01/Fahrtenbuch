@@ -78,8 +78,8 @@ select {
 .input-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  height: 60px; /* Passen Sie diesen Wert an, um die gewünschte Höhe zu erreichen */
+  justify-content: flex-start;
+  height: 80px; /* Passen Sie diesen Wert an, um die gewünschte Höhe zu erreichen */
 }
 @keyframes App-logo-spin {
   from {

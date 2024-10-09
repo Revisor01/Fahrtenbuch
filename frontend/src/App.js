@@ -417,7 +417,7 @@ function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
-  const [activeTooltip, setActiveTooltip] = useState(null);
+  const [showTooltip, setShowTooltip] = useState({});
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
@@ -715,12 +715,13 @@ function FahrtenListe() {
           <div key={index} className="mitfahrer-item relative">
           <span
           className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
-          onClick={() => setActiveTooltip(activeTooltip === `${fahrt.id}-${index}` ? null : `${fahrt.id}-${index}`)}
+          onMouseEnter={() => setShowTooltip({...showTooltip, [`${fahrt.id}-${index}`]: true})}
+          onMouseLeave={() => setShowTooltip({...showTooltip, [`${fahrt.id}-${index}`]: false})}
           >
           👤 {person.name}
           </span>
-          {activeTooltip === `${fahrt.id}-${index}` && (
-            <div className="absolute z-10 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg">
+          {showTooltip[`${fahrt.id}-${index}`] && (
+            <div className="absolute z-10 p-2 mt-1 text-xs bg-gray-700 text-white rounded shadow-lg">
             {person.name} - {person.arbeitsstaette} ({person.richtung})
             </div>
           )}

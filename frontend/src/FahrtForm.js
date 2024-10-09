@@ -384,14 +384,20 @@ function FahrtForm() {
     </div>
     </div>
     </form>
-    <div className="mt-2 text-sm">{kalkulierteStrecke !== null ? `Kalkulierte Strecke: ${kalkulierteStrecke} km` : ''}</div>
-    {formData.autosplit && kalkulierteStrecke !== null && (
-      <div className="mt-2 text-sm">
-      <p>Aufteilung:</p>
-      <p>Kirchenkreis: {autosplitInfo.kirchenkreis} km</p>
-      <p>Gemeinde: {autosplitInfo.gemeinde} km</p>
-      </div>
+    <div className="mt-4 h-16"> {/* Feste Höhe, um Springen zu vermeiden */}
+    {kalkulierteStrecke !== null ? (
+      <>
+      <div className="font-bold text-sm">Kalkulierte Strecke: {kalkulierteStrecke} km</div>
+      {formData.autosplit && (
+        <div className="text-sm mt-1">
+        Via Dienstort: Kirchenkreis: {autosplitInfo.kirchenkreis} km | Gemeinde: {autosplitInfo.gemeinde} km
+        </div>
+      )}
+      </>
+    ) : (
+      <div className="text-sm text-gray-500">Keine Strecke kalkuliert</div>
     )}
+    </div>
     {showMitfahrerModal && (
       <MitfahrerModal
       onClose={() => {
