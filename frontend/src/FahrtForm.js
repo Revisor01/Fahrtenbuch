@@ -123,10 +123,7 @@ function FahrtForm() {
       kilometer: formData.manuelleKilometer ? parseFloat(formData.manuelleKilometer) : kalkulierteStrecke,
       autosplit: formData.autosplit,
       abrechnung: formData.abrechnung,
-      mitfahrer: mitfahrer.map(m => ({
-        ...m,
-        richtung: addRueckfahrt ? 'hin_rueck' : m.richtung
-      }))
+      mitfahrer: mitfahrer.filter(m => m.richtung === 'hin' || m.richtung === 'hin_rueck')
     };
     
     try {
@@ -140,7 +137,7 @@ function FahrtForm() {
           einmaligerVonOrt: fahrtData.einmaligerNachOrt,
           einmaligerNachOrt: fahrtData.einmaligerVonOrt,
           anlass: `Rückfahrt: ${fahrtData.anlass}`,
-          mitfahrer: fahrtData.mitfahrer // Keine Änderung nötig, da wir 'hin_rueck' verwenden
+          mitfahrer: mitfahrer.filter(m => m.richtung === 'rueck' || m.richtung === 'hin_rueck')
         };
         await addFahrt(rueckfahrtData);
       }
@@ -367,37 +364,23 @@ function FahrtForm() {
     <div className="w-full mt-4">
     <div className="flex flex-wrap mt-2">
     {mitfahrer.map((person, index) => (
-      <div key={index} className="flex items-center bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700 mr-2 mb-2">
-      <span title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}>
-      👤 {person.name}
-      </span>
-      <button
-      type="button"
+      <span
+      key={index}
+      className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
       onClick={() => handleEditMitfahrer(index)}
-      className="ml-2 text-blue-500 hover:text-blue-700"
       >
-      ✏️
-      </button>
+      👤 {person.name}
       <button
-      type="button"
-      onClick={() => handleDeleteMitfahrer(index)}
-      className="ml-2 text-red-500 hover:text-red-700"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDeleteMitfahrer(index);
+      }}
+      className="ml-1 text-red-500 hover:text-red-700"
       >
       ❌
       </button>
-      </div>
+      </span>
     ))}
-    </div>
-    </div>
-    </form>
-    <div className="mt-2 text-sm">{kalkulierteStrecke !== null ? `Kalkulierte Strecke: ${kalkulierteStrecke} km` : ''}</div>
-    {formData.autosplit && kalkulierteStrecke !== null && (
-      <div className="mt-2 text-sm">
-      <p>Aufteilung:</p>
-      <p>Kirchenkreis: {autosplitInfo.kirchenkreis} km</p>
-      <p>Gemeinde: {autosplitInfo.gemeinde} km</p>
-      </div>
-    )}
     {showMitfahrerModal && (
       <MitfahrerModal
       onClose={() => {

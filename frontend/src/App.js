@@ -874,17 +874,19 @@ function FahrtenListe() {
         <div key={index} className="mitfahrer-item">
         <span
         className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
-        title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
         onClick={() => handleEditMitfahrer(fahrt.id, person)}
         >
         👤 {person.name}
-        </span>
         <button
-        onClick={() => handleDeleteMitfahrer(fahrt.id, person.id)}
-        className="text-red-500 hover:text-red-700 text-xs"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDeleteMitfahrer(fahrt.id, person.id);
+        }}
+        className="ml-1 text-red-500 hover:text-red-700"
         >
         ❌
         </button>
+        </span>
         </div>
       ))}
       <button
