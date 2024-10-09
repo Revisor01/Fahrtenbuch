@@ -1,0 +1,20 @@
+name: Deploy to Portainer
+
+on:
+  push:
+    branches:
+      - main  # oder der Name Ihres Hauptbranches
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Hier können Sie weitere Schritte hinzufügen, wie das Bauen und Pushen Ihres Docker Images
+
+      - name: Update Service via Webhook
+        uses: newarifrh/portainer-service-webhook@v1
+        with:
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
