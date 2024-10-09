@@ -75,7 +75,12 @@ input[type="date"],
 select {
   height: 32px; /* oder ein anderer konsistenter Wert */
 }
-
+.input-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 60px; /* Passen Sie diesen Wert an, um die gewünschte Höhe zu erreichen */
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

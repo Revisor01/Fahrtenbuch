@@ -417,6 +417,7 @@ function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
+  const [activeTooltip, setActiveTooltip] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
@@ -711,13 +712,18 @@ function FahrtenListe() {
         if (!shouldDisplay) return null;
         
         return (
-          <div key={index} className="mitfahrer-item">
+          <div key={index} className="mitfahrer-item relative">
           <span
           className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
-          title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
+          onClick={() => setActiveTooltip(activeTooltip === `${fahrt.id}-${index}` ? null : `${fahrt.id}-${index}`)}
           >
           👤 {person.name}
           </span>
+          {activeTooltip === `${fahrt.id}-${index}` && (
+            <div className="absolute z-10 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg">
+            {person.name} - {person.arbeitsstaette} ({person.richtung})
+            </div>
+          )}
           </div>
         );
       })}
@@ -789,7 +795,8 @@ function FahrtenListe() {
     <td className="border px-2 py-1">
     {editingFahrt?.id === fahrt.id ? (
       <div>
-      <div className="flex items-center mb-1">
+      
+      <label className="flex items-center mb-1 cursor-pointer">
       <input
       type="checkbox"
       checked={editingFahrt.nachOrtTyp === 'einmalig'}
@@ -802,7 +809,7 @@ function FahrtenListe() {
       className="mr-2"
       />
       <span className="text-sm">Einmaliger Nach-Ort</span>
-      </div>
+      </label>
       {editingFahrt.nachOrtTyp === 'gespeichert' ? (
         <select
         value={editingFahrt.nach_ort_id || ''}

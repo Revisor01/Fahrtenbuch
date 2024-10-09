@@ -201,7 +201,7 @@ function FahrtForm() {
     className="w-32 p-1 border rounded text-sm"
     required
     />
-    <div className="w-40">
+    <div className="w-40 input-container">
     <label className="flex items-center mb-1 cursor-pointer">
     <input
     type="checkbox"
@@ -234,7 +234,7 @@ function FahrtForm() {
       </select>
     )}
     </div>
-    <div className="w-40">
+    <div className="w-40 input-container">
     <label className="flex items-center mb-1 cursor-pointer">
     <input
     type="checkbox"
