@@ -460,13 +460,12 @@ function FahrtenListe() {
     }
   };
   
-  
   const handleDelete = async (id) => {
     if (window.confirm('Sind Sie sicher, dass Sie diese Fahrt löschen möchten?')) {
       try {
         await deleteFahrt(id);
         fetchFahrten();
-        fetchMonthlyData(); // Aktualisiere die monatliche Übersicht nach dem Löschen
+        fetchMonthlyData();
       } catch (error) {
         console.error('Fehler beim Löschen der Fahrt:', error);
       }
@@ -486,16 +485,10 @@ function FahrtenListe() {
     setEditingFahrt(updatedFahrt);
   };
   
-  const formatDateForDisplay = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
-  };
-  
   const formatDateForInput = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
   };
-  
   
   const getOrtTyp = (fahrt, isVon) => {
     if (isVon) {
@@ -561,6 +554,7 @@ function FahrtenListe() {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
     }
   };
+
   
   const getMonthSummary = () => {
     let kirchenkreisSum = 0;
@@ -636,6 +630,7 @@ function FahrtenListe() {
       document.body.removeChild(link);
     }
   };
+  
   const sortedFahrten = React.useMemo(() => {
     let sortableFahrten = [...fahrten];
     if (sortConfig.key !== null) {
@@ -667,7 +662,10 @@ function FahrtenListe() {
   };
   
   const handleAddMitfahrer = (fahrtId) => {
-    setEditingMitfahrer({ fahrtId, isNew: true });
+    const fahrt = fahrten.find(f => f.id === fahrtId);
+    const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
+    const suggestedRichtung = isHinfahrt ? 'hin' : 'rueck';
+    setEditingMitfahrer({ fahrtId, isNew: true, richtung: suggestedRichtung });
   };
   
   const handleDeleteMitfahrer = async (fahrtId, mitfahrerId) => {
@@ -681,7 +679,6 @@ function FahrtenListe() {
     }
   };
   
-  // Modifizieren Sie die handleSaveMitfahrer Funktion
   const handleSaveMitfahrer = async (updatedMitfahrer) => {
     try {
       if (updatedMitfahrer.isNew) {
@@ -695,7 +692,44 @@ function FahrtenListe() {
       console.error('Fehler beim Speichern des Mitfahrers:', error);
     }
   };
-
+  
+  const renderMitfahrer = (fahrt) => {
+    if (!fahrt.mitfahrer || fahrt.mitfahrer.length === 0) {
+      return <span className="text-gray-400">Keine Mitfahrer:innen</span>;
+    }
+    
+    const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
+    
+    return (
+      <div className="flex flex-col">
+      {fahrt.mitfahrer.map((person, index) => {
+        const shouldDisplay = 
+        (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
+        (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
+        
+        if (!shouldDisplay) return null;
+        
+        return (
+          <div key={index} className="flex items-center mb-1">
+          <span
+          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1"
+          title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
+          onClick={() => handleEditMitfahrer(fahrt.id, person)}
+          >
+          👤 {person.name}
+          </span>
+          <button
+          onClick={() => handleDeleteMitfahrer(fahrt.id,person.id)}
+          className="text-red-500 hover:text-red-700 text-xs"
+          >
+          ❌
+          </button>
+          </div>
+        );
+      })}
+      </div>
+    );
+  };
   
   const renderFahrtRow = (fahrt, detail = null) => (
     <tr key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} className={
@@ -717,15 +751,21 @@ function FahrtenListe() {
     </td>
     <td className="border px-2 py-1">
     {editingFahrt?.id === fahrt.id ? (
-      <>
-      <select
-      value={editingFahrt.vonOrtTyp}
-      onChange={(e) => setEditingFahrt({ ...editingFahrt, vonOrtTyp: e.target.value })}
-      className="w-full p-1 border rounded mb-1"
-      >
-      <option value="gespeichert">Gespeichert</option>
-      <option value="einmalig">Einmalig</option>
-      </select>
+      <div>
+      <div className="flex items-center mb-1">
+      <input
+      type="checkbox"
+      checked={editingFahrt.vonOrtTyp === 'einmalig'}
+      onChange={(e) => setEditingFahrt({
+        ...editingFahrt,
+        vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+        von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
+        einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
+      })}
+      className="mr-2"
+      />
+      <span className="text-sm">Einmaliger Von-Ort</span>
+      </div>
       {editingFahrt.vonOrtTyp === 'gespeichert' ? (
         <select
         value={editingFahrt.von_ort_id || ''}
@@ -744,7 +784,7 @@ function FahrtenListe() {
         placeholder="Von (einmalig)"
         />
       )}
-      </>
+      </div>
     ) : (
       <div>
       <div className="text-sm">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort)}</div>
@@ -754,15 +794,21 @@ function FahrtenListe() {
     </td>
     <td className="border px-2 py-1">
     {editingFahrt?.id === fahrt.id ? (
-      <>
-      <select
-      value={editingFahrt.nachOrtTyp}
-      onChange={(e) => setEditingFahrt({ ...editingFahrt, nachOrtTyp: e.target.value })}
-      className="w-full p-1 border rounded mb-1"
-      >
-      <option value="gespeichert">Gespeichert</option>
-      <option value="einmalig">Einmalig</option>
-      </select>
+      <div>
+      <div className="flex items-center mb-1">
+      <input
+      type="checkbox"
+      checked={editingFahrt.nachOrtTyp === 'einmalig'}
+      onChange={(e) => setEditingFahrt({
+        ...editingFahrt,
+        nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+        nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
+        einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
+      })}
+      className="mr-2"
+      />
+      <span className="text-sm">Einmaliger Nach-Ort</span>
+      </div>
       {editingFahrt.nachOrtTyp === 'gespeichert' ? (
         <select
         value={editingFahrt.nach_ort_id || ''}
@@ -781,7 +827,7 @@ function FahrtenListe() {
         placeholder="Nach (einmalig)"
         />
       )}
-      </>
+      </div>
     ) : (
       <div>
       <div className="text-sm">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort)}</div>
@@ -829,22 +875,13 @@ function FahrtenListe() {
     )}
     </td>
     <td className="border px-2 py-1 text-sm w-48 align-top">
-    {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 ? (
-      <div className="flex flex-col">
-      {fahrt.mitfahrer.map((person, index) => (
-        <span
-        key={index}
-        className="mb-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
-        title={`${person.name} - ${person.arbeitsstaette} (${person.richtung})`}
-        onClick={() => handleEditMitfahrer(fahrt.id, person)}
-        >
-        👤 {person.name}
-        </span>
-      ))}
-      </div>
-    ) : (
-      <span className="text-gray-400">Keine Mitfahrer:innen</span>
-    )}
+    {renderMitfahrer(fahrt)}
+    <button
+    onClick={() => handleAddMitfahrer(fahrt.id)}
+    className="mt-1 bg-green-500 text-white px-2 py-1 rounded text-xs"
+    >
+    + Mitfahrer:in
+    </button>
     </td>
     <td className="border px-2 py-1 text-sm">
     {!detail && (
@@ -904,7 +941,7 @@ function FahrtenListe() {
     <div className="mb-2 p-2 bg-gray-100 rounded text-sm flex justify-between items-center">
     <div>
     <p><strong>{selectedMonthName} {selectedYear}</strong></p>
-    <p>Kirchenkreis: {summary.kirchenkreis} € | Gemeinde: {summary.gemeinde} € | Gesamt: {summary.gesamt} €</p>
+    <p>Kirchenkreis: {summary.kirchenkreis} € | Gemeinde: {summary.gemeinde} € | Mitfahrer: {summary.mitfahrer} € | Gesamt: {summary.gesamt} €</p>
     </div>
     <div className="flex space-x-2">
     <button onClick={() => exportToCSV('kirchenkreis')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
