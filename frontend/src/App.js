@@ -417,7 +417,7 @@ function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
-  const [showTooltip, setShowTooltip] = useState({});
+  const [activeMitfahrerTooltip, setActiveMitfahrerTooltip] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
@@ -711,18 +711,21 @@ function FahrtenListe() {
         
         if (!shouldDisplay) return null;
         
+        const tooltipId = `${fahrt.id}-${index}`;
+        
         return (
-          <div key={index} className="mitfahrer-item relative">
+          <div key={index} className="mitfahrer-item relative inline-block mr-2">
           <span
-          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
-          onMouseEnter={() => setShowTooltip({...showTooltip, [`${fahrt.id}-${index}`]: true})}
-          onMouseLeave={() => setShowTooltip({...showTooltip, [`${fahrt.id}-${index}`]: false})}
+          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
+          onClick={() => setActiveMitfahrerTooltip(activeMitfahrerTooltip === tooltipId ? null : tooltipId)}
           >
           👤 {person.name}
           </span>
-          {showTooltip[`${fahrt.id}-${index}`] && (
-            <div className="absolute z-10 p-2 mt-1 text-xs bg-gray-700 text-white rounded shadow-lg">
-            {person.name} - {person.arbeitsstaette} ({person.richtung})
+          {activeMitfahrerTooltip === tooltipId && (
+            <div className="absolute z-10 w-48 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg">
+            <p><strong>Name:</strong> {person.name}</p>
+            <p><strong>Arbeitsstätte:</strong> {person.arbeitsstaette}</p>
+            <p><strong>Richtung:</strong> {person.richtung}</p>
             </div>
           )}
           </div>

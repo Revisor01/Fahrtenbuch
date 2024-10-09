@@ -361,7 +361,7 @@ function FahrtForm() {
     </button>
     <div className="flex-grow"></div>
     <button type="submit" className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Hinzufügen</button>
-    <div className="w-full mt-4">
+    <div className="w-full">
     <div className="flex flex-wrap mt-2">
     {mitfahrer.map((person, index) => (
       <span
