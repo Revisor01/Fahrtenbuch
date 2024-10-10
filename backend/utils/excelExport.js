@@ -7,9 +7,9 @@ const db = require('../config/database');
 async function getUserProfile(userId) {
   const [rows] = await db.execute(
     `SELECT p.*, o.adresse as home_address
-      FROM user_profiles p
-      LEFT JOIN orte o ON p.user_id = o.user_id AND o.ist_wohnort = 1
-      WHERE p.user_id = ?`,
+     FROM user_profiles p
+     LEFT JOIN orte o ON p.user_id = o.user_id AND o.ist_wohnort = 1
+     WHERE p.user_id = ?`,
     [userId]
   );
   return rows[0];
@@ -25,48 +25,16 @@ function getMonthName(monthNumber) {
   return monthNames[monthNumber - 1];
 }
 
-function prepareMitfahrerData(fahrten) {
-  const mitfahrerData = [];
-  const processedMitfahrer = new Set();
-  
-  fahrten.forEach(fahrt => {
-    if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
-      fahrt.mitfahrer.forEach(mitfahrer => {
-        const key = `${fahrt.datum}-${mitfahrer.name}-${mitfahrer.arbeitsstaette}`;
-        if (!processedMitfahrer.has(key)) {
-          processedMitfahrer.add(key);
-          mitfahrerData.push({
-            datum: fahrt.datum,
-            anlass: fahrt.anlass,
-            hinweg: mitfahrer.richtung === 'hin' || mitfahrer.richtung === 'hin_rueck',
-            rueckweg: mitfahrer.richtung === 'rueck' || mitfahrer.richtung === 'hin_rueck',
-            name: mitfahrer.name,
-            arbeitsstaette: mitfahrer.arbeitsstaette,
-            kilometer: mitfahrer.richtung === 'hin_rueck' ? fahrt.kilometer * 2 : fahrt.kilometer
-          });
-        }
-      });
-    }
-  });
-  
-  return mitfahrerData;
-}
-
 exports.exportToExcel = async (req, res) => {
   try {
-    console.log('Starting Excel export');
     const { year, month, type } = req.params;
     const userId = req.user.id;
     
-    console.log(`Exporting Excel for user ${userId}, year ${year}, month ${month}, type ${type}`);
-    
     // Abrufen der Fahrten für den angegebenen Monat
     const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
-    console.log(`Retrieved ${fahrten.length} trips for the month`);
     
     // Abrufen des Benutzerprofils
     const userProfile = await getUserProfile(userId);
-    console.log('User profile retrieved:', userProfile);
     
     // Funktion zur Formatierung des Datums
     const formatDate = (dateString) => {
@@ -124,7 +92,17 @@ exports.exportToExcel = async (req, res) => {
     }
     
     // Mitfahrerdaten vorbereiten
-    const mitfahrerData = prepareMitfahrerData(fahrten);
+    const mitfahrerData = fahrten.flatMap(fahrt => 
+      (fahrt.mitfahrer || []).map(mitfahrer => ({
+        datum: formatDate(fahrt.datum),
+        anlass: fahrt.anlass,
+        name: mitfahrer.name,
+        arbeitsstaette: mitfahrer.arbeitsstaette,
+        hinweg: mitfahrer.richtung === 'hin' || mitfahrer.richtung === 'hin_rueck' ? 'x' : '',
+        rueckweg: mitfahrer.richtung === 'rueck' || mitfahrer.richtung === 'hin_rueck' ? 'x' : '',
+        kilometer: mitfahrer.richtung === 'hin_rueck' ? fahrt.kilometer * 2 : fahrt.kilometer
+      }))
+    );
     
     // Pfad zur Vorlage
     const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
@@ -173,10 +151,10 @@ exports.exportToExcel = async (req, res) => {
         mitfahrerData.forEach((mitfahrer, index) => {
           if (index < 15) { // Maximal 15 Einträge (Zeile 10 bis 24)
             const row = mitnahmeWorksheet.getRow(index + 10);
-            row.getCell('A').value = formatDate(mitfahrer.datum);
+            row.getCell('A').value = mitfahrer.datum;
             row.getCell('B').value = mitfahrer.anlass;
-            row.getCell('C').value = mitfahrer.hinweg ? 'x' : '';
-            row.getCell('D').value = mitfahrer.rueckweg ? 'x' : '';
+            row.getCell('C').value = mitfahrer.hinweg;
+            row.getCell('D').value = mitfahrer.rueckweg;
             row.getCell('E').value = mitfahrer.name;
             row.getCell('F').value = mitfahrer.arbeitsstaette;
             row.getCell('G').value = mitfahrer.kilometer;
@@ -212,9 +190,8 @@ exports.exportToExcel = async (req, res) => {
     
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename=fahrtenabrechnung_${type}_${year}_${month}.zip`);
-    console.log('Finished processing. Sending response...');
-    res.send(zipBuffer || files[0].buffer);
-    console.log('Response sent');
+    res.send(zipBuffer);
+    
   } catch (error) {
     console.error('Fehler beim Exportieren nach Excel:', error);
     res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });

@@ -14,7 +14,6 @@ router.delete('/:id', fahrtController.deleteFahrt);
 router.get('/report/:year/:month', fahrtController.getMonthlyReport);
 router.get('/monthly-summary', fahrtController.getMonthlySummary);
 router.get('/year-summary/:year', fahrtController.getYearSummary);
-router.get('/export/:type/:year/:month', fahrtController.exportToExcel);
 router.post('/:fahrtId/mitfahrer', fahrtController.addMitfahrer);
 router.put('/:fahrtId/mitfahrer/:mitfahrerId', fahrtController.updateMitfahrer);
 router.delete('/:fahrtId/mitfahrer/:mitfahrerId', fahrtController.deleteMitfahrer);
