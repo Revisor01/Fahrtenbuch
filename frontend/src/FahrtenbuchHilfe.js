@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown, ChevronUp, HelpCircle, X } from 'lucide-react';
 
 const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
   return (
@@ -19,6 +19,7 @@ const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
 const FahrtenbuchHilfe = () => {
   const [openItem, setOpenItem] = useState(null);
   const [isHelpVisible, setIsHelpVisible] = useState(false);
+  const helpRef = useRef(null);
 
   const toggleItem = (index) => {
     setOpenItem(openItem === index ? null : index);
@@ -28,13 +29,37 @@ const FahrtenbuchHilfe = () => {
     setIsHelpVisible(!isHelpVisible);
   };
 
+  const closeHelp = () => {
+    setIsHelpVisible(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (helpRef.current && !helpRef.current.contains(event.target)) {
+        closeHelp();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       <div 
+        ref={helpRef}
         className={`fixed top-0 right-0 h-full w-80 bg-blue-50 shadow-lg transition-transform duration-300 ease-in-out transform ${isHelpVisible ? 'translate-x-0' : 'translate-x-full'}`}
         style={{zIndex: 1000}}
       >
-        <div className="p-4">
+        <div className="p-4 relative">
+          <button
+            onClick={closeHelp}
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          >
+            <X size={24} />
+          </button>
           <h2 className="text-xl font-bold mb-4">Willkommen in Ihrem persönlichen Fahrtenbuch!</h2>
           <AccordionItem
             title="Übersicht"
@@ -102,14 +127,16 @@ const FahrtenbuchHilfe = () => {
         </div>
       </div>
 
-      <div 
-        className="fixed top-20 right-0 bg-blue-500 text-white px-3 py-2 cursor-pointer rounded-l-lg flex items-center"
-        onClick={toggleHelp}
-        style={{zIndex: 1001}}
-      >
-        <HelpCircle size={24} className="mr-2" />
-        <span className="text-lg">Hilfe</span>
-      </div>
+      {!isHelpVisible && (
+        <div 
+          className="fixed top-20 right-0 bg-blue-500 text-white px-2 py-3 cursor-pointer rounded-l-lg flex flex-col items-center"
+          onClick={toggleHelp}
+          style={{zIndex: 1001, writingMode: 'vertical-rl', textOrientation: 'mixed'}}
+        >
+          <HelpCircle size={24} className="mb-2" />
+          <span className="text-lg">Hilfe</span>
+        </div>
+      )}
     </>
   );
 };
