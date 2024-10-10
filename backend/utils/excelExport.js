@@ -27,14 +27,22 @@ function getMonthName(monthNumber) {
 
 exports.exportToExcel = async (req, res) => {
   try {
+    console.log('Starting Excel export');
     const { year, month, type } = req.params;
     const userId = req.user.id;
     
+    console.log(`Export parameters: year=${year}, month=${month}, type=${type}, userId=${userId}`);
+    
+    // Korrigieren des Monatsformats
+    const correctedMonth = month.split('-')[1] || month;
+    
     // Abrufen der Fahrten für den angegebenen Monat
-    const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
+    const fahrten = await Fahrt.getMonthlyReport(year, correctedMonth, userId);
+    console.log(`Retrieved ${fahrten.length} fahrten for the month`);
     
     // Abrufen des Benutzerprofils
     const userProfile = await getUserProfile(userId);
+    console.log('User profile:', userProfile);
     
     // Funktion zur Formatierung des Datums
     const formatDate = (dateString) => {
@@ -70,6 +78,8 @@ exports.exportToExcel = async (req, res) => {
       }
       return [];
     }).sort((a, b) => a.datum - b.datum);
+    
+    console.log(`Formatted ${formattedData.length} entries for Excel`);
     
     // Aufteilen der Daten in Gruppen von genau 22 Zeilen
     const chunkedData = [];
@@ -164,6 +174,10 @@ exports.exportToExcel = async (req, res) => {
       
       return workbook;
     }));
+    
+    if (formattedData.length === 0) {
+      return res.status(404).json({ message: 'Keine Daten für den ausgewählten Zeitraum und Typ gefunden.' });
+    }
     
     // Generieren der Excel-Dateien
     const files = await Promise.all(workbooks.map(async (wb, index) => {

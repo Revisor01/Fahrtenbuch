@@ -514,7 +514,9 @@ function FahrtenListe() {
   
   const handleExportToExcel = async (type, year, month) => {
     try {
-      const response = await axios.get(`/api/fahrten/export/${type}/${year}/${month}`, {
+      // Stellen Sie sicher, dass der Monat im Format "MM" ist
+      const formattedMonth = month.padStart(2, '0');
+      const response = await axios.get(`/api/fahrten/export/${type}/${year}/${formattedMonth}`, {
         responseType: 'blob'
       });
       
