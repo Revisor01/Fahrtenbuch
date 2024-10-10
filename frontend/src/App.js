@@ -521,9 +521,28 @@ function FahrtenListe() {
       const contentType = response.headers['content-type'];
       const contentDisposition = response.headers['content-disposition'];
       const filenameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/i);
-      const filename = filenameMatch ? filenameMatch[1] : `fahrtenabrechnung_${type}_${year}_${month}`;
+      let filename = filenameMatch ? filenameMatch[1] : `fahrtenabrechnung_${type}_${year}_${month}`;
       
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: contentType }));
+      // Überprüfen Sie den Content-Type
+      if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        filename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
+      } else if (contentType === 'application/zip') {
+        filename = filename.endsWith('.zip') ? filename : `${filename}.zip`;
+      } else {
+        console.error('Unerwarteter Content-Type:', contentType);
+        throw new Error('Unerwarteter Dateityp vom Server erhalten');
+      }
+      
+      console.log('Received file:', { contentType, filename, size: response.data.size });
+      
+      const blob = new Blob([response.data], { type: contentType });
+      
+      if (blob.size === 22) {
+        console.error('Erhaltene Datei ist möglicherweise leer oder fehlerhaft');
+        throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
+      }
+      
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', filename);
@@ -531,9 +550,14 @@ function FahrtenListe() {
       link.click();
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
+      console.log('File download initiated');
     } catch (error) {
       console.error('Fehler beim Exportieren nach Excel:', error);
-      alert('Fehler beim Exportieren nach Excel. Bitte versuchen Sie es später erneut.');
+      if (error.response) {
+        console.error('Server-Antwort:', error.response.status, error.response.data);
+      }
+      alert('Fehler beim Exportieren nach Excel. Bitte versuchen Sie es später erneut und prüfen Sie die Konsole für weitere Details.');
     }
   };
   
