@@ -1000,12 +1000,6 @@ function FahrtenListe() {
     <p>Kirchenkreis: {summary.kirchenkreis} € | Gemeinde: {summary.gemeinde} € | Mitfahrer: {summary.mitfahrer} € | Gesamt: {summary.gesamt} €</p>
     </div>
     <div className="flex space-x-2">
-//  <button onClick={() => exportToCSV('kirchenkreis')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
-//  Export Kirchenkreis CSV
-//  </button>
-//  <button onClick={() => exportToCSV('gemeinde')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
-//  Export Gemeinde CSV
-//  </button>
     <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
     Export Kirchenkreis
     </button>
