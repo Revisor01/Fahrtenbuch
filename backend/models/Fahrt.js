@@ -182,73 +182,87 @@ class Fahrt {
     try {
       console.log(`Fetching monthly report for year ${year}, month ${month}, userId ${userId}`);
       
-      // Hauptabfrage für Fahrten
-      const [fahrtRows] = await db.execute(`
+      const [rows] = await db.execute(`
       SELECT f.*, 
               COALESCE(v.name, f.einmaliger_von_ort) AS von_ort_name, 
               COALESCE(v.adresse, f.einmaliger_von_ort) AS von_ort_adresse, 
               COALESCE(n.name, f.einmaliger_nach_ort) AS nach_ort_name, 
-              COALESCE(n.adresse, f.einmaliger_nach_ort) AS nach_ort_adresse
+              COALESCE(n.adresse, f.einmaliger_nach_ort) AS nach_ort_adresse,
+              fd.id AS detail_id, fd.von_ort_id AS detail_von_ort_id, fd.nach_ort_id AS detail_nach_ort_id, 
+              fd.kilometer AS detail_kilometer, fd.abrechnung AS detail_abrechnung,
+              vd.name AS detail_von_ort_name, vd.adresse AS detail_von_ort_adresse,
+              nd.name AS detail_nach_ort_name, nd.adresse AS detail_nach_ort_adresse
       FROM fahrten f
       LEFT JOIN orte v ON f.von_ort_id = v.id
       LEFT JOIN orte n ON f.nach_ort_id = n.id
+      LEFT JOIN fahrt_details fd ON f.id = fd.fahrt_id
+      LEFT JOIN orte vd ON fd.von_ort_id = vd.id
+      LEFT JOIN orte nd ON fd.nach_ort_id = nd.id
       WHERE YEAR(f.datum) = ? AND MONTH(f.datum) = ? AND f.user_id = ?
-      ORDER BY f.datum, f.id
+      ORDER BY f.datum, f.id, fd.id
     `, [year, month, userId]);
       
-      console.log(`Retrieved ${fahrtRows.length} main fahrt rows`);
+      console.log(`Retrieved ${rows.length} rows from database`);
       
-      if (fahrtRows.length === 0) {
-        console.log('No fahrten found for the given month');
-        return [];
-      }
+      const groupedFahrten = rows.reduce((acc, row) => {
+        if (!acc[row.id]) {
+          acc[row.id] = {
+            ...row,
+            details: []
+          };
+          delete acc[row.id].detail_id;
+          delete acc[row.id].detail_von_ort_id;
+          delete acc[row.id].detail_nach_ort_id;
+          delete acc[row.id].detail_kilometer;
+          delete acc[row.id].detail_abrechnung;
+          delete acc[row.id].detail_von_ort_name;
+          delete acc[row.id].detail_von_ort_adresse;
+          delete acc[row.id].detail_nach_ort_name;
+          delete acc[row.id].detail_nach_ort_adresse;
+        }
+        if (row.detail_id) {
+          acc[row.id].details.push({
+            id: row.detail_id,
+            von_ort_id: row.detail_von_ort_id,
+            nach_ort_id: row.detail_nach_ort_id,
+            von_ort_name: row.detail_von_ort_name,
+            von_ort_adresse: row.detail_von_ort_adresse,
+            nach_ort_name: row.detail_nach_ort_name,
+            nach_ort_adresse: row.detail_nach_ort_adresse,
+            kilometer: row.detail_kilometer,
+            abrechnung: row.detail_abrechnung
+          });
+        }
+        return acc;
+      }, {});
       
-      const fahrtIds = fahrtRows.map(row => row.id);
-      
-      // Abfrage für Fahrtdetails
-      const [detailRows] = await db.execute(`
-      SELECT fd.*, 
-              v.name AS von_ort_name, v.adresse AS von_ort_adresse,
-              n.name AS nach_ort_name, n.adresse AS nach_ort_adresse
-      FROM fahrt_details fd
-      LEFT JOIN orte v ON fd.von_ort_id = v.id
-      LEFT JOIN orte n ON fd.nach_ort_id = n.id
-      WHERE fd.fahrt_id IN (?)
-    `, [fahrtIds]);
-      
-      console.log(`Retrieved ${detailRows.length} detail rows`);
-      
-      // Abfrage für Mitfahrer
+      // Fetch Mitfahrer data
+      const fahrtIds = Object.keys(groupedFahrten);
       const [mitfahrerRows] = await db.execute(`
-      SELECT m.*
-      FROM mitfahrer m
-      WHERE m.fahrt_id IN (?)
+      SELECT * FROM mitfahrer WHERE fahrt_id IN (?)
     `, [fahrtIds]);
       
       console.log(`Retrieved ${mitfahrerRows.length} mitfahrer rows`);
       
-      // Zusammenführen der Daten
-      const groupedFahrten = fahrtRows.map(fahrt => {
-        const details = detailRows.filter(detail => detail.fahrt_id === fahrt.id);
-        const mitfahrer = mitfahrerRows.filter(mitfahrer => mitfahrer.fahrt_id === fahrt.id);
-        return {
-          ...fahrt,
-          details,
-          mitfahrer
-        };
+      // Add Mitfahrer to their respective Fahrten
+      mitfahrerRows.forEach(mitfahrer => {
+        if (groupedFahrten[mitfahrer.fahrt_id]) {
+          if (!groupedFahrten[mitfahrer.fahrt_id].mitfahrer) {
+            groupedFahrten[mitfahrer.fahrt_id].mitfahrer = [];
+          }
+          groupedFahrten[mitfahrer.fahrt_id].mitfahrer.push(mitfahrer);
+        }
       });
       
-      console.log(`Grouped ${groupedFahrten.length} fahrten`);
-      if (groupedFahrten.length > 0) {
-        console.log('Sample fahrt:', JSON.stringify(groupedFahrten[0], null, 2));
-      }
-      
-      return groupedFahrten;
+      const result = Object.values(groupedFahrten);
+      console.log(`Returning ${result.length} grouped fahrten`);
+      return result;
     } catch (error) {
       console.error('Fehler beim Abrufen des Monatsberichts:', error);
       throw error;
     }
   }
+  
   
   static async getYearSummary(year, userId) {
     try {
