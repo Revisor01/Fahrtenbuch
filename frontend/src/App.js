@@ -420,6 +420,7 @@ function FahrtenListe() {
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
+  const [editingMitfahrer, setEditingMitfahrer] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
@@ -559,9 +560,9 @@ function FahrtenListe() {
     }
   };
 
-  const handleViewMitfahrer = (mitfahrer) => {
+  const handleViewMitfahrer = (mitfahrer, event) => {
+    event.stopPropagation(); // Verhindert das Bubbling zum Bearbeitungs-Handler
     setViewingMitfahrer(mitfahrer);
-    setIsMitfahrerModalOpen(true);
   };
   
   const getMonthSummary = () => {
@@ -667,7 +668,6 @@ function FahrtenListe() {
   
   const handleEditMitfahrer = (fahrtId, mitfahrer) => {
     setEditingMitfahrer({ fahrtId, ...mitfahrer });
-    setIsMitfahrerModalOpen(true);
   };
   
   const handleAddMitfahrer = (fahrtId) => {
@@ -712,7 +712,7 @@ function FahrtenListe() {
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
     
     return (
-      <div className="flex flex-wrap mt-2">
+      <div className="flex flex-wrap gap-1 mt-2">
       {fahrt.mitfahrer.map((person, index) => {
         const shouldDisplay = 
         (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
@@ -723,8 +723,8 @@ function FahrtenListe() {
         return (
           <span
           key={index}
-          className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
-          onClick={() => handleViewMitfahrer(person)}
+          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
+          onClick={(event) => handleViewMitfahrer(person, event)}
           >
           👤 {person.name}
           </span>
@@ -733,6 +733,7 @@ function FahrtenListe() {
       </div>
     );
   };
+
   
   const renderFahrtRow = (fahrt, detail = null) => (
     <tr key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} className={
@@ -1011,25 +1012,19 @@ function FahrtenListe() {
     ))}
     </tbody>
     </table>
-    {editingMitfahrer && (
-      <MitfahrerModal
-      isOpen={isMitfahrerModalOpen}
-      onClose={() => {
-        setIsMitfahrerModalOpen(false);
-        setEditingMitfahrer(null);
-      }}
-      onSave={handleSaveMitfahrer}
-      initialData={editingMitfahrer}
-      />
-    )}
     <MitfahrerModal
-    isOpen={isMitfahrerModalOpen}
-    onClose={() => {
-      setIsMitfahrerModalOpen(false);
-      setViewingMitfahrer(null);
-    }}
-    mitfahrer={viewingMitfahrer}
+    isOpen={!!viewingMitfahrer}
+    onClose={() => setViewingMitfahrer(null)}
+    initialData={viewingMitfahrer}
     readOnly={true}
+    />
+    
+    <MitfahrerModal
+    isOpen={!!editingMitfahrer}
+    onClose={() => setEditingMitfahrer(null)}
+    onSave={handleSaveMitfahrer}
+    initialData={editingMitfahrer}
+    readOnly={false}
     />
     </div>
   );
