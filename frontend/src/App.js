@@ -884,7 +884,7 @@ function FahrtenListe() {
       {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
         <div key={index} className="mitfahrer-item">
         <span
-        className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1 mitfahrer-name"
+        className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1"
         onClick={() => handleEditMitfahrer(fahrt.id, person)}
         title={`${person.arbeitsstaette} - ${person.richtung}`}
         >
@@ -1088,7 +1088,7 @@ function OrteListe() {
   const { orte, updateOrt, deleteOrt } = useContext(AppContext);
   const [editingOrt, setEditingOrt] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'descending' });
+  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
 
   const handleEdit = (ort) => {
     setEditingOrt({ ...ort });
@@ -1240,7 +1240,7 @@ function DistanzenListe() {
   const { distanzen, orte, updateDistanz, deleteDistanz } = useContext(AppContext);
   const [editingDistanz, setEditingDistanz] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: 'von_ort_id', direction: 'descending' });
+  const [sortConfig, setSortConfig] = useState({ key: 'von_ort_id', direction: 'ascending' });
   
   const handleEdit = (distanz) => {
     setEditingDistanz({ ...distanz });
@@ -1438,10 +1438,6 @@ function AppContent() {
   
   return (
     <div className="container mx-auto p-4">
-    <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
-    <p className="font-bold">Willkommen im Fahrtenbuch</p>
-    <p>Hier können Sie Ihre Fahrten erfassen und verwalten. Nutzen Sie die Buttons oben, um Orte und Distanzen zu verwalten. Fügen Sie neue Fahrten hinzu und sehen Sie sich Ihre monatliche Übersicht an.</p>
-    </div>
     <div className="flex flex-col-mobile justify-between items-center mb-8">
     <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
     <div className="flex space-x-2">
@@ -1469,6 +1465,10 @@ function AppContent() {
     >
     Logout
     </button>
+    </div>
+    <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
+    <p className="font-bold">Willkommen im Fahrtenbuch</p>
+    <p>Hier können Sie Ihre Fahrten erfassen und verwalten. Nutzen Sie die Buttons oben, um Orte und Distanzen zu verwalten. Fügen Sie neue Fahrten hinzu und sehen Sie sich Ihre monatliche Übersicht an.</p>
     </div>
     </div>
     <div className="grid grid-cols-1 gap-4 mb-8">

@@ -23,7 +23,7 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
   };
   
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={readOnly ? "Mitfahrer Details" : "Mitfahrer hinzufügen/bearbeiten"}>
+    <Modal isOpen={isOpen} onClose={onClose} title={readOnly ? "Mitfahrer:in Details" : "Mitfahrer:in hinzufügen/bearbeiten"}>
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
     <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
@@ -59,8 +59,8 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     disabled={readOnly}
     >
     <option value="hin">Hin</option>
-    <option value="rueck">Zurück</option>
-    <option value="hin_rueck">Hin und zurück</option>
+    <option value="rueck">Rück</option>
+    <option value="hin_rueck">Hin & Rück</option>
     </select>
     </div>
     {!readOnly && (
