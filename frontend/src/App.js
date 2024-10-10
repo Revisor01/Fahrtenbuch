@@ -1079,11 +1079,7 @@ function OrteListe() {
   const [editingOrt, setEditingOrt] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
-  
-  const sortedOrte = useMemo(() => {
-    return [...orte].sort((a, b) => b.name.localeCompare(a.name));
-  }, [orte]);
-  
+
   const handleEdit = (ort) => {
     setEditingOrt({ ...ort });
   };
