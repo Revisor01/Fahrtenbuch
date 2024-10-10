@@ -2,6 +2,7 @@ const ExcelJS = require('exceljs');
 const path = require('path');
 const JSZip = require('jszip');
 const db = require('../config/database');
+const Fahrt = require('../models/Fahrt');
 
 async function getUserProfile(userId) {
   const [rows] = await db.execute(
