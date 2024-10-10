@@ -5,6 +5,7 @@ const db = require('../config/database');
 const Fahrt = require('../models/Fahrt');
 
 async function getUserProfile(userId) {
+  console.log(`Fetching user profile for userId: ${userId}`);
   const [rows] = await db.execute(
     `SELECT p.*, o.adresse as home_address
      FROM user_profiles p
@@ -12,6 +13,7 @@ async function getUserProfile(userId) {
      WHERE p.user_id = ?`,
     [userId]
   );
+  console.log(`User profile fetched: ${JSON.stringify(rows[0])}`);
   return rows[0];
 }
 
@@ -26,6 +28,7 @@ function getMonthName(monthNumber) {
 }
 
 function prepareMitfahrerData(fahrten) {
+  console.log('Preparing Mitfahrer data');
   const mitfahrerData = [];
   const processedMitfahrer = new Set();
 
@@ -49,20 +52,26 @@ function prepareMitfahrerData(fahrten) {
     }
   });
 
+  console.log(`Prepared ${mitfahrerData.length} Mitfahrer entries`);
   return mitfahrerData;
 }
 
 async function exportToExcel(req, res) {
   try {
+    console.log('Starting Excel export');
     const { year, month, type } = req.params;
     const userId = req.user.id;
     
+    console.log(`Exporting Excel for user ${userId}, year ${year}, month ${month}, type ${type}`);
+
     // Abrufen der Fahrten für den angegebenen Monat
     const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
-    
+    console.log(`Retrieved ${fahrten.length} trips for the month`);
+
     // Abrufen des Benutzerprofils
     const userProfile = await getUserProfile(userId);
-    
+    console.log('User profile retrieved');
+
     // Funktion zur Formatierung des Datums
     const formatDate = (dateString) => {
       const date = new Date(dateString);
@@ -98,6 +107,8 @@ async function exportToExcel(req, res) {
       return [];
     }).sort((a, b) => a.datum - b.datum);
     
+    console.log(`Formatted data contains ${formattedData.length} entries`);
+
     // Aufteilen der Daten in Gruppen von genau 22 Zeilen
     const chunkedData = [];
     for (let i = 0; i < formattedData.length; i += 22) {
@@ -118,11 +129,14 @@ async function exportToExcel(req, res) {
       }
     }
     
+    console.log(`Data split into ${chunkedData.length} chunks`);
+
     // Mitfahrerdaten vorbereiten
     const mitfahrerData = prepareMitfahrerData(fahrten);
     
     // Pfad zur Vorlage
     const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
+    console.log(`Template path: ${templatePath}`);
     
     // Erstellen der Workbooks basierend auf der Vorlage
     const workbooks = await Promise.all(chunkedData.map(async (chunk, index) => {
@@ -182,6 +196,8 @@ async function exportToExcel(req, res) {
       return workbook;
     }));
     
+    console.log(`Created ${workbooks.length} workbooks`);
+    
     // Generieren der Excel-Dateien
     const files = await Promise.all(workbooks.map(async (wb, index) => {
       const fileName = `fahrtenabrechnung_${type}_${year}_${month}_${index + 1}.xlsx`;
@@ -189,10 +205,13 @@ async function exportToExcel(req, res) {
       return { fileName, buffer };
     }));
     
+    console.log(`Generated ${files.length} Excel files`);
+
     // Wenn nur eine Datei, senden Sie sie direkt als XLSX
     if (files.length === 1) {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=${files[0].fileName}`);
+      console.log('Sending single Excel file');
       return res.send(files[0].buffer);
     }
     
@@ -205,8 +224,11 @@ async function exportToExcel(req, res) {
     
     const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
     
+    console.log(`Created ZIP archive with ${files.length} files, size: ${zipBuffer.length} bytes`);
+
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename=fahrtenabrechnung_${type}_${year}_${month}.zip`);
+    console.log('Sending ZIP file');
     res.send(zipBuffer);
     
   } catch (error) {
