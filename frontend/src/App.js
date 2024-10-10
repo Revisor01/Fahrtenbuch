@@ -1077,7 +1077,6 @@ function FahrtenListe() {
     )}
     {activeTooltip && (
       <div 
-      ref={tooltipRef}
       style={{
         position: 'fixed',  // Ändern Sie dies von 'absolute' zu 'fixed'
         top: `${tooltipPosition.top}px`,
