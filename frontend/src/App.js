@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import axios from 'axios';
 import './index.css';
 import './App.css';
@@ -1467,9 +1467,7 @@ function AppContent() {
     <FahrtenListe />
     <MonthlyOverview />
     
-    <Modal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Profil">
-    <ProfileModalContent />
-    </Modal>
+    <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     
     <Modal isOpen={showOrteModal} onClose={() => setShowOrteModal(false)} title="Orte">
     <p className="mb-4">Hier können Sie Orte verwalten. Fügen Sie Dienstorte, Wohnorte, Kirchspiele und sonstige Orte hinzu oder bearbeiten Sie bestehende.</p>
