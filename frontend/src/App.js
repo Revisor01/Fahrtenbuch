@@ -6,6 +6,7 @@ import ProfileModal from './ProfileModal';
 import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
+import Modal from './Modal'; 
 
 const API_BASE_URL = '/api';
 
@@ -711,23 +712,18 @@ function FahrtenListe() {
         
         if (!shouldDisplay) return null;
         
-        const tooltipId = `${fahrt.id}-${index}`;
-        
         return (
           <div key={index} className="mitfahrer-item relative inline-block mr-2">
           <span
-          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700"
-          onClick={() => setActiveMitfahrerTooltip(activeMitfahrerTooltip === tooltipId ? null : tooltipId)}
+          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-200"
           >
           👤 {person.name}
+          <div className="absolute z-50 w-48 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg invisible group-hover:visible transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+          <p><strong>Name:</strong> {person.name}</p>
+          <p><strong>Arbeitsstätte:</strong> {person.arbeitsstaette}</p>
+          <p><strong>Richtung:</strong> {person.richtung}</p>
+          </div>
           </span>
-          {activeMitfahrerTooltip === tooltipId && (
-            <div className="absolute z-10 w-48 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg">
-            <p><strong>Name:</strong> {person.name}</p>
-            <p><strong>Arbeitsstätte:</strong> {person.arbeitsstaette}</p>
-            <p><strong>Richtung:</strong> {person.richtung}</p>
-            </div>
-          )}
           </div>
         );
       })}
@@ -1084,6 +1080,10 @@ function OrteListe() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   
+  const sortedOrte = useMemo(() => {
+    return [...orte].sort((a, b) => b.name.localeCompare(a.name));
+  }, [orte]);
+  
   const handleEdit = (ort) => {
     setEditingOrt({ ...ort });
   };
@@ -1424,6 +1424,10 @@ function AppContent() {
   
   return (
     <div className="container mx-auto p-4">
+    <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
+    <p className="font-bold">Willkommen im Fahrtenbuch</p>
+    <p>Hier können Sie Ihre Fahrten erfassen und verwalten. Nutzen Sie die Buttons oben, um Orte und Distanzen zu verwalten. Fügen Sie neue Fahrten hinzu und sehen Sie sich Ihre monatliche Übersicht an.</p>
+    </div>
     <div className="flex flex-col-mobile justify-between items-center mb-8">
     <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
     <div className="flex space-x-2">
@@ -1458,39 +1462,22 @@ function AppContent() {
     </div>
     <FahrtenListe />
     <MonthlyOverview />
-    <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     
-    {showOrteModal && (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setShowOrteModal(false)}>
-      <div className="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
-      <h2 className="text-2xl font-bold mb-4">Orte</h2>
-      <OrtForm />
-      <OrteListe />
-      <button
-      onClick={() => setShowOrteModal(false)}
-      className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-      >
-      Schließen
-      </button>
-      </div>
-      </div>
-    )}
+    <Modal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Profil">
+    <ProfileModalContent />
+    </Modal>
     
-    {showDistanzenModal && (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setShowDistanzenModal(false)}>
-      <div className="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
-      <h2 className="text-2xl font-bold mb-4">Distanzen</h2>
-      <DistanzForm />
-      <DistanzenListe />
-      <button
-      onClick={() => setShowDistanzenModal(false)}
-      className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-      >
-      Schließen
-      </button>
-      </div>
-      </div>
-    )}
+    <Modal isOpen={showOrteModal} onClose={() => setShowOrteModal(false)} title="Orte">
+    <p className="mb-4">Hier können Sie Orte verwalten. Fügen Sie Dienstorte, Wohnorte, Kirchspiele und sonstige Orte hinzu oder bearbeiten Sie bestehende.</p>
+    <OrtForm />
+    <OrteListe />
+    </Modal>
+    
+    <Modal isOpen={showDistanzenModal} onClose={() => setShowDistanzenModal(false)} title="Distanzen">
+    <p className="mb-4">Verwalten Sie hier die Distanzen zwischen verschiedenen Orten. Diese werden für die Berechnung der Fahrtkosten verwendet.</p>
+    <DistanzForm />
+    <DistanzenListe />
+    </Modal>
     </div>
   );
 }

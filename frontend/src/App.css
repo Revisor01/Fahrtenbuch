@@ -81,6 +81,15 @@ select {
   justify-content: flex-start;
   height: 80px; /* Passen Sie diesen Wert an, um die gewünschte Höhe zu erreichen */
 }
+
+.group:hover .group-hover\:visible {
+  visibility: visible;
+}
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

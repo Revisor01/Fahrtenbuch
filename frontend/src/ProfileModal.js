@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from './App';
+import Modal from './Modal';
 
 function ProfileModal({ isOpen, onClose }) {
   const { token } = useContext(AppContext);
@@ -115,13 +116,7 @@ function ProfileModal({ isOpen, onClose }) {
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={onClose}>
-    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
-    <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
-    &#x2715;
-    </button>
-    <div className="mt-3 text-center">
-    <h3 className="text-lg leading-6 font-medium text-gray-900">Profil</h3>
+    <Modal isOpen={isOpen} onClose={onClose} title="Profil">
     <div className="mt-2 px-7 py-3">
     <form onSubmit={handleProfileUpdate}>
     <input
@@ -205,8 +200,6 @@ function ProfileModal({ isOpen, onClose }) {
     {!profile.dienstort && (
       <p className="text-sm text-red-500">Bitte Dienstort festlegen</p>
     )}
-    </div>
-    </div>
     
     {showMessage && (
       <MessageOverlay 
@@ -214,7 +207,7 @@ function ProfileModal({ isOpen, onClose }) {
       onClose={() => setShowMessage(false)}
       />
     )}
-    </div>
+    </Modal>
   );
 }
 
