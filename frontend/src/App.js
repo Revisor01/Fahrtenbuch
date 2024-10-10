@@ -1114,7 +1114,7 @@ function MonthlyOverview() {
 function OrteListe() {
   const { orte, updateOrt, deleteOrt } = useContext(AppContext);
   const [editingOrt, setEditingOrt] = useState(null);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
 
   const handleEdit = (ort) => {
@@ -1266,7 +1266,7 @@ function OrteListe() {
 function DistanzenListe() {
   const { distanzen, orte, updateDistanz, deleteDistanz } = useContext(AppContext);
   const [editingDistanz, setEditingDistanz] = useState(null);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'von_ort_id', direction: 'ascending' });
   
   const handleEdit = (distanz) => {
