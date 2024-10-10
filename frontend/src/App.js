@@ -714,16 +714,14 @@ function FahrtenListe() {
         
         return (
           <div key={index} className="mitfahrer-item relative inline-block mr-2">
-          <span
-          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-200"
-          >
+          <span className="mitfahrer-name">
           👤 {person.name}
-          <div className="absolute z-50 w-48 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg invisible group-hover:visible transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+          </span>
+          <div className="mitfahrer-tooltip">
           <p><strong>Name:</strong> {person.name}</p>
           <p><strong>Arbeitsstätte:</strong> {person.arbeitsstaette}</p>
           <p><strong>Richtung:</strong> {person.richtung}</p>
           </div>
-          </span>
           </div>
         );
       })}

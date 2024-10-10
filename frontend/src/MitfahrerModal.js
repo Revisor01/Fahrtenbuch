@@ -20,9 +20,11 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData }) {
     onClose();
   };
 
+if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Mitfahrer hinzufügen/bearbeiten">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal isOpen={isOpen} onClose={onClose} title="Mitfahrer:in hinzufügen/bearbeiten">
+    <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
           <input

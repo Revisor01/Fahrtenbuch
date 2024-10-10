@@ -400,6 +400,7 @@ function FahrtForm() {
     </div>
     {showMitfahrerModal && (
       <MitfahrerModal
+      isOpen={showMitfahrerModal}
       onClose={() => {
         setShowMitfahrerModal(false);
         setEditingMitfahrerIndex(null);
