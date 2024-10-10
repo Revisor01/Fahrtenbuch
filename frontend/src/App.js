@@ -512,16 +512,16 @@ function FahrtenListe() {
     });
   };
   
-  const exportToExcel = async (type) => {
+  const handleExportToExcel = async (type, year, month) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/fahrten/export/${type}/${selectedYear}/${selectedMonth.split('-')[1]}`, {
+      const response = await axios.get(`/api/fahrten/export/${type}/${year}/${month}`, {
         responseType: 'blob'
       });
       
       const contentType = response.headers['content-type'];
       const contentDisposition = response.headers['content-disposition'];
       const filenameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/i);
-      const filename = filenameMatch ? filenameMatch[1] : `fahrtenabrechnung_${type}_${selectedYear}_${selectedMonth.split('-')[1]}`;
+      const filename = filenameMatch ? filenameMatch[1] : `fahrtenabrechnung_${type}_${year}_${month}`;
       
       const url = window.URL.createObjectURL(new Blob([response.data], { type: contentType }));
       const link = document.createElement('a');
@@ -980,10 +980,10 @@ function FahrtenListe() {
     <button onClick={() => exportToCSV('gemeinde')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
     Export Gemeinde CSV
     </button>
-    <button onClick={() => exportToExcel('kirchenkreis')} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
+    <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
     Export Kirchenkreis Excel
     </button>
-    <button onClick={() => exportToExcel('gemeinde')} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
+    <button onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
     Export Gemeinde Excel
     </button>
     </div>

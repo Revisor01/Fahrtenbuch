@@ -41,63 +41,74 @@ const FahrtenbuchHilfe = () => {
             isOpen={openItem === 0}
             toggleOpen={() => toggleItem(0)}
           >
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Verwalten Sie Ihre dienstlichen Fahrten einfach und effizient</li>
-              <li>Fügen Sie neue Fahrten mit wenigen Klicks hinzu</li>
-              <li>Geben Sie Datum, Start- und Zielort, Anlass und Kilometerzahl ein</li>
-              <li>Option für Fahrten über den Dienstort und Mitfahrer:innen</li>
-              <li>Bearbeiten oder löschen Sie bestehende Einträge in der Fahrten-Liste</li>
-            </ul>
+            <p>
+              Hier können Sie ganz einfach Ihre dienstlichen Fahrten eintragen und verwalten. 
+              Oben auf der Seite finden Sie ein Formular für neue Fahrten. Tragen Sie einfach 
+              das Datum, von wo nach wo Sie gefahren sind, warum und wie viele Kilometer ein. 
+              Sie können auch angeben, ob Sie über Ihren Dienstort gefahren sind und ob jemand 
+              mitgefahren ist.
+            </p>
+            <p className="mt-2">
+              Unter dem Formular sehen Sie alle Ihre Fahrten in einer Liste. Hier können Sie 
+              Einträge ändern oder löschen, falls mal etwas nicht stimmt.
+            </p>
           </AccordionItem>
 
           <AccordionItem
-            title="Monatliche Übersicht und Export"
+            title="Monatliche Übersicht und Abrechnung"
             isOpen={openItem === 1}
             toggleOpen={() => toggleItem(1)}
           >
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Sehen Sie Ihre Erstattungen für Kirchenkreis und Gemeinde auf einen Blick</li>
-              <li>Nutzen Sie Excel-Export für einfache Abrechnungserstellung</li>
-              <li>Direkter Import in das Kirchenkreis-Formular möglich</li>
-              <li><strong>Wichtig:</strong> Vervollständigen Sie Ihr Profil für korrekte Daten im Excel-Export</li>
-            </ul>
+            <p>
+              In der monatlichen Übersicht sehen Sie, wie viel Geld Sie für Ihre Fahrten 
+              zurückbekommen - aufgeteilt nach Kirchenkreis und Gemeinde. Sie können diese 
+              Übersicht ganz einfach als Excel-Datei herunterladen. Das macht die Abrechnung 
+              mit dem Kirchenkreis viel einfacher!
+            </p>
+            <p className="mt-2">
+              <strong>Wichtig:</strong> Damit in der Excel-Datei alles stimmt, füllen Sie bitte 
+              alle Ihre persönlichen Daten in Ihrem Profil aus.
+            </p>
           </AccordionItem>
 
           <AccordionItem
-            title="Orte verwalten"
+            title="Orte speichern"
             isOpen={openItem === 2}
             toggleOpen={() => toggleItem(2)}
           >
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Speichern Sie regelmäßig besuchte Orte</li>
-              <li>Kategorisieren Sie als Heimatort, Dienstort oder Kirchspiel</li>
-              <li>Alle anderen Orte werden unter "Sonstiges" sortiert</li>
-              <li>Erleichtert schnelles Eintragen häufiger Fahrtziele</li>
-            </ul>
+            <p>
+              Unter "Orte" können Sie alle Orte speichern, zu denen Sie öfter fahren. Sie können 
+              hier auch Ihren Heimatort, Ihren Dienstort und Ihr Kirchspiel festlegen. Das macht 
+              es viel schneller, neue Fahrten einzutragen, weil Sie die Orte dann einfach auswählen 
+              können, statt sie jedes Mal neu einzugeben.
+            </p>
           </AccordionItem>
 
           <AccordionItem
-            title="Distanzen verwalten"
+            title="Entfernungen speichern"
             isOpen={openItem === 3}
             toggleOpen={() => toggleItem(3)}
           >
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Definieren Sie Entfernungen zwischen gespeicherten Orten</li>
-              <li>Automatische Kilometerberechnung spart Zeit bei der Eingabe</li>
-              <li>Besonders nützlich für Fahrten via Dienstort</li>
-              <li>Vordefinierte Distanzen für präzise Fahrtkilometerberechnung</li>
-            </ul>
+            <p>
+              Unter "Distanzen" können Sie die Entfernungen zwischen Orten, die Sie gespeichert 
+              haben, eintragen. Das ist praktisch, weil Sie dann bei neuen Fahrten nicht jedes Mal 
+              die Kilometerzahl ausrechnen müssen. Das Fahrtenbuch macht das automatisch für Sie.
+            </p>
+            <p className="mt-2">
+              Das ist besonders nützlich, wenn Sie oft über Ihren Dienstort fahren. Sie sparen 
+              Zeit und die Abrechnung wird genauer.
+            </p>
           </AccordionItem>
         </div>
       </div>
 
       <div 
-        className="fixed top-1/2 right-0 transform -translate-y-1/2 bg-blue-500 text-white p-2 cursor-pointer rounded-l-lg"
+        className="fixed top-20 right-0 bg-blue-500 text-white px-3 py-2 cursor-pointer rounded-l-lg flex items-center"
         onClick={toggleHelp}
-        style={{zIndex: 1001, writingMode: 'vertical-rl', textOrientation: 'mixed'}}
+        style={{zIndex: 1001}}
       >
-        <HelpCircle size={24} className="mb-2" />
-        Hilfe
+        <HelpCircle size={24} className="mr-2" />
+        <span className="text-lg">Hilfe</span>
       </div>
     </>
   );

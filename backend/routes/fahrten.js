@@ -18,5 +18,6 @@ router.get('/export/:type/:year/:month', fahrtController.exportToExcel);
 router.post('/:fahrtId/mitfahrer', fahrtController.addMitfahrer);
 router.put('/:fahrtId/mitfahrer/:mitfahrerId', fahrtController.updateMitfahrer);
 router.delete('/:fahrtId/mitfahrer/:mitfahrerId', fahrtController.deleteMitfahrer);
+router.get('/export/:type/:year/:month', authMiddleware, fahrtController.exportToExcel);
 
 module.exports = router;
