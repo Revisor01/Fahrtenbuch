@@ -127,16 +127,21 @@ const FahrtenbuchHilfe = () => {
         </div>
       </div>
 
-      {!isHelpVisible && (
-        <div 
-          className="fixed top-20 right-0 bg-blue-500 text-white px-2 py-3 cursor-pointer rounded-l-lg flex flex-col items-center"
-          onClick={toggleHelp}
-          style={{zIndex: 1001, writingMode: 'vertical-rl', textOrientation: 'mixed'}}
-        >
-          <HelpCircle size={24} className="mb-2" />
-          <span className="text-lg">Hilfe</span>
-        </div>
-      )}
+    {!isHelpVisible && (
+      <div 
+      className="fixed top-20 right-0 bg-blue-500 text-white px-3 py-2 cursor-pointer rounded-l-lg flex items-center"
+      onClick={toggleHelp}
+      style={{
+        zIndex: 1001,
+        writingMode: 'vertical-rl',
+        textOrientation: 'mixed',
+        transform: 'rotate(180deg)'
+      }}
+      >
+      <HelpCircle size={24} className="mb-2 transform rotate-90" />
+      <span className="text-lg ml-1">Hilfe</span>
+      </div>
+    )}
     </>
   );
 };
