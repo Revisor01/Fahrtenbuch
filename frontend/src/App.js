@@ -911,7 +911,7 @@ function FahrtenListe() {
       {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
         <div key={index} className="mitfahrer-item">
         <span
-        className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 mr-1"
+        className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
         onClick={() => handleEditMitfahrer(fahrt.id, person)}
         title={`${person.arbeitsstaette} - ${person.richtung}`}
         >
@@ -1000,17 +1000,17 @@ function FahrtenListe() {
     <p>Kirchenkreis: {summary.kirchenkreis} € | Gemeinde: {summary.gemeinde} € | Mitfahrer: {summary.mitfahrer} € | Gesamt: {summary.gesamt} €</p>
     </div>
     <div className="flex space-x-2">
-    <button onClick={() => exportToCSV('kirchenkreis')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
-    Export Kirchenkreis CSV
-    </button>
-    <button onClick={() => exportToCSV('gemeinde')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
-    Export Gemeinde CSV
-    </button>
+//  <button onClick={() => exportToCSV('kirchenkreis')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
+//  Export Kirchenkreis CSV
+//  </button>
+//  <button onClick={() => exportToCSV('gemeinde')} className="bg-green-500 text-white px-2 py-1 rounded text-xs">
+//  Export Gemeinde CSV
+//  </button>
     <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
-    Export Kirchenkreis Excel
+    Export Kirchenkreis
     </button>
     <button onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
-    Export Gemeinde Excel
+    Export Gemeinde
     </button>
     </div>
     </div>
