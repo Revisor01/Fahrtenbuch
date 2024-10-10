@@ -1021,7 +1021,7 @@ function FahrtenListe() {
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer anlass-col" onClick={() => requestSort('anlass')}>Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer kilometer-col" onClick={() => requestSort('kilometer')}>Kilometer {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
     <th className="border px-2 py-1 text-sm font-medium cursor-pointer abrechnung-col" onClick={() => requestSort('abrechnung')}>Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium mitfahrer-col">Mitfahrer</th>
+    <th className="border px-2 py-1 text-sm font-medium mitfahrer-col">Mitfahrer:innen</th>
     <th className="border px-2 py-1 text-sm font-medium aktionen-col">Aktionen</th>
     </tr>
     </thead>
@@ -1082,7 +1082,7 @@ function MonthlyOverview() {
     <th className="border px-2 py-1 text-sm font-medium w-1/5">Monat</th>
     <th className="border px-2 py-1 text-sm font-medium w-1/5">Kirchenkreis</th>
     <th className="border px-2 py-1 text-sm font-medium w-1/5">Gemeinde</th>
-    <th className="border px-2 py-1 text-sm font-medium w-1/5">Mitfahrer</th>
+    <th className="border px-2 py-1 text-sm font-medium w-1/5">Mitfahrer:innen</th>
     <th className="border px-2 py-1 text-sm font-medium w-1/5">Gesamt</th>
     </tr>
     </thead>

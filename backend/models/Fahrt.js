@@ -198,8 +198,14 @@ class Fahrt {
       
       console.log(`Retrieved ${fahrtRows.length} main fahrt rows`);
       
-      // Abfrage für Fahrtdetails
+      if (fahrtRows.length === 0) {
+        console.log('No fahrten found for the given month');
+        return [];
+      }
+      
       const fahrtIds = fahrtRows.map(row => row.id);
+      
+      // Abfrage für Fahrtdetails
       const [detailRows] = await db.execute(`
       SELECT fd.*, 
               v.name AS von_ort_name, v.adresse AS von_ort_adresse,
@@ -233,7 +239,9 @@ class Fahrt {
       });
       
       console.log(`Grouped ${groupedFahrten.length} fahrten`);
-      console.log('Sample fahrt:', JSON.stringify(groupedFahrten[0], null, 2));
+      if (groupedFahrten.length > 0) {
+        console.log('Sample fahrt:', JSON.stringify(groupedFahrten[0], null, 2));
+      }
       
       return groupedFahrten;
     } catch (error) {
