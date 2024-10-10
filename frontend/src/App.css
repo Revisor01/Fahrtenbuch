@@ -56,6 +56,9 @@
   display: inline-flex;
   align-items: center;
   margin-bottom: 0.25rem;
+}
+
+.mitfahrer-item {
   position: relative;
 }
 
@@ -71,11 +74,10 @@
 
 .mitfahrer-tooltip {
   display: none;
-  position: absolute;
-  z-index: 50;
+  position: fixed;  /* Änderung von absolute zu fixed */
+  z-index: 1000;    /* Erhöhter z-index */
   width: 200px;
   padding: 8px;
-  margin-top: 4px;
   font-size: 0.875rem;
   background-color: white;
   border-radius: 0.375rem;

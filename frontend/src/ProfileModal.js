@@ -117,7 +117,7 @@ function ProfileModal({ isOpen, onClose }) {
   
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Profil">
-    <div className="w-96 mx-auto">
+    <div className="max-w-md mx-auto">
     <form onSubmit={handleProfileUpdate}>
     <input
     type="email"

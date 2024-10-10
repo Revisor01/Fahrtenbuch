@@ -434,6 +434,28 @@ function FahrtenListe() {
     }
   }, [fahrten]);
   
+  useEffect(() => {
+    const positionTooltips = () => {
+      const tooltips = document.querySelectorAll('.mitfahrer-tooltip');
+      tooltips.forEach(tooltip => {
+        const parent = tooltip.closest('.mitfahrer-item');
+        const rect = parent.getBoundingClientRect();
+        tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        tooltip.style.left = `${rect.left + window.scrollX}px`;
+      });
+    };
+    
+    window.addEventListener('scroll', positionTooltips);
+    window.addEventListener('resize', positionTooltips);
+    positionTooltips();
+    
+    return () => {
+      window.removeEventListener('scroll', positionTooltips);
+      window.removeEventListener('resize', positionTooltips);
+    };
+  }, []);
+
+
   const handleMonthChange = (e) => {
     const monthIndex = e.target.value;
     const date = new Date(selectedYear, monthIndex);
