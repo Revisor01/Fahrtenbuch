@@ -188,6 +188,7 @@ function ProfileModal({ isOpen, onClose }) {
     <button type="submit" className="mt-4 w-full bg-green-500 text-white p-2 rounded-md">Passwort ändern</button>
     </form>
     </div>
+    <div className="mt-4 text-center">
     {profile.wohnort && (
       <p className="text-sm text-gray-500">Heimatort: {profile.wohnort_adresse}</p>
     )}
@@ -200,6 +201,7 @@ function ProfileModal({ isOpen, onClose }) {
     {!profile.dienstort && (
       <p className="text-sm text-red-500">Bitte Dienstort festlegen</p>
     )}
+    </div>
     
     {showMessage && (
       <MessageOverlay 

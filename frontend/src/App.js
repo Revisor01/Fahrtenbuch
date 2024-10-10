@@ -419,13 +419,11 @@ function FahrtenListe() {
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
-  const [activeMitfahrerTooltip, setActiveMitfahrerTooltip] = useState(null);
+  const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
-  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
-  const [activeTooltip, setActiveTooltip] = useState(null);
   
   useEffect(() => {
     fetchFahrten();
@@ -436,60 +434,6 @@ function FahrtenListe() {
       setSortConfig({ key: 'datum', direction: 'descending' });
     }
   }, [fahrten]);
-  
-  useEffect(() => {
-    const positionTooltips = () => {
-      const tooltips = document.querySelectorAll('.mitfahrer-tooltip');
-      tooltips.forEach(tooltip => {
-        const parent = tooltip.closest('.mitfahrer-item');
-        const rect = parent.getBoundingClientRect();
-        tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        tooltip.style.left = `${rect.left + window.scrollX}px`;
-      });
-    };
-    
-    window.addEventListener('scroll', positionTooltips);
-    window.addEventListener('resize', positionTooltips);
-    positionTooltips();
-    
-    return () => {
-      window.removeEventListener('scroll', positionTooltips);
-      window.removeEventListener('resize', positionTooltips);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (activeTooltip) {
-        const rect = activeTooltip.getBoundingClientRect();
-        setTooltipPosition({
-          top: rect.bottom + window.scrollY,
-          left: rect.left + window.scrollX
-        });
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, [activeTooltip]);
-  
-  const handleTooltipEnter = (event, person) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setTooltipPosition({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX
-    });
-    setActiveTooltip(person);  // Ändern Sie dies von event.currentTarget zu person
-  };
-  
-  const handleTooltipLeave = () => {
-    setActiveTooltip(null);
-  };
 
   const handleMonthChange = (e) => {
     const monthIndex = e.target.value;
@@ -615,6 +559,10 @@ function FahrtenListe() {
     }
   };
 
+  const handleViewMitfahrer = (mitfahrer) => {
+    setViewingMitfahrer(mitfahrer);
+    setIsMitfahrerModalOpen(true);
+  };
   
   const getMonthSummary = () => {
     let kirchenkreisSum = 0;
@@ -756,6 +704,11 @@ function FahrtenListe() {
     }
   };
   
+  const handleViewMitfahrer = (mitfahrer) => {
+    setViewingMitfahrer(mitfahrer);
+    setIsMitfahrerModalOpen(true);
+  };
+  
   const renderMitfahrer = (fahrt) => {
     if (!fahrt.mitfahrer || fahrt.mitfahrer.length === 0) {
       return <span className="text-gray-400"></span>;
@@ -764,7 +717,7 @@ function FahrtenListe() {
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
     
     return (
-      <div className="mitfahrer-container">
+      <div className="flex flex-wrap mt-2">
       {fahrt.mitfahrer.map((person, index) => {
         const shouldDisplay = 
         (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
@@ -775,9 +728,8 @@ function FahrtenListe() {
         return (
           <span
           key={index}
-          className="mitfahrer-item"
-          onMouseEnter={(e) => handleTooltipEnter(e, person)}
-          onMouseLeave={handleTooltipLeave}
+          className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
+          onClick={() => handleViewMitfahrer(person)}
           >
           👤 {person.name}
           </span>
@@ -1075,25 +1027,15 @@ function FahrtenListe() {
       initialData={editingMitfahrer}
       />
     )}
-    {activeTooltip && (
-      <div 
-      style={{
-        position: 'fixed',  // Ändern Sie dies von 'absolute' zu 'fixed'
-        top: `${tooltipPosition.top}px`,
-        left: `${tooltipPosition.left}px`,
-        zIndex: 10000,
-        backgroundColor: 'white',
-        border: '1px solid #ccc',
-        padding: '5px',
-        borderRadius: '3px',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-      }}
-      >
-      <p><strong>Name:</strong> {activeTooltip.name}</p>
-      <p><strong>Arbeitsstätte:</strong> {activeTooltip.arbeitsstaette}</p>
-      <p><strong>Richtung:</strong> {activeTooltip.richtung}</p>
-      </div>
-    )}
+    <MitfahrerModal
+    isOpen={isMitfahrerModalOpen}
+    onClose={() => {
+      setIsMitfahrerModalOpen(false);
+      setViewingMitfahrer(null);
+    }}
+    mitfahrer={viewingMitfahrer}
+    readOnly={true}
+    />
     </div>
   );
 }
