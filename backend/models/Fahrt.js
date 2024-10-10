@@ -238,21 +238,23 @@ class Fahrt {
       
       // Fetch Mitfahrer data
       const fahrtIds = Object.keys(groupedFahrten);
-      const [mitfahrerRows] = await db.execute(`
-      SELECT * FROM mitfahrer WHERE fahrt_id IN (?)
-    `, [fahrtIds]);
-      
-      console.log(`Retrieved ${mitfahrerRows.length} mitfahrer rows`);
-      
-      // Add Mitfahrer to their respective Fahrten
-      mitfahrerRows.forEach(mitfahrer => {
-        if (groupedFahrten[mitfahrer.fahrt_id]) {
-          if (!groupedFahrten[mitfahrer.fahrt_id].mitfahrer) {
-            groupedFahrten[mitfahrer.fahrt_id].mitfahrer = [];
+      if (fahrtIds.length > 0) {
+        const placeholders = fahrtIds.map(() => '?').join(',');
+        const [mitfahrerRows] = await db.execute(`
+        SELECT * FROM mitfahrer WHERE fahrt_id IN (${placeholders})
+      `, fahrtIds);
+        
+        console.log(`Retrieved ${mitfahrerRows.length} mitfahrer rows`);
+        
+        mitfahrerRows.forEach(mitfahrer => {
+          if (groupedFahrten[mitfahrer.fahrt_id]) {
+            if (!groupedFahrten[mitfahrer.fahrt_id].mitfahrer) {
+              groupedFahrten[mitfahrer.fahrt_id].mitfahrer = [];
+            }
+            groupedFahrten[mitfahrer.fahrt_id].mitfahrer.push(mitfahrer);
           }
-          groupedFahrten[mitfahrer.fahrt_id].mitfahrer.push(mitfahrer);
-        }
-      });
+        });
+      }
       
       const result = Object.values(groupedFahrten);
       console.log(`Returning ${result.length} grouped fahrten`);
