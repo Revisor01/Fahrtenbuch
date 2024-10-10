@@ -1467,6 +1467,7 @@ function AppContent() {
     Logout
     </button>
     </div>
+    
     <FahrtenbuchHilfe />
     </div>
     <div className="grid grid-cols-1 gap-4 mb-8">
@@ -1478,13 +1479,11 @@ function AppContent() {
     <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     
     <Modal isOpen={showOrteModal} onClose={() => setShowOrteModal(false)} title="Orte" wide={true}>
-    <p className="mb-4">Hier können Sie Orte verwalten. Fügen Sie Dienstorte, Wohnorte, Kirchspiele und sonstige Orte hinzu oder bearbeiten Sie bestehende.</p>
     <OrtForm />
     <OrteListe />
     </Modal>
     
     <Modal isOpen={showDistanzenModal} onClose={() => setShowDistanzenModal(false)} title="Distanzen" wide={true}>
-    <p className="mb-4">Verwalten Sie hier die Distanzen zwischen verschiedenen Orten. Diese werden für die Berechnung der Fahrtkosten verwendet.</p>
     <DistanzForm />
     <DistanzenListe />
     </Modal>
