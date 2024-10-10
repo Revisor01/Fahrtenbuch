@@ -1078,7 +1078,7 @@ function OrteListe() {
   const { orte, updateOrt, deleteOrt } = useContext(AppContext);
   const [editingOrt, setEditingOrt] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'descending' });
 
   const handleEdit = (ort) => {
     setEditingOrt({ ...ort });
@@ -1230,7 +1230,7 @@ function DistanzenListe() {
   const { distanzen, orte, updateDistanz, deleteDistanz } = useContext(AppContext);
   const [editingDistanz, setEditingDistanz] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+  const [sortConfig, setSortConfig] = useState({ key: 'von_ort_id', direction: 'descending' });
   
   const handleEdit = (distanz) => {
     setEditingDistanz({ ...distanz });
@@ -1252,21 +1252,29 @@ function DistanzenListe() {
     }
   };
   
-  const sortedDistanzen = React.useMemo(() => {
+  const sortedDistanzen = useMemo(() => {
     let sortableDistanzen = [...distanzen];
     if (sortConfig.key !== null) {
       sortableDistanzen.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
+        if (sortConfig.key === 'von_ort_id' || sortConfig.key === 'nach_ort_id') {
+          const ortA = orte.find(o => o.id === a[sortConfig.key]);
+          const ortB = orte.find(o => o.id === b[sortConfig.key]);
+          return sortConfig.direction === 'ascending' 
+          ? ortA.name.localeCompare(ortB.name)
+          : ortB.name.localeCompare(ortA.name);
+        } else {
+          if (a[sortConfig.key] < b[sortConfig.key]) {
+            return sortConfig.direction === 'ascending' ? -1 : 1;
+          }
+          if (a[sortConfig.key] > b[sortConfig.key]) {
+            return sortConfig.direction === 'ascending' ? 1 : -1;
+          }
+          return 0;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
       });
     }
     return sortableDistanzen;
-  }, [distanzen, sortConfig]);
+  }, [distanzen, sortConfig, orte]);
   
   const requestSort = (key) => {
     let direction = 'ascending';
