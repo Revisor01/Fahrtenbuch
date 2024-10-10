@@ -704,11 +704,6 @@ function FahrtenListe() {
     }
   };
   
-  const handleViewMitfahrer = (mitfahrer) => {
-    setViewingMitfahrer(mitfahrer);
-    setIsMitfahrerModalOpen(true);
-  };
-  
   const renderMitfahrer = (fahrt) => {
     if (!fahrt.mitfahrer || fahrt.mitfahrer.length === 0) {
       return <span className="text-gray-400"></span>;
