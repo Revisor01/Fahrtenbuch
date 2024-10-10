@@ -214,5 +214,3 @@ exports.exportToExcel = async (req, res) => {
     res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
   }
 };
-
-module.exports = { exportToExcel };
