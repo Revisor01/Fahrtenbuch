@@ -134,8 +134,7 @@ const FahrtenbuchHilfe = () => {
       style={{
         zIndex: 1001,
         writingMode: 'vertical-rl',
-        textOrientation: 'mixed',
-        transform: 'rotate(180deg)'
+        textOrientation: 'mixed'
       }}
       >
       <HelpCircle size={24} className="mb-2 transform rotate-90" />
