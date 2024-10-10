@@ -7,6 +7,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
+import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 
 const API_BASE_URL = '/api';
 
@@ -1466,10 +1467,7 @@ function AppContent() {
     Logout
     </button>
     </div>
-    <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
-    <p className="font-bold">Willkommen im Fahrtenbuch</p>
-    <p>Hier können Sie Ihre Fahrten erfassen und verwalten. Nutzen Sie die Buttons oben, um Orte und Distanzen zu verwalten. Fügen Sie neue Fahrten hinzu und sehen Sie sich Ihre monatliche Übersicht an.</p>
-    </div>
+    <FahrtenbuchHilfe />
     </div>
     <div className="grid grid-cols-1 gap-4 mb-8">
     <FahrtForm />
