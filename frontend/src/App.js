@@ -418,6 +418,7 @@ function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
+  const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [activeMitfahrerTooltip, setActiveMitfahrerTooltip] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
@@ -425,7 +426,6 @@ function FahrtenListe() {
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [activeTooltip, setActiveTooltip] = useState(null);
-  const tooltipRef = useRef(null);
   
   useEffect(() => {
     fetchFahrten();
@@ -719,6 +719,7 @@ function FahrtenListe() {
   
   const handleEditMitfahrer = (fahrtId, mitfahrer) => {
     setEditingMitfahrer({ fahrtId, ...mitfahrer });
+    setIsMitfahrerModalOpen(true);
   };
   
   const handleAddMitfahrer = (fahrtId) => {
@@ -726,6 +727,7 @@ function FahrtenListe() {
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
     const suggestedRichtung = isHinfahrt ? 'hin' : 'rueck';
     setEditingMitfahrer({ fahrtId, isNew: true, richtung: suggestedRichtung });
+    setIsMitfahrerModalOpen(true);
   };
   
   const handleDeleteMitfahrer = async (fahrtId, mitfahrerId) => {
@@ -747,6 +749,7 @@ function FahrtenListe() {
         await axios.put(`${API_BASE_URL}/fahrten/${updatedMitfahrer.fahrtId}/mitfahrer/${updatedMitfahrer.id}`, updatedMitfahrer);
       }
       setEditingMitfahrer(null);
+      setIsMitfahrerModalOpen(false);
       fetchFahrten();
     } catch (error) {
       console.error('Fehler beim Speichern des Mitfahrers:', error);
@@ -1063,7 +1066,11 @@ function FahrtenListe() {
     </table>
     {editingMitfahrer && (
       <MitfahrerModal
-      onClose={() => setEditingMitfahrer(null)}
+      isOpen={isMitfahrerModalOpen}
+      onClose={() => {
+        setIsMitfahrerModalOpen(false);
+        setEditingMitfahrer(null);
+      }}
       onSave={handleSaveMitfahrer}
       initialData={editingMitfahrer}
       />
