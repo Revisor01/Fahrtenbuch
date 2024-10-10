@@ -417,7 +417,6 @@ function DistanzForm() {
 function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
-  const [editingMitfahrer, setEditingMitfahrer] = useState(null);
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
