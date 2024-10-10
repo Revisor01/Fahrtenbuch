@@ -423,6 +423,9 @@ function FahrtenListe() {
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [activeTooltip, setActiveTooltip] = useState(null);
+  const tooltipRef = useRef(null);
   
   useEffect(() => {
     fetchFahrten();
@@ -455,6 +458,38 @@ function FahrtenListe() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (activeTooltip) {
+        const rect = activeTooltip.getBoundingClientRect();
+        setTooltipPosition({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX
+        });
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [activeTooltip]);
+  
+  const handleTooltipEnter = (event, person) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX
+    });
+    setActiveTooltip(person);  // Ändern Sie dies von event.currentTarget zu person
+  };
+  
+  const handleTooltipLeave = () => {
+    setActiveTooltip(null);
+  };
 
   const handleMonthChange = (e) => {
     const monthIndex = e.target.value;
@@ -735,16 +770,14 @@ function FahrtenListe() {
         if (!shouldDisplay) return null;
         
         return (
-          <div key={index} className="mitfahrer-item relative inline-block mr-2">
-          <span className="mitfahrer-name">
+          <span
+          key={index}
+          className="mitfahrer-item"
+          onMouseEnter={(e) => handleTooltipEnter(e, person)}
+          onMouseLeave={handleTooltipLeave}
+          >
           👤 {person.name}
           </span>
-          <div className="mitfahrer-tooltip">
-          <p><strong>Name:</strong> {person.name}</p>
-          <p><strong>Arbeitsstätte:</strong> {person.arbeitsstaette}</p>
-          <p><strong>Richtung:</strong> {person.richtung}</p>
-          </div>
-          </div>
         );
       })}
       </div>
@@ -1034,6 +1067,26 @@ function FahrtenListe() {
       onSave={handleSaveMitfahrer}
       initialData={editingMitfahrer}
       />
+    )}
+    {activeTooltip && (
+      <div 
+      ref={tooltipRef}
+      style={{
+        position: 'fixed',  // Ändern Sie dies von 'absolute' zu 'fixed'
+        top: `${tooltipPosition.top}px`,
+        left: `${tooltipPosition.left}px`,
+        zIndex: 10000,
+        backgroundColor: 'white',
+        border: '1px solid #ccc',
+        padding: '5px',
+        borderRadius: '3px',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+      }}
+      >
+      <p><strong>Name:</strong> {activeTooltip.name}</p>
+      <p><strong>Arbeitsstätte:</strong> {activeTooltip.arbeitsstaette}</p>
+      <p><strong>Richtung:</strong> {activeTooltip.richtung}</p>
+      </div>
     )}
     </div>
   );
@@ -1489,13 +1542,13 @@ function AppContent() {
     
     <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     
-    <Modal isOpen={showOrteModal} onClose={() => setShowOrteModal(false)} title="Orte">
+    <Modal isOpen={showOrteModal} onClose={() => setShowOrteModal(false)} title="Orte" wide={true}>
     <p className="mb-4">Hier können Sie Orte verwalten. Fügen Sie Dienstorte, Wohnorte, Kirchspiele und sonstige Orte hinzu oder bearbeiten Sie bestehende.</p>
     <OrtForm />
     <OrteListe />
     </Modal>
     
-    <Modal isOpen={showDistanzenModal} onClose={() => setShowDistanzenModal(false)} title="Distanzen">
+    <Modal isOpen={showDistanzenModal} onClose={() => setShowDistanzenModal(false)} title="Distanzen" wide={true}>
     <p className="mb-4">Verwalten Sie hier die Distanzen zwischen verschiedenen Orten. Diese werden für die Berechnung der Fahrtkosten verwendet.</p>
     <DistanzForm />
     <DistanzenListe />

@@ -116,7 +116,7 @@ function ProfileModal({ isOpen, onClose }) {
   if (!isOpen) return null;
   
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Profil">
+    <Modal isOpen={isOpen} onClose={onClose} title="Profil" wide={false}>
     <div className="max-w-md mx-auto">
     <form onSubmit={handleProfileUpdate}>
     <input
