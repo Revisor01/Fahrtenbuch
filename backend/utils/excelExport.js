@@ -54,14 +54,19 @@ function prepareMitfahrerData(fahrten) {
 
 exports.exportToExcel = async (req, res) => {
   try {
+    console.log('Starting Excel export');
     const { year, month, type } = req.params;
     const userId = req.user.id;
     
+    console.log(`Exporting Excel for user ${userId}, year ${year}, month ${month}, type ${type}`);
+    
     // Abrufen der Fahrten für den angegebenen Monat
     const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
+    console.log(`Retrieved ${fahrten.length} trips for the month`);
     
     // Abrufen des Benutzerprofils
     const userProfile = await getUserProfile(userId);
+    console.log('User profile retrieved:', userProfile);
     
     // Funktion zur Formatierung des Datums
     const formatDate = (dateString) => {
@@ -207,8 +212,9 @@ exports.exportToExcel = async (req, res) => {
     
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename=fahrtenabrechnung_${type}_${year}_${month}.zip`);
-    res.send(zipBuffer);
-    
+    console.log('Finished processing. Sending response...');
+    res.send(zipBuffer || files[0].buffer);
+    console.log('Response sent');
   } catch (error) {
     console.error('Fehler beim Exportieren nach Excel:', error);
     res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
