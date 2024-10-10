@@ -98,7 +98,7 @@ function AppProvider({ children }) {
       const response = await axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`);
       setFahrten(response.data.fahrten.map(fahrt => ({
         ...fahrt,
-        mitfahrer: fahrt.mitfahrer || [] // Stellen Sie sicher, dass mitfahrer immer ein Array ist
+        mitfahrer: fahrt.mitfahrer || [] // Stellen Sie sicher, dass mitfahrer immer ein Array ist push
       })));
       setGesamtKirchenkreis(response.data.summary.kirchenkreisErstattung || 0);
       setGesamtGemeinde(response.data.summary.gemeindeErstattung || 0);
