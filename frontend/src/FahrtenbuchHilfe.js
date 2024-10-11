@@ -129,7 +129,7 @@ const FahrtenbuchHilfe = () => {
 
     {!isHelpVisible && (
       <div 
-      className="fixed top-20 right-0 bg-blue-500 text-white px-3 py-2 cursor-pointer rounded-l-lg flex items-center"
+      className="fixed top-20 right-0 bg-blue-500 text-white px-3 py-2 cursor-pointer rounded-l-lg flex items-center opacity-70"
       onClick={toggleHelp}
       style={{
         zIndex: 1001,
