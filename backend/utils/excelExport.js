@@ -96,15 +96,19 @@ exports.exportToExcel = async (req, res) => {
     
     // Mitfahrerdaten vorbereiten (jetzt für alle Fahrten, unabhängig vom Typ)
     const mitfahrerData = fahrten.flatMap(fahrt => 
-      (fahrt.mitfahrer || []).map(mitfahrer => ({
-        datum: formatDate(fahrt.datum),
-        anlass: fahrt.anlass,
-        name: mitfahrer.name,
-        arbeitsstaette: mitfahrer.arbeitsstaette,
-        hinweg: `${fahrt.von_ort_id}-${fahrt.nach_ort_id}`,
-        rueckweg: `${fahrt.nach_ort_id}-${fahrt.von_ort_id}`,
-        kilometer: Math.round(mitfahrer.richtung === 'hin_rueck' ? fahrt.kilometer * 2 : fahrt.kilometer)
-      }))
+      (fahrt.mitfahrer || []).map(mitfahrer => {
+        const vonOrt = fahrt.von_ort_name || fahrt.von_ort_adresse || fahrt.einmaliger_von_ort;
+        const nachOrt = fahrt.nach_ort_name || fahrt.nach_ort_adresse || fahrt.einmaliger_nach_ort;
+        return {
+          datum: formatDate(fahrt.datum),
+          anlass: fahrt.anlass,
+          name: mitfahrer.name,
+          arbeitsstaette: mitfahrer.arbeitsstaette,
+          hinweg: mitfahrer.richtung === 'hin' || mitfahrer.richtung === 'hin_rueck' ? `${vonOrt}-${nachOrt}` : '',
+          rueckweg: mitfahrer.richtung === 'rueck' || mitfahrer.richtung === 'hin_rueck' ? `${nachOrt}-${vonOrt}` : '',
+          kilometer: Math.round(mitfahrer.richtung === 'hin_rueck' ? fahrt.kilometer * 2 : fahrt.kilometer)
+        };
+      })
     );
     
     // Entfernen von Duplikaten bei Mitfahrern
@@ -128,7 +132,7 @@ exports.exportToExcel = async (req, res) => {
       
       const abrechnungWorksheet = workbook.getWorksheet('monatliche Abrechnung');
       if (abrechnungWorksheet) {
-        abrechnungWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth) - 1)} ${year}`;
+        abrechnungWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth))} ${year}`;
         chunk.forEach((row, rowIndex) => {
           const excelRow = abrechnungWorksheet.getRow(rowIndex + 8);
           
@@ -150,7 +154,7 @@ exports.exportToExcel = async (req, res) => {
       
       const mitnahmeWorksheet = workbook.getWorksheet('Mitnahmeentschädigung');
       if (mitnahmeWorksheet && type === 'kirchenkreis') {
-        mitnahmeWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth) - 1)} ${year}`;
+        mitnahmeWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth))} ${year}`;
         
         uniqueMitfahrerData.forEach((mitfahrer, index) => {
           if (index < 15) {
