@@ -133,12 +133,10 @@ const FahrtenbuchHilfe = () => {
       onClick={toggleHelp}
       style={{
         zIndex: 1001,
-        writingMode: 'vertical-rl',
         textOrientation: 'mixed'
       }}
       >
-      <HelpCircle size={24} className="mb-2 transform rotate-90" />
-      <span className="text-lg ml-1">Hilfe</span>
+      <HelpCircle size={24} />
       </div>
     )}
     </>
