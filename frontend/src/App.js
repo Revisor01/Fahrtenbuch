@@ -434,12 +434,11 @@ function DistanzForm() {
 }
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData  } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification  } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
-  const { deleteFahrt, showNotification } = useContext(AppContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
