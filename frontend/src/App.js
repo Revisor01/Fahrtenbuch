@@ -717,16 +717,23 @@ function FahrtenListe() {
   
   const handleSaveMitfahrer = async (updatedMitfahrer) => {
     try {
+      console.log('Saving Mitfahrer:', updatedMitfahrer);  // Debugging
+      if (!updatedMitfahrer.fahrtId) {
+        throw new Error('Fahrt ID ist nicht definiert');
+      }
       if (updatedMitfahrer.isNew) {
         await axios.post(`${API_BASE_URL}/fahrten/${updatedMitfahrer.fahrtId}/mitfahrer`, updatedMitfahrer);
       } else {
+        if (!updatedMitfahrer.id) {
+          throw new Error('Mitfahrer ID ist nicht definiert');
+        }
         await axios.put(`${API_BASE_URL}/fahrten/${updatedMitfahrer.fahrtId}/mitfahrer/${updatedMitfahrer.id}`, updatedMitfahrer);
       }
       setEditingMitfahrer(null);
-      setIsMitfahrerModalOpen(false);
       fetchFahrten();
     } catch (error) {
       console.error('Fehler beim Speichern des Mitfahrers:', error);
+      alert(`Fehler beim Speichern des Mitfahrers: ${error.message}`);
     }
   };
   

@@ -17,7 +17,12 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!readOnly) {
-      onSave({ name, arbeitsstaette, richtung });
+      onSave({ 
+        ...initialData,  // Dies enthält fahrtId und id, wenn sie existieren
+        name, 
+        arbeitsstaette, 
+        richtung 
+      });
     }
     onClose();
   };
