@@ -167,7 +167,6 @@ function FahrtForm() {
       showNotification("Fehler", "Beim Hinzufügen der Fahrt ist ein Fehler aufgetreten.");
     }
   };
-  };
   
   const handleAddMitfahrer = (newMitfahrer) => {
     if (editingMitfahrerIndex !== null) {
