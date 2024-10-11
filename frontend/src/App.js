@@ -280,7 +280,7 @@ function AppProvider({ children }) {
 }
 
 function OrtForm() {
-  const { orte, addOrt } = useContext(AppContext);
+  const { orte, addOrt, showNotification } = useContext(AppContext);
   const [name, setName] = useState('');
   const [adresse, setAdresse] = useState('');
   const [istWohnort, setIstWohnort] = useState(false);
@@ -298,6 +298,7 @@ function OrtForm() {
     setIstWohnort(false);
     setIstDienstort(false);
     setIstKirchspiel(false);
+    showNotification("Erfolg", "Der neue Ort wurde erfolgreich hinzugefügt.");
   };
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
@@ -360,7 +361,7 @@ function OrtForm() {
   );
 }
 function DistanzForm() {
-  const { orte, addDistanz, distanzen } = useContext(AppContext);
+  const { orte, addDistanz, distanzen, showNotification } = useContext(AppContext);
   const [vonOrtId, setVonOrtId] = useState('');
   const [nachOrtId, setNachOrtId] = useState('');
   const [distanz, setDistanz] = useState('');
@@ -391,6 +392,7 @@ function DistanzForm() {
     setNachOrtId('');
     setDistanz('');
     setExistingDistanz(null);
+    showNotification("Erfolg", "Die neue Distanz wurde erfolgreich hinzugefügt.");
   };
   
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
@@ -601,13 +603,14 @@ function FahrtenListe() {
         abrechnung: editingFahrt.abrechnung,
         autosplit: editingFahrt.autosplit
       };
-      console.log('Saving updated Fahrt:', updatedFahrt);
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
       fetchFahrten();
       fetchMonthlyData();
+      showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
+      showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
     }
   };
 
@@ -730,14 +733,21 @@ function FahrtenListe() {
   };
   
   const handleDeleteMitfahrer = async (fahrtId, mitfahrerId) => {
-    if (window.confirm('Möchten Sie diesen Mitfahrer wirklich löschen?')) {
-      try {
-        await axios.delete(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer/${mitfahrerId}`);
-        fetchFahrten();
-      } catch (error) {
-        console.error('Fehler beim Löschen des Mitfahrers:', error);
-      }
-    }
+    showNotification(
+      "Mitfahrer löschen",
+      "Sind Sie sicher, dass Sie diesen Mitfahrer löschen möchten?",
+      async () => {
+        try {
+          await axios.delete(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer/${mitfahrerId}`);
+          fetchFahrten();
+          showNotification("Erfolg", "Der Mitfahrer wurde erfolgreich gelöscht.");
+        } catch (error) {
+          console.error('Fehler beim Löschen des Mitfahrers:', error);
+          showNotification("Fehler", "Beim Löschen des Mitfahrers ist ein Fehler aufgetreten.");
+        }
+      },
+      true // showCancel
+    );
   };
   
   const handleSaveMitfahrer = async (updatedMitfahrer) => {
@@ -1138,7 +1148,7 @@ function MonthlyOverview() {
 }
 
 function OrteListe() {
-  const { orte, updateOrt, deleteOrt } = useContext(AppContext);
+  const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
   const [editingOrt, setEditingOrt] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
@@ -1150,25 +1160,32 @@ function OrteListe() {
   const handleSave = () => {
     const updatedOrt = {
       ...editingOrt,
-      ist_wohnort: editingOrt.ist_wohnort !== undefined ? editingOrt.ist_wohnort : false,  // Sicherstellen, dass boolean-Werte gesetzt sind
+      ist_wohnort: editingOrt.ist_wohnort !== undefined ? editingOrt.ist_wohnort : false,
       ist_dienstort: editingOrt.ist_dienstort !== undefined ? editingOrt.ist_dienstort : false,
       ist_kirchspiel: editingOrt.ist_kirchspiel !== undefined ? editingOrt.ist_kirchspiel : false
     };
     updateOrt(editingOrt.id, updatedOrt);
     setEditingOrt(null);
+    showNotification("Erfolg", "Der Ort wurde erfolgreich aktualisiert.");
   };
   
   
   
   const handleDelete = async (id) => {
-    if (window.confirm('Sind Sie sicher, dass Sie diesen Ort löschen möchten?')) {
-      try {
-        await deleteOrt(id);
-      } catch (error) {
-        console.error('Fehler beim Löschen des Ortes:', error);
-        alert('Dieser Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird.');
-      }
-    }
+    showNotification(
+      "Ort löschen",
+      "Sind Sie sicher, dass Sie diesen Ort löschen möchten?",
+      async () => {
+        try {
+          await deleteOrt(id);
+          showNotification("Erfolg", "Der Ort wurde erfolgreich gelöscht.");
+        } catch (error) {
+          console.error('Fehler beim Löschen des Ortes:', error);
+          showNotification("Fehler", "Dieser Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird.");
+        }
+      },
+      true // showCancel
+    );
   };
   
   const sortedOrte = React.useMemo(() => {
@@ -1290,7 +1307,7 @@ function OrteListe() {
 }
 
 function DistanzenListe() {
-  const { distanzen, orte, updateDistanz, deleteDistanz } = useContext(AppContext);
+  const { distanzen, orte, updateDistanz, deleteDistanz, showNotification } = useContext(AppContext);
   const [editingDistanz, setEditingDistanz] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'von_ort_id', direction: 'ascending' });
@@ -1302,6 +1319,7 @@ function DistanzenListe() {
   const handleSave = () => {
     updateDistanz(editingDistanz.id, editingDistanz);
     setEditingDistanz(null);
+    showNotification("Erfolg", "Die Distanz wurde erfolgreich aktualisiert.");
   };
   
   const getOrtName = (id) => {
@@ -1310,9 +1328,20 @@ function DistanzenListe() {
   };
   
   const handleDelete = async (id) => {
-    if (window.confirm('Sind Sie sicher, dass Sie diese Distanz löschen möchten?')) {
-      await deleteDistanz(id);
-    }
+    showNotification(
+      "Distanz löschen",
+      "Sind Sie sicher, dass Sie diese Distanz löschen möchten?",
+      async () => {
+        try {
+          await deleteDistanz(id);
+          showNotification("Erfolg", "Die Distanz wurde erfolgreich gelöscht.");
+        } catch (error) {
+          console.error('Fehler beim Löschen der Distanz:', error);
+          showNotification("Fehler", "Beim Löschen der Distanz ist ein Fehler aufgetreten.");
+        }
+      },
+      true // showCancel
+    );
   };
   
   const sortedDistanzen = useMemo(() => {

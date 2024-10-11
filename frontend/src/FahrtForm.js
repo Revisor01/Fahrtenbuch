@@ -5,7 +5,7 @@ import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 
 function FahrtForm() {
-  const { orte, addFahrt, fetchMonthlyData } = useContext(AppContext);
+  const { orte, addFahrt, fetchMonthlyData, showNotification } = useContext(AppContext);
   const [showAutosplitInfo, setShowAutosplitInfo] = useState(false);
   const [mitfahrer, setMitfahrer] = useState([]);
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
@@ -161,10 +161,12 @@ function FahrtForm() {
       setAddRueckfahrt(false);
       fetchMonthlyData();
       setMitfahrer([]);
+      showNotification("Erfolg", "Die neue Fahrt wurde erfolgreich hinzugefügt.");
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Fahrt:', error);
-      alert('Fehler beim Hinzufügen der Fahrt. Bitte versuchen Sie es erneut.');
+      showNotification("Fehler", "Beim Hinzufügen der Fahrt ist ein Fehler aufgetreten.");
     }
+  };
   };
   
   const handleAddMitfahrer = (newMitfahrer) => {
