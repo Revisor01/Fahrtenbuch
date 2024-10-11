@@ -97,8 +97,8 @@ exports.exportToExcel = async (req, res) => {
     // Mitfahrerdaten vorbereiten (jetzt für alle Fahrten, unabhängig vom Typ)
     const mitfahrerData = fahrten.flatMap(fahrt => 
       (fahrt.mitfahrer || []).map(mitfahrer => {
-        const vonOrt = fahrt.von_ort_name || fahrt.von_ort_adresse || fahrt.einmaliger_von_ort;
-        const nachOrt = fahrt.nach_ort_name || fahrt.nach_ort_adresse || fahrt.einmaliger_nach_ort;
+        const vonOrt = fahrt.von_ort_adresse || fahrt.einmaliger_von_ort || fahrt.von_ort_name;
+        const nachOrt = fahrt.nach_ort_adresse || fahrt.einmaliger_nach_ort || fahrt.nach_ort_name;
         return {
           datum: formatDate(fahrt.datum),
           anlass: fahrt.anlass,
