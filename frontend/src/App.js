@@ -8,6 +8,7 @@ import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
 import FahrtenbuchHilfe from './FahrtenbuchHilfe';
+import NotificationModal from './NotificationModal';
 
 const API_BASE_URL = '/api';
 
@@ -24,6 +25,15 @@ function AppProvider({ children }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
+  const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
+  
+  const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
+    setNotification({ isOpen: true, title, message, onConfirm, showCancel });
+  };
+  
+  const closeNotification = () => {
+    setNotification(prev => ({ ...prev, isOpen: false }));
+  };
   
   useEffect(() => {
     if (token) {
@@ -254,9 +264,17 @@ function AppProvider({ children }) {
       isLoggedIn, login, logout, token, updateFahrt, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData,
-      setIsProfileModalOpen, isProfileModalOpen
+      setIsProfileModalOpen, isProfileModalOpen, showNotification, closeNotification
     }}>
     {children}
+    <NotificationModal
+    isOpen={notification.isOpen}
+    onClose={closeNotification}
+    title={notification.title}
+    message={notification.message}
+    onConfirm={notification.onConfirm}
+    showCancel={notification.showCancel}
+    />
     </AppContext.Provider>
   );
 }
@@ -421,6 +439,7 @@ function FahrtenListe() {
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
+  const { deleteFahrt, showNotification } = useContext(AppContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
@@ -466,15 +485,22 @@ function FahrtenListe() {
   };
   
   const handleDelete = async (id) => {
-    if (window.confirm('Sind Sie sicher, dass Sie diese Fahrt löschen möchten?')) {
-      try {
-        await deleteFahrt(id);
-        fetchFahrten();
-        fetchMonthlyData();
-      } catch (error) {
-        console.error('Fehler beim Löschen der Fahrt:', error);
-      }
-    }
+    showNotification(
+      "Fahrt löschen",
+      "Sind Sie sicher, dass Sie diese Fahrt löschen möchten?",
+      async () => {
+        try {
+          await deleteFahrt(id);
+          fetchFahrten();
+          fetchMonthlyData();
+          showNotification("Erfolg", "Die Fahrt wurde erfolgreich gelöscht.");
+        } catch (error) {
+          console.error('Fehler beim Löschen der Fahrt:', error);
+          showNotification("Fehler", "Beim Löschen der Fahrt ist ein Fehler aufgetreten.");
+        }
+      },
+      true // showCancel
+    );
   };
   
   const handleEditChange = async (field, value) => {
@@ -733,7 +759,7 @@ function FahrtenListe() {
       fetchFahrten();
     } catch (error) {
       console.error('Fehler beim Speichern des Mitfahrers:', error);
-      alert(`Fehler beim Speichern des Mitfahrers: ${error.message}`);
+      showNotification("Fehler", `Fehler beim Speichern des Mitfahrers: ${error.message}`);
     }
   };
   
