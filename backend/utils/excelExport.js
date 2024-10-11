@@ -33,18 +33,14 @@ exports.exportToExcel = async (req, res) => {
     
     console.log(`Export parameters: year=${year}, month=${month}, type=${type}, userId=${userId}`);
     
-    // Korrigieren des Monatsformats
     const correctedMonth = month.split('-')[1] || month;
     
-    // Abrufen der Fahrten für den angegebenen Monat
     const fahrten = await Fahrt.getMonthlyReport(year, correctedMonth, userId);
     console.log(`Retrieved ${fahrten.length} fahrten for the month`);
     
-    // Abrufen des Benutzerprofils
     const userProfile = await getUserProfile(userId);
     console.log('User profile:', userProfile);
     
-    // Funktion zur Formatierung des Datums
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       const day = date.getDate().toString().padStart(2, '0');
@@ -53,7 +49,6 @@ exports.exportToExcel = async (req, res) => {
       return `${day}. ${monthName}`;
     };
     
-    // Formatieren und Filtern der Daten für Excel
     const formattedData = fahrten.flatMap(fahrt => {
       if (fahrt.autosplit) {
         return fahrt.details
@@ -81,13 +76,11 @@ exports.exportToExcel = async (req, res) => {
     
     console.log(`Formatted ${formattedData.length} entries for Excel`);
     
-    // Aufteilen der Daten in Gruppen von genau 22 Zeilen
     const chunkedData = [];
     for (let i = 0; i < formattedData.length; i += 22) {
       chunkedData.push(formattedData.slice(i, i + 22));
     }
     
-    // Wenn die letzte Gruppe weniger als 22 Einträge hat, fülle sie auf
     if (chunkedData.length > 0 && chunkedData[chunkedData.length - 1].length < 22) {
       const lastChunk = chunkedData[chunkedData.length - 1];
       while (lastChunk.length < 22) {
@@ -101,39 +94,41 @@ exports.exportToExcel = async (req, res) => {
       }
     }
     
-    // Mitfahrerdaten vorbereiten
+    // Mitfahrerdaten vorbereiten (jetzt für alle Fahrten, unabhängig vom Typ)
     const mitfahrerData = fahrten.flatMap(fahrt => 
       (fahrt.mitfahrer || []).map(mitfahrer => ({
         datum: formatDate(fahrt.datum),
         anlass: fahrt.anlass,
         name: mitfahrer.name,
         arbeitsstaette: mitfahrer.arbeitsstaette,
-        hinweg: mitfahrer.richtung === 'hin' || mitfahrer.richtung === 'hin_rueck' ? 'x' : '',
-        rueckweg: mitfahrer.richtung === 'rueck' || mitfahrer.richtung === 'hin_rueck' ? 'x' : '',
-        kilometer: mitfahrer.richtung === 'hin_rueck' ? fahrt.kilometer * 2 : fahrt.kilometer
+        hinweg: `${fahrt.von_ort_id}-${fahrt.nach_ort_id}`,
+        rueckweg: `${fahrt.nach_ort_id}-${fahrt.von_ort_id}`,
+        kilometer: Math.round(mitfahrer.richtung === 'hin_rueck' ? fahrt.kilometer * 2 : fahrt.kilometer)
       }))
     );
     
-    // Pfad zur Vorlage
+    // Entfernen von Duplikaten bei Mitfahrern
+    const uniqueMitfahrerData = mitfahrerData.filter((mitfahrer, index, self) =>
+      index === self.findIndex((t) => t.datum === mitfahrer.datum && t.name === mitfahrer.name)
+    );
+    
     const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
     
-    // Erstellen der Workbooks basierend auf der Vorlage
     const workbooks = await Promise.all(chunkedData.map(async (chunk, index) => {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.readFile(templatePath);
       
-      // Bearbeite das "Vorlage" Worksheet
       const vorlageWorksheet = workbook.getWorksheet('Vorlage');
       if (vorlageWorksheet) {
-        vorlageWorksheet.getCell('C7').value = userProfile.kirchengemeinde;
+        vorlageWorksheet.getCell('C7').value = type === 'kirchenkreis' ? userProfile.kirchenkreis : userProfile.kirchengemeinde;
         vorlageWorksheet.getCell('C11').value = userProfile.full_name;
         vorlageWorksheet.getCell('C12').value = userProfile.home_address;
         vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
       }
       
-      // Bearbeite das "monatliche Abrechnung" Worksheet
       const abrechnungWorksheet = workbook.getWorksheet('monatliche Abrechnung');
       if (abrechnungWorksheet) {
+        abrechnungWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth) - 1)} ${year}`;
         chunk.forEach((row, rowIndex) => {
           const excelRow = abrechnungWorksheet.getRow(rowIndex + 8);
           
@@ -153,13 +148,12 @@ exports.exportToExcel = async (req, res) => {
         });
       }
       
-      // Bearbeite das "Mitnahmeentschädigung" Worksheet
       const mitnahmeWorksheet = workbook.getWorksheet('Mitnahmeentschädigung');
-      if (mitnahmeWorksheet) {
-        mitnahmeWorksheet.getCell('B2').value = `${getMonthName(parseInt(month) - 1)} ${year}`;
+      if (mitnahmeWorksheet && type === 'kirchenkreis') {
+        mitnahmeWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth) - 1)} ${year}`;
         
-        mitfahrerData.forEach((mitfahrer, index) => {
-          if (index < 15) { // Maximal 15 Einträge (Zeile 10 bis 24)
+        uniqueMitfahrerData.forEach((mitfahrer, index) => {
+          if (index < 15) {
             const row = mitnahmeWorksheet.getRow(index + 10);
             row.getCell('A').value = mitfahrer.datum;
             row.getCell('B').value = mitfahrer.anlass;
@@ -168,6 +162,12 @@ exports.exportToExcel = async (req, res) => {
             row.getCell('E').value = mitfahrer.name;
             row.getCell('F').value = mitfahrer.arbeitsstaette;
             row.getCell('G').value = mitfahrer.kilometer;
+            
+            // Setze alle Zellen auf Arial 10
+            ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(col => {
+              const cell = row.getCell(col);
+              cell.font = { name: 'Arial', size: 10 };
+            });
           }
         });
       }
@@ -175,25 +175,22 @@ exports.exportToExcel = async (req, res) => {
       return workbook;
     }));
     
-    if (formattedData.length === 0) {
+    if (formattedData.length === 0 && type !== 'kirchenkreis') {
       return res.status(404).json({ message: 'Keine Daten für den ausgewählten Zeitraum und Typ gefunden.' });
     }
     
-    // Generieren der Excel-Dateien
     const files = await Promise.all(workbooks.map(async (wb, index) => {
-      const fileName = `fahrtenabrechnung_${type}_${year}_${month}_${index + 1}.xlsx`;
+      const fileName = `fahrtenabrechnung_${type}_${year}_${correctedMonth}_${index + 1}.xlsx`;
       const buffer = await wb.xlsx.writeBuffer();
       return { fileName, buffer };
     }));
     
-    // Wenn nur eine Datei, senden Sie sie direkt als XLSX
     if (files.length === 1) {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=${files[0].fileName}`);
       return res.send(files[0].buffer);
     }
     
-    // Wenn mehrere Dateien, erstellen Sie ein Zip-Archiv
     const zip = new JSZip();
     
     files.forEach(file => {
@@ -203,7 +200,7 @@ exports.exportToExcel = async (req, res) => {
     const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
     
     res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename=fahrtenabrechnung_${type}_${year}_${month}.zip`);
+    res.setHeader('Content-Disposition', `attachment; filename=fahrtenabrechnung_${type}_${year}_${correctedMonth}.zip`);
     res.send(zipBuffer);
     
   } catch (error) {
