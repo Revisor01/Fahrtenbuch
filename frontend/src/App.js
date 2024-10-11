@@ -1000,10 +1000,10 @@ function FahrtenListe() {
     <p>Kirchenkreis: {summary.kirchenkreis} € | Gemeinde: {summary.gemeinde} € | Mitfahrer: {summary.mitfahrer} € | Gesamt: {summary.gesamt} €</p>
     </div>
     <div className="flex space-x-2">
-    <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
-    Export Kirchenkreis
+    <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+    Export Kirchenkreis / Mitfaher:innen
     </button>
-    <button onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">
+    <button onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
     Export Gemeinde
     </button>
     </div>
