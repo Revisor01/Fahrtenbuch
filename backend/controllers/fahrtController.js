@@ -1,5 +1,6 @@
 const Fahrt = require('../models/Fahrt');
 const Mitfahrer = require('../models/Mitfahrer');
+const Abrechnung = require('../models/Abrechnung');
 const { getDistance, calculateAutoSplit } = require('../utils/distanceCalculator');
 const ExcelJS = require('exceljs');
 const path = require('path');
