@@ -1277,11 +1277,11 @@ function MonthlyOverview() {
         'opacity-50' : ''}
       >
       <td className="border px-2 py-1 text-sm">{`${month.monthName} ${month.year}`}</td>
-      <td className="border px-2 py-1 text-sm">{month.kirchenkreisErstattung.toFixed(2)} €</td>
+      <td className="border px-2 py-1 text-sm">{Number(month.kirchenkreisErstattung || 0).toFixed(2)} €</td>
       <td className="border px-2 py-1">{renderStatusCell(month, 'Kirchenkreis')}</td>
-      <td className="border px-2 py-1 text-sm">{month.gemeindeErstattung.toFixed(2)} €</td>
+      <td className="border px-2 py-1 text-sm">{Number(month.gemeindeErstattung || 0).toFixed(2)} €</td>
       <td className="border px-2 py-1">{renderStatusCell(month, 'Gemeinde')}</td>
-      <td className="border px-2 py-1 text-sm">{month.mitfahrerErstattung?.toFixed(2) || '0.00'} €</td>
+      <td className="border px-2 py-1 text-sm">{Number(month.mitfahrerErstattung || 0).toFixed(2)} €</td>
       <td className="border px-2 py-1 text-sm">
       {(
         Number(month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : month.kirchenkreisErstattung || 0) +
@@ -1289,15 +1289,16 @@ function MonthlyOverview() {
         Number(month.mitfahrerErstattung || 0)
       ).toFixed(2)} €
       </td>
+      </tr>
     ))}
     <tr className="font-bold bg-gray-100">
     <td className="border px-2 py-1 text-sm">Jahresgesamt</td>
-    <td className="border px-2 py-1 text-sm">{yearTotal.kirchenkreis.toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{Number(yearTotal.kirchenkreis || 0).toFixed(2)} €</td>
     <td className="border px-2 py-1"></td>
-    <td className="border px-2 py-1 text-sm">{yearTotal.gemeinde.toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{Number(yearTotal.gemeinde || 0).toFixed(2)} €</td>
     <td className="border px-2 py-1"></td>
     <td className="border px-2 py-1 text-sm">{yearTotal.mitfahrer.toFixed(2)} €</td>
-    <td className="border px-2 py-1 text-sm">{(yearTotal.kirchenkreis + yearTotal.gemeinde + yearTotal.mitfahrer).toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{Number(yearTotal.mitfahrer || 0).toFixed(2)} €</td>
     </tr>
     </tbody>
     </table>
