@@ -213,9 +213,11 @@ function AppProvider({ children }) {
           yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
           monthName: date.toLocaleString('default', { month: 'long' }),
           year: date.getFullYear(),
+          monatNr: date.getMonth() + 1,  // Hier fügen wir monatNr explizit hinzu
           kirchenkreisErstattung: response.data.summary.kirchenkreisErstattung,
           gemeindeErstattung: response.data.summary.gemeindeErstattung,
-          mitfahrerErstattung: response.data.summary.mitfahrerErstattung || 0 // Fügen Sie dies hinzu
+          mitfahrerErstattung: response.data.summary.mitfahrerErstattung || 0,
+          abrechnungsStatus: response.data.summary.abrechnungsStatus
         };
       })
       .filter(month => month.kirchenkreisErstattung > 0 || month.gemeindeErstattung > 0 || month.mitfahrerErstattung > 0);
@@ -1264,9 +1266,9 @@ function MonthlyOverview() {
     <tr className="bg-gray-200">
     <th className="border px-2 py-1 text-sm font-medium">Monat</th>
     <th className="border px-2 py-1 text-sm font-medium">Kirchenkreis</th>
-    <th className="border px-2 py-1 text-sm font-medium">Status KK</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status Kirchenkreis</th>
     <th className="border px-2 py-1 text-sm font-medium">Gemeinde</th>
-    <th className="border px-2 py-1 text-sm font-medium">Status Gem.</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status Gemeinde</th>
     <th className="border px-2 py-1 text-sm font-medium">Mitfahrer</th>
     <th className="border px-2 py-1 text-sm font-medium">Gesamt</th>
     </tr>
