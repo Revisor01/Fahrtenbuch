@@ -1197,6 +1197,9 @@ function MonthlyOverview() {
     month.kirchenkreisErstattung : 
     month.gemeindeErstattung;
     
+    // Monat aus yearMonth extrahieren
+    const monat = parseInt(month.yearMonth.split('-')[1]);
+    
     if (status?.erhalten_am) {
       return (
         <div className="text-green-600 text-sm">
@@ -1217,15 +1220,15 @@ function MonthlyOverview() {
           open: true, 
           typ, 
           aktion: 'erhalten', 
-          jahr: month.year, 
-          monat: month.monatNr 
+          jahr: month.year,
+          monat: monat     // Geändert: Benutzt jetzt den extrahierten Monat
         })}
         className="bg-green-500 text-white px-2 py-1 rounded text-xs"
         >
         Erhalten
         </button>
         <button
-        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        onClick={() => handleStatusUpdate(month.year, monat, typ, 'reset')}  // Geändert
         className="bg-red-500 text-white px-2 py-1 rounded text-xs"
         >
         Zurücksetzen
@@ -1241,8 +1244,8 @@ function MonthlyOverview() {
         open: true, 
         typ, 
         aktion: 'eingereicht', 
-        jahr: month.year, 
-        monat: month.monatNr 
+        jahr: month.year,
+        monat: monat     // Geändert: Benutzt jetzt den extrahierten Monat
       })}
       className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
       >
