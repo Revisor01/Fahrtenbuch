@@ -702,11 +702,11 @@ function FahrtenListe() {
       
       <div className="mt-2">
       <p className="text-sm">
-      Mitfahrer: {summary.mitfahrer} € | 
+      Mitfahrer: {Number(summary.mitfahrer || 0).toFixed(2)} € | 
       Gesamt: {(
-        (summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : summary.kirchenkreis) +
-        (summary.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : summary.gemeinde) +
-        summary.mitfahrer
+        Number(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : (summary.kirchenkreis || 0)) +
+        Number(summary.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : (summary.gemeinde || 0)) +
+        Number(summary.mitfahrer || 0)
       ).toFixed(2)} €
       </p>
       </div>
