@@ -9,6 +9,7 @@ import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
 import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 import NotificationModal from './NotificationModal';
+import AbrechnungsStatusModal from './AbrechnungsStatusModal';
 
 const API_BASE_URL = '/api';
 
@@ -93,6 +94,24 @@ function AppProvider({ children }) {
     }
   };
   
+  const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum) => {
+    try {
+      await axios.post(`${API_BASE_URL}/fahrten/abrechnungsstatus`, {
+        jahr,
+        monat,
+        typ,
+        aktion,
+        datum
+      });
+      await fetchFahrten();
+      await fetchMonthlyData();
+      showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
+      showNotification("Fehler", "Status konnte nicht aktualisiert werden");
+    }
+  };
+
   const fetchDistanzen = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/distanzen`);
@@ -264,7 +283,7 @@ function AppProvider({ children }) {
       isLoggedIn, login, logout, token, updateFahrt, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData,
-      setIsProfileModalOpen, isProfileModalOpen, showNotification, closeNotification
+      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification
     }}>
     {children}
     <NotificationModal
@@ -644,6 +663,66 @@ function FahrtenListe() {
       mitfahrer: mitfahrerSum.toFixed(2),
       gesamt: (kirchenkreisSum + gemeindeSum + mitfahrerSum).toFixed(2)
     };
+  };
+  
+  const renderAbrechnungsStatus = (summary) => {
+    return (
+      <div className="mb-4 p-4 bg-white rounded-lg shadow">
+      <h3 className="text-lg font-semibold mb-2">Abrechnungsstatus {selectedMonthName} {selectedYear}</h3>
+      
+      <div className="grid grid-cols-2 gap-4">
+      <div>
+      <h4 className="font-medium">Kirchenkreis: {summary.kirchenkreis} €</h4>
+      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
+        <p className="text-sm text-yellow-600">
+        Eingereicht am: {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
+        </p>
+      )}
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
+        <p className="text-sm text-green-600">
+        Erhalten am: {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
+        </p>
+      )}
+      </div>
+      
+      <div>
+      <h4 className="font-medium">Gemeinde: {summary.gemeinde} €</h4>
+      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
+        <p className="text-sm text-yellow-600">
+        Eingereicht am: {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}
+        </p>
+      )}
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
+        <p className="text-sm text-green-600">
+        Erhalten am: {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}
+        </p>
+      )}
+      </div>
+      </div>
+      
+      <div className="mt-2">
+      <p className="text-sm">
+      Mitfahrer: {summary.mitfahrer} € | 
+      Gesamt: {(
+        (summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : summary.kirchenkreis) +
+        (summary.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : summary.gemeinde) +
+        summary.mitfahrer
+      ).toFixed(2)} €
+      </p>
+      </div>
+      
+      <div className="flex space-x-2 mt-4">
+      <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} 
+      className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+      Export Kirchenkreis / Mitfaher:innen
+      </button>
+      <button onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} 
+      className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+      Export Gemeinde
+      </button>
+      </div>
+      </div>
+    );
   };
   
   const summary = getMonthSummary();
@@ -1036,20 +1115,7 @@ function FahrtenListe() {
     </select>
     </div>
     </div>
-    <div className="mb-2 p-2 bg-gray-100 rounded text-sm flex justify-between items-center">
-    <div>
-    <p><strong>{selectedMonthName} {selectedYear}</strong></p>
-    <p>Kirchenkreis: {summary.kirchenkreis} € | Gemeinde: {summary.gemeinde} € | Mitfahrer: {summary.mitfahrer} € | Gesamt: {summary.gesamt} €</p>
-    </div>
-    <div className="flex space-x-2">
-    <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
-    Export Kirchenkreis / Mitfaher:innen
-    </button>
-    <button onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
-    Export Gemeinde
-    </button>
-    </div>
-    </div>
+{renderAbrechnungsStatus(summary)}
     <table className="w-full border-collapse text-left fahrten-table">
     <thead>
     <tr className="bg-gray-200">
@@ -1093,21 +1159,97 @@ function FahrtenListe() {
 }
 
 function MonthlyOverview() {
-  const { monthlyData, fetchMonthlyData } = useContext(AppContext);
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = useContext(AppContext);
+  const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
   
   useEffect(() => {
     fetchMonthlyData();
   }, []);
   
+  const handleStatusUpdate = async (jahr, monat, typ, aktion, datum) => {
+    try {
+      await updateAbrechnungsStatus(jahr, monat, typ, aktion, datum);
+      await fetchMonthlyData();
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Status:', error);
+    }
+  };
+  
   const calculateYearTotal = () => {
     return monthlyData.reduce((total, month) => {
-      total.kirchenkreis += month.kirchenkreisErstattung;
-      total.gemeinde += month.gemeindeErstattung;
-      total.mitfahrer += month.mitfahrerErstattung || 0; // Fügen Sie dies hinzu
+      // Nur nicht abgerechnete Beträge zum Jahresgesamt hinzufügen
+      if (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
+        total.kirchenkreis += month.kirchenkreisErstattung;
+      }
+      if (!month.abrechnungsStatus?.gemeinde?.erhalten_am) {
+        total.gemeinde += month.gemeindeErstattung;
+      }
+      total.mitfahrer += month.mitfahrerErstattung || 0;
       return total;
     }, { kirchenkreis: 0, gemeinde: 0, mitfahrer: 0 });
   };
-
+  
+  const renderStatusCell = (month, typ) => {
+    const status = typ === 'Kirchenkreis' ? 
+    month.abrechnungsStatus?.kirchenkreis : 
+    month.abrechnungsStatus?.gemeinde;
+    const betrag = typ === 'Kirchenkreis' ? 
+    month.kirchenkreisErstattung : 
+    month.gemeindeErstattung;
+    
+    if (status?.erhalten_am) {
+      return (
+        <div className="text-green-600 text-sm">
+        Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
+        </div>
+      );
+    }
+    
+    if (status?.eingereicht_am) {
+      return (
+        <div>
+        <div className="text-yellow-600 text-sm">
+        Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
+        </div>
+        <div className="flex space-x-2 mt-1">
+        <button
+        onClick={() => setStatusModal({ 
+          open: true, 
+          typ, 
+          aktion: 'erhalten', 
+          jahr: month.year, 
+          monat: month.monatNr 
+        })}
+        className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+        >
+        Erhalten
+        </button>
+        <button
+        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+        >
+        Zurücksetzen
+        </button>
+        </div>
+        </div>
+      );
+    }
+    
+    return betrag > 0 ? (
+      <button
+      onClick={() => setStatusModal({ 
+        open: true, 
+        typ, 
+        aktion: 'eingereicht', 
+        jahr: month.year, 
+        monat: month.monatNr 
+      })}
+      className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+      >
+      Als eingereicht markieren
+      </button>
+    ) : null;
+  };
   
   const yearTotal = calculateYearTotal();
   
@@ -1117,32 +1259,64 @@ function MonthlyOverview() {
     <table className="w-full border-collapse text-left">
     <thead>
     <tr className="bg-gray-200">
-    <th className="border px-2 py-1 text-sm font-medium w-1/5">Monat</th>
-    <th className="border px-2 py-1 text-sm font-medium w-1/5">Kirchenkreis</th>
-    <th className="border px-2 py-1 text-sm font-medium w-1/5">Gemeinde</th>
-    <th className="border px-2 py-1 text-sm font-medium w-1/5">Mitfahrer:innen</th>
-    <th className="border px-2 py-1 text-sm font-medium w-1/5">Gesamt</th>
+    <th className="border px-2 py-1 text-sm font-medium">Monat</th>
+    <th className="border px-2 py-1 text-sm font-medium">Kirchenkreis</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status KK</th>
+    <th className="border px-2 py-1 text-sm font-medium">Gemeinde</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status Gem.</th>
+    <th className="border px-2 py-1 text-sm font-medium">Mitfahrer</th>
+    <th className="border px-2 py-1 text-sm font-medium">Gesamt</th>
     </tr>
     </thead>
     <tbody>
     {monthlyData.map((month) => (
-      <tr key={month.yearMonth}>
+      <tr 
+      key={month.yearMonth}
+      className={month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+        month.abrechnungsStatus?.gemeinde?.erhalten_am ? 
+        'opacity-50' : ''}
+      >
       <td className="border px-2 py-1 text-sm">{`${month.monthName} ${month.year}`}</td>
       <td className="border px-2 py-1 text-sm">{month.kirchenkreisErstattung.toFixed(2)} €</td>
+      <td className="border px-2 py-1">{renderStatusCell(month, 'Kirchenkreis')}</td>
       <td className="border px-2 py-1 text-sm">{month.gemeindeErstattung.toFixed(2)} €</td>
-      <td className="border px-2 py-1 text-sm">{month.mitfahrerErstattung.toFixed(2)} €</td>
-      <td className="border px-2 py-1 text-sm">{(month.kirchenkreisErstattung + month.gemeindeErstattung + month.mitfahrerErstattung).toFixed(2)} €</td>
+      <td className="border px-2 py-1">{renderStatusCell(month, 'Gemeinde')}</td>
+      <td className="border px-2 py-1 text-sm">{month.mitfahrerErstattung?.toFixed(2) || '0.00'} €</td>
+      <td className="border px-2 py-1 text-sm">{(
+        (month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : month.kirchenkreisErstattung) +
+        (month.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : month.gemeindeErstattung) +
+        (month.mitfahrerErstattung || 0)
+      ).toFixed(2)} €</td>
       </tr>
     ))}
     <tr className="font-bold bg-gray-100">
     <td className="border px-2 py-1 text-sm">Jahresgesamt</td>
     <td className="border px-2 py-1 text-sm">{yearTotal.kirchenkreis.toFixed(2)} €</td>
+    <td className="border px-2 py-1"></td>
     <td className="border px-2 py-1 text-sm">{yearTotal.gemeinde.toFixed(2)} €</td>
+    <td className="border px-2 py-1"></td>
     <td className="border px-2 py-1 text-sm">{yearTotal.mitfahrer.toFixed(2)} €</td>
     <td className="border px-2 py-1 text-sm">{(yearTotal.kirchenkreis + yearTotal.gemeinde + yearTotal.mitfahrer).toFixed(2)} €</td>
     </tr>
     </tbody>
     </table>
+    
+    <AbrechnungsStatusModal 
+    isOpen={statusModal.open}
+    onClose={() => setStatusModal({ open: false })}
+    onSubmit={(datum) => {
+      handleStatusUpdate(
+        statusModal.jahr,
+        statusModal.monat,
+        statusModal.typ,
+        statusModal.aktion,
+        datum
+      );
+      setStatusModal({ open: false });
+    }}
+    typ={statusModal.typ}
+    aktion={statusModal.aktion}
+    />
     </div>
   );
 }

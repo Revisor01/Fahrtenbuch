@@ -193,9 +193,13 @@ exports.getMonthlyReport = async (req, res) => {
       return res.status(400).json({ message: 'Ungültiges Jahr oder Monat' });
     }
     
-    const fahrten = await Fahrt.getMonthlyReport(year, month, userId);
+    // Hole Fahrten und Abrechnungsstatus parallel
+    const [fahrten, abrechnungsStatus] = await Promise.all([
+      Fahrt.getMonthlyReport(year, month, userId),
+      Abrechnung.getStatus(userId, year, month)
+    ]);
     
-    // Fügen Sie hier die Mitfahrer-Daten hinzu
+    // Füge Mitfahrer-Daten hinzu (bestehende Logik)
     for (let fahrt of fahrten) {
       fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
     }
@@ -205,6 +209,7 @@ exports.getMonthlyReport = async (req, res) => {
     let gemeindeSum = 0;
     let mitfahrerSum = 0;
     
+    // Bestehende Logik für die Berechnung der Fahrten
     const report = fahrten.map((fahrt) => {
       let kirchenkreisKm = 0;
       let gemeindeKm = 0;
@@ -227,8 +232,16 @@ exports.getMonthlyReport = async (req, res) => {
         mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
       }
       
-      kirchenkreisSum += kirchenkreisKm * erstattungssatz;
-      gemeindeSum += gemeindeKm * erstattungssatz;
+      // Nur nicht abgerechnete Fahrten zur Summe hinzufügen
+      const kirchenkreisStatus = abrechnungsStatus.find(s => s.typ === 'Kirchenkreis');
+      const gemeindeStatus = abrechnungsStatus.find(s => s.typ === 'Gemeinde');
+      
+      if (!kirchenkreisStatus?.erhalten_am) {
+        kirchenkreisSum += kirchenkreisKm * erstattungssatz;
+      }
+      if (!gemeindeStatus?.erhalten_am) {
+        gemeindeSum += gemeindeKm * erstattungssatz;
+      }
       
       return {
         ...fahrt,
@@ -247,7 +260,11 @@ exports.getMonthlyReport = async (req, res) => {
         kirchenkreisErstattung: kirchenkreisSum,
         gemeindeErstattung: gemeindeSum,
         mitfahrerErstattung: mitfahrerSum,
-        gesamtErstattung: kirchenkreisSum + gemeindeSum + mitfahrerSum
+        gesamtErstattung: kirchenkreisSum + gemeindeSum + mitfahrerSum,
+        abrechnungsStatus: {
+          kirchenkreis: abrechnungsStatus.find(s => s.typ === 'Kirchenkreis'),
+          gemeinde: abrechnungsStatus.find(s => s.typ === 'Gemeinde')
+        }
       }
     });
   } catch (error) {
@@ -321,6 +338,23 @@ exports.getYearSummary = async (req, res) => {
     res.status(200).json(summary);
   } catch (error) {
     res.status(500).json({ message: 'Fehler beim Abrufen der Jahreszusammenfassung', error: error.message });
+  }
+};
+
+exports.updateAbrechnungsStatus = async (req, res) => {
+  try {
+    const { jahr, monat, typ, aktion, datum } = req.body;
+    const userId = req.user.id;
+    
+    const result = await Abrechnung.updateStatus(userId, jahr, monat, typ, aktion, datum);
+    
+    res.status(200).json({
+      message: `Abrechnungsstatus erfolgreich aktualisiert`,
+      result
+    });
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
+    res.status(500).json({ message: 'Fehler beim Aktualisieren des Status', error: error.message });
   }
 };
 
