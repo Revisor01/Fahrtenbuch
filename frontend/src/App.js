@@ -1175,7 +1175,7 @@ function FahrtenListe() {
 }
 
 function MonthlyOverview() {
-  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = useContext(AppContext);
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
   
   useEffect(() => {
@@ -1193,20 +1193,35 @@ function MonthlyOverview() {
   
   const calculateYearTotal = () => {
     return monthlyData.reduce((total, month) => {
-      const kk = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 
-      0 : Number(month.kirchenkreisErstattung || 0);
-      const gem = month.abrechnungsStatus?.gemeinde?.erhalten_am ? 
-      0 : Number(month.gemeindeErstattung || 0);
-      const mitf = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ?
-      0 : Number(month.mitfahrerErstattung || 0);
+      // Werte werden nur dann zur Summe hinzugefügt, wenn sie noch nicht als erhalten markiert wurden
+      const kk = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(month.kirchenkreisErstattung || 0);
+      const gem = month.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : Number(month.gemeindeErstattung || 0);
+      const mitf = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(month.mitfahrerErstattung || 0);
       
       total.kirchenkreis += kk;
       total.gemeinde += gem;
       total.mitfahrer += mitf;
       total.gesamt = total.kirchenkreis + total.gemeinde + total.mitfahrer;
       
+      // Gesamtsumme aller Beträge (inklusive erhaltener)
+      total.originalKirchenkreis += Number(month.kirchenkreisErstattung || 0);
+      total.originalGemeinde += Number(month.gemeindeErstattung || 0);
+      total.originalMitfahrer += Number(month.mitfahrerErstattung || 0);
+      total.originalGesamt = total.originalKirchenkreis + total.originalGemeinde + total.originalMitfahrer;
+      
       return total;
-    }, { kirchenkreis: 0, gemeinde: 0, mitfahrer: 0, gesamt: 0 });
+    }, {
+      kirchenkreis: 0, gemeinde: 0, mitfahrer: 0, gesamt: 0,
+      originalKirchenkreis: 0, originalGemeinde: 0, originalMitfahrer: 0, originalGesamt: 0
+    });
+  };
+  
+  const renderBetrag = (betrag, isReceived) => {
+    return (
+      <span className={isReceived ? "text-gray-400" : ""}>
+      {Number(betrag || 0).toFixed(2)} €
+      </span>
+    );
   };
   
   const renderStatusCell = (month, typ) => {
@@ -1319,64 +1334,76 @@ function MonthlyOverview() {
     </tr>
     </thead>
     <tbody>
-    {monthlyData.map((month) => (
-      <tr 
-      key={month.yearMonth}
-      className={month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-        month.abrechnungsStatus?.gemeinde?.erhalten_am ? 
-        'opacity-50' : ''}
-      >
-      <td className="border px-2 py-1 text-sm">{`${month.monthName} ${month.year}`}</td>
-      <td className="border px-2 py-1 text-sm">
-      {/* Kirchenkreis */}
-      <span className={month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
-      {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
-      </span>
-      </td>
-      <td className="border px-2 py-1">{renderStatusCell(month, 'Kirchenkreis')}</td>
-      <td className="border px-2 py-1 text-sm">
-      {/* Gemeinde */}
-      <span className={month.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : ""}>
-      {Number(month.gemeindeErstattung || 0).toFixed(2)} €
-      </span>
-      </td>
-      <td className="border px-2 py-1">{renderStatusCell(month, 'Gemeinde')}</td>
-      <td className="border px-2 py-1 text-sm">
-      {/* Mitfahrer */}
-      <span className={month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
-      {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
-      </span>
-      </td>
-      <td className="border px-2 py-1 text-sm">
-      {/* Aktuell ausstehender Betrag */}
-      {(
-        (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(month.kirchenkreisErstattung || 0) : 0) +
-        (!month.abrechnungsStatus?.gemeinde?.erhalten_am ? Number(month.gemeindeErstattung || 0) : 0) +
-        (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(month.mitfahrerErstattung || 0) : 0)
-      ).toFixed(2)} €
+    {monthlyData.map((month) => {
+      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
       
-      {/* Ursprünglicher Gesamtbetrag in Klammern wenn etwas bezahlt wurde */}
-      {(month.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
-        month.abrechnungsStatus?.gemeinde?.erhalten_am) && (
-          <span className="text-gray-400 ml-2">
-          ({(
-            Number(month.kirchenkreisErstattung || 0) +
-            Number(month.gemeindeErstattung || 0) +
-            Number(month.mitfahrerErstattung || 0)
-          ).toFixed(2)} €)
+      // Berechnung der ausstehenden Beträge
+      const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
+      const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
+      const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
+      const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
+      
+      // Originale Gesamtbeträge
+      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
+      Number(month.gemeindeErstattung || 0) + 
+      Number(month.mitfahrerErstattung || 0);
+      
+      return (
+        <tr key={month.yearMonth}>
+        <td className="border px-2 py-1 text-sm">{`${month.monthName} ${month.year}`}</td>
+        <td className="border px-2 py-1 text-sm">
+        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
+        </td>
+        <td className="border px-2 py-1">{/* Status Kirchenkreis */}</td>
+        <td className="border px-2 py-1 text-sm">
+        {renderBetrag(month.gemeindeErstattung, gemReceived)}
+        </td>
+        <td className="border px-2 py-1">{/* Status Gemeinde */}</td>
+        <td className="border px-2 py-1 text-sm">
+        {renderBetrag(month.mitfahrerErstattung, kkReceived)}
+        </td>
+        <td className="border px-2 py-1 text-sm">
+        {ausstehendGesamt > 0 && (
+          <span>{ausstehendGesamt.toFixed(2)} € </span>
+        )}
+        {(kkReceived || gemReceived) && (
+          <span className="text-gray-400">
+          ({originalGesamt.toFixed(2)} €)
           </span>
         )}
-      </td>
-      </tr>
-    ))}
+        </td>
+        </tr>
+      );
+    })}
     <tr className="font-bold bg-gray-100">
     <td className="border px-2 py-1 text-sm">Jahresgesamt</td>
-    <td className="border px-2 py-1 text-sm">{yearTotal.kirchenkreis.toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">
+    {yearTotal.kirchenkreis.toFixed(2)} €
+    {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
+      <span className="text-gray-400 ml-2">({yearTotal.originalKirchenkreis.toFixed(2)} €)</span>
+    )}
+    </td>
     <td className="border px-2 py-1"></td>
-    <td className="border px-2 py-1 text-sm">{yearTotal.gemeinde.toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">
+    {yearTotal.gemeinde.toFixed(2)} €
+    {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
+      <span className="text-gray-400 ml-2">({yearTotal.originalGemeinde.toFixed(2)} €)</span>
+    )}
+    </td>
     <td className="border px-2 py-1"></td>
-    <td className="border px-2 py-1 text-sm">{yearTotal.mitfahrer.toFixed(2)} €</td>
-    <td className="border px-2 py-1 text-sm">{yearTotal.gesamt.toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">
+    {yearTotal.mitfahrer.toFixed(2)} €
+    {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
+      <span className="text-gray-400 ml-2">({yearTotal.originalMitfahrer.toFixed(2)} €)</span>
+    )}
+    </td>
+    <td className="border px-2 py-1 text-sm">
+    {yearTotal.gesamt.toFixed(2)} €
+    {yearTotal.originalGesamt !== yearTotal.gesamt && (
+      <span className="text-gray-400 ml-2">({yearTotal.originalGesamt.toFixed(2)} €)</span>
+    )}
+    </td>
     </tr>
     </tbody>
     </table>
