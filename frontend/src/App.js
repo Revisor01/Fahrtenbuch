@@ -1400,6 +1400,7 @@ function MonthlyOverview() {
     />
     </div>
   );
+}
 
 function OrteListe() {
   const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
