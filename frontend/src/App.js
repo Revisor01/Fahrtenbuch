@@ -672,7 +672,6 @@ function FahrtenListe() {
       <div className="mb-4 p-4 bg-white rounded-lg shadow">
       <h3 className="text-lg font-semibold mb-2">Abrechnungsstatus {selectedMonthName} {selectedYear}</h3>
       
-      <div className="grid grid-cols-2 gap-4">
       <div className="text-sm text-gray-500">
       {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
         `KK eingereicht am ${new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}`}
@@ -683,15 +682,20 @@ function FahrtenListe() {
       {summary.abrechnungsStatus?.gemeinde?.erhalten_am && 
         ` | Gem. erhalten am ${new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}`}
       </div>
-      </div>
       
       <div className="mt-2">
       <p className="text-sm">
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-        <span className="text-gray-400">Mitfahrer: {Number(summary.mitfahrer || 0).toFixed(2)} €</span>
-      ) : (
-        `Mitfahrer: ${Number(summary.mitfahrer || 0).toFixed(2)} €`
-      )}
+      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      KK: {Number(summary.kirchenkreis || 0).toFixed(2)} €
+      </span>
+      {' | '}
+      <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : ""}>
+      Gem: {Number(summary.gemeinde || 0).toFixed(2)} €
+      </span>
+      {' | '}
+      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      Mitfahrer: {Number(summary.mitfahrer || 0).toFixed(2)} €
+      </span>
       {' | '}
       Gesamt: {(
         (summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(summary.kirchenkreis || 0)) +
@@ -699,9 +703,7 @@ function FahrtenListe() {
         (summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(summary.mitfahrer || 0))
       ).toFixed(2)} €
       {((summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
-        summary.abrechnungsStatus?.gemeinde?.erhalten_am) && 
-        !(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-          summary.abrechnungsStatus?.gemeinde?.erhalten_am)) && 
+        summary.abrechnungsStatus?.gemeinde?.erhalten_am)) && 
         <span className="text-gray-400 ml-2">
         ({(Number(summary.kirchenkreis || 0) + 
           Number(summary.gemeinde || 0) +
