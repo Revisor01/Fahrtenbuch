@@ -1255,63 +1255,75 @@ function MonthlyOverview() {
     );
   };
   
-  const QuickActions = ({ onAction }) => {
+  const QuickActions = ({ filteredData, handleStatusUpdate }) => {
     const [isOpen, setIsOpen] = useState(false);
     
     const actions = [
       {
-        label: 'Alle angezeigten als eingereicht markieren',
-        onClick: async (data) => {
-          const today = new Date().toISOString();
-          for (const month of data) {
-            if (month.kirchenkreisErstattung > 0 && 
-              !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
-                await handleStatusUpdate(
-                  month.year, 
-                  month.monatNr, 
-                  'Kirchenkreis', 
-                  'eingereicht', 
-                  today
-                );
-              }
-            if (month.gemeindeErstattung > 0 && 
-              !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
-                await handleStatusUpdate(
-                  month.year, 
-                  month.monatNr, 
-                  'Gemeinde', 
-                  'eingereicht', 
-                  today
-                );
-              }
+        label: 'Alle als eingereicht markieren',
+        action: async () => {
+          const today = new Date().toISOString().split('T')[0];
+          try {
+            for (const month of filteredData) {
+              // Kirchenkreis
+              if (month.kirchenkreisErstattung > 0 && 
+                !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Kirchenkreis', 
+                    'eingereicht', 
+                    today
+                  );
+                }
+              // Gemeinde
+              if (month.gemeindeErstattung > 0 && 
+                !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Gemeinde', 
+                    'eingereicht', 
+                    today
+                  );
+                }
+            }
+          } catch (error) {
+            console.error('Fehler beim Massenupdate:', error);
           }
         }
       },
       {
-        label: 'Alle angezeigten als erhalten markieren',
-        onClick: async (data) => {
-          const today = new Date().toISOString();
-          for (const month of data) {
-            if (month.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
-              !month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
-                await handleStatusUpdate(
-                  month.year, 
-                  month.monatNr, 
-                  'Kirchenkreis', 
-                  'erhalten', 
-                  today
-                );
-              }
-            if (month.abrechnungsStatus?.gemeinde?.eingereicht_am && 
-              !month.abrechnungsStatus?.gemeinde?.erhalten_am) {
-                await handleStatusUpdate(
-                  month.year, 
-                  month.monatNr, 
-                  'Gemeinde', 
-                  'erhalten', 
-                  today
-                );
-              }
+        label: 'Alle eingereichten als erhalten markieren',
+        action: async () => {
+          const today = new Date().toISOString().split('T')[0];
+          try {
+            for (const month of filteredData) {
+              // Kirchenkreis
+              if (month.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
+                !month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Kirchenkreis', 
+                    'erhalten', 
+                    today
+                  );
+                }
+              // Gemeinde
+              if (month.abrechnungsStatus?.gemeinde?.eingereicht_am && 
+                !month.abrechnungsStatus?.gemeinde?.erhalten_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Gemeinde', 
+                    'erhalten', 
+                    today
+                  );
+                }
+            }
+          } catch (error) {
+            console.error('Fehler beim Massenupdate:', error);
           }
         }
       }
@@ -1321,18 +1333,18 @@ function MonthlyOverview() {
       <div className="relative">
       <button
       onClick={() => setIsOpen(!isOpen)}
-      className="px-4 py-2 text-sm bg-white border rounded hover:bg-gray-50 flex items-center"
+      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
       >
       Schnellaktionen ▼
       </button>
       
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg z-10">
+        <div className="absolute right-0 mt-2 w-72 bg-white border rounded shadow-lg z-10">
         {actions.map((action, index) => (
           <button
           key={index}
-          onClick={() => {
-            action.onClick(getFilteredData());
+          onClick={async () => {
+            await action.action();
             setIsOpen(false);
           }}
           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
@@ -1426,7 +1438,6 @@ function MonthlyOverview() {
     <div>
     <div className="flex justify-between items-center mb-4">
     <h2 className="text-lg font-semibold">Monatliche Übersicht</h2>
-    <QuickActions />
     </div>
     
     <div className="mb-4 flex items-center justify-between bg-gray-100 p-3 rounded">
@@ -1462,8 +1473,11 @@ function MonthlyOverview() {
     </div>
     </div>
     
+    <div className="flex items-center space-x-4">
     <div className="text-sm text-gray-600">
     {getFilteredData().length} von {monthlyData.length} Monaten angezeigt
+    </div>
+    <QuickActions filteredData={getFilteredData()} handleStatusUpdate={handleStatusUpdate} />
     </div>
     </div>
     
@@ -1472,9 +1486,9 @@ function MonthlyOverview() {
     <tr className="bg-gray-200">
     <th className="border px-2 py-1 text-sm font-medium w-32">Monat</th>
     <th className="border px-2 py-1 text-sm font-medium">Kirchenkreis</th>
-    <th className="border px-2 py-1 text-sm font-medium">Status KK</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status Kirchenkreis</th>
     <th className="border px-2 py-1 text-sm font-medium">Gemeinde</th>
-    <th className="border px-2 py-1 text-sm font-medium">Status Gem.</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status Gemeinde</th>
     <th className="border px-2 py-1 text-sm font-medium">Mitfahrer</th>
     <th className="border px-2 py-1 text-sm font-medium">Gesamt</th>
     </tr>
