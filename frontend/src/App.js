@@ -1255,6 +1255,97 @@ function MonthlyOverview() {
     );
   };
   
+  const QuickActions = ({ onAction }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const actions = [
+      {
+        label: 'Alle angezeigten als eingereicht markieren',
+        onClick: async (data) => {
+          const today = new Date().toISOString();
+          for (const month of data) {
+            if (month.kirchenkreisErstattung > 0 && 
+              !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
+                await handleStatusUpdate(
+                  month.year, 
+                  month.monatNr, 
+                  'Kirchenkreis', 
+                  'eingereicht', 
+                  today
+                );
+              }
+            if (month.gemeindeErstattung > 0 && 
+              !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
+                await handleStatusUpdate(
+                  month.year, 
+                  month.monatNr, 
+                  'Gemeinde', 
+                  'eingereicht', 
+                  today
+                );
+              }
+          }
+        }
+      },
+      {
+        label: 'Alle angezeigten als erhalten markieren',
+        onClick: async (data) => {
+          const today = new Date().toISOString();
+          for (const month of data) {
+            if (month.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
+              !month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
+                await handleStatusUpdate(
+                  month.year, 
+                  month.monatNr, 
+                  'Kirchenkreis', 
+                  'erhalten', 
+                  today
+                );
+              }
+            if (month.abrechnungsStatus?.gemeinde?.eingereicht_am && 
+              !month.abrechnungsStatus?.gemeinde?.erhalten_am) {
+                await handleStatusUpdate(
+                  month.year, 
+                  month.monatNr, 
+                  'Gemeinde', 
+                  'erhalten', 
+                  today
+                );
+              }
+          }
+        }
+      }
+    ];
+    
+    return (
+      <div className="relative">
+      <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="px-4 py-2 text-sm bg-white border rounded hover:bg-gray-50 flex items-center"
+      >
+      Schnellaktionen ▼
+      </button>
+      
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg z-10">
+        {actions.map((action, index) => (
+          <button
+          key={index}
+          onClick={() => {
+            action.onClick(getFilteredData());
+            setIsOpen(false);
+          }}
+          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+          >
+          {action.label}
+          </button>
+        ))}
+        </div>
+      )}
+      </div>
+    );
+  };
+  
   const renderStatusCell = (month, typ) => {
     const status = typ === 'Kirchenkreis' ? 
     month.abrechnungsStatus?.kirchenkreis : 
@@ -1263,68 +1354,49 @@ function MonthlyOverview() {
     month.kirchenkreisErstattung : 
     month.gemeindeErstattung;
     
-    // Monat aus yearMonth extrahieren
-    const monat = parseInt(month.yearMonth.split('-')[1]);
-    
     if (status?.erhalten_am) {
       return (
-        <div>
-        <div className="text-green-600 text-sm">
-        {status.erhalten_am ? 
-          `Erhalten am: ${new Date(status.erhalten_am).toLocaleDateString()}` :
-          `Eingereicht am: ${new Date(status.eingereicht_am).toLocaleDateString()}`
-        }
-        </div>
-        <div className="flex space-x-2 mt-1">
-        {!status.erhalten_am && (
-          <button
-          onClick={() => setStatusModal({ 
-            open: true, 
-            typ, 
-            aktion: 'erhalten', 
-            jahr: month.year,
-            monat: month.monatNr
-          })}
-          className="bg-green-500 text-white px-2 py-1 rounded text-xs"
-          >
-          Als erhalten markieren
-          </button>
-        )}
+        <div className="flex items-center space-x-2">
+        <span className="text-green-500">✓</span>
+        <span className="text-xs text-green-700">
+        {new Date(status.erhalten_am).toLocaleDateString()}
+        </span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+        className="ml-2 text-xs text-gray-400 hover:text-red-500"
+        title="Zurücksetzen"
         >
-        Zurücksetzen
+        ×
         </button>
         </div>
-        </div>
       );
-    };
+    }
     
     if (status?.eingereicht_am) {
       return (
-        <div>
-        <div className="text-yellow-600 text-sm">
-        Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
-        </div>
-        <div className="flex space-x-2 mt-1">
+        <div className="flex items-center space-x-2">
+        <span className="text-yellow-500">○</span>
+        <span className="text-xs text-yellow-700">
+        {new Date(status.eingereicht_am).toLocaleDateString()}
+        </span>
+        <div className="space-x-1">
         <button
         onClick={() => setStatusModal({ 
           open: true, 
           typ, 
           aktion: 'erhalten', 
           jahr: month.year,
-          monat: monat     // Geändert: Benutzt jetzt den extrahierten Monat
+          monat: month.monatNr
         })}
-        className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+        className="text-xs bg-green-100 text-green-700 px-2 rounded"
         >
-        Erhalten
+        ✓
         </button>
         <button
-        onClick={() => handleStatusUpdate(month.year, monat, typ, 'reset')}  // Geändert
-        className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        className="text-xs bg-red-100 text-red-700 px-2 rounded"
         >
-        Zurücksetzen
+        ×
         </button>
         </div>
         </div>
@@ -1338,11 +1410,12 @@ function MonthlyOverview() {
         typ, 
         aktion: 'eingereicht', 
         jahr: month.year,
-        monat: monat     // Geändert: Benutzt jetzt den extrahierten Monat
+        monat: month.monatNr
       })}
-      className="bg-blue-500 text-white px-2 py-1 rounded text-xs"
+      className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
       >
-      Als eingereicht markieren
+      <span>⟳</span>
+      <span>Einreichen</span>
       </button>
     ) : null;
   };
@@ -1353,6 +1426,7 @@ function MonthlyOverview() {
     <div>
     <div className="flex justify-between items-center mb-4">
     <h2 className="text-lg font-semibold">Monatliche Übersicht</h2>
+    <QuickActions />
     </div>
     
     <div className="mb-4 flex items-center justify-between bg-gray-100 p-3 rounded">
