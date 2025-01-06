@@ -673,32 +673,15 @@ function FahrtenListe() {
       <h3 className="text-lg font-semibold mb-2">Abrechnungsstatus {selectedMonthName} {selectedYear}</h3>
       
       <div className="grid grid-cols-2 gap-4">
-      <div>
-      <h4 className="font-medium">Kirchenkreis: {summary.kirchenkreis} €</h4>
-      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-        <p className="text-sm text-yellow-600">
-        Eingereicht am: {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
-        </p>
-      )}
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-        <p className="text-sm text-green-600">
-        Erhalten am: {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
-        </p>
-      )}
-      </div>
-      
-      <div>
-      <h4 className="font-medium">Gemeinde: {summary.gemeinde} €</h4>
-      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
-        <p className="text-sm text-yellow-600">
-        Eingereicht am: {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}
-        </p>
-      )}
-      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
-        <p className="text-sm text-green-600">
-        Erhalten am: {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}
-        </p>
-      )}
+      <div className="text-sm text-gray-600">
+      Status: {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
+        `KK eingereicht am ${new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}`}
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+        ` | KK erhalten am ${new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}`}
+      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && 
+        ` | Gem. eingereicht am ${new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}`}
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && 
+        ` | Gem. erhalten am ${new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}`}
       </div>
       </div>
       
@@ -1179,16 +1162,16 @@ function MonthlyOverview() {
   
   const calculateYearTotal = () => {
     return monthlyData.reduce((total, month) => {
-      // Nur nicht abgerechnete Beträge zum Jahresgesamt hinzufügen
-      if (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
-        total.kirchenkreis += month.kirchenkreisErstattung;
-      }
-      if (!month.abrechnungsStatus?.gemeinde?.erhalten_am) {
-        total.gemeinde += month.gemeindeErstattung;
-      }
-      total.mitfahrer += month.mitfahrerErstattung || 0;
+      const kk = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 
+      0 : Number(month.kirchenkreisErstattung || 0);
+      const gem = month.abrechnungsStatus?.gemeinde?.erhalten_am ? 
+      0 : Number(month.gemeindeErstattung || 0);
+      
+      total.kirchenkreis += kk;
+      total.gemeinde += gem;
+      
       return total;
-    }, { kirchenkreis: 0, gemeinde: 0, mitfahrer: 0 });
+    }, { kirchenkreis: 0, gemeinde: 0 });
   };
   
   const renderStatusCell = (month, typ) => {
@@ -1204,11 +1187,38 @@ function MonthlyOverview() {
     
     if (status?.erhalten_am) {
       return (
+        <div>
         <div className="text-green-600 text-sm">
-        Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
+        {status.erhalten_am ? 
+          `Erhalten am: ${new Date(status.erhalten_am).toLocaleDateString()}` :
+          `Eingereicht am: ${new Date(status.eingereicht_am).toLocaleDateString()}`
+        }
+        </div>
+        <div className="flex space-x-2 mt-1">
+        {!status.erhalten_am && (
+          <button
+          onClick={() => setStatusModal({ 
+            open: true, 
+            typ, 
+            aktion: 'erhalten', 
+            jahr: month.year,
+            monat: month.monatNr
+          })}
+          className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+          >
+          Als erhalten markieren
+          </button>
+        )}
+        <button
+        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+        >
+        Zurücksetzen
+        </button>
+        </div>
         </div>
       );
-    }
+    };
     
     if (status?.eingereicht_am) {
       return (
@@ -1289,10 +1299,31 @@ function MonthlyOverview() {
       <td className="border px-2 py-1 text-sm">{Number(month.mitfahrerErstattung || 0).toFixed(2)} €</td>
       <td className="border px-2 py-1 text-sm">
       {(
-        Number(month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : month.kirchenkreisErstattung || 0) +
-        Number(month.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : month.gemeindeErstattung || 0) +
-        Number(month.mitfahrerErstattung || 0)
-      ).toFixed(2)} €
+        (month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 
+          0 : 
+          Number(month.kirchenkreisErstattung || 0)) +
+        (month.abrechnungsStatus?.gemeinde?.erhalten_am ? 
+          0 : 
+          Number(month.gemeindeErstattung || 0))
+      ).toFixed(2)} € 
+      {/* Ursprünglicher Wert in Klammern, wenn teilweise bezahlt */}
+      {((month.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
+        month.abrechnungsStatus?.gemeinde?.erhalten_am) && 
+        !(month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+          month.abrechnungsStatus?.gemeinde?.erhalten_am)) && 
+        <span className="text-gray-400 ml-2">
+        ({(Number(month.kirchenkreisErstattung || 0) + 
+          Number(month.gemeindeErstattung || 0)).toFixed(2)} €)
+        </span>
+      }
+      {/* Komplett ausgegraut wenn alles bezahlt */}
+      {(month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+        month.abrechnungsStatus?.gemeinde?.erhalten_am) && 
+        <span className="text-gray-400">
+        {(Number(month.kirchenkreisErstattung || 0) + 
+          Number(month.gemeindeErstattung || 0)).toFixed(2)} €
+        </span>
+      }
       </td>
       </tr>
     ))}
