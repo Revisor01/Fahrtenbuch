@@ -1166,12 +1166,16 @@ function MonthlyOverview() {
       0 : Number(month.kirchenkreisErstattung || 0);
       const gem = month.abrechnungsStatus?.gemeinde?.erhalten_am ? 
       0 : Number(month.gemeindeErstattung || 0);
+      const mitf = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ?
+      0 : Number(month.mitfahrerErstattung || 0);
       
       total.kirchenkreis += kk;
       total.gemeinde += gem;
+      total.mitfahrer += mitf;
+      total.gesamt = total.kirchenkreis + total.gemeinde + total.mitfahrer;
       
       return total;
-    }, { kirchenkreis: 0, gemeinde: 0 });
+    }, { kirchenkreis: 0, gemeinde: 0, mitfahrer: 0, gesamt: 0 });
   };
   
   const renderStatusCell = (month, typ) => {
@@ -1329,12 +1333,12 @@ function MonthlyOverview() {
     ))}
     <tr className="font-bold bg-gray-100">
     <td className="border px-2 py-1 text-sm">Jahresgesamt</td>
-    <td className="border px-2 py-1 text-sm">{Number(yearTotal.kirchenkreis || 0).toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{yearTotal.kirchenkreis.toFixed(2)} €</td>
     <td className="border px-2 py-1"></td>
-    <td className="border px-2 py-1 text-sm">{Number(yearTotal.gemeinde || 0).toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{yearTotal.gemeinde.toFixed(2)} €</td>
     <td className="border px-2 py-1"></td>
     <td className="border px-2 py-1 text-sm">{yearTotal.mitfahrer.toFixed(2)} €</td>
-    <td className="border px-2 py-1 text-sm">{Number(yearTotal.mitfahrer || 0).toFixed(2)} €</td>
+    <td className="border px-2 py-1 text-sm">{yearTotal.gesamt.toFixed(2)} €</td>
     </tr>
     </tbody>
     </table>
