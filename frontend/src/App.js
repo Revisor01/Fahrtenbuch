@@ -1177,7 +1177,9 @@ function FahrtenListe() {
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
-  
+  const [selectedYear, setSelectedYear] = useState('all'); // 'all' für Gesamt
+  const [hideCompleted, setHideCompleted] = useState(true); // Standard: abgeschlossene ausblenden
+
   useEffect(() => {
     fetchMonthlyData();
   }, []);
@@ -1191,8 +1193,162 @@ function MonthlyOverview() {
     }
   };
   
+  // Neue Hilfsfunktion zum Filtern der Daten
+  const getFilteredData = () => {
+    return monthlyData.filter(month => {
+      // Jahr filtern
+      if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
+        return false;
+      }
+      
+      // Abgeschlossene ausblenden wenn gewünscht
+      if (hideCompleted) {
+        const isCompleted = month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+        month.abrechnungsStatus?.gemeinde?.erhalten_am;
+        if (isCompleted) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  };
+  
+  const getStatusColor = (status) => {
+    if (status?.erhalten_am) return 'bg-green-50';
+    if (status?.eingereicht_am) return 'bg-yellow-50';
+    return '';
+  };
+  
+  // Kompaktere Status-Buttons
+  const renderCompactStatus = (month, typ) => {
+    const status = typ === 'Kirchenkreis' ? 
+    month.abrechnungsStatus?.kirchenkreis : 
+    month.abrechnungsStatus?.gemeinde;
+    
+    if (status?.erhalten_am) {
+      return (
+        <div className="flex items-center space-x-2">
+        <Check className="text-green-500" size={16} />
+        <span className="text-xs text-green-700">
+        {new Date(status.erhalten_am).toLocaleDateString()}
+        </span>
+        <button
+        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        className="ml-2 text-gray-500 hover:text-red-500"
+        title="Zurücksetzen"
+        >
+        ×
+        </button>
+        </div>
+      );
+    }
+    
+    if (status?.eingereicht_am) {
+      return (
+        <div className="flex items-center space-x-2">
+        <Clock className="text-yellow-500" size={16} />
+        <span className="text-xs text-yellow-700">
+        {new Date(status.eingereicht_am).toLocaleDateString()}
+        </span>
+        <div className="flex space-x-1">
+        <button
+        onClick={() => setStatusModal({ 
+          open: true, 
+          typ, 
+          aktion: 'erhalten', 
+          jahr: month.year,
+          monat: month.monatNr
+        })}
+        className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+        >
+        ✓
+        </button>
+        <button
+        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+        >
+        ×
+        </button>
+        </div>
+        </div>
+      );
+    }
+    
+    if (month[typ === 'Kirchenkreis' ? 'kirchenkreisErstattung' : 'gemeindeErstattung'] > 0) {
+      return (
+        <button
+        onClick={() => setStatusModal({ 
+          open: true, 
+          typ, 
+          aktion: 'eingereicht', 
+          jahr: month.year,
+          monat: month.monatNr
+        })}
+        className="flex items-center space-x-2 px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+        >
+        <AlertCircle size={16} />
+        <span className="text-xs">Einreichen</span>
+        </button>
+      );
+    }
+    
+    return null;
+  };
+  
+  // Quick Actions Dropdown
+  const QuickActions = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const actions = [
+      {
+        label: 'Alle als eingereicht markieren',
+        onClick: async () => {
+          const visible = getFilteredData();
+          for (const month of visible) {
+            if (month.kirchenkreisErstattung > 0 && !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
+              await handleStatusUpdate(month.year, month.monatNr, 'Kirchenkreis', 'eingereicht', new Date().toISOString());
+            }
+            if (month.gemeindeErstattung > 0 && !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
+              await handleStatusUpdate(month.year, month.monatNr, 'Gemeinde', 'eingereicht', new Date().toISOString());
+            }
+          }
+        }
+      }
+      // Weitere Quick Actions hier...
+    ];
+    return (
+      <div className="relative">
+      <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="flex items-center space-x-2 px-4 py-2 bg-white border rounded hover:bg-gray-50"
+      >
+      <span>Quick Actions</span>
+      <ChevronDown size={16} />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg z-10">
+        {actions.map((action, index) => (
+          <button
+          key={index}
+          onClick={() => {
+            action.onClick();
+            setIsOpen(false);
+          }}
+          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+          {action.label}
+          </button>
+        ))}
+        </div>
+      )}
+      </div>
+    );
+  };
+    
   const calculateYearTotal = () => {
-    return monthlyData.reduce((total, month) => {
+    return getFilteredData().reduce((total, month) => {
       // Berechne immer die Originalbeträge
       total.originalKirchenkreis += Number(month.kirchenkreisErstattung || 0);
       total.originalGemeinde += Number(month.gemeindeErstattung || 0);
@@ -1322,21 +1478,68 @@ function MonthlyOverview() {
   
   return (
     <div>
-    <h2 className="text-lg font-semibold mb-2">Monatliche Übersicht</h2>
+    <div className="flex justify-between items-center mb-4">
+    <h2 className="text-lg font-semibold">Monatliche Übersicht</h2>
+    <QuickActions />
+    </div>
+    
+    <div className="mb-4 flex items-center justify-between bg-gray-100 p-3 rounded">
+    <div className="flex items-center space-x-4">
+    <div>
+    <label className="mr-2">Jahr:</label>
+    <select 
+    value={selectedYear} 
+    onChange={(e) => setSelectedYear(e.target.value)}
+    className="p-1 border rounded"
+    >
+    <option value="all">Gesamt</option>
+    {[...new Set(monthlyData.map(m => m.year))]
+      .sort((a, b) => b - a)
+      .map(year => (
+        <option key={year} value={year}>{year}</option>
+      ))
+    }
+    </select>
+    </div>
+    
+    <div className="flex items-center">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="mr-2"
+    />
+    <label htmlFor="hideCompleted">
+    Abgeschlossene Monate ausblenden
+    </label>
+    </div>
+    </div>
+    
+    <div className="text-sm text-gray-600">
+    {getFilteredData().length} von {monthlyData.length} Monaten angezeigt
+    </div>
+    </div>
+    
     <table className="w-full border-collapse text-left">
     <thead>
     <tr className="bg-gray-200">
-    <th className="border px-2 py-1 text-sm font-medium">Monat</th>
+    <th className="border px-2 py-1 text-sm font-medium w-32">Monat</th>
     <th className="border px-2 py-1 text-sm font-medium">Kirchenkreis</th>
-    <th className="border px-2 py-1 text-sm font-medium">Status Kirchenkreis</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status KK</th>
     <th className="border px-2 py-1 text-sm font-medium">Gemeinde</th>
-    <th className="border px-2 py-1 text-sm font-medium">Status Gemeinde</th>
+    <th className="border px-2 py-1 text-sm font-medium">Status Gem.</th>
     <th className="border px-2 py-1 text-sm font-medium">Mitfahrer</th>
     <th className="border px-2 py-1 text-sm font-medium">Gesamt</th>
     </tr>
     </thead>
     <tbody>
-    {monthlyData.map((month) => {
+    {getFilteredData().map((month) => {
+      const kkStatus = month.abrechnungsStatus?.kirchenkreis;
+      const gemStatus = month.abrechnungsStatus?.gemeinde;
+      const rowColor = (kkStatus?.erhalten_am && gemStatus?.erhalten_am) ? 'bg-green-50' :
+      (kkStatus?.eingereicht_am && gemStatus?.eingereicht_am) ? 'bg-yellow-50' : '';
+
       const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
       const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
       
