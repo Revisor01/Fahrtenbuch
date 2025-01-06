@@ -685,34 +685,48 @@ function FahrtenListe() {
       
       <div className="mt-2">
       <p className="text-sm">
-      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
-      KK: {Number(summary.kirchenkreis || 0).toFixed(2)} €
-      </span>
+      {/* Kirchenkreis */}
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
+        <span className="text-gray-400">KK: {Number(summary.kirchenkreis || 0).toFixed(2)} €</span>
+      ) : (
+        `KK: ${Number(summary.kirchenkreis || 0).toFixed(2)} €`
+      )}
       {' | '}
-      <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : ""}>
-      Gem: {Number(summary.gemeinde || 0).toFixed(2)} €
-      </span>
+      {/* Gemeinde */}
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
+        <span className="text-gray-400">Gem: {Number(summary.gemeinde || 0).toFixed(2)} €</span>
+      ) : (
+        `Gem: ${Number(summary.gemeinde || 0).toFixed(2)} €`
+      )}
       {' | '}
-      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
-      Mitfahrer: {Number(summary.mitfahrer || 0).toFixed(2)} €
-      </span>
+      {/* Mitfahrer */}
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
+        <span className="text-gray-400">Mitfahrer: {Number(summary.mitfahrer || 0).toFixed(2)} €</span>
+      ) : (
+        `Mitfahrer: ${Number(summary.mitfahrer || 0).toFixed(2)} €`
+      )}
       {' | '}
+      {/* Gesamt */}
       Gesamt: {(
-        (summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(summary.kirchenkreis || 0)) +
-        (summary.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : Number(summary.gemeinde || 0)) +
-        (summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(summary.mitfahrer || 0))
+        (!summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(summary.kirchenkreis || 0) : 0) +
+        (!summary.abrechnungsStatus?.gemeinde?.erhalten_am ? Number(summary.gemeinde || 0) : 0) +
+        (!summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(summary.mitfahrer || 0) : 0)
       ).toFixed(2)} €
-      {((summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
-        summary.abrechnungsStatus?.gemeinde?.erhalten_am)) && 
-        <span className="text-gray-400 ml-2">
-        ({(Number(summary.kirchenkreis || 0) + 
-          Number(summary.gemeinde || 0) +
-          Number(summary.mitfahrer || 0)).toFixed(2)} €)
-        </span>
-      }
+      {/* Original Gesamtsumme in Klammern wenn teilweise bezahlt */}
+      {(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
+        summary.abrechnungsStatus?.gemeinde?.erhalten_am) && (
+          <span className="text-gray-400 ml-2">
+          ({(
+            Number(summary.kirchenkreis || 0) +
+            Number(summary.gemeinde || 0) +
+            Number(summary.mitfahrer || 0)
+          ).toFixed(2)} €)
+          </span>
+        )}
       </p>
       </div>
       
+      {/* Export Buttons bleiben unverändert */}
       <div className="flex space-x-2 mt-4">
       <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} 
       className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
@@ -1314,60 +1328,43 @@ function MonthlyOverview() {
       >
       <td className="border px-2 py-1 text-sm">{`${month.monthName} ${month.year}`}</td>
       <td className="border px-2 py-1 text-sm">
-      {month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-        <span className="text-gray-400">
-        {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
-        </span>
-      ) : (
-        `${Number(month.kirchenkreisErstattung || 0).toFixed(2)} €`
-      )}
+      {/* Kirchenkreis */}
+      <span className={month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
+      </span>
       </td>
       <td className="border px-2 py-1">{renderStatusCell(month, 'Kirchenkreis')}</td>
       <td className="border px-2 py-1 text-sm">
-      {month.abrechnungsStatus?.gemeinde?.erhalten_am ? (
-        <span className="text-gray-400">
-        {Number(month.gemeindeErstattung || 0).toFixed(2)} €
-        </span>
-      ) : (
-        `${Number(month.gemeindeErstattung || 0).toFixed(2)} €`
-      )}
+      {/* Gemeinde */}
+      <span className={month.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : ""}>
+      {Number(month.gemeindeErstattung || 0).toFixed(2)} €
+      </span>
       </td>
       <td className="border px-2 py-1">{renderStatusCell(month, 'Gemeinde')}</td>
       <td className="border px-2 py-1 text-sm">
-      {month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-        <span className="text-gray-400">
-        {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
-        </span>
-      ) : (
-        `${Number(month.mitfahrerErstattung || 0).toFixed(2)} €`
-      )}
+      {/* Mitfahrer */}
+      <span className={month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
+      </span>
       </td>
       <td className="border px-2 py-1 text-sm">
-      {(month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-        month.abrechnungsStatus?.gemeinde?.erhalten_am) ? (
-          <span className="text-gray-400">
-          {(Number(month.kirchenkreisErstattung || 0) + 
+      {/* Aktuell ausstehender Betrag */}
+      {(
+        (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(month.kirchenkreisErstattung || 0) : 0) +
+        (!month.abrechnungsStatus?.gemeinde?.erhalten_am ? Number(month.gemeindeErstattung || 0) : 0) +
+        (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(month.mitfahrerErstattung || 0) : 0)
+      ).toFixed(2)} €
+      
+      {/* Ursprünglicher Gesamtbetrag in Klammern wenn etwas bezahlt wurde */}
+      {(month.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
+        month.abrechnungsStatus?.gemeinde?.erhalten_am) && (
+          <span className="text-gray-400 ml-2">
+          ({(
+            Number(month.kirchenkreisErstattung || 0) +
             Number(month.gemeindeErstattung || 0) +
-            Number(month.mitfahrerErstattung || 0)).toFixed(2)} €
+            Number(month.mitfahrerErstattung || 0)
+          ).toFixed(2)} €)
           </span>
-        ) : (
-          <>
-          {(
-            (month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(month.kirchenkreisErstattung || 0)) +
-            (month.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : Number(month.gemeindeErstattung || 0)) +
-            (month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(month.mitfahrerErstattung || 0))
-          ).toFixed(2)} €
-          {((month.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
-            month.abrechnungsStatus?.gemeinde?.erhalten_am) && 
-            !(month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-              month.abrechnungsStatus?.gemeinde?.erhalten_am)) && 
-            <span className="text-gray-400 ml-2">
-            ({(Number(month.kirchenkreisErstattung || 0) + 
-              Number(month.gemeindeErstattung || 0) +
-              Number(month.mitfahrerErstattung || 0)).toFixed(2)} €)
-            </span>
-          }
-          </>
         )}
       </td>
       </tr>
