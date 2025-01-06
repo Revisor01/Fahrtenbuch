@@ -649,13 +649,16 @@ function FahrtenListe() {
       if (fahrt.autosplit) {
         kirchenkreisSum += (fahrt.kirchenkreisKm || 0) * 0.3;
         gemeindeSum += (fahrt.gemeindeKm || 0) * 0.3;
+        if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
+          mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
+        }
       } else if (fahrt.abrechnung === 'Kirchenkreis') {
         kirchenkreisSum += (fahrt.kilometer || 0) * 0.3;
+        if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
+          mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
+        }
       } else if (fahrt.abrechnung === 'Gemeinde') {
         gemeindeSum += (fahrt.kilometer || 0) * 0.3;
-      }
-      if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
-        mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
       }
     });
     
@@ -669,8 +672,9 @@ function FahrtenListe() {
   
   const resetToCurrentMonth = () => {
     const date = new Date();
-    handleMonthChange({ target: { value: date.getMonth().toString() }});
-    handleYearChange({ target: { value: date.getFullYear().toString() }});
+    setSelectedYear(date.getFullYear().toString());
+    setSelectedMonthName(date.toLocaleString('default', { month: 'long' }));
+    setSelectedMonth(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
   };
   
   const renderAbrechnungsStatus = (summary) => {
@@ -699,6 +703,14 @@ function FahrtenListe() {
       <div className="flex justify-between items-center mb-2">
       <h2 className="text-lg font-semibold">Fahrten</h2>
       <div className="flex items-center space-x-2">
+      {selectedMonth !== `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}` && (
+        <button
+        onClick={resetToCurrentMonth}
+        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+        >
+        Aktueller Monat
+        </button>
+      )}
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
@@ -720,14 +732,6 @@ function FahrtenListe() {
         return <option key={year} value={year}>{year}</option>;
       })}
       </select>
-      {!isCurrentMonth && (
-        <button
-        onClick={resetToCurrentMonth}
-        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-        >
-        Aktueller Monat
-        </button>
-      )}
       </div>
       </div>
       
