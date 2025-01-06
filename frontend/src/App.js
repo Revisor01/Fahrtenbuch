@@ -1193,21 +1193,23 @@ function MonthlyOverview() {
   
   const calculateYearTotal = () => {
     return monthlyData.reduce((total, month) => {
-      // Werte werden nur dann zur Summe hinzugefügt, wenn sie noch nicht als erhalten markiert wurden
-      const kk = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(month.kirchenkreisErstattung || 0);
-      const gem = month.abrechnungsStatus?.gemeinde?.erhalten_am ? 0 : Number(month.gemeindeErstattung || 0);
-      const mitf = month.abrechnungsStatus?.kirchenkreis?.erhalten_am ? 0 : Number(month.mitfahrerErstattung || 0);
-      
-      total.kirchenkreis += kk;
-      total.gemeinde += gem;
-      total.mitfahrer += mitf;
-      total.gesamt = total.kirchenkreis + total.gemeinde + total.mitfahrer;
-      
-      // Gesamtsumme aller Beträge (inklusive erhaltener)
+      // Berechne immer die Originalbeträge
       total.originalKirchenkreis += Number(month.kirchenkreisErstattung || 0);
       total.originalGemeinde += Number(month.gemeindeErstattung || 0);
       total.originalMitfahrer += Number(month.mitfahrerErstattung || 0);
+      
+      // Für die aktuelle Summe nur nicht-erhaltene Beträge addieren
+      if (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
+        total.kirchenkreis += Number(month.kirchenkreisErstattung || 0);
+        total.mitfahrer += Number(month.mitfahrerErstattung || 0);
+      }
+      if (!month.abrechnungsStatus?.gemeinde?.erhalten_am) {
+        total.gemeinde += Number(month.gemeindeErstattung || 0);
+      }
+      
+      // Berechne beide Gesamtsummen
       total.originalGesamt = total.originalKirchenkreis + total.originalGemeinde + total.originalMitfahrer;
+      total.gesamt = total.kirchenkreis + total.gemeinde + total.mitfahrer;
       
       return total;
     }, {
@@ -1355,11 +1357,15 @@ function MonthlyOverview() {
         <td className="border px-2 py-1 text-sm">
         {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
         </td>
-        <td className="border px-2 py-1">{/* Status Kirchenkreis */}</td>
+        <td className="border px-2 py-1">
+        {renderStatusCell(month, 'Kirchenkreis')}
+        </td>
         <td className="border px-2 py-1 text-sm">
         {renderBetrag(month.gemeindeErstattung, gemReceived)}
         </td>
-        <td className="border px-2 py-1">{/* Status Gemeinde */}</td>
+        <td className="border px-2 py-1">
+        {renderStatusCell(month, 'Gemeinde')}
+        </td>
         <td className="border px-2 py-1 text-sm">
         {renderBetrag(month.mitfahrerErstattung, kkReceived)}
         </td>

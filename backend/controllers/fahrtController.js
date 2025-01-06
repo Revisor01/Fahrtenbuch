@@ -200,17 +200,16 @@ exports.getMonthlyReport = async (req, res) => {
       Abrechnung.getStatus(userId, year, month)
     ]);
     
-    // Füge Mitfahrer-Daten hinzu (bestehende Logik)
+    // Füge Mitfahrer-Daten hinzu
     for (let fahrt of fahrten) {
       fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
     }
     
-    const erstattungssatz = 0.30;  // 0,30 € pro km
+    const erstattungssatz = 0.30;
     let kirchenkreisSum = 0;
     let gemeindeSum = 0;
     let mitfahrerSum = 0;
     
-    // Bestehende Logik für die Berechnung der Fahrten
     const report = fahrten.map((fahrt) => {
       let kirchenkreisKm = 0;
       let gemeindeKm = 0;
@@ -229,20 +228,14 @@ exports.getMonthlyReport = async (req, res) => {
         gemeindeKm = fahrt.kilometer;
       }
       
+      // Mitfahrer-Summe immer berechnen
       if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
         mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
       }
       
-      // Nur nicht abgerechnete Fahrten zur Summe hinzufügen
-      const kirchenkreisStatus = abrechnungsStatus.find(s => s.typ === 'Kirchenkreis');
-      const gemeindeStatus = abrechnungsStatus.find(s => s.typ === 'Gemeinde');
-      
-      if (!kirchenkreisStatus?.erhalten_am) {
-        kirchenkreisSum += kirchenkreisKm * erstattungssatz;
-      }
-      if (!gemeindeStatus?.erhalten_am) {
-        gemeindeSum += gemeindeKm * erstattungssatz;
-      }
+      // Immer die Summen berechnen, unabhängig vom Status
+      kirchenkreisSum += kirchenkreisKm * erstattungssatz;
+      gemeindeSum += gemeindeKm * erstattungssatz;
       
       return {
         ...fahrt,
