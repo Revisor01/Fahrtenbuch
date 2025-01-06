@@ -1219,58 +1219,6 @@ function MonthlyOverview() {
     if (status?.eingereicht_am) return 'bg-yellow-50';
     return '';
   };
-  
-  
-  // Quick Actions Dropdown
-  const QuickActions = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    
-    const actions = [
-      {
-        label: 'Alle als eingereicht markieren',
-        onClick: async () => {
-          const visible = getFilteredData();
-          for (const month of visible) {
-            if (month.kirchenkreisErstattung > 0 && !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
-              await handleStatusUpdate(month.year, month.monatNr, 'Kirchenkreis', 'eingereicht', new Date().toISOString());
-            }
-            if (month.gemeindeErstattung > 0 && !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
-              await handleStatusUpdate(month.year, month.monatNr, 'Gemeinde', 'eingereicht', new Date().toISOString());
-            }
-          }
-        }
-      }
-      // Weitere Quick Actions hier...
-    ];
-    return (
-      <div className="relative">
-      <button
-      onClick={() => setIsOpen(!isOpen)}
-      className="flex items-center space-x-2 px-4 py-2 bg-white border rounded hover:bg-gray-50"
-      >
-      <span>Quick Actions</span>
-      <ChevronDown size={16} />
-      </button>
-      
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg z-10">
-        {actions.map((action, index) => (
-          <button
-          key={index}
-          onClick={() => {
-            action.onClick();
-            setIsOpen(false);
-          }}
-          className="w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-          {action.label}
-          </button>
-        ))}
-        </div>
-      )}
-      </div>
-    );
-  };
     
   const calculateYearTotal = () => {
     return getFilteredData().reduce((total, month) => {
@@ -1405,7 +1353,6 @@ function MonthlyOverview() {
     <div>
     <div className="flex justify-between items-center mb-4">
     <h2 className="text-lg font-semibold">Monatliche Übersicht</h2>
-    <QuickActions />
     </div>
     
     <div className="mb-4 flex items-center justify-between bg-gray-100 p-3 rounded">
