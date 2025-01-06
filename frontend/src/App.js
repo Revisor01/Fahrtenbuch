@@ -667,12 +667,72 @@ function FahrtenListe() {
     };
   };
   
+  const resetToCurrentMonth = () => {
+    const date = new Date();
+    handleMonthChange({ target: { value: date.getMonth().toString() }});
+    handleYearChange({ target: { value: date.getFullYear().toString() }});
+  };
+  
   const renderAbrechnungsStatus = (summary) => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth().toString();
+    const currentYear = currentDate.getFullYear().toString();
+    const isCurrentMonth = selectedMonth === `${currentYear}-${(parseInt(currentMonth) + 1).toString().padStart(2, '0')}`;
+    
+    const kkReceived = summary.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+    const gemReceived = summary.abrechnungsStatus?.gemeinde?.erhalten_am;
+    
+    const currentTotal = (
+      (!kkReceived ? Number(summary.kirchenkreis || 0) : 0) +
+      (!gemReceived ? Number(summary.gemeinde || 0) : 0) +
+      (!kkReceived ? Number(summary.mitfahrer || 0) : 0)
+    ).toFixed(2);
+    
+    const originalTotal = (
+      Number(summary.kirchenkreis || 0) +
+      Number(summary.gemeinde || 0) +
+      Number(summary.mitfahrer || 0)
+    ).toFixed(2);
+    
     return (
-      <div className="mb-4 p-4 bg-white rounded-lg shadow">
-      <h3 className="text-lg font-semibold mb-2">Abrechnungsstatus {selectedMonthName} {selectedYear}</h3>
+      <div className="mb-4">
+      <div className="flex justify-between items-center mb-2">
+      <h2 className="text-lg font-semibold">Fahrten</h2>
+      <div className="flex items-center space-x-2">
+      <select
+      value={new Date(`${selectedMonth}-01`).getMonth().toString()}
+      onChange={handleMonthChange}
+      className="p-1 border rounded text-sm"
+      >
+      {[...Array(12)].map((_, i) => (
+        <option key={i} value={i}>
+        {new Date(0, i).toLocaleString('default', { month: 'long' })}
+        </option>
+      ))}
+      </select>
+      <select
+      value={selectedYear}
+      onChange={handleYearChange}
+      className="p-1 border rounded text-sm"
+      >
+      {[...Array(10)].map((_, i) => {
+        const year = new Date().getFullYear() - 5 + i;
+        return <option key={year} value={year}>{year}</option>;
+      })}
+      </select>
+      {!isCurrentMonth && (
+        <button
+        onClick={resetToCurrentMonth}
+        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+        >
+        Aktueller Monat
+        </button>
+      )}
+      </div>
+      </div>
       
-      <div className="text-sm text-gray-500">
+      <div className="bg-white p-4 rounded-lg shadow mb-4">
+      <div className="text-sm mb-2">
       {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
         `KK eingereicht am ${new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}`}
       {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
@@ -683,59 +743,32 @@ function FahrtenListe() {
         ` | Gem. erhalten am ${new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}`}
       </div>
       
-      <div className="mt-2">
+      <div className="flex justify-between items-center">
       <p className="text-sm">
-      {/* Kirchenkreis */}
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-        <span className="text-gray-400">KK: {Number(summary.kirchenkreis || 0).toFixed(2)} €</span>
-      ) : (
-        `KK: ${Number(summary.kirchenkreis || 0).toFixed(2)} €`
+      KK: <span className={kkReceived ? "text-gray-400" : ""}>{Number(summary.kirchenkreis || 0).toFixed(2)} €</span> | 
+      Gem: <span className={gemReceived ? "text-gray-400" : ""}>{Number(summary.gemeinde || 0).toFixed(2)} €</span> | 
+      Mitfahrer: <span className={kkReceived ? "text-gray-400" : ""}>{Number(summary.mitfahrer || 0).toFixed(2)} €</span> | 
+      Gesamt: {currentTotal} € 
+      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
+        <span className="text-gray-400 ml-1">({originalTotal} €)</span>
       )}
-      {' | '}
-      {/* Gemeinde */}
-      {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
-        <span className="text-gray-400">Gem: {Number(summary.gemeinde || 0).toFixed(2)} €</span>
-      ) : (
-        `Gem: ${Number(summary.gemeinde || 0).toFixed(2)} €`
-      )}
-      {' | '}
-      {/* Mitfahrer */}
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-        <span className="text-gray-400">Mitfahrer: {Number(summary.mitfahrer || 0).toFixed(2)} €</span>
-      ) : (
-        `Mitfahrer: ${Number(summary.mitfahrer || 0).toFixed(2)} €`
-      )}
-      {' | '}
-      {/* Gesamt */}
-      Gesamt: {(
-        (!summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(summary.kirchenkreis || 0) : 0) +
-        (!summary.abrechnungsStatus?.gemeinde?.erhalten_am ? Number(summary.gemeinde || 0) : 0) +
-        (!summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? Number(summary.mitfahrer || 0) : 0)
-      ).toFixed(2)} €
-      {/* Original Gesamtsumme in Klammern wenn teilweise bezahlt */}
-      {(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || 
-        summary.abrechnungsStatus?.gemeinde?.erhalten_am) && (
-          <span className="text-gray-400 ml-2">
-          ({(
-            Number(summary.kirchenkreis || 0) +
-            Number(summary.gemeinde || 0) +
-            Number(summary.mitfahrer || 0)
-          ).toFixed(2)} €)
-          </span>
-        )}
       </p>
       </div>
       
-      {/* Export Buttons bleiben unverändert */}
-      <div className="flex space-x-2 mt-4">
-      <button onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} 
-      className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+      <div className="flex justify-end space-x-2 mt-4">
+      <button 
+      onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} 
+      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded text-sm"
+      >
       Export Kirchenkreis / Mitfaher:innen
       </button>
-      <button onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} 
-      className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+      <button 
+      onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} 
+      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded text-sm"
+      >
       Export Gemeinde
       </button>
+      </div>
       </div>
       </div>
     );
