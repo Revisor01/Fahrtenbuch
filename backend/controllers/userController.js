@@ -1,3 +1,4 @@
+const db = require('../config/database');
 const User = require('../models/User');
 const mailService = require('../services/mailService');
 const bcrypt = require('bcrypt');

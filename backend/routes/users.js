@@ -32,8 +32,9 @@ router.get('/me', authMiddleware, async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'Benutzer nicht gefunden' });
         }
-        // Entferne sensitive Daten
+        // Wichtig: Rolle mit zurückgeben
         const { password, ...userData } = user;
+        console.log('Sending user data:', userData); // Debug-Log
         res.json(userData);
     } catch (error) {
         console.error('Error fetching user profile:', error);
