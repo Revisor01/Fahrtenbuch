@@ -148,3 +148,5 @@ class User {
         return result.affectedRows > 0;
     }
 }
+
+module.exports = User;
