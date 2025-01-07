@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ortController = require('../controllers/ortController');
-const authMiddleware = require('../middleware/authMiddleware'); // Fügen Sie diese Zeile hinzu
+const { authMiddleware } = require('../middleware/authMiddleware');
 
 // Fügen Sie authMiddleware zu allen Routen hinzu
 router.use(authMiddleware);
