@@ -53,6 +53,36 @@ exports.createUser = async (req, res) => {
     }
 };
 
+exports.resendVerification = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const userId = req.user.id;
+        
+        // Prüfe ob der User die E-Mail ändern darf
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+        }
+        
+        // Generiere neuen Verifikationstoken
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        
+        // Speichere den neuen Token
+        const [result] = await db.execute(
+            'INSERT INTO email_verifications (user_id, new_email, verification_token, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))',
+            [userId, email, verificationToken]
+        );
+        
+        // Sende neue Verifikationsmail
+        await mailService.sendEmailVerification(email, user.username, verificationToken);
+        
+        res.json({ message: 'Verifizierungs-E-Mail wurde erneut gesendet' });
+    } catch (error) {
+        console.error('Fehler beim Senden der Verifikationsmail:', error);
+        res.status(500).json({ message: 'Fehler beim Senden der Verifikationsmail' });
+    }
+};
+
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;

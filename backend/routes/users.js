@@ -16,6 +16,7 @@ router.delete('/:id', authMiddleware, requireRole('admin'), userController.delet
 // Admin or self routes
 router.put('/:id', authMiddleware, requireAdminOrSelf('id'), userController.updateUser);
 router.put('/:id/password', authMiddleware, requireAdminOrSelf('id'), userController.changePassword);
+router.post('/resend-verification', authMiddleware, userController.resendVerification);
 
 // Public routes (no auth required)
 router.post('/reset-password', userController.requestPasswordReset);
