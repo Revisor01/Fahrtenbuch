@@ -128,15 +128,13 @@ function AppProvider({ children }) {
       const response = await axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`);
       setFahrten(response.data.fahrten.map(fahrt => ({
         ...fahrt,
-        mitfahrer: fahrt.mitfahrer || [] // Stellen Sie sicher, dass mitfahrer immer ein Array ist push
+        mitfahrer: fahrt.mitfahrer || []
       })));
-      setGesamtKirchenkreis(response.data.summary.kirchenkreisErstattung || 0);
-      setGesamtGemeinde(response.data.summary.gemeindeErstattung || 0);
+      setSummary(response.data.summary);  // Diese Zeile hinzufügen
     } catch (error) {
       console.error('Fehler beim Abrufen der Fahrten:', error);
       setFahrten([]);
-      setGesamtKirchenkreis(0);
-      setGesamtGemeinde(0);
+      setSummary({});  // Diese Zeile hinzufügen
     }
   };
   
@@ -466,6 +464,7 @@ function FahrtenListe() {
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
+  const [summary, setSummary] = useState({});
   
   useEffect(() => {
     fetchFahrten();
@@ -648,12 +647,15 @@ function FahrtenListe() {
   };
   
   const renderAbrechnungsStatus = (summary) => {
+    const currentDate = new Date();
+    const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    
     return (
       <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
       <h2 className="text-lg font-semibold">Fahrten</h2>
       <div className="flex items-center space-x-2">
-      {selectedMonth !== `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}` && (
+      {selectedMonth !== currentMonth && (
         <button
         onClick={resetToCurrentMonth}
         className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
@@ -684,7 +686,6 @@ function FahrtenListe() {
       </select>
       </div>
       </div>
-      
       <div className="bg-white p-4 rounded-lg shadow mb-4">
       <div className="text-sm mb-2">
       {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
@@ -696,7 +697,6 @@ function FahrtenListe() {
       {summary.abrechnungsStatus?.gemeinde?.erhalten_am && 
         ` | Gem. erhalten am ${new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}`}
       </div>
-      
       <div className="flex justify-between items-center">
       <p className="text-sm">
       KK: <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
@@ -708,23 +708,27 @@ function FahrtenListe() {
       Mitfahrer: <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
       {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
       </span> | 
-      Gesamt: {summary.currentTotal} € 
-      {(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || summary.abrechnungsStatus?.gemeinde?.erhalten_am) && 
-        summary.currentTotal !== summary.originalTotal && (
-          <span className="text-gray-400 ml-1">({summary.originalTotal} €)</span>
-        )}
+      Gesamt: {Number(!summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? summary.kirchenkreisErstattung : 0 || 0 
+        + !summary.abrechnungsStatus?.gemeinde?.erhalten_am ? summary.gemeindeErstattung : 0 || 0
+        + !summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? summary.mitfahrerErstattung : 0 || 0).toFixed(2)} € 
+      {(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || summary.abrechnungsStatus?.gemeinde?.erhalten_am) && (
+        <span className="text-gray-400 ml-1">
+        ({Number(summary.kirchenkreisErstattung || 0 
+          + summary.gemeindeErstattung || 0
+          + summary.mitfahrerErstattung || 0).toFixed(2)} €)
+        </span>
+      )}
       </p>
       </div>
-      
       <div className="flex justify-end space-x-2 mt-4">
       <button 
-      onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth)} 
+      onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth.split('-')[1])} 
       className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded text-sm"
       >
       Export Kirchenkreis / Mitfaher:innen
       </button>
       <button 
-      onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth)} 
+      onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth.split('-')[1])} 
       className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded text-sm"
       >
       Export Gemeinde
@@ -734,8 +738,6 @@ function FahrtenListe() {
       </div>
     );
   };
-  
-  {renderAbrechnungsStatus(summary)}
   
   const roundKilometers = (value) => {
     return value % 1 < 0.5 ? Math.floor(value) : Math.ceil(value);
@@ -1099,32 +1101,6 @@ function FahrtenListe() {
   
   return (
     <div className="mb-4">
-    <div className="flex justify-between items-center mb-2">
-    <h2 className="text-lg font-semibold">Fahrten</h2>
-    <div className="flex items-center space-x-2">
-    <select
-    value={new Date(`${selectedMonth}-01`).getMonth().toString()}
-    onChange={handleMonthChange}
-    className="p-1 border rounded text-sm"
-    >
-    {[...Array(12)].map((_, i) => (
-      <option key={i} value={i}>
-      {new Date(0, i).toLocaleString('default', { month: 'long' })}
-      </option>
-    ))}
-    </select>
-    <select
-    value={selectedYear}
-    onChange={handleYearChange}
-    className="p-1 border rounded text-sm"
-    >
-    {[...Array(10)].map((_, i) => {
-      const year = new Date().getFullYear() - 5 + i;
-      return <option key={year} value={year}>{year}</option>;
-    })}
-    </select>
-    </div>
-    </div>
 {renderAbrechnungsStatus(summary)}
     <table className="w-full border-collapse text-left fahrten-table">
     <thead>
