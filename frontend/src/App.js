@@ -68,19 +68,19 @@ function AppProvider({ children }) {
     }
   }, [isLoggedIn]);
   
+  // Nach erfolgreichem Login
   const login = async (username, password) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, { username, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       setToken(token);
+      // Wichtig: Setze den Token als Default Header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setIsLoggedIn(true);
       
-      // Neu: User-Daten laden
-      const userResponse = await axios.get('/api/users/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // User-Daten laden
+      const userResponse = await axios.get('/api/users/me');
       setUser(userResponse.data);
     } catch (error) {
       console.error('Login fehlgeschlagen:', error);

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const User = require('../models/User');  // Wichtig: User-Model importieren
 const { 
     authMiddleware, 
     requireRole, 
@@ -25,10 +26,19 @@ router.post('/set-password', userController.setPassword);
 router.post('/verify-email', userController.verifyEmail);
 
 // Protected routes
-router.get('/me', authMiddleware, requireVerifiedEmail, (req, res) => {
-    // Entferne sensitive Daten
-    const { password, ...user } = req.user;
-    res.json(user);
+router.get('/me', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+        }
+        // Entferne sensitive Daten
+        const { password, ...userData } = user;
+        res.json(userData);
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 module.exports = router;
