@@ -6,16 +6,31 @@ const crypto = require('crypto');
 
 exports.getAllUsers = async (req, res) => {
     try {
-        // Prüfe ob der anfragende User ein Admin ist
+        // Nur Admins dürfen alle Benutzer abrufen
         if (req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
         }
-
-        const users = await User.getAllUsers();
-        res.json(users);
+        
+        // Benutzerinformationen aus der Datenbank abrufen
+        const [rows] = await db.execute(
+            `SELECT 
+                u.id, 
+                u.username, 
+                u.role, 
+                u.email_verified, 
+                p.email, 
+                p.full_name, 
+                p.kirchengemeinde, 
+                p.kirchspiel, 
+                p.kirchenkreis
+                FROM users u
+                LEFT JOIN user_profiles p ON u.id = p.user_id`
+        );
+        
+        res.json(rows);
     } catch (error) {
         console.error('Fehler beim Abrufen der Benutzer:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler' });
+        res.status(500).json({ message: 'Interner Server-Fehler beim Abrufen der Benutzer' });
     }
 };
 
