@@ -678,7 +678,12 @@ function FahrtenListe() {
     return (
       <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
+      <div className="flex items-center space-x-4">
       <h2 className="text-lg font-semibold">Fahrten</h2>
+      <span className="text-lg text-gray-600">
+      {new Date(`${selectedMonth}-01`).toLocaleString('default', { month: 'long' })} {selectedYear}
+      </span>
+      </div>
       <div className="flex items-center space-x-2">
       {selectedMonth !== currentMonth && (
         <button
@@ -704,8 +709,8 @@ function FahrtenListe() {
       onChange={handleYearChange}
       className="p-1 border rounded text-sm"
       >
-      {[...Array(10)].map((_, i) => {
-        const year = new Date().getFullYear() - 5 + i;
+      {[...Array(6)].map((_, i) => {
+        const year = 2024 + i;
         return <option key={year} value={year}>{year}</option>;
       })}
       </select>
@@ -749,13 +754,13 @@ function FahrtenListe() {
       
       <div className="text-xs text-gray-500 space-x-2">
       {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
-        <span>KK eingereicht {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}</span>}
+        <span>Kirchenkreis eingereicht {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}</span>}
       {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-        <span>| KK erhalten {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}</span>}
+        <span>| Kirchenkreis erhalten {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}</span>}
       {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && 
-        <span>| Gem. eingereicht {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}</span>}
+        <span>| Gemeinde eingereicht {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}</span>}
       {summary.abrechnungsStatus?.gemeinde?.erhalten_am && 
-        <span>| Gem. erhalten {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}</span>}
+        <span>| Gemeinde erhalten {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}</span>}
       </div>
       
       <div className="flex justify-end space-x-2 mt-3">
