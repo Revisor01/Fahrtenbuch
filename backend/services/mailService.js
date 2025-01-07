@@ -69,4 +69,4 @@ class MailService {
     }
 }
 
-module.exports = new MailService();w
+module.exports = new MailService();
