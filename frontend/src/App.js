@@ -716,7 +716,7 @@ function FahrtenListe() {
       <div className="flex items-baseline space-x-4">
       <div className="flex items-center space-x-1">
       <p className="text-sm font-medium">
-      KK: <span className={kkReceived ? "text-gray-400" : "font-semibold"}>
+      Kirchenkreis: <span className={kkReceived ? "text-gray-400" : "font-semibold"}>
       {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
       </span>
       <span className="ml-1">{renderStatusIcon(summary.abrechnungsStatus?.kirchenkreis)}</span>
@@ -724,7 +724,7 @@ function FahrtenListe() {
       </div>
       <div className="flex items-center space-x-1">
       <p className="text-sm font-medium">
-      Gem: <span className={gemReceived ? "text-gray-400" : "font-semibold"}>
+      Gemeinde: <span className={gemReceived ? "text-gray-400" : "font-semibold"}>
       {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
       </span>
       <span className="ml-1">{renderStatusIcon(summary.abrechnungsStatus?.gemeinde)}</span>
@@ -737,7 +737,7 @@ function FahrtenListe() {
       </span>
       </p>
       </div>
-      <div className="flex-grow"></div>
+      <div className="flex items-center space-x-1"></div>
       <div className="text-sm font-medium">
       Gesamt: <span className="font-semibold">{currentTotal} €</span>
       {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
