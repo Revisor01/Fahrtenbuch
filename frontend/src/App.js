@@ -665,6 +665,16 @@ function FahrtenListe() {
       Number(summary.mitfahrerErstattung || 0)
     ).toFixed(2);
     
+    const renderStatusIcon = (status) => {
+      if (status?.erhalten_am) {
+        return <span className="text-green-500">✓</span>;
+      }
+      if (status?.eingereicht_am) {
+        return <span className="text-yellow-500">○</span>;
+      }
+      return null;
+    };
+    
     return (
       <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
@@ -701,44 +711,63 @@ function FahrtenListe() {
       </select>
       </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow mb-4">
-      <div className="text-sm mb-2">
-      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
-        `KK eingereicht am ${new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}`}
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-        ` | KK erhalten am ${new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}`}
-      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && 
-        ` | Gem. eingereicht am ${new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}`}
-      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && 
-        ` | Gem. erhalten am ${new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}`}
-      </div>
-      <div className="flex justify-between items-center">
-      <p className="text-sm">
-      KK: <span className={kkReceived ? "text-gray-400" : ""}>
+      <div className="bg-white p-3 rounded-lg shadow mb-4">
+      <div className="mb-3">
+      <div className="flex items-baseline space-x-4">
+      <div className="flex items-center space-x-1">
+      <p className="text-sm font-medium">
+      KK: <span className={kkReceived ? "text-gray-400" : "font-semibold"}>
       {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-      </span> | 
-      Gem: <span className={gemReceived ? "text-gray-400" : ""}>
+      </span>
+      <span className="ml-1">{renderStatusIcon(summary.abrechnungsStatus?.kirchenkreis)}</span>
+      </p>
+      </div>
+      <div className="flex items-center space-x-1">
+      <p className="text-sm font-medium">
+      Gem: <span className={gemReceived ? "text-gray-400" : "font-semibold"}>
       {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
-      </span> | 
-      Mitfahrer: <span className={kkReceived ? "text-gray-400" : ""}>
+      </span>
+      <span className="ml-1">{renderStatusIcon(summary.abrechnungsStatus?.gemeinde)}</span>
+      </p>
+      </div>
+      <div className="flex items-center space-x-1">
+      <p className="text-sm font-medium">
+      Mitfahrer: <span className={kkReceived ? "text-gray-400" : "font-semibold"}>
       {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
-      </span> | 
-      Gesamt: {currentTotal} € 
+      </span>
+      </p>
+      </div>
+      <div className="flex-grow"></div>
+      <div className="text-sm font-medium">
+      Gesamt: <span className="font-semibold">{currentTotal} €</span>
       {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
         <span className="text-gray-400 ml-1">({originalTotal} €)</span>
       )}
-      </p>
       </div>
-      <div className="flex justify-end space-x-2 mt-4">
+      </div>
+      </div>
+      
+      <div className="text-xs text-gray-500 space-x-2">
+      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
+        <span>KK eingereicht {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}</span>}
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+        <span>| KK erhalten {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}</span>}
+      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && 
+        <span>| Gem. eingereicht {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}</span>}
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && 
+        <span>| Gem. erhalten {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}</span>}
+      </div>
+      
+      <div className="flex justify-end space-x-2 mt-3">
       <button 
       onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth.split('-')[1])} 
-      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded text-sm"
+      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm"
       >
       Export Kirchenkreis / Mitfaher:innen
       </button>
       <button 
       onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth.split('-')[1])} 
-      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded text-sm"
+      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm"
       >
       Export Gemeinde
       </button>
