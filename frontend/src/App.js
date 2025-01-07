@@ -640,36 +640,6 @@ function FahrtenListe() {
     setViewingMitfahrer(mitfahrer);
   };
   
-  const getMonthSummary = () => {
-    let kirchenkreisSum = 0;
-    let gemeindeSum = 0;
-    let mitfahrerSum = 0;
-    
-    fahrten.forEach((fahrt) => {
-      if (fahrt.autosplit) {
-        kirchenkreisSum += (fahrt.kirchenkreisKm || 0) * 0.3;
-        gemeindeSum += (fahrt.gemeindeKm || 0) * 0.3;
-        if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
-          mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
-        }
-      } else if (fahrt.abrechnung === 'Kirchenkreis') {
-        kirchenkreisSum += (fahrt.kilometer || 0) * 0.3;
-        if (fahrt.mitfahrer && fahrt.mitfahrer.length > 0) {
-          mitfahrerSum += fahrt.mitfahrer.length * 0.05 * fahrt.kilometer;
-        }
-      } else if (fahrt.abrechnung === 'Gemeinde') {
-        gemeindeSum += (fahrt.kilometer || 0) * 0.3;
-      }
-    });
-    
-    return {
-      kirchenkreis: kirchenkreisSum.toFixed(2),
-      gemeinde: gemeindeSum.toFixed(2),
-      mitfahrer: mitfahrerSum.toFixed(2),
-      gesamt: (kirchenkreisSum + gemeindeSum + mitfahrerSum).toFixed(2)
-    };
-  };
-  
   const resetToCurrentMonth = () => {
     const date = new Date();
     setSelectedYear(date.getFullYear().toString());
@@ -678,26 +648,6 @@ function FahrtenListe() {
   };
   
   const renderAbrechnungsStatus = (summary) => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth().toString();
-    const currentYear = currentDate.getFullYear().toString();
-    const isCurrentMonth = selectedMonth === `${currentYear}-${(parseInt(currentMonth) + 1).toString().padStart(2, '0')}`;
-    
-    const kkReceived = summary.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-    const gemReceived = summary.abrechnungsStatus?.gemeinde?.erhalten_am;
-    
-    const currentTotal = (
-      (!kkReceived ? Number(summary.kirchenkreis || 0) : 0) +
-      (!gemReceived ? Number(summary.gemeinde || 0) : 0) +
-      (!kkReceived ? Number(summary.mitfahrer || 0) : 0)
-    ).toFixed(2);
-    
-    const originalTotal = (
-      Number(summary.kirchenkreis || 0) +
-      Number(summary.gemeinde || 0) +
-      Number(summary.mitfahrer || 0)
-    ).toFixed(2);
-    
     return (
       <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
@@ -749,13 +699,20 @@ function FahrtenListe() {
       
       <div className="flex justify-between items-center">
       <p className="text-sm">
-      KK: <span className={kkReceived ? "text-gray-400" : ""}>{Number(summary.kirchenkreis || 0).toFixed(2)} €</span> | 
-      Gem: <span className={gemReceived ? "text-gray-400" : ""}>{Number(summary.gemeinde || 0).toFixed(2)} €</span> | 
-      Mitfahrer: <span className={kkReceived ? "text-gray-400" : ""}>{Number(summary.mitfahrer || 0).toFixed(2)} €</span> | 
-      Gesamt: {currentTotal} € 
-      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
-        <span className="text-gray-400 ml-1">({originalTotal} €)</span>
-      )}
+      KK: <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
+      </span> | 
+      Gem: <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : ""}>
+      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
+      </span> | 
+      Mitfahrer: <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
+      </span> | 
+      Gesamt: {summary.currentTotal} € 
+      {(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || summary.abrechnungsStatus?.gemeinde?.erhalten_am) && 
+        summary.currentTotal !== summary.originalTotal && (
+          <span className="text-gray-400 ml-1">({summary.originalTotal} €)</span>
+        )}
       </p>
       </div>
       
@@ -778,7 +735,7 @@ function FahrtenListe() {
     );
   };
   
-  const summary = getMonthSummary();
+  {renderAbrechnungsStatus(summary)}
   
   const roundKilometers = (value) => {
     return value % 1 < 0.5 ? Math.floor(value) : Math.ceil(value);
