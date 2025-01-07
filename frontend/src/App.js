@@ -27,6 +27,7 @@ function AppProvider({ children }) {
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
+  const [summary, setSummary] = useState({});
   
   const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
     setNotification({ isOpen: true, title, message, onConfirm, showCancel });
@@ -282,7 +283,7 @@ function AppProvider({ children }) {
     <AppContext.Provider value={{ 
       isLoggedIn, login, logout, token, updateFahrt, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
-      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData,
+      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
       setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification
     }}>
     {children}
@@ -455,7 +456,7 @@ function DistanzForm() {
 }
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification  } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -464,7 +465,6 @@ function FahrtenListe() {
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
-  const [summary, setSummary] = useState({});
   
   useEffect(() => {
     fetchFahrten();
@@ -650,6 +650,21 @@ function FahrtenListe() {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
     
+    const kkReceived = summary.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+    const gemReceived = summary.abrechnungsStatus?.gemeinde?.erhalten_am;
+    
+    const currentTotal = (
+      (!kkReceived ? Number(summary.kirchenkreisErstattung || 0) : 0) +
+      (!gemReceived ? Number(summary.gemeindeErstattung || 0) : 0) +
+      (!kkReceived ? Number(summary.mitfahrerErstattung || 0) : 0)
+    ).toFixed(2);
+    
+    const originalTotal = (
+      Number(summary.kirchenkreisErstattung || 0) +
+      Number(summary.gemeindeErstattung || 0) +
+      Number(summary.mitfahrerErstattung || 0)
+    ).toFixed(2);
+    
     return (
       <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
@@ -699,24 +714,18 @@ function FahrtenListe() {
       </div>
       <div className="flex justify-between items-center">
       <p className="text-sm">
-      KK: <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      KK: <span className={kkReceived ? "text-gray-400" : ""}>
       {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
       </span> | 
-      Gem: <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : ""}>
+      Gem: <span className={gemReceived ? "text-gray-400" : ""}>
       {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
       </span> | 
-      Mitfahrer: <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}>
+      Mitfahrer: <span className={kkReceived ? "text-gray-400" : ""}>
       {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
       </span> | 
-      Gesamt: {Number(!summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? summary.kirchenkreisErstattung : 0 || 0 
-        + !summary.abrechnungsStatus?.gemeinde?.erhalten_am ? summary.gemeindeErstattung : 0 || 0
-        + !summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? summary.mitfahrerErstattung : 0 || 0).toFixed(2)} € 
-      {(summary.abrechnungsStatus?.kirchenkreis?.erhalten_am || summary.abrechnungsStatus?.gemeinde?.erhalten_am) && (
-        <span className="text-gray-400 ml-1">
-        ({Number(summary.kirchenkreisErstattung || 0 
-          + summary.gemeindeErstattung || 0
-          + summary.mitfahrerErstattung || 0).toFixed(2)} €)
-        </span>
+      Gesamt: {currentTotal} € 
+      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
+        <span className="text-gray-400 ml-1">({originalTotal} €)</span>
       )}
       </p>
       </div>
