@@ -10,6 +10,7 @@ import Modal from './Modal';
 import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
+import UserManagement from './UserManagement';
 
 const API_BASE_URL = '/api';
 
@@ -18,6 +19,7 @@ export const AppContext = createContext();
 function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [user, setUser] = useState(null);
   const [orte, setOrte] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [distanzen, setDistanzen] = useState([]);
@@ -72,7 +74,14 @@ function AppProvider({ children }) {
       const { token } = response.data;
       localStorage.setItem('token', token);
       setToken(token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setIsLoggedIn(true);
+      
+      // Neu: User-Daten laden
+      const userResponse = await axios.get('/api/users/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(userResponse.data);
     } catch (error) {
       console.error('Login fehlgeschlagen:', error);
       throw error;
@@ -83,7 +92,7 @@ function AppProvider({ children }) {
     localStorage.removeItem('token');
     setToken(null);
     setIsLoggedIn(false);
-    delete axios.defaults.headers.common['Authorization'];
+    setUser(null);  // Neu: User-Daten löschen
   };
   
   const fetchOrte = async () => {
@@ -281,7 +290,7 @@ function AppProvider({ children }) {
   
   return (
     <AppContext.Provider value={{ 
-      isLoggedIn, login, logout, token, updateFahrt, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
+      isLoggedIn, login, logout, token, updateFahrt, user, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
       setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification
@@ -1894,6 +1903,7 @@ function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AppContext);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1909,6 +1919,7 @@ function LoginPage() {
     <div className="px-4 sm:px-8 py-6 mt-4 text-left bg-white shadow-lg w-full max-w-md">
     <h3 className="text-2xl font-bold text-center">Fahrtenbuch</h3>
     <form onSubmit={handleSubmit}>
+    {/* Bestehende Login-Felder */}
     <div className="mt-4">
     <div>
     <label className="block" htmlFor="username">Benutzername</label>
@@ -1932,13 +1943,97 @@ function LoginPage() {
     required
     />
     </div>
-    <div className="flex items-baseline justify-between">
-    <button type="submit" className="w-full px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900">Login</button>
+    <div className="flex flex-col items-baseline justify-between">
+    <button 
+    type="submit" 
+    className="w-full px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900"
+    >
+    Login
+    </button>
+    <button
+    type="button"
+    onClick={() => setShowForgotPassword(true)}
+    className="w-full text-center mt-4 text-blue-500 hover:text-blue-700"
+    >
+    Passwort vergessen?
+    </button>
     </div>
     </div>
     </form>
     </div>
+    
+    {/* Passwort vergessen Modal */}
+    <Modal
+    isOpen={showForgotPassword}
+    onClose={() => setShowForgotPassword(false)}
+    title="Passwort zurücksetzen"
+    >
+    <ForgotPasswordForm onClose={() => setShowForgotPassword(false)} />
+    </Modal>
     </div>
+  );
+}
+
+function ForgotPasswordForm({ onClose }) {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState(null);
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/api/users/reset-password', { email });
+      setStatus({
+        type: 'success',
+        message: 'Wenn ein Account mit dieser E-Mail existiert, wurden Anweisungen zum Zurücksetzen des Passworts versendet.'
+      });
+      setTimeout(onClose, 3000);
+    } catch (error) {
+      setStatus({
+        type: 'error',
+        message: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
+      });
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+    <div>
+    <label className="block text-sm font-medium text-gray-700">
+    E-Mail-Adresse
+    </label>
+    <input
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+    required
+    />
+    </div>
+    
+    {status && (
+      <div className={`p-4 rounded ${
+        status.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+      }`}>
+      {status.message}
+      </div>
+    )}
+    
+    <div className="flex justify-end space-x-2">
+    <button
+    type="button"
+    onClick={onClose}
+    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+    >
+    Abbrechen
+    </button>
+    <button
+    type="submit"
+    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+    Anweisungen senden
+    </button>
+    </div>
+    </form>
   );
 }
 
@@ -1955,9 +2050,10 @@ function App() {
 }
 
 function AppContent() {
-  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen } = useContext(AppContext);
+  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
   const [showOrteModal, setShowOrteModal] = useState(false);
   const [showDistanzenModal, setShowDistanzenModal] = useState(false);
+  const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -1986,6 +2082,14 @@ function AppContent() {
     <div className="flex flex-col-mobile justify-between items-center mb-8">
     <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
     <div className="flex space-x-2">
+    {user?.role === 'admin' && (
+      <button
+      onClick={() => setShowUserManagementModal(true)}
+      className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+      >
+      Benutzerverwaltung
+      </button>
+    )}
     <button
     onClick={() => setShowOrteModal(true)}
     className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
@@ -2021,6 +2125,15 @@ function AppContent() {
     <MonthlyOverview />
     
     <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+    
+    <Modal 
+    isOpen={showUserManagementModal} 
+    onClose={() => setShowUserManagementModal(false)}
+    title="Benutzerverwaltung"
+    wide={true}
+    >
+    <UserManagement />
+    </Modal>
     
     <Modal isOpen={showOrteModal} onClose={() => setShowOrteModal(false)} title="Orte" wide={true}>
     <OrtForm />

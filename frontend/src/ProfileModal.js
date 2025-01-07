@@ -4,7 +4,7 @@ import { AppContext } from './App';
 import Modal from './Modal';
 
 function ProfileModal({ isOpen, onClose }) {
-  const { token } = useContext(AppContext);
+  const { token, user } = useContext(AppContext);
   const [profile, setProfile] = useState({});
   const [originalProfile, setOriginalProfile] = useState({});
   const [newPassword, setNewPassword] = useState('');
@@ -101,6 +101,23 @@ function ProfileModal({ isOpen, onClose }) {
     setShowMessage(true);
   };
   
+  const handleResendVerification = async () => {
+    try {
+      await axios.post('/api/users/resend-verification', {
+        email: profile.email
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      showSuccessMessage('Verifizierungs-E-Mail wurde erneut gesendet.');
+    } catch (error) {
+      console.error('Fehler beim Senden der Verifizierungs-E-Mail:', error);
+      showErrorMessage(
+        error.response?.data?.message || 
+        'Fehler beim Senden der Verifizierungs-E-Mail.'
+      );
+    }
+  };
+  
   const MessageOverlay = ({ message, onClose }) => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
     <div className="bg-white p-6 rounded-lg relative" onClick={e => e.stopPropagation()}>
@@ -119,13 +136,35 @@ function ProfileModal({ isOpen, onClose }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Profil" wide={false}>
     <div className="max-w-md mx-auto">
     <form onSubmit={handleProfileUpdate}>
+    <div className="relative">
     <input
     type="email"
     placeholder="E-Mail"
     value={profile.email || ''}
     onChange={(e) => setProfile({...profile, email: e.target.value})}
-    className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
+    className={`mt-2 px-3 py-2 bg-white border shadow-sm ${
+      profile.email_verified 
+      ? 'border-green-300' 
+      : 'border-yellow-300'
+      } placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1`}
     />
+    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+    {profile.email_verified ? (
+      <span className="text-green-500 text-sm">✓ Verifiziert</span>
+    ) : (
+      <>
+      <span className="text-yellow-500 text-sm">Nicht verifiziert</span>
+      <button
+      type="button"
+      onClick={handleResendVerification}
+      className="text-blue-500 hover:text-blue-700 text-sm"
+      >
+      Erneut senden
+      </button>
+      </>
+    )}
+    </div>
+    </div>
     <input
     type="text"
     placeholder="Voller Name"
