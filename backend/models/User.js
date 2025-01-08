@@ -50,15 +50,23 @@ class User {
     
     static async findById(id) {
         const [rows] = await db.execute(
-            'SELECT id, username, email, role, email_verified FROM users WHERE id = ?',
+            `SELECT u.id, u.username, u.role, u.email_verified, 
+                p.email, p.full_name, p.iban, 
+                p.kirchengemeinde, p.kirchspiel, p.kirchenkreis
+        FROM users u
+        LEFT JOIN user_profiles p ON u.id = p.user_id
+        WHERE u.id = ?`,
             [id]
         );
         return rows[0];
     }
 
     static async findByEmail(email) {
-        const [rows] = await db.execute(
-            'SELECT * FROM users WHERE email = ?',
+        const [rows] = await db.execute(`
+        SELECT u.*, p.email 
+        FROM users u
+        JOIN user_profiles p ON u.id = p.user_id
+        WHERE p.email = ?`,
             [email]
         );
         return rows[0];
