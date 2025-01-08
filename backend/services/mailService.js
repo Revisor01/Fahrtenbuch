@@ -53,7 +53,7 @@ class MailService {
 
     async sendPasswordReset(email, username, token) {
         try {
-            const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+            const resetLink = `${process.env.FRONTEND_URL}/set-password?token=${token}`;
             
             console.log('Sending password reset email with data:', {
                 email,
