@@ -13,7 +13,6 @@ import AbrechnungsStatusModal from './AbrechnungsStatusModal';
 import UserManagement from './UserManagement';
 import VerifyEmail from './VerifyEmail';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import VerifyEmail from './VerifyEmail';
 import ResetPassword from './ResetPassword';
 import SetPassword from './SetPassword';
 
