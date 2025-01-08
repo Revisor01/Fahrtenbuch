@@ -2144,9 +2144,6 @@ function AppContent() {
     </div>
     <FahrtenbuchHilfe />
     </div>
-    
-    <FahrtenbuchHilfe />
-    </div>
     <div className="grid grid-cols-1 gap-4 mb-8">
     <FahrtForm />
     </div>
