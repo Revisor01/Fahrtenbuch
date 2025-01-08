@@ -308,7 +308,7 @@ function AppProvider({ children }) {
   
   return (
     <AppContext.Provider value={{ 
-      isLoggedIn, login, logout, token, updateFahrt, user, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
+      isLoggedIn, login, logout, token, updateFahrt, user, setUser, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
       setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification
