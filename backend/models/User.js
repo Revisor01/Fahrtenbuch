@@ -8,7 +8,7 @@ class User {
             username, 
             email, 
             role = 'user',
-            fullName = null,
+            fullName,
             iban = null,
             kirchengemeinde = null,
             kirchspiel = null,
@@ -35,7 +35,7 @@ class User {
             // Profil erstellen
             await connection.execute(
                 'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [userId, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
+                [userId, email, fullName || null, iban, kirchengemeinde, kirchspiel, kirchenkreis]
             );
             
             await connection.commit();

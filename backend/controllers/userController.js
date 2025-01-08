@@ -312,7 +312,17 @@ exports.resetPassword = async (req, res) => {
 exports.setPassword = async (req, res) => {
     try {
         const { token, newPassword } = req.body;
-        const user = await User.findByEmail(req.body.email);
+        
+        // Find User by token
+        const [rows] = await db.execute(
+            'SELECT id FROM users WHERE verification_token = ?',
+            [token]
+        );
+        
+        if (rows.length === 0) {
+            return res.status(400).json({ message: 'Ungültiger oder abgelaufener Token' });
+        }
+        const user = rows[0];
         const success = await User.setPassword(user.id, newPassword);
         
         if (!success) {
