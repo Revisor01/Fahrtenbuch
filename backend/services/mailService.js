@@ -50,22 +50,27 @@ class MailService {
     }
 
     async sendPasswordReset(email, username, token) {
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-        
-        await this.transporter.sendMail({
-            from: process.env.MAIL_FROM,
-            to: email,
-            subject: 'Passwort zurücksetzen',
-            html: `
-                <h1>Passwort zurücksetzen</h1>
-                <p>Hallo ${username},</p>
-                <p>Sie haben angefordert, Ihr Passwort zurückzusetzen. Klicken Sie auf den folgenden Link:</p>
-                <p><a href="${resetLink}">Passwort zurücksetzen</a></p>
-                <p>Dieser Link ist 24 Stunden gültig.</p>
-                <p>Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.</p>
-                <p>Mit freundlichen Grüßen<br>Ihr Fahrtenbuch-Team</p>
-            `
-        });
+        try {
+            const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+            
+            await this.transporter.sendMail({
+                from: process.env.MAIL_FROM,
+                to: email,
+                subject: 'Passwort zurücksetzen',
+                html: `
+                    <h1>Passwort zurücksetzen</h1>
+                    <p>Hallo ${username},</p>
+                    <p>Sie haben angefordert, Ihr Passwort zurückzusetzen. Klicken Sie auf den folgenden Link:</p>
+                    <p><a href="${resetLink}">Passwort zurücksetzen</a></p>
+                    <p>Dieser Link ist 24 Stunden gültig.</p>
+                    <p>Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.</p>
+                    <p>Mit freundlichen Grüßen<br>Ihr Fahrtenbuch-Team</p>
+                `
+            });
+        } catch (error) {
+            console.error('Fehler beim senden des Passwort Reset Links:', error);
+            throw error;
+        }
     }
 }
 
