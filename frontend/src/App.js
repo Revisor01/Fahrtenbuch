@@ -2156,17 +2156,28 @@ function AppContent() {
     isOpen={showUserManagementModal} 
     onClose={() => setShowUserManagementModal(false)}
     title="Benutzerverwaltung"
-    wide={true}
+    size="wide"
     >
     <UserManagement />
     </Modal>
     
-    <Modal isOpen={showOrteModal} onClose={() => setShowOrteModal(false)} title="Orte" wide={true}>
+    <Modal 
+    isOpen={showOrteModal} 
+    onClose={() => setShowOrteModal(false)} 
+    title="Orte" 
+    size="wide"
+    >
     <OrtForm />
     <OrteListe />
     </Modal>
     
-    <Modal isOpen={showDistanzenModal} onClose={() => setShowDistanzenModal(false)} title="Distanzen" wide={true}>
+    // Für Distanzen
+    <Modal 
+    isOpen={showDistanzenModal} 
+    onClose={() => setShowDistanzenModal(false)} 
+    title="Distanzen" 
+    size="wide"
+    >
     <DistanzForm />
     <DistanzenListe />
     </Modal>
