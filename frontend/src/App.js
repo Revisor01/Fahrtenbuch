@@ -2223,7 +2223,6 @@ function AppContent() {
     <OrteListe />
     </Modal>
     
-    // Für Distanzen
     <Modal 
     isOpen={showDistanzenModal} 
     onClose={() => setShowDistanzenModal(false)} 
