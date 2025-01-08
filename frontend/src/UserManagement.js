@@ -33,102 +33,78 @@ import Modal from './Modal';
     return (
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                        E-Mail <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={inputClasses}
-                        placeholder="user@example.com"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Benutzername <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Rolle</label>
-                    <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                        <option value="user">Benutzer</option>
-                        <option value="admin">Administrator</option>
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Voller Name</label>
-                    <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">IBAN</label>
-                    <input
-                        type="text"
-                        name="iban"
-                        value={formData.iban}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Kirchengemeinde</label>
-                    <input
-                        type="text"
-                        name="kirchengemeinde"
-                        value={formData.kirchengemeinde}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Kirchspiel</label>
-                    <input
-                        type="text"
-                        name="kirchspiel"
-                        value={formData.kirchspiel}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Kirchenkreis</label>
-                    <input
-                        type="text"
-                        name="kirchenkreis"
-                        value={formData.kirchenkreis}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={inputClasses}
+                    placeholder="E-Mail *"
+                    required
+                />
+                <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className={inputClasses}
+                    placeholder="Benutzername *"
+                    required
+                />
+                <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    className={inputClasses}
+                >
+                    <option value="user">Benutzer</option>
+                    <option value="admin">Administrator</option>
+                </select>
+                <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className={inputClasses}
+                    placeholder="Voller Name"
+                />
+                <input
+                    type="text"
+                    name="iban"
+                    value={formData.iban}
+                    onChange={handleChange}
+                    className={inputClasses}
+                    placeholder="IBAN"
+                />
+                <input
+                    type="text"
+                    name="kirchengemeinde"
+                    value={formData.kirchengemeinde}
+                    onChange={handleChange}
+                    className={inputClasses}
+                    placeholder="Kirchengemeinde"
+                />
+                <input
+                    type="text"
+                    name="kirchspiel"
+                    value={formData.kirchspiel}
+                    onChange={handleChange}
+                    className={inputClasses}
+                    placeholder="Kirchspiel"
+                />
+                <input
+                    type="text"
+                    name="kirchenkreis"
+                    value={formData.kirchenkreis}
+                    onChange={handleChange}
+                    className={inputClasses}
+                    placeholder="Kirchenkreis"
                 </div>
             </div>
             <div className="mt-6">
                 <button
                     type="submit"
-                    className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-200"
+                    className="w-full bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200 transition duration-200"
                 >
                     {isEdit ? 'Aktualisieren' : 'Erstellen'}
                 </button>
