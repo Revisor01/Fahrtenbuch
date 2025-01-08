@@ -445,13 +445,15 @@ function DistanzForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
-    <div>
-    <h2 className="text-lg font-semibold mb-2">Neue Distanz hinzufügen</h2>
-    <form onSubmit={handleSubmit} className="flex items-center bg-gray-100 p-4 rounded-lg">
+    <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-sm">
+    <div className="p-4">
+    <h2 className="text-lg font-semibold text-gray-800 mb-4">Neue Distanz hinzufügen</h2>
+    <form onSubmit={handleSubmit} className="flex items-center gap-3">
     <select
     value={vonOrtId}
     onChange={(e) => setVonOrtId(e.target.value)}
-    className="w-1/3 p-2 border rounded mr-2 text-sm"
+    className="w-1/3 p-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
     required
     >
     <option value="">Von Ort auswählen</option>
@@ -460,7 +462,7 @@ function DistanzForm() {
     <select
     value={nachOrtId}
     onChange={(e) => setNachOrtId(e.target.value)}
-    className="w-1/3 p-2 border rounded mr-2 text-sm"
+    className="w-1/3 p-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
     required
     >
     <option value="">Nach Ort auswählen</option>
@@ -471,13 +473,17 @@ function DistanzForm() {
     value={distanz}
     onChange={(e) => setDistanz(e.target.value)}
     placeholder="Distanz in km"
-    className="w-32 p-2 border rounded mr-2 text-sm"
+    className="w-32 p-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
     required
     />
-    <button type="submit" className="bg-blue-500 text-white px-4 py-2 text-sm rounded ml-auto">
+    <button 
+    type="submit" 
+    className="bg-blue-100 text-blue-700 px-4 py-2 rounded hover:bg-blue-200 transition-colors duration-200 text-sm ml-auto"
+    >
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
+    </div>
     </div>
   );
 }
@@ -1867,104 +1873,72 @@ function DistanzenListe() {
   };
   
   return (
-    <div className="mb-4">
-    <h2 className="text-xl font-semibold text-gray-800 mb-4 cursor-pointer" 
-    onClick={() => setIsCollapsed(!isCollapsed)}
-    >
-    Distanzen {isCollapsed ? '▼' : '▲'}
-    </h2>
-    
-    {!isCollapsed && (
-      <div className="bg-white rounded-lg shadow-sm w-full">
-      <div className="overflow-x-auto w-full">
-      <table className="w-full">
-      <thead className="sm:table-header-group hidden">
-      <tr className="bg-gray-50 border-b">
-      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" 
-      onClick={() => requestSort('von_ort_id')}
-      >
-      Von
-      </th>
-      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-      onClick={() => requestSort('nach_ort_id')}
-      >
-      Nach
-      </th>
-      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-      onClick={() => requestSort('distanz')}
-      >
-      Distanz (km)
-      </th>
-      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-      Aktionen
-      </th>
+    <div className="bg-white rounded-lg shadow-sm">
+    <div className="p-4">
+    <div className="overflow-x-auto">
+    <table className="w-full">
+    <thead>
+    <tr className="border-b">
+    <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Von</th>
+    <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nach</th>
+    <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Distanz</th>
+    <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th>
+    </tr>
+    </thead>
+    <tbody className="divide-y divide-gray-200">
+    {sortedDistanzen.map((distanz) => (
+      <tr key={distanz.id} className="hover:bg-gray-50">
+      <td className="px-4 py-3 text-sm text-gray-900">{getOrtName(distanz.von_ort_id)}</td>
+      <td className="px-4 py-3 text-sm text-gray-900">{getOrtName(distanz.nach_ort_id)}</td>
+      <td className="px-4 py-3 text-sm text-gray-900">
+      {editingDistanz?.id === distanz.id ? (
+        <input
+        type="number"
+        value={editingDistanz.distanz}
+        onChange={(e) => setEditingDistanz({ 
+          ...editingDistanz, 
+          distanz: parseInt(e.target.value) 
+        })}
+        className="w-24 p-1 border rounded text-sm"
+        />
+      ) : (
+        `${distanz.distanz} km`
+      )}
+      </td>
+      <td className="px-4 py-3 text-sm text-right space-x-1">
+      {editingDistanz?.id === distanz.id ? (
+        <button
+        onClick={handleSave}
+        className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200"
+        >
+        ✓
+        </button>
+      ) : (
+        <>
+        <button
+        onClick={() => handleEdit(distanz)}
+        className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200"
+        title="Bearbeiten"
+        >
+        ✎
+        </button>
+        <button
+        onClick={() => handleDelete(distanz.id)}
+        className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200"
+        title="Löschen"
+        >
+        ×
+        </button>
+        </>
+      )}
+      </td>
       </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-200">
-      {sortedDistanzen.map((distanz) => (
-        <tr key={distanz.id} className="hover:bg-gray-50">
-        <td className="px-4 py-3 text-sm text-gray-900">
-        <div className="flex flex-col">
-        <span>{getOrtName(distanz.von_ort_id)}</span>
-        <span className="text-xs text-gray-500 sm:hidden">
-        → {getOrtName(distanz.nach_ort_id)}
-        </span>
-        </div>
-        </td>
-        <td className="px-4 py-3 text-sm text-gray-900 hidden sm:table-cell">
-        {getOrtName(distanz.nach_ort_id)}
-        </td>
-        <td className="px-4 py-3 text-sm text-gray-900">
-        {editingDistanz?.id === distanz.id ? (
-          <input
-          type="number"
-          value={editingDistanz.distanz}
-          onChange={(e) => setEditingDistanz({ 
-            ...editingDistanz, 
-            distanz: parseInt(e.target.value) 
-          })}
-          className="w-24 p-1 border rounded text-sm"
-          />
-        ) : (
-          `${distanz.distanz} km`
-        )}
-        </td>
-        <td className="px-4 py-3 text-sm">
-        <div className="flex sm:flex-row flex-col gap-2 justify-end">
-        {editingDistanz?.id === distanz.id ? (
-          <button
-          onClick={handleSave}
-          className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 w-full sm:w-auto text-center"
-          >
-          ✓
-          </button>
-        ) : (
-          <>
-          <button
-          onClick={() => handleEdit(distanz)}
-          className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 w-full sm:w-auto text-center"
-          title="Bearbeiten"
-          >
-          ✎
-          </button>
-          <button
-          onClick={() => handleDelete(distanz.id)}
-          className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 w-full sm:w-auto text-center"
-          title="Löschen"
-          >
-          ×
-          </button>
-          </>
-        )}
-        </div>
-        </td>
-        </tr>
-      ))}
-      </tbody>
-      </table>
-      </div>
-      </div>
-    )}
+    ))}
+    </tbody>
+    </table>
+    </div>
+    </div>
+    </div>
     </div>
   );
 }
