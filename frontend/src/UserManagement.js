@@ -190,8 +190,11 @@ export default function UserManagement() {
    };
 
    const openEditModal = (user) => {
-       setSelectedUser(user);
-       setIsEditModalOpen(true);
+      setSelectedUser({
+         ...user,
+         fullName: user.full_name
+      });
+      setIsEditModalOpen(true);
    };
 
    return (
