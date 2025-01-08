@@ -22,22 +22,22 @@ function ProfileModal({ isOpen, onClose }) {
     }, [isOpen]);
 
     const fetchProfile = async () => {
-        try {
-            const response = await axios.get('/api/profile', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const profileData = {
-                ...response.data,
-                fullName: response.data.full_name
-            };
-
-            setProfile(profileData);
-            setOriginalProfile(profileData);
-            setUser({ ...user, email_verified: profileData.email_verified });
-        } catch (error) {
-            console.error('Fehler beim Abrufen des Profils:', error);
-            showErrorMessage('Fehler beim Abrufen des Profils.');
-        }
+      try {
+        const response = await axios.get('/api/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // Hier das full_name korrekt zuweisen
+        const profileData = {
+          ...response.data,
+          fullName: response.data.full_name
+        };
+        setProfile(profileData);
+        setOriginalProfile(profileData);
+        setUser({ ...user, email_verified: profileData.email_verified });
+      } catch (error) {
+        console.error('Fehler beim Abrufen des Profils:', error);
+        showErrorMessage('Fehler beim Abrufen des Profils.');
+      }
     };
 
     const handleProfileUpdate = async (e) => {
@@ -50,12 +50,13 @@ function ProfileModal({ isOpen, onClose }) {
             delete cleanProfile.dienstort_adresse;
             delete cleanProfile.username;
             
-            // Hier werden die Daten jetzt konsistent an /api/profile gesendet
             const response = await axios.put('/api/profile', cleanProfile, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setMessage(response.data.message);
-            setShowMessage(true);
+             setMessage(response.data.message);
+             setShowMessage(true);
+            // Profil neu laden nach dem Update
+             fetchProfile();
         } catch (error) {
             console.error('Fehler beim Aktualisieren des Profils:', error);
             setMessage(error.response?.data?.message || 'Fehler beim Aktualisieren des Profils.');
@@ -139,35 +140,36 @@ function ProfileModal({ isOpen, onClose }) {
         <Modal isOpen={isOpen} onClose={onClose} title="Profil" wide={false}>
             <div className="max-w-md mx-auto">
                 <form onSubmit={handleProfileUpdate}>
-                    <div className="relative">
-                        <input
-                            type="email"
-                            placeholder="E-Mail"
-                            value={profile.email || ''}
-                            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                            className={`mt-2 px-3 py-2 bg-white border shadow-sm ${profile.email_verified
-                                ? 'border-green-300'
-                                : 'border-yellow-300'
-                                } placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1`}
-                        />
-                         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                            {profile.email_verified ? (
-                                <span className="text-green-500 text-sm">✓ Verifiziert</span>
-                            ) : (
-                                <>
-                                    <span className="text-yellow-500 text-sm">Nicht verifiziert</span>
-                                    <button
-                                        type="button"
-                                        onClick={handleResendVerification}
-                                        className="text-blue-500 hover:text-blue-700 text-sm"
-                                    >
-                                        Erneut senden
-                                    </button>
-                                </>
-                            )}
+                   <div className="relative">
+                      <input
+                        type="email"
+                        placeholder="E-Mail"
+                        value={profile.email || ''}
+                        onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                        className={`mt-2 px-3 py-2 bg-white border shadow-sm ${
+                          profile.email_verified 
+                          ? 'border-green-300' 
+                          : 'border-yellow-300'
+                        } placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1`}
+                      />
+                       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                          {profile.email_verified ? (
+                              <span className="text-green-500 text-sm">✓ Verifiziert</span>
+                          ) : (
+                            <>
+                              <span className="text-yellow-500 text-sm">Nicht verifiziert</span>
+                              <button
+                                type="button"
+                                onClick={handleResendVerification}
+                                className="text-blue-500 hover:text-blue-700 text-sm"
+                              >
+                                Erneut senden
+                              </button>
+                             </>
+                          )}
                         </div>
-                    </div>
-                    <input
+                      </div>
+                     <input
                         type="text"
                         placeholder="Voller Name"
                         value={profile.fullName || ''}
@@ -230,25 +232,25 @@ function ProfileModal({ isOpen, onClose }) {
                 </form>
             </div>
             <div className="mt-4 text-center">
-              {profile.wohnort && (
-                  <p className="text-sm text-gray-500">Heimatort: {profile.wohnort_adresse}</p>
-              )}
-                {!profile.wohnort && (
-                  <p className="text-sm text-red-500">Bitte Heimatort festlegen</p>
-              )}
-              {profile.dienstort && (
-                  <p className="text-sm text-gray-500">Dienstort: {profile.dienstort_adresse}</p>
-              )}
-              {!profile.dienstort && (
-                  <p className="text-sm text-red-500">Bitte Dienstort festlegen</p>
-              )}
+                {profile.wohnort && (
+                    <p className="text-sm text-gray-500">Heimatort: {profile.wohnort_adresse}</p>
+                )}
+                  {!profile.wohnort && (
+                      <p className="text-sm text-red-500">Bitte Heimatort festlegen</p>
+                  )}
+                  {profile.dienstort && (
+                    <p className="text-sm text-gray-500">Dienstort: {profile.dienstort_adresse}</p>
+                  )}
+                   {!profile.dienstort && (
+                    <p className="text-sm text-red-500">Bitte Dienstort festlegen</p>
+                  )}
             </div>
-            {showMessage && (
+             {showMessage && (
                 <MessageOverlay
                     message={message}
                     onClose={() => setShowMessage(false)}
                 />
-            )}
+              )}
         </Modal>
     );
 }
