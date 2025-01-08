@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
+    "@heroicons/react": "^2.1.1",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "autoprefixer": "^10.4.20",
@@ -17,6 +18,9 @@
     "react-scripts": "5.0.1",
     "tailwindcss": "^3.4.12",
     "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.23.7"
   },
   "scripts": {
     "start": "PORT=9642 react-scripts start",
