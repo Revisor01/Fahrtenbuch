@@ -3,18 +3,29 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
-  console.log('Login attempt:', { username });
+  const { username, password, email } = req.body;
+  console.log('Login attempt:', { username, email });
+  
+  if (!username && !email) {
+    return res.status(400).json({ message: 'Benutzername oder E-Mail erforderlich' });
+  }
   
   try {
-    const [users] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
+    // Suche den User anhand des Usernamens oder der E-Mail
+    const [rows] = await db.execute(
+        `SELECT u.*, p.email
+         FROM users u
+         LEFT JOIN user_profiles p ON u.id = p.user_id
+         WHERE u.username = ? OR p.email = ?`,
+      [username, email]
+    );
     
-    if (users.length === 0) {
+    if (rows.length === 0) {
       console.log('User not found');
       return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
     }
     
-    const user = users[0];
+    const user = rows[0];
     
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('Password match:', isMatch);
@@ -25,7 +36,7 @@ exports.login = async (req, res) => {
     }
     
     const token = jwt.sign(
-      { id: user.id, username: user.username },
+      { id: user.id, role: user.role }, // username entfernt und role hinzugefügt
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -38,7 +49,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// Optional: Registrierungsfunktion
+// Optional: Registrierungsfunktion (bleibt unverändert)
 exports.register = async (req, res) => {
   const { username, password } = req.body;
 

@@ -62,15 +62,17 @@ class User {
     }
 
     static async findByEmail(email) {
+        // Hier wird der JOIN angepasst, damit die E-Mail aus `user_profiles` geholt wird
         const [rows] = await db.execute(`
-        SELECT u.*, p.email 
-        FROM users u
-        JOIN user_profiles p ON u.id = p.user_id
-        WHERE p.email = ?`,
+            SELECT u.*, p.email
+            FROM users u
+            JOIN user_profiles p ON u.id = p.user_id
+            WHERE p.email = ?`,
             [email]
         );
         return rows[0];
     }
+    
 
     static async updateProfile(id, userData) {
         const { username, email, full_name } = userData;
@@ -97,12 +99,12 @@ class User {
             
             const verification = rows[0];
             
-            // Update email in user_profiles statt users
+           // Update email in user_profiles statt users
             await connection.execute(
                 'UPDATE user_profiles SET email = ? WHERE user_id = ?',
                 [verification.new_email, verification.user_id]
             );
-            
+             // Update user email verified in users tabelle
             await connection.execute(
                 'UPDATE users SET email_verified = TRUE WHERE id = ?',
                 [verification.user_id]
@@ -122,7 +124,8 @@ class User {
             connection.release();
         }
     }
-    static async initiatePasswordReset(email) {
+
+  static async initiatePasswordReset(email) {
         console.log('User.initiatePasswordReset called with email:', email);
         
         try {
@@ -186,7 +189,7 @@ class User {
         return result.affectedRows > 0;
     }
 
-    static async delete(id) {
+  static async delete(id) {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();

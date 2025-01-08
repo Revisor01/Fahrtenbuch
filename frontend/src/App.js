@@ -1922,6 +1922,7 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const { login } = useContext(AppContext);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [loginMode, setLoginMode] = useState('username'); // 'username' oder 'email'
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1937,13 +1938,33 @@ function LoginPage() {
     <div className="px-4 sm:px-8 py-6 mt-4 text-left bg-white shadow-lg w-full max-w-md">
     <h3 className="text-2xl font-bold text-center">Fahrtenbuch</h3>
     <form onSubmit={handleSubmit}>
-    {/* Bestehende Login-Felder */}
+    {/* Login-Modus auswählen */}
+    <div className="flex justify-center space-x-2 mb-4">
+    <button
+    type="button"
+    className={`px-4 py-2 rounded ${loginMode === 'username' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+    onClick={() => setLoginMode('username')}
+    >
+    Benutzername
+    </button>
+    <button
+    type="button"
+    className={`px-4 py-2 rounded ${loginMode === 'email' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+    onClick={() => setLoginMode('email')}
+    >
+    E-Mail
+    </button>
+    </div>
+    
+    {/* Eingabefeld basierend auf dem Modus */}
     <div className="mt-4">
     <div>
-    <label className="block" htmlFor="username">Benutzername</label>
+    <label className="block" htmlFor="username">
+    {loginMode === 'username' ? 'Benutzername' : 'E-Mail'}
+    </label>
     <input
-    type="text"
-    placeholder="Benutzername"
+    type={loginMode === 'username' ? 'text' : 'email'}
+    placeholder={loginMode === 'username' ? 'Benutzername' : 'E-Mail'}
     className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
     value={username}
     onChange={(e) => setUsername(e.target.value)}
@@ -1962,8 +1983,8 @@ function LoginPage() {
     />
     </div>
     <div className="flex flex-col items-baseline justify-between">
-    <button 
-    type="submit" 
+    <button
+    type="submit"
     className="w-full px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900"
     >
     Login

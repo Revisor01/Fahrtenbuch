@@ -199,8 +199,9 @@ exports.updateUser = async (req, res) => {
                 [id]
             );
             
-            // Bei E-Mail-Änderung Verifikation starten
-            if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
+           // Bei E-Mail-Änderung Verifikation starten
+           // Hier wird die Email auch in der Profil Tabelle aktualisiert. Das sollte ok sein, da die Email eh aus dem Profil geholt wird.
+           if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
                 const verificationToken = crypto.randomBytes(32).toString('hex');
                 await connection.execute(
                     'INSERT INTO email_verifications (user_id, new_email, verification_token, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))',
