@@ -274,21 +274,36 @@ exports.verifyEmail = async (req, res) => {
 };
 
 exports.requestPasswordReset = async (req, res) => {
-    const { email } = req.body; // Extrahieren der E-Mail aus dem Request Body
-    console.log('userController.requestPasswordReset called with email:', email);
+    const { email } = req.body;
+    console.log('Password reset requested for email:', email);
+    
     try {
-        const resetToken = await User.initiatePasswordReset(email);
-        console.log('Reset token generated:', resetToken);
+        // Erst prüfen ob User existiert
         const user = await User.findByEmail(email);
+        if (!user) {
+            // Wir geben die gleiche Nachricht zurück wie bei Erfolg (Sicherheit)
+            console.log('No user found for email:', email);
+            return res.json({ 
+                message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' 
+            });
+        }
+        
+        // Token generieren
+        const resetToken = await User.initiatePasswordReset(email);
+        console.log('Reset token generated for user:', user.username);
+        
+        // Mail senden
         await mailService.sendPasswordReset(email, user.username, resetToken);
         console.log('Password reset email sent to:', email);
-        res.json({ message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' });
+        
+        res.json({ 
+            message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' 
+        });
     } catch (error) {
-        console.error('Error during password reset request:', error);
+        console.error('Error in password reset flow:', error);
+        // Generische Fehlermeldung nach außen
         res.status(500).json({ 
-            message: 'Interner Server-Fehler',
-            error: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            message: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.' 
         });
     }
 };
