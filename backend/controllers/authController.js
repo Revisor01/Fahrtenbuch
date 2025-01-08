@@ -3,21 +3,17 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
 exports.login = async (req, res) => {
-    const { username, password, email } = req.body;
-    console.log('Login attempt:', { username, email });
-    
-    if (!username && !email) {
-        return res.status(400).json({ message: 'Benutzername oder E-Mail erforderlich' });
-    }
+    const { username, password } = req.body;
+    console.log('Login attempt:', { username });
     
     try {
-        // Suche den User anhand des Usernamens oder der E-Mail
+      // Suche den User anhand des Usernamens oder der E-Mail
       const [rows] = await db.execute(
           `SELECT u.*, p.email, p.full_name
            FROM users u
            LEFT JOIN user_profiles p ON u.id = p.user_id
            WHERE u.username = ? OR p.email = ?`,
-          [username, email]
+          [username, username]
       );
         
       if (rows.length === 0) {
