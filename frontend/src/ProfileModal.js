@@ -31,12 +31,7 @@
           fullName: response.data.full_name
         };
         
-        //Setze hier nun explizit den Status um den Render neu zu forcieren
-        setProfile(prevProfile => ({
-          ...profileData,
-          email_verified: profileData.email_verified,
-        }))
-        
+        setProfile(profileData);
         setOriginalProfile(profileData);
         setUser({...user, email_verified: profileData.email_verified });
       } catch (error) {
