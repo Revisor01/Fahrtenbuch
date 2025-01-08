@@ -1999,7 +1999,7 @@ function ForgotPasswordForm({ onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/users/reset-password', { email });
+      await axios.post('/api/users/reset-password/request', { email });
       setStatus({
         type: 'success',
         message: 'Wenn ein Account mit dieser E-Mail existiert, wurden Anweisungen zum Zurücksetzen des Passworts versendet.'
