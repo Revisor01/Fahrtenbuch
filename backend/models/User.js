@@ -116,16 +116,22 @@ class User {
     }
     static async initiatePasswordReset(email) {
         console.log('User.initiatePasswordReset called with email:', email);
-        const token = crypto.randomBytes(32).toString('hex');
-        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-        
-        console.log('Generated reset token:', token);
-        console.log('Token expires at:', expires);
         
         try {
+            const user = await this.findByEmail(email);
+            if (!user) {
+                throw new Error('No user found with this email address');
+            }
+            
+            const token = crypto.randomBytes(32).toString('hex');
+            const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+            
+            console.log('Generated reset token:', token);
+            console.log('Token expires at:', expires);
+            
             const [result] = await db.execute(
-                'UPDATE users SET password_reset_token = ?, password_reset_expires = ? WHERE email = ?',
-                [token, expires, email]
+                'UPDATE users SET password_reset_token = ?, password_reset_expires = ? WHERE id = ?',
+                [token, expires, user.id]
             );
             
             console.log('Database result:', result);
@@ -135,8 +141,7 @@ class User {
             }
             
             return token;
-        }
-        catch (error) {
+        } catch (error) {
             console.error('Fehler in User.initiatePasswordReset:', error);
             throw error;
         }
