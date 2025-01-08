@@ -11,8 +11,6 @@ const {
 
 // Public routes first
 router.post('/reset-password/request', userController.requestPasswordReset);
-router.post('/reset-password/verify', userController.resetPassword);
-router.post('/reset-password/set', userController.setPassword);
 router.post('/set-password', userController.setPassword);
 router.post('/verify-email', userController.verifyEmail);
 

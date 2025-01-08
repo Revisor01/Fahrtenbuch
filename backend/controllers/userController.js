@@ -328,26 +328,35 @@ exports.setPassword = async (req, res) => {
     try {
         const { token, newPassword } = req.body;
         
-        // Find User by token
+        if (!token || !newPassword) {
+            return res.status(400).json({ message: 'Token und neues Passwort sind erforderlich' });
+        }
+        
+        // Find User by token (egal ob Verification oder Reset token)
         const [rows] = await db.execute(
-            'SELECT id FROM users WHERE verification_token = ?',
-            [token]
+            'SELECT id FROM users WHERE verification_token = ? OR password_reset_token = ?',
+            [token, token]
         );
         
         if (rows.length === 0) {
             return res.status(400).json({ message: 'Ungültiger oder abgelaufener Token' });
         }
+        
         const user = rows[0];
-        const success = await User.setPassword(user.id, newPassword);
         
-        if (!success) {
-            return res.status(400).json({ message: 'Ungültiger oder abgelaufener Token' });
-        }
+        // Passwort hashen und setzen
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
         
-        // Markiere Email als verifiziert
+        // Update user: Setze Passwort, lösche Token und markiere Email als verifiziert
         await db.execute(
-            'UPDATE users SET email_verified = TRUE, verification_token = NULL WHERE id = ?',
-            [user.id]
+            `UPDATE users 
+            SET password = ?, 
+                verification_token = NULL,
+                password_reset_token = NULL,
+                email_verified = TRUE 
+            WHERE id = ?`,
+            [hashedPassword, user.id]
         );
         
         res.json({ message: 'Passwort erfolgreich gesetzt' });
