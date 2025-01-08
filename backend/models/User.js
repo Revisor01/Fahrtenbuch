@@ -191,9 +191,20 @@ class User {
         try {
             await connection.beginTransaction();
             
-            // Erst Profile löschen
-            await connection.execute('DELETE FROM user_profiles WHERE user_id = ?', [id]);
-            // Dann User löschen
+            // Diese Tabellen haben ON DELETE CASCADE:
+            // - email_verifications
+            // - user_profiles
+            // - mitfahrer (über fahrten)
+            // - fahrt_details (über fahrten)
+            
+            // Lösche abhängige Daten
+            await connection.execute('DELETE FROM abrechnungen WHERE user_id = ?', [id]);
+            await connection.execute('DELETE FROM abrechnungsarten WHERE user_id = ?', [id]);
+            await connection.execute('DELETE FROM fahrten WHERE user_id = ?', [id]);
+            await connection.execute('DELETE FROM distanzen WHERE user_id = ?', [id]);
+            await connection.execute('DELETE FROM orte WHERE user_id = ?', [id]);
+            
+            // Zuletzt den User selbst löschen - dies triggert auch die CASCADE Deletes
             const [result] = await connection.execute('DELETE FROM users WHERE id = ?', [id]);
             
             await connection.commit();
