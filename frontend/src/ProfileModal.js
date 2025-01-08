@@ -140,7 +140,12 @@
   if (!isOpen) return null;
   
         return (
-            <Modal isOpen={isOpen} onClose={onClose} title="Profil">
+            <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Profil"
+            size="compact"
+            >
             <div className="space-y-4">
             <form onSubmit={handleProfileUpdate} className="space-y-3">
             <div className="relative">
