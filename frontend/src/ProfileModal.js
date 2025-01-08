@@ -30,11 +30,12 @@
           ...response.data,
           fullName: response.data.full_name
         };
-        if(profileData.email_verified) {
-          setProfile({...profileData, email_verified: true});
-        } else {
-          setProfile({...profileData, email_verified: false});
-        }
+        
+        //Setze hier nun explizit den Status um den Render neu zu forcieren
+        setProfile(prevProfile => ({
+          ...profileData,
+          email_verified: profileData.email_verified,
+        }))
         
         setOriginalProfile(profileData);
         setUser({...user, email_verified: profileData.email_verified });
