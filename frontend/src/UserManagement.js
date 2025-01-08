@@ -99,7 +99,7 @@ import Modal from './Modal';
                     onChange={handleChange}
                     className={inputClasses}
                     placeholder="Kirchenkreis"
-                </div>
+                />
             </div>
             <div className="mt-6">
                 <button
