@@ -9,10 +9,12 @@ class MailService {
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASSWORD
-            }
+            },
+            logger: true,
+            debug: true
         });
     }
-
+    
     async sendWelcomeEmail(email, username, token) {
         const resetLink = `${process.env.FRONTEND_URL}/set-password?token=${token}`;
         
@@ -53,7 +55,7 @@ class MailService {
         try {
             const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
             
-            await this.transporter.sendMail({
+            const info = await this.transporter.sendMail({
                 from: process.env.MAIL_FROM,
                 to: email,
                 subject: 'Passwort zurücksetzen',
@@ -67,6 +69,7 @@ class MailService {
                     <p>Mit freundlichen Grüßen<br>Ihr Fahrtenbuch-Team</p>
                 `
             });
+            console.log("Nachricht verschickt: %s", info.messageId);
         } catch (error) {
             console.error('Fehler beim senden des Passwort Reset Links:', error);
             throw error;
