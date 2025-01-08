@@ -282,10 +282,10 @@ exports.requestPasswordReset = async (req, res) => {
             // Aus Sicherheitsgründen geben wir die gleiche Erfolgsmeldung zurück
             return res.json({ message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' });
         }
-
+        
         const resetToken = await User.initiatePasswordReset(email);
         await mailService.sendPasswordReset(email, user.username, resetToken);
-
+        
         res.json({ message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' });
     } catch (error) {
         console.error('Fehler beim Anfordern des Passwort-Resets:', error);

@@ -4,14 +4,31 @@ const bcrypt = require('bcrypt');
 exports.getProfile = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      'SELECT u.username, p.email, p.full_name, p.iban, p.kirchengemeinde, p.kirchspiel, p.kirchenkreis, o.name as wohnort, o.adresse as wohnort_adresse, d.name as dienstort, d.adresse as dienstort_adresse FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id LEFT JOIN orte o ON u.id = o.user_id AND o.ist_wohnort = 1 LEFT JOIN orte d ON u.id = d.user_id AND d.ist_dienstort = 1 WHERE u.id = ?',
+      `SELECT 
+                u.username, 
+                u.email_verified,
+                p.email, 
+                p.full_name, 
+                p.iban, 
+                p.kirchengemeinde, 
+                p.kirchspiel, 
+                p.kirchenkreis, 
+                o.name as wohnort, 
+                o.adresse as wohnort_adresse, 
+                d.name as dienstort, 
+                d.adresse as dienstort_adresse 
+            FROM users u 
+            LEFT JOIN user_profiles p ON u.id = p.user_id 
+            LEFT JOIN orte o ON u.id = o.user_id AND o.ist_wohnort = 1 
+            LEFT JOIN orte d ON u.id = d.user_id AND d.ist_dienstort = 1 
+            WHERE u.id = ?`,
       [req.user.id]
     );
-
+    
     if (rows.length === 0) {
       return res.status(404).json({ message: 'Profil nicht gefunden' });
     }
-
+    
     res.json(rows[0]);
   } catch (error) {
     console.error('Fehler beim Abrufen des Profils:', error);
