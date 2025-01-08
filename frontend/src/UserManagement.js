@@ -3,7 +3,8 @@ import axios from 'axios';
 import { AppContext } from './App';
 import Modal from './Modal';
 
-const UserForm = ({ onSubmit, isEdit, initialData }) => {
+    const UserForm = ({ onSubmit, isEdit, initialData }) => {
+        const inputClasses = "w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-sm";
     const formRef = useRef(null);
     const [formData, setFormData] = useState(initialData || {
         username: '',
@@ -31,7 +32,7 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
 
     return (
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
                         E-Mail <span className="text-red-500">*</span>
@@ -41,7 +42,8 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        className={inputClasses}
+                        placeholder="user@example.com"
                         required
                     />
                 </div>
@@ -206,7 +208,7 @@ export default function UserManagement() {
                 <h2 className="text-xl font-semibold text-gray-800">Benutzerverwaltung</h2>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="bg-blue-100 text-blue-700 px-6 py-3 rounded-md hover:bg-blue-200 transition duration-200 w-full sm:w-auto text-sm"
+                    className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200 transition duration-200 w-full sm:w-auto text-sm"
                 >
                     + Neuer Benutzer
                 </button>
@@ -248,28 +250,30 @@ export default function UserManagement() {
                                             {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-right">
-                                        <button
-                                            onClick={() => openEditModal(user)}
-                                            className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200"
-                                            title="Bearbeiten"
-                                        >
-                                            ✎
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                showNotification(
-                                                    'Benutzer löschen',
-                                                    'Möchten Sie diesen Benutzer wirklich löschen?',
-                                                    () => handleDelete(user.id),
-                                                    true
-                                                );
-                                            }}
-                                            className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded ml-2 hover:bg-red-200"
-                                            title="Löschen"
-                                        >
-                                            ×
-                                        </button>
+                                    <td className="px-4 py-3 text-sm">
+                                        <div className="flex sm:flex-row flex-col gap-2 justify-end">
+                                            <button
+                                                onClick={() => openEditModal(user)}
+                                                className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 w-full sm:w-auto text-center"
+                                                title="Bearbeiten"
+                                            >
+                                                ✎
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    showNotification(
+                                                        'Benutzer löschen',
+                                                        'Möchten Sie diesen Benutzer wirklich löschen?',
+                                                        () => handleDelete(user.id),
+                                                        true
+                                                    );
+                                                }}
+                                                className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 w-full sm:w-auto text-center"
+                                                title="Löschen"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
