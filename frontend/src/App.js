@@ -1927,6 +1927,7 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Hier ist der Unterschied
       await login(username, password);
     } catch (error) {
       alert('Login fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.');
