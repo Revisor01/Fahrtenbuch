@@ -4,26 +4,42 @@ const crypto = require('crypto');
 
 class User {
     static async create(userData) {
-        const { username, email, role = 'user', password = null } = userData;
-        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const { 
+            username, 
+            email, 
+            role = 'user',
+            fullName = null,
+            iban = null,
+            kirchengemeinde = null,
+            kirchspiel = null,
+            kirchenkreis = null
+        } = userData;
         
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
             
-            let hashedPassword = null;
-            if (password) {
-                const salt = await bcrypt.genSalt(10);
-                hashedPassword = await bcrypt.hash(password, salt);
-            }
-
-            const [result] = await connection.execute(
-                'INSERT INTO users (username, email, password, role, verification_token) VALUES (?, ?, ?, ?, ?)',
-                [username, email, hashedPassword, role, verificationToken]
+            // Basis User erstellen
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const tempPassword = crypto.randomBytes(8).toString('hex');
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(tempPassword, salt);
+            
+            const [userResult] = await connection.execute(
+                'INSERT INTO users (username, password, role, verification_token) VALUES (?, ?, ?, ?)',
+                [username, hashedPassword, role, verificationToken]
             );
-
+            
+            const userId = userResult.insertId;
+            
+            // Profil erstellen
+            await connection.execute(
+                'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [userId, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
+            );
+            
             await connection.commit();
-            return { id: result.insertId, verificationToken };
+            return { id: userId, verificationToken };
         } catch (error) {
             await connection.rollback();
             throw error;
@@ -61,28 +77,34 @@ class User {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
-
+            
             const [rows] = await connection.execute(
                 'SELECT * FROM email_verifications WHERE verification_token = ? AND expires_at > NOW()',
                 [token]
             );
-
+            
             if (rows.length === 0) {
                 throw new Error('Invalid or expired verification token');
             }
-
+            
             const verification = rows[0];
-
+            
+            // Update email in user_profiles statt users
             await connection.execute(
-                'UPDATE users SET email = ?, email_verified = TRUE WHERE id = ?',
+                'UPDATE user_profiles SET email = ? WHERE user_id = ?',
                 [verification.new_email, verification.user_id]
             );
-
+            
+            await connection.execute(
+                'UPDATE users SET email_verified = TRUE WHERE id = ?',
+                [verification.user_id]
+            );
+            
             await connection.execute(
                 'DELETE FROM email_verifications WHERE id = ?',
                 [verification.id]
             );
-
+            
             await connection.commit();
             return true;
         } catch (error) {
@@ -92,7 +114,6 @@ class User {
             connection.release();
         }
     }
-
     static async initiatePasswordReset(email) {
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
@@ -141,11 +162,23 @@ class User {
     }
 
     static async delete(id) {
-        const [result] = await db.execute(
-            'DELETE FROM users WHERE id = ?',
-            [id]
-        );
-        return result.affectedRows > 0;
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
+            
+            // Erst Profile löschen
+            await connection.execute('DELETE FROM user_profiles WHERE user_id = ?', [id]);
+            // Dann User löschen
+            const [result] = await connection.execute('DELETE FROM users WHERE id = ?', [id]);
+            
+            await connection.commit();
+            return result.affectedRows > 0;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 }
 

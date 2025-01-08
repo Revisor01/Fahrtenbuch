@@ -11,6 +11,11 @@ import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
 import UserManagement from './UserManagement';
+import VerifyEmail from './VerifyEmail';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import VerifyEmail from './VerifyEmail';
+import ResetPassword from './ResetPassword';
+import SetPassword from './SetPassword';
 
 const API_BASE_URL = '/api';
 
@@ -19,7 +24,10 @@ export const AppContext = createContext();
 function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [orte, setOrte] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [distanzen, setDistanzen] = useState([]);
@@ -43,9 +51,24 @@ function AppProvider({ children }) {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setIsLoggedIn(true);
-      setupAxiosInterceptors();
+      // User-Daten laden wenn noch nicht vorhanden
+      if (!user) {
+        fetchCurrentUser();
+      }
     }
   }, [token]);
+  
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await axios.get('/api/users/me');
+      const userData = response.data;
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      logout();
+    }
+  };
   
   const setupAxiosInterceptors = () => {
     axios.interceptors.response.use(
@@ -67,32 +90,28 @@ function AppProvider({ children }) {
       fetchFahrten();
     }
   }, [isLoggedIn]);
-  
-  // Nach erfolgreichem Login
+
   const login = async (username, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, { username, password });
+      const response = await axios.post('/api/auth/login', { username, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       setToken(token);
-      // Wichtig: Setze den Token als Default Header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      await fetchCurrentUser(); // User-Daten direkt nach Login laden
       setIsLoggedIn(true);
-      
-      // User-Daten laden
-      const userResponse = await axios.get('/api/users/me');
-      setUser(userResponse.data);
     } catch (error) {
-      console.error('Login fehlgeschlagen:', error);
+      console.error('Login failed:', error);
       throw error;
     }
   };
   
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
+    setUser(null);
     setIsLoggedIn(false);
-    setUser(null);  // Neu: User-Daten löschen
   };
   
   const fetchOrte = async () => {
@@ -2043,9 +2062,16 @@ function App() {
   }, []);
   
   return (
+    <BrowserRouter>
     <AppProvider>
-    <AppContent />
+    <Routes>
+    <Route path="/" element={<AppContent />} />
+    <Route path="/verify-email" element={<VerifyEmail />} />
+    <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/set-password" element={<SetPassword />} />
+    </Routes>
     </AppProvider>
+    </BrowserRouter>
   );
 }
 

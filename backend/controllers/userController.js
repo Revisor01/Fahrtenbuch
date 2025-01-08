@@ -6,25 +6,31 @@ const crypto = require('crypto');
 
 exports.getAllUsers = async (req, res) => {
     try {
-        // Nur Admins dürfen alle Benutzer abrufen
         if (req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
         }
         
-        // Benutzerinformationen aus der Datenbank abrufen
-        const [rows] = await db.execute(
-            `SELECT 
+        // Gleiche Struktur wie im profileController
+        const [rows] = await db.execute(`
+            SELECT 
                 u.id, 
                 u.username, 
                 u.role, 
-                u.email_verified, 
-                p.email, 
-                p.full_name, 
+                u.email_verified,
+                p.email,
+                p.full_name,
+                p.iban,
                 p.kirchengemeinde, 
                 p.kirchspiel, 
-                p.kirchenkreis
-                FROM users u
-                LEFT JOIN user_profiles p ON u.id = p.user_id`
+                p.kirchenkreis,
+                o.name as wohnort,
+                o.adresse as wohnort_adresse,
+                d.name as dienstort,
+                d.adresse as dienstort_adresse
+            FROM users u
+            LEFT JOIN user_profiles p ON u.id = p.user_id 
+            LEFT JOIN orte o ON u.id = o.user_id AND o.ist_wohnort = 1 
+            LEFT JOIN orte d ON u.id = d.user_id AND d.ist_dienstort = 1`
         );
         
         res.json(rows);
@@ -34,38 +40,100 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
+exports.getCurrentUser = async (req, res) => {
+    try {
+        const [rows] = await db.execute(`
+            SELECT 
+                u.id, 
+                u.username, 
+                u.role, 
+                u.email_verified,
+                p.email,
+                p.full_name,
+                p.iban,
+                p.kirchengemeinde, 
+                p.kirchspiel, 
+                p.kirchenkreis,
+                o.name as wohnort,
+                o.adresse as wohnort_adresse,
+                d.name as dienstort,
+                d.adresse as dienstort_adresse
+            FROM users u
+            LEFT JOIN user_profiles p ON u.id = p.user_id 
+            LEFT JOIN orte o ON u.id = o.user_id AND o.ist_wohnort = 1 
+            LEFT JOIN orte d ON u.id = d.user_id AND d.ist_dienstort = 1
+            WHERE u.id = ?`,
+            [req.user.id]
+        );
+        
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+        }
+        
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 exports.createUser = async (req, res) => {
     try {
-        // Prüfe ob der anfragende User ein Admin ist
         if (req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
         }
-
-        const { username, email, role = 'user' } = req.body;
-
+        
+        const { 
+            username, 
+            email, 
+            role = 'user',
+            fullName,
+            iban,
+            kirchengemeinde,
+            kirchspiel,
+            kirchenkreis 
+        } = req.body;
+        
         // Prüfe ob die E-Mail bereits existiert
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
             return res.status(400).json({ message: 'Diese E-Mail-Adresse wird bereits verwendet' });
         }
-
-        // Erstelle den neuen User
-        const { id, verificationToken } = await User.create({
+        
+        // Erstelle den neuen User mit Profil
+        const { id, verificationToken } = await User.createUserWithProfile({
             username,
             email,
-            role
+            role,
+            fullName,
+            iban,
+            kirchengemeinde,
+            kirchspiel,
+            kirchenkreis
         });
-
-        // Sende Willkommens-E-Mail mit Link zur Passwort-Erstellung
+        
+        // Debug-Logging für Mail-Service
+        console.log('Sending welcome email with data:', {
+            email,
+            username,
+            verificationToken,
+            FRONTEND_URL: process.env.FRONTEND_URL
+        });
+        
+        // Sende Willkommens-E-Mail
         await mailService.sendWelcomeEmail(email, username, verificationToken);
-
+        
         res.status(201).json({
             message: 'Benutzer erfolgreich erstellt. Eine E-Mail mit weiteren Anweisungen wurde versendet.',
             userId: id
         });
     } catch (error) {
-        console.error('Fehler beim Erstellen des Benutzers:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler' });
+        console.error('Detaillierter Fehler beim Erstellen des Benutzers:', error);
+        res.status(500).json({ 
+            message: 'Fehler beim Erstellen des Benutzers',
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
@@ -102,39 +170,65 @@ exports.resendVerification = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, email, role } = req.body;
-
-        // Prüfe Berechtigungen
+        const { username, email, role, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis } = req.body;
+        
+        // Berechtigungsprüfung: Nur Admin oder der User selbst darf ändern
         if (req.user.role !== 'admin' && req.user.id !== parseInt(id)) {
             return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
         }
-
-        // Wenn ein normaler User versucht die Rolle zu ändern
+        
+        // Normale User dürfen keine Rollen ändern
         if (req.user.role !== 'admin' && role) {
             return res.status(403).json({ message: 'Keine Berechtigung, die Rolle zu ändern' });
         }
-
-        // Prüfe bei E-Mail-Änderung ob die neue E-Mail bereits existiert
-        if (email) {
-            const existingUser = await User.findByEmail(email);
-            if (existingUser && existingUser.id !== parseInt(id)) {
-                return res.status(400).json({ message: 'Diese E-Mail-Adresse wird bereits verwendet' });
+        
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
+            
+            // User-Basisdaten aktualisieren
+            await connection.execute(
+                'UPDATE users SET username = ?, role = ? WHERE id = ?',
+                [username, role, id]
+            );
+            
+            // Profildaten prüfen
+            const [existingProfile] = await connection.execute(
+                'SELECT * FROM user_profiles WHERE user_id = ?', 
+                [id]
+            );
+            
+            // Bei E-Mail-Änderung Verifikation starten
+            if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
+                const verificationToken = crypto.randomBytes(32).toString('hex');
+                await connection.execute(
+                    'INSERT INTO email_verifications (user_id, new_email, verification_token, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))',
+                    [id, email, verificationToken]
+                );
+                await mailService.sendEmailVerification(email, username, verificationToken);
             }
+            
+            // Profil aktualisieren/erstellen
+            if (existingProfile.length > 0) {
+                await connection.execute(
+                    'UPDATE user_profiles SET email = ?, full_name = ?, iban = ?, kirchengemeinde = ?, kirchspiel = ?, kirchenkreis = ? WHERE user_id = ?',
+                    [email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis, id]
+                );
+            } else {
+                await connection.execute(
+                    'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    [id, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
+                );
+            }
+            
+            await connection.commit();
+            res.json({ message: 'Benutzerprofil erfolgreich aktualisiert' });
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
         }
-
-        const currentUser = await User.findById(id);
-        if (!currentUser) {
-            return res.status(404).json({ message: 'Benutzer nicht gefunden' });
-        }
-
-        // Bei E-Mail-Änderung Verifikation starten
-        if (email && email !== currentUser.email) {
-            const verificationToken = crypto.randomBytes(32).toString('hex');
-            await mailService.sendEmailVerification(email, username || currentUser.username, verificationToken);
-        }
-
-        await User.updateProfile(id, req.body);
-        res.json({ message: 'Benutzerprofil erfolgreich aktualisiert' });
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Benutzers:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });

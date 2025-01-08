@@ -78,47 +78,134 @@ export default function UserManagement() {
     setIsEditModalOpen(true);
   };
 
-  const UserForm = ({ onSubmit, isEdit }) => (
-    <form onSubmit={onSubmit} className="space-y-4">
+  const UserForm = ({ onSubmit, isEdit }) => {
+    const formRef = useRef(null);
+    const [formData, setFormData] = useState({
+      username: '',
+      email: '',
+      role: 'user',
+      fullName: '',
+      iban: '',
+      kirchengemeinde: '',
+      kirchspiel: '',
+      kirchenkreis: ''
+    });
+    
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    };
+    
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      onSubmit(formData);
+    };
+    
+    return (
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Benutzername</label>
-        <input
-          type="text"
-          value={formData.username}
-          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
-          required
-        />
+      <label className="block text-sm font-medium text-gray-700">
+      E-Mail <span className="text-red-500">*</span>
+      </label>
+      <input
+      type="email"
+      name="email"
+      value={formData.email}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      required
+      />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">E-Mail</label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
-          required
-        />
+      <label className="block text-sm font-medium text-gray-700">
+      Benutzername <span className="text-red-500">*</span>
+      </label>
+      <input
+      type="text"
+      name="username"
+      value={formData.username}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      required
+      />
+      </div>
+      
+      <div>
+      <label className="block text-sm font-medium text-gray-700">Rolle</label>
+      <select
+      name="role"
+      value={formData.role}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      >
+      <option value="user">Benutzer</option>
+      <option value="admin">Administrator</option>
+      </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Rolle</label>
-        <select
-          value={formData.role}
-          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
-        >
-          <option value="user">Benutzer</option>
-          <option value="admin">Administrator</option>
-        </select>
+      <label className="block text-sm font-medium text-gray-700">Voller Name</label>
+      <input
+      type="text"
+      name="fullName"
+      value={formData.fullName}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      />
+      </div>
+      <div>
+      <label className="block text-sm font-medium text-gray-700">IBAN</label>
+      <input
+      type="text"
+      name="iban"
+      value={formData.iban}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      />
+      </div>
+      <div>
+      <label className="block text-sm font-medium text-gray-700">Kirchengemeinde</label>
+      <input
+      type="text"
+      name="kirchengemeinde"
+      value={formData.kirchengemeinde}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      />
+      </div>
+      <div>
+      <label className="block text-sm font-medium text-gray-700">Kirchspiel</label>
+      <input
+      type="text"
+      name="kirchspiel"
+      value={formData.kirchspiel}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      />
+      </div>
+      <div>
+      <label className="block text-sm font-medium text-gray-700">Kirchenkreis</label>
+      <input
+      type="text"
+      name="kirchenkreis"
+      value={formData.kirchenkreis}
+      onChange={handleChange}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+      />
+      </div>
       </div>
       <button
-        type="submit"
-        className="w-full bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600"
+      type="submit"
+      className="w-full bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600 mt-6"
       >
-        {isEdit ? 'Aktualisieren' : 'Erstellen'}
+      {isEdit ? 'Aktualisieren' : 'Erstellen'}
       </button>
-    </form>
-  );
+      </form>
+    );
+  };
 
   return (
     <div className="p-4">
@@ -133,31 +220,35 @@ export default function UserManagement() {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Benutzername
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                E-Mail
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Rolle
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Aktionen
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+    <table className="min-w-full">
+    <thead className="bg-gray-50">
+    <tr>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Benutzername
+    </th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    E-Mail
+    </th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Kirchengemeinde
+    </th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Rolle
+    </th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Status
+    </th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Aktionen
+    </th>
+    </tr>
+    </thead>
+    <tbody>
+    {users.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{user.kirchengemeinde || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                     user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
