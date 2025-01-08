@@ -329,6 +329,12 @@ exports.setPassword = async (req, res) => {
             return res.status(400).json({ message: 'Ungültiger oder abgelaufener Token' });
         }
         
+        // Markiere Email als verifiziert
+        await db.execute(
+            'UPDATE users SET email_verified = TRUE, verification_token = NULL WHERE id = ?',
+            [user.id]
+        );
+        
         res.json({ message: 'Passwort erfolgreich gesetzt' });
     } catch (error) {
         console.error('Fehler beim Setzen des Passworts:', error);

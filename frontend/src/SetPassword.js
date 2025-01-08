@@ -51,7 +51,7 @@ export default function SetPassword() {
 
       // Nach 2 Sekunden zum Login weiterleiten
       setTimeout(() => {
-        navigate('/login');
+        navigate('/');
       }, 2000);
 
     } catch (error) {

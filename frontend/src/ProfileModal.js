@@ -30,8 +30,14 @@ function ProfileModal({ isOpen, onClose }) {
         ...response.data,
         fullName: response.data.full_name
       };
-      setProfile(profileData);
+      if(profileData.email_verified) {
+        setProfile({...profileData, email_verified: true});
+      } else {
+        setProfile(profileData);
+      }
+      
       setOriginalProfile(profileData);
+      setUser({...user, email_verified: profileData.email_verified });
     } catch (error) {
       console.error('Fehler beim Abrufen des Profils:', error);
       showErrorMessage('Fehler beim Abrufen des Profils.');
