@@ -21,28 +21,28 @@
   }
   }, [isOpen]);
   
-  const fetchProfile = async () => {
-  try {
-  const response = await axios.get('/api/profile', {
-      headers: { Authorization: `Bearer ${token}` }
-  });
-  const profileData = {
-      ...response.data,
-      fullName: response.data.full_name
-  };
-      if(profileData.email_verified) {
-        setProfile({...profileData, email_verified: true});
-    } else {
-        setProfile(profileData);
-    }
-
-    setOriginalProfile(profileData);
-    setUser({...user, email_verified: profileData.email_verified });
-  } catch (error) {
-  console.error('Fehler beim Abrufen des Profils:', error);
-  showErrorMessage('Fehler beim Abrufen des Profils.');
-  }
-  };
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get('/api/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const profileData = {
+          ...response.data,
+          fullName: response.data.full_name
+        };
+        if(profileData.email_verified) {
+          setProfile({...profileData, email_verified: true});
+        } else {
+          setProfile({...profileData, email_verified: false});
+        }
+        
+        setOriginalProfile(profileData);
+        setUser({...user, email_verified: profileData.email_verified });
+      } catch (error) {
+        console.error('Fehler beim Abrufen des Profils:', error);
+        showErrorMessage('Fehler beim Abrufen des Profils.');
+      }
+    };
   
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
