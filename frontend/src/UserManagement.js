@@ -59,7 +59,7 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                     />
                 </div>
 
-                <div>
+                 <div>
                     <label className="block text-sm font-medium text-gray-700">Rolle</label>
                     <select
                         name="role"
@@ -72,16 +72,16 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                     </select>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Voller Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Voller Name</label>
                     <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
                     />
                 </div>
-                <div>
+                 <div>
                     <label className="block text-sm font-medium text-gray-700">IBAN</label>
                     <input
                         type="text"
@@ -190,10 +190,10 @@ export default function UserManagement() {
     };
 
     const openEditModal = (user) => {
-        setSelectedUser({
-            ...user,
-            fullName: user.full_name
-        });
+       setSelectedUser({
+          ...user,
+          fullName: user.full_name
+       });
         setIsEditModalOpen(true);
     };
 
@@ -210,72 +210,76 @@ export default function UserManagement() {
             </div>
 
             <div className="bg-white rounded-lg shadow overflow-hidden">
-                <table className="min-w-full">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Benutzername
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                E-Mail
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Kirchengemeinde
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Rolle
-                            </th>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                      <thead className="bg-gray-50">
+                      <tr>
+                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                               Benutzername
                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Aktionen
+                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                               E-Mail
+                           </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Kirchengemeinde
+                           </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                               Rolle
                             </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map((user) => (
-                            <tr key={user.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.kirchengemeinde || '-'}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}`}>
-                                        {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
-                                    </span>
-                                </td>
-                                 <td className="px-6 py-4 whitespace-nowrap">
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                               Aktionen
+                            </th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {users.map((user) => (
+                          <tr key={user.id}>
+                            <td className="px-4 py-3 whitespace-nowrap">{user.username}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">{user.email}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">{user.kirchengemeinde || '-'}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                       user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
+                                   }`}>
+                                       {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
+                                   </span>
+                               </td>
+                                <td className="px-4 py-3 whitespace-nowrap">
                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                        user.email_verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                    }`}>
                                        {user.email_verified ? 'Verifiziert' : 'Nicht verifiziert'}
                                    </span>
                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                    <button
-                                        onClick={() => openEditModal(user)}
-                                        className="text-indigo-600 hover:text-indigo-900"
-                                    >
-                                        Bearbeiten
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            showNotification(
-                                                'Benutzer löschen',
-                                                'Möchten Sie diesen Benutzer wirklich löschen?',
-                                                () => handleDelete(user.id),
-                                                true
-                                            );
-                                        }}
-                                        className="text-red-600 hover:text-red-900"
-                                    >
-                                        Löschen
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium space-x-2">
+                              <button
+                                  onClick={() => openEditModal(user)}
+                                  className="text-indigo-600 hover:text-indigo-900"
+                              >
+                                  Bearbeiten
+                              </button>
+                              <button
+                                  onClick={() => {
+                                      showNotification(
+                                          'Benutzer löschen',
+                                          'Möchten Sie diesen Benutzer wirklich löschen?',
+                                          () => handleDelete(user.id),
+                                          true
+                                      );
+                                  }}
+                                  className="text-red-600 hover:text-red-900"
+                              >
+                                  Löschen
+                              </button>
+                           </td>
+                           </tr>
+                      ))}
+                      </tbody>
+                  </table>
+                 </div>
             </div>
 
             <Modal
