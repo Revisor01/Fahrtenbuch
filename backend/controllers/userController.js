@@ -77,6 +77,7 @@ exports.getCurrentUser = async (req, res) => {
     }
 };
 
+
 exports.createUser = async (req, res) => {
     try {
         if (req.user.role !== 'admin') {

@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
 class User {
-    static async create(userData) {
+    static async createUserWithProfile(userData) {
         const { 
             username, 
             email, 
@@ -47,7 +47,7 @@ class User {
             connection.release();
         }
     }
-
+    
     static async findById(id) {
         const [rows] = await db.execute(
             'SELECT id, username, email, role, email_verified FROM users WHERE id = ?',
