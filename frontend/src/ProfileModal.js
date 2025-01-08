@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { AppContext } from './App';
-import Modal from './Modal';
-
-function ProfileModal({ isOpen, onClose }) {
-  const { token, user } = useContext(AppContext);
+  import React, { useState, useEffect, useContext } from 'react';
+  import axios from 'axios';
+  import { AppContext } from './App';
+  import Modal from './Modal';
+  
+  function ProfileModal({ isOpen, onClose }) {
+      const { token, user, setUser } = useContext(AppContext);
   const [profile, setProfile] = useState({});
   const [originalProfile, setOriginalProfile] = useState({});
   const [newPassword, setNewPassword] = useState('');
@@ -14,126 +14,126 @@ function ProfileModal({ isOpen, onClose }) {
   const [showMessage, setShowMessage] = useState(false);
   
   useEffect(() => {
-    if (isOpen) {
-      fetchProfile();
-    } else {
-      resetPasswordFields();
-    }
+  if (isOpen) {
+  fetchProfile();
+  } else {
+  resetPasswordFields();
+  }
   }, [isOpen]);
   
   const fetchProfile = async () => {
-    try {
-      const response = await axios.get('/api/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const profileData = {
-        ...response.data,
-        fullName: response.data.full_name
-      };
+  try {
+  const response = await axios.get('/api/profile', {
+      headers: { Authorization: `Bearer ${token}` }
+  });
+  const profileData = {
+      ...response.data,
+      fullName: response.data.full_name
+  };
       if(profileData.email_verified) {
         setProfile({...profileData, email_verified: true});
-      } else {
+    } else {
         setProfile(profileData);
-      }
-      
-      setOriginalProfile(profileData);
-      setUser({...user, email_verified: profileData.email_verified });
-    } catch (error) {
-      console.error('Fehler beim Abrufen des Profils:', error);
-      showErrorMessage('Fehler beim Abrufen des Profils.');
     }
+
+    setOriginalProfile(profileData);
+    setUser({...user, email_verified: profileData.email_verified });
+  } catch (error) {
+  console.error('Fehler beim Abrufen des Profils:', error);
+  showErrorMessage('Fehler beim Abrufen des Profils.');
+  }
   };
   
-  const handleProfileUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      const cleanProfile = { ...profile };
-      delete cleanProfile.wohnort;
-      delete cleanProfile.wohnort_adresse;
-      delete cleanProfile.dienstort;
-      delete cleanProfile.dienstort_adresse;
-      delete cleanProfile.username;
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        try {
+          const cleanProfile = { ...profile };
+          delete cleanProfile.wohnort;
+          delete cleanProfile.wohnort_adresse;
+          delete cleanProfile.dienstort;
+          delete cleanProfile.dienstort_adresse;
+          delete cleanProfile.username;
+          
+          const response = await axios.put('/api/profile', cleanProfile, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setMessage(response.data.message);
+          setShowMessage(true);
+        } catch (error) {
+          console.error('Fehler beim Aktualisieren des Profils:', error);
+          setMessage(error.response?.data?.message || 'Fehler beim Aktualisieren des Profils.');
+          setShowMessage(true);
+        }
+      };
       
-      const response = await axios.put('/api/profile', cleanProfile, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setMessage(response.data.message);
-      setShowMessage(true);
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Profils:', error);
-      setMessage(error.response?.data?.message || 'Fehler beim Aktualisieren des Profils.');
-      setShowMessage(true);
-    }
-  };
-  
   const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      setMessage('Neue Passwörter stimmen nicht überein.');
-      setShowMessage(true);
-      return;
-    }
-    try {
-      const response = await axios.put('/api/profile/change-password', {
-        oldPassword,
-        newPassword,
-        confirmPassword
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setMessage(response.data.message);
-      setShowMessage(true);
-      resetPasswordFields();
-    } catch (error) {
-      console.error('Fehler beim Ändern des Passworts:', error);
-      setMessage(error.response?.data?.message || 'Fehler beim Ändern des Passworts.');
-      setShowMessage(true);
-    }
+  e.preventDefault();
+  if (newPassword !== confirmPassword) {
+  setMessage('Neue Passwörter stimmen nicht überein.');
+  setShowMessage(true);
+  return;
+  }
+  try {
+  const response = await axios.put('/api/profile/change-password', {
+      oldPassword,
+      newPassword,
+      confirmPassword
+  }, {
+      headers: { Authorization: `Bearer ${token}` }
+  });
+  setMessage(response.data.message);
+  setShowMessage(true);
+  resetPasswordFields();
+  } catch (error) {
+  console.error('Fehler beim Ändern des Passworts:', error);
+  setMessage(error.response?.data?.message || 'Fehler beim Ändern des Passworts.');
+  setShowMessage(true);
+  }
   };
   
   const resetPasswordFields = () => {
-    setOldPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+  setOldPassword('');
+  setNewPassword('');
+  setConfirmPassword('');
   };
   
   const showSuccessMessage = (msg) => {
-    setMessage(msg);
-    setShowMessage(true);
+  setMessage(msg);
+  setShowMessage(true);
   };
   
   const showErrorMessage = (msg) => {
-    setMessage(msg);
-    setShowMessage(true);
+  setMessage(msg);
+  setShowMessage(true);
   };
   
   const handleResendVerification = async () => {
-    try {
-      await axios.post('/api/users/resend-verification', {
-        email: profile.email
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      showSuccessMessage('Verifizierungs-E-Mail wurde erneut gesendet.');
-    } catch (error) {
-      console.error('Fehler beim Senden der Verifizierungs-E-Mail:', error);
-      showErrorMessage(
-        error.response?.data?.message || 
-        'Fehler beim Senden der Verifizierungs-E-Mail.'
-      );
-    }
+  try {
+  await axios.post('/api/users/resend-verification', {
+      email: profile.email
+  }, {
+      headers: { Authorization: `Bearer ${token}` }
+  });
+  showSuccessMessage('Verifizierungs-E-Mail wurde erneut gesendet.');
+  } catch (error) {
+  console.error('Fehler beim Senden der Verifizierungs-E-Mail:', error);
+  showErrorMessage(
+      error.response?.data?.message || 
+      'Fehler beim Senden der Verifizierungs-E-Mail.'
+  );
+  }
   };
   
   const MessageOverlay = ({ message, onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
-    <div className="bg-white p-6 rounded-lg relative" onClick={e => e.stopPropagation()}>
-    <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
-    &#x2715;
-    </button>
-    <p className="mb-4">{message}</p>
-    <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded">OK</button>
-    </div>
-    </div>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+  <div className="bg-white p-6 rounded-lg relative" onClick={e => e.stopPropagation()}>
+  <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+  ✕
+  </button>
+  <p className="mb-4">{message}</p>
+  <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded">OK</button>
+  </div>
+  </div>
   );
   
   if (!isOpen) return null;
