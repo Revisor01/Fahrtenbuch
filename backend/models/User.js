@@ -115,19 +115,31 @@ class User {
         }
     }
     static async initiatePasswordReset(email) {
+        console.log('User.initiatePasswordReset called with email:', email);
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-        const [result] = await db.execute(
-            'UPDATE users SET password_reset_token = ?, password_reset_expires = ? WHERE email = ?',
-            [token, expires, email]
-        );
-
-        if (result.affectedRows === 0) {
-            throw new Error('No user found with this email address');
+        
+        console.log('Generated reset token:', token);
+        console.log('Token expires at:', expires);
+        
+        try {
+            const [result] = await db.execute(
+                'UPDATE users SET password_reset_token = ?, password_reset_expires = ? WHERE email = ?',
+                [token, expires, email]
+            );
+            
+            console.log('Database result:', result);
+            
+            if (result.affectedRows === 0) {
+                throw new Error('No user found with this email address');
+            }
+            
+            return token;
         }
-
-        return token;
+        catch (error) {
+            console.error('Fehler in User.initiatePasswordReset:', error);
+            throw error;
+        }
     }
 
     static async resetPassword(token, newPassword) {
