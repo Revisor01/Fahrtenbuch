@@ -2108,39 +2108,41 @@ function AppContent() {
     <div className="container mx-auto p-4">
     <div className="flex flex-col-mobile justify-between items-center mb-8">
     <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
-    <div className="flex space-x-2">
+    <div className="flex flex-wrap gap-2">
     {user?.role === 'admin' && (
       <button
       onClick={() => setShowUserManagementModal(true)}
-      className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+      className="bg-purple-100 text-purple-700 hover:bg-purple-200 py-2 px-4 rounded transition-colors duration-200"
       >
       Benutzerverwaltung
       </button>
     )}
     <button
     onClick={() => setShowOrteModal(true)}
-    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+    className="bg-amber-100 text-amber-700 hover:bg-amber-200 py-2 px-4 rounded transition-colors duration-200"
     >
     Orte
     </button>
     <button
     onClick={() => setShowDistanzenModal(true)}
-    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+    className="bg-amber-100 text-amber-700 hover:bg-amber-200 py-2 px-4 rounded transition-colors duration-200"
     >
     Distanzen
     </button>
     <button
     onClick={() => setIsProfileModalOpen(true)}
-    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full-mobile"
+    className="bg-blue-100 text-blue-700 hover:bg-blue-200 py-2 px-4 rounded transition-colors duration-200 w-full-mobile"
     >
     Profil
     </button>
     <button 
     onClick={logout} 
-    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full-mobile"
+    className="bg-red-100 text-red-700 hover:bg-red-200 py-2 px-4 rounded transition-colors duration-200 w-full-mobile"
     >
     Logout
     </button>
+    </div>
+    <FahrtenbuchHilfe />
     </div>
     
     <FahrtenbuchHilfe />
