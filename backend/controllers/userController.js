@@ -312,12 +312,13 @@ exports.resetPassword = async (req, res) => {
 exports.setPassword = async (req, res) => {
     try {
         const { token, newPassword } = req.body;
-        const success = await User.resetPassword(token, newPassword);
+        const user = await User.findByEmail(req.body.email);
+        const success = await User.setPassword(user.id, newPassword);
         
         if (!success) {
             return res.status(400).json({ message: 'Ungültiger oder abgelaufener Token' });
         }
-
+        
         res.json({ message: 'Passwort erfolgreich gesetzt' });
     } catch (error) {
         console.error('Fehler beim Setzen des Passworts:', error);
