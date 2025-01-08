@@ -183,20 +183,23 @@
                         onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
                         className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
                     />
-                    <input
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                     <input
                         type="text"
                         placeholder="Kirchengemeinde"
                         value={profile.kirchengemeinde || ''}
                         onChange={(e) => setProfile({ ...profile, kirchengemeinde: e.target.value })}
                         className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
-                    />
-                    <input
+                      />
+                    
+                     <input
                         type="text"
                         placeholder="Kirchspiel"
                         value={profile.kirchspiel || ''}
                         onChange={(e) => setProfile({ ...profile, kirchspiel: e.target.value })}
                         className="mt-2 px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-sky-500 block w-full rounded-md sm:text-sm focus:ring-1"
-                    />
+                     />
+                     </div>
                      <input
                         type="text"
                         placeholder="Kirchenkreis"

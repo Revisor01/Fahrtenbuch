@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import { AppContext } from './App';
 import Modal from './Modal';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
+
 
 const UserForm = ({ onSubmit, isEdit, initialData }) => {
     const formRef = useRef(null);
@@ -30,36 +32,36 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
     };
 
     return (
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                        E-Mail <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                        Benutzername <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
-                        required
-                    />
-                </div>
+       <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div>
+                   <label className="block text-sm font-medium text-gray-700">
+                       E-Mail <span className="text-red-500">*</span>
+                   </label>
+                   <input
+                       type="email"
+                       name="email"
+                       value={formData.email}
+                       onChange={handleChange}
+                       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                       required
+                   />
+               </div>
+               <div>
+                   <label className="block text-sm font-medium text-gray-700">
+                       Benutzername <span className="text-red-500">*</span>
+                   </label>
+                   <input
+                       type="text"
+                       name="username"
+                       value={formData.username}
+                       onChange={handleChange}
+                       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                       required
+                   />
+               </div>
 
-                 <div>
+                <div className="flex flex-col">
                     <label className="block text-sm font-medium text-gray-700">Rolle</label>
                     <select
                         name="role"
@@ -71,7 +73,7 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                         <option value="admin">Administrator</option>
                     </select>
                 </div>
-                <div>
+                <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700">Voller Name</label>
                     <input
                       type="text"
@@ -81,7 +83,7 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
                     />
                 </div>
-                 <div>
+                 <div className="flex flex-col">
                     <label className="block text-sm font-medium text-gray-700">IBAN</label>
                     <input
                         type="text"
@@ -91,7 +93,7 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                         className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
                     />
                 </div>
-                <div>
+                <div className="flex flex-col">
                     <label className="block text-sm font-medium text-gray-700">Kirchengemeinde</label>
                     <input
                         type="text"
@@ -101,7 +103,7 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                         className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
                     />
                 </div>
-                <div>
+                <div className="flex flex-col">
                     <label className="block text-sm font-medium text-gray-700">Kirchspiel</label>
                     <input
                         type="text"
@@ -111,7 +113,7 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                         className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
                     />
                 </div>
-                <div>
+                <div className="flex flex-col">
                     <label className="block text-sm font-medium text-gray-700">Kirchenkreis</label>
                     <input
                         type="text"
@@ -205,7 +207,7 @@ export default function UserManagement() {
 
 
     return (
-        <div className="p-4">
+       <div className="p-4">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Benutzerverwaltung</h2>
                 <button
@@ -226,7 +228,7 @@ export default function UserManagement() {
                                 <th className="px-3 py-2 text-sm font-medium">Kirchengemeinde</th>
                                 <th className="px-3 py-2 text-sm font-medium">Rolle</th>
                                 <th className="px-3 py-2 text-sm font-medium">Status</th>
-                                 <th className="px-3 py-2 text-sm font-medium w-28">Aktionen</th>
+                                 <th className="px-3 py-2 text-sm font-medium w-24">Aktionen</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -250,7 +252,7 @@ export default function UserManagement() {
                                             onClick={() => openEditModal(user)}
                                             className="text-indigo-600 hover:text-indigo-900 text-xs"
                                         >
-                                            Bearbeiten
+                                           <PencilIcon className="h-4 w-4 inline-block align-middle" />
                                         </button>
                                         <button
                                             onClick={() => {
@@ -263,7 +265,7 @@ export default function UserManagement() {
                                             }}
                                             className="text-red-600 hover:text-red-900 text-xs"
                                         >
-                                            Löschen
+                                            <TrashIcon className="h-4 w-4 inline-block align-middle" />
                                         </button>
                                     </td>
                                 </tr>
