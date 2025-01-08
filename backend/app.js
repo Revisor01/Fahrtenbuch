@@ -45,7 +45,7 @@ app.use(cors({
 app.use(express.json());
 
 // Define path to React build directory
-const reactBuildPath = path.join(__dirname, '../frontend/build');
+const reactBuildPath = path.join(__dirname, '../frontend/public');
 
 // Static files for React app
 app.use(express.static(reactBuildPath));
