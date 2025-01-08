@@ -1,12 +1,18 @@
 import React from 'react';
 
-function Modal({ isOpen, onClose, title, children, wide = false }) {
+function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
   if (!isOpen) return null;
+  
+  // Bestimme die Breiten-Klasse basierend auf der size prop
+  const widthClass = {
+    'compact': 'w-[95%] sm:w-[30rem]', // Profil, Benutzer erstellen/bearbeiten
+    'wide': 'w-[95%] sm:w-[80%]',      // Benutzerverwaltung, Orte, Distanzen
+  }[size];
   
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={onClose}>
       <div 
-        className="relative top-20 mx-auto p-5 border shadow-lg rounded-md bg-white w-[95%] sm:max-w-md"
+        className={`relative top-20 mx-auto p-5 border shadow-lg rounded-md bg-white ${widthClass}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">

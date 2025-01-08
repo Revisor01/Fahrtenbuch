@@ -99,7 +99,7 @@ import Modal from './Modal';
                     onChange={handleChange}
                     className={inputClasses}
                     placeholder="Kirchenkreis"
-                />
+                </div>
             </div>
             <div className="mt-6">
                 <button
@@ -262,6 +262,7 @@ export default function UserManagement() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 title="Neuen Benutzer erstellen"
+                size="compact"
             >
                 <UserForm onSubmit={handleCreate} isEdit={false} />
             </Modal>
@@ -270,6 +271,7 @@ export default function UserManagement() {
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 title="Benutzer bearbeiten"
+                size="compact"
             >
                 <UserForm onSubmit={handleEdit} isEdit={true} initialData={selectedUser} />
             </Modal>
