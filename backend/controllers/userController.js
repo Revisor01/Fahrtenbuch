@@ -274,21 +274,16 @@ exports.verifyEmail = async (req, res) => {
 };
 
 exports.requestPasswordReset = async (req, res) => {
+    console.log('userController.requestPasswordReset called with email:', email);
     try {
-        const { email } = req.body;
-        const user = await User.findByEmail(email);
-        
-        if (!user) {
-            // Aus Sicherheitsgründen geben wir die gleiche Erfolgsmeldung zurück
-            return res.json({ message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' });
-        }
-        
         const resetToken = await User.initiatePasswordReset(email);
+        console.log('Reset token generated:', resetToken);
+        const user = await User.findByEmail(email);
         await mailService.sendPasswordReset(email, user.username, resetToken);
-        
+        console.log('Password reset email sent to:', email);
         res.json({ message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' });
     } catch (error) {
-        console.error('Fehler beim Anfordern des Passwort-Resets:', error);
+        console.error('Error during password reset request:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
     }
 };
