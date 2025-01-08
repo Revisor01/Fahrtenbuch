@@ -32,8 +32,8 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
     return (
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                    <label className="block text-sm font-medium text-gray-700">
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">
                         E-Mail <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -41,12 +41,12 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         required
                     />
                 </div>
-                <div className="flex flex-col">
-                    <label className="block text-sm font-medium text-gray-700">
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">
                         Benutzername <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -54,81 +54,83 @@ const UserForm = ({ onSubmit, isEdit, initialData }) => {
                         name="username"
                         value={formData.username}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         required
                     />
                 </div>
 
-                <div className="flex flex-col">
-                    <label className="block text-sm font-medium text-gray-700">Rolle</label>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Rolle</label>
                     <select
                         name="role"
                         value={formData.role}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="user">Benutzer</option>
                         <option value="admin">Administrator</option>
                     </select>
                 </div>
-                <div className="flex flex-col">
-                  <label className="block text-sm font-medium text-gray-700">Voller Name</label>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Voller Name</label>
                     <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
                 
-                 <div className="flex flex-col">
-                    <label className="block text-sm font-medium text-gray-700">IBAN</label>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">IBAN</label>
                     <input
                         type="text"
                         name="iban"
                         value={formData.iban}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
-                 <div className="flex flex-col">
-                    <label className="block text-sm font-medium text-gray-700">Kirchengemeinde</label>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Kirchengemeinde</label>
                     <input
                         type="text"
                         name="kirchengemeinde"
                         value={formData.kirchengemeinde}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
-                <div className="flex flex-col">
-                   <label className="block text-sm font-medium text-gray-700">Kirchspiel</label>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Kirchspiel</label>
                     <input
                         type="text"
                         name="kirchspiel"
                         value={formData.kirchspiel}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
-                <div className="flex flex-col">
-                   <label className="block text-sm font-medium text-gray-700">Kirchenkreis</label>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Kirchenkreis</label>
                     <input
                         type="text"
                         name="kirchenkreis"
                         value={formData.kirchenkreis}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
             </div>
-            <button
-                type="submit"
-                className="w-full bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600 mt-6"
-            >
-                {isEdit ? 'Aktualisieren' : 'Erstellen'}
-            </button>
+            <div className="mt-6">
+                <button
+                    type="submit"
+                    className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-200"
+                >
+                    {isEdit ? 'Aktualisieren' : 'Erstellen'}
+                </button>
+            </div>
         </form>
     );
 };
@@ -191,67 +193,68 @@ export default function UserManagement() {
     };
 
     const openEditModal = (user) => {
-       setSelectedUser({
-          ...user,
-          fullName: user.full_name
-       });
+        setSelectedUser({
+            ...user,
+            fullName: user.full_name
+        });
         setIsEditModalOpen(true);
     };
-   const renderStatus = (email_verified) => {
-    if (email_verified === 1) {
-      return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Verifiziert</span>;
-    }
-       return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Nicht verifiziert</span>;
-   }
-
 
     return (
         <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Benutzerverwaltung</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h2 className="text-xl font-semibold text-gray-800">Benutzerverwaltung</h2>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200 transition duration-200 w-full sm:w-auto"
                 >
-                    Neuen Benutzer erstellen
+                    + Neuer Benutzer
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-               <div className="overflow-x-auto">
-                     <table className="w-full border-collapse text-left">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-3 py-2 text-sm font-medium">Benutzername</th>
-                                <th className="px-3 py-2 text-sm font-medium">E-Mail</th>
-                                 <th className="px-3 py-2 text-sm font-medium">Kirchengemeinde</th>
-                                <th className="px-3 py-2 text-sm font-medium">Rolle</th>
-                                 <th className="px-3 py-2 text-sm font-medium">Status</th>
-                                <th className="px-3 py-2 text-sm font-medium w-24">Aktionen</th>
+            <div className="bg-white rounded-lg shadow-sm">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <table className="w-full min-w-[640px]">
+                        <thead>
+                            <tr className="bg-gray-50 border-b">
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Benutzername</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">E-Mail</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kirchengemeinde</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rolle</th>
+                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-gray-200">
                             {users.map(user => (
-                                <tr key={user.id}>
-                                    <td className="border px-3 py-2 text-sm">{user.username}</td>
-                                    <td className="border px-3 py-2 text-sm">{user.email}</td>
-                                     <td className="border px-3 py-2 text-sm">{user.kirchengemeinde || '-'}</td>
-                                     <td className="border px-3 py-2 text-sm">
-                                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                           user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
-                                      }`}>
-                                           {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
-                                       </span>
-                                     </td>
-                                   <td className="border px-3 py-2 text-sm">
-                                     {renderStatus(user.email_verified)}
-                                   </td>
-                                    <td className="border px-3 py-2 text-sm space-x-1">
+                                <tr key={user.id} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3 text-sm text-gray-900">
+                                        <div className="flex flex-col">
+                                            <span>{user.username}</span>
+                                            <span className="text-xs text-gray-500 sm:hidden">{user.email}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{user.email}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">{user.kirchengemeinde || '-'}</td>
+                                    <td className="px-4 py-3 text-sm">
+                                        {user.email_verified ? (
+                                            <span className="text-green-600 text-xs">● Verifiziert</span>
+                                        ) : (
+                                            <span className="text-yellow-600 text-xs">○ Ausstehend</span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm hidden sm:table-cell">
+                                        <span className={`text-xs ${user.role === 'admin' ? 'text-purple-600' : 'text-blue-600'}`}>
+                                            {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-right">
                                         <button
                                             onClick={() => openEditModal(user)}
-                                            className="text-indigo-600 hover:text-indigo-900 text-xs px-2 py-1 rounded"
+                                            className="text-xs bg-blue-100 text-blue-700 px-2 rounded hover:bg-blue-200"
+                                            title="Bearbeiten"
                                         >
-                                            Bearbeiten
+                                            ✎
                                         </button>
                                         <button
                                             onClick={() => {
@@ -262,16 +265,17 @@ export default function UserManagement() {
                                                     true
                                                 );
                                             }}
-                                            className="text-red-600 hover:text-red-900 text-xs px-2 py-1 rounded"
+                                            className="text-xs bg-red-100 text-red-700 px-2 rounded ml-2 hover:bg-red-200"
+                                            title="Löschen"
                                         >
-                                            Löschen
+                                            ×
                                         </button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                 </div>
+                </div>
             </div>
 
             <Modal
