@@ -1868,55 +1868,106 @@ function DistanzenListe() {
   
   return (
     <div className="mb-4">
-    <h2 className="text-lg font-semibold mb-2 cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
+    <h2 className="text-xl font-semibold text-gray-800 mb-4 cursor-pointer" 
+    onClick={() => setIsCollapsed(!isCollapsed)}
+    >
     Distanzen {isCollapsed ? '▼' : '▲'}
     </h2>
+    
     {!isCollapsed && (
-      <table className="w-full border-collapse text-left">
-      <thead>
-      <tr className="bg-gray-200">
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('von_ort_id')}>Von</th>
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('nach_ort_id')}>Nach</th>
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('distanz')}>Distanz (km)</th>
-      <th className="border px-2 py-1 text-sm font-medium w-48">Aktion</th>
+      <div className="bg-white rounded-lg shadow-sm w-full">
+      <div className="overflow-x-auto w-full">
+      <table className="w-full">
+      <thead className="sm:table-header-group hidden">
+      <tr className="bg-gray-50 border-b">
+      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" 
+      onClick={() => requestSort('von_ort_id')}
+      >
+      Von
+      </th>
+      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+      onClick={() => requestSort('nach_ort_id')}
+      >
+      Nach
+      </th>
+      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+      onClick={() => requestSort('distanz')}
+      >
+      Distanz (km)
+      </th>
+      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+      Aktionen
+      </th>
       </tr>
       </thead>
-      <tbody>
+      <tbody className="divide-y divide-gray-200">
       {sortedDistanzen.map((distanz) => (
-        <tr key={distanz.id}>
-        <td className="border p-2 text-sm">{getOrtName(distanz.von_ort_id)}</td>
-        <td className="border p-2 text-sm">{getOrtName(distanz.nach_ort_id)}</td>
-        <td className="border p-2 text-sm">
+        <tr key={distanz.id} className="hover:bg-gray-50">
+        <td className="px-4 py-3 text-sm text-gray-900">
+        <div className="flex flex-col">
+        <span>{getOrtName(distanz.von_ort_id)}</span>
+        <span className="text-xs text-gray-500 sm:hidden">
+        → {getOrtName(distanz.nach_ort_id)}
+        </span>
+        </div>
+        </td>
+        <td className="px-4 py-3 text-sm text-gray-900 hidden sm:table-cell">
+        {getOrtName(distanz.nach_ort_id)}
+        </td>
+        <td className="px-4 py-3 text-sm text-gray-900">
         {editingDistanz?.id === distanz.id ? (
           <input
           type="number"
           value={editingDistanz.distanz}
-          onChange={(e) => setEditingDistanz({ ...editingDistanz, distanz: parseInt(e.target.value) })}
-          className="w-full p-1 border rounded"
+          onChange={(e) => setEditingDistanz({ 
+            ...editingDistanz, 
+            distanz: parseInt(e.target.value) 
+          })}
+          className="w-24 p-1 border rounded text-sm"
           />
         ) : (
-          distanz.distanz
+          `${distanz.distanz} km`
         )}
         </td>
-        <td className="border px-2 py-1 text-sm w-48">
+        <td className="px-4 py-3 text-sm">
+        <div className="flex sm:flex-row flex-col gap-2 justify-end">
         {editingDistanz?.id === distanz.id ? (
-          <button onClick={handleSave} className="bg-green-500 text-white px-2 py-1 rounded text-xs mr-1">Speichern</button>
+          <button
+          onClick={handleSave}
+          className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 w-full sm:w-auto text-center"
+          >
+          ✓
+          </button>
         ) : (
           <>
-          <button onClick={() => handleEdit(distanz)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">Bearbeiten</button>
-          <button onClick={() => handleDelete(distanz.id)} className="bg-red-500 text-white px-2 py-1 rounded text-xs">Löschen</button>
+          <button
+          onClick={() => handleEdit(distanz)}
+          className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 w-full sm:w-auto text-center"
+          title="Bearbeiten"
+          >
+          ✎
+          </button>
+          <button
+          onClick={() => handleDelete(distanz.id)}
+          className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 w-full sm:w-auto text-center"
+          title="Löschen"
+          >
+          ×
+          </button>
           </>
         )}
+        </div>
         </td>
         </tr>
       ))}
       </tbody>
       </table>
+      </div>
+      </div>
     )}
     </div>
   );
-}
-
+  
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
