@@ -1892,10 +1892,6 @@ function DistanzenListe() {
     <tr className="bg-primary-25 border-b border-primary-100">
     <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer" 
     onClick={() => requestSort('von_ort_id')}>
-    <thead>
-    <tr className="bg-primary-25 border-b border-primary-100">
-    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer" 
-    onClick={() => requestSort('von_ort_id')}>
     Von
     </th>
     <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
