@@ -1921,7 +1921,7 @@ function DistanzenListe() {
       <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
       {getOrtName(distanz.nach_ort_id)}
       </td>
-      <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
+      <td className="px-4 py-3 text-sm text-primary-900">
       {editingDistanz?.id === distanz.id ? (
         <input
         type="number"
