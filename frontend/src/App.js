@@ -473,7 +473,7 @@ function DistanzForm() {
     </select>
     </div>
     
-    <div className="w-full sm:w-32">
+    <div className="w-full sm:w-36">
     <input
     type="number"
     value={distanz}
