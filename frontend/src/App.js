@@ -1938,7 +1938,7 @@ function DistanzenListe() {
       {editingDistanz?.id === distanz.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-300 text-white px-3 py-1 rounded hover:bg-primary-400 transition-colors duration-150 w-full sm:w-auto text-center"
         >
         ✓
         </button>
@@ -1946,14 +1946,14 @@ function DistanzenListe() {
         <>
         <button
         onClick={() => handleEdit(distanz)}
-        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-300 text-white px-3 py-1 rounded hover:bg-primary-400 transition-colors duration-150 w-full sm:w-auto text-center"
         title="Bearbeiten"
         >
         ✎
         </button>
         <button
         onClick={() => handleDelete(distanz.id)}
-        className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-secondary-300 text-white px-3 py-1 rounded hover:bg-secondary-400 transition-colors duration-150 w-full sm:w-auto text-center"
         title="Löschen"
         >
         ×
