@@ -191,26 +191,28 @@ function FahrtForm() {
   };
 
   return (
-    <div className="p-4 bg-gray-100 rounded-lg">
-    <h2 className="text-lg font-semibold mb-4">Fahrt hinzufügen</h2>
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-center space-x-2 bg-gray-100 p-2 rounded-lg">
+    <div className="mb-4">
+    <div className="table-container">
+    <div className="bg-primary-25 p-6">
+    <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
     <input
     type="date"
     name="datum"
     value={formData.datum}
     onChange={handleChange}
-    className="w-32 p-1 border rounded text-sm"
+    className="form-input w-32"
     required
     />
-    <div className="w-40 input-container">
-    <label className="flex items-center mb-1 cursor-pointer">
+    
+    <div className="w-40">
+    <label className="flex items-center mb-2 cursor-pointer">
     <input
     type="checkbox"
     checked={useEinmaligenVonOrt}
     onChange={(e) => setUseEinmaligenVonOrt(e.target.checked)}
-    className="mr-2"
+    className="mr-2 text-primary-500"
     />
-    <span className="text-sm">Einmaliger Von-Ort</span>
+    <span className="text-sm text-primary-900">Einmaliger Von-Ort</span>
     </label>
     {useEinmaligenVonOrt ? (
       <input
@@ -219,7 +221,7 @@ function FahrtForm() {
       value={formData.einmaligerVonOrt}
       onChange={handleChange}
       placeholder="Von (einmalig)"
-      className="w-full p-1 border rounded text-sm h-8"
+      className="form-input"
       required
       />
     ) : (
@@ -227,7 +229,7 @@ function FahrtForm() {
       name="vonOrtId"
       value={formData.vonOrtId}
       onChange={handleChange}
-      className="w-full p-1 border rounded text-sm h-8"
+      className="form-select"
       required
       >
       <option value="">Von</option>
@@ -235,15 +237,16 @@ function FahrtForm() {
       </select>
     )}
     </div>
-    <div className="w-40 input-container">
-    <label className="flex items-center mb-1 cursor-pointer">
+    
+    <div className="w-40">
+    <label className="flex items-center mb-2 cursor-pointer">
     <input
     type="checkbox"
     checked={useEinmaligenNachOrt}
     onChange={(e) => setUseEinmaligenNachOrt(e.target.checked)}
-    className="mr-2"
+    className="mr-2 text-primary-500"
     />
-    <span className="text-sm">Einmaliger Nach-Ort</span>
+    <span className="text-sm text-primary-900">Einmaliger Nach-Ort</span>
     </label>
     {useEinmaligenNachOrt ? (
       <input
@@ -252,7 +255,7 @@ function FahrtForm() {
       value={formData.einmaligerNachOrt}
       onChange={handleChange}
       placeholder="Nach (einmalig)"
-      className="w-full p-1 border rounded text-sm h-8"
+      className="form-input"
       required
       />
     ) : (
@@ -260,7 +263,7 @@ function FahrtForm() {
       name="nachOrtId"
       value={formData.nachOrtId}
       onChange={handleChange}
-      className="w-full p-1 border rounded text-sm h-8"
+      className="form-select"
       required
       >
       <option value="">Nach</option>
@@ -268,22 +271,24 @@ function FahrtForm() {
       </select>
     )}
     </div>
-    <div className="flex items-center space-x-2">
+    
+    <div className="flex items-center gap-4">
     <label className="flex items-center">
     <input
     type="checkbox"
     name="autosplit"
     checked={formData.autosplit}
     onChange={handleChange}
-    className="mr-1"
+    className="mr-2 text-primary-500"
     disabled={useEinmaligenVonOrt || useEinmaligenNachOrt}
     />
-    <span className="text-sm">via Dienstort</span>
+    <span className="text-sm text-primary-900">via Dienstort</span>
     </label>
+    
     <div className="relative">
     <button
     type="button"
-    className="text-blue-500 hover:text-blue-700"
+    className="text-primary-500 hover:text-primary-600"
     onClick={() => setShowAutosplitInfo(!showAutosplitInfo)}
     >
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -291,24 +296,26 @@ function FahrtForm() {
     </svg>
     </button>
     {showAutosplitInfo && (
-      <div className="absolute z-10 w-64 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg">
+      <div className="absolute z-10 w-64 p-3 mt-1 text-sm bg-white rounded-lg shadow-lg border border-primary-100">
       Bei Aktivierung wird die Fahrt über den Dienstort geleitet. Die Strecke zum Dienstort wird über den Kirchenkreis abgerechnet, die restliche Strecke über die Gemeinde.
       </div>
     )}
     </div>
+    
     <label className="flex items-center">
     <input
     type="checkbox"
     checked={addRueckfahrt}
     onChange={(e) => setAddRueckfahrt(e.target.checked)}
-    className="mr-1"
+    className="mr-2 text-primary-500"
     />
-    <span className="text-sm">Rückfahrt</span>
+    <span className="text-sm text-primary-900">Rückfahrt</span>
     </label>
+    
     <div className="relative">
     <button
     type="button"
-    className="text-blue-500 hover:text-blue-700"
+    className="text-primary-500 hover:text-primary-600"
     onClick={() => setShowRueckfahrtInfo(!showRueckfahrtInfo)}
     >
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -316,21 +323,23 @@ function FahrtForm() {
     </svg>
     </button>
     {showRueckfahrtInfo && (
-      <div className="absolute z-10 w-64 p-2 mt-1 text-sm bg-white rounded-lg shadow-lg">
+      <div className="absolute z-10 w-64 p-3 mt-1 text-sm bg-white rounded-lg shadow-lg border border-primary-100">
       Bei Aktivierung wird automatisch eine Rückfahrt mit umgekehrter Strecke hinzugefügt.
       </div>
     )}
     </div>
     </div>
+    
     <input
     type="text"
     name="anlass"
     value={formData.anlass}
     onChange={handleChange}
     placeholder="Anlass"
-    className="w-62 p-1 border rounded text-sm"
+    className="form-input w-60"
     required
     />
+    
     <input
     type="number"
     name="manuelleKilometer"
@@ -338,36 +347,44 @@ function FahrtForm() {
     onChange={handleManuelleKilometerChange}
     onFocus={handleKilometerFocus}
     placeholder="km"
-    className="w-20 p-1 border rounded text-sm"
+    className="form-input w-20"
     required={useEinmaligenVonOrt || useEinmaligenNachOrt}
     disabled={formData.autosplit || (isKilometerLocked && !useEinmaligenVonOrt && !useEinmaligenNachOrt)}
     />
+    
     <select
     name="abrechnung"
     value={formData.abrechnung}
     onChange={handleChange}
-    className="w-32 p-1 border rounded text-sm"
+    className="form-select w-32"
     disabled={formData.autosplit}
     >
     <option value="Kirchenkreis">Kirchenkreis</option>
     <option value="Gemeinde">Gemeinde</option>
     <option value="Autosplit">Autosplit</option>
     </select>
+    
     <button
     type="button"
     onClick={() => setShowMitfahrerModal(true)}
-    className="bg-green-500 text-white px-2 py-1 rounded text-sm"
+    className="bg-primary-400 text-white px-4 h-9 rounded hover:bg-primary-500 transition-colors duration-200 text-sm shadow-sm"
     >
     Mitfahrer:in hinzufügen
     </button>
-    <div className="flex-grow"></div>
-    <button type="submit" className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Hinzufügen</button>
+    
+    <button 
+    type="submit" 
+    className="bg-primary-500 text-white px-6 h-9 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm ml-auto"
+    >
+    Hinzufügen
+    </button>
+    
     <div className="w-full">
-    <div className="flex flex-wrap mt-2">
+    <div className="flex flex-wrap gap-2 mt-2">
     {mitfahrer.map((person, index) => (
       <span
       key={index}
-      className="mr-1 cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
+      className="cursor-pointer bg-primary-100 rounded-full px-3 py-1 text-sm font-semibold text-primary-700 flex items-center"
       onClick={() => handleEditMitfahrer(index)}
       >
       👤 {person.name}
@@ -376,7 +393,7 @@ function FahrtForm() {
         e.stopPropagation();
         handleDeleteMitfahrer(index);
       }}
-      className="ml-1 text-red-500 hover:text-red-700"
+      className="ml-2 text-secondary-500 hover:text-secondary-600"
       >
       ❌
       </button>
@@ -385,10 +402,11 @@ function FahrtForm() {
     </div>
     </div>
     </form>
-    <div className="mt-4 h-16"> {/* Feste Höhe, um Springen zu vermeiden */}
+    
+    <div className="mt-4 min-h-[4rem] text-primary-900">
     {kalkulierteStrecke !== null ? (
       <>
-      <div className="font-bold text-sm">Kalkulierte Strecke: {kalkulierteStrecke} km</div>
+      <div className="font-semibold text-sm">Kalkulierte Strecke: {kalkulierteStrecke} km</div>
       {formData.autosplit && (
         <div className="text-sm mt-1">
         Via Dienstort: Kirchenkreis: {autosplitInfo.kirchenkreis} km | Gemeinde: {autosplitInfo.gemeinde} km
@@ -396,9 +414,12 @@ function FahrtForm() {
       )}
       </>
     ) : (
-      <div className="text-sm text-gray-500">Keine Strecke kalkuliert</div>
+      <div className="text-sm text-primary-400">Keine Strecke kalkuliert</div>
     )}
     </div>
+    </div>
+    </div>
+    
     {showMitfahrerModal && (
       <MitfahrerModal
       isOpen={showMitfahrerModal}
@@ -410,14 +431,15 @@ function FahrtForm() {
       initialData={editingMitfahrerIndex !== null ? mitfahrer[editingMitfahrerIndex] : null}
       />
     )}
+    
     {showKilometerWarning && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded">
-      <p>Es existiert bereits eine berechnete Strecke. Möchten Sie wirklich manuell Kilometer eintragen?</p>
-      <div className="mt-4 flex justify-end space-x-2">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md">
+      <p className="text-primary-900">Es existiert bereits eine berechnete Strecke. Möchten Sie wirklich manuell Kilometer eintragen?</p>
+      <div className="mt-4 flex justify-end gap-3">
       <button 
       onClick={unlockKilometerField} 
-      className="px-4 py-2 bg-blue-500 text-white rounded"
+      className="bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 transition-colors duration-200"
       >
       Ja
       </button>
@@ -426,7 +448,7 @@ function FahrtForm() {
         setShowKilometerWarning(false);
         setFormData(prev => ({ ...prev, manuelleKilometer: kalkulierteStrecke.toString() }));
       }} 
-      className="px-4 py-2 bg-gray-300 rounded"
+      className="bg-primary-100 text-primary-700 px-4 py-2 rounded hover:bg-primary-200 transition-colors duration-200"
       >
       Nein
       </button>

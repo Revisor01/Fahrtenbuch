@@ -1890,18 +1890,27 @@ function DistanzenListe() {
     <table className="w-full">
     <thead>
     <tr className="bg-primary-25 border-b border-primary-100">
-    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer" 
-    onClick={() => requestSort('von_ort_id')}>
+    <th
+    className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    onClick={() => requestSort('von_ort_id')}
+    >
     Von
     </th>
-    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
-    onClick={() => requestSort('nach_ort_id')}>
+    <th
+    className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    onClick={() => requestSort('nach_ort_id')}
+    >
     Nach
     </th>
-    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
-    onClick={() => requestSort('distanz')}>
-    Distanz (km)
+    {/* Distanz wird immer angezeigt, aber mit einem kleinen Trick*/}
+    <th
+    className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    onClick={() => requestSort('distanz')}
+    >
+    <span className="sm:hidden">km</span>
+    <span className="hidden sm:inline">Distanz (km)</span>
     </th>
+    
     <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider">
     Aktionen
     </th>
@@ -1921,12 +1930,18 @@ function DistanzenListe() {
       <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
       {getOrtName(distanz.nach_ort_id)}
       </td>
+      {/* Distanz wird jetzt immer angezeigt */}
       <td className="px-4 py-3 text-sm text-primary-900">
       {editingDistanz?.id === distanz.id ? (
         <input
         type="number"
         value={editingDistanz.distanz}
-        onChange={(e) => setEditingDistanz({ ...editingDistanz, distanz: parseInt(e.target.value) })}
+        onChange={(e) =>
+          setEditingDistanz({
+            ...editingDistanz,
+            distanz: parseInt(e.target.value),
+          })
+        }
         className="form-input w-24"
         />
       ) : (
