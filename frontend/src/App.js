@@ -446,42 +446,58 @@ function DistanzForm() {
   
   return (
     <div className="bg-white rounded-lg shadow-sm w-full mb-6">
-    <div className="p-4">
-    <h2 className="text-xl font-semibold text-gray-800 mb-4">Neue Distanz hinzufügen</h2>
-    <form onSubmit={handleSubmit} className="flex items-center gap-3">
+    <div className="p-6">
+    <h2 className="text-xl font-semibold text-gray-800 mb-6">Neue Distanz hinzufügen</h2>
+    
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+    <div className="w-full sm:flex-1">
     <select
     value={vonOrtId}
     onChange={(e) => setVonOrtId(e.target.value)}
-    className="w-1/3 p-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+    className="w-full h-10 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     required
     >
     <option value="">Von Ort auswählen</option>
     {renderOrteOptions(orte)}
     </select>
+    </div>
+    
+    <div className="w-full sm:flex-1">
     <select
     value={nachOrtId}
     onChange={(e) => setNachOrtId(e.target.value)}
-    className="w-1/3 p-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+    className="w-full h-10 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     required
     >
     <option value="">Nach Ort auswählen</option>
     {renderOrteOptions(orte)}
     </select>
+    </div>
+    
+    <div className="w-full sm:w-32">
     <input
     type="number"
     value={distanz}
     onChange={(e) => setDistanz(e.target.value)}
-    placeholder="Distanz in km"
-    className="w-32 p-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+    placeholder="km"
+    className="w-full h-10 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     required
     />
+    </div>
+    
     <button 
     type="submit" 
-    className="bg-blue-100 text-blue-700 px-4 py-2 rounded hover:bg-blue-200 transition-colors duration-200 text-sm ml-auto"
+    className="w-full sm:w-auto px-6 h-10 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200 text-sm whitespace-nowrap"
     >
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
+    
+    {existingDistanz && (
+      <div className="mt-4 text-sm text-gray-500">
+      Bestehende Distanz wird aktualisiert
+      </div>
+    )}
     </div>
     </div>
   );
