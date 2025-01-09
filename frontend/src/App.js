@@ -445,16 +445,16 @@ function DistanzForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
-    <div className="bg-white rounded-lg shadow-sm w-full mb-6">
-    <div className="p-6">
+    <div className="bg-gray-50 rounded-lg shadow-sm w-full mb-6 p-1"> {/* Äußerer Container mit hellgrauem Hintergrund */}
+    <div className="bg-white rounded-lg p-6 shadow-sm"> {/* Innerer Container */}
     <h2 className="text-xl font-semibold text-gray-800 mb-6">Neue Distanz hinzufügen</h2>
     
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 bg-gray-50 p-4 rounded-lg"> {/* Formular mit kontrastierendem Hintergrund */}
     <div className="w-full sm:flex-1">
     <select
     value={vonOrtId}
     onChange={(e) => setVonOrtId(e.target.value)}
-    className="w-full h-10 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    className="w-full h-11 px-3 bg-white border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
     required
     >
     <option value="">Von Ort auswählen</option>
@@ -466,7 +466,7 @@ function DistanzForm() {
     <select
     value={nachOrtId}
     onChange={(e) => setNachOrtId(e.target.value)}
-    className="w-full h-10 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    className="w-full h-11 px-3 bg-white border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
     required
     >
     <option value="">Nach Ort auswählen</option>
@@ -480,14 +480,14 @@ function DistanzForm() {
     value={distanz}
     onChange={(e) => setDistanz(e.target.value)}
     placeholder="km"
-    className="w-full h-10 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    className="w-full h-11 px-3 bg-white border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm"
     required
     />
     </div>
     
     <button 
     type="submit" 
-    className="w-full sm:w-auto px-6 h-10 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200 text-sm whitespace-nowrap"
+    className="w-full sm:w-auto px-6 h-11 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm"
     >
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
