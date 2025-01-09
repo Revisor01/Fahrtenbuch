@@ -445,16 +445,16 @@ function DistanzForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
-    <div className="bg-teal-50 rounded-lg shadow-sm w-full mb-6 p-1">
+    <div className="bg-cyan-50 rounded-lg shadow-sm w-full mb-6 p-1">
     <div className="bg-white rounded-lg p-6 shadow-sm">
-    <h2 className="text-xl font-semibold text-teal-950 mb-6">Neue Distanz hinzufügen</h2>
+    <h2 className="text-xl font-semibold text-cyan-950 mb-6">Neue Distanz hinzufügen</h2>
     
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 bg-teal-50 p-4 rounded-lg border border-teal-300">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 bg-cyan-50 p-4 rounded-lg border border-cyan-300">
     <div className="w-full sm:flex-1">
     <select
     value={vonOrtId}
     onChange={(e) => setVonOrtId(e.target.value)}
-    className="w-full h-9 px-3 bg-white border border-teal-300 rounded-md text-sm focus:ring-2 focus:ring-teal-400 focus:border-transparent shadow-sm text-teal-950"
+    className="w-full h-9 px-3 bg-white border border-cyan-300 rounded-md text-sm focus:ring-2 focus:ring-cyan-400 focus:border-transparent shadow-sm text-cyan-950"
     required
     >
     <option value="">Von Ort auswählen</option>
@@ -466,7 +466,7 @@ function DistanzForm() {
     <select
     value={nachOrtId}
     onChange={(e) => setNachOrtId(e.target.value)}
-    className="w-full h-9 px-3 bg-white border border-teal-300 rounded-md text-sm focus:ring-2 focus:ring-teal-400 focus:border-transparent shadow-sm text-teal-950"
+    className="w-full h-9 px-3 bg-white border border-cyan-300 rounded-md text-sm focus:ring-2 focus:ring-cyan-400 focus:border-transparent shadow-sm text-cyan-950"
     required
     >
     <option value="">Nach Ort auswählen</option>
@@ -480,21 +480,21 @@ function DistanzForm() {
     value={distanz}
     onChange={(e) => setDistanz(e.target.value)}
     placeholder="km"
-    className="w-full h-9 px-3 bg-white border border-teal-300 rounded-md text-sm focus:ring-2 focus:ring-teal-400 focus:border-transparent shadow-sm text-teal-950"
+    className="w-full h-9 px-3 bg-white border border-cyan-300 rounded-md text-sm focus:ring-2 focus:ring-cyan-400 focus:border-transparent shadow-sm text-cyan-950"
     required
     />
     </div>
     
     <button 
     type="submit" 
-    className="w-full sm:w-auto px-6 h-9 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm"
+    className="w-full sm:w-auto px-6 h-9 bg-cyan-500 text-white rounded-md hover:bg-cyan-600 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm"
     >
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
     
     {existingDistanz && (
-      <div className="mt-4 text-sm text-teal-950">
+      <div className="mt-4 text-sm text-cyan-950">
       Bestehende Distanz wird aktualisiert
       </div>
     )}
@@ -1889,55 +1889,55 @@ function DistanzenListe() {
   
   return (
     <div className="mb-4">
-    <h2 className="text-xl font-semibold text-teal-950 mb-4 cursor-pointer" 
+    <h2 className="text-xl font-semibold text-cyan-950 mb-4 cursor-pointer" 
     onClick={() => setIsCollapsed(!isCollapsed)}>
     Distanzen {isCollapsed ? '▼' : '▲'}
     </h2>
     
     {!isCollapsed && (
-      <div className="bg-white rounded-lg shadow-sm w-full border border-teal-100">
+      <div className="bg-white rounded-lg shadow-sm w-full border border-cyan-50">
       <div className="overflow-x-auto w-full">
       <table className="w-full">
       <thead className="sm:table-header-group hidden">
-      <tr className="bg-teal-50 border-b border-teal-200">
-      <th className="px-4 py-3 text-left text-xs font-medium text-teal-950 uppercase tracking-wider cursor-pointer" 
+      <tr className="bg-cyan-50 border-b border-cyan-200">
+      <th className="px-4 py-3 text-left text-xs font-medium text-cyan-950 uppercase tracking-wider cursor-pointer" 
       onClick={() => requestSort('von_ort_id')}>
       Von
       </th>
-      <th className="px-4 py-3 text-left text-xs font-medium text-teal-950 uppercase tracking-wider cursor-pointer"
+      <th className="px-4 py-3 text-left text-xs font-medium text-cyan-950 uppercase tracking-wider cursor-pointer"
       onClick={() => requestSort('nach_ort_id')}>
       Nach
       </th>
-      <th className="px-4 py-3 text-left text-xs font-medium text-teal-950 uppercase tracking-wider cursor-pointer"
+      <th className="px-4 py-3 text-left text-xs font-medium text-cyan-950 uppercase tracking-wider cursor-pointer"
       onClick={() => requestSort('distanz')}>
       Distanz (km)
       </th>
-      <th className="px-4 py-3 text-right text-xs font-medium text-teal-950 uppercase tracking-wider">
+      <th className="px-4 py-3 text-right text-xs font-medium text-cyan-950 uppercase tracking-wider">
       Aktionen
       </th>
       </tr>
       </thead>
-      <tbody className="divide-y divide-teal-100">
+      <tbody className="divide-y divide-cyan-50">
       {sortedDistanzen.map((distanz) => (
-        <tr key={distanz.id} className="hover:bg-teal-50 transition-colors duration-150">
-        <td className="px-4 py-3 text-sm text-teal-950">
+        <tr key={distanz.id} className="hover:bg-cyan-50 transition-colors duration-150">
+        <td className="px-4 py-3 text-sm text-cyan-950">
         <div className="flex flex-col">
         <span>{getOrtName(distanz.von_ort_id)}</span>
-        <span className="text-xs text-teal-600 sm:hidden">
+        <span className="text-xs text-cyan-600 sm:hidden">
         → {getOrtName(distanz.nach_ort_id)}
         </span>
         </div>
         </td>
-        <td className="px-4 py-3 text-sm text-teal-950 hidden sm:table-cell">
+        <td className="px-4 py-3 text-sm text-cyan-950 hidden sm:table-cell">
         {getOrtName(distanz.nach_ort_id)}
         </td>
-        <td className="px-4 py-3 text-sm text-teal-950">
+        <td className="px-4 py-3 text-sm text-cyan-950">
         {editingDistanz?.id === distanz.id ? (
           <input
           type="number"
           value={editingDistanz.distanz}
           onChange={(e) => setEditingDistanz({ ...editingDistanz, distanz: parseInt(e.target.value) })}
-          className="w-24 h-9 px-3 bg-white border border-teal-300 rounded-md text-sm focus:ring-2 focus:ring-teal-400 focus:border-transparent shadow-sm text-teal-950"
+          className="w-24 h-9 px-3 bg-white border border-cyan-300 rounded-md text-sm focus:ring-2 focus:ring-cyan-400 focus:border-transparent shadow-sm text-cyan-950"
           />
         ) : (
           `${distanz.distanz} km`
@@ -1948,7 +1948,7 @@ function DistanzenListe() {
         {editingDistanz?.id === distanz.id ? (
           <button
           onClick={handleSave}
-          className="text-sm bg-teal-100 text-teal-700 px-3 py-1 rounded hover:bg-teal-200 w-full sm:w-auto text-center"
+          className="text-sm bg-cyan-50 text-cyan-700 px-3 py-1 rounded hover:bg-cyan-200 w-full sm:w-auto text-center"
           >
           ✓
           </button>
@@ -1956,7 +1956,7 @@ function DistanzenListe() {
           <>
           <button
           onClick={() => handleEdit(distanz)}
-          className="text-sm bg-teal-100 text-teal-700 px-3 py-1 rounded hover:bg-teal-200 w-full sm:w-auto text-center"
+          className="text-sm bg-cyan-50 text-cyan-700 px-3 py-1 rounded hover:bg-cyan-200 w-full sm:w-auto text-center"
           title="Bearbeiten"
           >
           ✎
