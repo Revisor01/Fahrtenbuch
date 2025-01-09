@@ -1892,9 +1892,13 @@ function DistanzenListe() {
     <tr className="bg-primary-25 border-b border-primary-100">
     <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer" 
     onClick={() => requestSort('von_ort_id')}>
+    <thead>
+    <tr className="bg-primary-25 border-b border-primary-100">
+    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer" 
+    onClick={() => requestSort('von_ort_id')}>
     Von
     </th>
-    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
     onClick={() => requestSort('nach_ort_id')}>
     Nach
     </th>
@@ -1918,10 +1922,10 @@ function DistanzenListe() {
       </span>
       </div>
       </td>
-      <td className="px-4 py-3 text-sm text-primary-900 hidden sm:table-cell">
+      <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
       {getOrtName(distanz.nach_ort_id)}
       </td>
-      <td className="px-4 py-3 text-sm text-primary-900">
+      <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
       {editingDistanz?.id === distanz.id ? (
         <input
         type="number"
@@ -1938,7 +1942,7 @@ function DistanzenListe() {
       {editingDistanz?.id === distanz.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-300 text-white px-3 py-1 rounded hover:bg-primary-400 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-200 text-white px-3 py-1 rounded hover:bg-primary-300 transition-colors duration-150 w-full sm:w-auto text-center"
         >
         ✓
         </button>
@@ -1946,14 +1950,14 @@ function DistanzenListe() {
         <>
         <button
         onClick={() => handleEdit(distanz)}
-        className="bg-primary-300 text-white px-3 py-1 rounded hover:bg-primary-400 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-200 text-white px-3 py-1 rounded hover:bg-primary-300 transition-colors duration-150 w-full sm:w-auto text-center"
         title="Bearbeiten"
         >
         ✎
         </button>
         <button
         onClick={() => handleDelete(distanz.id)}
-        className="bg-secondary-300 text-white px-3 py-1 rounded hover:bg-secondary-400 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-secondary-200 text-white px-3 py-1 rounded hover:bg-secondary-300 transition-colors duration-150 w-full sm:w-auto text-center"
         title="Löschen"
         >
         ×
