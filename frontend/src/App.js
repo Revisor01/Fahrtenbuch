@@ -446,9 +446,8 @@ function DistanzForm() {
   
   return (
     <div className="mb-4">
-    <h2 className="text-xl font-semibold text-primary-900 mb-4">Neue Distanz hinzufügen</h2>
-    
-    <div className="table-container p-6">
+    <div className="table-container">
+    <div className="bg-primary-25 p-6">
     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
     <div className="w-full sm:flex-1">
     <select
@@ -485,7 +484,7 @@ function DistanzForm() {
     />
     </div>
     
-    <button type="submit" className="bg-primary-600 text-white px-6 h-9 rounded-md hover:bg-primary-700 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm">
+    <button type="submit" className="bg-primary-500 text-white px-6 h-9 rounded-md hover:bg-primary-600 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm">
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
@@ -495,6 +494,7 @@ function DistanzForm() {
       Bestehende Distanz wird aktualisiert
       </div>
     )}
+    </div>
     </div>
     </div>
   );
@@ -1885,97 +1885,88 @@ function DistanzenListe() {
   };
   
   return (
-    <div className="mb-4">
-    <h2 className="text-xl font-semibold text-primary-900 mb-4 cursor-pointer" 
-    onClick={() => setIsCollapsed(!isCollapsed)}>
-    Distanzen {isCollapsed ? '▼' : '▲'}
-    </h2>
-    
-    {!isCollapsed && (
-      <div className="table-container">
-      <div className="overflow-x-auto w-full">
-      <table className="w-full">
-      <thead className="sm:table-header-group hidden">
-      <tr className="bg-primary-25 border-b border-primary-100">
-      <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer" 
-      onClick={() => requestSort('von_ort_id')}>
-      Von
-      </th>
-      <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
-      onClick={() => requestSort('nach_ort_id')}>
-      Nach
-      </th>
-      <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
-      onClick={() => requestSort('distanz')}>
-      Distanz (km)
-      </th>
-      <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider">
-      Aktionen
-      </th>
+    <div className="table-container">
+    <div className="overflow-x-auto w-full">
+    <table className="w-full">
+    <thead>
+    <tr className="bg-primary-25 border-b border-primary-100">
+    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer" 
+    onClick={() => requestSort('von_ort_id')}>
+    Von
+    </th>
+    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    onClick={() => requestSort('nach_ort_id')}>
+    Nach
+    </th>
+    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    onClick={() => requestSort('distanz')}>
+    Distanz (km)
+    </th>
+    <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider">
+    Aktionen
+    </th>
+    </tr>
+    </thead>
+    <tbody className="divide-y divide-primary-50">
+    {sortedDistanzen.map((distanz) => (
+      <tr key={distanz.id} className="hover:bg-primary-25 transition-colors duration-150">
+      <td className="px-4 py-3 text-sm text-primary-900">
+      <div className="flex flex-col">
+      <span>{getOrtName(distanz.von_ort_id)}</span>
+      <span className="text-xs text-primary-500 sm:hidden">
+      → {getOrtName(distanz.nach_ort_id)}
+      </span>
+      </div>
+      </td>
+      <td className="px-4 py-3 text-sm text-primary-900 hidden sm:table-cell">
+      {getOrtName(distanz.nach_ort_id)}
+      </td>
+      <td className="px-4 py-3 text-sm text-primary-900">
+      {editingDistanz?.id === distanz.id ? (
+        <input
+        type="number"
+        value={editingDistanz.distanz}
+        onChange={(e) => setEditingDistanz({ ...editingDistanz, distanz: parseInt(e.target.value) })}
+        className="form-input w-24"
+        />
+      ) : (
+        `${distanz.distanz} km`
+      )}
+      </td>
+      <td className="px-4 py-3 text-sm">
+      <div className="flex sm:flex-row flex-col gap-2 justify-end">
+      {editingDistanz?.id === distanz.id ? (
+        <button
+        onClick={handleSave}
+        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        >
+        ✓
+        </button>
+      ) : (
+        <>
+        <button
+        onClick={() => handleEdit(distanz)}
+        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        title="Bearbeiten"
+        >
+        ✎
+        </button>
+        <button
+        onClick={() => handleDelete(distanz.id)}
+        className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        title="Löschen"
+        >
+        ×
+        </button>
+        </>
+      )}
+      </div>
+      </td>
       </tr>
-      </thead>
-      <tbody className="divide-y divide-primary-50">
-      {sortedDistanzen.map((distanz) => (
-        <tr key={distanz.id} className="hover:bg-primary-25 transition-colors duration-150">
-        <td className="px-4 py-3 text-sm text-primary-900">
-        <div className="flex flex-col">
-        <span>{getOrtName(distanz.von_ort_id)}</span>
-        <span className="text-xs text-primary-500 sm:hidden">
-        → {getOrtName(distanz.nach_ort_id)}
-        </span>
-        </div>
-        </td>
-        <td className="px-4 py-3 text-sm text-primary-900 hidden sm:table-cell">
-        {getOrtName(distanz.nach_ort_id)}
-        </td>
-        <td className="px-4 py-3 text-sm text-primary-900">
-        {editingDistanz?.id === distanz.id ? (
-          <input
-          type="number"
-          value={editingDistanz.distanz}
-          onChange={(e) => setEditingDistanz({ ...editingDistanz, distanz: parseInt(e.target.value) })}
-          className="form-input w-24"
-          />
-        ) : (
-          `${distanz.distanz} km`
-        )}
-        </td>
-        <td className="px-4 py-3 text-sm">
-        <div className="flex sm:flex-row flex-col gap-2 justify-end">
-        {editingDistanz?.id === distanz.id ? (
-          <button
-          onClick={handleSave}
-          className="bg-primary-600 text-white px-3 py-1 rounded hover:bg-primary-700 transition-colors duration-150 w-full sm:w-auto text-center"
-          >
-          ✓
-          </button>
-        ) : (
-          <>
-          <button
-          onClick={() => handleEdit(distanz)}
-          className="bg-primary-600 text-white px-3 py-1 rounded hover:bg-primary-700 transition-colors duration-150 w-full sm:w-auto text-center"
-          title="Bearbeiten"
-          >
-          ✎
-          </button>
-          <button
-          onClick={() => handleDelete(distanz.id)}
-          className="bg-secondary-600 text-white px-3 py-1 rounded hover:bg-secondary-700 transition-colors duration-150 w-full sm:w-auto text-center"
-          title="Löschen"
-          >
-          ×
-          </button>
-          </>
-        )}
-        </div>
-        </td>
-        </tr>
-      ))}
-      </tbody>
-      </table>
-      </div>
-      </div>
-    )}
+    ))}
+    </tbody>
+    </table>
+    </div>
     </div>
   );
 }
