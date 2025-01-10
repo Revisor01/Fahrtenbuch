@@ -1,7 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import axios from 'axios';
 import './index.css';
-import './App.css';
 import ProfileModal from './ProfileModal';
 import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
