@@ -139,147 +139,151 @@
   
   if (!isOpen) return null;
   
-        return (
-            <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            title="Profil"
-            size="compact"
-            >
-            <div className="space-y-4">
-            <form onSubmit={handleProfileUpdate} className="space-y-3">
-            <div className="relative">
-            <input
-            type="email"
-            placeholder="E-Mail"
-            value={profile.email || ''}
-            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            className={`${inputClasses} ${
-                profile.email_verified 
-                ? 'border-green-200 bg-green-50' 
-                : 'border-yellow-200 bg-yellow-50'
-            }`}
-            />
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-            {profile.email_verified ? (
-                <span className="text-green-600 text-xs">● Verifiziert</span>
-            ) : (
-                <>
-                <span className="text-yellow-600 text-xs">○ Ausstehend</span>
-                <button
-                type="button"
-                onClick={handleResendVerification}
-                className="text-blue-600 hover:text-blue-800 text-xs"
-                >
-                Erneut senden
-                </button>
-                </>
-            )}
-            </div>
-            </div>
-            
-            <input
-            type="text"
-            placeholder="Voller Name"
-            value={profile.fullName || ''}
-            onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-            className={inputClasses}
-            />
-            
-            <input
-            type="text"
-            placeholder="IBAN"
-            value={profile.iban || ''}
-            onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
-            className={inputClasses}
-            />
-            
-            <input
-            type="text"
-            placeholder="Kirchengemeinde"
-            value={profile.kirchengemeinde || ''}
-            onChange={(e) => setProfile({ ...profile, kirchengemeinde: e.target.value })}
-            className={inputClasses}
-            />
-            
-            <input
-            type="text"
-            placeholder="Kirchspiel"
-            value={profile.kirchspiel || ''}
-            onChange={(e) => setProfile({ ...profile, kirchspiel: e.target.value })}
-            className={inputClasses}
-            />
-            
-            <input
-            type="text"
-            placeholder="Kirchenkreis"
-            value={profile.kirchenkreis || ''}
-            onChange={(e) => setProfile({ ...profile, kirchenkreis: e.target.value })}
-            className={inputClasses}
-            />
-            
-            <button type="submit" className={buttonClasses}>
-            Profil aktualisieren
-            </button>
-            </form>
-            
-            <div className="border-t border-gray-200 my-6"></div>
-            
-            <form onSubmit={handlePasswordChange} className="space-y-3">
-            <input
-            type="password"
-            placeholder="Altes Passwort"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            className={inputClasses}
-            />
-            <input
-            type="password"
-            placeholder="Neues Passwort"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className={inputClasses}
-            />
-            <input
-            type="password"
-            placeholder="Neues Passwort bestätigen"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className={inputClasses}
-            />
-            <button type="submit" className={`${buttonClasses} bg-green-100 text-green-700 hover:bg-green-200`}>
-            Passwort ändern
-            </button>
-            </form>
-            
-            <div className="border-t border-gray-200 my-6"></div>
-            
-            <div className="space-y-2">
-            {profile.wohnort ? (
-                <p className="text-sm text-gray-500">Heimatort: {profile.wohnort_adresse}</p>
-            ) : (
-                <p className="text-sm text-yellow-600">● Bitte Heimatort festlegen</p>
-            )}
-            {profile.dienstort ? (
-                <p className="text-sm text-gray-500">Dienstort: {profile.dienstort_adresse}</p>
-            ) : (
-                <p className="text-sm text-yellow-600">● Bitte Dienstort festlegen</p>
-            )}
-            </div>
-            </div>
-            
-            {showMessage && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowMessage(false)}>
-                <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
-                <p className="mb-4">{message}</p>
-                <button onClick={() => setShowMessage(false)} className={buttonClasses}>
-                OK
-                </button>
-                </div>
-                </div>
-            )}
-            </Modal>
-        );
+    return (
+      <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Profil"
+      size="compact"
+      >
+      <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+      {/* Profil-Formular */}
+      <form onSubmit={handleProfileUpdate} className="space-y-4">
+      <div className="relative">
+      <input
+      type="email"
+      placeholder="E-Mail"
+      value={profile.email || ''}
+      onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+      className={`form-input ${
+        profile.email_verified 
+        ? 'border-primary-200 bg-primary-50' 
+        : 'border-secondary-200 bg-secondary-50'
+      }`}
+      />
+      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+      {profile.email_verified ? (
+        <span className="text-primary-600 text-xs">● Verifiziert</span>
+      ) : (
+        <>
+        <span className="text-secondary-600 text-xs">○ Ausstehend</span>
+        <button
+        type="button"
+        onClick={handleResendVerification}
+        className="text-primary-600 hover:text-primary-700 text-xs"
+        >
+        Erneut senden
+        </button>
+        </>
+      )}
+      </div>
+      </div>
+      
+      <input
+      type="text"
+      placeholder="Voller Name"
+      value={profile.fullName || ''}
+      onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+      className="form-input"
+      />
+      
+      <input
+      type="text"
+      placeholder="IBAN"
+      value={profile.iban || ''}
+      onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
+      className="form-input"
+      />
+      
+      <input
+      type="text"
+      placeholder="Kirchengemeinde"
+      value={profile.kirchengemeinde || ''}
+      onChange={(e) => setProfile({ ...profile, kirchengemeinde: e.target.value })}
+      className="form-input"
+      />
+      
+      <input
+      type="text"
+      placeholder="Kirchspiel"
+      value={profile.kirchspiel || ''}
+      onChange={(e) => setProfile({ ...profile, kirchspiel: e.target.value })}
+      className="form-input"
+      />
+      
+      <input
+      type="text"
+      placeholder="Kirchenkreis"
+      value={profile.kirchenkreis || ''}
+      onChange={(e) => setProfile({ ...profile, kirchenkreis: e.target.value })}
+      className="form-input"
+      />
+      
+      <button type="submit" className="btn-primary w-full">
+      Profil aktualisieren
+      </button>
+      </form>
+      
+      <div className="border-t border-primary-200"></div>
+      
+      {/* Passwort-Formular */}
+      <form onSubmit={handlePasswordChange} className="space-y-4">
+      <input
+      type="password"
+      placeholder="Altes Passwort"
+      value={oldPassword}
+      onChange={(e) => setOldPassword(e.target.value)}
+      className="form-input"
+      />
+      <input
+      type="password"
+      placeholder="Neues Passwort"
+      value={newPassword}
+      onChange={(e) => setNewPassword(e.target.value)}
+      className="form-input"
+      />
+      <input
+      type="password"
+      placeholder="Neues Passwort bestätigen"
+      value={confirmPassword}
+      onChange={(e) => setConfirmPassword(e.target.value)}
+      className="form-input"
+      />
+      <button type="submit" className="btn-secondary w-full">
+      Passwort ändern
+      </button>
+      </form>
+      
+      <div className="border-t border-primary-200"></div>
+      
+      {/* Ortsinfos */}
+      <div className="space-y-2">
+      {profile.wohnort ? (
+        <p className="text-sm text-primary-600">Heimatort: {profile.wohnort_adresse}</p>
+      ) : (
+        <p className="text-sm text-secondary-600">● Bitte Heimatort festlegen</p>
+      )}
+      {profile.dienstort ? (
+        <p className="text-sm text-primary-600">Dienstort: {profile.dienstort_adresse}</p>
+      ) : (
+        <p className="text-sm text-secondary-600">● Bitte Dienstort festlegen</p>
+      )}
+      </div>
+      
+      {/* Benachrichtigung */}
+      {showMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowMessage(false)}>
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
+        <p className="mb-4 text-primary-900">{message}</p>
+        <button onClick={() => setShowMessage(false)} className="btn-primary w-full">
+        OK
+        </button>
+        </div>
+        </div>
+      )}
+      </div>
+      </Modal>
+    );
     }
 
 export default ProfileModal;
