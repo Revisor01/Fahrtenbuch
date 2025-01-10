@@ -357,7 +357,6 @@ function OrtForm() {
     {/* Alle Eingabefelder in einer Zeile auf Desktop */}
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
     <div className="w-full sm:w-1/4">
-    //<label className="block mb-1 text-sm text-primary-900">Name</label>
     <input
     type="text"
     value={name}
@@ -368,7 +367,6 @@ function OrtForm() {
     />
     </div>
     <div className="w-full sm:w-2/5">
-    //<label className="block mb-1 text-sm text-primary-900">Adresse</label>
     <input
     type="text"
     value={adresse}
@@ -379,7 +377,6 @@ function OrtForm() {
     />
     </div>
     <div className="w-full sm:w-1/5">
-    //<label className="block mb-1 text-sm text-primary-900">Art des Ortes</label>
     <select
     value={ortTyp} // Das müsste als State definiert sein
     onChange={(e) => {
@@ -391,7 +388,7 @@ function OrtForm() {
     }}
     className="form-select w-full h-8"
     >
-    <option value="">Bitte wählen</option>
+    <option value="">Art des Ortes</option>
     {!hasWohnort && <option value="wohnort">Wohnort</option>}
     {!hasDienstort && <option value="dienstort">Dienstort</option>}
     <option value="kirchspiel">Kirchspiel</option>
