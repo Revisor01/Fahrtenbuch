@@ -453,7 +453,7 @@ function DistanzForm() {
     <select
     value={vonOrtId}
     onChange={(e) => setVonOrtId(e.target.value)}
-    className="form-select"
+    className="form-select w-full h-8"
     required
     >
     <option value="">Von Ort auswählen</option>
@@ -465,7 +465,7 @@ function DistanzForm() {
     <select
     value={nachOrtId}
     onChange={(e) => setNachOrtId(e.target.value)}
-    className="form-select"
+    className="form-select w-full h-8"
     required
     >
     <option value="">Nach Ort auswählen</option>
@@ -479,12 +479,15 @@ function DistanzForm() {
     value={distanz}
     onChange={(e) => setDistanz(e.target.value)}
     placeholder="km"
-    className="form-input"
+    className="form-input w-full h-8"
     required
     />
     </div>
     
-    <button type="submit" className="bg-primary-500 text-white px-6 h-9 rounded-md hover:bg-primary-600 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm">
+    <button 
+    type="submit" 
+    className="bg-primary-500 text-white px-6 h-8 rounded-md hover:bg-primary-600 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm"
+    >
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
@@ -1953,7 +1956,7 @@ function DistanzenListe() {
       {editingDistanz?.id === distanz.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-200 text-white px-3 py-1 rounded hover:bg-primary-300 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
         >
         ✓
         </button>
@@ -1961,14 +1964,14 @@ function DistanzenListe() {
         <>
         <button
         onClick={() => handleEdit(distanz)}
-        className="bg-primary-200 text-white px-3 py-1 rounded hover:bg-primary-300 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
         title="Bearbeiten"
         >
         ✎
         </button>
         <button
         onClick={() => handleDelete(distanz.id)}
-        className="bg-secondary-200 text-white px-3 py-1 rounded hover:bg-secondary-300 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
         title="Löschen"
         >
         ×
