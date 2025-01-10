@@ -353,9 +353,9 @@ function OrtForm() {
     <div className="table-container">
     <div className="bg-primary-25 p-6">
     <form onSubmit={handleSubmit} className="space-y-4">
-    {/* Erste Zeile: Name und Adresse */}
+    {/* Erste Zeile: Name, Adresse und Typ */}
     <div className="flex flex-wrap gap-4">
-    <div className="w-full sm:w-1/3">
+    <div className="w-full sm:w-1/4">
     <label className="block mb-1 text-sm text-primary-900">Name</label>
     <input
     type="text"
@@ -366,7 +366,7 @@ function OrtForm() {
     required
     />
     </div>
-    <div className="w-full sm:w-2/3">
+    <div className="w-full sm:w-2/4">
     <label className="block mb-1 text-sm text-primary-900">Adresse</label>
     <input
     type="text"
@@ -377,47 +377,32 @@ function OrtForm() {
     required
     />
     </div>
+    <div className="w-full sm:w-1/4">
+    <label className="block mb-1 text-sm text-primary-900">Art des Ortes</label>
+    <select
+    value=""
+    onChange={(e) => {
+      const value = e.target.value;
+      setIstWohnort(value === 'wohnort');
+      setIstDienstort(value === 'dienstort');
+      setIstKirchspiel(value === 'kirchspiel');
+    }}
+    className="form-select w-full h-8"
+    >
+    <option value="">Bitte wählen</option>
+    {!hasWohnort && <option value="wohnort">Wohnort</option>}
+    {!hasDienstort && <option value="dienstort">Dienstort</option>}
+    <option value="kirchspiel">Kirchspiel</option>
+    <option value="none">Sonstiger Ort</option>
+    </select>
+    </div>
     </div>
     
-    {/* Zweite Zeile: Checkboxen und Button */}
-    <div className="flex flex-wrap items-center gap-4">
-    <div className="flex flex-wrap gap-4">
-    {!hasWohnort && (
-      <label className="flex items-center">
-      <input
-      type="checkbox"
-      checked={istWohnort}
-      onChange={(e) => setIstWohnort(e.target.checked)}
-      className="mr-2 text-primary-500"
-      />
-      <span className="text-sm text-primary-900">Wohnort</span>
-      </label>
-    )}
-    {!hasDienstort && (
-      <label className="flex items-center">
-      <input
-      type="checkbox"
-      checked={istDienstort}
-      onChange={(e) => setIstDienstort(e.target.checked)}
-      className="mr-2 text-primary-500"
-      />
-      <span className="text-sm text-primary-900">Dienstort</span>
-      </label>
-    )}
-    <label className="flex items-center">
-    <input
-    type="checkbox"
-    checked={istKirchspiel}
-    onChange={(e) => setIstKirchspiel(e.target.checked)}
-    className="mr-2 text-primary-500"
-    />
-    <span className="text-sm text-primary-900">Kirchspiel</span>
-    </label>
-    </div>
-    
+    {/* Zweite Zeile: Button */}
+    <div>
     <button 
     type="submit" 
-    className="bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap ml-auto"
+    className="w-full sm:w-auto bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap"
     >
     Hinzufügen
     </button>
