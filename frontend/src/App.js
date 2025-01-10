@@ -1983,7 +1983,7 @@ function DistanzenListe() {
             distanz: parseInt(e.target.value),
           })
         }
-        className="form-input w-24"
+        className="form-input w-16"
         />
       ) : (
         `${distanz.distanz} km`
