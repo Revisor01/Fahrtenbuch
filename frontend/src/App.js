@@ -333,7 +333,7 @@ function OrtForm() {
   const [istWohnort, setIstWohnort] = useState(false);
   const [istDienstort, setIstDienstort] = useState(false);
   const [istKirchspiel, setIstKirchspiel] = useState(false);
-  
+  const [ortTyp, setOrtTyp] = useState('');
   const hasDienstort = orte.some(ort => ort.ist_dienstort);
   const hasWohnort = orte.some(ort => ort.ist_wohnort);
   
@@ -352,9 +352,9 @@ function OrtForm() {
   return (
     <div className="table-container">
     <div className="bg-primary-25 p-6">
-    <form onSubmit={handleSubmit} className="space-y-4">
-    {/* Erste Zeile: Name, Adresse und Typ */}
-    <div className="flex flex-wrap gap-4">
+    <form onSubmit={handleSubmit}>
+    {/* Alle Eingabefelder in einer Zeile auf Desktop */}
+    <div className="flex flex-col sm:flex-row gap-4 mb-4">
     <div className="w-full sm:w-1/4">
     <label className="block mb-1 text-sm text-primary-900">Name</label>
     <input
@@ -366,7 +366,7 @@ function OrtForm() {
     required
     />
     </div>
-    <div className="w-full sm:w-2/4">
+    <div className="w-full sm:w-2/5">
     <label className="block mb-1 text-sm text-primary-900">Adresse</label>
     <input
     type="text"
@@ -377,12 +377,13 @@ function OrtForm() {
     required
     />
     </div>
-    <div className="w-full sm:w-1/4">
+    <div className="w-full sm:w-1/5">
     <label className="block mb-1 text-sm text-primary-900">Art des Ortes</label>
     <select
-    value=""
+    value={ortTyp} // Das müsste als State definiert sein
     onChange={(e) => {
       const value = e.target.value;
+      setOrtTyp(value);
       setIstWohnort(value === 'wohnort');
       setIstDienstort(value === 'dienstort');
       setIstKirchspiel(value === 'kirchspiel');
@@ -396,16 +397,14 @@ function OrtForm() {
     <option value="none">Sonstiger Ort</option>
     </select>
     </div>
-    </div>
-    
-    {/* Zweite Zeile: Button */}
-    <div>
+    <div className="w-full sm:w-auto sm:self-end">
     <button 
     type="submit" 
     className="w-full sm:w-auto bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap"
     >
     Hinzufügen
     </button>
+    </div>
     </div>
     </form>
     </div>
