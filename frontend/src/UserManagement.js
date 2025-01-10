@@ -30,87 +30,110 @@ import Modal from './Modal';
         onSubmit(formData);
     };
 
-    return (
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-                <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="E-Mail *"
-                    required
-                />
-                <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="Benutzername *"
-                    required
-                />
-                <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className={inputClasses}
-                >
-                    <option value="user">Benutzer</option>
-                    <option value="admin">Administrator</option>
-                </select>
-                <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="Voller Name"
-                />
-                <input
-                    type="text"
-                    name="iban"
-                    value={formData.iban}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="IBAN"
-                />
-                <input
-                    type="text"
-                    name="kirchengemeinde"
-                    value={formData.kirchengemeinde}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="Kirchengemeinde"
-                />
-                <input
-                    type="text"
-                    name="kirchspiel"
-                    value={formData.kirchspiel}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="Kirchspiel"
-                />
-                <input
-                    type="text"
-                    name="kirchenkreis"
-                    value={formData.kirchenkreis}
-                    onChange={handleChange}
-                    className={inputClasses}
-                    placeholder="Kirchenkreis"
-                />
+        return (
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">E-Mail *</label>
+            <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="form-input"
+            required
+            />
             </div>
-            <div className="mt-6">
-                <button
-                    type="submit"
-                    className="w-full bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200 transition duration-200"
-                >
-                    {isEdit ? 'Aktualisieren' : 'Erstellen'}
-                </button>
+            
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">Benutzername *</label>
+            <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="form-input"
+            required
+            />
             </div>
-        </form>
-    );
+            
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">Rolle</label>
+            <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="form-select"
+            >
+            <option value="user">Benutzer</option>
+            <option value="admin">Administrator</option>
+            </select>
+            </div>
+            
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">Voller Name</label>
+            <input
+            type="text"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            className="form-input"
+            />
+            </div>
+            
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">IBAN</label>
+            <input
+            type="text"
+            name="iban"
+            value={formData.iban}
+            onChange={handleChange}
+            className="form-input"
+            />
+            </div>
+            
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">Kirchengemeinde</label>
+            <input
+            type="text"
+            name="kirchengemeinde"
+            value={formData.kirchengemeinde}
+            onChange={handleChange}
+            className="form-input"
+            />
+            </div>
+            
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">Kirchspiel</label>
+            <input
+            type="text"
+            name="kirchspiel"
+            value={formData.kirchspiel}
+            onChange={handleChange}
+            className="form-input"
+            />
+            </div>
+            
+            <div>
+            <label className="block mb-1 text-sm text-primary-900">Kirchenkreis</label>
+            <input
+            type="text"
+            name="kirchenkreis"
+            value={formData.kirchenkreis}
+            onChange={handleChange}
+            className="form-input"
+            />
+            </div>
+            </div>
+            
+            <button
+            type="submit"
+            className="btn-primary w-full"
+            >
+            {isEdit ? 'Aktualisieren' : 'Erstellen'}
+            </button>
+            </form>
+        );
 };
 
 export default function UserManagement() {
@@ -180,101 +203,101 @@ export default function UserManagement() {
 
     return (
         <div className="w-full max-w-full p-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <h2 className="text-xl font-semibold text-gray-800">Benutzerverwaltung</h2>
-                <button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200 transition duration-200 w-full sm:w-auto text-sm"
-                >
-                    + Neuer Benutzer
-                </button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h2 className="text-xl font-semibold text-primary-900">Benutzerverwaltung</h2>
+        <button
+        onClick={() => setIsCreateModalOpen(true)}
+        className="btn-primary w-full-mobile"
+        >
+        + Neuer Benutzer
+        </button>
+        </div>
+        
+        <div className="table-container">
+        <div className="overflow-x-auto w-full">
+        <table className="w-full">
+        <thead>
+        <tr className="bg-primary-25 border-b border-primary-100">
+        <th className="table-header">Benutzername</th>
+        <th className="hidden sm:table-cell table-header">E-Mail</th>
+        <th className="hidden md:table-cell table-header">Kirchengemeinde</th>
+        <th className="table-header">Status</th>
+        <th className="hidden sm:table-cell table-header">Rolle</th>
+        <th className="table-header text-right">Aktionen</th>
+        </tr>
+        </thead>
+        <tbody className="divide-y divide-primary-50">
+        {users.map(user => (
+            <tr key={user.id} className="table-row">
+            <td className="table-cell">
+            <div className="flex flex-col">
+            <span>{user.username}</span>
+            <span className="text-xs text-primary-500 sm:hidden">{user.email}</span>
             </div>
-
-            <div className="bg-white rounded-lg shadow-sm w-full">
-                <div className="overflow-x-auto w-full">
-                    <table className="w-full">
-                        <thead className="sm:table-header-group hidden">
-                            <tr className="bg-gray-50 border-b">
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Benutzername</th>
-                                <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">E-Mail</th>
-                                <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kirchengemeinde</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rolle</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {users.map(user => (
-                                <tr key={user.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-sm text-gray-900">
-                                        <div className="flex flex-col">
-                                            <span>{user.username}</span>
-                                            <span className="text-xs text-gray-500 sm:hidden">{user.email}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{user.email}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">{user.kirchengemeinde || '-'}</td>
-                                    <td className="px-4 py-3 text-sm">
-                                        {user.email_verified ? (
-                                            <span className="text-green-600 text-xs">● Verifiziert</span>
-                                        ) : (
-                                            <span className="text-yellow-600 text-xs">○ Ausstehend</span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 text-sm hidden sm:table-cell">
-                                        <span className={`text-xs ${user.role === 'admin' ? 'text-purple-600' : 'text-blue-600'}`}>
-                                            {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-sm">
-                                        <div className="flex sm:flex-row flex-col gap-2 justify-end">
-                                            <button
-                                                onClick={() => openEditModal(user)}
-                                                className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 w-full sm:w-auto text-center"
-                                                title="Bearbeiten"
-                                            >
-                                                ✎
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    showNotification(
-                                                        'Benutzer löschen',
-                                                        'Möchten Sie diesen Benutzer wirklich löschen?',
-                                                        () => handleDelete(user.id),
-                                                        true
-                                                    );
-                                                }}
-                                                className="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 w-full sm:w-auto text-center"
-                                                title="Löschen"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+            </td>
+            <td className="table-cell hidden sm:table-cell">{user.email}</td>
+            <td className="table-cell hidden md:table-cell">{user.kirchengemeinde || '-'}</td>
+            <td className="table-cell">
+            {user.email_verified ? (
+                <span className="text-primary-600 text-xs">● Verifiziert</span>
+            ) : (
+                <span className="text-secondary-500 text-xs">○ Ausstehend</span>
+            )}
+            </td>
+            <td className="table-cell hidden sm:table-cell">
+            <span className={`text-xs ${user.role === 'admin' ? 'text-primary-700' : 'text-primary-600'}`}>
+            {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
+            </span>
+            </td>
+            <td className="table-cell">
+            <div className="flex sm:flex-row flex-col gap-2 justify-end">
+            <button
+            onClick={() => openEditModal(user)}
+            className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+            title="Bearbeiten"
+            >
+            ✎
+            </button>
+            <button
+            onClick={() => {
+                showNotification(
+                    'Benutzer löschen',
+                    'Möchten Sie diesen Benutzer wirklich löschen?',
+                    () => handleDelete(user.id),
+                    true
+                );
+            }}
+            className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+            title="Löschen"
+            >
+            ×
+            </button>
             </div>
-
-            <Modal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                title="Neuen Benutzer erstellen"
-                size="compact"
-            >
-                <UserForm onSubmit={handleCreate} isEdit={false} />
-            </Modal>
-
-            <Modal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                title="Benutzer bearbeiten"
-                size="compact"
-            >
-                <UserForm onSubmit={handleEdit} isEdit={true} initialData={selectedUser} />
-            </Modal>
+            </td>
+            </tr>
+        ))}
+        </tbody>
+        </table>
+        </div>
+        </div>
+        
+        <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Neuen Benutzer erstellen"
+        size="compact"
+        >
+        <UserForm onSubmit={handleCreate} isEdit={false} />
+        </Modal>
+        
+        <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Benutzer bearbeiten"
+        size="compact"
+        >
+        <UserForm onSubmit={handleEdit} isEdit={true} initialData={selectedUser} />
+        </Modal>
         </div>
     );
 }
