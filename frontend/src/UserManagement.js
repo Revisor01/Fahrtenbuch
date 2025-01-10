@@ -31,34 +31,29 @@ import Modal from './Modal';
     };
 
         return (
+            <div className="bg-primary-25 p-6 rounded-lg">
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">E-Mail *</label>
             <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             className="form-input"
+            placeholder="E-Mail *"
             required
             />
-            </div>
             
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">Benutzername *</label>
             <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
             className="form-input"
+            placeholder="Benutzername *"
             required
             />
-            </div>
             
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">Rolle</label>
             <select
             name="role"
             value={formData.role}
@@ -68,62 +63,51 @@ import Modal from './Modal';
             <option value="user">Benutzer</option>
             <option value="admin">Administrator</option>
             </select>
-            </div>
             
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">Voller Name</label>
             <input
             type="text"
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
             className="form-input"
+            placeholder="Voller Name"
             />
-            </div>
             
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">IBAN</label>
             <input
             type="text"
             name="iban"
             value={formData.iban}
             onChange={handleChange}
             className="form-input"
+            placeholder="IBAN"
             />
-            </div>
             
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">Kirchengemeinde</label>
             <input
             type="text"
             name="kirchengemeinde"
             value={formData.kirchengemeinde}
             onChange={handleChange}
             className="form-input"
+            placeholder="Kirchengemeinde"
             />
-            </div>
             
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">Kirchspiel</label>
             <input
             type="text"
             name="kirchspiel"
             value={formData.kirchspiel}
             onChange={handleChange}
             className="form-input"
+            placeholder="Kirchspiel"
             />
-            </div>
             
-            <div>
-            <label className="block mb-1 text-sm text-primary-900">Kirchenkreis</label>
             <input
             type="text"
             name="kirchenkreis"
             value={formData.kirchenkreis}
             onChange={handleChange}
             className="form-input"
+            placeholder="Kirchenkreis"
             />
-            </div>
             </div>
             
             <button
@@ -133,6 +117,7 @@ import Modal from './Modal';
             {isEdit ? 'Aktualisieren' : 'Erstellen'}
             </button>
             </form>
+            </div>
         );
 };
 
@@ -204,7 +189,6 @@ export default function UserManagement() {
     return (
         <div className="w-full max-w-full p-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-xl font-semibold text-primary-900">Benutzerverwaltung</h2>
         <button
         onClick={() => setIsCreateModalOpen(true)}
         className="btn-primary w-full-mobile"
