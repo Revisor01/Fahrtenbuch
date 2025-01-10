@@ -1727,96 +1727,132 @@ function OrteListe() {
     setSortConfig({ key, direction });
   };
   
+  const getOrtStatus = (ort) => {
+    if (ort.ist_wohnort) return 'wohnort';
+    if (ort.ist_dienstort) return 'dienstort';
+    if (ort.ist_kirchspiel) return 'kirchspiel';
+    return '';
+  };
+  
+  const getOrtStatusLabel = (ort) => {
+    if (ort.ist_wohnort) return 'Wohnort';
+    if (ort.ist_dienstort) return 'Dienstort';
+    if (ort.ist_kirchspiel) return 'Kirchspiel';
+    return 'Sonstiger Ort';
+  };
+  
+  const handleStatusChange = (e) => {
+    const value = e.target.value;
+    setEditingOrt({
+      ...editingOrt,
+      ist_wohnort: value === 'wohnort',
+      ist_dienstort: value === 'dienstort',
+      ist_kirchspiel: value === 'kirchspiel'
+    });
+  };
+  
   return (
-    <div className="mb-4">
-    <h2 className="text-lg font-semibold mb-2 cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
-    Orte {isCollapsed ? '▼' : '▲'}
-    </h2>
-    {!isCollapsed && (
-      <table className="w-full border-collapse text-left">
-      <thead>
-      <tr className="bg-gray-200">
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('name')}>Name</th>
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('adresse')}>Adresse</th>
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('ist_wohnort')}>Wohnort</th>
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('ist_dienstort')}>Dienstort</th>
-      <th className="border px-2 py-1 text-sm font-medium cursor-pointer" onClick={() => requestSort('ist_kirchspiel')}>Kirchspiel</th>
-      <th className="border px-2 py-1 text-sm font-medium w-48">Aktion</th>
+    <div className="table-container">
+    <div className="overflow-x-auto w-full">
+    <table className="w-full">
+    <thead>
+    <tr className="bg-primary-25 border-b border-primary-100">
+    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    onClick={() => requestSort('name')}>
+    Name
+    </th>
+    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    onClick={() => requestSort('adresse')}>
+    Adresse
+    </th>
+    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
+    Status
+    </th>
+    <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider">
+    Aktionen
+    </th>
+    </tr>
+    </thead>
+    <tbody className="divide-y divide-primary-50">
+    {sortedOrte.map((ort) => (
+      <tr key={ort.id} className="hover:bg-primary-25 transition-colors duration-150">
+      <td className="px-4 py-3 text-sm text-primary-900">
+      {editingOrt?.id === ort.id ? (
+        <input
+        value={editingOrt.name}
+        onChange={(e) => setEditingOrt({ ...editingOrt, name: e.target.value })}
+        className="form-input w-full h-8"
+        />
+      ) : (
+        <div className="flex flex-col">
+        <span>{ort.name}</span>
+        <span className="text-xs text-primary-500 sm:hidden">
+        {ort.adresse}
+        </span>
+        </div>
+      )}
+      </td>
+      <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
+      {editingOrt?.id === ort.id ? (
+        <input
+        value={editingOrt.adresse}
+        onChange={(e) => setEditingOrt({ ...editingOrt, adresse: e.target.value })}
+        className="form-input w-full h-8"
+        />
+      ) : (
+        ort.adresse
+      )}
+      </td>
+      <td className="px-4 py-3 text-sm text-primary-900">
+      {editingOrt?.id === ort.id ? (
+        <select
+        value={getOrtStatus(editingOrt)}
+        onChange={handleStatusChange}
+        className="form-select w-full h-8"
+        >
+        <option value="">Sonstiger Ort</option>
+        <option value="wohnort">Wohnort</option>
+        <option value="dienstort">Dienstort</option>
+        <option value="kirchspiel">Kirchspiel</option>
+        </select>
+      ) : (
+        getOrtStatusLabel(ort)
+      )}
+      </td>
+      <td className="px-4 py-3 text-sm">
+      <div className="flex sm:flex-row flex-col gap-2 justify-end">
+      {editingOrt?.id === ort.id ? (
+        <button
+        onClick={handleSave}
+        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        >
+        ✓
+        </button>
+      ) : (
+        <>
+        <button
+        onClick={() => handleEdit(ort)}
+        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        title="Bearbeiten"
+        >
+        ✎
+        </button>
+        <button
+        onClick={() => handleDelete(ort.id)}
+        className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        title="Löschen"
+        >
+        ×
+        </button>
+        </>
+      )}
+      </div>
+      </td>
       </tr>
-      </thead>
-      <tbody>
-      {sortedOrte.map((ort) => (
-        <tr key={ort.id}>
-        <td className="border p-2 text-sm">
-        {editingOrt?.id === ort.id ? (
-          <input
-          value={editingOrt.name}
-          onChange={(e) => setEditingOrt({ ...editingOrt, name: e.target.value })}
-          className="w-full p-1 border rounded"
-          />
-        ) : (
-          ort.name
-        )}
-        </td>
-        <td className="border p-2 text-sm">
-        {editingOrt?.id === ort.id ? (
-          <input
-          value={editingOrt.adresse}
-          onChange={(e) => setEditingOrt({ ...editingOrt, adresse: e.target.value })}
-          className="w-full p-1 border rounded"
-          />
-        ) : (
-          ort.adresse
-        )}
-        </td>
-        <td className="border p-2 text-sm">
-        {editingOrt?.id === ort.id ? (
-          <input
-          type="checkbox"
-          checked={editingOrt.ist_wohnort || false} // <-- Hier sicherstellen, dass false gesetzt wird
-          onChange={(e) => setEditingOrt({ ...editingOrt, ist_wohnort: e.target.checked })}
-          />
-        ) : (
-          ort.ist_wohnort ? 'Ja' : 'Nein'
-        )}
-        </td>
-        <td className="border p-2 text-sm">
-        {editingOrt?.id === ort.id ? (
-          <input
-          type="checkbox"
-          checked={editingOrt.ist_dienstort || false} // <-- Hier sicherstellen, dass false gesetzt wird
-          onChange={(e) => setEditingOrt({ ...editingOrt, ist_dienstort: e.target.checked })}
-          />
-        ) : (
-          ort.ist_dienstort ? 'Ja' : 'Nein'
-        )}
-        </td>
-        <td className="border p-2 text-sm">
-        {editingOrt?.id === ort.id ? (
-          <input
-          type="checkbox"
-          checked={editingOrt.ist_kirchspiel || false} // <-- Hier sicherstellen, dass false gesetzt wird
-          onChange={(e) => setEditingOrt({ ...editingOrt, ist_kirchspiel: e.target.checked })}
-          />
-        ) : (
-          ort.ist_kirchspiel ? 'Ja' : 'Nein'
-        )}
-        </td>
-        <td className="border px-2 py-1 text-sm w-48">
-        {editingOrt?.id === ort.id ? (
-          <button onClick={handleSave} className="bg-green-500 text-white px-2 py-1 rounded text-xs mr-1">Speichern</button>
-        ) : (
-          <>
-          <button onClick={() => handleEdit(ort)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">Bearbeiten</button>
-          <button onClick={() => handleDelete(ort.id)} className="bg-red-500 text-white px-2 py-1 rounded text-xs">Löschen</button>
-          </>
-        )}
-        </td>
-        </tr>
-      ))}
-      </tbody>
-      </table>
-    )}
+    ))}
+    </tbody>
+    </table>
+    </div>
     </div>
   );
 }
