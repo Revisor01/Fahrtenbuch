@@ -196,7 +196,7 @@ function FahrtForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Erste Zeile: Basis-Informationen */}
     <div className="flex flex-wrap gap-4">
-    <div className="w-full sm:flex-1">
+    <div className="w-full sm:w-32">  {/* Datum: feste Breite auf Desktop */}
     <label className="block mb-1 text-sm text-primary-900">Datum</label>
     <input
     type="date"
@@ -208,7 +208,7 @@ function FahrtForm() {
     />
     </div>
     
-    <div className="w-full sm:flex-1">
+    <div className="w-full sm:flex-1">  {/* Anlass: füllt restliche Breite */}
     <label className="block mb-1 text-sm text-primary-900">Anlass der Fahrt</label>
     <input
     type="text"
