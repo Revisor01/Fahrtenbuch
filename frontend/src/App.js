@@ -354,7 +354,7 @@ function OrtForm() {
     <div className="bg-primary-25 p-6">
     <form onSubmit={handleSubmit}>
     {/* Alle Eingabefelder in einer Zeile auf Desktop */}
-    <div className="flex flex-col sm:flex-row gap-4 mb-4">
+    <div className="flex flex-col sm:flex-row gap-4">
     <div className="w-full sm:w-1/4">
     <input
     type="text"
