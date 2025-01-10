@@ -261,7 +261,47 @@ function FahrtForm() {
     )}
     </div>
     
-    <div className="w-full sm:w-auto flex-1 min-w-[240px]">
+    <div className="flex flex-wrap gap-4">
+    {/* Von Ort */}
+    <div className="w-full sm:flex-1 min-w-[240px]">
+    <div className="flex justify-between mb-1">
+    <label className="text-sm text-primary-900">Startort</label>
+    <label className="flex items-center cursor-pointer">
+    <input
+    type="checkbox"
+    checked={useEinmaligenVonOrt}
+    onChange={(e) => setUseEinmaligenVonOrt(e.target.checked)}
+    className="mr-2 text-primary-500"
+    />
+    <span className="text-sm text-primary-900">Einmaliger Ort</span>
+    </label>
+    </div>
+    {useEinmaligenVonOrt ? (
+      <input
+      type="text"
+      name="einmaligerVonOrt"
+      value={formData.einmaligerVonOrt}
+      onChange={handleChange}
+      placeholder="Adresse eingeben"
+      className="form-input w-full h-8"
+      required
+      />
+    ) : (
+      <select
+      name="vonOrtId"
+      value={formData.vonOrtId}
+      onChange={handleChange}
+      className="form-select w-full h-8"
+      required
+      >
+      <option value="">Ort auswählen</option>
+      {renderOrteOptions(orte)}
+      </select>
+    )}
+    </div>
+    
+    {/* Nach Ort */}
+    <div className="w-full sm:flex-1 min-w-[240px]">
     <div className="flex justify-between mb-1">
     <label className="text-sm text-primary-900">Zielort</label>
     <label className="flex items-center cursor-pointer">
@@ -297,11 +337,10 @@ function FahrtForm() {
       </select>
     )}
     </div>
-    </div>
     
-    {/* Dritte Zeile: Kilometer und Abrechnung */}
-    <div className="flex flex-wrap gap-4 items-end justify-end">
-    <div>
+    {/* Kilometer und Abrechnung */}
+    <div className="w-full sm:w-auto flex flex-wrap gap-4">
+    <div className="w-1/2 sm:w-24">
     <label className="block mb-1 text-sm text-primary-900">Kilometer</label>
     <input
     type="number"
@@ -310,24 +349,25 @@ function FahrtForm() {
     onChange={handleManuelleKilometerChange}
     onFocus={handleKilometerFocus}
     placeholder="km"
-    className="form-input w-24 h-8"
+    className="form-input w-full h-8"
     required={useEinmaligenVonOrt || useEinmaligenNachOrt}
     disabled={formData.autosplit || (isKilometerLocked && !useEinmaligenVonOrt && !useEinmaligenNachOrt)}
     />
     </div>
-    <div>
+    <div className="w-1/2 sm:w-40">
     <label className="block mb-1 text-sm text-primary-900">Abrechnung</label>
     <select
     name="abrechnung"
     value={formData.abrechnung}
     onChange={handleChange}
-    className="form-select w-40 h-8"
+    className="form-select w-full h-8"
     disabled={formData.autosplit}
     >
     <option value="Kirchenkreis">Kirchenkreis</option>
     <option value="Gemeinde">Gemeinde</option>
     <option value="Autosplit">Autosplit</option>
     </select>
+    </div>
     </div>
     </div>
     
