@@ -357,7 +357,7 @@ function OrtForm() {
     {/* Alle Eingabefelder in einer Zeile auf Desktop */}
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
     <div className="w-full sm:w-1/4">
-    <label className="block mb-1 text-sm text-primary-900">Name</label>
+    //<label className="block mb-1 text-sm text-primary-900">Name</label>
     <input
     type="text"
     value={name}
@@ -368,7 +368,7 @@ function OrtForm() {
     />
     </div>
     <div className="w-full sm:w-2/5">
-    <label className="block mb-1 text-sm text-primary-900">Adresse</label>
+    //<label className="block mb-1 text-sm text-primary-900">Adresse</label>
     <input
     type="text"
     value={adresse}
@@ -379,7 +379,7 @@ function OrtForm() {
     />
     </div>
     <div className="w-full sm:w-1/5">
-    <label className="block mb-1 text-sm text-primary-900">Art des Ortes</label>
+    //<label className="block mb-1 text-sm text-primary-900">Art des Ortes</label>
     <select
     value={ortTyp} // Das müsste als State definiert sein
     onChange={(e) => {
@@ -1826,7 +1826,7 @@ function OrteListe() {
       {editingOrt?.id === ort.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
         >
         ✓
         </button>
@@ -1834,7 +1834,7 @@ function OrteListe() {
         <>
         <button
         onClick={() => handleEdit(ort)}
-        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
         title="Bearbeiten"
         >
         ✎
