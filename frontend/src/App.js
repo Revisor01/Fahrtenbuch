@@ -350,6 +350,7 @@ function OrtForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
+    <div className="mb-4">
     <div className="table-container">
     <div className="bg-primary-25 p-6">
     <form onSubmit={handleSubmit}>
@@ -407,6 +408,7 @@ function OrtForm() {
     </div>
     </div>
     </form>
+    </div>
     </div>
     </div>
   );
