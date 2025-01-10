@@ -222,47 +222,8 @@ function FahrtForm() {
     </div>
     </div>
     
-    {/* Zweite Zeile: Ortsauswahl */}
+    {/* Zweite Zeile: Orte + KM + Abrechnung */}
     <div className="flex flex-wrap gap-4">
-    <div className="w-full sm:w-auto flex-1 min-w-[240px]">
-    <div className="flex justify-between mb-1">
-    <label className="text-sm text-primary-900">Startort</label>
-    <label className="flex items-center cursor-pointer">
-    <input
-    type="checkbox"
-    checked={useEinmaligenVonOrt}
-    onChange={(e) => setUseEinmaligenVonOrt(e.target.checked)}
-    className="mr-2 text-primary-500"
-    />
-    <span className="text-sm text-primary-900">Einmaliger Ort</span>
-    </label>
-    </div>
-    {useEinmaligenVonOrt ? (
-      <input
-      type="text"
-      name="einmaligerVonOrt"
-      value={formData.einmaligerVonOrt}
-      onChange={handleChange}
-      placeholder="Adresse eingeben"
-      className="form-input w-full h-8"
-      required
-      />
-    ) : (
-      <select
-      name="vonOrtId"
-      value={formData.vonOrtId}
-      onChange={handleChange}
-      className="form-select w-full h-8"
-      required
-      >
-      <option value="">Ort auswählen</option>
-      {renderOrteOptions(orte)}
-      </select>
-    )}
-    </div>
-    
-    <div className="flex flex-wrap gap-4">
-    {/* Von Ort */}
     <div className="w-full sm:flex-1 min-w-[240px]">
     <div className="flex justify-between mb-1">
     <label className="text-sm text-primary-900">Startort</label>
@@ -300,7 +261,6 @@ function FahrtForm() {
     )}
     </div>
     
-    {/* Nach Ort */}
     <div className="w-full sm:flex-1 min-w-[240px]">
     <div className="flex justify-between mb-1">
     <label className="text-sm text-primary-900">Zielort</label>
@@ -338,7 +298,6 @@ function FahrtForm() {
     )}
     </div>
     
-    {/* Kilometer und Abrechnung */}
     <div className="w-full sm:w-auto flex flex-wrap gap-4">
     <div className="w-1/2 sm:w-24">
     <label className="block mb-1 text-sm text-primary-900">Kilometer</label>
@@ -371,7 +330,7 @@ function FahrtForm() {
     </div>
     </div>
     
-    {/* Vierte Zeile: Checkboxen und Buttons */}
+    {/* Dritte Zeile: Checkboxen und Buttons */}
     <div className="flex flex-wrap items-center gap-4">
     <label className="flex items-center">
     <input
@@ -447,7 +406,7 @@ function FahrtForm() {
     </form>
     </div>
     
-    {/* Modal für Kilometer-Warnung */}
+    {/* Kilometer-Warnung Modal */}
     {showKilometerWarning && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
@@ -475,7 +434,7 @@ function FahrtForm() {
       </div>
     )}
     
-    {/* Modal für Mitfahrer */}
+    {/* Mitfahrer Modal */}
     {showMitfahrerModal && (
       <MitfahrerModal
       isOpen={showMitfahrerModal}

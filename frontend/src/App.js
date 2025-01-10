@@ -350,60 +350,80 @@ function OrtForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
-    <div>
-    <h2 className="text-lg font-semibold mb-2">Neuen Ort hinzufügen</h2>
-    <form onSubmit={handleSubmit} className="flex items-center bg-gray-100 p-4 rounded-lg">
+    <div className="table-container">
+    <div className="bg-primary-25 p-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
+    {/* Erste Zeile: Name und Adresse */}
+    <div className="flex flex-wrap gap-4">
+    <div className="w-full sm:w-1/3">
+    <label className="block mb-1 text-sm text-primary-900">Name</label>
     <input
     type="text"
     value={name}
     onChange={(e) => setName(e.target.value)}
-    placeholder="Name"
-    className="w-1/4 p-2 border rounded mr-2 text-sm"
+    placeholder="Name des Ortes"
+    className="form-input w-full h-8"
     required
     />
+    </div>
+    <div className="w-full sm:w-2/3">
+    <label className="block mb-1 text-sm text-primary-900">Adresse</label>
     <input
     type="text"
     value={adresse}
     onChange={(e) => setAdresse(e.target.value)}
-    placeholder="Adresse"
-    className="w-1/2 p-2 border rounded mr-2 text-sm"
+    placeholder="Vollständige Adresse"
+    className="form-input w-full h-8"
     required
     />
+    </div>
+    </div>
+    
+    {/* Zweite Zeile: Checkboxen und Button */}
+    <div className="flex flex-wrap items-center gap-4">
+    <div className="flex flex-wrap gap-4">
     {!hasWohnort && (
-      <label className="flex items-center mr-2">
+      <label className="flex items-center">
       <input
       type="checkbox"
       checked={istWohnort}
       onChange={(e) => setIstWohnort(e.target.checked)}
-      className="mr-2"
+      className="mr-2 text-primary-500"
       />
-      Wohnort
+      <span className="text-sm text-primary-900">Wohnort</span>
       </label>
     )}
     {!hasDienstort && (
-      <label className="flex items-center mr-2">
+      <label className="flex items-center">
       <input
       type="checkbox"
       checked={istDienstort}
       onChange={(e) => setIstDienstort(e.target.checked)}
-      className="mr-2"
+      className="mr-2 text-primary-500"
       />
-      Dienstort
+      <span className="text-sm text-primary-900">Dienstort</span>
       </label>
     )}
-    <label className="flex items-center mr-2">
+    <label className="flex items-center">
     <input
     type="checkbox"
     checked={istKirchspiel}
     onChange={(e) => setIstKirchspiel(e.target.checked)}
-    className="mr-2"
+    className="mr-2 text-primary-500"
     />
-    Kirchspiel
+    <span className="text-sm text-primary-900">Kirchspiel</span>
     </label>
-    <button type="submit" className="bg-blue-500 text-white px-4 py-2 text-sm rounded ml-auto">
+    </div>
+    
+    <button 
+    type="submit" 
+    className="bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap ml-auto"
+    >
     Hinzufügen
     </button>
+    </div>
     </form>
+    </div>
     </div>
   );
 }
