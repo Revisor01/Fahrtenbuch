@@ -1010,281 +1010,408 @@ function FahrtenListe() {
   
   const renderMitfahrer = (fahrt) => {
     if (!fahrt.mitfahrer || fahrt.mitfahrer.length === 0) {
-      return <span className="text-gray-400"></span>;
+      return null;
     }
     
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
     
     return (
-      <div className="flex flex-wrap gap-1 mt-2">
-      {fahrt.mitfahrer.map((person, index) => {
-        const shouldDisplay = 
-        (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
-        (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
-        
-        if (!shouldDisplay) return null;
-        
-        return (
-          <span
-          key={index}
-          className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
-          onClick={(event) => handleViewMitfahrer(person, event)}
-          >
-          👤 {person.name}
-          </span>
-        );
-      })}
+      <div className="flex flex-wrap gap-1">
+        {fahrt.mitfahrer.map((person, index) => {
+          const shouldDisplay = 
+            (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
+            (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
+          
+          if (!shouldDisplay) return null;
+          
+          return (
+            <span
+              key={index}
+              className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
+              onClick={(event) => handleViewMitfahrer(person, event)}
+            >
+              {person.name}
+            </span>
+          );
+        })}
       </div>
     );
   };
 
   
   const renderFahrtRow = (fahrt, detail = null) => (
-    <tr key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} className={
-      detail ? "bg-gray-50" : 
-      (fahrt.autosplit ? "bg-yellow-50" : 
-        (fahrt.einmaliger_von_ort || fahrt.einmaliger_nach_ort ? "bg-green-50" : ""))
-    }>
-    <td className="border px-2 py-1 text-sm">
-    {editingFahrt?.id === fahrt.id ? (
-      <input
-      type="date"
-      value={editingFahrt.datum}
-      onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
-      className="w-full p-1 border rounded"
-      />
-    ) : (
-      new Date(fahrt.datum).toLocaleDateString()
-    )}
-    </td>
-    <td className="border px-2 py-1">
-    {editingFahrt?.id === fahrt.id ? (
-      <div>
-      <label className="flex items-center mb-1 cursor-pointer">
-      <input
-      type="checkbox"
-      checked={editingFahrt.vonOrtTyp === 'einmalig'}
-      onChange={(e) => setEditingFahrt({
-        ...editingFahrt,
-        vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-        von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
-        einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
-      })}
-      className="mr-2"
-      />
-      <span className="text-sm">Einmaliger Von-Ort</span>
-      </label>
-      {editingFahrt.vonOrtTyp === 'gespeichert' ? (
-        <select
-        value={editingFahrt.von_ort_id || ''}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
-        className="w-full p-1 border rounded"
-        >
-        <option value="">Bitte wählen</option>
-        {renderOrteOptions(orte)}
-        </select>
-      ) : (
-        <input
-        type="text"
-        value={editingFahrt.einmaliger_von_ort || ''}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
-        className="w-full p-1 border rounded"
-        placeholder="Von (einmalig)"
-        />
-      )}
-      </div>
-    ) : (
-      <div>
-      <div className="text-sm">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort)}</div>
-      <div className="text-xs text-gray-500">{detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}</div>
-      </div>
-    )}
-    </td>
-    <td className="border px-2 py-1">
-    {editingFahrt?.id === fahrt.id ? (
-      <div>
-      
-      <label className="flex items-center mb-1 cursor-pointer">
-      <input
-      type="checkbox"
-      checked={editingFahrt.nachOrtTyp === 'einmalig'}
-      onChange={(e) => setEditingFahrt({
-        ...editingFahrt,
-        nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-        nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
-        einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
-      })}
-      className="mr-2"
-      />
-      <span className="text-sm">Einmaliger Nach-Ort</span>
-      </label>
-      {editingFahrt.nachOrtTyp === 'gespeichert' ? (
-        <select
-        value={editingFahrt.nach_ort_id || ''}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
-        className="w-full p-1 border rounded"
-        >
-        <option value="">Bitte wählen</option>
-        {renderOrteOptions(orte)}
-        </select>
-      ) : (
-        <input
-        type="text"
-        value={editingFahrt.einmaliger_nach_ort || ''}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
-        className="w-full p-1 border rounded"
-        placeholder="Nach (einmalig)"
-        />
-      )}
-      </div>
-    ) : (
-      <div>
-      <div className="text-sm">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort)}</div>
-      <div className="text-xs text-gray-500">{detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}</div>
-      </div>
-    )}
-    </td>
-    <td className="border px-2 py-1 text-sm">
-    {editingFahrt?.id === fahrt.id ? (
-      <input
-      type="text"
-      value={editingFahrt.anlass}
-      onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
-      className="w-full p-1 border rounded"
-      />
-    ) : (
-      fahrt.anlass
-    )}
-    </td>
-    <td className="border px-2 py-1 text-sm text-right">
-    {editingFahrt?.id === fahrt.id ? (
-      <input
-      type="number"
-      value={editingFahrt.kilometer}
-      onChange={(e) => setEditingFahrt({ ...editingFahrt, kilometer: parseFloat(e.target.value) })}
-      className="w-full p-1 border rounded"
-      />
-    ) : (
-      `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))} km`
-    )}
-    </td>
-    <td className="border px-2 py-1 text-sm">
-    {editingFahrt?.id === fahrt.id ? (
-      <select
-      value={editingFahrt.abrechnung}
-      onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
-      className="w-full p-1 border rounded"
-      >
-      <option value="Kirchenkreis">Kirchenkreis</option>
-      <option value="Gemeinde">Gemeinde</option>
-      <option value="Autosplit">Autosplit</option>
-      </select>
-    ) : (
-      detail ? detail.abrechnung : fahrt.abrechnung
-    )}
-    </td>
-    <td className="border px-2 py-1 text-sm w-48 align-top">
-    {editingFahrt?.id === fahrt.id ? (
-      <div className="mitfahrer-container">
-      {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
-        <div key={index} className="mitfahrer-item">
-        <span
-        className="cursor-pointer bg-blue-100 rounded-full px-2 py-1 text-sm font-semibold text-blue-700"
-        onClick={() => handleEditMitfahrer(fahrt.id, person)}
-        title={`${person.arbeitsstaette} - ${person.richtung}`}
-        >
-        👤 {person.name}
-        <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleDeleteMitfahrer(fahrt.id, person.id);
-        }}
-        className="ml-1 text-red-500 hover:text-red-700"
-        >
-        ❌
-        </button>
-        </span>
-        </div>
-      ))}
-      <button
-      onClick={() => handleAddMitfahrer(fahrt.id)}
-      className="mt-1 bg-green-500 text-white px-2 py-1 rounded text-xs add-mitfahrer-button"
-      >
-      +
-      </button>
-      </div>
-    ) : (
-      renderMitfahrer(fahrt)
-    )}
-    </td>
-    <td className="border px-2 py-1 text-sm">
-    {!detail && (
-      <div className="flex space-x-1">
-      {editingFahrt?.id === fahrt.id ? (
-        <>
-        <button onClick={handleSave} className="bg-green-500 text-white px-2 py-1 rounded text-xs">Speichern</button>
-        <button onClick={() => setEditingFahrt(null)} className="bg-gray-500 text-white px-2 py-1 rounded text-xs">Abbrechen</button>
-        </>
-      ) : (
-        <>
-        {!fahrt.autosplit && (
-          <button onClick={() => handleEdit(fahrt)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">Bearbeiten</button>
+    <tr 
+      key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
+      className={`${
+          detail ? "bg-primary-50" : 
+          (fahrt.autosplit ? "bg-primary-25" : "")
+        } hover:bg-primary-25 transition-colors duration-150`}
+    >
+      <td className="table-cell">
+        {editingFahrt?.id === fahrt.id ? (
+          <input
+            type="date"
+            value={editingFahrt.datum}
+            onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
+            className="form-input"
+          />
+        ) : (
+          new Date(fahrt.datum).toLocaleDateString()
         )}
-        <button onClick={() => handleDelete(fahrt.id)} className="bg-red-500 text-white px-2 py-1 rounded text-xs">Löschen</button>
-        {fahrt.autosplit ? (
-          <button onClick={() => toggleFahrtDetails(fahrt.id)} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
-          {expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
-          </button>
-        ) : null}
-        </>
-      )}
-      </div>
-    )}
-    </td>
+      </td>
+      <td className="table-cell">
+        {editingFahrt?.id === fahrt.id ? (
+          <div className="space-y-2">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editingFahrt.vonOrtTyp === 'einmalig'}
+                onChange={(e) => setEditingFahrt({
+                  ...editingFahrt,
+                  vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+                  von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
+                  einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
+                })}
+                className="mr-2"
+              />
+              <span className="text-sm">Einmaliger Von-Ort</span>
+            </label>
+            {editingFahrt.vonOrtTyp === 'gespeichert' ? (
+              <select
+                value={editingFahrt.von_ort_id || ''}
+                onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
+                className="form-select"
+              >
+                <option value="">Bitte wählen</option>
+                {renderOrteOptions(orte)}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={editingFahrt.einmaliger_von_ort || ''}
+                onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
+                className="form-input"
+                placeholder="Von (einmalig)"
+              />
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="text-primary-900">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort)}</div>
+            <div className="text-xs text-primary-600">{detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}</div>
+          </div>
+        )}
+      </td>
+      <td className="table-cell">
+        {editingFahrt?.id === fahrt.id ? (
+          <div className="space-y-2">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editingFahrt.nachOrtTyp === 'einmalig'}
+                onChange={(e) => setEditingFahrt({
+                  ...editingFahrt,
+                  nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+                  nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
+                  einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
+                })}
+                className="mr-2"
+              />
+              <span className="text-sm">Einmaliger Nach-Ort</span>
+            </label>
+            {editingFahrt.nachOrtTyp === 'gespeichert' ? (
+              <select
+                value={editingFahrt.nach_ort_id || ''}
+                onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
+                className="form-select"
+              >
+                <option value="">Bitte wählen</option>
+                {renderOrteOptions(orte)}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={editingFahrt.einmaliger_nach_ort || ''}
+                onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
+                className="form-input"
+                placeholder="Nach (einmalig)"
+              />
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="text-primary-900">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort)}</div>
+            <div className="text-xs text-primary-600">{detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}</div>
+          </div>
+        )}
+      </td>
+      <td className="table-cell">
+        {editingFahrt?.id === fahrt.id ? (
+          <input
+            type="text"
+            value={editingFahrt.anlass}
+            onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
+            className="form-input"
+          />
+        ) : (
+          fahrt.anlass
+        )}
+      </td>
+      <td className="table-cell text-right">
+        {editingFahrt?.id === fahrt.id ? (
+          <input
+            type="number"
+            value={editingFahrt.kilometer}
+            onChange={(e) => setEditingFahrt({ ...editingFahrt, kilometer: parseFloat(e.target.value) })}
+            className="form-input"
+          />
+        ) : (
+          `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))} km`
+        )}
+      </td>
+      <td className="table-cell">
+        {editingFahrt?.id === fahrt.id ? (
+          <select
+            value={editingFahrt.abrechnung}
+            onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
+            className="form-select"
+          >
+            <option value="Kirchenkreis">Kirchenkreis</option>
+            <option value="Gemeinde">Gemeinde</option>
+            <option value="Autosplit">Autosplit</option>
+          </select>
+        ) : (
+          detail ? detail.abrechnung : fahrt.abrechnung
+        )}
+      </td>
+      <td className="table-cell">
+        {editingFahrt?.id === fahrt.id ? (
+          <div className="space-y-2">
+            {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
+                  onClick={() => handleEditMitfahrer(fahrt.id, person)}
+                >
+                  {person.name}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteMitfahrer(fahrt.id, person.id);
+                  }}
+                  className="btn-secondary text-xs"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => handleAddMitfahrer(fahrt.id)}
+              className="btn-primary text-xs w-full"
+            >
+              + Mitfahrer:in
+            </button>
+          </div>
+        ) : (
+          renderMitfahrer(fahrt)
+        )}
+      </td>
+      <td className="table-cell text-right">
+        {!detail && (
+          <div className="flex justify-end gap-1">
+            {editingFahrt?.id === fahrt.id ? (
+              <>
+                <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
+                <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
+              </>
+            ) : (
+              <>
+                {!fahrt.autosplit && (
+                  <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
+                    ✎
+                  </button>
+                )}
+                <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
+                  ×
+                </button>
+                {fahrt.autosplit && (
+                  <button 
+                    onClick={() => toggleFahrtDetails(fahrt.id)} 
+                    className="btn-primary text-xs"
+                    title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
+                  >
+                    {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </td>
     </tr>
   );
-  
+
+  // Haupt-Return für die Komponente
   return (
-    <div className="mb-4">
-{renderAbrechnungsStatus(summary)}
-    <table className="w-full border-collapse text-left fahrten-table">
-    <thead>
-    <tr className="bg-gray-200">
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer datum-col" onClick={() => requestSort('datum')}>Datum {sortConfig.key === 'datum' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer ort-col" onClick={() => requestSort('von_ort_name')}>Von {sortConfig.key === 'von_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer ort-col" onClick={() => requestSort('nach_ort_name')}>Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer anlass-col" onClick={() => requestSort('anlass')}>Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer kilometer-col" onClick={() => requestSort('kilometer')}>Kilometer {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium cursor-pointer abrechnung-col" onClick={() => requestSort('abrechnung')}>Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}</th>
-    <th className="border px-2 py-1 text-sm font-medium mitfahrer-col">Mitfahrer:innen</th>
-    <th className="border px-2 py-1 text-sm font-medium aktionen-col">Aktionen</th>
-    </tr>
-    </thead>
-    <tbody>
-    {sortedFahrten.map((fahrt) => (
-      <React.Fragment key={fahrt.id}>
-      {renderFahrtRow(fahrt)}
-      {fahrt.autosplit ? (
-        expandedFahrten[fahrt.id] && fahrt.details.map(detail => renderFahrtRow(fahrt, detail))
-      ) : null}
-      </React.Fragment>
-    ))}
-    </tbody>
-    </table>
-    <MitfahrerModal
-    isOpen={!!viewingMitfahrer}
-    onClose={() => setViewingMitfahrer(null)}
-    initialData={viewingMitfahrer}
-    readOnly={true}
-    />
-    
-    <MitfahrerModal
-    isOpen={!!editingMitfahrer}
-    onClose={() => setEditingMitfahrer(null)}
-    onSave={handleSaveMitfahrer}
-    initialData={editingMitfahrer}
-    readOnly={false}
-    />
+    <div className="table-container">
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-primary-25 border-b border-primary-100">
+              <th className="table-header" onClick={() => requestSort('datum')}>
+                Datum {sortConfig.key === 'datum' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+              </th>
+              <th className="table-header" onClick={() => requestSort('von_ort_name')}>
+                Von {sortConfig.key === 'von_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+              </th>
+              <th className="table-header" onClick={() => requestSort('nach_ort_name')}>
+Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+              </th>
+              <th className="table-header" onClick={() => requestSort('anlass')}>
+                Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+              </th>
+              <th className="table-header text-right" onClick={() => requestSort('kilometer')}>
+                km {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+              </th>
+              <th className="table-header" onClick={() => requestSort('abrechnung')}>
+                Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+              </th>
+              <th className="table-header">Mitfahrer:innen</th>
+              <th className="table-header text-right">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-primary-50">
+            {sortedFahrten.map((fahrt) => (
+              <React.Fragment key={fahrt.id}>
+                {renderFahrtRow(fahrt)}
+                {fahrt.autosplit && expandedFahrten[fahrt.id] && 
+                  fahrt.details.map(detail => renderFahrtRow(fahrt, detail))}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile View */}
+      <div className="md:hidden space-y-4">
+        {sortedFahrten.map((fahrt) => (
+          <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
+            {/* Header */}
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <div className="text-primary-900 font-medium">
+                  {new Date(fahrt.datum).toLocaleDateString()}
+                </div>
+                <div className="text-sm text-primary-600">
+                  {fahrt.autosplit ? "Via Dienstort" : fahrt.abrechnung}
+                </div>
+              </div>
+              <div className="flex gap-1">
+                {!fahrt.autosplit && (
+                  <button
+                    onClick={() => handleEdit(fahrt)}
+                    className="btn-primary text-xs"
+                  >
+                    ✎
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDelete(fahrt.id)}
+                  className="btn-secondary text-xs"
+                >
+                  ×
+                </button>
+                {fahrt.autosplit && (
+                  <button
+                    onClick={() => toggleFahrtDetails(fahrt.id)}
+                    className="btn-primary text-xs"
+                  >
+                    {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-4">
+              {/* Route */}
+              <div className="grid grid-cols-1 gap-2">
+                <div>
+                  <div className="text-xs text-primary-600">Von</div>
+                  <div className="text-primary-900">
+                    {fahrt.von_ort_name || fahrt.einmaliger_von_ort}
+                  </div>
+                  {fahrt.von_ort_adresse && (
+                    <div className="text-xs text-primary-600">{fahrt.von_ort_adresse}</div>
+                  )}
+                </div>
+                <div>
+                  <div className="text-xs text-primary-600">Nach</div>
+                  <div className="text-primary-900">
+                    {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+                  </div>
+                  {fahrt.nach_ort_adresse && (
+                    <div className="text-xs text-primary-600">{fahrt.nach_ort_adresse}</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Anlass & Kilometer */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-primary-600">Anlass</div>
+                  <div className="text-primary-900">{fahrt.anlass}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-primary-600">Kilometer</div>
+                  <div className="text-primary-900">{formatValue(roundKilometers(fahrt.kilometer))} km</div>
+                </div>
+              </div>
+
+              {/* Mitfahrer */}
+              {fahrt.mitfahrer?.length > 0 && (
+                <div>
+                  <div className="text-xs text-primary-600 mb-1">Mitfahrer:innen</div>
+                  {renderMitfahrer(fahrt)}
+                </div>
+              )}
+
+              {/* Autosplit Details */}
+              {fahrt.autosplit && expandedFahrten[fahrt.id] && (
+                <div className="space-y-2">
+                  {fahrt.details.map((detail, idx) => (
+                    <div key={idx} className="bg-primary-50 p-2 rounded">
+                      <div className="text-xs text-primary-600">{detail.abrechnung}</div>
+                      <div className="text-sm">
+                        {detail.von_ort_name} → {detail.nach_ort_name}
+                      </div>
+                      <div className="text-sm">{formatValue(roundKilometers(detail.kilometer))} km</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modals */}
+      <MitfahrerModal
+        isOpen={!!viewingMitfahrer}
+        onClose={() => setViewingMitfahrer(null)}
+        initialData={viewingMitfahrer}
+        readOnly={true}
+      />
+      
+      <MitfahrerModal
+        isOpen={!!editingMitfahrer}
+        onClose={() => setEditingMitfahrer(null)}
+        onSave={handleSaveMitfahrer}
+        initialData={editingMitfahrer}
+        readOnly={false}
+      />
     </div>
   );
 }
