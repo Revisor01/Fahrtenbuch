@@ -310,7 +310,7 @@ function AppProvider({ children }) {
       isLoggedIn, login, logout, token, updateFahrt, user, setUser, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
-      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification
+      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification, setFahrten
     }}>
     {children}
     <NotificationModal
@@ -890,7 +890,8 @@ function FahrtenListe() {
   };
   
   const roundKilometers = (value) => {
-    return value % 1 < 0.5 ? Math.floor(value) : Math.ceil(value);
+    const numValue = Number(value ?? 0); // Setze nullish auf 0
+    return numValue % 1 < 0.5 ? Math.floor(numValue) : Math.ceil(numValue);
   };
   
   const exportToCSV = (type) => {
@@ -959,7 +960,7 @@ function FahrtenListe() {
     setSortConfig({ key, direction });
   };
   
-  const formatValue = (value) => value === 0 ? null : value;
+  const formatValue = (value) => value == null ? "" : value;
   
   const handleEditMitfahrer = (fahrtId, mitfahrer) => {
     setEditingMitfahrer({ fahrtId, ...mitfahrer });
@@ -1053,18 +1054,6 @@ function FahrtenListe() {
     >
     <td className="table-cell">
     {editingFahrt?.id === fahrt.id ? (
-      <input
-      type="date"
-      value={editingFahrt.datum}
-      onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
-      className="form-input"
-      />
-    ) : (
-      new Date(fahrt.datum).toLocaleDateString()
-    )}
-    </td>
-    <td className="table-cell">
-    {editingFahrt?.id === fahrt.id ? (
       <div className="space-y-2">
       <label className="flex items-center cursor-pointer">
       <input
@@ -1101,7 +1090,7 @@ function FahrtenListe() {
       </div>
     ) : (
       <div>
-      <div className="text-primary-900">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort)}</div>
+      <div className="text-primary-900">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort || "")}</div>
       <div className="text-xs text-primary-600">{detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}</div>
       </div>
     )}
@@ -1144,7 +1133,7 @@ function FahrtenListe() {
       </div>
     ) : (
       <div>
-      <div className="text-primary-900">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort)}</div>
+      <div className="text-primary-900">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || "")}</div>
       <div className="text-xs text-primary-600">{detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}</div>
       </div>
     )}
