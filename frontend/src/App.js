@@ -1295,210 +1295,228 @@ Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending
         </table>
       </div>
 
-      {/* Mobile View */}
-<div className="md:hidden space-y-4">
-  {sortedFahrten.map((fahrt) => (
-    <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
+    {/* Mobile View */}
+    <div className="md:hidden space-y-4">
+    {sortedFahrten.map((fahrt) => (
+      <div key={fahrt.id}
+      className={`bg-white p-4 rounded-lg border border-primary-100 ${
+        fahrt.autosplit ? "bg-primary-25" : ""
+      }`}>
       {editingFahrt?.id === fahrt.id ? (
         // Edit Mode
         <div className="space-y-4">
-          <input
-            type="date"
-            value={editingFahrt.datum}
-            onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
-            className="form-input w-full"
-          />
-          
-          <div>
-            <label className="text-xs text-primary-600">Von</label>
-            <select
-              value={editingFahrt.von_ort_id || ''}
-              onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
-              className="form-select w-full mt-1"
-            >
-              <option value="">Bitte wählen</option>
-              {renderOrteOptions(orte)}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-xs text-primary-600">Nach</label>
-            <select
-              value={editingFahrt.nach_ort_id || ''}
-              onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
-              className="form-select w-full mt-1"
-            >
-              <option value="">Bitte wählen</option>
-              {renderOrteOptions(orte)}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-xs text-primary-600">Anlass</label>
-            <input
-              type="text"
-              value={editingFahrt.anlass}
-              onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
-              className="form-input w-full mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-primary-600">Kilometer</label>
-            <input
-              type="number"
-              value={editingFahrt.kilometer}
-              onChange={(e) => setEditingFahrt({ ...editingFahrt, kilometer: parseFloat(e.target.value) })}
-              className="form-input w-full mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-primary-600">Abrechnung</label>
-            <select
-              value={editingFahrt.abrechnung}
-              onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
-              className="form-select w-full mt-1"
-            >
-              <option value="Kirchenkreis">Kirchenkreis</option>
-              <option value="Gemeinde">Gemeinde</option>
-              <option value="Autosplit">Autosplit</option>
-            </select>
-          </div>
-
-          <div className="flex gap-2">
-            <button onClick={handleSave} className="btn-primary flex-1">Speichern</button>
-            <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">Abbrechen</button>
-          </div>
+        <input
+        type="date"
+        value={editingFahrt.datum}
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
+        className="form-input w-full"
+        />
+        
+        <div>
+        <label className="text-xs text-primary-600">Von</label>
+        <select
+        value={editingFahrt.von_ort_id || ''}
+        onChange={(e) =>
+          setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })
+        }
+        className="form-select w-full mt-1"
+        >
+        <option value="">Bitte wählen</option>
+        {renderOrteOptions(orte)}
+        </select>
+        </div>
+        
+        <div>
+        <label className="text-xs text-primary-600">Nach</label>
+        <select
+        value={editingFahrt.nach_ort_id || ''}
+        onChange={(e) =>
+          setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })
+        }
+        className="form-select w-full mt-1"
+        >
+        <option value="">Bitte wählen</option>
+        {renderOrteOptions(orte)}
+        </select>
+        </div>
+        
+        <div>
+        <label className="text-xs text-primary-600">Anlass</label>
+        <input
+        type="text"
+        value={editingFahrt.anlass}
+        onChange={(e) =>
+          setEditingFahrt({ ...editingFahrt, anlass: e.target.value })
+        }
+        className="form-input w-full mt-1"
+        />
+        </div>
+        
+        <div>
+        <label className="text-xs text-primary-600">Kilometer</label>
+        <input
+        type="number"
+        value={editingFahrt.kilometer}
+        onChange={(e) =>
+          setEditingFahrt({
+            ...editingFahrt,
+            kilometer: parseFloat(e.target.value),
+          })
+        }
+        className="form-input w-full mt-1"
+        />
+        </div>
+        
+        <div>
+        <label className="text-xs text-primary-600">Abrechnung</label>
+        <select
+        value={editingFahrt.abrechnung}
+        onChange={(e) =>
+          setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })
+        }
+        className="form-select w-full mt-1"
+        >
+        <option value="Kirchenkreis">Kirchenkreis</option>
+        <option value="Gemeinde">Gemeinde</option>
+        <option value="Autosplit">Autosplit</option>
+        </select>
+        </div>
+        
+        <div className="flex gap-2">
+        <button onClick={handleSave} className="btn-primary flex-1">
+        Speichern
+        </button>
+        <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">
+        Abbrechen
+        </button>
+        </div>
         </div>
       ) : (
         // View Mode
-        <>
-        {
-          <div className="md:hidden space-y-4">
-          {sortedFahrten.map((fahrt) => (
-            <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
-            {/* Header */}
-            <div className="flex justify-between items-start mb-4">
-            <div>
-            <div className="text-primary-900 font-medium">
-            {new Date(fahrt.datum).toLocaleDateString()}
+        <div key={fahrt.id}
+        className={`bg-white p-4 rounded-lg border border-primary-100 ${
+          fahrt.autosplit ? "bg-primary-25" : ""
+        }`}>
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
+        <div>
+        <div className="text-primary-900 font-medium">
+        {new Date(fahrt.datum).toLocaleDateString()}
+        </div>
+        <div className="text-sm text-primary-600">
+        {fahrt.autosplit ? "Via Dienstort" : fahrt.abrechnung}
+        </div>
+        </div>
+        <div className="flex gap-1">
+        {!fahrt.autosplit && (
+          <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs">
+          ✎
+          </button>
+        )}
+        <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs">
+        ×
+        </button>
+        {fahrt.autosplit && (
+          <button
+          onClick={() => toggleFahrtDetails(fahrt.id)}
+          className="btn-primary text-xs"
+          >
+          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+          </button>
+        )}
+        </div>
+        </div>
+        
+        {/* Details */}
+        <div className="space-y-4">
+        {/* Route */}
+        <div className="grid grid-cols-1 gap-2">
+        <div>
+        <div className="text-xs text-primary-600">Von</div>
+        <div className="text-primary-900">
+        {fahrt.von_ort_name || fahrt.einmaliger_von_ort}
+        </div>
+        {fahrt.von_ort_adresse && (
+          <div className="text-xs text-primary-600">
+          {fahrt.von_ort_adresse}
+          </div>
+        )}
+        </div>
+        <div>
+        <div className="text-xs text-primary-600">Nach</div>
+        <div className="text-primary-900">
+        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+        </div>
+        {fahrt.nach_ort_adresse && (
+          <div className="text-xs text-primary-600">
+          {fahrt.nach_ort_adresse}
+          </div>
+        )}
+        </div>
+        </div>
+        
+        {/* Anlass & Kilometer */}
+        <div className="grid grid-cols-2 gap-4">
+        <div>
+        <div className="text-xs text-primary-600">Anlass</div>
+        <div className="text-primary-900">{fahrt.anlass}</div>
+        </div>
+        <div>
+        <div className="text-xs text-primary-600">Kilometer</div>
+        <div className="text-primary-900">
+        {formatValue(roundKilometers(fahrt.kilometer))} km
+        </div>
+        </div>
+        </div>
+        
+        {/* Mitfahrer */}
+        {fahrt.mitfahrer?.length > 0 && (
+          <div>
+          <div className="text-xs text-primary-600 mb-1">Mitfahrer:innen</div>
+          {renderMitfahrer(fahrt)}
+          </div>
+        )}
+        
+        {/* Autosplit Details */}
+        {fahrt.autosplit && expandedFahrten[fahrt.id] && (
+          <div className="space-y-2">
+          {fahrt.details.map((detail, idx) => (
+            <div key={idx} className="bg-primary-50 p-2 rounded">
+            <div className="text-xs text-primary-600">
+            {detail.abrechnung}
             </div>
-            <div className="text-sm text-primary-600">
-            {fahrt.autosplit ? "Via Dienstort" : fahrt.abrechnung}
+            <div className="text-sm">
+            {detail.von_ort_name} → {detail.nach_ort_name}
             </div>
+            <div className="text-sm">
+            {formatValue(roundKilometers(detail.kilometer))} km
             </div>
-            <div className="flex gap-1">
-            {!fahrt.autosplit && (
-              <button
-              onClick={() => handleEdit(fahrt)}
-              className="btn-primary text-xs"
-              >
-              ✎
-              </button>
-            )}
-            <button
-            onClick={() => handleDelete(fahrt.id)}
-            className="btn-secondary text-xs"
-            >
-            ×
-            </button>
-            {fahrt.autosplit && (
-              <button
-              onClick={() => toggleFahrtDetails(fahrt.id)}
-              className="btn-primary text-xs"
-              >
-              {expandedFahrten[fahrt.id] ? '▼' : '▶'}
-              </button>
-            )}
-            </div>
-            </div>
-            
-            {/* Details */}
-            <div className="space-y-4">
-            {/* Route */}
-            <div className="grid grid-cols-1 gap-2">
-            <div>
-            <div className="text-xs text-primary-600">Von</div>
-            <div className="text-primary-900">
-            {fahrt.von_ort_name || fahrt.einmaliger_von_ort}
-            </div>
-            {fahrt.von_ort_adresse && (
-              <div className="text-xs text-primary-600">{fahrt.von_ort_adresse}</div>
-            )}
-            </div>
-            <div>
-            <div className="text-xs text-primary-600">Nach</div>
-            <div className="text-primary-900">
-            {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
-            </div>
-            {fahrt.nach_ort_adresse && (
-              <div className="text-xs text-primary-600">{fahrt.nach_ort_adresse}</div>
-            )}
-            </div>
-            </div>
-            
-            {/* Anlass & Kilometer */}
-            <div className="grid grid-cols-2 gap-4">
-            <div>
-            <div className="text-xs text-primary-600">Anlass</div>
-            <div className="text-primary-900">{fahrt.anlass}</div>
-            </div>
-            <div>
-            <div className="text-xs text-primary-600">Kilometer</div>
-            <div className="text-primary-900">{formatValue(roundKilometers(fahrt.kilometer))} km</div>
-            </div>
-            </div>
-            
-            {/* Mitfahrer */}
-            {fahrt.mitfahrer?.length > 0 && (
-              <div>
-              <div className="text-xs text-primary-600 mb-1">Mitfahrer:innen</div>
-              {renderMitfahrer(fahrt)}
-              </div>
-            )}
-            
-            {/* Autosplit Details */}
-            {fahrt.autosplit && expandedFahrten[fahrt.id] && (
-              <div className="space-y-2">
-              {fahrt.details.map((detail, idx) => (
-                <div key={idx} className="bg-primary-50 p-2 rounded">
-                <div className="text-xs text-primary-600">{detail.abrechnung}</div>
-                <div className="text-sm">
-                {detail.von_ort_name} → {detail.nach_ort_name}
-                </div>
-                <div className="text-sm">{formatValue(roundKilometers(detail.kilometer))} km</div>
-                </div>
-              ))}
-              </div>
-            )}
-            </div>
-            </div>
-            }
-            </>
-          )}
             </div>
           ))}
           </div>
-
-      {/* Modals */}
-      <MitfahrerModal
-        isOpen={!!viewingMitfahrer}
-        onClose={() => setViewingMitfahrer(null)}
-        initialData={viewingMitfahrer}
-        readOnly={true}
-      />
-      
-      <MitfahrerModal
-        isOpen={!!editingMitfahrer}
-        onClose={() => setEditingMitfahrer(null)}
-        onSave={handleSaveMitfahrer}
-        initialData={editingMitfahrer}
-        readOnly={false}
-      />
-    </div>
-  );
-}
+        )}
+        </div>
+        </div>
+      )}
+      </div>
+    ))
+    }
+    
+    
+    {/* Modals */}
+    <MitfahrerModal
+    isOpen={!!viewingMitfahrer}
+    onClose={() => setViewingMitfahrer(null)}
+    initialData={viewingMitfahrer}
+    readOnly={true}
+    />
+    
+    <MitfahrerModal
+    isOpen={!!editingMitfahrer}
+    onClose={() => setEditingMitfahrer(null)}
+    onSave={handleSaveMitfahrer}
+    initialData={editingMitfahrer}
+    readOnly={false}
 
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
