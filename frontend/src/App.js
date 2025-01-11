@@ -776,7 +776,7 @@ function FahrtenListe() {
       ) : null}
       </div>
       <div
-      className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
             {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
           </div>
           {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
@@ -807,7 +807,7 @@ function FahrtenListe() {
             ) : null}
           </div>
           <div
-            className={`text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+            className={'text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
             {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
           </div>
           {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
@@ -833,7 +833,7 @@ function FahrtenListe() {
             <span className="text-sm text-primary-600">Mitfahrer</span>
           </div>
           <div
-            className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+            className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
             {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
           </div>
         </div>
@@ -1374,111 +1374,112 @@ Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending
       ) : (
         // View Mode
         <>
-{
-      <div className="md:hidden space-y-4">
-        {sortedFahrten.map((fahrt) => (
-          <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
+        {
+          <div className="md:hidden space-y-4">
+          {sortedFahrten.map((fahrt) => (
+            <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
             {/* Header */}
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <div className="text-primary-900 font-medium">
-                  {new Date(fahrt.datum).toLocaleDateString()}
-                </div>
-                <div className="text-sm text-primary-600">
-                  {fahrt.autosplit ? "Via Dienstort" : fahrt.abrechnung}
-                </div>
-              </div>
-              <div className="flex gap-1">
-                {!fahrt.autosplit && (
-                  <button
-                    onClick={() => handleEdit(fahrt)}
-                    className="btn-primary text-xs"
-                  >
-                    ✎
-                  </button>
-                )}
-                <button
-                  onClick={() => handleDelete(fahrt.id)}
-                  className="btn-secondary text-xs"
-                >
-                  ×
-                </button>
-                {fahrt.autosplit && (
-                  <button
-                    onClick={() => toggleFahrtDetails(fahrt.id)}
-                    className="btn-primary text-xs"
-                  >
-                    {expandedFahrten[fahrt.id] ? '▼' : '▶'}
-                  </button>
-                )}
-              </div>
+            <div>
+            <div className="text-primary-900 font-medium">
+            {new Date(fahrt.datum).toLocaleDateString()}
             </div>
-
+            <div className="text-sm text-primary-600">
+            {fahrt.autosplit ? "Via Dienstort" : fahrt.abrechnung}
+            </div>
+            </div>
+            <div className="flex gap-1">
+            {!fahrt.autosplit && (
+              <button
+              onClick={() => handleEdit(fahrt)}
+              className="btn-primary text-xs"
+              >
+              ✎
+              </button>
+            )}
+            <button
+            onClick={() => handleDelete(fahrt.id)}
+            className="btn-secondary text-xs"
+            >
+            ×
+            </button>
+            {fahrt.autosplit && (
+              <button
+              onClick={() => toggleFahrtDetails(fahrt.id)}
+              className="btn-primary text-xs"
+              >
+              {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+              </button>
+            )}
+            </div>
+            </div>
+            
             {/* Details */}
             <div className="space-y-4">
-              {/* Route */}
-              <div className="grid grid-cols-1 gap-2">
-                <div>
-                  <div className="text-xs text-primary-600">Von</div>
-                  <div className="text-primary-900">
-                    {fahrt.von_ort_name || fahrt.einmaliger_von_ort}
-                  </div>
-                  {fahrt.von_ort_adresse && (
-                    <div className="text-xs text-primary-600">{fahrt.von_ort_adresse}</div>
-                  )}
-                </div>
-                <div>
-                  <div className="text-xs text-primary-600">Nach</div>
-                  <div className="text-primary-900">
-                    {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
-                  </div>
-                  {fahrt.nach_ort_adresse && (
-                    <div className="text-xs text-primary-600">{fahrt.nach_ort_adresse}</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Anlass & Kilometer */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-xs text-primary-600">Anlass</div>
-                  <div className="text-primary-900">{fahrt.anlass}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-primary-600">Kilometer</div>
-                  <div className="text-primary-900">{formatValue(roundKilometers(fahrt.kilometer))} km</div>
-                </div>
-              </div>
-
-              {/* Mitfahrer */}
-              {fahrt.mitfahrer?.length > 0 && (
-                <div>
-                  <div className="text-xs text-primary-600 mb-1">Mitfahrer:innen</div>
-                  {renderMitfahrer(fahrt)}
-                </div>
-              )}
-
-              {/* Autosplit Details */}
-              {fahrt.autosplit && expandedFahrten[fahrt.id] && (
-                <div className="space-y-2">
-                  {fahrt.details.map((detail, idx) => (
-                    <div key={idx} className="bg-primary-50 p-2 rounded">
-                      <div className="text-xs text-primary-600">{detail.abrechnung}</div>
-                      <div className="text-sm">
-                        {detail.von_ort_name} → {detail.nach_ort_name}
-                      </div>
-                      <div className="text-sm">{formatValue(roundKilometers(detail.kilometer))} km</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            {/* Route */}
+            <div className="grid grid-cols-1 gap-2">
+            <div>
+            <div className="text-xs text-primary-600">Von</div>
+            <div className="text-primary-900">
+            {fahrt.von_ort_name || fahrt.einmaliger_von_ort}
             </div>
-}
-        </>
-      )}
+            {fahrt.von_ort_adresse && (
+              <div className="text-xs text-primary-600">{fahrt.von_ort_adresse}</div>
+            )}
+            </div>
+            <div>
+            <div className="text-xs text-primary-600">Nach</div>
+            <div className="text-primary-900">
+            {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+            </div>
+            {fahrt.nach_ort_adresse && (
+              <div className="text-xs text-primary-600">{fahrt.nach_ort_adresse}</div>
+            )}
+            </div>
+            </div>
+            
+            {/* Anlass & Kilometer */}
+            <div className="grid grid-cols-2 gap-4">
+            <div>
+            <div className="text-xs text-primary-600">Anlass</div>
+            <div className="text-primary-900">{fahrt.anlass}</div>
+            </div>
+            <div>
+            <div className="text-xs text-primary-600">Kilometer</div>
+            <div className="text-primary-900">{formatValue(roundKilometers(fahrt.kilometer))} km</div>
+            </div>
+            </div>
+            
+            {/* Mitfahrer */}
+            {fahrt.mitfahrer?.length > 0 && (
+              <div>
+              <div className="text-xs text-primary-600 mb-1">Mitfahrer:innen</div>
+              {renderMitfahrer(fahrt)}
+              </div>
+            )}
+            
+            {/* Autosplit Details */}
+            {fahrt.autosplit && expandedFahrten[fahrt.id] && (
+              <div className="space-y-2">
+              {fahrt.details.map((detail, idx) => (
+                <div key={idx} className="bg-primary-50 p-2 rounded">
+                <div className="text-xs text-primary-600">{detail.abrechnung}</div>
+                <div className="text-sm">
+                {detail.von_ort_name} → {detail.nach_ort_name}
+                </div>
+                <div className="text-sm">{formatValue(roundKilometers(detail.kilometer))} km</div>
+                </div>
+              ))}
+              </div>
+            )}
+            </div>
+            </div>
+            }
+            </>
+          )}
+            </div>
+          ))}
           </div>
-        ))}
-      </div>
 
       {/* Modals */}
       <MitfahrerModal
