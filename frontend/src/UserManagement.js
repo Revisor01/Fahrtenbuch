@@ -32,59 +32,93 @@ import Modal from './Modal';
     };
 
         return (
-            <div className="mb-4">
             <div className="table-container">
-            <div className="bg-primary-25 p-6">
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:flex-1">
-            <select
-            value={vonOrtId}
-            onChange={(e) => setVonOrtId(e.target.value)}
-            className="form-select w-full"
-            required
-            >
-            <option value="">Von Ort auswählen</option>
-            {renderOrteOptions(orte)}
-            </select>
-            </div>
-            
-            <div className="w-full sm:flex-1">
-            <select
-            value={nachOrtId}
-            onChange={(e) => setNachOrtId(e.target.value)}
-            className="form-select w-full"
-            required
-            >
-            <option value="">Nach Ort auswählen</option>
-            {renderOrteOptions(orte)}
-            </select>
-            </div>
-            
-            <div className="w-full sm:w-36">
+            <div className="bg-primary-25 p-6 rounded-lg">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
             <input
-            type="number"
-            value={distanz}
-            onChange={(e) => setDistanz(e.target.value)}
-            placeholder="km"
-            className="form-input w-full"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="form-input"
+            placeholder="E-Mail *"
             required
+            />
+            
+            <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="form-input"
+            placeholder="Benutzername *"
+            required
+            />
+            
+            <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="form-select"
+            >
+            <option value="user">Benutzer</option>
+            <option value="admin">Administrator</option>
+            </select>
+            
+            <input
+            type="text"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            className="form-input"
+            placeholder="Voller Name"
+            />
+            
+            <input
+            type="text"
+            name="iban"
+            value={formData.iban}
+            onChange={handleChange}
+            className="form-input"
+            placeholder="IBAN"
+            />
+            
+            <input
+            type="text"
+            name="kirchengemeinde"
+            value={formData.kirchengemeinde}
+            onChange={handleChange}
+            className="form-input"
+            placeholder="Kirchengemeinde"
+            />
+            
+            <input
+            type="text"
+            name="kirchspiel"
+            value={formData.kirchspiel}
+            onChange={handleChange}
+            className="form-input"
+            placeholder="Kirchspiel"
+            />
+            
+            <input
+            type="text"
+            name="kirchenkreis"
+            value={formData.kirchenkreis}
+            onChange={handleChange}
+            className="form-input"
+            placeholder="Kirchenkreis"
             />
             </div>
             
-            <button 
-            type="submit" 
-            className="btn-primary"
+            <button
+            type="submit"
+            className="btn-primary w-full"
             >
-            {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
+            {isEdit ? 'Aktualisieren' : 'Erstellen'}
             </button>
             </form>
-            
-            {existingDistanz && (
-                <div className="mt-4 text-sm text-primary-600">
-                Bestehende Distanz wird aktualisiert
-                </div>
-            )}
-            </div>
             </div>
             </div>
         );
