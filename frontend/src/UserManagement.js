@@ -206,10 +206,10 @@ export default function UserManagement() {
         <thead>
         <tr className="bg-primary-25 border-b border-primary-100">
         <th className="table-header">Benutzername</th>
-        <th className="hidden sm:table-cell table-header">E-Mail</th>
-        <th className="hidden md:table-cell table-header">Kirchengemeinde</th>
+        <th className="hidden table-header">E-Mail</th>
+        <th className="hidden table-header">Kirchengemeinde</th>
         <th className="table-header">Status</th>
-        <th className="hidden sm:table-cell table-header">Rolle</th>
+        <th className="hidden table-header">Rolle</th>
         <th className="table-header text-right">Aktionen</th>
         </tr>
         </thead>
