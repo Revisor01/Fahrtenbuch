@@ -32,92 +32,60 @@ import Modal from './Modal';
     };
 
         return (
-            <div className="bg-primary-25 p-6 rounded-lg">
-            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-4">
-            <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="E-Mail *"
-            required
-            />
-            
-            <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="Benutzername *"
-            required
-            />
-            
+            <div className="mb-4">
+            <div className="table-container">
+            <div className="bg-primary-25 p-6">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:flex-1">
             <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="form-select"
+            value={vonOrtId}
+            onChange={(e) => setVonOrtId(e.target.value)}
+            className="form-select w-full"
+            required
             >
-            <option value="user">Benutzer</option>
-            <option value="admin">Administrator</option>
+            <option value="">Von Ort auswählen</option>
+            {renderOrteOptions(orte)}
             </select>
+            </div>
             
-            <input
-            type="text"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="Voller Name"
-            />
+            <div className="w-full sm:flex-1">
+            <select
+            value={nachOrtId}
+            onChange={(e) => setNachOrtId(e.target.value)}
+            className="form-select w-full"
+            required
+            >
+            <option value="">Nach Ort auswählen</option>
+            {renderOrteOptions(orte)}
+            </select>
+            </div>
             
+            <div className="w-full sm:w-36">
             <input
-            type="text"
-            name="iban"
-            value={formData.iban}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="IBAN"
-            />
-            
-            <input
-            type="text"
-            name="kirchengemeinde"
-            value={formData.kirchengemeinde}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="Kirchengemeinde"
-            />
-            
-            <input
-            type="text"
-            name="kirchspiel"
-            value={formData.kirchspiel}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="Kirchspiel"
-            />
-            
-            <input
-            type="text"
-            name="kirchenkreis"
-            value={formData.kirchenkreis}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="Kirchenkreis"
+            type="number"
+            value={distanz}
+            onChange={(e) => setDistanz(e.target.value)}
+            placeholder="km"
+            className="form-input w-full"
+            required
             />
             </div>
             
-            <button
-            type="submit"
-            className="btn-primary w-full"
+            <button 
+            type="submit" 
+            className="btn-primary"
             >
-            {isEdit ? 'Aktualisieren' : 'Erstellen'}
+            {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
             </button>
             </form>
+            
+            {existingDistanz && (
+                <div className="mt-4 text-sm text-primary-600">
+                Bestehende Distanz wird aktualisiert
+                </div>
+            )}
+            </div>
+            </div>
             </div>
         );
 };
@@ -189,7 +157,7 @@ export default function UserManagement() {
 
     return (
         <div className="w-full max-w-full p-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex justify-end mb-6">
         <button
         onClick={() => setIsCreateModalOpen(true)}
         className="btn-primary w-full-mobile"

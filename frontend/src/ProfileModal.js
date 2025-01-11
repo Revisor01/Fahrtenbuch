@@ -146,6 +146,7 @@
       title="Profil"
       size="compact"
       >
+      <div className="table-container">
       <div className="bg-primary-25 p-6 rounded-lg space-y-6">
       {/* Profil-Formular */}
       <form onSubmit={handleProfileUpdate} className="space-y-4">
@@ -268,6 +269,7 @@
       ) : (
         <p className="text-sm text-secondary-600">● Bitte Dienstort festlegen</p>
       )}
+      </div>
       </div>
       
       {/* Benachrichtigung */}
