@@ -41,10 +41,14 @@ code {
   .table-header {
     @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer;
   }
-  
-  .table-cell {
-    @apply px-4 py-3 text-sm text-primary-900;
+
+  .table-header-sm {
+    @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer hidden sm:table-cell;
   }
+    
+    .table-cell {
+        @apply px-4 py-3 text-sm text-primary-900;
+    }
 
   .table-row {
     @apply hover:bg-primary-25 transition-colors duration-150;
