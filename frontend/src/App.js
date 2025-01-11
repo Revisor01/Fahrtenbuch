@@ -726,19 +726,22 @@ function FahrtenListe() {
     };
     
     return (
-      <div className="mb-4">
-      <div className="flex justify-between items-center mb-2">
-      <div className="flex items-center space-x-4">
-      <h2 className="text-lg font-semibold">Fahrten</h2>
-      <span className="text-lg text-gray-600">
+      <div className="table-container mb-4">
+      <div className="bg-primary-25 p-6 space-y-6">
+      {/* Header mit Titel und Navigation */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+      <h2 className="text-lg font-semibold text-primary-900">Fahrten</h2>
+      <span className="text-primary-600">
       {new Date(`${selectedMonth}-01`).toLocaleString('default', { month: 'long' })} {selectedYear}
       </span>
       </div>
-      <div className="flex items-center space-x-2">
+      
+      <div className="flex flex-wrap items-center gap-2">
       {selectedMonth !== currentMonth && (
-        <button
-        onClick={resetToCurrentMonth}
-        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+        <button 
+        onClick={resetToCurrentMonth} 
+        className="btn-secondary"
         >
         Aktueller Monat
         </button>
@@ -746,7 +749,7 @@ function FahrtenListe() {
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
-      className="p-1 border rounded text-sm"
+      className="form-select w-36"
       >
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
@@ -757,7 +760,7 @@ function FahrtenListe() {
       <select
       value={selectedYear}
       onChange={handleYearChange}
-      className="p-1 border rounded text-sm"
+      className="form-select w-24"
       >
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
@@ -766,70 +769,95 @@ function FahrtenListe() {
       </select>
       </div>
       </div>
-      <div className="bg-white p-3 rounded-lg shadow mb-4">
-      <div className="mb-3">
-      <div className="flex items-baseline space-x-4">
-      <div className="flex items-center space-x-1">
-      <p className="text-sm font-medium">
-      Kirchenkreis: <span className={kkReceived ? "text-gray-400" : "font-semibold"}>
-      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-      </span>
-      <span className="ml-1">{renderStatusIcon(summary.abrechnungsStatus?.kirchenkreis)}</span>
-      </p>
-      </div>
-      <div className="flex items-center space-x-1">
-      <p className="text-sm font-medium">
-      Gemeinde: <span className={gemReceived ? "text-gray-400" : "font-semibold"}>
-      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
-      </span>
-      <span className="ml-1">{renderStatusIcon(summary.abrechnungsStatus?.gemeinde)}</span>
-      </p>
-      </div>
-      <div className="flex items-center space-x-1">
-      <p className="text-sm font-medium">
-      Mitfahrer: <span className={kkReceived ? "text-gray-400" : "font-semibold"}>
-      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
-      </span>
-      </p>
-      </div>
-      <div className="flex items-center space-x-1"></div>
-      <div className="text-sm font-medium">
-      Gesamt: <span className="font-semibold">{currentTotal} €</span>
-      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
-        <span className="text-gray-400 ml-1">({originalTotal} €)</span>
-      )}
-      </div>
-      </div>
-      </div>
       
-      <div className="text-xs text-gray-500 space-x-2">
-      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
-        <span>Kirchenkreis eingereicht {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}</span>}
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-        <span>| Kirchenkreis erhalten {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}</span>}
-      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && 
-        <span>| Gemeinde eingereicht {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}</span>}
-      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && 
-        <span>| Gemeinde erhalten {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}</span>}
+      {/* Zusammenfassung */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between">
+      <span className="text-sm text-primary-600">Kirchenkreis</span>
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
+        <span className="text-primary-600 text-xs">● Erhalten</span>
+      ) : summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am ? (
+        <span className="text-secondary-600 text-xs">○ Eingereicht</span>
+      ) : null}
       </div>
-      
-      <div className="flex justify-end space-x-2 mt-3">
-      <button 
-      onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth.split('-')[1])} 
-      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm"
-      >
-      Export Kirchenkreis / Mitfaher:innen
-      </button>
-      <button 
-      onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth.split('-')[1])} 
-      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm"
-      >
-      Export Gemeinde
-      </button>
+      <div className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+            {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-primary-600">Gemeinde</span>
+            {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
+              <span className="text-primary-600 text-xs">● Erhalten</span>
+            ) : summary.abrechnungsStatus?.gemeinde?.eingereicht_am ? (
+              <span className="text-secondary-600 text-xs">○ Eingereicht</span>
+            ) : null}
+          </div>
+          <div className={`text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+            {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-primary-600">Mitfahrer</span>
+          </div>
+          <div className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+            {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-primary-600">Gesamt</span>
+          </div>
+          <div className="text-lg font-semibold text-primary-900">
+            {currentTotal} €
+            {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
+              <span className="text-sm text-gray-400 ml-2">({originalTotal} €)</span>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Status Timeline */}
+      <div className="text-xs text-primary-600 space-y-1">
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
+            <span>Kirchenkreis eingereicht {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}</span>
+          )}
+          {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
+            <span>Kirchenkreis erhalten {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}</span>
+          )}
+          {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
+            <span>Gemeinde eingereicht {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}</span>
+          )}
+          {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
+            <span>Gemeinde erhalten {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}</span>
+          )}
+        </div>
       </div>
+
+      {/* Export Buttons */}
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
+        <button 
+          onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth.split('-')[1])} 
+          className="btn-primary"
+        >
+          Export Kirchenkreis / Mitfaher:innen
+        </button>
+        <button 
+          onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth.split('-')[1])} 
+          className="btn-primary"
+        >
+          Export Gemeinde
+        </button>
       </div>
-    );
+    </div>
+  </div>
+);
   };
   
   const roundKilometers = (value) => {
