@@ -1255,6 +1255,7 @@ function FahrtenListe() {
   // Haupt-Return für die Komponente
   return (
     <div className="table-container">
+      {renderAbrechnungsStatus(summary)}
       {/* Desktop View */}
       <div className="hidden md:block">
         <table className="w-full border-collapse">
@@ -1282,19 +1283,95 @@ Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending
               <th className="table-header text-right">Aktionen</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-primary-50">
-            {sortedFahrten.map((fahrt) => (
-              <React.Fragment key={fahrt.id}>
-                {renderFahrtRow(fahrt)}
-                {fahrt.autosplit && expandedFahrten[fahrt.id] && 
-                  fahrt.details.map(detail => renderFahrtRow(fahrt, detail))}
-              </React.Fragment>
-            ))}
-          </tbody>
+<tbody className="divide-y divide-primary-50">
+  {sortedFahrten.map((fahrt) => (
+    <React.Fragment key={fahrt.id}>
+      {renderFahrtRow(fahrt)}
+      {fahrt.autosplit && expandedFahrten[fahrt.id] && fahrt.details.length > 0 && 
+        fahrt.details.map((detail, idx) => renderFahrtRow(fahrt, detail, idx))}
+    </React.Fragment>
+  ))}
+</tbody>
         </table>
       </div>
 
       {/* Mobile View */}
+<div className="md:hidden space-y-4">
+  {sortedFahrten.map((fahrt) => (
+    <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
+      {editingFahrt?.id === fahrt.id ? (
+        // Edit Mode
+        <div className="space-y-4">
+          <input
+            type="date"
+            value={editingFahrt.datum}
+            onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
+            className="form-input w-full"
+          />
+          
+          <div>
+            <label className="text-xs text-primary-600">Von</label>
+            <select
+              value={editingFahrt.von_ort_id || ''}
+              onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
+              className="form-select w-full mt-1"
+            >
+              <option value="">Bitte wählen</option>
+              {renderOrteOptions(orte)}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs text-primary-600">Nach</label>
+            <select
+              value={editingFahrt.nach_ort_id || ''}
+              onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
+              className="form-select w-full mt-1"
+            >
+              <option value="">Bitte wählen</option>
+              {renderOrteOptions(orte)}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs text-primary-600">Anlass</label>
+            <input
+              type="text"
+              value={editingFahrt.anlass}
+              onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
+              className="form-input w-full mt-1"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-primary-600">Kilometer</label>
+            <input
+              type="number"
+              value={editingFahrt.kilometer}
+              onChange={(e) => setEditingFahrt({ ...editingFahrt, kilometer: parseFloat(e.target.value) })}
+              className="form-input w-full mt-1"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-primary-600">Abrechnung</label>
+            <select
+              value={editingFahrt.abrechnung}
+              onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
+              className="form-select w-full mt-1"
+            >
+              <option value="Kirchenkreis">Kirchenkreis</option>
+              <option value="Gemeinde">Gemeinde</option>
+              <option value="Autosplit">Autosplit</option>
+            </select>
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={handleSave} className="btn-primary flex-1">Speichern</button>
+            <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">Abbrechen</button>
+          </div>
+        </div>
+      ) : (
       <div className="md:hidden space-y-4">
         {sortedFahrten.map((fahrt) => (
           <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
