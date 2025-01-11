@@ -1372,6 +1372,9 @@ Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending
           </div>
         </div>
       ) : (
+        // View Mode
+        <>
+{
       <div className="md:hidden space-y-4">
         {sortedFahrten.map((fahrt) => (
           <div key={fahrt.id} className={`bg-white p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : ""}`}>
@@ -1470,6 +1473,9 @@ Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending
                 </div>
               )}
             </div>
+}
+        </>
+      )}
           </div>
         ))}
       </div>
