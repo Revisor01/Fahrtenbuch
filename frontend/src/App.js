@@ -728,52 +728,46 @@ function FahrtenListe() {
     return (
       <div className="table-container mb-4">
       <div className="bg-primary-25 p-6 space-y-6">
-      {/* Header mit Titel und Navigation */}
+      {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
       <h2 className="text-lg font-semibold text-primary-900">Fahrten</h2>
-      <span className="text-primary-600">
-      {new Date(`${selectedMonth}-01`).toLocaleString('default', { month: 'long' })} {selectedYear}
-      </span>
-      </div>
       
       <div className="flex flex-wrap items-center gap-2">
       {selectedMonth !== currentMonth && (
-        <button 
-        onClick={resetToCurrentMonth} 
-        className="btn-secondary"
-        >
+        <button onClick={resetToCurrentMonth} className="btn-secondary">
         Aktueller Monat
         </button>
       )}
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
-      className="form-select w-36"
-      >
+      className="form-select w-36">
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
-        {new Date(0, i).toLocaleString('default', { month: 'long' })}
+        {new Date(0, i).toLocaleString("default", { month: "long" })}
         </option>
       ))}
       </select>
       <select
       value={selectedYear}
       onChange={handleYearChange}
-      className="form-select w-24"
-      >
+      className="form-select w-24">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
-        return <option key={year} value={year}>{year}</option>;
+        return (
+          <option key={year} value={year}>
+          {year}
+          </option>
+        );
       })}
       </select>
       </div>
       </div>
       
-      {/* Zusammenfassung */}
+      {/* Zusammenfassung Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       <div className="bg-white p-4 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-2">
       <span className="text-sm text-primary-600">Kirchenkreis</span>
       {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
         <span className="text-primary-600 text-xs">● Erhalten</span>
@@ -781,13 +775,30 @@ function FahrtenListe() {
         <span className="text-secondary-600 text-xs">○ Eingereicht</span>
       ) : null}
       </div>
-      <div className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+      <div
+      className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
             {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
           </div>
+          {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
+            <div className="text-xs text-primary-600 mt-2">
+              Eingereicht:{" "}
+              {new Date(
+                summary.abrechnungsStatus.kirchenkreis.eingereicht_am,
+              ).toLocaleDateString()}
+            </div>
+          )}
+          {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
+            <div className="text-xs text-primary-600">
+              Erhalten:{" "}
+              {new Date(
+                summary.abrechnungsStatus.kirchenkreis.erhalten_am,
+              ).toLocaleDateString()}
+            </div>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-primary-600">Gemeinde</span>
             {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
               <span className="text-primary-600 text-xs">● Erhalten</span>
@@ -795,69 +806,82 @@ function FahrtenListe() {
               <span className="text-secondary-600 text-xs">○ Eingereicht</span>
             ) : null}
           </div>
-          <div className={`text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+          <div
+            className={`text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
             {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
           </div>
+          {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
+            <div className="text-xs text-primary-600 mt-2">
+              Eingereicht:{" "}
+              {new Date(
+                summary.abrechnungsStatus.gemeinde.eingereicht_am,
+              ).toLocaleDateString()}
+            </div>
+          )}
+          {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
+            <div className="text-xs text-primary-600">
+              Erhalten:{" "}
+              {new Date(
+                summary.abrechnungsStatus.gemeinde.erhalten_am,
+              ).toLocaleDateString()}
+            </div>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-primary-600">Mitfahrer</span>
           </div>
-          <div className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
+          <div
+            className={`text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}`}>
             {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-primary-600">Gesamt</span>
           </div>
           <div className="text-lg font-semibold text-primary-900">
             {currentTotal} €
             {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
-              <span className="text-sm text-gray-400 ml-2">({originalTotal} €)</span>
+              <span className="text-sm text-gray-400 ml-2">
+                ({originalTotal} €)
+              </span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Status Timeline */}
-      <div className="text-xs text-primary-600 space-y-1">
-        <div className="flex flex-wrap gap-x-4 gap-y-1">
-          {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-            <span>Kirchenkreis eingereicht {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}</span>
-          )}
-          {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-            <span>Kirchenkreis erhalten {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}</span>
-          )}
-          {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
-            <span>Gemeinde eingereicht {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}</span>
-          )}
-          {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
-            <span>Gemeinde erhalten {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}</span>
-          )}
-        </div>
-      </div>
-
       {/* Export Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2">
-        <button 
-          onClick={() => handleExportToExcel('kirchenkreis', selectedYear, selectedMonth.split('-')[1])} 
-          className="btn-primary"
-        >
+        <button
+          onClick={() =>
+            handleExportToExcel(
+              "kirchenkreis",
+              selectedYear,
+              selectedMonth.split("-")[1],
+            )
+          }
+          className="btn-primary">
           Export Kirchenkreis / Mitfaher:innen
         </button>
-        <button 
-          onClick={() => handleExportToExcel('gemeinde', selectedYear, selectedMonth.split('-')[1])} 
-          className="btn-primary"
-        >
+        <button
+          onClick={() =>
+            handleExportToExcel(
+              "gemeinde",
+              selectedYear,
+              selectedMonth.split("-")[1],
+            )
+          }
+          className="btn-primary">
           Export Gemeinde
         </button>
       </div>
     </div>
   </div>
 );
+
   };
   
   const roundKilometers = (value) => {

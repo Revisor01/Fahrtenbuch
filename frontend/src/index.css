@@ -42,10 +42,6 @@ code {
     @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer;
   }
   
-  .table-header-hidden {
-    @apply hidden sm:table-cell table-header;
-  }
-
   .table-cell {
     @apply px-4 py-3 text-sm text-primary-900;
   }
