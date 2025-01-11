@@ -588,7 +588,6 @@ function FahrtenListe() {
   };
   
   const formatDateForInput = (dateString) => {
-    if (!dateString) return ''; // Füge eine Überprüfung auf null oder undefiniert hinzu
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
   };
@@ -674,27 +673,18 @@ function FahrtenListe() {
         abrechnung: editingFahrt.abrechnung,
         autosplit: editingFahrt.autosplit
       };
+      const updatedFahrten = fahrten.map(f => 
+        f.id === editingFahrt.id ? { ...f, ...updatedFahrt } : f);
       
-      // Hier wird die neue Referenz der Fahrten generiert
-      const updatedFahrten = fahrten.map(f => {
-        if (f.id === editingFahrt.id) {
-          return { ...f, ...updatedFahrt };
-        }
-        return f;
-      });
       setFahrten(updatedFahrten);
-      
       await updateFahrt(editingFahrt.id, updatedFahrt);
-      setEditingFahrt(null);
       
+      setEditingFahrt(null);
       fetchFahrten();
       fetchMonthlyData();
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
-      if (error.response) {
-        console.error('Fehlerdetails:', error.response.data);
-      }
       showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
     }
   };
@@ -741,7 +731,7 @@ function FahrtenListe() {
     };
     
     return (
-      
+      <div className="table-container mb-4">
       <div className="bg-primary-25 p-6 space-y-6">
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -894,7 +884,9 @@ function FahrtenListe() {
       </button>
       </div>
       </div>
+      </div>
     );
+    
   };
   
   const roundKilometers = (value) => {
@@ -1032,7 +1024,7 @@ function FahrtenListe() {
     return (
       <div className="flex flex-wrap gap-1">
       {fahrt.mitfahrer.map((person, index) => {
-        const shouldDisplay =
+        const shouldDisplay = 
         (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
         (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
         
@@ -1408,7 +1400,6 @@ function FahrtenListe() {
         </div>
       ) : (
         // View Mode
-        
         <div key={fahrt.id}
         className={`bg-white p-4 rounded-lg border border-primary-100 ${
           fahrt.autosplit ? "bg-primary-25" : ""
@@ -1450,7 +1441,7 @@ function FahrtenListe() {
         <div>
         <div className="text-xs text-primary-600">Von</div>
         <div className="text-primary-900">
-        {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
+        {fahrt.von_ort_name || fahrt.einmaliger_von_ort}
         </div>
         {fahrt.von_ort_adresse && (
           <div className="text-xs text-primary-600">
@@ -1461,7 +1452,7 @@ function FahrtenListe() {
         <div>
         <div className="text-xs text-primary-600">Nach</div>
         <div className="text-primary-900">
-        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
+        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
         </div>
         {fahrt.nach_ort_adresse && (
           <div className="text-xs text-primary-600">
@@ -1519,7 +1510,6 @@ function FahrtenListe() {
     }
     
     
-    
     {/* Modals */}
     <MitfahrerModal
     isOpen={!!viewingMitfahrer}
@@ -1535,11 +1525,11 @@ function FahrtenListe() {
     initialData={editingMitfahrer}
     readOnly={false}
     />
-    
+    </div>
     </div>
   );
 }
-
+            
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
