@@ -506,7 +506,7 @@ function DistanzForm() {
 }
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -525,7 +525,7 @@ function FahrtenListe() {
       setSortConfig({ key: 'datum', direction: 'descending' });
     }
   }, [fahrten]);
-
+  
   const handleMonthChange = (e) => {
     const monthIndex = e.target.value;
     const date = new Date(selectedYear, monthIndex);
@@ -673,7 +673,12 @@ function FahrtenListe() {
         abrechnung: editingFahrt.abrechnung,
         autosplit: editingFahrt.autosplit
       };
+      const updatedFahrten = fahrten.map(f => 
+        f.id === editingFahrt.id ? { ...f, ...updatedFahrt } : f);
+      
+      setFahrten(updatedFahrten);
       await updateFahrt(editingFahrt.id, updatedFahrt);
+      
       setEditingFahrt(null);
       fetchFahrten();
       fetchMonthlyData();
@@ -683,7 +688,7 @@ function FahrtenListe() {
       showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
     }
   };
-
+  
   const handleViewMitfahrer = (mitfahrer, event) => {
     event.stopPropagation(); // Verhindert das Bubbling zum Bearbeitungs-Handler
     setViewingMitfahrer(mitfahrer);
@@ -777,111 +782,111 @@ function FahrtenListe() {
       </div>
       <div
       className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-            {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-          </div>
-          {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-            <div className="text-xs text-primary-600 mt-2">
-              Eingereicht:{" "}
-              {new Date(
-                summary.abrechnungsStatus.kirchenkreis.eingereicht_am,
-              ).toLocaleDateString()}
-            </div>
-          )}
-          {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-            <div className="text-xs text-primary-600">
-              Erhalten:{" "}
-              {new Date(
-                summary.abrechnungsStatus.kirchenkreis.erhalten_am,
-              ).toLocaleDateString()}
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-primary-600">Gemeinde</span>
-            {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
-              <span className="text-primary-600 text-xs">● Erhalten</span>
-            ) : summary.abrechnungsStatus?.gemeinde?.eingereicht_am ? (
-              <span className="text-secondary-600 text-xs">○ Eingereicht</span>
-            ) : null}
-          </div>
-          <div
-            className={'text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-            {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
-          </div>
-          {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
-            <div className="text-xs text-primary-600 mt-2">
-              Eingereicht:{" "}
-              {new Date(
-                summary.abrechnungsStatus.gemeinde.eingereicht_am,
-              ).toLocaleDateString()}
-            </div>
-          )}
-          {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
-            <div className="text-xs text-primary-600">
-              Erhalten:{" "}
-              {new Date(
-                summary.abrechnungsStatus.gemeinde.erhalten_am,
-              ).toLocaleDateString()}
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-primary-600">Mitfahrer</span>
-          </div>
-          <div
-            className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-            {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-primary-600">Gesamt</span>
-          </div>
-          <div className="text-lg font-semibold text-primary-900">
-            {currentTotal} €
-            {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
-              <span className="text-sm text-gray-400 ml-2">
-                ({originalTotal} €)
-              </span>
-            )}
-          </div>
-        </div>
+      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
       </div>
-
+      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
+        <div className="text-xs text-primary-600 mt-2">
+        Eingereicht:{" "}
+        {new Date(
+          summary.abrechnungsStatus.kirchenkreis.eingereicht_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
+        <div className="text-xs text-primary-600">
+        Erhalten:{" "}
+        {new Date(
+          summary.abrechnungsStatus.kirchenkreis.erhalten_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      </div>
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-primary-600">Gemeinde</span>
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
+        <span className="text-primary-600 text-xs">● Erhalten</span>
+      ) : summary.abrechnungsStatus?.gemeinde?.eingereicht_am ? (
+        <span className="text-secondary-600 text-xs">○ Eingereicht</span>
+      ) : null}
+      </div>
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
+      </div>
+      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
+        <div className="text-xs text-primary-600 mt-2">
+        Eingereicht:{" "}
+        {new Date(
+          summary.abrechnungsStatus.gemeinde.eingereicht_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
+        <div className="text-xs text-primary-600">
+        Erhalten:{" "}
+        {new Date(
+          summary.abrechnungsStatus.gemeinde.erhalten_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      </div>
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-primary-600">Mitfahrer</span>
+      </div>
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
+      </div>
+      </div>
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-primary-600">Gesamt</span>
+      </div>
+      <div className="text-lg font-semibold text-primary-900">
+      {currentTotal} €
+      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
+        <span className="text-sm text-gray-400 ml-2">
+        ({originalTotal} €)
+        </span>
+      )}
+      </div>
+      </div>
+      </div>
+      
       {/* Export Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2">
-        <button
-          onClick={() =>
-            handleExportToExcel(
-              "kirchenkreis",
-              selectedYear,
-              selectedMonth.split("-")[1],
-            )
-          }
-          className="btn-primary">
-          Export Kirchenkreis / Mitfaher:innen
-        </button>
-        <button
-          onClick={() =>
-            handleExportToExcel(
-              "gemeinde",
-              selectedYear,
-              selectedMonth.split("-")[1],
-            )
-          }
-          className="btn-primary">
-          Export Gemeinde
-        </button>
+      <button
+      onClick={() =>
+        handleExportToExcel(
+          "kirchenkreis",
+          selectedYear,
+          selectedMonth.split("-")[1],
+        )
+      }
+      className="btn-primary">
+      Export Kirchenkreis / Mitfaher:innen
+      </button>
+      <button
+      onClick={() =>
+        handleExportToExcel(
+          "gemeinde",
+          selectedYear,
+          selectedMonth.split("-")[1],
+        )
+      }
+      className="btn-primary">
+      Export Gemeinde
+      </button>
       </div>
-    </div>
-  </div>
-);
-
+      </div>
+      </div>
+    );
+    
   };
   
   const roundKilometers = (value) => {
@@ -1017,284 +1022,283 @@ function FahrtenListe() {
     
     return (
       <div className="flex flex-wrap gap-1">
-        {fahrt.mitfahrer.map((person, index) => {
-          const shouldDisplay = 
-            (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
-            (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
-          
-          if (!shouldDisplay) return null;
-          
-          return (
-            <span
-              key={index}
-              className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
-              onClick={(event) => handleViewMitfahrer(person, event)}
-            >
-              {person.name}
-            </span>
-          );
-        })}
+      {fahrt.mitfahrer.map((person, index) => {
+        const shouldDisplay = 
+        (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
+        (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
+        
+        if (!shouldDisplay) return null;
+        
+        return (
+          <span
+          key={index}
+          className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
+          onClick={(event) => handleViewMitfahrer(person, event)}
+          >
+          {person.name}
+          </span>
+        );
+      })}
       </div>
     );
   };
-
   
   const renderFahrtRow = (fahrt, detail = null) => (
     <tr 
-      key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
-      className={`${
-          detail ? "bg-primary-50" : 
-          (fahrt.autosplit ? "bg-primary-25" : "")
-        } hover:bg-primary-25 transition-colors duration-150`}
+    key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
+    className={`${
+      detail ? "bg-primary-50" : 
+      (fahrt.autosplit ? "bg-primary-25" : "")
+      } hover:bg-primary-25 transition-colors duration-150`}
     >
-      <td className="table-cell">
-        {editingFahrt?.id === fahrt.id ? (
-          <input
-            type="date"
-            value={editingFahrt.datum}
-            onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
-            className="form-input"
-          />
-        ) : (
-          new Date(fahrt.datum).toLocaleDateString()
+    <td className="table-cell">
+    {editingFahrt?.id === fahrt.id ? (
+      <input
+      type="date"
+      value={editingFahrt.datum}
+      onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
+      className="form-input"
+      />
+    ) : (
+      new Date(fahrt.datum).toLocaleDateString()
+    )}
+    </td>
+    <td className="table-cell">
+    {editingFahrt?.id === fahrt.id ? (
+      <div className="space-y-2">
+      <label className="flex items-center cursor-pointer">
+      <input
+      type="checkbox"
+      checked={editingFahrt.vonOrtTyp === 'einmalig'}
+      onChange={(e) => setEditingFahrt({
+        ...editingFahrt,
+        vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+        von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
+        einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
+      })}
+      className="mr-2"
+      />
+      <span className="text-sm">Einmaliger Von-Ort</span>
+      </label>
+      {editingFahrt.vonOrtTyp === 'gespeichert' ? (
+        <select
+        value={editingFahrt.von_ort_id || ''}
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
+        className="form-select"
+        >
+        <option value="">Bitte wählen</option>
+        {renderOrteOptions(orte)}
+        </select>
+      ) : (
+        <input
+        type="text"
+        value={editingFahrt.einmaliger_von_ort || ''}
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
+        className="form-input"
+        placeholder="Von (einmalig)"
+        />
+      )}
+      </div>
+    ) : (
+      <div>
+      <div className="text-primary-900">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort)}</div>
+      <div className="text-xs text-primary-600">{detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}</div>
+      </div>
+    )}
+    </td>
+    <td className="table-cell">
+    {editingFahrt?.id === fahrt.id ? (
+      <div className="space-y-2">
+      <label className="flex items-center cursor-pointer">
+      <input
+      type="checkbox"
+      checked={editingFahrt.nachOrtTyp === 'einmalig'}
+      onChange={(e) => setEditingFahrt({
+        ...editingFahrt,
+        nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+        nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
+        einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
+      })}
+      className="mr-2"
+      />
+      <span className="text-sm">Einmaliger Nach-Ort</span>
+      </label>
+      {editingFahrt.nachOrtTyp === 'gespeichert' ? (
+        <select
+        value={editingFahrt.nach_ort_id || ''}
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
+        className="form-select"
+        >
+        <option value="">Bitte wählen</option>
+        {renderOrteOptions(orte)}
+        </select>
+      ) : (
+        <input
+        type="text"
+        value={editingFahrt.einmaliger_nach_ort || ''}
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
+        className="form-input"
+        placeholder="Nach (einmalig)"
+        />
+      )}
+      </div>
+    ) : (
+      <div>
+      <div className="text-primary-900">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort)}</div>
+      <div className="text-xs text-primary-600">{detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}</div>
+      </div>
+    )}
+    </td>
+    <td className="table-cell">
+    {editingFahrt?.id === fahrt.id ? (
+      <input
+      type="text"
+      value={editingFahrt.anlass}
+      onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
+      className="form-input"
+      />
+    ) : (
+      fahrt.anlass
+    )}
+    </td>
+    <td className="table-cell text-right">
+    {editingFahrt?.id === fahrt.id ? (
+      <input
+      type="number"
+      value={editingFahrt.kilometer}
+      onChange={(e) => setEditingFahrt({ ...editingFahrt, kilometer: parseFloat(e.target.value) })}
+      className="form-input"
+      />
+    ) : (
+      `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))} km`
+    )}
+    </td>
+    <td className="table-cell">
+    {editingFahrt?.id === fahrt.id ? (
+      <select
+      value={editingFahrt.abrechnung}
+      onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
+      className="form-select"
+      >
+      <option value="Kirchenkreis">Kirchenkreis</option>
+      <option value="Gemeinde">Gemeinde</option>
+      <option value="Autosplit">Autosplit</option>
+      </select>
+    ) : (
+      detail ? detail.abrechnung : fahrt.abrechnung
+    )}
+    </td>
+    <td className="table-cell">
+    {editingFahrt?.id === fahrt.id ? (
+      <div className="space-y-2">
+      {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
+        <div key={index} className="flex items-center justify-between">
+        <span
+        className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
+        onClick={() => handleEditMitfahrer(fahrt.id, person)}
+        >
+        {person.name}
+        </span>
+        <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDeleteMitfahrer(fahrt.id, person.id);
+        }}
+        className="btn-secondary text-xs"
+        >
+        ×
+        </button>
+        </div>
+      ))}
+      <button
+      onClick={() => handleAddMitfahrer(fahrt.id)}
+      className="btn-primary text-xs w-full"
+      >
+      + Mitfahrer:in
+      </button>
+      </div>
+    ) : (
+      renderMitfahrer(fahrt)
+    )}
+    </td>
+    <td className="table-cell text-right">
+    {!detail && (
+      <div className="flex justify-end gap-1">
+      {editingFahrt?.id === fahrt.id ? (
+        <>
+        <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
+        <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
+        </>
+      ) : (
+        <>
+        {!fahrt.autosplit && (
+          <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
+          ✎
+          </button>
         )}
-      </td>
-      <td className="table-cell">
-        {editingFahrt?.id === fahrt.id ? (
-          <div className="space-y-2">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={editingFahrt.vonOrtTyp === 'einmalig'}
-                onChange={(e) => setEditingFahrt({
-                  ...editingFahrt,
-                  vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-                  von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
-                  einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
-                })}
-                className="mr-2"
-              />
-              <span className="text-sm">Einmaliger Von-Ort</span>
-            </label>
-            {editingFahrt.vonOrtTyp === 'gespeichert' ? (
-              <select
-                value={editingFahrt.von_ort_id || ''}
-                onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
-                className="form-select"
-              >
-                <option value="">Bitte wählen</option>
-                {renderOrteOptions(orte)}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={editingFahrt.einmaliger_von_ort || ''}
-                onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
-                className="form-input"
-                placeholder="Von (einmalig)"
-              />
-            )}
-          </div>
-        ) : (
-          <div>
-            <div className="text-primary-900">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort)}</div>
-            <div className="text-xs text-primary-600">{detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}</div>
-          </div>
-        )}
-      </td>
-      <td className="table-cell">
-        {editingFahrt?.id === fahrt.id ? (
-          <div className="space-y-2">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={editingFahrt.nachOrtTyp === 'einmalig'}
-                onChange={(e) => setEditingFahrt({
-                  ...editingFahrt,
-                  nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-                  nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
-                  einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
-                })}
-                className="mr-2"
-              />
-              <span className="text-sm">Einmaliger Nach-Ort</span>
-            </label>
-            {editingFahrt.nachOrtTyp === 'gespeichert' ? (
-              <select
-                value={editingFahrt.nach_ort_id || ''}
-                onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
-                className="form-select"
-              >
-                <option value="">Bitte wählen</option>
-                {renderOrteOptions(orte)}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={editingFahrt.einmaliger_nach_ort || ''}
-                onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
-                className="form-input"
-                placeholder="Nach (einmalig)"
-              />
-            )}
-          </div>
-        ) : (
-          <div>
-            <div className="text-primary-900">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort)}</div>
-            <div className="text-xs text-primary-600">{detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}</div>
-          </div>
-        )}
-      </td>
-      <td className="table-cell">
-        {editingFahrt?.id === fahrt.id ? (
-          <input
-            type="text"
-            value={editingFahrt.anlass}
-            onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
-            className="form-input"
-          />
-        ) : (
-          fahrt.anlass
-        )}
-      </td>
-      <td className="table-cell text-right">
-        {editingFahrt?.id === fahrt.id ? (
-          <input
-            type="number"
-            value={editingFahrt.kilometer}
-            onChange={(e) => setEditingFahrt({ ...editingFahrt, kilometer: parseFloat(e.target.value) })}
-            className="form-input"
-          />
-        ) : (
-          `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))} km`
-        )}
-      </td>
-      <td className="table-cell">
-        {editingFahrt?.id === fahrt.id ? (
-          <select
-            value={editingFahrt.abrechnung}
-            onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
-            className="form-select"
+        <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
+        ×
+        </button>
+        {fahrt.autosplit && (
+          <button 
+          onClick={() => toggleFahrtDetails(fahrt.id)} 
+          className="btn-primary text-xs"
+          title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
           >
-            <option value="Kirchenkreis">Kirchenkreis</option>
-            <option value="Gemeinde">Gemeinde</option>
-            <option value="Autosplit">Autosplit</option>
-          </select>
-        ) : (
-          detail ? detail.abrechnung : fahrt.abrechnung
+          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+          </button>
         )}
-      </td>
-      <td className="table-cell">
-        {editingFahrt?.id === fahrt.id ? (
-          <div className="space-y-2">
-            {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
-                  onClick={() => handleEditMitfahrer(fahrt.id, person)}
-                >
-                  {person.name}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteMitfahrer(fahrt.id, person.id);
-                  }}
-                  className="btn-secondary text-xs"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => handleAddMitfahrer(fahrt.id)}
-              className="btn-primary text-xs w-full"
-            >
-              + Mitfahrer:in
-            </button>
-          </div>
-        ) : (
-          renderMitfahrer(fahrt)
-        )}
-      </td>
-      <td className="table-cell text-right">
-        {!detail && (
-          <div className="flex justify-end gap-1">
-            {editingFahrt?.id === fahrt.id ? (
-              <>
-                <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
-                <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
-              </>
-            ) : (
-              <>
-                {!fahrt.autosplit && (
-                  <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
-                    ✎
-                  </button>
-                )}
-                <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
-                  ×
-                </button>
-                {fahrt.autosplit && (
-                  <button 
-                    onClick={() => toggleFahrtDetails(fahrt.id)} 
-                    className="btn-primary text-xs"
-                    title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
-                  >
-                    {expandedFahrten[fahrt.id] ? '▼' : '▶'}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </td>
+        </>
+      )}
+      </div>
+    )}
+    </td>
     </tr>
   );
-
+  
   // Haupt-Return für die Komponente
   return (
     <div className="table-container">
-      {renderAbrechnungsStatus(summary)}
-      {/* Desktop View */}
-      <div className="hidden md:block">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-primary-25 border-b border-primary-100">
-              <th className="table-header" onClick={() => requestSort('datum')}>
-                Datum {sortConfig.key === 'datum' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </th>
-              <th className="table-header" onClick={() => requestSort('von_ort_name')}>
-                Von {sortConfig.key === 'von_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </th>
-              <th className="table-header" onClick={() => requestSort('nach_ort_name')}>
-Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </th>
-              <th className="table-header" onClick={() => requestSort('anlass')}>
-                Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </th>
-              <th className="table-header text-right" onClick={() => requestSort('kilometer')}>
-                km {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </th>
-              <th className="table-header" onClick={() => requestSort('abrechnung')}>
-                Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-              </th>
-              <th className="table-header">Mitfahrer:innen</th>
-              <th className="table-header text-right">Aktionen</th>
-            </tr>
-          </thead>
-<tbody className="divide-y divide-primary-50">
-  {sortedFahrten.map((fahrt) => (
-    <React.Fragment key={fahrt.id}>
+    {renderAbrechnungsStatus(summary)}
+    {/* Desktop View */}
+    <div className="hidden md:block">
+    <table className="w-full border-collapse">
+    <thead>
+    <tr className="bg-primary-25 border-b border-primary-100">
+    <th className="table-header" onClick={() => requestSort('datum')}>
+    Datum {sortConfig.key === 'datum' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+    </th>
+    <th className="table-header" onClick={() => requestSort('von_ort_name')}>
+    Von {sortConfig.key === 'von_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+    </th>
+    <th className="table-header" onClick={() => requestSort('nach_ort_name')}>
+    Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+    </th>
+    <th className="table-header" onClick={() => requestSort('anlass')}>
+    Anlass {sortConfig.key === 'anlass' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+    </th>
+    <th className="table-header text-right" onClick={() => requestSort('kilometer')}>
+    km {sortConfig.key === 'kilometer' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+    </th>
+    <th className="table-header" onClick={() => requestSort('abrechnung')}>
+    Abrechnung {sortConfig.key === 'abrechnung' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+    </th>
+    <th className="table-header">Mitfahrer:innen</th>
+    <th className="table-header text-right">Aktionen</th>
+    </tr>
+    </thead>
+    <tbody className="divide-y divide-primary-50">
+    {sortedFahrten.map((fahrt) => (
+      <React.Fragment key={fahrt.id}>
       {renderFahrtRow(fahrt)}
       {fahrt.autosplit && expandedFahrten[fahrt.id] && fahrt.details.length > 0 && 
         fahrt.details.map((detail, idx) => renderFahrtRow(fahrt, detail, idx))}
-    </React.Fragment>
-  ))}
-</tbody>
-        </table>
-      </div>
-
+      </React.Fragment>
+    ))}
+    </tbody>
+    </table>
+    </div>
+    
     {/* Mobile View */}
     <div className="md:hidden space-y-4">
     {sortedFahrten.map((fahrt) => (
@@ -1308,7 +1312,9 @@ Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending
         <input
         type="date"
         value={editingFahrt.datum}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
+        onChange={(e) =>
+          setEditingFahrt({ ...editingFahrt, datum: e.target.value })
+        }
         className="form-input w-full"
         />
         
@@ -1517,7 +1523,12 @@ Nach {sortConfig.key === 'nach_ort_name' && (sortConfig.direction === 'ascending
     onSave={handleSaveMitfahrer}
     initialData={editingMitfahrer}
     readOnly={false}
-
+    />
+    </div>
+    </div>
+  );
+}
+            
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
