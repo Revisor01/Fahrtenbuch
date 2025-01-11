@@ -2245,14 +2245,14 @@ function AppContent() {
     {user?.role === 'admin' && (
       <button
       onClick={() => setShowUserManagementModal(true)}
-      className="btn-secondary flex-1 sm:flex-initial"
+      className="btn-primary flex-1 sm:flex-initial"
       >
       Benutzerverwaltung
       </button>
     )}
     <button
     onClick={() => setIsProfileModalOpen(true)}
-    className="btn-secondary flex-1 sm:flex-initial"
+    className="btn-primary flex-1 sm:flex-initial"
     >
     Profil
     </button>

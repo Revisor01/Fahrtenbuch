@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
+import './index.css';
 import { AppContext } from './App';
 import Modal from './Modal';
 
