@@ -2216,51 +2216,74 @@ function AppContent() {
   
   return (
     <div className="container mx-auto p-4">
-    <div className="flex flex-col-mobile justify-between items-center mb-8">
-    <h1 className="text-3xl font-bold mb-4 sm:mb-0">Fahrtenabrechnung</h1>
-    <div className="flex flex-wrap gap-2">
-    {user?.role === 'admin' && (
-      <button
-      onClick={() => setShowUserManagementModal(true)}
-      className="bg-purple-100 text-purple-700 hover:bg-purple-200 py-2 px-4 rounded transition-colors duration-200"
-      >
-      Benutzerverwaltung
-      </button>
-    )}
+    {/* Header-Bereich mit Navigation */}
+    <div className="mb-8">
+    {/* Titel und Buttons in einer Flex-Box */}
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h1 className="text-2xl font-semibold text-primary-900">Fahrtenabrechnung</h1>
+    
+    {/* Navigation */}
+    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+    {/* Primäre Aktionen - immer sichtbar */}
+    <div className="flex gap-2 w-full sm:w-auto">
     <button
     onClick={() => setShowOrteModal(true)}
-    className="bg-amber-100 text-amber-700 hover:bg-amber-200 py-2 px-4 rounded transition-colors duration-200"
+    className="btn-primary flex-1 sm:flex-initial"
     >
     Orte
     </button>
     <button
     onClick={() => setShowDistanzenModal(true)}
-    className="bg-amber-100 text-amber-700 hover:bg-amber-200 py-2 px-4 rounded transition-colors duration-200"
+    className="btn-primary flex-1 sm:flex-initial"
     >
     Distanzen
     </button>
+    </div>
+    
+    {/* Sekundäre Aktionen - gestapelt auf Mobile */}
+    <div className="flex gap-2 w-full sm:w-auto">
+    {user?.role === 'admin' && (
+      <button
+      onClick={() => setShowUserManagementModal(true)}
+      className="btn-secondary flex-1 sm:flex-initial"
+      >
+      Benutzerverwaltung
+      </button>
+    )}
     <button
     onClick={() => setIsProfileModalOpen(true)}
-    className="bg-blue-100 text-blue-700 hover:bg-blue-200 py-2 px-4 rounded transition-colors duration-200 w-full-mobile"
+    className="btn-secondary flex-1 sm:flex-initial"
     >
     Profil
     </button>
     <button 
     onClick={logout} 
-    className="bg-red-100 text-red-700 hover:bg-red-200 py-2 px-4 rounded transition-colors duration-200 w-full-mobile"
+    className="bg-secondary-400 text-white hover:bg-secondary-500 px-4 h-8 rounded transition-colors duration-200 text-sm shadow-sm flex-1 sm:flex-initial"
     >
     Logout
     </button>
     </div>
+    </div>
+    </div>
+    
+    {/* FahrtenbuchHilfe separat */}
+    <div className="mt-4">
     <FahrtenbuchHilfe />
     </div>
-    <div className="grid grid-cols-1 gap-4 mb-8">
-    <FahrtForm />
     </div>
+    
+    {/* Hauptinhalt */}
+    <div className="space-y-8">
+    <FahrtForm />
     <FahrtenListe />
     <MonthlyOverview />
+    </div>
     
-    <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+    {/* Modals */}
+    <ProfileModal 
+    isOpen={isProfileModalOpen} 
+    onClose={() => setIsProfileModalOpen(false)} 
+    />
     
     <Modal 
     isOpen={showUserManagementModal} 
