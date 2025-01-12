@@ -1047,16 +1047,6 @@ function FahrtenListe() {
   };
   
   const renderFahrtRow = (fahrt, detail = null) => {
-    if (process.env.NODE_ENV !== 'production') {
-      // Nur in der Entwicklung loggen
-      console.log('Row:', { 
-        id: fahrt.id, 
-        isDetail: Boolean(detail),
-        isAutosplit: Boolean(fahrt.autosplit)
-      });
-    }
-    
-    return (
     
     <tr 
     key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
