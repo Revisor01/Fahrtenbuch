@@ -458,8 +458,8 @@ function FahrtForm() {
       initialData={editingMitfahrerIndex !== null ? mitfahrer[editingMitfahrerIndex] : null}
       />
     )}
-    </div>
     </form>
+    </div>
   );
 }
 
