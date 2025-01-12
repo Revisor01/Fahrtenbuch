@@ -1227,29 +1227,33 @@ function FahrtenListe() {
     )}
     </td>
     <td className="table-cell text-right">
-    {editingFahrt?.id === fahrt.id ? (
+    {!detail && ( // Nur rendern wenn es keine Detail-Zeile ist
       <div className="flex justify-end gap-1">
-      <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
-      <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
-      </div>
-    ) : (
-      <div className="flex justify-end gap-1">
-      {!fahrt.autosplit && (
-        <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
-        ✎
+      {editingFahrt?.id === fahrt.id ? (
+        <>
+        <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
+        <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
+        </>
+      ) : (
+        <>
+        {!fahrt.autosplit && (
+          <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
+          ✎
+          </button>
+        )}
+        <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
+        ×
         </button>
-      )}
-      <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
-      ×
-      </button>
-      {fahrt.autosplit && expandedFahrten[fahrt.id] !== undefined && (
-        <button 
-        onClick={() => toggleFahrtDetails(fahrt.id)} 
-        className="btn-primary text-xs"
-        title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
-        >
-        {expandedFahrten[fahrt.id] ? '▼' : '▶'}
-        </button>
+        {fahrt.autosplit && (
+          <button 
+          onClick={() => toggleFahrtDetails(fahrt.id)} 
+          className="btn-primary text-xs"
+          title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
+          >
+          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+          </button>
+        )}
+        </>
       )}
       </div>
     )}
@@ -1292,7 +1296,7 @@ function FahrtenListe() {
     {sortedFahrten.map((fahrt) => (
       <React.Fragment key={fahrt.id}>
       {renderFahrtRow(fahrt)}
-      {fahrt.autosplit && expandedFahrten[fahrt.id] && fahrt.details.length > 0 && 
+      {fahrt.autosplit && expandedFahrten[fahrt.id] && fahrt.details?.length > 0 && 
         fahrt.details.map((detail, idx) => renderFahrtRow(fahrt, detail, idx))}
       </React.Fragment>
     ))}
