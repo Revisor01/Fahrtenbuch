@@ -1049,6 +1049,7 @@ function FahrtenListe() {
   };
   
   const renderFahrtRow = (fahrt, detail = null) => (
+    return (
     <tr 
     key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
     className={`${
@@ -1227,13 +1228,14 @@ function FahrtenListe() {
     )}
     </td>
     <td className="table-cell text-right">
+    <div className="flex justify-end gap-1">
     {editingFahrt?.id === fahrt.id ? (
-      <div className="flex justify-end gap-1">
+      <>
       <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
       <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
-      </div>
+      </>
     ) : (
-      <div className="flex justify-end gap-1">
+      <>
       {!fahrt.autosplit && (
         <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
         ✎
@@ -1242,7 +1244,7 @@ function FahrtenListe() {
       <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
       ×
       </button>
-      {fahrt.autosplit && expandedFahrten[fahrt.id] !== undefined && (
+      {fahrt.autosplit === 1 && (
         <button 
         onClick={() => toggleFahrtDetails(fahrt.id)} 
         className="btn-primary text-xs"
@@ -1251,12 +1253,14 @@ function FahrtenListe() {
         {expandedFahrten[fahrt.id] ? '▼' : '▶'}
         </button>
       )}
-      </div>
+      </>
     )}
+    </div>
     </td>
     </tr>
   );
-  
+};
+
   // Haupt-Return für die Komponente
   return (
     <div>
