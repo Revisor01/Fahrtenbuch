@@ -1577,7 +1577,7 @@ function FahrtenListe() {
           {renderMitfahrer(fahrt)}
           </div>
         )}
-           
+
         {/* Autosplit Details */}
         {fahrt.autosplit && expandedFahrten[fahrt.id] && (
           <div className="space-y-2">
@@ -1600,9 +1600,8 @@ function FahrtenListe() {
         </div>
       )}
       </div>
-    ))
-    }
-    
+    ))}
+    </div>
     
     {/* Modals */}
     <MitfahrerModal
@@ -1619,7 +1618,6 @@ function FahrtenListe() {
     initialData={editingMitfahrer}
     readOnly={false}
     />
-    </div>
     </div>
   );
 }
