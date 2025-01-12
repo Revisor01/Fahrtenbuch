@@ -1026,7 +1026,7 @@ function FahrtenListe() {
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
     
     return (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-2">
       {fahrt.mitfahrer.map((person, index) => {
         const shouldDisplay = 
         (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
@@ -1037,10 +1037,19 @@ function FahrtenListe() {
         return (
           <span
           key={index}
-          className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
-          onClick={(event) => handleViewMitfahrer(person, event)}
+          className="inline-flex items-center bg-primary-100 rounded px-2 h-6 text-sm text-primary-700"
           >
           {person.name}
+          <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleDeleteMitfahrer(fahrt.id, person.id);
+          }}
+          className="ml-2 text-secondary-500 hover:text-secondary-600"
+          >
+          ×
+          </button>
           </span>
         );
       })}
@@ -1262,9 +1271,11 @@ function FahrtenListe() {
 };
 
   // Haupt-Return für die Komponente
+  // Haupt-Return für die Komponente
   return (
     <div>
     {renderAbrechnungsStatus(summary)}
+    
     {/* Desktop View */}
     <div className="hidden md:block">
     <table className="w-full border-collapse border border-primary-100">
@@ -1296,8 +1307,9 @@ function FahrtenListe() {
     {sortedFahrten.map((fahrt) => (
       <React.Fragment key={fahrt.id}>
       {renderFahrtRow(fahrt)}
-      {fahrt.autosplit === 1 && expandedFahrten[fahrt.id] && 
-        fahrt.details.map((detail, idx) => renderFahrtRow(fahrt, detail, idx))}
+      {fahrt.autosplit === 1 && expandedFahrten[fahrt.id] && fahrt.details?.map((detail, idx) => 
+        renderFahrtRow(fahrt, detail, idx)
+      )}
       </React.Fragment>
     ))}
     </tbody>
@@ -1307,48 +1319,90 @@ function FahrtenListe() {
     {/* Mobile View */}
     <div className="md:hidden space-y-4">
     {sortedFahrten.map((fahrt) => (
-      <div key={fahrt.id}
-      className={`bg-primary-25 p-4 rounded-lg border border-primary-100 ${
-        fahrt.autosplit ? "bg-primary-25" : ""
-      }`}>
+      <div key={fahrt.id} className={`p-4 rounded-lg border border-primary-100 ${fahrt.autosplit ? "bg-primary-25" : "bg-white"}`}>
       {editingFahrt?.id === fahrt.id ? (
         // Edit Mode
         <div className="space-y-4">
+        <div>
+        <label className="text-xs text-primary-600">Datum</label>
         <input
         type="date"
         value={editingFahrt.datum}
-        onChange={(e) =>
-          setEditingFahrt({ ...editingFahrt, datum: e.target.value })
-        }
-        className="form-input w-full"
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
+        className="form-input w-full mt-1"
         />
-        
-        <div>
-        <label className="text-xs text-primary-600">Von</label>
-        <select
-        value={editingFahrt.von_ort_id || ''}
-        onChange={(e) =>
-          setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })
-        }
-        className="form-select w-full mt-1"
-        >
-        <option value="">Bitte wählen</option>
-        {renderOrteOptions(orte)}
-        </select>
         </div>
         
+        {/* Von-Ort mit einmaligem Ort */}
         <div>
-        <label className="text-xs text-primary-600">Nach</label>
-        <select
-        value={editingFahrt.nach_ort_id || ''}
-        onChange={(e) =>
-          setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })
-        }
-        className="form-select w-full mt-1"
-        >
-        <option value="">Bitte wählen</option>
-        {renderOrteOptions(orte)}
-        </select>
+        <label className="flex items-center cursor-pointer mb-2">
+        <input
+        type="checkbox"
+        checked={editingFahrt.vonOrtTyp === 'einmalig'}
+        onChange={(e) => setEditingFahrt({
+          ...editingFahrt,
+          vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+          von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
+          einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
+        })}
+        className="mr-2"
+        />
+        <span className="text-sm">Einmaliger Von-Ort</span>
+        </label>
+        {editingFahrt.vonOrtTyp === 'einmalig' ? (
+          <input
+          type="text"
+          value={editingFahrt.einmaliger_von_ort || ''}
+          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
+          className="form-input w-full"
+          placeholder="Von (einmalig)"
+          />
+        ) : (
+          <select
+          value={editingFahrt.von_ort_id || ''}
+          onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
+          className="form-select w-full"
+          >
+          <option value="">Bitte wählen</option>
+          {renderOrteOptions(orte)}
+          </select>
+        )}
+        </div>
+        
+        {/* Nach-Ort mit einmaligem Ort */}
+        <div>
+        <label className="flex items-center cursor-pointer mb-2">
+        <input
+        type="checkbox"
+        checked={editingFahrt.nachOrtTyp === 'einmalig'}
+        onChange={(e) => setEditingFahrt({
+          ...editingFahrt,
+          nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
+          nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
+          einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
+        })}
+        className="mr-2"
+        />
+        <span className="text-sm">Einmaliger Nach-Ort</span>
+        </label>
+        {editingFahrt.nachOrtTyp === 'einmalig' ? (
+          <input
+          type="text"
+          value={editingFahrt.einmaliger_nach_ort || ''}
+          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
+          className="form-input w-full"
+          placeholder="Nach (einmalig)"
+          />
+        ) : (
+          <select
+          value={editingFahrt.nach_ort_id || ''}
+          onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
+          className="form-select w-full"
+          >
+          <option value="">Bitte wählen</option>
+          {renderOrteOptions(orte)}
+          </select>
+        )}
         </div>
         
         <div>
@@ -1356,9 +1410,7 @@ function FahrtenListe() {
         <input
         type="text"
         value={editingFahrt.anlass}
-        onChange={(e) =>
-          setEditingFahrt({ ...editingFahrt, anlass: e.target.value })
-        }
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
         className="form-input w-full mt-1"
         />
         </div>
@@ -1368,12 +1420,10 @@ function FahrtenListe() {
         <input
         type="number"
         value={editingFahrt.kilometer}
-        onChange={(e) =>
-          setEditingFahrt({
-            ...editingFahrt,
-            kilometer: parseFloat(e.target.value),
-          })
-        }
+        onChange={(e) => setEditingFahrt({
+          ...editingFahrt,
+          kilometer: parseFloat(e.target.value),
+        })}
         className="form-input w-full mt-1"
         />
         </div>
@@ -1382,15 +1432,53 @@ function FahrtenListe() {
         <label className="text-xs text-primary-600">Abrechnung</label>
         <select
         value={editingFahrt.abrechnung}
-        onChange={(e) =>
-          setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })
-        }
+        onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
         className="form-select w-full mt-1"
         >
         <option value="Kirchenkreis">Kirchenkreis</option>
         <option value="Gemeinde">Gemeinde</option>
         <option value="Autosplit">Autosplit</option>
         </select>
+        </div>
+        
+        {/* Mitfahrer Bereich */}
+        <div>
+        <label className="text-xs text-primary-600">Mitfahrer:innen</label>
+        <div className="mt-2 space-y-2">
+        <div className="flex flex-wrap gap-2">
+        {fahrt.mitfahrer?.map((person, index) => {
+          const shouldDisplay = 
+          (!fahrt.anlass.toLowerCase().includes('rückfahrt') && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
+          (fahrt.anlass.toLowerCase().includes('rückfahrt') && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
+          
+          if (!shouldDisplay) return null;
+          
+          return (
+            <span
+            key={index}
+            className="inline-flex items-center bg-primary-100 rounded px-2 h-6 text-sm text-primary-700"
+            >
+            {person.name}
+            <button
+            onClick={(e) => {
+              e.preventDefault();
+              handleDeleteMitfahrer(fahrt.id, person.id);
+            }}
+            className="ml-2 text-secondary-500 hover:text-secondary-600"
+            >
+            ×
+            </button>
+            </span>
+          );
+        })}
+        </div>
+        <button
+        onClick={() => handleAddMitfahrer(fahrt.id)}
+        className="btn-primary text-xs w-full mt-2"
+        >
+        + Mitfahrer:in
+        </button>
+        </div>
         </div>
         
         <div className="flex gap-2">
@@ -1404,10 +1492,7 @@ function FahrtenListe() {
         </div>
       ) : (
         // View Mode
-        <div key={fahrt.id}
-        className={`bg-white p-4 rounded-lg border border-primary-100 ${
-          fahrt.autosplit ? "bg-primary-25" : ""
-        }`}>
+        <div>
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
         <div>
@@ -1420,14 +1505,20 @@ function FahrtenListe() {
         </div>
         <div className="flex gap-1">
         {!fahrt.autosplit && (
-          <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs">
+          <button
+          onClick={() => handleEdit(fahrt)}
+          className="btn-primary text-xs"
+          >
           ✎
           </button>
         )}
-        <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs">
+        <button
+        onClick={() => handleDelete(fahrt.id)}
+        className="btn-secondary text-xs"
+        >
         ×
         </button>
-        {fahrt.autosplit && (
+        {fahrt.autosplit === 1 && (
           <button
           onClick={() => toggleFahrtDetails(fahrt.id)}
           className="btn-primary text-xs"
@@ -1486,7 +1577,7 @@ function FahrtenListe() {
           {renderMitfahrer(fahrt)}
           </div>
         )}
-        
+           
         {/* Autosplit Details */}
         {fahrt.autosplit && expandedFahrten[fahrt.id] && (
           <div className="space-y-2">
