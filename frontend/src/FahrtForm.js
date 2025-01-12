@@ -209,7 +209,7 @@ function FahrtForm() {
     </div>
     
     <div className="w-full sm:flex-1">  {/* Anlass: füllt restliche Breite */}
-    <label className="block mb-1 text-sm text-primary-900">Anlass der Fahrt</label>
+    <label className="block mb-1 text-xs text-primary-600">Anlass der Fahrt</label>
     <input
     type="text"
     name="anlass"
@@ -226,7 +226,7 @@ function FahrtForm() {
     <div className="flex flex-wrap gap-4">
     <div className="w-full sm:flex-1 min-w-[240px]">
     <div className="flex justify-between mb-1">
-    <label className="text-sm text-primary-900">Startort</label>
+    <label className="text-xs text-primary-600">Startort</label>
     <label className="flex items-center cursor-pointer">
     <input
     type="checkbox"
@@ -234,7 +234,7 @@ function FahrtForm() {
     onChange={(e) => setUseEinmaligenVonOrt(e.target.checked)}
     className="mr-2 text-primary-500"
     />
-    <span className="text-sm text-primary-900">Einmaliger Ort</span>
+    <span className="text-xs text-primary-600">Einmaliger Ort</span>
     </label>
     </div>
     {useEinmaligenVonOrt ? (
@@ -263,7 +263,7 @@ function FahrtForm() {
     
     <div className="w-full sm:flex-1 min-w-[240px]">
     <div className="flex justify-between mb-1">
-    <label className="text-sm text-primary-900">Zielort</label>
+    <label className="text-xs text-primary-600">Zielort</label>
     <label className="flex items-center cursor-pointer">
     <input
     type="checkbox"
@@ -271,7 +271,7 @@ function FahrtForm() {
     onChange={(e) => setUseEinmaligenNachOrt(e.target.checked)}
     className="mr-2 text-primary-500"
     />
-    <span className="text-sm text-primary-900">Einmaliger Ort</span>
+    <span className="text-xs text-primary-600">Einmaliger Ort</span>
     </label>
     </div>
     {useEinmaligenNachOrt ? (
@@ -299,8 +299,8 @@ function FahrtForm() {
     </div>
     
     <div className="flex flex-col sm:flex-row gap-4">
-    <div className="w-full sm:w-1/2">
-    <label className="block mb-1 text-sm text-primary-900">Kilometer</label>
+    <div className="w-full sm:w-1/3">
+    <label className="block mb-1 text-xs text-primary-600">Kilometer</label>
     <input
     type="number"
     name="manuelleKilometer"
@@ -315,7 +315,7 @@ function FahrtForm() {
     />
     </div>
     <div className="w-full sm:w-1/2">
-    <label className="block mb-1 text-sm text-primary-900">Abrechnung</label>
+    <label className="block mb-1 text-xs text-primary-600">Abrechnung</label>
     <select
     name="abrechnung"
     value={formData.abrechnung}
@@ -342,7 +342,7 @@ function FahrtForm() {
     className="mr-2 text-primary-500"
     disabled={useEinmaligenVonOrt || useEinmaligenNachOrt}
     />
-    <span className="text-sm text-primary-900">via Dienstort</span>
+    <span className="text-xs text-primary-600">via Dienstort</span>
     </label>
     
     <label className="flex items-center">
@@ -352,7 +352,7 @@ function FahrtForm() {
     onChange={(e) => setAddRueckfahrt(e.target.checked)}
     className="mr-2 text-primary-500"
     />
-    <span className="text-sm text-primary-900">Rückfahrt anlegen</span>
+    <span className="text-xs text-primary-600">Rückfahrt anlegen</span>
     </label>
     
     <div className="flex gap-2 ml-auto">
