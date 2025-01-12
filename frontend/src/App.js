@@ -890,7 +890,8 @@ function FahrtenListe() {
   };
   
   const roundKilometers = (value) => {
-    const numValue = Number(value ?? 0); // Setze nullish auf 0
+    console.log("roundKilometers input:", value);
+    const numValue = Number(value ?? 0);
     return numValue % 1 < 0.5 ? Math.floor(numValue) : Math.ceil(numValue);
   };
   
@@ -960,7 +961,10 @@ function FahrtenListe() {
     setSortConfig({ key, direction });
   };
   
-  const formatValue = (value) => value == null ? "" : value;
+  const formatValue = (value) => {
+    console.log("formatValue input:", value);
+    return value == null ? "" : value;
+  };
   
   const handleEditMitfahrer = (fahrtId, mitfahrer) => {
     setEditingMitfahrer({ fahrtId, ...mitfahrer });
