@@ -890,7 +890,6 @@ function FahrtenListe() {
   };
   
   const roundKilometers = (value) => {
-    console.log("roundKilometers input:", value);
     const numValue = Number(value ?? 0);
     return numValue % 1 < 0.5 ? Math.floor(numValue) : Math.ceil(numValue);
   };
@@ -962,7 +961,6 @@ function FahrtenListe() {
   };
   
   const formatValue = (value) => {
-    console.log("formatValue input:", value);
     return value == null ? "" : value;
   };
   
@@ -1057,7 +1055,6 @@ function FahrtenListe() {
       autosplit: fahrt.autosplit
     });
     
-    return (
     <tr 
     key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
     className={`${
