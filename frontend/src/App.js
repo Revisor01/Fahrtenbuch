@@ -1037,7 +1037,8 @@ function FahrtenListe() {
         return (
           <span
           key={index}
-          className="inline-flex items-center bg-primary-100 rounded px-2 h-6 text-sm text-primary-700"
+          className="inline-flex items-center bg-primary-100 rounded px-2 h-6 text-sm text-primary-700 cursor-pointer"
+          onClick={() => handleEditMitfahrer(fahrt.id, person)}
           >
           {person.name}
           <button
@@ -1579,7 +1580,7 @@ function FahrtenListe() {
         )}
 
         {/* Autosplit Details */}
-        {fahrt.autosplit && expandedFahrten[fahrt.id] && (
+        {fahrt.autosplit === 1 && expandedFahrten[fahrt.id] && fahrt.details?.length > 0 && (
           <div className="space-y-2">
           {fahrt.details.map((detail, idx) => (
             <div key={idx} className="bg-primary-50 p-2 rounded">
