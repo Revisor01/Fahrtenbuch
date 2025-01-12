@@ -1171,7 +1171,7 @@ function FahrtenListe() {
       className="form-input"
       />
     ) : (
-      `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))} km`
+      `${formatValue(roundKilometers(fahrt.kilometer))} km`
     )}
     </td>
     <td className="table-cell">
@@ -1263,7 +1263,7 @@ function FahrtenListe() {
     {renderAbrechnungsStatus(summary)}
     {/* Desktop View */}
     <div className="hidden md:block">
-    <table className="w-full border-collapse">
+    <table className="w-full border-collapse border border-primary-100">
     <thead>
     <tr className="bg-primary-25 border-b border-primary-100">
     <th className="table-header" onClick={() => requestSort('datum')}>
@@ -1304,7 +1304,7 @@ function FahrtenListe() {
     <div className="md:hidden space-y-4">
     {sortedFahrten.map((fahrt) => (
       <div key={fahrt.id}
-      className={`bg-white p-4 rounded-lg border border-primary-100 ${
+      className={`bg-primary-25 p-4 rounded-lg border border-primary-100 ${
         fahrt.autosplit ? "bg-primary-25" : ""
       }`}>
       {editingFahrt?.id === fahrt.id ? (
@@ -1434,14 +1434,13 @@ function FahrtenListe() {
         </div>
         </div>
         
-        {/* Details */}
         <div className="space-y-4">
         {/* Route */}
         <div className="grid grid-cols-1 gap-2">
         <div>
         <div className="text-xs text-primary-600">Von</div>
         <div className="text-primary-900">
-        {fahrt.von_ort_name || fahrt.einmaliger_von_ort}
+        {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
         </div>
         {fahrt.von_ort_adresse && (
           <div className="text-xs text-primary-600">
@@ -1452,7 +1451,7 @@ function FahrtenListe() {
         <div>
         <div className="text-xs text-primary-600">Nach</div>
         <div className="text-primary-900">
-        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
         </div>
         {fahrt.nach_ort_adresse && (
           <div className="text-xs text-primary-600">
