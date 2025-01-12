@@ -1048,7 +1048,7 @@ function FahrtenListe() {
     );
   };
   
-  const renderFahrtRow = (fahrt, detail = null) => (
+  const renderFahrtRow = (fahrt, detail = null) => {
     return (
     <tr 
     key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
