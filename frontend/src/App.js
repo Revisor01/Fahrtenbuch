@@ -1623,33 +1623,13 @@ function FahrtenListe() {
     </div>
   );
 }
-
+            
 function MonthlyOverview() {
-  const { 
-    monthlyData, 
-    fetchMonthlyData, 
-    updateAbrechnungsStatus, 
-    summary,
-    handleExportToExcel,
-    selectedMonth 
-  } = React.useContext(AppContext);
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
-  const [selectedYear, setSelectedYear] = useState('all');
-  const [hideCompleted, setHideCompleted] = useState(true);
-  
-  const kkReceived = summary?.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-  const gemReceived = summary?.abrechnungsStatus?.gemeinde?.erhalten_am;
-  const currentTotal = (
-    (!kkReceived ? Number(summary?.kirchenkreisErstattung || 0) : 0) +
-    (!gemReceived ? Number(summary?.gemeindeErstattung || 0) : 0) +
-    (!kkReceived ? Number(summary?.mitfahrerErstattung || 0) : 0)
-  ).toFixed(2);
-  const originalTotal = (
-    Number(summary?.kirchenkreisErstattung || 0) +
-    Number(summary?.gemeindeErstattung || 0) +
-    Number(summary?.mitfahrerErstattung || 0)
-  ).toFixed(2);
-  
+  const [selectedYear, setSelectedYear] = useState('all'); // 'all' für Gesamt
+  const [hideCompleted, setHideCompleted] = useState(true); // Standard: abgeschlossene ausblenden
+
   useEffect(() => {
     fetchMonthlyData();
   }, []);
@@ -1663,33 +1643,170 @@ function MonthlyOverview() {
     }
   };
   
+  // Neue Hilfsfunktion zum Filtern der Daten
   const getFilteredData = () => {
     return monthlyData.filter(month => {
+      // Jahr filtern
       if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
         return false;
       }
       
+      // Abgeschlossene ausblenden wenn gewünscht
       if (hideCompleted) {
         const isCompleted = month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
         month.abrechnungsStatus?.gemeinde?.erhalten_am;
-        if (isCompleted) return false;
+        if (isCompleted) {
+          return false;
+        }
       }
       
       return true;
     });
   };
   
-  const renderStatusIcon = (status) => {
-    if (status?.erhalten_am) return <span className="text-green-500">✓</span>;
-    if (status?.eingereicht_am) return <span className="text-yellow-500">○</span>;
-    return null;
+  const getStatusColor = (status) => {
+    if (status?.erhalten_am) return 'bg-green-50';
+    if (status?.eingereicht_am) return 'bg-yellow-50';
+    return '';
+  };
+    
+  const calculateYearTotal = () => {
+    return getFilteredData().reduce((total, month) => {
+      // Berechne immer die Originalbeträge
+      total.originalKirchenkreis += Number(month.kirchenkreisErstattung || 0);
+      total.originalGemeinde += Number(month.gemeindeErstattung || 0);
+      total.originalMitfahrer += Number(month.mitfahrerErstattung || 0);
+      
+      // Für die aktuelle Summe nur nicht-erhaltene Beträge addieren
+      if (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
+        total.kirchenkreis += Number(month.kirchenkreisErstattung || 0);
+        total.mitfahrer += Number(month.mitfahrerErstattung || 0);
+      }
+      if (!month.abrechnungsStatus?.gemeinde?.erhalten_am) {
+        total.gemeinde += Number(month.gemeindeErstattung || 0);
+      }
+      
+      // Berechne beide Gesamtsummen
+      total.originalGesamt = total.originalKirchenkreis + total.originalGemeinde + total.originalMitfahrer;
+      total.gesamt = total.kirchenkreis + total.gemeinde + total.mitfahrer;
+      
+      return total;
+    }, {
+      kirchenkreis: 0, gemeinde: 0, mitfahrer: 0, gesamt: 0,
+      originalKirchenkreis: 0, originalGemeinde: 0, originalMitfahrer: 0, originalGesamt: 0
+    });
   };
   
-  const renderBetrag = (betrag, isReceived) => (
-    <span className={isReceived ? "text-gray-400" : ""}>
-    {Number(betrag || 0).toFixed(2)} €
-    </span>
-  );
+  const renderBetrag = (betrag, isReceived) => {
+    return (
+      <span className={isReceived ? "text-gray-400" : ""}>
+      {Number(betrag || 0).toFixed(2)} €
+      </span>
+    );
+  };
+  
+  const QuickActions = ({ filteredData, handleStatusUpdate }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const actions = [
+      {
+        label: 'Alle als eingereicht markieren',
+        action: async () => {
+          const today = new Date().toISOString().split('T')[0];
+          try {
+            for (const month of filteredData) {
+              // Kirchenkreis
+              if (month.kirchenkreisErstattung > 0 && 
+                !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Kirchenkreis', 
+                    'eingereicht', 
+                    today
+                  );
+                }
+              // Gemeinde
+              if (month.gemeindeErstattung > 0 && 
+                !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Gemeinde', 
+                    'eingereicht', 
+                    today
+                  );
+                }
+            }
+          } catch (error) {
+            console.error('Fehler beim Massenupdate:', error);
+          }
+        }
+      },
+      {
+        label: 'Alle eingereichten als erhalten markieren',
+        action: async () => {
+          const today = new Date().toISOString().split('T')[0];
+          try {
+            for (const month of filteredData) {
+              // Kirchenkreis
+              if (month.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
+                !month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Kirchenkreis', 
+                    'erhalten', 
+                    today
+                  );
+                }
+              // Gemeinde
+              if (month.abrechnungsStatus?.gemeinde?.eingereicht_am && 
+                !month.abrechnungsStatus?.gemeinde?.erhalten_am) {
+                  await handleStatusUpdate(
+                    month.year, 
+                    month.monatNr, 
+                    'Gemeinde', 
+                    'erhalten', 
+                    today
+                  );
+                }
+            }
+          } catch (error) {
+            console.error('Fehler beim Massenupdate:', error);
+          }
+        }
+      }
+    ];
+    
+    return (
+      <div className="relative">
+      <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
+      >
+      Schnellaktionen ▼
+      </button>
+      
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-72 bg-white border rounded shadow-lg z-10">
+        {actions.map((action, index) => (
+          <button
+          key={index}
+          onClick={async () => {
+            await action.action();
+            setIsOpen(false);
+          }}
+          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+          >
+          {action.label}
+          </button>
+        ))}
+        </div>
+      )}
+      </div>
+    );
+  };
   
   const renderStatusCell = (month, typ) => {
     const status = typ === 'Kirchenkreis' ? 
@@ -1708,7 +1825,8 @@ function MonthlyOverview() {
         </span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="text-xs text-gray-400 hover:text-secondary-500"
+        className="ml-2 text-xs text-gray-400 hover:text-red-500"
+        title="Zurücksetzen"
         >
         ×
         </button>
@@ -1732,13 +1850,13 @@ function MonthlyOverview() {
           jahr: month.year,
           monat: month.monatNr
         })}
-        className="btn-primary text-xs"
+        className="text-xs bg-green-100 text-green-700 px-2 rounded"
         >
         ✓
         </button>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="btn-secondary text-xs"
+        className="text-xs bg-red-100 text-red-700 px-2 rounded"
         >
         ×
         </button>
@@ -1756,9 +1874,10 @@ function MonthlyOverview() {
         jahr: month.year,
         monat: month.monatNr
       })}
-      className="btn-primary text-xs"
+      className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
       >
-      ⟳ Einreichen
+      <span>⟳</span>
+      <span>Einreichen</span>
       </button>
     ) : null;
   };
@@ -1766,19 +1885,19 @@ function MonthlyOverview() {
   const yearTotal = calculateYearTotal();
   
   return (
-    <div className="table-container space-y-6">
-    {/* Header und Filter */}
-    <div className="bg-primary-25 p-4 sm:p-6">
+    <div className="table-container">
+    <div className="bg-primary-25 p-4 sm:p-6 space-y-4">
+    {/* Header mit Filtern */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
     <h2 className="text-lg font-medium text-primary-900">Monatliche Übersicht</h2>
     
     <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
     <div className="flex items-center gap-2">
-    <label className="text-sm text-primary-600 whitespace-nowrap">Jahr:</label>
+    <label className="text-sm text-primary-600">Jahr:</label>
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select flex-grow sm:w-28"
+    className="form-select"
     >
     <option value="all">Gesamt</option>
     {[...new Set(monthlyData.map(m => m.year))]
@@ -1798,131 +1917,183 @@ function MonthlyOverview() {
     onChange={(e) => setHideCompleted(e.target.checked)}
     className="form-input w-4 h-4"
     />
-    <label htmlFor="hideCompleted" className="ml-2 text-primary-600 text-sm">
+    <label htmlFor="hideCompleted" className="ml-2 text-sm text-primary-600">
     Abgeschlossene ausblenden
     </label>
     </div>
     </div>
+    
+    <QuickActions filteredData={getFilteredData()} handleStatusUpdate={handleStatusUpdate} />
     </div>
     
-    {/* Status Karten */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
-    <StatusCard
-    title="Kirchenkreis"
-    amount={summary?.kirchenkreisErstattung}
-    status={summary?.abrechnungsStatus?.kirchenkreis}
-    isReceived={kkReceived}
-    />
-    <StatusCard
-    title="Gemeinde"
-    amount={summary?.gemeindeErstattung}
-    status={summary?.abrechnungsStatus?.gemeinde}
-    isReceived={gemReceived}
-    />
-    <StatusCard
-    title="Mitfahrer"
-    amount={summary?.mitfahrerErstattung}
-    isReceived={kkReceived}
-    />
-    <StatusCard
-    title="Gesamt"
-    amount={currentTotal}
-    originalAmount={originalTotal}
-    showOriginal={currentTotal !== originalTotal && (kkReceived || gemReceived)}
-    />
-    </div>
-    
-    {/* Export Buttons */}
-    <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
-    <button
-    onClick={() => handleExportToExcel("kirchenkreis", selectedYear, selectedMonth.split("-")[1])}
-    className="btn-primary w-full sm:w-auto"
-    >
-    Export Kirchenkreis / Mitfaher:innen
-    </button>
-    <button
-    onClick={() => handleExportToExcel("gemeinde", selectedYear, selectedMonth.split("-")[1])}
-    className="btn-primary w-full sm:w-auto"
-    >
-    Export Gemeinde
-    </button>
-    </div>
-    </div>
-    
-    {/* Desktop Tabelle */}
+    {/* Desktop Table */}
     <div className="hidden sm:block">
     <table className="w-full border-collapse">
     <thead>
     <tr className="bg-primary-25">
-    <th className="table-header">Monat</th>
-    <th className="table-header">Kirchenkreis</th>
-    <th className="table-header">Status KK</th>
-    <th className="table-header">Gemeinde</th>
-    <th className="table-header">Status Gemeinde</th>
-    <th className="table-header">Mitfahrer</th>
-    <th className="table-header">Gesamt</th>
+    <th className="table-header w-36">Monat</th>
+    <th className="table-header" colSpan="2">
+    <div className="flex justify-between px-2">
+    <span>Kirchenkreis</span>
+    <span className="text-xs text-primary-500">Status</span>
+    </div>
+    </th>
+    <th className="table-header" colSpan="2">
+    <div className="flex justify-between px-2">
+    <span>Gemeinde</span>
+    <span className="text-xs text-primary-500">Status</span>
+    </div>
+    </th>
+    <th className="table-header text-right">Mitfahrer</th>
+    <th className="table-header text-right w-32">Gesamt</th>
     </tr>
     </thead>
     <tbody className="divide-y divide-primary-100">
-    {getFilteredData().map((month) => (
-      <tr key={month.yearMonth} className="hover:bg-primary-25">
-      <td className="table-cell">{month.monthName} {month.year}</td>
-      <td className="table-cell">{renderBetrag(month.kirchenkreisErstattung, false)}</td>
-      <td className="table-cell">{renderStatusCell(month, 'Kirchenkreis')}</td>
-      <td className="table-cell">{renderBetrag(month.gemeindeErstattung, false)}</td>
-      <td className="table-cell">{renderStatusCell(month, 'Gemeinde')}</td>
-      <td className="table-cell">{renderBetrag(month.mitfahrerErstattung, false)}</td>
-      <td className="table-cell">
-      {(Number(month.kirchenkreisErstattung || 0) + 
-        Number(month.gemeindeErstattung || 0) + 
-        Number(month.mitfahrerErstattung || 0)).toFixed(2)} €
-      </td>
-      </tr>
-    ))}
+    {getFilteredData().map((month) => {
+      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
+      
+      return (
+        <tr key={month.yearMonth} className="hover:bg-primary-25">
+        <td className="table-cell font-medium">
+        {month.monthName} {month.year}
+        </td>
+        
+        <td className="table-cell text-right border-r-0 pr-2">
+        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
+        </td>
+        <td className="table-cell border-l-0 w-28">
+        <div className="flex justify-end">
+        {renderStatusCell(month, 'Kirchenkreis')}
+        </div>
+        </td>
+        
+        <td className="table-cell text-right border-r-0 pr-2">
+        {renderBetrag(month.gemeindeErstattung, gemReceived)}
+        </td>
+        <td className="table-cell border-l-0 w-28">
+        <div className="flex justify-end">
+        {renderStatusCell(month, 'Gemeinde')}
+        </div>
+        </td>
+        
+        <td className="table-cell text-right">
+        {renderBetrag(month.mitfahrerErstattung, kkReceived)}
+        </td>
+        
+        <td className="table-cell text-right font-medium">
+        {(
+          Number(month.kirchenkreisErstattung || 0) +
+          Number(month.gemeindeErstattung || 0) +
+          Number(month.mitfahrerErstattung || 0)
+        ).toFixed(2)} €
+        </td>
+        </tr>
+      );
+    })}
+    
+    {/* Jahresgesamt */}
+    <tr className="font-bold bg-primary-25">
+    <td className="table-cell">Jahresgesamt</td>
+    <td className="table-cell text-right border-r-0" colSpan="2">
+    {yearTotal.kirchenkreis.toFixed(2)} €
+    {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
+      <span className="text-primary-500 ml-2">({yearTotal.originalKirchenkreis.toFixed(2)} €)</span>
+    )}
+    </td>
+    <td className="table-cell text-right border-r-0" colSpan="2">
+    {yearTotal.gemeinde.toFixed(2)} €
+    {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
+      <span className="text-primary-500 ml-2">({yearTotal.originalGemeinde.toFixed(2)} €)</span>
+    )}
+    </td>
+    <td className="table-cell text-right">
+    {yearTotal.mitfahrer.toFixed(2)} €
+    {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
+      <span className="text-primary-500 ml-2">({yearTotal.originalMitfahrer.toFixed(2)} €)</span>
+    )}
+    </td>
+    <td className="table-cell text-right">
+    {yearTotal.gesamt.toFixed(2)} €
+    {yearTotal.originalGesamt !== yearTotal.gesamt && (
+      <span className="text-primary-500 ml-2">({yearTotal.originalGesamt.toFixed(2)} €)</span>
+    )}
+    </td>
+    </tr>
     </tbody>
     </table>
     </div>
     
-    {/* Mobile Kartendarstellung */}
+    {/* Mobile Cards */}
     <div className="sm:hidden space-y-4">
-    {getFilteredData().map((month) => (
-      <div key={month.yearMonth} className="bg-white rounded-lg border border-primary-100 p-4">
-      <div className="flex justify-between items-start mb-3">
-      <div className="text-primary-900 font-medium">
-      {month.monthName} {month.year}
-      </div>
-      <div className="text-primary-600">
-      {(Number(month.kirchenkreisErstattung || 0) + 
-        Number(month.gemeindeErstattung || 0) + 
-        Number(month.mitfahrerErstattung || 0)).toFixed(2)} €
-      </div>
-      </div>
+    {getFilteredData().map((month) => {
+      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
       
-      <div className="space-y-2 text-sm">
-      <StatusRow
-      label="Kirchenkreis"
-      month={month}
-      amount={month.kirchenkreisErstattung}
-      typ="Kirchenkreis"
-      isReceived={false}
-      />
-      <StatusRow
-      label="Gemeinde"
-      month={month}
-      amount={month.gemeindeErstattung}
-      typ="Gemeinde"
-      isReceived={false}
-      />
-      <StatusRow
-      label="Mitfahrer"
-      month={month}
-      amount={month.mitfahrerErstattung}
-      isReceived={false}
-      hideStatus
-      />
-      </div>
-      </div>
-    ))}
+      return (
+        <div key={month.yearMonth} className="bg-white rounded-lg border border-primary-100 p-4">
+        <div className="flex justify-between items-start mb-3">
+        <div className="text-primary-900 font-medium">
+        {month.monthName} {month.year}
+        </div>
+        <div className="text-primary-900 font-medium">
+        {(
+          Number(month.kirchenkreisErstattung || 0) +
+          Number(month.gemeindeErstattung || 0) +
+          Number(month.mitfahrerErstattung || 0)
+        ).toFixed(2)} €
+        </div>
+        </div>
+        
+        <div className="space-y-3">
+        <div className="flex justify-between items-center">
+        <span className="text-sm text-primary-600">Kirchenkreis</span>
+        <div className="flex items-center gap-3">
+        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
+        {renderStatusCell(month, 'Kirchenkreis')}
+        </div>
+        </div>
+        
+        <div className="flex justify-between items-center">
+        <span className="text-sm text-primary-600">Gemeinde</span>
+        <div className="flex items-center gap-3">
+        {renderBetrag(month.gemeindeErstattung, gemReceived)}
+        {renderStatusCell(month, 'Gemeinde')}
+        </div>
+        </div>
+        
+        <div className="flex justify-between items-center">
+        <span className="text-sm text-primary-600">Mitfahrer</span>
+        {renderBetrag(month.mitfahrerErstattung, kkReceived)}
+        </div>
+        </div>
+        </div>
+      );
+    })}
+    
+    {/* Mobile Jahresgesamt */}
+    <div className="bg-primary-25 rounded-lg border border-primary-100 p-4">
+    <div className="text-lg font-medium mb-3">Jahresgesamt</div>
+    <div className="space-y-2">
+    <div className="flex justify-between">
+    <span>Kirchenkreis</span>
+    <span>{yearTotal.kirchenkreis.toFixed(2)} €</span>
+    </div>
+    <div className="flex justify-between">
+    <span>Gemeinde</span>
+    <span>{yearTotal.gemeinde.toFixed(2)} €</span>
+    </div>
+    <div className="flex justify-between">
+    <span>Mitfahrer</span>
+    <span>{yearTotal.mitfahrer.toFixed(2)} €</span>
+    </div>
+    <div className="flex justify-between font-medium pt-2 border-t border-primary-100">
+    <span>Gesamt</span>
+    <span>{yearTotal.gesamt.toFixed(2)} €</span>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
     
     <AbrechnungsStatusModal 
@@ -1944,38 +2115,6 @@ function MonthlyOverview() {
     </div>
   );
 }
-
-// Hilfskkomponenten
-const StatusCard = ({ title, amount, status, isReceived, originalAmount, showOriginal }) => {
-  return (
-    <div className="bg-white p-3 sm:p-4 rounded border border-primary-100">
-    <div className="flex items-center justify-between mb-1 sm:mb-2">
-    <span className="text-xs sm:text-sm text-primary-600">{title}</span>
-    {status && renderStatusIcon(status)}
-    </div>
-    <div className={`${isReceived ? "text-gray-400" : "text-primary-900"} font-medium text-sm sm:text-base`}>
-    {Number(amount || 0).toFixed(2)} €
-    {showOriginal && (
-      <span className="text-xs sm:text-sm text-gray-400 ml-2">
-      ({originalAmount} €)
-      </span>
-    )}
-    </div>
-    </div>
-  );
-};
-
-const StatusRow = ({ label, month, amount, typ, isReceived, hideStatus }) => {
-  return (
-    <div className="flex justify-between">
-    <span className="text-primary-600">{label}</span>
-    <div className="flex items-center gap-2">
-    <span>{renderBetrag(amount, isReceived)}</span>
-    {!hideStatus && renderStatusCell(month, typ)}
-    </div>
-    </div>
-  );
-};
 
 function OrteListe() {
   const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
