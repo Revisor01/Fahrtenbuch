@@ -1305,8 +1305,9 @@ function FahrtenListe() {
     {sortedFahrten.map((fahrt) => (
       <React.Fragment key={fahrt.id}>
       {renderFahrtRow(fahrt)}
-      {fahrt.autosplit && expandedFahrten[fahrt.id] && fahrt.details?.length > 0 && 
-        fahrt.details.map((detail, idx) => renderFahrtRow(fahrt, detail, idx))}
+      {fahrt.autosplit && expandedFahrten[fahrt.id] && fahrt.details?.map((detail, idx) => 
+        renderFahrtRow(fahrt, detail, idx)
+      )}
       </React.Fragment>
     ))}
     </tbody>
