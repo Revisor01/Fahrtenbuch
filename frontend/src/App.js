@@ -1049,6 +1049,7 @@ function FahrtenListe() {
   };
   
   const renderFahrtRow = (fahrt, detail = null) => (
+    console.log('Rendering row:', { fahrt, detail });
     <tr 
     key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
     className={`${
