@@ -328,6 +328,7 @@ function FahrtForm() {
     </select>
     </div>
     </div>
+    </div>
     
     {/* Dritte Zeile: Checkboxen und Buttons */}
     <div className="flex flex-wrap items-center gap-4">
