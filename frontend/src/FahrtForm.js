@@ -196,7 +196,7 @@ function FahrtForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Erste Zeile: Basis-Informationen */}
     <div className="flex flex-wrap gap-4">
-    <div className="w-full sm:w-32">  {/* Datum: feste Breite auf Desktop */}
+    <div className="w-full">
     <label className="block mb-1 text-xs text-primary-600">Datum</label>
     <input
     type="date"
@@ -299,7 +299,7 @@ function FahrtForm() {
     </div>
     
     <div className="flex flex-col sm:flex-row gap-4">
-    <div className="w-1/3 sm:w-1/2">
+    <div className="w-full sm:w-1/2">
     <label className="block mb-1 text-xs text-primary-600">Kilometer</label>
     <input
     type="number"
@@ -314,7 +314,7 @@ function FahrtForm() {
     step="1"
     />
     </div>
-    <div className="w-1/2 sm:w-1/2">
+    <div className="w-full sm:w-1/2">
     <label className="block mb-1 text-xs text-primary-600">Abrechnung</label>
     <select
     name="abrechnung"

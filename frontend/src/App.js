@@ -1227,33 +1227,30 @@ function FahrtenListe() {
     )}
     </td>
     <td className="table-cell text-right">
-    {!detail && (
+    {editingFahrt?.id === fahrt.id ? (
       <div className="flex justify-end gap-1">
-      {editingFahrt?.id === fahrt.id ? (
-        <>
-        <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
-        <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
-        </>
-      ) : (
-        <>
-        {!fahrt.autosplit && (
-          <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
-          ✎
-          </button>
-        )}
-        <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
-        ×
+      
+      <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
+      <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
+      </div>
+    ) : (
+      <div className="flex justify-end gap-1">
+      {!fahrt.autosplit && (
+        <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
+        ✎
         </button>
-        {fahrt.autosplit && expandedFahrten[fahrt.id] !== undefined && (
-          <button 
-          onClick={() => toggleFahrtDetails(fahrt.id)} 
-          className="btn-primary text-xs"
-          title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
-          >
-          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
-          </button>
-        )}
-        </>
+      )}
+      <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
+      ×
+      </button>
+      {fahrt.autosplit && expandedFahrten[fahrt.id] !== undefined && (
+        <button 
+        onClick={() => toggleFahrtDetails(fahrt.id)} 
+        className="btn-primary text-xs"
+        title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
+        >
+        {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+        </button>
       )}
       </div>
     )}
