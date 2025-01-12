@@ -1244,7 +1244,7 @@ function FahrtenListe() {
         <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
         ×
         </button>
-        {fahrt.autosplit && (
+        {fahrt.autosplit && expandedFahrten[fahrt.id] !== undefined && (
           <button 
           onClick={() => toggleFahrtDetails(fahrt.id)} 
           className="btn-primary text-xs"
