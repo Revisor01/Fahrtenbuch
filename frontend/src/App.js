@@ -735,7 +735,7 @@ function FahrtenListe() {
       <div className="bg-primary-25 p-6 space-y-6">
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h2 className="text-lg font-semibold text-primary-900">Fahrten</h2>
+      <h2 className="text-lg font-semibold text-primary-900">Monatsübersicht</h2>
       
       <div className="flex flex-wrap items-center gap-2">
       {selectedMonth !== currentMonth && (
@@ -1819,7 +1819,7 @@ function MonthlyOverview() {
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center space-x-2">
-        <span className="text-primary-600 text-xs">● Erhalten</span>
+        <span className="text-primary-600 text-xs">● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
         className="btn-secondary text-xs px-2 py-0.5"
@@ -1834,7 +1834,7 @@ function MonthlyOverview() {
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center space-x-2">
-        <span className="text-secondary-500 text-xs">○ Eingereicht</span>
+        <span className="text-secondary-500 text-xs">○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}</span>
         <button
         onClick={() => setStatusModal({ 
           open: true, 
@@ -1862,7 +1862,7 @@ function MonthlyOverview() {
       })}
       className="btn-primary text-xs"
       >
-      Einreichen
+      Als eingereicht markieren
       </button>
     ) : null;
   };
@@ -2002,14 +2002,7 @@ function MonthlyOverview() {
         <tr key={month.yearMonth} className="table-row">
         <td className="table-cell">{month.monthName} {month.year}</td>
         <td className="table-cell text-right">
-        <div className="font-medium">
         {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
-        </div>
-        {kkReceived && (
-          <div className="text-xs text-primary-500">
-          Ursprünglich: {month.kirchenkreisErstattung.toFixed(2)} €
-          </div>
-        )}
         </td>
         <td className="table-cell">
         {renderStatusCell(month, 'Kirchenkreis')}
@@ -2083,8 +2076,8 @@ function MonthlyOverview() {
         <div className="flex items-center justify-between">
         <span className="text-sm text-primary-600">Gemeinde</span>
         <div className="flex items-center gap-3">
-        {renderBetrag(month.gemeindeErstattung, gemReceived)}
         {renderStatusCell(month, 'Gemeinde')}
+        {renderBetrag(month.gemeindeErstattung, gemReceived)}
         </div>
         </div>
         
