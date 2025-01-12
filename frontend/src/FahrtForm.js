@@ -298,7 +298,7 @@ function FahrtForm() {
     )}
     </div>
     
-    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col sm:flex-col gap-4">
     <div className="w-full sm:w-1/2">
     <label className="block mb-1 text-xs text-primary-600">Kilometer</label>
     <input
