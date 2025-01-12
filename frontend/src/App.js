@@ -1819,13 +1819,10 @@ function MonthlyOverview() {
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center space-x-2">
-        <span className="text-green-500">✓</span>
-        <span className="text-xs text-green-700">
-        {new Date(status.erhalten_am).toLocaleDateString()}
-        </span>
+        <span className="text-primary-600 text-xs">● Erhalten</span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="ml-2 text-xs text-gray-400 hover:text-red-500"
+        className="btn-secondary text-xs px-2 py-0.5"
         title="Zurücksetzen"
         >
         ×
@@ -1837,11 +1834,7 @@ function MonthlyOverview() {
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center space-x-2">
-        <span className="text-yellow-500">○</span>
-        <span className="text-xs text-yellow-700">
-        {new Date(status.eingereicht_am).toLocaleDateString()}
-        </span>
-        <div className="space-x-1">
+        <span className="text-secondary-500 text-xs">○ Eingereicht</span>
         <button
         onClick={() => setStatusModal({ 
           open: true, 
@@ -1850,17 +1843,10 @@ function MonthlyOverview() {
           jahr: month.year,
           monat: month.monatNr
         })}
-        className="text-xs bg-green-100 text-green-700 px-2 rounded"
+        className="btn-primary text-xs px-2 py-0.5"
         >
         ✓
         </button>
-        <button
-        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="text-xs bg-red-100 text-red-700 px-2 rounded"
-        >
-        ×
-        </button>
-        </div>
         </div>
       );
     }
@@ -1874,10 +1860,9 @@ function MonthlyOverview() {
         jahr: month.year,
         monat: month.monatNr
       })}
-      className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+      className="btn-primary text-xs"
       >
-      <span>⟳</span>
-      <span>Einreichen</span>
+      Einreichen
       </button>
     ) : null;
   };
@@ -1890,7 +1875,7 @@ function MonthlyOverview() {
     <div className="bg-primary-25 p-6">
     {/* Header und Filter */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <h2 className="text-lg font-medium text-primary-900">Monatliche Übersicht</h2>
+    <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     
     <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
     <div className="flex items-center gap-2">
@@ -2017,7 +2002,14 @@ function MonthlyOverview() {
         <tr key={month.yearMonth} className="table-row">
         <td className="table-cell">{month.monthName} {month.year}</td>
         <td className="table-cell text-right">
+        <div className="font-medium">
         {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
+        </div>
+        {kkReceived && (
+          <div className="text-xs text-primary-500">
+          Ursprünglich: {month.kirchenkreisErstattung.toFixed(2)} €
+          </div>
+        )}
         </td>
         <td className="table-cell">
         {renderStatusCell(month, 'Kirchenkreis')}
@@ -2083,8 +2075,8 @@ function MonthlyOverview() {
         <div className="flex items-center justify-between">
         <span className="text-sm text-primary-600">Kirchenkreis</span>
         <div className="flex items-center gap-3">
-        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
         {renderStatusCell(month, 'Kirchenkreis')}
+        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
         </div>
         </div>
         
