@@ -1186,7 +1186,7 @@ function FahrtenListe() {
       className="form-input"
       />
     ) : (
-      `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))} km`
+      `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))}`
     )}
     </td>
     <td className="table-cell">
@@ -1204,39 +1204,40 @@ function FahrtenListe() {
       detail ? detail.abrechnung : fahrt.abrechnung
     )}
     </td>
-    <td className="table-cell">
-    {editingFahrt?.id === fahrt.id ? (
-      <div className="space-y-2">
-      {fahrt.mitfahrer && fahrt.mitfahrer.map((person, index) => (
-        <div key={index} className="flex items-center justify-between">
-        <span
-        className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-50 text-primary-700 cursor-pointer"
-        onClick={() => handleEditMitfahrer(fahrt.id, person)}
-        >
-        {person.name}
-        </span>
+      <td className="table-cell">
+      {editingFahrt?.id === fahrt.id ? (
+        <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+        {fahrt.mitfahrer?.map((person, index) => (
+          <span
+          key={index}
+          className="inline-flex items-center bg-primary-100 rounded px-2 h-6 text-sm text-primary-700"
+          >
+          {person.name}
+          <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleDeleteMitfahrer(fahrt.id, person.id);
+          }}
+          className="ml-2 text-secondary-500 hover:text-secondary-600"
+          >
+          ×
+          </button>
+          </span>
+        ))}
+        </div>
         <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleDeleteMitfahrer(fahrt.id, person.id);
-        }}
-        className="btn-secondary text-xs"
+        onClick={() => handleAddMitfahrer(fahrt.id)}
+        className="btn-primary text-xs w-full"
         >
-        ×
+        + Mitfahrer:in
         </button>
         </div>
-      ))}
-      <button
-      onClick={() => handleAddMitfahrer(fahrt.id)}
-      className="btn-primary text-xs w-full"
-      >
-      + Mitfahrer:in
-      </button>
-      </div>
-    ) : (
-      renderMitfahrer(fahrt)
-    )}
-    </td>
+      ) : (
+        renderMitfahrer(fahrt)
+      )}
+      </td>
     <td className="table-cell text-right">
     <div className="flex justify-end gap-1">
     {editingFahrt?.id === fahrt.id ? (
