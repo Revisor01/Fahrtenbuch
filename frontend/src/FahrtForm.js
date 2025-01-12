@@ -195,8 +195,7 @@ function FahrtForm() {
     <div className="bg-primary-25 p-6">
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Erste Zeile: Basis-Informationen */}
-    <div className="flex flex-wrap gap-4">
-    <div className="w-full">
+    <div className="w-full sm:w-32"> {/* Datum: feste Breite auf Desktop, volle Breite auf Mobile */}
     <label className="block mb-1 text-xs text-primary-600">Datum</label>
     <input
     type="date"
@@ -327,7 +326,6 @@ function FahrtForm() {
     <option value="Gemeinde">Gemeinde</option>
     <option value="Autosplit">Autosplit</option>
     </select>
-    </div>
     </div>
     </div>
     

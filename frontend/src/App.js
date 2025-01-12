@@ -1229,7 +1229,6 @@ function FahrtenListe() {
     <td className="table-cell text-right">
     {editingFahrt?.id === fahrt.id ? (
       <div className="flex justify-end gap-1">
-      
       <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
       <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
       </div>
