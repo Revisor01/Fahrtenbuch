@@ -1048,8 +1048,16 @@ function FahrtenListe() {
     );
   };
   
-  const renderFahrtRow = (fahrt, detail = null) => (
-    console.log('Rendering row:', { fahrt, detail });
+  const renderFahrtRow = (fahrt, detail = null) => {
+    console.log('Rendering row:', { 
+      id: fahrt.id,
+      isDetail: !!detail,
+      detailId: detail?.id,
+      anlass: fahrt.anlass,
+      autosplit: fahrt.autosplit
+    });
+    
+    return (
     <tr 
     key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
     className={`${
