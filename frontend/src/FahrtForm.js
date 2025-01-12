@@ -196,7 +196,7 @@ function FahrtForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Erste Zeile: Basis-Informationen */}
     <div className="flex flex-wrap gap-4">
-    <div className="w-full"> {/* Datum: feste Breite auf Desktop */}
+    <div className="w-full sm:w-32">  {/* Datum: feste Breite auf Desktop */}
     <label className="block mb-1 text-xs text-primary-600">Datum</label>
     <input
     type="date"
@@ -311,7 +311,7 @@ function FahrtForm() {
     className="form-input w-full h-8"
     required={useEinmaligenVonOrt || useEinmaligenNachOrt}
     disabled={formData.autosplit || (isKilometerLocked && !useEinmaligenVonOrt && !useEinmaligenNachOrt)}
-    step="1"  // Hinzufügen des Attributs step="1"
+    step="1"
     />
     </div>
     <div className="w-full sm:w-1/2">

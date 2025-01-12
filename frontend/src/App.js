@@ -1175,7 +1175,7 @@ function FahrtenListe() {
       className="form-input"
       />
     ) : (
-      `${formatValue(roundKilometers(fahrt.kilometer))} km`
+      `${formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))} km`
     )}
     </td>
     <td className="table-cell">
