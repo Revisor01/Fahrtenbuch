@@ -731,13 +731,18 @@ function FahrtenListe() {
     };
     
     return (
-      <div className="w-full max-w-full">
-      <div className="bg-primary-25 p-6 rounded-lg">
-      {/* Header und Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-      <h2 className="text-lg font-medium text-primary-900">Monatsübersicht</h2>
+      <div className="table-container mb-4">
+      <div className="bg-primary-25 p-6 space-y-6">
+      {/* Header mit Navigation */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <h2 className="text-lg font-semibold text-primary-900">Monatsübersicht</h2>
       
       <div className="flex flex-wrap items-center gap-2">
+      {selectedMonth !== currentMonth && (
+        <button onClick={resetToCurrentMonth} className="btn-secondary">
+        Aktueller Monat
+        </button>
+      )}
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
@@ -761,24 +766,100 @@ function FahrtenListe() {
         );
       })}
       </select>
-      {selectedMonth !== currentMonth && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary">
-        Aktueller Monat
-        </button>
-      )}
       </div>
       </div>
       
       {/* Zusammenfassung Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="p-4 rounded-lg border border-primary-100">
-      {/* Bestehender Card-Content bleibt gleich */}
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-primary-600">Kirchenkreis</span>
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
+        <span className="text-primary-600 text-xs">● Erhalten</span>
+      ) : summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am ? (
+        <span className="text-secondary-600 text-xs">○ Eingereicht</span>
+      ) : null}
       </div>
-      {/* Weitere Cards... */}
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
+      </div>
+      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
+        <div className="text-xs text-primary-600 mt-2">
+        Eingereicht:{" "}
+        {new Date(
+          summary.abrechnungsStatus.kirchenkreis.eingereicht_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
+        <div className="text-xs text-primary-600">
+        Erhalten:{" "}
+        {new Date(
+          summary.abrechnungsStatus.kirchenkreis.erhalten_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      </div>
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-primary-600">Gemeinde</span>
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
+        <span className="text-primary-600 text-xs">● Erhalten</span>
+      ) : summary.abrechnungsStatus?.gemeinde?.eingereicht_am ? (
+        <span className="text-secondary-600 text-xs">○ Eingereicht</span>
+      ) : null}
+      </div>
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
+      </div>
+      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
+        <div className="text-xs text-primary-600 mt-2">
+        Eingereicht:{" "}
+        {new Date(
+          summary.abrechnungsStatus.gemeinde.eingereicht_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
+        <div className="text-xs text-primary-600">
+        Erhalten:{" "}
+        {new Date(
+          summary.abrechnungsStatus.gemeinde.erhalten_am,
+        ).toLocaleDateString()}
+        </div>
+      )}
+      </div>
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-primary-600">Mitfahrer</span>
+      </div>
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
+      </div>
+      </div>
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-primary-600">Gesamt</span>
+      </div>
+      <div className="text-lg font-semibold text-primary-900">
+      {currentTotal} €
+      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
+        <span className="text-sm text-gray-400 ml-2">
+        ({originalTotal} €)
+        </span>
+      )}
+      </div>
+      </div>
       </div>
       
       {/* Export Buttons */}
-      <div className="flex justify-end gap-2 mt-6">
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
       <button
       onClick={() =>
         handleExportToExcel(
@@ -805,6 +886,7 @@ function FahrtenListe() {
       </div>
       </div>
     );
+    
   };
   
   const roundKilometers = (value) => {
@@ -1724,11 +1806,11 @@ function MonthlyOverview() {
   
   const renderStatusCell = (month, typ) => {
     const status = typ === 'Kirchenkreis' ? 
-      month.abrechnungsStatus?.kirchenkreis : 
-      month.abrechnungsStatus?.gemeinde;
+    month.abrechnungsStatus?.kirchenkreis : 
+    month.abrechnungsStatus?.gemeinde;
     const betrag = typ === 'Kirchenkreis' ? 
-      month.kirchenkreisErstattung : 
-      month.gemeindeErstattung;
+    month.kirchenkreisErstattung : 
+    month.gemeindeErstattung;
     
     if (status?.erhalten_am) {
       return (
@@ -1738,7 +1820,7 @@ function MonthlyOverview() {
         </span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="text-xs text-secondary-600 hover:text-secondary-700" // Deutlich dezenter
+        className="text-xs text-secondary-600 hover:text-secondary-700"
         title="Zurücksetzen"
         >
         Zurücksetzen
@@ -1754,8 +1836,14 @@ function MonthlyOverview() {
         ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
         </span>
         <button
-        onClick={() => setStatusModal({ ... })}
-        className="text-xs text-primary-600 hover:text-primary-700" // Dezenter, aber noch erkennbar
+        onClick={() => setStatusModal({ 
+          open: true, 
+          typ, 
+          aktion: 'erhalten', 
+          jahr: month.year,
+          monat: month.monatNr
+        })}
+        className="text-xs text-primary-600 hover:text-primary-700"
         >
         Als erhalten markieren
         </button>
@@ -1765,8 +1853,14 @@ function MonthlyOverview() {
     
     return betrag > 0 ? (
       <button
-      onClick={() => setStatusModal({ ... })}
-      className="text-xs text-primary-600 hover:text-primary-700" // Konsistent mit anderen Buttons
+      onClick={() => setStatusModal({ 
+        open: true, 
+        typ, 
+        aktion: 'eingereicht', 
+        jahr: month.year,
+        monat: month.monatNr
+      })}
+      className="text-xs text-primary-600 hover:text-primary-700"
       >
       Als eingereicht markieren
       </button>

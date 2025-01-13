@@ -44,30 +44,32 @@ export default function VerifyEmail() {
   }, [location.search, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          E-Mail Verifizierung
-        </h2>
-
-        {status.message && (
-          <div className={`p-4 rounded ${
-            status.type === 'success' 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-red-100 text-red-700'
-          }`}>
-            <p className="text-center">{status.message}</p>
-          </div>
-        )}
-
-        {status.type === 'error' && (
-          <div className="text-center mt-4">
-            <a href="/" className="text-blue-500 hover:text-blue-700">
-              Zurück zum Dashboard
-            </a>
-          </div>
-        )}
+    <div className="min-h-screen flex items-center justify-center bg-primary-25">
+    <div className="table-container w-full max-w-md">
+    <div className="bg-white p-6 rounded-lg border border-primary-100 space-y-6">
+    <h2 className="text-2xl font-medium text-primary-900 text-center">
+    E-Mail Verifizierung
+    </h2>
+    
+    {status.message && (
+      <div className={`p-4 rounded ${
+        status.type === 'success' 
+        ? 'bg-primary-25 text-primary-600' 
+        : 'bg-secondary-25 text-secondary-600'
+      }`}>
+      <p className="text-center">{status.message}</p>
       </div>
+    )}
+    
+    {status.type === 'error' && (
+      <div className="text-center border-t border-primary-200 pt-4">
+      <a href="/" className="btn-primary inline-block">
+      Zurück zum Dashboard
+      </a>
+      </div>
+    )}
+    </div>
+    </div>
     </div>
   );
 }
