@@ -1826,64 +1826,62 @@ function MonthlyOverview() {
   
   const renderStatusCell = (month, typ) => {
     const status = typ === 'Kirchenkreis' ? 
-      month.abrechnungsStatus?.kirchenkreis : 
-      month.abrechnungsStatus?.gemeinde;
+    month.abrechnungsStatus?.kirchenkreis : 
+    month.abrechnungsStatus?.gemeinde;
     const betrag = typ === 'Kirchenkreis' ? 
-      month.kirchenkreisErstattung : 
-      month.gemeindeErstattung;
+    month.kirchenkreisErstattung : 
+    month.gemeindeErstattung;
     
     if (status?.erhalten_am) {
       return (
-        <div className="flex flex-col">
-          <span className="text-primary-600 text-xs mb-1">
-            ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
-          </span>
-          <button
-            onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-            className="btn-secondary text-xs w-full"
-            title="Zurücksetzen"
-          >
-            Zurücksetzen
-          </button>
+        <div className="flex items-center justify-between gap-2">
+        <span className="text-primary-600 text-xs">● Erhalten</span>
+        <button
+        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        className="text-xs text-primary-600 hover:text-primary-800"
+        title="Zurücksetzen"
+        >
+        ↺
+        </button>
         </div>
       );
     }
     
     if (status?.eingereicht_am) {
       return (
-        <div className="flex flex-col">
-          <span className="text-secondary-500 text-xs mb-1">
-            ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
-          </span>
-          <button
-            onClick={() => setStatusModal({ 
-              open: true, 
-              typ, 
-              aktion: 'erhalten', 
-              jahr: month.year,
-              monat: month.monatNr
-            })}
-            className="btn-primary text-xs w-full"
-          >
-            Als erhalten markieren
-          </button>
+        <div className="flex items-center justify-between gap-2">
+        <span className="text-secondary-500 text-xs">○ Eingereicht</span>
+        <button
+        onClick={() => setStatusModal({ 
+          open: true, 
+          typ, 
+          aktion: 'erhalten', 
+          jahr: month.year,
+          monat: month.monatNr
+        })}
+        className="text-xs text-secondary-600 hover:text-secondary-800"
+        >
+        ✓
+        </button>
         </div>
       );
     }
     
     return betrag > 0 ? (
+      <div className="flex items-center justify-end">
       <button
-        onClick={() => setStatusModal({ 
-          open: true, 
-          typ, 
-          aktion: 'eingereicht', 
-          jahr: month.year,
-          monat: month.monatNr
-        })}
-        className="btn-primary text-xs w-full"
+      onClick={() => setStatusModal({ 
+        open: true, 
+        typ, 
+        aktion: 'eingereicht', 
+        jahr: month.year,
+        monat: month.monatNr
+      })}
+      className="text-xs text-primary-600 hover:text-primary-800"
       >
-        Als eingereicht markieren
+      Als eingereicht markieren
       </button>
+      </div>
     ) : null;
   };
   
