@@ -1629,7 +1629,8 @@ function MonthlyOverview() {
   const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
   const [selectedYear, setSelectedYear] = useState('all'); // 'all' für Gesamt
   const [hideCompleted, setHideCompleted] = useState(true); // Standard: abgeschlossene ausblenden
-
+  const currentYear = new Date().getFullYear().toString();
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString()); // Aktuelles Jahr vorausgewählt
   useEffect(() => {
     fetchMonthlyData();
   }, []);
@@ -2129,6 +2130,8 @@ function MonthlyOverview() {
     typ={statusModal.typ}
     aktion={statusModal.aktion}
     />
+    </div>
+  );
 }
 
 function OrteListe() {
