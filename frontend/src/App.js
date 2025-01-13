@@ -768,50 +768,6 @@ function FahrtenListe() {
       </select>
       </div>
       </div>
-      
-      {/* Zusammenfassung Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-white p-4 rounded border border-primary-100">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-primary-600">Kirchenkreis</span>
-      <span className={'font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-    </span>
-  </div>
-  
-  <div className="text-xs space-y-1">
-    {/* Status Anzeige - nur wenn eingereicht oder erhalten */}
-    {(summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am || summary.abrechnungsStatus?.kirchenkreis?.erhalten_am) && (
-      <div className="flex justify-between items-center">
-        <span className="text-primary-500">Status</span>
-        {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-          <span className="text-primary-600">● Erhalten</span>
-        ) : (
-          <span className="text-secondary-600">○ Eingereicht</span>
-        )}
-      </div>
-    )}
-    
-    {/* Datum Informationen */}
-    {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-      <div className="flex justify-between items-center">
-        <span className="text-primary-500">Eingereicht</span>
-        <span className="text-primary-600">
-          {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
-        </span>
-      </div>
-    )}
-    
-    {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-      <div className="flex justify-between items-center">
-        <span className="text-primary-500">Erhalten</span>
-        <span className="text-primary-600">
-          {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
-        </span>
-      </div>
-    )}
-  </div>
-</div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Kirchenkreis Card */}
@@ -921,7 +877,7 @@ function FahrtenListe() {
     )}
   </div>
 </div>
-</div>
+      
       {/* Export Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2">
       <button
