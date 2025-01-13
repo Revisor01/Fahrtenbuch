@@ -1834,23 +1834,30 @@ function MonthlyOverview() {
     
     if (status?.erhalten_am) {
       return (
-        <div className="flex items-center justify-between gap-2">
-        <span className="text-primary-600 text-xs">● Erhalten</span>
+        <div className="flex flex-col">
+        <span className="text-primary-600 text-xs mb-1">
+        ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
+        </span>
+        <div className="flex justify-end">
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="text-xs text-primary-600 hover:text-primary-800"
+        className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 text-xs"
         title="Zurücksetzen"
         >
-        ↺
+        ↺ Zurücksetzen
         </button>
+        </div>
         </div>
       );
     }
     
     if (status?.eingereicht_am) {
       return (
-        <div className="flex items-center justify-between gap-2">
-        <span className="text-secondary-500 text-xs">○ Eingereicht</span>
+        <div className="flex flex-col">
+        <span className="text-secondary-500 text-xs mb-1">
+        ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
+        </span>
+        <div className="flex justify-end">
         <button
         onClick={() => setStatusModal({ 
           open: true, 
@@ -1859,16 +1866,17 @@ function MonthlyOverview() {
           jahr: month.year,
           monat: month.monatNr
         })}
-        className="text-xs text-secondary-600 hover:text-secondary-800"
+        className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 text-xs"
         >
-        ✓
+        Als erhalten markieren
         </button>
+        </div>
         </div>
       );
     }
     
     return betrag > 0 ? (
-      <div className="flex items-center justify-end">
+      <div className="flex justify-end">
       <button
       onClick={() => setStatusModal({ 
         open: true, 
@@ -1877,7 +1885,7 @@ function MonthlyOverview() {
         jahr: month.year,
         monat: month.monatNr
       })}
-      className="text-xs text-primary-600 hover:text-primary-800"
+      className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 text-xs"
       >
       Als eingereicht markieren
       </button>
