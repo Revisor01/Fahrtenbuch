@@ -2153,8 +2153,6 @@ function OrteListe() {
     showNotification("Erfolg", "Der Ort wurde erfolgreich aktualisiert.");
   };
   
-  
-  
   const handleDelete = async (id) => {
     showNotification(
       "Ort löschen",
