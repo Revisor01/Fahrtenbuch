@@ -1840,10 +1840,10 @@ function MonthlyOverview() {
         </span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="bg-primary-700 text-white w-8 h-8 rounded flex items-center justify-center hover:bg-primary-800 transition-colors duration-150 ml-2"
-        title="Zurücksetzen"
+        className="text-primary-600 hover:text-primary-800 text-xs ml-2"
+        title="Status zurücksetzen"
         >
-        ↺
+        bearbeiten
         </button>
         </div>
       );
@@ -1863,17 +1863,17 @@ function MonthlyOverview() {
           jahr: month.year,
           monat: month.monatNr
         })}
-        className="bg-primary-700 text-white w-8 h-8 rounded flex items-center justify-center hover:bg-primary-800 transition-colors duration-150 ml-2"
-        title="Als erhalten markieren"
+        className="text-secondary-600 hover:text-secondary-800 text-xs ml-2"
         >
-        ●
+        bearbeiten
         </button>
         </div>
       );
     }
     
     return betrag > 0 ? (
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between">
+      <span className="text-primary-500 text-xs">ausstehend</span>
       <button
       onClick={() => setStatusModal({ 
         open: true, 
@@ -1882,10 +1882,9 @@ function MonthlyOverview() {
         jahr: month.year,
         monat: month.monatNr
       })}
-      className="bg-primary-700 text-white w-8 h-8 rounded flex items-center justify-center hover:bg-primary-800 transition-colors duration-150"
-      title="Als eingereicht markieren"
+      className="text-primary-600 hover:text-primary-800 text-xs ml-2"
       >
-      ○
+      bearbeiten
       </button>
       </div>
     ) : null;
