@@ -1812,63 +1812,6 @@ function MonthlyOverview() {
       month.kirchenkreisErstattung : 
       month.gemeindeErstattung;
     
-    
-    if (status?.erhalten_am) {
-      return (
-        <div className="flex flex-col">
-        <span className="text-primary-600 text-xs mb-1">
-        ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
-        </span>
-        <button
-        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="text-xs text-secondary-600 hover:text-secondary-700" // Deutlich dezenter
-        title="Zurücksetzen"
-        >
-        Zurücksetzen
-        </button>
-        </div>
-      );
-    }
-    
-    if (status?.eingereicht_am) {
-      return (
-        <div className="flex flex-col">
-        <span className="text-secondary-500 text-xs mb-1">
-        ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
-        </span>
-        <button
-        onClick={() => setStatusModal({ 
-          open: true, 
-          typ, 
-          aktion: 'erhalten', 
-          jahr: month.year,
-          monat: month.monatNr
-        })}
-        className="text-xs text-primary-600 hover:text-primary-700"
-        >
-        Als erhalten markieren
-        </button>
-        </div>
-      );
-    }
-    
-    return betrag > 0 ? (
-      <button
-      onClick={() => setStatusModal({ 
-        open: true, 
-        typ, 
-        aktion: 'eingereicht', 
-        jahr: month.year,
-        monat: month.monatNr
-      })}
-      className="text-xs text-primary-600 hover:text-primary-700"
-      >
-      Als eingereicht markieren
-      </button>
-    ) : null;
-  };
-  
-  
     if (status?.erhalten_am) {
       return (
         <div className="flex flex-col">
@@ -2040,7 +1983,7 @@ function MonthlyOverview() {
       </div>
 
       {/* Tabellenübersicht Card */}
-      <div className="bg-white rounded-lg border border-primary-100">
+      <div className="bg-white rounded-lg border border-primary-100 p-6">
         {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto w-full">
           <table className="w-full">
