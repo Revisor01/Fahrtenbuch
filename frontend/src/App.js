@@ -1843,7 +1843,7 @@ function MonthlyOverview() {
         className="text-primary-600 hover:text-primary-800 text-xs ml-2"
         title="Status zurücksetzen"
         >
-        bearbeiten
+        ↺
         </button>
         </div>
       );
@@ -1852,10 +1852,7 @@ function MonthlyOverview() {
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center justify-between">
-        <span className="text-secondary-500 text-xs">
-        ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
-        </span>
-        <button
+        <span className="text-secondary-500 text-xs cursor-pointer"
         onClick={() => setStatusModal({ 
           open: true, 
           typ, 
@@ -1863,18 +1860,17 @@ function MonthlyOverview() {
           jahr: month.year,
           monat: month.monatNr
         })}
-        className="text-secondary-600 hover:text-secondary-800 text-xs ml-2"
         >
-        bearbeiten
-        </button>
+        ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
+        </span>
+        <span className="text-secondary-600 text-xs ml-2">✓</span>
         </div>
       );
     }
     
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
-      <span className="text-primary-500 text-xs">ausstehend</span>
-      <button
+      <span className="text-primary-500 text-xs cursor-pointer"
       onClick={() => setStatusModal({ 
         open: true, 
         typ, 
@@ -1882,10 +1878,10 @@ function MonthlyOverview() {
         jahr: month.year,
         monat: month.monatNr
       })}
-      className="text-primary-600 hover:text-primary-800 text-xs ml-2"
       >
-      bearbeiten
-      </button>
+      Nicht eingereicht
+      </span>
+      <span className="text-primary-600 text-xs ml-2">+</span>
       </div>
     ) : null;
   };
