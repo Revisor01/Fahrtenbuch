@@ -1292,14 +1292,13 @@ function FahrtenListe() {
   );
 };
 
-  // Haupt-Return für die Komponente
-  // Haupt-Return für die Komponente
   return (
     <div>
     {renderAbrechnungsStatus(summary)}
     
     {/* Desktop View */}
     <div className="hidden md:block">
+    <div className="table-container">
     <table className="w-full border-collapse border border-primary-100">
     <thead>
     <tr className="bg-primary-25 border-b border-primary-100">
@@ -1336,6 +1335,7 @@ function FahrtenListe() {
     ))}
     </tbody>
     </table>
+    </div>
     </div>
     
     {/* Mobile View */}
@@ -1926,7 +1926,7 @@ function MonthlyOverview() {
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select w-28"
+    className="form-select w-24"
     >
     <option value="all">Gesamt</option>
     {[...new Set(monthlyData.map(m => m.year))]
