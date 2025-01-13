@@ -2129,19 +2129,20 @@ function MonthlyOverview() {
     typ={statusModal.typ}
     aktion={statusModal.aktion}
     />
+}
 
-    function OrteListe() {
-      const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
-      const [editingOrt, setEditingOrt] = useState(null);
-      const [isCollapsed, setIsCollapsed] = useState(false);
-      const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
-      
-      const handleEdit = (ort) => {
-        setEditingOrt({ ...ort });
-      };
-      
-      const handleSave = () => {
-        const updatedOrt = {
+function OrteListe() {
+  const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
+  const [editingOrt, setEditingOrt] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
+
+  const handleEdit = (ort) => {
+    setEditingOrt({ ...ort });
+  };
+  
+  const handleSave = () => {
+    const updatedOrt = {
       ...editingOrt,
       ist_wohnort: editingOrt.ist_wohnort !== undefined ? editingOrt.ist_wohnort : false,
       ist_dienstort: editingOrt.ist_dienstort !== undefined ? editingOrt.ist_dienstort : false,
