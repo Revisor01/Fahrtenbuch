@@ -2090,7 +2090,7 @@ function MonthlyOverview() {
                 
                 <div className="space-y-4">
                   {/* Kirchenkreis */}
-                  <div className="border-t pt-4">
+                  <div className="pt-4">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-sm text-primary-600">Kirchenkreis</span>
                       <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
@@ -2103,7 +2103,7 @@ function MonthlyOverview() {
                   </div>
                   
                   {/* Gemeinde */}
-                  <div className="border-t pt-4">
+                  <div className="pt-4">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-sm text-primary-600">Gemeinde</span>
                       <span className={gemReceived ? "text-gray-400" : "text-primary-900"}>
@@ -2116,7 +2116,7 @@ function MonthlyOverview() {
                   </div>
                   
                   {/* Mitfahrer */}
-                  <div className="border-t pt-4">
+                  <div className="pt-4">
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-primary-600">Mitfahrer</span>
                       <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>

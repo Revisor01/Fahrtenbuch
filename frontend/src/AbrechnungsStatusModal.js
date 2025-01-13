@@ -36,7 +36,7 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, typ, aktion }) {
     />
     </div>
     
-    <div className="border-t border-primary-200 pt-4 flex justify-end gap-2">
+    <div className="border-primary-200 pt-4 flex justify-end gap-2">
     <button
     type="button"
     onClick={onClose}
