@@ -771,35 +771,44 @@ function FahrtenListe() {
       
       {/* Zusammenfassung Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-2">
+      <div className="bg-white p-4 rounded border border-primary-100">
+      <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Kirchenkreis</span>
+      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}>
+      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
+      </span>
+      </div>
+      
+      <div className="text-xs space-y-1">
+      {/* Status Anzeige */}
+      <div className="flex justify-between items-center">
+      <span className="text-primary-500">Status</span>
       {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-        <span className="text-primary-600 text-xs">● Erhalten</span>
+        <span className="text-primary-600">● Erhalten</span>
       ) : summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am ? (
-        <span className="text-secondary-600 text-xs">○ Eingereicht</span>
+        <span className="text-secondary-600">○ Eingereicht</span>
       ) : null}
       </div>
-      <div
-      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-      </div>
+      
+      {/* Datum Informationen */}
       {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-        <div className="text-xs text-primary-600 mt-2">
-        Eingereicht:{" "}
-        {new Date(
-          summary.abrechnungsStatus.kirchenkreis.eingereicht_am,
-        ).toLocaleDateString()}
+        <div className="flex justify-between items-center">
+        <span className="text-primary-500">Eingereicht</span>
+        <span className="text-primary-600">
+        {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
+        </span>
         </div>
       )}
+      
       {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-        <div className="text-xs text-primary-600">
-        Erhalten:{" "}
-        {new Date(
-          summary.abrechnungsStatus.kirchenkreis.erhalten_am,
-        ).toLocaleDateString()}
+        <div className="flex justify-between items-center">
+        <span className="text-primary-500">Erhalten</span>
+        <span className="text-primary-600">
+        {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
+        </span>
         </div>
       )}
+      </div>
       </div>
       
       <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -1776,7 +1785,7 @@ function MonthlyOverview() {
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="btn-secondary flex items-center gap-2 px-4 py-2 text-sm font-medium"
+          className="btn-primary flex items-center gap-2 px-4 py-2 text-sm font-medium"
         >
           <span>Schnellaktionen</span>
           <span className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
@@ -1973,10 +1982,12 @@ function MonthlyOverview() {
               </div>
             )}
           </div>
+    <div className="flex flex-col sm:flex-row justify-end gap-2">
     <QuickActions 
     filteredData={getFilteredData()} 
     handleStatusUpdate={handleStatusUpdate} 
     />
+    </div>
         </div>
       </div>
 
