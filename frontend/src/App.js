@@ -1783,13 +1783,16 @@ function MonthlyOverview() {
       <div className="relative">
       <button
       onClick={() => setIsOpen(!isOpen)}
-      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
+      className="btn-secondary flex items-center gap-2"
       >
-      Schnellaktionen ▼
+      <span>Schnellaktionen</span>
+      <span className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+      ▼
+      </span>
       </button>
       
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white border rounded shadow-lg z-10">
+        <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-10">
         {actions.map((action, index) => (
           <button
           key={index}
@@ -1797,7 +1800,7 @@ function MonthlyOverview() {
             await action.action();
             setIsOpen(false);
           }}
-          className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+          className="w-full text-left px-4 py-2 text-sm hover:bg-primary-50 first:rounded-t-lg last:rounded-b-lg"
           >
           {action.label}
           </button>
@@ -1818,14 +1821,16 @@ function MonthlyOverview() {
     
     if (status?.erhalten_am) {
       return (
-        <div className="flex items-center space-x-2">
-        <span className="text-primary-600 text-xs">● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
+        <div className="flex flex-col">
+        <span className="text-primary-600 text-xs mb-1">
+        ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
+        </span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="btn-secondary text-xs px-2 py-0.5"
+        className="btn-secondary text-xs w-full"
         title="Zurücksetzen"
         >
-        ×
+        Zurücksetzen
         </button>
         </div>
       );
@@ -1833,8 +1838,10 @@ function MonthlyOverview() {
     
     if (status?.eingereicht_am) {
       return (
-        <div className="flex items-center space-x-2">
-        <span className="text-secondary-500 text-xs">○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}</span>
+        <div className="flex flex-col">
+        <span className="text-secondary-500 text-xs mb-1">
+        ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
+        </span>
         <button
         onClick={() => setStatusModal({ 
           open: true, 
@@ -1843,9 +1850,9 @@ function MonthlyOverview() {
           jahr: month.year,
           monat: month.monatNr
         })}
-        className="btn-primary text-xs px-2 py-0.5"
+        className="btn-primary text-xs w-full"
         >
-        ✓
+        Als erhalten markieren
         </button>
         </div>
       );
@@ -1860,7 +1867,7 @@ function MonthlyOverview() {
         jahr: month.year,
         monat: month.monatNr
       })}
-      className="btn-primary text-xs"
+      className="btn-primary text-xs w-full"
       >
       Als eingereicht markieren
       </button>
@@ -1877,9 +1884,9 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     
-    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+    <div className="bg-white rounded-lg border border-primary-100 p-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <div className="flex items-center gap-2">
-    <label className="text-sm text-primary-600">Jahr:</label>
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1893,22 +1900,22 @@ function MonthlyOverview() {
       ))
     }
     </select>
+    
+    {selectedYear !== currentYear && selectedYear !== 'all' && (
+      <button 
+      onClick={() => setSelectedYear(currentYear)}
+      className="btn-secondary"
+      >
+      Aktuelles Jahr
+      </button>
+    )}
     </div>
     
-    <div className="flex items-center">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}
-    className="form-input w-4 h-4"
+    <div className="flex items-center gap-4">
+    <QuickActions 
+    filteredData={getFilteredData()} 
+    handleStatusUpdate={handleStatusUpdate} 
     />
-    <label htmlFor="hideCompleted" className="ml-2 text-sm text-primary-600">
-    Abgeschlossene ausblenden
-    </label>
-    </div>
-    
-    <QuickActions filteredData={getFilteredData()} handleStatusUpdate={handleStatusUpdate} />
     </div>
     </div>
     
@@ -2048,7 +2055,7 @@ function MonthlyOverview() {
       
       return (
         <div key={month.yearMonth} className="bg-white rounded-lg border border-primary-100 p-4">
-        <div className="flex justify-between items-start mb-3">
+        <div className="flex justify-between items-start mb-4">
         <div className="text-primary-900 font-medium">
         {month.monthName} {month.year}
         </div>
@@ -2064,32 +2071,46 @@ function MonthlyOverview() {
         </div>
         </div>
         
-        <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="space-y-4">
+        {/* Kirchenkreis */}
+        <div className="border-t pt-4">
+        <div className="flex justify-between items-start mb-2">
         <span className="text-sm text-primary-600">Kirchenkreis</span>
-        <div className="flex items-center gap-3">
+        <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
+        {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
+        </span>
+        </div>
+        <div className="mt-2">
         {renderStatusCell(month, 'Kirchenkreis')}
-        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
         </div>
         </div>
         
-        <div className="flex items-center justify-between">
+        {/* Gemeinde */}
+        <div className="border-t pt-4">
+        <div className="flex justify-between items-start mb-2">
         <span className="text-sm text-primary-600">Gemeinde</span>
-        <div className="flex items-center gap-3">
+        <span className={gemReceived ? "text-gray-400" : "text-primary-900"}>
+        {Number(month.gemeindeErstattung || 0).toFixed(2)} €
+        </span>
+        </div>
+        <div className="mt-2">
         {renderStatusCell(month, 'Gemeinde')}
-        {renderBetrag(month.gemeindeErstattung, gemReceived)}
         </div>
         </div>
         
-        <div className="flex items-center justify-between">
+        {/* Mitfahrer */}
+        <div className="border-t pt-4">
+        <div className="flex justify-between items-start">
         <span className="text-sm text-primary-600">Mitfahrer</span>
-        {renderBetrag(month.mitfahrerErstattung, kkReceived)}
+        <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
+        {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
+        </span>
+        </div>
         </div>
         </div>
         </div>
       );
     })}
-    </div>
     </div>
     
     <AbrechnungsStatusModal 
