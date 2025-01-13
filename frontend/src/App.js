@@ -774,7 +774,7 @@ function FahrtenListe() {
       <div className="bg-white p-4 rounded border border-primary-100">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Kirchenkreis</span>
-      <span className={'text-primary-900 font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}'}>
+      <span className={'font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
       {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
     </span>
   </div>
@@ -813,62 +813,115 @@ function FahrtenListe() {
   </div>
 </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Kirchenkreis Card */}
+      <div className="bg-white p-4 rounded border border-primary-100">
+      <div className="flex justify-between items-center mb-2">
+      <span className="text-sm text-primary-600">Kirchenkreis</span>
+      <span className={'font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+        {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
+      </span>
+    </div>
+    
+    <div className="text-xs space-y-1">
+      {(summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am || summary.abrechnungsStatus?.kirchenkreis?.erhalten_am) && (
+        <div className="flex justify-between items-center">
+          <span className="text-primary-500">Status</span>
+          {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
+            <span className="text-primary-600">● Erhalten</span>
+          ) : (
+            <span className="text-secondary-600">○ Eingereicht</span>
+          )}
+        </div>
+      )}
+      
+      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
+        <div className="flex justify-between items-center">
+          <span className="text-primary-500">Eingereicht</span>
+          <span className="text-primary-600">
+            {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
+          </span>
+        </div>
+      )}
+      
+      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
+        <div className="flex justify-between items-center">
+          <span className="text-primary-500">Erhalten</span>
+          <span className="text-primary-600">
+            {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
+          </span>
+        </div>
+      )}
+    </div>
+  </div>
+
+  {/* Gemeinde Card */}
+  <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Gemeinde</span>
-      {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
-        <span className="text-primary-600 text-xs">● Erhalten</span>
-      ) : summary.abrechnungsStatus?.gemeinde?.eingereicht_am ? (
-        <span className="text-secondary-600 text-xs">○ Eingereicht</span>
-      ) : null}
-      </div>
-      <div
-      className={'text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
-      </div>
+      <span className={'font-medium ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+        {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
+      </span>
+    </div>
+    
+    <div className="text-xs space-y-1">
+      {(summary.abrechnungsStatus?.gemeinde?.eingereicht_am || summary.abrechnungsStatus?.gemeinde?.erhalten_am) && (
+        <div className="flex justify-between items-center">
+          <span className="text-primary-500">Status</span>
+          {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
+            <span className="text-primary-600">● Erhalten</span>
+          ) : (
+            <span className="text-secondary-600">○ Eingereicht</span>
+          )}
+        </div>
+      )}
+      
       {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
-        <div className="text-xs text-primary-600 mt-2">
-        Eingereicht:{" "}
-        {new Date(
-          summary.abrechnungsStatus.gemeinde.eingereicht_am,
-        ).toLocaleDateString()}
+        <div className="flex justify-between items-center">
+          <span className="text-primary-500">Eingereicht</span>
+          <span className="text-primary-600">
+            {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}
+          </span>
         </div>
       )}
+      
       {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
-        <div className="text-xs text-primary-600">
-        Erhalten:{" "}
-        {new Date(
-          summary.abrechnungsStatus.gemeinde.erhalten_am,
-        ).toLocaleDateString()}
+        <div className="flex justify-between items-center">
+          <span className="text-primary-500">Erhalten</span>
+          <span className="text-primary-600">
+            {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}
+          </span>
         </div>
       )}
-      </div>
-      
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-2">
+    </div>
+  </div>
+
+  {/* Mitfahrer Card */}
+  <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Mitfahrer</span>
-      </div>
-      <div
-      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
-      </div>
-      </div>
-      
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-2">
+      <span className={'font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+        {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
+      </span>
+    </div>
+  </div>
+
+  {/* Gesamt Card */}
+  <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Gesamt</span>
+      <span className="font-medium text-primary-900">
+        {currentTotal} €
+      </span>
+    </div>
+    {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
+      <div className="text-xs text-primary-500 text-right">
+        Ursprünglich: {originalTotal} €
       </div>
-      <div className="text-lg font-semibold text-primary-900">
-      {currentTotal} €
-      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
-        <span className="text-sm text-gray-400 ml-2">
-        ({originalTotal} €)
-        </span>
-      )}
-      </div>
-      </div>
-      </div>
-      
+    )}
+  </div>
+</div>
+</div>
       {/* Export Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2">
       <button
@@ -1985,7 +2038,7 @@ function MonthlyOverview() {
             )}
           </div>
         </div>
-    <div className="flex flex-col sm:flex-row justify-end gap-2">
+    <div className="mt-6 flex flex-col sm:flex-row justify-end gap-2">
     <QuickActions 
     filteredData={getFilteredData()} 
     handleStatusUpdate={handleStatusUpdate} 
