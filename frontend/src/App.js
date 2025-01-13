@@ -2129,9 +2129,6 @@ function MonthlyOverview() {
     typ={statusModal.typ}
     aktion={statusModal.aktion}
     />
-    </div>
-  );
-}
 
 function OrteListe() {
   const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
