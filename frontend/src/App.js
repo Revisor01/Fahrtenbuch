@@ -731,13 +731,18 @@ function FahrtenListe() {
     };
     
     return (
-      <div className="w-full max-w-full">
-      <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+      <div className="table-container mb-4">
+      <div className="bg-primary-25 p-6 space-y-6">
       {/* Header mit Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <h2 className="text-lg font-semibold text-primary-900">Monatsübersicht</h2>
       
       <div className="flex flex-wrap items-center gap-2">
+      {selectedMonth !== currentMonth && (
+        <button onClick={resetToCurrentMonth} className="btn-secondary">
+        Aktueller Monat
+        </button>
+      )}
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
@@ -761,11 +766,6 @@ function FahrtenListe() {
         );
       })}
       </select>
-      {selectedMonth !== currentMonth && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary">
-        Aktueller Monat
-        </button>
-      )}
       </div>
       </div>
       
@@ -780,19 +780,24 @@ function FahrtenListe() {
         <span className="text-secondary-600 text-xs">○ Eingereicht</span>
       ) : null}
       </div>
-      <div className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
       {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
       </div>
       {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
         <div className="text-xs text-primary-600 mt-2">
         Eingereicht:{" "}
-        {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
+        {new Date(
+          summary.abrechnungsStatus.kirchenkreis.eingereicht_am,
+        ).toLocaleDateString()}
         </div>
       )}
       {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
         <div className="text-xs text-primary-600">
         Erhalten:{" "}
-        {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
+        {new Date(
+          summary.abrechnungsStatus.kirchenkreis.erhalten_am,
+        ).toLocaleDateString()}
         </div>
       )}
       </div>
@@ -806,19 +811,24 @@ function FahrtenListe() {
         <span className="text-secondary-600 text-xs">○ Eingereicht</span>
       ) : null}
       </div>
-      <div className={'text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
       {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
       </div>
       {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
         <div className="text-xs text-primary-600 mt-2">
         Eingereicht:{" "}
-        {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}
+        {new Date(
+          summary.abrechnungsStatus.gemeinde.eingereicht_am,
+        ).toLocaleDateString()}
         </div>
       )}
       {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
         <div className="text-xs text-primary-600">
         Erhalten:{" "}
-        {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}
+        {new Date(
+          summary.abrechnungsStatus.gemeinde.erhalten_am,
+        ).toLocaleDateString()}
         </div>
       )}
       </div>
@@ -827,7 +837,8 @@ function FahrtenListe() {
       <div className="flex items-center justify-between mb-2">
       <span className="text-sm text-primary-600">Mitfahrer</span>
       </div>
-      <div className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
+      <div
+      className={'text-lg font-semibold ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
       {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
       </div>
       </div>
@@ -848,7 +859,7 @@ function FahrtenListe() {
       </div>
       
       {/* Export Buttons */}
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
       <button
       onClick={() =>
         handleExportToExcel(
@@ -875,6 +886,7 @@ function FahrtenListe() {
       </div>
       </div>
     );
+    
   };
   
   const roundKilometers = (value) => {
@@ -1794,11 +1806,12 @@ function MonthlyOverview() {
   
   const renderStatusCell = (month, typ) => {
     const status = typ === 'Kirchenkreis' ? 
-    month.abrechnungsStatus?.kirchenkreis : 
-    month.abrechnungsStatus?.gemeinde;
+      month.abrechnungsStatus?.kirchenkreis : 
+      month.abrechnungsStatus?.gemeinde;
     const betrag = typ === 'Kirchenkreis' ? 
-    month.kirchenkreisErstattung : 
-    month.gemeindeErstattung;
+      month.kirchenkreisErstattung : 
+      month.gemeindeErstattung;
+    
     
     if (status?.erhalten_am) {
       return (
@@ -1808,7 +1821,7 @@ function MonthlyOverview() {
         </span>
         <button
         onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="text-xs text-secondary-600 hover:text-secondary-700"
+        className="text-xs text-secondary-600 hover:text-secondary-700" // Deutlich dezenter
         title="Zurücksetzen"
         >
         Zurücksetzen
@@ -1855,125 +1868,177 @@ function MonthlyOverview() {
     ) : null;
   };
   
+  
+    if (status?.erhalten_am) {
+      return (
+        <div className="flex flex-col">
+          <span className="text-primary-600 text-xs mb-1">
+            ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
+          </span>
+          <button
+            onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+            className="btn-secondary text-xs w-full"
+            title="Zurücksetzen"
+          >
+            Zurücksetzen
+          </button>
+        </div>
+      );
+    }
+    
+    if (status?.eingereicht_am) {
+      return (
+        <div className="flex flex-col">
+          <span className="text-secondary-500 text-xs mb-1">
+            ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
+          </span>
+          <button
+            onClick={() => setStatusModal({ 
+              open: true, 
+              typ, 
+              aktion: 'erhalten', 
+              jahr: month.year,
+              monat: month.monatNr
+            })}
+            className="btn-primary text-xs w-full"
+          >
+            Als erhalten markieren
+          </button>
+        </div>
+      );
+    }
+    
+    return betrag > 0 ? (
+      <button
+        onClick={() => setStatusModal({ 
+          open: true, 
+          typ, 
+          aktion: 'eingereicht', 
+          jahr: month.year,
+          monat: month.monatNr
+        })}
+        className="btn-primary text-xs w-full"
+      >
+        Als eingereicht markieren
+      </button>
+    ) : null;
+  };
+  
   const yearTotal = calculateYearTotal();
   
   return (
-    <div className="w-full max-w-full">
-    <div className="bg-primary-25 p-6 rounded-lg">
-    {/* Header und Filter */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
-    
-    <div className="flex items-center gap-2">
-    <select 
-    value={selectedYear} 
-    onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select w-28"
-    >
-    <option value="all">Gesamt</option>
-    {[...new Set(monthlyData.map(m => m.year))]
-      .sort((a, b) => b - a)
-      .map(year => (
-        <option key={year} value={year}>{year}</option>
-      ))
-    }
-    </select>
-    
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary"
-      >
-      Aktuelles Jahr
-      </button>
-    )}
-    </div>
-    </div>
-    
-    {/* Filteroptionen */}
-    <div className="mb-4">
-    <div className="flex items-center">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}
-    className="form-checkbox h-4 w-4"
-    />
-    <label htmlFor="hideCompleted" className="ml-2 text-sm text-primary-600">
-    Abgeschlossene ausblenden
-    </label>
-    </div>
-    </div>
-    
-    {/* Gesamtübersicht Cards */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div className="p-4 rounded-lg border border-primary-100">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Kirchenkreis</span>
-    <span className="text-primary-900 font-medium">
-    {yearTotal.kirchenkreis.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
-      <div className="text-xs text-primary-500">
-      Ursprünglich: {yearTotal.originalKirchenkreis.toFixed(2)} €
+    <div className="w-full max-w-full space-y-6">
+      {/* Jahresübersicht Card */}
+      <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
+          
+          <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex items-center gap-2">
+              <select 
+                value={selectedYear} 
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="form-select w-28"
+              >
+                <option value="all">Gesamt</option>
+                {[...new Set(monthlyData.map(m => m.year))]
+                  .sort((a, b) => b - a)
+                  .map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))
+                }
+              </select>
+              
+              {selectedYear !== currentYear && selectedYear !== 'all' && (
+                <button 
+                  onClick={() => setSelectedYear(currentYear)}
+                  className="btn-secondary"
+                >
+                  Aktuelles Jahr
+                </button>
+              )}
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="hideCompleted"
+                checked={hideCompleted}
+                onChange={(e) => setHideCompleted(e.target.checked)}
+                className="form-checkbox h-4 w-4"
+              />
+              <label htmlFor="hideCompleted" className="ml-2 text-sm text-primary-600">
+                Abgeschlossene ausblenden
+              </label>
+            </div>
+            
+            <QuickActions 
+              filteredData={getFilteredData()} 
+              handleStatusUpdate={handleStatusUpdate} 
+            />
+          </div>
+        </div>
+
+        {/* Gesamtübersicht Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded border border-primary-100">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-primary-600">Kirchenkreis</span>
+              <span className="text-primary-900 font-medium">
+                {yearTotal.kirchenkreis.toFixed(2)} €
+              </span>
+            </div>
+            {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
+              <div className="text-xs text-primary-500">
+                Ursprünglich: {yearTotal.originalKirchenkreis.toFixed(2)} €
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-white p-4 rounded border border-primary-100">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-primary-600">Gemeinde</span>
+              <span className="text-primary-900 font-medium">
+                {yearTotal.gemeinde.toFixed(2)} €
+              </span>
+            </div>
+            {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
+              <div className="text-xs text-primary-500">
+                Ursprünglich: {yearTotal.originalGemeinde.toFixed(2)} €
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-white p-4 rounded border border-primary-100">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-primary-600">Mitfahrer</span>
+              <span className="text-primary-900 font-medium">
+                {yearTotal.mitfahrer.toFixed(2)} €
+              </span>
+            </div>
+            {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
+              <div className="text-xs text-primary-500">
+                Ursprünglich: {yearTotal.originalMitfahrer.toFixed(2)} €
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-white p-4 rounded border border-primary-100">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-primary-600">Gesamt</span>
+              <span className="text-primary-900 font-medium">
+                {yearTotal.gesamt.toFixed(2)} €
+              </span>
+            </div>
+            {yearTotal.originalGesamt !== yearTotal.gesamt && (
+              <div className="text-xs text-primary-500">
+                Ursprünglich: {yearTotal.originalGesamt.toFixed(2)} €
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    )}
-    </div>
-    
-    <div className="p-4 rounded-lg border border-primary-100">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Gemeinde</span>
-    <span className="text-primary-900 font-medium">
-    {yearTotal.gemeinde.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
-      <div className="text-xs text-primary-500">
-      Ursprünglich: {yearTotal.originalGemeinde.toFixed(2)} €
-      </div>
-    )}
-    </div>
-    
-    <div className="p-4 rounded-lg border border-primary-100">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Mitfahrer</span>
-    <span className="text-primary-900 font-medium">
-    {yearTotal.mitfahrer.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
-      <div className="text-xs text-primary-500">
-      Ursprünglich: {yearTotal.originalMitfahrer.toFixed(2)} €
-      </div>
-    )}
-    </div>
-    
-    <div className="p-4 rounded-lg border border-primary-100">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Gesamt</span>
-    <span className="text-primary-900 font-medium">
-    {yearTotal.gesamt.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalGesamt !== yearTotal.gesamt && (
-      <div className="text-xs text-primary-500">
-      Ursprünglich: {yearTotal.originalGesamt.toFixed(2)} €
-      </div>
-    )}
-    </div>
-    </div>
-    
-    {/* Schnellaktionen */}
-    <div className="flex justify-end mt-6">
-    <QuickActions 
-    filteredData={getFilteredData()} 
-    handleStatusUpdate={handleStatusUpdate} 
-    className="btn-primary"
-    />
-    </div>
-    
+
       {/* Tabellenübersicht Card */}
       <div className="bg-white rounded-lg border border-primary-100">
         {/* Desktop Table */}
@@ -2128,7 +2193,6 @@ function MonthlyOverview() {
         aktion={statusModal.aktion}
       />
     </div>
-    </div>
   );
 }
 
@@ -2153,6 +2217,8 @@ function OrteListe() {
     setEditingOrt(null);
     showNotification("Erfolg", "Der Ort wurde erfolgreich aktualisiert.");
   };
+  
+  
   
   const handleDelete = async (id) => {
     showNotification(
