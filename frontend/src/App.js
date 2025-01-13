@@ -774,43 +774,45 @@ function FahrtenListe() {
       <div className="bg-white p-4 rounded border border-primary-100">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Kirchenkreis</span>
-      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}>
+      <span className={'text-primary-900 font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : ""}'}>
       {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-      </span>
-      </div>
-      
-      <div className="text-xs space-y-1">
-      {/* Status Anzeige */}
+    </span>
+  </div>
+  
+  <div className="text-xs space-y-1">
+    {/* Status Anzeige - nur wenn eingereicht oder erhalten */}
+    {(summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am || summary.abrechnungsStatus?.kirchenkreis?.erhalten_am) && (
       <div className="flex justify-between items-center">
-      <span className="text-primary-500">Status</span>
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-        <span className="text-primary-600">● Erhalten</span>
-      ) : summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am ? (
-        <span className="text-secondary-600">○ Eingereicht</span>
-      ) : null}
+        <span className="text-primary-500">Status</span>
+        {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
+          <span className="text-primary-600">● Erhalten</span>
+        ) : (
+          <span className="text-secondary-600">○ Eingereicht</span>
+        )}
       </div>
-      
-      {/* Datum Informationen */}
-      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-        <div className="flex justify-between items-center">
+    )}
+    
+    {/* Datum Informationen */}
+    {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
+      <div className="flex justify-between items-center">
         <span className="text-primary-500">Eingereicht</span>
         <span className="text-primary-600">
-        {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
+          {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
         </span>
-        </div>
-      )}
-      
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-        <div className="flex justify-between items-center">
+      </div>
+    )}
+    
+    {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
+      <div className="flex justify-between items-center">
         <span className="text-primary-500">Erhalten</span>
         <span className="text-primary-600">
-        {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
+          {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
         </span>
-        </div>
-      )}
       </div>
-      </div>
-      
+    )}
+  </div>
+</div>
+
       <div className="bg-white p-4 rounded-lg shadow-sm">
       <div className="flex items-center justify-between mb-2">
       <span className="text-sm text-primary-600">Gemeinde</span>
@@ -1982,13 +1984,13 @@ function MonthlyOverview() {
               </div>
             )}
           </div>
+        </div>
     <div className="flex flex-col sm:flex-row justify-end gap-2">
     <QuickActions 
     filteredData={getFilteredData()} 
     handleStatusUpdate={handleStatusUpdate} 
     />
     </div>
-        </div>
       </div>
 
       {/* Tabellenübersicht Card */}
