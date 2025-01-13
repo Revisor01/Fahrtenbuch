@@ -1879,10 +1879,6 @@ function MonthlyOverview() {
           <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
             <div className="flex items-center gap-2">
     <div className="flex items-center">
-    <QuickActions 
-    filteredData={getFilteredData()} 
-    handleStatusUpdate={handleStatusUpdate} 
-    />
     <input
     type="checkbox"
     id="hideCompleted"
@@ -1919,7 +1915,7 @@ function MonthlyOverview() {
             </div>
           </div>
         </div>
-
+<div>
         {/* Gesamtübersicht Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded border border-primary-100">
@@ -1977,8 +1973,14 @@ function MonthlyOverview() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+    </div>
+    <div className="mt-6 flex flex-col sm:flex-row justify-end gap-2">
+    <QuickActions 
+    filteredData={getFilteredData()} 
+    handleStatusUpdate={handleStatusUpdate} 
+    />
+    </div>
+    </div>
 
       {/* Tabellenübersicht Card */}
       <div className="bg-white rounded-lg border border-primary-100 p-6">
