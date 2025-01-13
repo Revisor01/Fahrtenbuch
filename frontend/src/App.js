@@ -2001,7 +2001,7 @@ function MonthlyOverview() {
       </div>
 
       {/* Tabellenübersicht Card */}
-      <div className="bg-white rounded-lg border border-primary-100 p-6">
+      <div className="bg-white rounded-lg border border-primary-100">
         {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto w-full">
           <table className="w-full">
