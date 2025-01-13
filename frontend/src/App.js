@@ -2128,6 +2128,7 @@ function MonthlyOverview() {
         aktion={statusModal.aktion}
       />
     </div>
+    </div>
   );
 }
 
