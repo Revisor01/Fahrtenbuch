@@ -774,8 +774,8 @@ function FahrtenListe() {
       <div className="bg-white p-4 rounded border border-primary-100">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Kirchenkreis</span>
-      <span className={'font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-        {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
+      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-gray-400" : "font-medium text-primary-900"}>
+      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
       </span>
     </div>
     
@@ -815,8 +815,8 @@ function FahrtenListe() {
   <div className="bg-white p-4 rounded border border-primary-100">
     <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Gemeinde</span>
-      <span className={'font-medium ${summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-        {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
+      <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "font-medium text-gray-400" : "font-medium text-primary-900"}>
+      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
       </span>
     </div>
     
@@ -856,8 +856,8 @@ function FahrtenListe() {
   <div className="bg-white p-4 rounded border border-primary-100">
     <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Mitfahrer</span>
-      <span className={'font-medium ${summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "text-gray-400" : "text-primary-900"}'}>
-        {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
+      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-gray-400" : "font-medium text-primary-900"}>
+      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
       </span>
     </div>
   </div>
