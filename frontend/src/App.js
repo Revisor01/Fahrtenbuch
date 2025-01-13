@@ -1835,16 +1835,11 @@ function MonthlyOverview() {
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center justify-between">
-        <span className="text-primary-600 text-xs">
+        <span className="text-primary-600 text-xs cursor-pointer"
+        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        >
         ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
         </span>
-        <button
-        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
-        className="text-primary-600 hover:text-primary-800 text-xs ml-2"
-        title="Status zurücksetzen"
-        >
-        ↺
-        </button>
         </div>
       );
     }
@@ -1863,7 +1858,6 @@ function MonthlyOverview() {
         >
         ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
         </span>
-        <span className="text-secondary-600 text-xs ml-2">✓</span>
         </div>
       );
     }
@@ -1881,7 +1875,6 @@ function MonthlyOverview() {
       >
       Nicht eingereicht
       </span>
-      <span className="text-primary-600 text-xs ml-2">+</span>
       </div>
     ) : null;
   };
