@@ -405,7 +405,6 @@ function FahrtForm() {
     )}
     </form>
     </div>
-    </div>
     
     {/* Kilometer-Warnung Modal */}
     {showKilometerWarning && (
@@ -448,6 +447,7 @@ function FahrtForm() {
       />
     )}
     </div>
+    </div> 
   );
 }
 
