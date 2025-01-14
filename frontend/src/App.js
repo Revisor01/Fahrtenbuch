@@ -6,6 +6,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
+import { HelpCircle } from 'lucide-react';
 import HilfeModal from './HilfeModal';
 import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 import NotificationModal from './NotificationModal';
@@ -2739,6 +2740,7 @@ function AppContent() {
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   
+  // Token Check Effect
   useEffect(() => {
     const checkTokenExpiration = () => {
       const token = localStorage.getItem('token');
@@ -2751,19 +2753,18 @@ function AppContent() {
       }
     };
     
-    useEffect(() => {
-      const hasSeenHelp = localStorage.getItem('hasSeenHelp') === 'true';
-      if (!hasSeenHelp) {
-        setShowHelpModal(true);
-        localStorage.setItem('hasSeenHelp', 'true');
-      }
-    }, []);
-    
     checkTokenExpiration();
-    const interval = setInterval(checkTokenExpiration, 60000); // Check every minute
-    
+    const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
   }, [logout]);
+  
+  useEffect(() => {
+    const hasSeenHelp = localStorage.getItem('hasSeenHelp') === 'true';
+    if (!hasSeenHelp && isLoggedIn) {
+      setShowHelpModal(true);
+      localStorage.setItem('hasSeenHelp', 'true');
+    }
+  }, [isLoggedIn]);
   
   if (!isLoggedIn) {
     return <LoginPage />;
