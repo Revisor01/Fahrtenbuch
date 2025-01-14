@@ -1661,7 +1661,13 @@ function FahrtenListe() {
 
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
-  const [statusModal, setStatusModal] = useState({ open: false, typ: '', aktion: '', jahr: null, monat: null });
+  const [statusModal, setStatusModal] = useState({
+    open: false,
+    typ: null,
+    aktion: null,
+    jahr: null,
+    monat: null
+  });
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString()); // Geändert von 'all'
   const [hideCompleted, setHideCompleted] = useState(true);
   
@@ -1851,7 +1857,13 @@ function MonthlyOverview() {
       return (
         <div className="flex items-center justify-between">
         <span className="text-primary-600 text-xs cursor-pointer"
-        onClick={() => handleStatusUpdate(month.year, month.monatNr, typ, 'reset')}
+        onClick={() => setStatusModal({ 
+          open: true, 
+          typ, 
+          aktion: 'reset', 
+          jahr: month.year,
+          monat: month.monatNr
+        })}
         >
         ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
         </span>
@@ -2149,22 +2161,48 @@ function MonthlyOverview() {
         </div>
       </div>
       
-      <AbrechnungsStatusModal 
-        isOpen={statusModal.open}
-        onClose={() => setStatusModal({ open: false })}
-        onSubmit={(datum) => {
-          handleStatusUpdate(
-            statusModal.jahr,
-            statusModal.monat,
-            statusModal.typ,
-            statusModal.aktion,
-            datum
-          );
-          setStatusModal({ open: false });
-        }}
-        typ={statusModal.typ}
-        aktion={statusModal.aktion}
-      />
+    <AbrechnungsStatusModal 
+    isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
+    onClose={() => setStatusModal({})}
+    onSubmit={(date) => handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.typ, statusModal.aktion, date)}
+    typ={statusModal.typ}
+    aktion={statusModal.aktion}
+    />
+    
+    <Modal
+    isOpen={statusModal.open && statusModal.aktion === 'reset'}
+    onClose={() => setStatusModal({})}
+    title="Status zurücksetzen"
+    >
+    <div className="table-container">
+    <div className="bg-primary-25 p-6 rounded-lg">
+    <p className="text-sm text-primary-600 mb-6">
+    Möchten Sie den Status wirklich zurücksetzen?
+    </p>
+    <div className="w-full">
+    <div className="flex flex-col sm:flex-row gap-2">
+    <button
+    type="button"
+    onClick={() => setStatusModal({})}
+    className="btn-secondary w-full"
+    >
+    Abbrechen
+    </button>
+    <button
+    type="button"
+    onClick={() => {
+      handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.typ, 'reset');
+      setStatusModal({});
+    }}
+    className="btn-primary w-full"
+    >
+    Zurücksetzen
+    </button>
+    </div>
+    </div>
+    </div>
+    </div>
+    </Modal>
     </div>
   );
 }
