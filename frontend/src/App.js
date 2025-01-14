@@ -6,6 +6,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
+,import HilfeModal from './HilfeModal';
 import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
@@ -2736,6 +2737,7 @@ function AppContent() {
   const [showOrteModal, setShowOrteModal] = useState(false);
   const [showDistanzenModal, setShowDistanzenModal] = useState(false);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -2749,6 +2751,14 @@ function AppContent() {
       }
     };
     
+    useEffect(() => {
+      const hasSeenHelp = localStorage.getItem('hasSeenHelp') === 'true';
+      if (!hasSeenHelp) {
+        setShowHelpModal(true);
+        localStorage.setItem('hasSeenHelp', 'true');
+      }
+    }, []);
+    
     checkTokenExpiration();
     const interval = setInterval(checkTokenExpiration, 60000); // Check every minute
     
@@ -2761,15 +2771,12 @@ function AppContent() {
   
   return (
     <div className="container mx-auto p-4">
-    {/* Header-Bereich mit Navigation */}
     <div className="mb-8">
-    {/* Titel und Buttons in einer Flex-Box */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
     <h1 className="text-2xl font-semibold text-primary-900">Fahrtenabrechnung</h1>
     
-    {/* Navigation */}
     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-    {/* Primäre Aktionen - immer sichtbar */}
+    {/* Primäre Aktionen */}
     <div className="flex gap-2 w-full sm:w-auto">
     <button
     onClick={() => setShowOrteModal(true)}
@@ -2782,6 +2789,13 @@ function AppContent() {
     className="btn-primary flex-1 sm:flex-initial"
     >
     Distanzen
+    </button>
+    <button
+    onClick={() => setShowHelpModal(true)}
+    className="btn-secondary flex-1 sm:flex-initial flex items-center justify-center gap-1"
+    >
+    <HelpCircle size={16} />
+    <span>Hilfe</span>
     </button>
     </div>
     
@@ -2809,11 +2823,6 @@ function AppContent() {
     </button>
     </div>
     </div>
-    </div>
-    
-    {/* FahrtenbuchHilfe separat */}
-    <div className="mt-4">
-    <FahrtenbuchHilfe />
     </div>
     </div>
     
@@ -2858,6 +2867,10 @@ function AppContent() {
     <DistanzForm />
     <DistanzenListe />
     </Modal>
+    <HilfeModal 
+    isOpen={showHelpModal}
+    onClose={() => setShowHelpModal(false)}
+    />
     </div>
   );
 }
