@@ -371,6 +371,7 @@ function FahrtForm() {
     </button>
     </div>
     </div>
+    </div>
     
     {/* Mitfahrer Liste */}
     {mitfahrer.length > 0 && (
