@@ -354,17 +354,17 @@ function FahrtForm() {
     <span className="text-xs text-primary-600">Rückfahrt anlegen</span>
     </label>
     
-    <div className="flex gap-2 ml-auto">
+    <div className="flex flex-col sm:flex-row gap-2 ml-auto">
     <button
     type="button"
     onClick={() => setShowMitfahrerModal(true)}
-    className="bg-secondary-400 text-white px-4 h-8 rounded hover:bg-secondary-500 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap"
+    className="bg-secondary-400 text-white px-4 h-8 rounded hover:bg-secondary-500 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap w-full-mobile"
     >
     Mitfahrer:in
     </button>
     <button 
     type="submit" 
-    className="bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap"
+    className="bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap w-full-mobile"
     >
     Speichern
     </button>
