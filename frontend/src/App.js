@@ -494,12 +494,6 @@ function DistanzForm() {
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
-    
-    {existingDistanz && (
-      <div className="mt-4 text-sm text-primary-600">
-      Bestehende Distanz wird aktualisiert
-      </div>
-    )}
     </div>
     </div>
     </div>
