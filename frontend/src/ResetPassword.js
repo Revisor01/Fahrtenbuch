@@ -59,38 +59,47 @@ export default function ResetPassword() {
   };
     
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="max-w-md w-full p-6 bg-white rounded-lg shadow">
-    <h2 className="text-2xl font-semibold text-center mb-6">Passwort zurücksetzen</h2>
+    <div className="min-h-screen flex items-center justify-center bg-primary-25">
+    <div className="table-container w-full max-w-md">
+    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <h2 className="text-2xl font-medium text-primary-900 text-center">
+    Passwort zurücksetzen
+    </h2>
     
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
-    <label className="block text-sm font-medium text-gray-700">Neues Passwort</label>
+    <label className="block text-sm font-medium text-primary-600">
+    Neues Passwort
+    </label>
     <input
     type="password"
     value={password}
     onChange={(e) => setPassword(e.target.value)}
-    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+    className="form-input"
     required
     disabled={isSubmitting}
     />
     </div>
     
     <div>
-    <label className="block text-sm font-medium text-gray-700">Passwort bestätigen</label>
+    <label className="block text-sm font-medium text-primary-600">
+    Passwort bestätigen
+    </label>
     <input
     type="password"
     value={confirmPassword}
     onChange={(e) => setConfirmPassword(e.target.value)}
-    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+    className="form-input"
     required
     disabled={isSubmitting}
     />
     </div>
     
     {status.message && (
-      <div className={`p-3 rounded ${
-        status.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+      <div className={`p-4 rounded ${
+        status.type === 'success' 
+        ? 'bg-primary-25 text-primary-600' 
+        : 'bg-secondary-25 text-secondary-600'
       }`}>
       {status.message}
       </div>
@@ -98,14 +107,13 @@ export default function ResetPassword() {
     
     <button
     type="submit"
-    className={`w-full bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600 ${
-      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-    }`}
+    className="btn-primary w-full"
     disabled={isSubmitting}
     >
     {isSubmitting ? 'Wird verarbeitet...' : 'Passwort zurücksetzen'}
     </button>
     </form>
+    </div>
     </div>
     </div>
   );

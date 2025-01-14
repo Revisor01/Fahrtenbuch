@@ -1314,7 +1314,7 @@ function FahrtenListe() {
     {/* Desktop View */}
     <div className="hidden md:block">
     <div className="table-container">
-    <table className="w-full border-collapse border border-primary-100">
+    <table className="w-full">
     <thead>
     <tr className="bg-primary-25 border-b border-primary-100">
     <th className="table-header" onClick={() => requestSort('datum')}>
@@ -2580,9 +2580,9 @@ function LoginPage() {
   };
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary-25">
-    <div className="table-container w-full max-w-md">
-    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <div className="min-h-screen flex items-center justify-center">
+    <div className="table-container bg-primary-25 w-full max-w-md">
+    <div className="p-6 rounded-lg space-y-6">
     <h2 className="text-2xl font-medium text-primary-900 text-center">
     Fahrtenbuch
     </h2>
@@ -2621,7 +2621,7 @@ function LoginPage() {
     <button
     type="button"
     onClick={() => setShowForgotPassword(true)}
-    className="text-primary-600 hover:text-primary-800"
+    className="btn-secondary w-full"
     >
     Passwort vergessen?
     </button>
