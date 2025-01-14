@@ -1879,7 +1879,7 @@ function MonthlyOverview() {
     
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
-      <span className="text-primary-500 text-xs cursor-pointer"
+      <span className="text-secondary-500 text-xs cursor-pointer"
       onClick={() => setStatusModal({ 
         open: true, 
         typ, 
