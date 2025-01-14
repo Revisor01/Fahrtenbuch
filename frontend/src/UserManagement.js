@@ -237,7 +237,7 @@ export default function UserManagement() {
             </span>
             </td>
             <td className="table-cell">
-            <div className="flex flex-col sm:flex-row items-end gap-2">
+            <div className="flex flex-col sm:flex-row items-end sm:justify-end gap-2">
             <button
             onClick={() => openEditModal(user)}
             className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"

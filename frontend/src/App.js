@@ -2481,7 +2481,7 @@ function DistanzenListe() {
       )}
       </td>
       <td className="px-4 py-3 text-sm">
-      <div className="flex flex-col sm:flex-row items-end gap-2">
+      <div className="flex flex-col sm:flex-row items-end sm:justify-end gap-2">
       {editingDistanz?.id === distanz.id ? (
         <button
         onClick={handleSave}
