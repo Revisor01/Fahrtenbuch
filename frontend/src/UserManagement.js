@@ -32,6 +32,11 @@ import Modal from './Modal';
     };
 
         return (
+            <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={isEdit ? "Benutzer bearbeiten" : "Neuen Benutzer erstellen"}
+            >
             <div className="table-container">
             <div className="bg-primary-25 p-6 rounded-lg">
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
@@ -112,15 +117,27 @@ import Modal from './Modal';
             />
             </div>
             
+            <div className="w-full">
+            <div className="flex flex-col sm:flex-row gap-2">
+            <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary w-full"
+            >
+            Abbrechen
+            </button>
             <button
             type="submit"
             className="btn-primary w-full"
             >
             {isEdit ? 'Aktualisieren' : 'Erstellen'}
             </button>
+            </div>
+            </div>
             </form>
             </div>
             </div>
+            </Modal>
         );
 };
 

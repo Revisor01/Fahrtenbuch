@@ -21,7 +21,16 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, typ, aktion }) {
     >
     <div className="table-container">
     <div className="bg-primary-25 p-6 rounded-lg space-y-6">
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <p className="text-sm text-primary-600">
+    {aktion === 'eingereicht' 
+      ? `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${typ} eingereicht wurden.`
+      : aktion === 'erhalten'
+      ? `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${typ} erhalten wurden.`
+      : 'Wählen Sie das entsprechende Datum aus.'
+    }
+    </p>
+    
+    <form onSubmit={handleSubmit} className="space-y-6">
     <div>
     <label className="block text-sm font-medium text-primary-600">
     Datum
@@ -36,20 +45,22 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, typ, aktion }) {
     />
     </div>
     
-    <div className="border-primary-200 pt-4 flex justify-end gap-2">
+    <div className="w-full">
+    <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
     onClick={onClose}
-    className="btn-secondary"
+    className="btn-secondary w-full"
     >
     Abbrechen
     </button>
     <button
     type="submit"
-    className="btn-primary"
+    className="btn-primary w-full"
     >
     Speichern
     </button>
+    </div>
     </div>
     </form>
     </div>
