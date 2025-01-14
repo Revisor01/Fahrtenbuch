@@ -1253,37 +1253,57 @@ function FahrtenListe() {
         renderMitfahrer(fahrt)
       )}
       </td>
-    <td className="table-cell text-right">
-    <div className="flex justify-end gap-1">
-    {editingFahrt?.id === fahrt.id ? (
-      <>
-      <button onClick={handleSave} className="btn-primary text-xs">Speichern</button>
-      <button onClick={() => setEditingFahrt(null)} className="btn-secondary text-xs">Abbrechen</button>
-      </>
-    ) : (
-      <>
-      {!fahrt.autosplit && (
-        <button onClick={() => handleEdit(fahrt)} className="btn-primary text-xs" title="Bearbeiten">
-        ✎
-        </button>
-      )}
-      <button onClick={() => handleDelete(fahrt.id)} className="btn-secondary text-xs" title="Löschen">
-      ×
-      </button>
-      {fahrt.autosplit === 1 && (
+      <td className="table-cell">
+      <div className="flex gap-2 justify-end">
+      {editingFahrt?.id === fahrt.id ? (
+        <>
         <button 
-        onClick={() => toggleFahrtDetails(fahrt.id)} 
-        className="btn-primary text-xs"
-        title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
+        onClick={handleSave} 
+        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
+        title="Speichern"
         >
-        {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+        ✓
         </button>
+        <button 
+        onClick={() => setEditingFahrt(null)} 
+        className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-150"
+        title="Abbrechen"
+        >
+        ×
+        </button>
+        </>
+      ) : (
+        <>
+        {!fahrt.autosplit && (
+          <button 
+          onClick={() => handleEdit(fahrt)} 
+          className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
+          title="Bearbeiten"
+          >
+          ✎
+          </button>
+        )}
+        <button 
+        onClick={() => handleDelete(fahrt.id)} 
+        className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-150"
+        title="Löschen"
+        >
+        ×
+        </button>
+        {fahrt.autosplit === 1 && (
+          <button 
+          onClick={() => toggleFahrtDetails(fahrt.id)} 
+          className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
+          title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
+          >
+          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+          </button>
+        )}
+        </>
       )}
-      </>
-    )}
-    </div>
-    </td>
-    </tr>
+      </div>
+      </td>
+      </tr>
   );
 };
 
