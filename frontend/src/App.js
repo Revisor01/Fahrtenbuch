@@ -6,7 +6,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-,import HilfeModal from './HilfeModal';
+import HilfeModal from './HilfeModal';
 import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
@@ -2104,7 +2104,7 @@ function MonthlyOverview() {
               Number(month.mitfahrerErstattung || 0);
             
             return (
-              <div key={month.yearMonth} className="bg-white rounded-lg border border-primary-100 p-4">
+              <div key={month.yearMonth} className="bg-white rounded-lg sm:border sm:border-primary-100 p-4">
                 <div className="flex justify-between items-start mb-4">
                   <div className="text-primary-900 font-medium">
                     {month.monthName} {month.year}
