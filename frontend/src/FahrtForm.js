@@ -330,7 +330,6 @@ function FahrtForm() {
     </div>
     </div>
     </div> 
-    {/* Dritte Zeile: Checkboxen und Buttons */}
     <div className="flex flex-wrap items-center gap-4">
     <label className="flex items-center">
     <input
@@ -354,17 +353,19 @@ function FahrtForm() {
     <span className="text-xs text-primary-600">Rückfahrt anlegen</span>
     </label>
     
-    <div className="flex flex-col sm:flex-row gap-2 ml-auto">
+    {/* Buttons - neue Struktur */}
+    <div className="w-full sm:w-auto sm:ml-auto">
+    <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
     onClick={() => setShowMitfahrerModal(true)}
-    className="bg-secondary-400 text-white px-4 h-8 rounded hover:bg-secondary-500 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap w-full-mobile"
+    className="bg-secondary-400 text-white px-4 h-8 rounded hover:bg-secondary-500 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap"
     >
     Mitfahrer:in
     </button>
     <button 
     type="submit" 
-    className="bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap w-full-mobile"
+    className="bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap"
     >
     Speichern
     </button>
