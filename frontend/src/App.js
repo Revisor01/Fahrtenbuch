@@ -2001,12 +2001,14 @@ function MonthlyOverview() {
             )}
           </div>
         </div>
-    <div className="mt-6 flex flex-col sm:flex-row justify-end gap-2">
+    <div className="mt-6 w-full">
+    <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
     <QuickActions 
     filteredData={getFilteredData()} 
     handleStatusUpdate={handleStatusUpdate}
     className="w-full sm:w-auto" 
     />
+    </div>
     </div>
       </div>
 
