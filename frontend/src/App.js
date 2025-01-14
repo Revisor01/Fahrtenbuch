@@ -364,6 +364,9 @@ function OrtForm() {
     className="form-input w-full h-8"
     required
     />
+    <p className="text-xs text-gray-500 mt-1">
+    Gib einen kurzen, eindeutigen Namen für den Ort ein (z.B. "Pfarrhaus", "Gemeindezentrum").
+    </p>
     </div>
     <div className="w-full sm:w-2/5">
     <input
@@ -374,6 +377,9 @@ function OrtForm() {
     className="form-input w-full h-8"
     required
     />
+    <p className="text-xs text-gray-500 mt-1">
+    Gib die vollständige Adresse des Ortes ein.
+    </p>
     </div>
     <div className="w-full sm:w-1/5">
     <select
@@ -393,6 +399,10 @@ function OrtForm() {
     <option value="kirchspiel">Kirchspiel</option>
     <option value="none">Sonstiger Ort</option>
     </select>
+    <p className="text-xs text-gray-500 mt-1">Wähle die Art des Ortes aus.
+    <br/>
+    (Dein Wohnort und Dienstort können jeweils nur einmal ausgewählt werden)
+    </p>
     </div>
     <div className="w-full sm:w-auto sm:self-end">
     <button 
@@ -409,6 +419,7 @@ function OrtForm() {
     </div>
   );
 }
+
 function DistanzForm() {
   const { orte, addDistanz, distanzen, showNotification } = useContext(AppContext);
   const [vonOrtId, setVonOrtId] = useState('');
