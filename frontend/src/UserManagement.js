@@ -201,7 +201,7 @@ export default function UserManagement() {
         </div>
         
         <div className="table-container">
-        <div className="-mx-4 sm:mx-0 overflow-auto">
+        <div className="-mx-0 sm:mx-0 overflow-auto">
         <table className="min-w-full">
         <thead>
         <tr className="bg-primary-25 border-b border-primary-100">
