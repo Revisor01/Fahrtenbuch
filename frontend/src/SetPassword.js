@@ -74,81 +74,77 @@ export default function SetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          {location.pathname.includes('reset-password') 
-            ? 'Neues Passwort setzen' 
-            : 'Passwort erstellen'}
-        </h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Neues Passwort
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={`mt-1 block w-full rounded-md border shadow-sm p-2 ${
-                password && !validatePassword(password)
-                  ? 'border-red-300'
-                  : 'border-gray-300'
-              }`}
-              required
-              disabled={isSubmitting || !token}
-            />
-            {password && !validatePassword(password) && (
-              <p className="mt-1 text-sm text-red-600">
-                Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, 
-                einen Kleinbuchstaben und eine Zahl enthalten.
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Passwort bestätigen
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={`mt-1 block w-full rounded-md border shadow-sm p-2 ${
-                confirmPassword && password !== confirmPassword
-                  ? 'border-red-300'
-                  : 'border-gray-300'
-              }`}
-              required
-              disabled={isSubmitting || !token}
-            />
-            {confirmPassword && password !== confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">
-                Die Passwörter stimmen nicht überein.
-              </p>
-            )}
-          </div>
-
-          {status.message && (
-            <div className={`p-3 rounded ${
-              status.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`}>
-              {status.message}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className={`w-full bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600 ${
-              (isSubmitting || !token) ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            disabled={isSubmitting || !token || !validatePassword(password) || password !== confirmPassword}
-          >
-            {isSubmitting ? 'Wird verarbeitet...' : 'Passwort setzen'}
-          </button>
-        </form>
+    <div className="min-h-screen flex items-center justify-center bg-primary-25">
+    <div className="table-container w-full max-w-md">
+    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <h2 className="text-2xl font-medium text-primary-900 text-center">
+    {location.pathname.includes('reset-password') 
+      ? 'Neues Passwort setzen' 
+      : 'Passwort erstellen'}
+    </h2>
+    
+    <form onSubmit={handleSubmit} className="space-y-4">
+    <div>
+    <label className="block text-sm font-medium text-primary-600">
+    Neues Passwort
+    </label>
+    <input
+    type="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    className="form-input"
+    required
+    disabled={isSubmitting || !token}
+    />
+    {password && !validatePassword(password) && (
+      <p className="mt-1 text-xs text-secondary-600">
+      Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, 
+      einen Kleinbuchstaben und eine Zahl enthalten.
+      </p>
+    )}
+    </div>
+    
+    <div>
+    <label className="block text-sm font-medium text-primary-600">
+    Passwort bestätigen
+    </label>
+    <input
+    type="password"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    className="form-input"
+    required
+    disabled={isSubmitting || !token}
+    />
+    {confirmPassword && password !== confirmPassword && (
+      <p className="mt-1 text-xs text-secondary-600">
+      Die Passwörter stimmen nicht überein.
+      </p>
+    )}
+    </div>
+    
+    {status.message && (
+      <div className={`p-4 rounded ${
+        status.type === 'success' 
+        ? 'bg-primary-25 text-primary-600' 
+        : 'bg-secondary-25 text-secondary-600'
+      }`}>
+      {status.message}
       </div>
+    )}
+    
+    <div className="flex flex-col sm:flex-row gap-2">
+    <button
+    type="submit"
+    className="btn-primary w-full"
+    disabled={isSubmitting || !token || !validatePassword(password) || password !== confirmPassword}
+    >
+    {isSubmitting ? 'Wird verarbeitet...' : 'Passwort setzen'}
+    </button>
+    </div>
+    </form>
+    </div>
+    </div>
     </div>
   );
 }

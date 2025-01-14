@@ -46,7 +46,7 @@ export default function VerifyEmail() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-primary-25">
     <div className="table-container w-full max-w-md">
-    <div className="bg-white p-6 rounded-lg border border-primary-100 space-y-6">
+    <div className="bg-primary-25 p-6 rounded-lg border border-primary-100 space-y-6">
     <h2 className="text-2xl font-medium text-primary-900 text-center">
     E-Mail Verifizierung
     </h2>
@@ -63,7 +63,7 @@ export default function VerifyEmail() {
     
     {status.type === 'error' && (
       <div className="text-center border-t border-primary-200 pt-4">
-      <a href="/" className="btn-primary inline-block">
+      <a href="/" className="btn-primary">
       Zurück zum Dashboard
       </a>
       </div>
