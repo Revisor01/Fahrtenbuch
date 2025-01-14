@@ -8,7 +8,6 @@ import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
 import { HelpCircle } from 'lucide-react';
 import HilfeModal from './HilfeModal';
-import FahrtenbuchHilfe from './FahrtenbuchHilfe';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
 import UserManagement from './UserManagement';

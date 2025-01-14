@@ -16,46 +16,43 @@ const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
   );
 };
 
-const FahrtenbuchHilfe = () => {
+const HilfeModal = ({ isOpen, onClose }) => {
   const [openItem, setOpenItem] = useState(null);
-  const [isHelpVisible, setIsHelpVisible] = useState(false);
   const helpRef = useRef(null);
 
   const toggleItem = (index) => {
     setOpenItem(openItem === index ? null : index);
   };
 
-  const toggleHelp = () => {
-    setIsHelpVisible(!isHelpVisible);
-  };
-
-  const closeHelp = () => {
-    setIsHelpVisible(false);
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (helpRef.current && !helpRef.current.contains(event.target)) {
-        closeHelp();
+        onClose();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [isOpen, onClose]);
 
+  if (!isOpen) {
+    return null;
+  }
   return (
-    <>
+    
       <div 
         ref={helpRef}
-        className={`fixed top-0 right-0 h-full w-80 bg-blue-50 shadow-lg transition-transform duration-300 ease-in-out transform ${isHelpVisible ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-80 bg-blue-50 shadow-lg transition-transform duration-300 ease-in-out transform  translate-x-0`}
         style={{zIndex: 1000}}
       >
         <div className="p-4 relative">
           <button
-            onClick={closeHelp}
+            onClick={onClose}
             className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
           >
             <X size={24} />
@@ -90,14 +87,48 @@ const FahrtenbuchHilfe = () => {
               Übersicht ganz einfach als Excel-Datei herunterladen. Das macht die Abrechnung 
               mit dem Kirchenkreis viel einfacher!
             </p>
+             <p className="mt-2">
+             <strong>Wie exportiere ich die Daten?</strong> Klicken Sie auf den Button "Export Kirchenkreis" oder "Export Gemeinde"
+              , um die jeweilige Excel-Datei zu erstellen und herunterzuladen. 
+             </p>
             <p className="mt-2">
               <strong>Wichtig:</strong> Damit in der Excel-Datei alles stimmt, füllen Sie bitte 
               alle Ihre persönlichen Daten in Ihrem Profil aus.
             </p>
+            <p className="mt-2">
+              <strong>Was bedeuten die unterschiedlichen Symbole in der Tabelle?</strong> 
+               <ul>
+                    <li><b>● Erhalten:</b> Das Geld wurde bereits ausbezahlt.</li>
+                    <li><b>○ Eingereicht:</b> Die Abrechnung wurde eingereicht, aber noch nicht ausbezahlt.</li>
+                    <li><b>Nicht eingereicht:</b> Die Abrechnung muss noch eingereicht werden.</li>
+                </ul>
+            </p>
+          </AccordionItem>
+
+           <AccordionItem
+            title="Fahrten eintragen"
+            isOpen={openItem === 4}
+            toggleOpen={() => toggleItem(4)}
+          >
+            <p>
+             <strong>Wie trage ich eine Fahrt ein?</strong> Verwenden Sie das Formular "Fahrt hinzufügen", geben Sie das Datum, den Start- und Zielort, den Anlass und die gefahrenen Kilometer ein.
+             </p>
+             <p className="mt-2">
+            <strong>Was bedeutet "Via Dienstort"?</strong> Wenn Sie auf dem Weg zu ihrem eigentlichen Ziel über ihren Dienstort fahren, können Sie das mit der Checkbox "Via Dienstort" auswählen. Die Kilometer zum Dienstort und die Kilometer vom Dienstort zum Zielort werden automatisch berechnet.
+            </p>
+              <p className="mt-2">
+              <strong>Was bedeutet "Autosplit"?</strong> Bei der Autosplit funktion werden Kilometer und Beträge automatisch aufgeteilt, wenn die Fahrt durch einen Dienstort durchgeführt wird. Dabei wird die Strecke einmalig zur Gesamtabrechnung hinzugerechnet.
+            </p>
+            <p className="mt-2">
+              <strong>Wie füge ich Mitfahrer:innen hinzu?</strong> Wenn Sie Mitfahrer:innen haben, können Sie diese mit "+" hinzufügen und die jeweiligen Namen eintragen.
+            </p>
+            <p className="mt-2">
+            <strong>Was bedeutet einmaliger Ort?</strong> Mit einmaligen Orten kann ein Ort ausgewählt werden, der nicht gespeichert werden muss. 
+            </p>
           </AccordionItem>
 
           <AccordionItem
-            title="Orte speichern"
+             title="Orte speichern"
             isOpen={openItem === 2}
             toggleOpen={() => toggleItem(2)}
           >
@@ -106,6 +137,9 @@ const FahrtenbuchHilfe = () => {
               hier auch Ihren Heimatort, Ihren Dienstort und Ihr Kirchspiel festlegen. Das macht 
               es viel schneller, neue Fahrten einzutragen, weil Sie die Orte dann einfach auswählen 
               können, statt sie jedes Mal neu einzugeben.
+            </p>
+            <p className="mt-2">
+              <strong>Wie trage ich einen Ort ein?</strong> Füllen Sie einfach das Formular mit dem Namen und der Adresse aus und geben Sie an, ob es sich um ihren Wohnort, Dienstort oder ein Kirchspiel handelt.
             </p>
           </AccordionItem>
 
@@ -120,27 +154,47 @@ const FahrtenbuchHilfe = () => {
               die Kilometerzahl ausrechnen müssen. Das Fahrtenbuch macht das automatisch für Sie.
             </p>
             <p className="mt-2">
+             <strong>Wie trage ich eine Distanz ein?</strong> Wählen Sie den Start- und Zielort aus der Liste aus und tragen Sie die Kilometerzahl ein.
+            </p>
+             <p className="mt-2">
               Das ist besonders nützlich, wenn Sie oft über Ihren Dienstort fahren. Sie sparen 
               Zeit und die Abrechnung wird genauer.
             </p>
           </AccordionItem>
+
+          <AccordionItem
+            title="Profil"
+            isOpen={openItem === 5}
+            toggleOpen={() => toggleItem(5)}
+          >
+            <p>
+            <strong>Was kann ich in meinem Profil tun?</strong> Hier können Sie Ihre persönlichen Informationen einsehen,
+            Ihr Passwort ändern oder sich ausloggen.
+            </p>
+          </AccordionItem>
+          
+            <AccordionItem
+            title="Benutzerverwaltung (Admin)"
+            isOpen={openItem === 6}
+            toggleOpen={() => toggleItem(6)}
+          >
+            <p>
+                Als Admin können Sie hier Benutzer verwalten, Rollen ändern, Benutzer hinzufügen oder entfernen.
+            </p>
+          </AccordionItem>
+           <AccordionItem
+            title="Passwort vergessen"
+            isOpen={openItem === 7}
+            toggleOpen={() => toggleItem(7)}
+           >
+            <p>
+              Wenn Sie Ihr Passwort vergessen haben, klicken Sie im Login-Bildschirm auf "Passwort vergessen?".
+             Sie erhalten eine E-Mail mit einem Link, um ein neues Passwort zu erstellen.
+           </p>
+          </AccordionItem>
         </div>
       </div>
-
-    {!isHelpVisible && (
-      <div 
-      className="fixed top-20 right-0 bg-blue-500 text-white px-3 py-2 cursor-pointer rounded-l-lg flex items-center opacity-70"
-      onClick={toggleHelp}
-      style={{
-        zIndex: 1001,
-        textOrientation: 'mixed'
-      }}
-      >
-      <HelpCircle size={24} />
-      </div>
-    )}
-    </>
   );
 };
 
-export default FahrtenbuchHilfe;
+export default HilfeModal;
