@@ -741,7 +741,7 @@ function FahrtenListe() {
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
-      className="form-select w-36">
+      className="form-select w-28">
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
         {new Date(0, i).toLocaleString("default", { month: "long" })}
@@ -1900,11 +1900,10 @@ function MonthlyOverview() {
     <div className="w-full max-w-full space-y-6">
       {/* Jahresübersicht Card */}
       <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
-          
-          <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
-            <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
+    
+    <div className="w-full sm:w-auto flex flex-col gap-3">
     <div className="flex items-center">
     <input
     type="checkbox"
@@ -1917,15 +1916,16 @@ function MonthlyOverview() {
     Abgeschlossene ausblenden
     </label>
     </div>
-
-              {selectedYear !== currentYear && selectedYear !== 'all' && (
-                <button 
-                  onClick={() => setSelectedYear(currentYear)}
-                  className="btn-secondary"
-                >
-                  Aktuelles Jahr
-                </button>
-              )}
+    
+    <div className="flex items-center gap-2">
+    {selectedYear !== currentYear && selectedYear !== 'all' && (
+      <button 
+      onClick={() => setSelectedYear(currentYear)}
+      className="btn-secondary"
+      >
+      Aktuelles Jahr
+      </button>
+    )}
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1939,9 +1939,9 @@ function MonthlyOverview() {
       ))
     }
     </select>
-            </div>
-          </div>
-        </div>
+    </div>
+    </div>
+    </div>
 
         {/* Gesamtübersicht Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -2002,7 +2002,7 @@ function MonthlyOverview() {
           </div>
         </div>
     <div className="mt-6 w-full">
-    <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+    <div className="w-full flex flex-col sm:flex-row sm:justify-end gap-2">
     <QuickActions 
     filteredData={getFilteredData()} 
     handleStatusUpdate={handleStatusUpdate}
