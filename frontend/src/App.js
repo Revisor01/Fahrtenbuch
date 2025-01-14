@@ -1915,7 +1915,8 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     
-    <div className="w-full sm:w-auto flex flex-col gap-3">
+    <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
     <div className="flex items-center">
     <input
     type="checkbox"
@@ -1929,7 +1930,6 @@ function MonthlyOverview() {
     </label>
     </div>
     
-    <div className="flex items-center gap-2">
     {selectedYear !== currentYear && selectedYear !== 'all' && (
       <button 
       onClick={() => setSelectedYear(currentYear)}
@@ -1954,7 +1954,7 @@ function MonthlyOverview() {
     </div>
     </div>
     </div>
-
+    
         {/* Gesamtübersicht Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded border border-primary-100">
@@ -2015,11 +2015,13 @@ function MonthlyOverview() {
         </div>
     <div className="mt-6 w-full">
     <div className="w-full flex flex-col sm:flex-row sm:justify-end gap-2">
+    <div className="w-full sm:w-auto">
     <QuickActions 
     filteredData={getFilteredData()} 
     handleStatusUpdate={handleStatusUpdate}
-    className="w-full sm:w-auto" 
+    className="w-full" 
     />
+    </div>
     </div>
     </div>
       </div>
