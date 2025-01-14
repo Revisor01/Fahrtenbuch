@@ -201,7 +201,7 @@ export default function UserManagement() {
         </div>
         
         <div className="table-container">
-        <div className="overflow-x-auto w-full">
+        <div className="-mx-4 sm:mx-0 overflow-x-auto">
         <table className="w-full">
         <thead>
         <tr className="bg-primary-25 border-b border-primary-100">
@@ -237,10 +237,10 @@ export default function UserManagement() {
             </span>
             </td>
             <td className="table-cell">
-            <div className="flex sm:flex-row flex-col gap-2 justify-end">
+            <div className="flex gap-2 justify-end">
             <button
             onClick={() => openEditModal(user)}
-            className="bg-primary-400 text-white px-3 py-1 rounded hover:bg-primary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+            className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-200 shadow-sm"
             title="Bearbeiten"
             >
             ✎
@@ -254,7 +254,7 @@ export default function UserManagement() {
                     true
                 );
             }}
-            className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+            className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-200 shadow-sm"
             title="Löschen"
             >
             ×

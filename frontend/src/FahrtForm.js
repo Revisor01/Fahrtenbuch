@@ -298,8 +298,8 @@ function FahrtForm() {
     )}
     </div>
     
-    <div className="flex flex-col sm:flex-row gap-4">
-    <div className="w-full sm:w-1/2">
+    <div className="flex gap-4">
+    <div className="w-1/2">
     <label className="block mb-1 text-xs text-primary-600">Kilometer</label>
     <input
     type="number"
@@ -314,7 +314,7 @@ function FahrtForm() {
     step="1"
     />
     </div>
-    <div className="w-full sm:w-1/2">
+    <div className="w-1/2">
     <label className="block mb-1 text-xs text-primary-600">Abrechnung</label>
     <select
     name="abrechnung"
@@ -327,7 +327,6 @@ function FahrtForm() {
     <option value="Gemeinde">Gemeinde</option>
     <option value="Autosplit">Autosplit</option>
     </select>
-    </div>
     </div>
     </div>
     

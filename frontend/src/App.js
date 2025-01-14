@@ -1989,7 +1989,8 @@ function MonthlyOverview() {
     <div className="mt-6 flex flex-col sm:flex-row justify-end gap-2">
     <QuickActions 
     filteredData={getFilteredData()} 
-    handleStatusUpdate={handleStatusUpdate} 
+    handleStatusUpdate={handleStatusUpdate}
+    className="w-full sm:w-auto" 
     />
     </div>
       </div>
@@ -2422,28 +2423,17 @@ function DistanzenListe() {
     <table className="w-full">
     <thead>
     <tr className="bg-primary-25 border-b border-primary-100">
-    <th
-    className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
-    onClick={() => requestSort('von_ort_id')}
-    >
+    <th className="table-header" onClick={() => requestSort('von_ort_id')}>
     Von
     </th>
-    <th
-    className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
-    onClick={() => requestSort('nach_ort_id')}
-    >
+    <th className="table-header-sm" onClick={() => requestSort('nach_ort_id')}>
     Nach
     </th>
-    {/* Distanz wird immer angezeigt, aber mit einem kleinen Trick*/}
-    <th
-    className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
-    onClick={() => requestSort('distanz')}
-    >
+    <th className="table-header" onClick={() => requestSort('distanz')}>
     <span className="sm:hidden">km</span>
     <span className="hidden sm:inline">Distanz (km)</span>
     </th>
-    
-    <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider">
+    <th className="table-header text-right">
     Aktionen
     </th>
     </tr>
@@ -2477,15 +2467,15 @@ function DistanzenListe() {
         className="form-input w-16"
         />
       ) : (
-        `${distanz.distanz} km`
+        `${distanz.distanz}`
       )}
       </td>
       <td className="px-4 py-3 text-sm">
-      <div className="flex sm:flex-row flex-col gap-2 justify-end">
+      <div className="flex flex-col sm:flex-row gap-2 justify-end">
       {editingDistanz?.id === distanz.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
         >
         ✓
         </button>
@@ -2493,14 +2483,14 @@ function DistanzenListe() {
         <>
         <button
         onClick={() => handleEdit(distanz)}
-        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
         title="Bearbeiten"
         >
         ✎
         </button>
         <button
         onClick={() => handleDelete(distanz.id)}
-        className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-150"
         title="Löschen"
         >
         ×
