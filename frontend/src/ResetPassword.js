@@ -98,8 +98,8 @@ export default function ResetPassword() {
     {status.message && (
       <div className={`p-4 rounded ${
         status.type === 'success' 
-        ? 'bg-primary-25 text-primary-600' 
-        : 'bg-secondary-25 text-secondary-600'
+        ? 'bg-primary-25 text-primary-600 text-xs' 
+        : 'bg-secondary-25 text-secondary-600 text-xs'
       }`}>
       {status.message}
       </div>

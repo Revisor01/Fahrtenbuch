@@ -2663,44 +2663,52 @@ function ForgotPasswordForm({ onClose }) {
   };
   
   return (
+    <div className="table-container">
+    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
-    <label className="block text-sm font-medium text-gray-700">
+    <label className="block text-sm font-medium text-primary-600">
     E-Mail-Adresse
     </label>
     <input
     type="email"
     value={email}
     onChange={(e) => setEmail(e.target.value)}
-    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2"
+    className="form-input"
     required
     />
     </div>
     
     {status && (
       <div className={`p-4 rounded ${
-        status.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        status.type === 'success' 
+        ? 'bg-primary-25 text-primary-600 text-xs' 
+        : 'bg-secondary-25 text-secondary-600 text-xs'
       }`}>
       {status.message}
       </div>
     )}
     
-    <div className="flex justify-end space-x-2">
+    <div className="w-full">
+    <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
     onClick={onClose}
-    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+    className="btn-secondary w-full"
     >
     Abbrechen
     </button>
     <button
     type="submit"
-    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    className="btn-primary w-full"
     >
     Anweisungen senden
     </button>
     </div>
+    </div>
     </form>
+    </div>
+    </div>
   );
 }
 

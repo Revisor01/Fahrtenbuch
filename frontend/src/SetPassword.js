@@ -74,13 +74,13 @@ export default function SetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary-25">
-    <div className="table-container w-full max-w-md">
-    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <div className="min-h-screen flex items-center justify-center">
+    <div className="table-container bg-primary-25 w-full max-w-md">
+    <div className="p-6 rounded-lg space-y-6">
     <h2 className="text-2xl font-medium text-primary-900 text-center">
     {location.pathname.includes('reset-password') 
       ? 'Neues Passwort setzen' 
-      : 'Passwort erstellen'}
+      : 'Passwort festlegen'}
     </h2>
     
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,8 +126,8 @@ export default function SetPassword() {
     {status.message && (
       <div className={`p-4 rounded ${
         status.type === 'success' 
-        ? 'bg-primary-25 text-primary-600' 
-        : 'bg-secondary-25 text-secondary-600'
+        ? 'bg-primary-25 text-primary-600 text-xs' 
+        : 'bg-secondary-25 text-secondary-600 text-xs'
       }`}>
       {status.message}
       </div>
