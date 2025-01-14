@@ -364,9 +364,6 @@ function OrtForm() {
     className="form-input w-full h-8"
     required
     />
-    <p className="text-xs text-gray-500 mt-1">
-    Gib einen kurzen, eindeutigen Namen für den Ort ein (z.B. "Pfarrhaus", "Gemeindezentrum").
-    </p>
     </div>
     <div className="w-full sm:w-2/5">
     <input
@@ -377,9 +374,6 @@ function OrtForm() {
     className="form-input w-full h-8"
     required
     />
-    <p className="text-xs text-gray-500 mt-1">
-    Gib die vollständige Adresse des Ortes ein.
-    </p>
     </div>
     <div className="w-full sm:w-1/5">
     <select
@@ -399,10 +393,6 @@ function OrtForm() {
     <option value="kirchspiel">Kirchspiel</option>
     <option value="none">Sonstiger Ort</option>
     </select>
-    <p className="text-xs text-gray-500 mt-1">Wähle die Art des Ortes aus.
-    <br/>
-    (Dein Wohnort und Dienstort können jeweils nur einmal ausgewählt werden)
-    </p>
     </div>
     <div className="w-full sm:w-auto sm:self-end">
     <button 
@@ -2321,11 +2311,11 @@ function OrteListe() {
       )}
       </td>
       <td className="px-4 py-3 text-sm">
-      <div className="flex sm:flex-row flex-col gap-2 justify-end">
+      <div className="flex flex-col sm:flex-row items-end sm:justify-end gap-2">
       {editingOrt?.id === ort.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
         >
         ✓
         </button>
@@ -2333,14 +2323,14 @@ function OrteListe() {
         <>
         <button
         onClick={() => handleEdit(ort)}
-        className="bg-primary-500 text-white px-3 py-1 rounded hover:bg-primary-600 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
         title="Bearbeiten"
         >
         ✎
         </button>
         <button
         onClick={() => handleDelete(ort.id)}
-        className="bg-secondary-400 text-white px-3 py-1 rounded hover:bg-secondary-500 transition-colors duration-150 w-full sm:w-auto text-center"
+        className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-150"
         title="Löschen"
         >
         ×
