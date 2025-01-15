@@ -18,6 +18,18 @@ code {
 }
 
 @layer components {
+  .table-header, .table-header-sm {
+    @apply px-4 py-3 text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer !important;
+  }
+  
+  .table-header {
+    @apply text-left !important;
+  }
+  
+  .table-header-sm {
+    @apply text-left hidden sm:table-cell !important;
+  }
+
   .btn-primary {
     @apply bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
   }
@@ -37,14 +49,6 @@ code {
   .table-container {
     @apply bg-white rounded-lg shadow-sm w-full border border-primary-100;
   }
-
-    th.table-header {
-      @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer;
-    }
-    
-    th.table-header-sm {
-      @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer hidden sm:table-cell;
-    }
   
     .table-cell {
         @apply px-4 py-3 text-sm text-primary-900;
@@ -53,14 +57,7 @@ code {
   .table-row {
     @apply hover:bg-primary-25 transition-colors duration-150;
   }
-  
-  .custom-table-header {
-    @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer;
-  }
-  
-  .custom-table-header-sm {
-    @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer hidden sm:table-cell;
-  }
+
 }
 
 @layer utilities {
