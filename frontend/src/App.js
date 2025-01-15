@@ -1910,7 +1910,6 @@ function MonthlyOverview() {
   const yearTotal = calculateYearTotal();
   
   return (
-    {/* Filter-Bereich */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     
@@ -1954,7 +1953,6 @@ function MonthlyOverview() {
     </div>
     </div>
     
-        {/* Gesamtübersicht Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded border border-primary-100">
             <div className="flex justify-between items-center mb-2">
@@ -2025,9 +2023,7 @@ function MonthlyOverview() {
     </div>
       </div>
 
-      {/* Tabellenübersicht Card */}
       <div className="bg-white sm:rounded-lg sm:border sm:border-primary-100">
-        {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto w-full">
           <table className="w-full">
             <thead>
@@ -2088,7 +2084,6 @@ function MonthlyOverview() {
           </table>
         </div>
         
-        {/* Mobile Cards */}
         <div className="sm:hidden space-y-4 p-4">
           {getFilteredData().map((month) => {
             const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
@@ -2120,7 +2115,6 @@ function MonthlyOverview() {
                 </div>
                 
                 <div className="space-y-4">
-                  {/* Kirchenkreis */}
                   <div className="pt-4">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-sm text-primary-600">Kirchenkreis</span>
@@ -2133,7 +2127,6 @@ function MonthlyOverview() {
                     </div>
                   </div>
                   
-                  {/* Gemeinde */}
                   <div className="pt-4">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-sm text-primary-600">Gemeinde</span>
@@ -2146,10 +2139,9 @@ function MonthlyOverview() {
                     </div>
                   </div>
                   
-                  {/* Mitfahrer */}
                   <div className="pt-4">
                     <div className="flex justify-between items-start">
-                      <span className="text-sm text-primary-600">Mitfahrer</span>
+                      <span className="text-sm text-primary-600">Mitfahrer:innen</span>
                       <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
                         {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
                       </span>
