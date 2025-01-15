@@ -213,16 +213,16 @@ export default function UserManagement() {
            <div className="table-container">
                <div className="-mx-0 sm:mx-0 overflow-auto">
                    <table className="min-w-full">
-                       <thead>
-                           <tr className="bg-primary-25 border-b border-primary-100">
-                               <th className="table-header">Benutzername</th>
-                               <th className="table-header-sm">E-Mail</th>
-                               <th className="table-header-sm">Kirchengemeinde</th>
-                               <th className="table-header">Status</th>
-                               <th className="table-header-sm">Rolle</th>
-                               <th className="table-header text-right">Aktionen</th>
-                           </tr>
-                       </thead>
+      <thead>
+      <tr className="bg-primary-25 border-b border-primary-100">
+      <th className="custom-table-header">Benutzername</th>
+      <th className="custom-table-header-sm">E-Mail</th>
+      <th className="hidden md:table-cell custom-table-header">Kirchengemeinde</th>
+      <th className="custom-table-header">Status</th>
+      <th className="custom-table-header-sm">Rolle</th>
+      <th className="custom-table-header text-right">Aktionen</th>
+      </tr>
+      </thead>
                        <tbody className="divide-y divide-primary-50">
                            {users.map(user => (
                                <tr key={user.id} className="table-row">

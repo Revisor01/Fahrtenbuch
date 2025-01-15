@@ -53,6 +53,15 @@ code {
   .table-row {
     @apply hover:bg-primary-25 transition-colors duration-150;
   }
+  
+  .custom-table-header {
+    @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer;
+  }
+  
+  .custom-table-header-sm {
+    @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer hidden sm:table-cell;
+  }
+}
 }
 
 @layer utilities {
