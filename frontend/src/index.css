@@ -38,12 +38,8 @@ code {
     @apply bg-white rounded-lg shadow-sm w-full border border-primary-100;
   }
 
-  .table-header {
+  .table-header, .table-header-sm {
     @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer;
-  }
-
-  .table-header-sm {
-    @apply px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer hidden sm:table-cell;
   }
     
     .table-cell {
@@ -52,6 +48,15 @@ code {
 
   .table-row {
     @apply hover:bg-primary-25 transition-colors duration-150;
+    
+  .table-header-sm {
+    @apply hidden;
+  }
+    
+  @screen sm {
+    .table-header-sm {
+      @apply table-cell;
+    }
   }
 }
 
