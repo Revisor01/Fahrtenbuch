@@ -1915,7 +1915,7 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     
-    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
+    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
     <div className="text-xs sm:text-sm flex items-center">
     <input
     type="checkbox"
