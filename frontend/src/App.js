@@ -2575,7 +2575,7 @@ function LoginPage() {
   
   return (
     <div className="min-h-screen flex items-center justify-center">
-    <div className="table-container bg-primary-25 w-full max-w-md">
+    <div className="table-container m-6 bg-primary-25 w-full max-w-md">
     <div className="p-6 rounded-lg space-y-6">
     <h2 className="text-2xl font-medium text-primary-900 text-center">
     Fahrtenbuch

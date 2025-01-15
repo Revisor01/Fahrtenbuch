@@ -194,10 +194,10 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
     </AccordionItem>
     </div>
     
-    <div className="mt-6">
+    <div className="mt-6 flex justify-end">
     <button
     onClick={onClose}
-    className="btn-primary w-full"
+    className="w-full sm:w-auto btn-primary"
     >
     {isFirstVisit ? 'Los geht\'s!' : 'Verstanden'}
     </button>
