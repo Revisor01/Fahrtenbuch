@@ -48,7 +48,7 @@ code {
 
   .table-row {
     @apply hover:bg-primary-25 transition-colors duration-150;
-    
+  }
   .table-header-sm {
     @apply hidden;
   }
