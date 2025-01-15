@@ -1910,18 +1910,33 @@ function MonthlyOverview() {
   const yearTotal = calculateYearTotal();
   
   return (
-    <div className="w-full max-w-full space-y-6">
-    {/* Jahresübersicht Card */}
-    <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
-    {/* Header mit Titel */}
-    <div className="flex justify-between items-center mb-4">
+    {/* Filter-Bereich */}
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
+    
+    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
+    <div className="text-xs sm:text-sm flex items-center">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.checked)}
+    className="form-checkbox h-4 w-4"
+    />
+    <label htmlFor="hideCompleted" className="ml-2 text-primary-600">
+    Abgeschlossene ausblenden
+    </label>
     </div>
     
-    {/* Filter-Bereich - neu strukturiert für Mobile */}
-    <div className="space-y-4 sm:space-y-0 sm:flex sm:justify-end">
-    {/* Jahr-Auswahl und Aktuelles Jahr in einer Zeile */}
-    <div className="flex items-center justify-between sm:justify-end gap-2">
+    <div className="flex items-center gap-2">
+    {selectedYear !== currentYear && selectedYear !== 'all' && (
+      <button 
+      onClick={() => setSelectedYear(currentYear)}
+      className="btn-secondary whitespace-nowrap text-sm"
+      >
+      Aktuelles Jahr
+      </button>
+    )}
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1935,29 +1950,7 @@ function MonthlyOverview() {
       ))
     }
     </select>
-    
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary whitespace-nowrap"
-      >
-      Aktuelles Jahr
-      </button>
-    )}
     </div>
-    
-    {/* Checkbox in separater Zeile auf Mobile */}
-    <div className="flex items-center sm:ml-4">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.checked)}
-    className="form-checkbox h-4 w-4"
-    />
-    <label htmlFor="hideCompleted" className="ml-2 text-sm text-primary-600">
-    Abgeschlossene ausblenden
-    </label>
     </div>
     </div>
     
@@ -2033,7 +2026,7 @@ function MonthlyOverview() {
       </div>
 
       {/* Tabellenübersicht Card */}
-      <div className="bg-white rounded-lg border border-primary-100">
+      <div className="bg-white sm:rounded-lg sm:border sm:border-primary-100">
         {/* Desktop Table */}
         <div className="hidden sm:block overflow-x-auto w-full">
           <table className="w-full">
@@ -2096,7 +2089,7 @@ function MonthlyOverview() {
         </div>
         
         {/* Mobile Cards */}
-        <div className="sm:hidden space-y-4">
+        <div className="sm:hidden space-y-4 p-4">
           {getFilteredData().map((month) => {
             const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
             const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
