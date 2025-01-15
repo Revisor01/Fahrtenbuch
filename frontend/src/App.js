@@ -2298,18 +2298,18 @@ function OrteListe() {
     <table className="w-full">
     <thead>
     <tr className="bg-primary-25 border-b border-primary-100">
-    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    <th className="table-header"
     onClick={() => requestSort('name')}>
     Name
     </th>
-    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer"
+    <th className="table-header-sm"
     onClick={() => requestSort('adresse')}>
     Adresse
     </th>
-    <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider">
+    <th className="table-header">
     Status
     </th>
-    <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider">
+    <th className="table-header text-right">
     Aktionen
     </th>
     </tr>
