@@ -213,16 +213,16 @@ export default function UserManagement() {
            <div className="table-container">
                <div className="-mx-0 sm:mx-0 overflow-auto">
                    <table className="min-w-full">
-      <thead>
-      <tr className="bg-primary-25 border-b border-primary-100">
-      <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer">Benutzername</th>
-      <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer">E-Mail</th>
-      <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer">Kirchengemeinde</th>
-      <th className="px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer">Status</th>
-      <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer">Rolle</th>
-      <th className="px-4 py-3 text-right text-xs font-medium text-primary-600 uppercase tracking-wider cursor-pointer">Aktionen</th>
-      </tr>
-      </thead>
+                       <thead>
+                           <tr className="bg-primary-25 border-b border-primary-100">
+                               <th className="table-header">Benutzername</th>
+                               <th className="table-header-sm">E-Mail</th>
+                               <th className="table-header-sm">Kirchengemeinde</th>
+                               <th className="table-header">Status</th>
+                               <th className="table-header-sm">Rolle</th>
+                               <th className="table-header text-right">Aktionen</th>
+                           </tr>
+                       </thead>
                        <tbody className="divide-y divide-primary-50">
                            {users.map(user => (
                                <tr key={user.id} className="table-row">
