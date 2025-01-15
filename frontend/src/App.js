@@ -1924,7 +1924,7 @@ function MonthlyOverview() {
     onChange={(e) => setHideCompleted(e.checked)}
     className="form-checkbox h-4 w-4"
     />
-    <label htmlFor="hideCompleted" className="ml-2 text-primary-600">
+    <label htmlFor="hideCompleted" className="ml-2 text-xs">
     Abgeschlossene ausblenden
     </label>
     </div>
@@ -2087,7 +2087,7 @@ function MonthlyOverview() {
     </table>
     </div>
     
-    <div className="sm:hidden space-y-4 p-4">
+    <div className="sm:hidden space-y-4">
     {getFilteredData().map((month) => {
       const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
       const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
