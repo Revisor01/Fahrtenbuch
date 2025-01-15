@@ -1910,6 +1910,8 @@ function MonthlyOverview() {
   const yearTotal = calculateYearTotal();
   
   return (
+    <div className="w-full max-w-full space-y-6">
+    <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     
@@ -1953,63 +1955,64 @@ function MonthlyOverview() {
     </div>
     </div>
     
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded border border-primary-100">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-primary-600">Kirchenkreis</span>
-              <span className="text-primary-900 font-medium">
-                {yearTotal.kirchenkreis.toFixed(2)} €
-              </span>
-            </div>
-            {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
-              <div className="text-xs text-primary-500">
-                Ursprünglich: {yearTotal.originalKirchenkreis.toFixed(2)} €
-              </div>
-            )}
-          </div>
-          
-          <div className="bg-white p-4 rounded border border-primary-100">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-primary-600">Gemeinde</span>
-              <span className="text-primary-900 font-medium">
-                {yearTotal.gemeinde.toFixed(2)} €
-              </span>
-            </div>
-            {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
-              <div className="text-xs text-primary-500">
-                Ursprünglich: {yearTotal.originalGemeinde.toFixed(2)} €
-              </div>
-            )}
-          </div>
-          
-          <div className="bg-white p-4 rounded border border-primary-100">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-primary-600">Mitfahrer</span>
-              <span className="text-primary-900 font-medium">
-                {yearTotal.mitfahrer.toFixed(2)} €
-              </span>
-            </div>
-            {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
-              <div className="text-xs text-primary-500">
-                Ursprünglich: {yearTotal.originalMitfahrer.toFixed(2)} €
-              </div>
-            )}
-          </div>
-          
-          <div className="bg-white p-4 rounded border border-primary-100">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-primary-600">Gesamt</span>
-              <span className="text-primary-900 font-medium">
-                {yearTotal.gesamt.toFixed(2)} €
-              </span>
-            </div>
-            {yearTotal.originalGesamt !== yearTotal.gesamt && (
-              <div className="text-xs text-primary-500">
-                Ursprünglich: {yearTotal.originalGesamt.toFixed(2)} €
-              </div>
-            )}
-          </div>
-        </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="flex justify-between items-center mb-2">
+    <span className="text-sm text-primary-600">Kirchenkreis</span>
+    <span className="text-primary-900 font-medium">
+    {yearTotal.kirchenkreis.toFixed(2)} €
+    </span>
+    </div>
+    {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
+      <div className="text-xs text-primary-500">
+      Ursprünglich: {yearTotal.originalKirchenkreis.toFixed(2)} €
+      </div>
+    )}
+    </div>
+    
+    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="flex justify-between items-center mb-2">
+    <span className="text-sm text-primary-600">Gemeinde</span>
+    <span className="text-primary-900 font-medium">
+    {yearTotal.gemeinde.toFixed(2)} €
+    </span>
+    </div>
+    {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
+      <div className="text-xs text-primary-500">
+      Ursprünglich: {yearTotal.originalGemeinde.toFixed(2)} €
+      </div>
+    )}
+    </div>
+    
+    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="flex justify-between items-center mb-2">
+    <span className="text-sm text-primary-600">Mitfahrer</span>
+    <span className="text-primary-900 font-medium">
+    {yearTotal.mitfahrer.toFixed(2)} €
+    </span>
+    </div>
+    {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
+      <div className="text-xs text-primary-500">
+      Ursprünglich: {yearTotal.originalMitfahrer.toFixed(2)} €
+      </div>
+    )}
+    </div>
+    
+    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="flex justify-between items-center mb-2">
+    <span className="text-sm text-primary-600">Gesamt</span>
+    <span className="text-primary-900 font-medium">
+    {yearTotal.gesamt.toFixed(2)} €
+    </span>
+    </div>
+    {yearTotal.originalGesamt !== yearTotal.gesamt && (
+      <div className="text-xs text-primary-500">
+      Ursprünglich: {yearTotal.originalGesamt.toFixed(2)} €
+      </div>
+    )}
+    </div>
+    </div>
+    
     <div className="mt-6 w-full">
     <div className="w-full flex flex-col sm:flex-row sm:justify-end gap-2">
     <div className="w-full sm:w-auto">
@@ -2021,139 +2024,139 @@ function MonthlyOverview() {
     </div>
     </div>
     </div>
-      </div>
-
-      <div className="bg-white sm:rounded-lg sm:border sm:border-primary-100">
-        <div className="hidden sm:block overflow-x-auto w-full">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-primary-25 border-b border-primary-100">
-                <th className="table-header">Monat</th>
-                <th className="table-header text-right">Kirchenkreis</th>
-                <th className="table-header-sm">Status</th>
-                <th className="table-header text-right">Gemeinde</th>
-                <th className="table-header-sm">Status</th>
-                <th className="table-header text-right">Mitfahrer</th>
-                <th className="table-header text-right">Gesamt</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-primary-50">
-              {getFilteredData().map((month) => {
-                const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-                const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
-                const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
-                const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
-                const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
-                const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-                const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-                  Number(month.gemeindeErstattung || 0) + 
-                  Number(month.mitfahrerErstattung || 0);
-                
-                return (
-                  <tr key={month.yearMonth} className="table-row">
-                    <td className="table-cell">{month.monthName} {month.year}</td>
-                    <td className="table-cell text-right">
-                      {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
-                    </td>
-                    <td className="table-cell">
-                      {renderStatusCell(month, 'Kirchenkreis')}
-                    </td>
-                    <td className="table-cell text-right">
-                      {renderBetrag(month.gemeindeErstattung, gemReceived)}
-                    </td>
-                    <td className="table-cell">
-                      {renderStatusCell(month, 'Gemeinde')}
-                    </td>
-                    <td className="table-cell text-right">
-                      {renderBetrag(month.mitfahrerErstattung, kkReceived)}
-                    </td>
-                    <td className="table-cell text-right">
-                      <div className="font-medium">
-                        {ausstehendGesamt.toFixed(2)} €
-                      </div>
-                      {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
-                        <div className="text-xs text-primary-500">
-                          ({originalGesamt.toFixed(2)} €)
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+    </div>
+    
+    <div className="bg-white sm:rounded-lg sm:border sm:border-primary-100">
+    <div className="hidden sm:block overflow-x-auto w-full">
+    <table className="w-full">
+    <thead>
+    <tr className="bg-primary-25 border-b border-primary-100">
+    <th className="table-header">Monat</th>
+    <th className="table-header text-right">Kirchenkreis</th>
+    <th className="table-header-sm">Status</th>
+    <th className="table-header text-right">Gemeinde</th>
+    <th className="table-header-sm">Status</th>
+    <th className="table-header text-right">Mitfahrer</th>
+    <th className="table-header text-right">Gesamt</th>
+    </tr>
+    </thead>
+    <tbody className="divide-y divide-primary-50">
+    {getFilteredData().map((month) => {
+      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
+      const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
+      const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
+      const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
+      const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
+      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
+      Number(month.gemeindeErstattung || 0) + 
+      Number(month.mitfahrerErstattung || 0);
+      
+      return (
+        <tr key={month.yearMonth} className="table-row">
+        <td className="table-cell">{month.monthName} {month.year}</td>
+        <td className="table-cell text-right">
+        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
+        </td>
+        <td className="table-cell">
+        {renderStatusCell(month, 'Kirchenkreis')}
+        </td>
+        <td className="table-cell text-right">
+        {renderBetrag(month.gemeindeErstattung, gemReceived)}
+        </td>
+        <td className="table-cell">
+        {renderStatusCell(month, 'Gemeinde')}
+        </td>
+        <td className="table-cell text-right">
+        {renderBetrag(month.mitfahrerErstattung, kkReceived)}
+        </td>
+        <td className="table-cell text-right">
+        <div className="font-medium">
+        {ausstehendGesamt.toFixed(2)} €
+        </div>
+        {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
+          <div className="text-xs text-primary-500">
+          ({originalGesamt.toFixed(2)} €)
+          </div>
+        )}
+        </td>
+        </tr>
+      );
+    })}
+    </tbody>
+    </table>
+    </div>
+    
+    <div className="sm:hidden space-y-4 p-4">
+    {getFilteredData().map((month) => {
+      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
+      const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
+      const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
+      const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
+      const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
+      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
+      Number(month.gemeindeErstattung || 0) + 
+      Number(month.mitfahrerErstattung || 0);
+      
+      return (
+        <div key={month.yearMonth} className="bg-white rounded-lg border border-primary-100 p-4">
+        <div className="flex justify-between items-start mb-4">
+        <div className="text-primary-900 font-medium">
+        {month.monthName} {month.year}
+        </div>
+        <div className="text-right">
+        <div className="font-medium text-primary-900">
+        {ausstehendGesamt.toFixed(2)} €
+        </div>
+        {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
+          <div className="text-xs text-primary-500">
+          Ursprünglich: {originalGesamt.toFixed(2)} €
+          </div>
+        )}
+        </div>
         </div>
         
-        <div className="sm:hidden space-y-4 p-4">
-          {getFilteredData().map((month) => {
-            const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-            const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
-            const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
-            const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
-            const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
-            const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-            const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-              Number(month.gemeindeErstattung || 0) + 
-              Number(month.mitfahrerErstattung || 0);
-            
-            return (
-              <div key={month.yearMonth} className="bg-white rounded-lg border border-primary-100 p-4">
-              <div className="flex justify-between items-start mb-4">
-                  <div className="text-primary-900 font-medium">
-                    {month.monthName} {month.year}
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium text-primary-900">
-                      {ausstehendGesamt.toFixed(2)} €
-                    </div>
-                    {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
-                      <div className="text-xs text-primary-500">
-                        Ursprünglich: {originalGesamt.toFixed(2)} €
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="pt-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-sm text-primary-600">Kirchenkreis</span>
-                      <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
-                        {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
-                      </span>
-                    </div>
-                    <div className="mt-2">
-                      {renderStatusCell(month, 'Kirchenkreis')}
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-sm text-primary-600">Gemeinde</span>
-                      <span className={gemReceived ? "text-gray-400" : "text-primary-900"}>
-                        {Number(month.gemeindeErstattung || 0).toFixed(2)} €
-                      </span>
-                    </div>
-                    <div className="mt-2">
-                      {renderStatusCell(month, 'Gemeinde')}
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-primary-600">Mitfahrer:innen</span>
-                      <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
-                        {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="space-y-4">
+        <div className="pt-4">
+        <div className="flex justify-between items-start mb-2">
+        <span className="text-sm text-primary-600">Kirchenkreis</span>
+        <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
+        {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
+        </span>
         </div>
-      </div>
-      
+        <div className="mt-2">
+        {renderStatusCell(month, 'Kirchenkreis')}
+        </div>
+        </div>
+        
+        <div className="pt-4">
+        <div className="flex justify-between items-start mb-2">
+        <span className="text-sm text-primary-600">Gemeinde</span>
+        <span className={gemReceived ? "text-gray-400" : "text-primary-900"}>
+        {Number(month.gemeindeErstattung || 0).toFixed(2)} €
+        </span>
+        </div>
+        <div className="mt-2">
+        {renderStatusCell(month, 'Gemeinde')}
+        </div>
+        </div>
+        
+        <div className="pt-4">
+        <div className="flex justify-between items-start">
+        <span className="text-sm text-primary-600">Mitfahrer</span>
+        <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
+        {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
+        </span>
+        </div>
+        </div>
+        </div>
+        </div>
+      );
+    })}
+    </div>
+    </div>
+    
     <AbrechnungsStatusModal 
     isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
     onClose={() => setStatusModal({})}
