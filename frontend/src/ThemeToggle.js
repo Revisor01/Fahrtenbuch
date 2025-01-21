@@ -1,5 +1,5 @@
 import { Moon, Sun, Palette } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from './ThemeContext';
 import { useState } from 'react';
 
 export default function ThemeToggle() {
