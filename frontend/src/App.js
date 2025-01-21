@@ -6,7 +6,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-import { HelpCircle, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle } from 'lucide-react';
+import { HelpCircle, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
 import HilfeModal from './HilfeModal';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
@@ -1859,7 +1859,7 @@ function MonthlyOverview() {
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center justify-between">
-        <span className="text-primary-600 text-xs cursor-pointer"
+        <span className="text-primary-600 text-xs cursor-pointer flex items-center gap-1"
         onClick={() => setStatusModal({ 
           open: true, 
           typ, 
@@ -1868,7 +1868,8 @@ function MonthlyOverview() {
           monat: month.monatNr
         })}
         >
-        ● Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}
+        <CheckCircle2 size={14} className="text-green-500" />
+        <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
         </span>
         </div>
       );
@@ -1877,7 +1878,7 @@ function MonthlyOverview() {
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center justify-between">
-        <span className="text-secondary-500 text-xs cursor-pointer"
+        <span className="text-secondary-500 text-xs cursor-pointer flex items-center gap-1"
         onClick={() => setStatusModal({ 
           open: true, 
           typ, 
@@ -1886,7 +1887,8 @@ function MonthlyOverview() {
           monat: month.monatNr
         })}
         >
-        ○ Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}
+        <Circle size={14} className="text-yellow-500" />
+        <span>Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}</span>
         </span>
         </div>
       );
@@ -1894,7 +1896,7 @@ function MonthlyOverview() {
     
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
-      <span className="text-secondary-500 text-xs cursor-pointer"
+      <span className="text-secondary-500 text-xs cursor-pointer flex items-center gap-1"
       onClick={() => setStatusModal({ 
         open: true, 
         typ, 
@@ -1903,8 +1905,8 @@ function MonthlyOverview() {
         monat: month.monatNr
       })}
       >
-      <AlertCircle size={14} className="inline-block mr-1" />
-      Nicht eingereicht
+      <AlertCircle size={14} className="text-secondary-500" />
+      <span>Nicht eingereicht</span>
       </span>
       </div>
     ) : null;
@@ -2766,8 +2768,8 @@ function AppContent() {
   
   return (
     <div className="container mx-auto p-4">
-    <div className="mb-12">  {/* von mb-8 auf mb-12 geändert */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="mb-8">  {/* von mb-8 auf mb-12 geändert */}
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
     <h1 className="text-2xl font-semibold text-primary-900">Fahrtenabrechnung</h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -2820,7 +2822,7 @@ function AppContent() {
               </button>
               <button 
                 onClick={logout} 
-                className="bg-secondary-400 text-white hover:bg-secondary-500 h-8 rounded transition-colors duration-200 text-sm shadow-sm whitespace-nowrap flex items-center justify-center gap-1 w-full"
+                className="btn-secondary flex items-center justify-center gap-1 whitespace-nowrap w-full"
               >
                 <LogOut size={16} />
                 <span>Logout</span>
