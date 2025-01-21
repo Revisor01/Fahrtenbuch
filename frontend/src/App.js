@@ -177,7 +177,6 @@ function AppProvider({ children }) {
   
   const addFahrt = async (fahrt, retries = 3) => {
     try {
-      console.log('Sending fahrt data:', fahrt);
       const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
       if (response.status === 201) {
         fetchFahrten();
@@ -935,7 +934,6 @@ function FahrtenListe() {
   };
   
   const roundKilometers = (value) => {
-    console.log("roundKilometers input:", value);
     const numValue = Number(value ?? 0);
     return numValue % 1 < 0.5 ? Math.floor(numValue) : Math.ceil(numValue);
   };
@@ -1007,7 +1005,6 @@ function FahrtenListe() {
   };
   
   const formatValue = (value) => {
-    console.log("formatValue input:", value);
     return value == null ? "" : value;
   };
   
@@ -1043,7 +1040,6 @@ function FahrtenListe() {
   
   const handleSaveMitfahrer = async (updatedMitfahrer) => {
     try {
-      console.log('Saving Mitfahrer:', updatedMitfahrer);  // Debugging
       if (!updatedMitfahrer.fahrtId) {
         throw new Error('Fahrt ID ist nicht definiert');
       }
@@ -1705,15 +1701,18 @@ function MonthlyOverview() {
   const [filteredData, setFilteredData] = useState([]);
   
   useEffect(() => {
+    console.log('hideCompleted changed:', hideCompleted); // Debug
     const filtered = monthlyData.filter(month => {
       if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
         return false;
       }
       
       if (hideCompleted) {
-        const isCompleted = month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+        const kkCompleted = month.kirchenkreisErstattung === 0 || 
+        month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
+        const gemCompleted = month.gemeindeErstattung === 0 || 
         month.abrechnungsStatus?.gemeinde?.erhalten_am;
-        if (isCompleted) {
+        if (kkCompleted && gemCompleted) {
           return false;
         }
       }
@@ -1904,7 +1903,8 @@ function MonthlyOverview() {
     month.kirchenkreisErstattung : 
     month.gemeindeErstattung;
     
-    if (status?.erhalten_am) {
+    // Wenn Betrag 0 ist
+    if (betrag === 0) {
       return (
         <div className="flex items-center justify-between">
         <span className="text-primary-600 text-xs cursor-pointer flex items-center gap-1"
@@ -1917,7 +1917,7 @@ function MonthlyOverview() {
         })}
         >
         <CheckCircle2 size={14} className="text-primary-600" />
-        <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
+        <span>Keine Abrechnung</span>
         </span>
         </div>
       );
