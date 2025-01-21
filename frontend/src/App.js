@@ -2069,7 +2069,7 @@ function MonthlyOverview() {
     <div className="w-full flex flex-col sm:flex-row sm:justify-end gap-2">
     <div className="w-full sm:w-auto">
     <QuickActions 
-    filteredData={filteredData()} 
+    filteredData={filteredData}
     handleStatusUpdate={handleStatusUpdate}
     className="w-full" 
     />
