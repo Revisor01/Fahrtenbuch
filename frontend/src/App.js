@@ -1918,6 +1918,19 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Jahresübersicht</h2>
     
+    <div className="flex items-center">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.checked)}
+    className="form-checkbox h-3 w-3"
+    />
+    <label htmlFor="hideCompleted" className="ml-1">
+    Abgeschlossene
+    </label>
+    </div>
+    
     <div className="flex items-center justify-end gap-3 text-[11px]">
     {selectedYear !== currentYear && selectedYear !== 'all' && (
       <button 
@@ -1941,18 +1954,6 @@ function MonthlyOverview() {
     }
     </select>
     
-    <div className="flex items-center">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.checked)}
-    className="form-checkbox h-3 w-3"
-    />
-    <label htmlFor="hideCompleted" className="ml-1">
-    Abgeschlossene
-    </label>
-    </div>
     </div>
     </div>
     
@@ -2765,23 +2766,23 @@ function AppContent() {
   
   return (
     <div className="container mx-auto p-4">
-    <div className="mb-8">
+    <div className="mb-12">  {/* von mb-8 auf mb-12 geändert */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
     <h1 className="text-2xl font-semibold text-primary-900">Fahrtenabrechnung</h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
     {/* Hauptnavigation - Verwaltung */}
-    <div className="flex gap-2">
+    <div className="grid grid-cols-2 sm:flex gap-2 w-full">
     <button
     onClick={() => setShowOrteModal(true)}
-    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
+    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1 w-full"
     >
     <MapPin size={16} />
     <span>Orte</span>
     </button>
     <button
     onClick={() => setShowDistanzenModal(true)}
-    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
+    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1 w-full"
     >
     <Ruler size={16} />
     <span>Distanzen</span>
@@ -2789,44 +2790,44 @@ function AppContent() {
     </div>
     
     {/* Benutzer-bezogene Aktionen */}
-    <div className="flex gap-2">
-    {user?.role === 'admin' && (
-      <button
-      onClick={() => setShowUserManagementModal(true)}
-      className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
-      >
-      <Users size={16} />
-      <span>Benutzerverwaltung</span>
-      </button>
-    )}
-    <button
-    onClick={() => setIsProfileModalOpen(true)}
-    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
-    >
-    <UserCircle size={16} />
-    <span>Profil</span>
-    </button>
-    </div>
-    
-    {/* Hilfe und Logout */}
-    <div className="flex gap-2">
-    <button
-    onClick={() => setShowHelpModal(true)}
-    className="btn-primary flex items-center justify-center gap-1 whitespace-nowrap"
-    >
-    <HelpCircle size={16} />
-    <span>Hilfe</span>
-    </button>
-    <button 
-    onClick={logout} 
-    className="bg-secondary-400 text-white hover:bg-secondary-500 px-4 h-8 rounded transition-colors duration-200 text-sm shadow-sm whitespace-nowrap flex items-center justify-center gap-1"
-    >
-    <LogOut size={16} />
-    <span>Logout</span>
-    </button>
-    </div>
-    </div>
-    </div>
+    <div className={`grid ${user?.role === 'admin' ? 'grid-cols-2' : 'grid-cols-1'} sm:flex gap-2 w-full`}>
+              {user?.role === 'admin' && (
+                <button
+                  onClick={() => setShowUserManagementModal(true)}
+                  className="btn-primary whitespace-nowrap flex items-center justify-center gap-1 w-full"
+                >
+                  <Users size={16} />
+                  <span>Benutzerverwaltung</span>
+                </button>
+              )}
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="btn-primary whitespace-nowrap flex items-center justify-center gap-1 w-full"
+              >
+                <UserCircle size={16} />
+                <span>Profil</span>
+              </button>
+            </div>
+            
+            {/* Hilfe und Logout */}
+            <div className="grid grid-cols-2 sm:flex gap-2 w-full">
+              <button
+                onClick={() => setShowHelpModal(true)}
+                className="btn-primary flex items-center justify-center gap-1 whitespace-nowrap w-full"
+              >
+                <HelpCircle size={16} />
+                <span>Hilfe</span>
+              </button>
+              <button 
+                onClick={logout} 
+                className="bg-secondary-400 text-white hover:bg-secondary-500 h-8 rounded transition-colors duration-200 text-sm shadow-sm whitespace-nowrap flex items-center justify-center gap-1 w-full"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
     
     {/* Hauptinhalt */}
     <div className="space-y-8">
@@ -2879,5 +2880,3 @@ function AppContent() {
 }
 
 export default App;
-  
-  
