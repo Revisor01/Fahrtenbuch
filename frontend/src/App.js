@@ -757,7 +757,7 @@ function FahrtenListe() {
     
     return (
       <div className="table-container mb-4">
-      <div className="bg-white p-6 space-y-6">
+      <div className="p-6 space-y-6">
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
       <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Monatsübersicht</h2>
@@ -1978,7 +1978,9 @@ function MonthlyOverview() {
   
   return (
     <div className="w-full max-w-full space-y-6">
-    <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
+    {/* Outer Container mit Border und Hintergrundfarbe */}
+    <div className="table-container-outer">
+    <div className="p-6">
     <div className="flex flex-col gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1987,7 +1989,7 @@ function MonthlyOverview() {
     type="checkbox"
     id="hideCompleted"
     checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}  // statt e.checked
+    onChange={(e) => setHideCompleted(e.target.checked)}
     className="form-checkbox h-3 w-3"
     />
     <label htmlFor="hideCompleted" className="ml-1">
@@ -1997,15 +1999,15 @@ function MonthlyOverview() {
     
     <div className="flex items-center justify-end gap-3 text-[11px]">
     {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
+      <button
       onClick={() => setSelectedYear(currentYear)}
       className="btn-secondary"
       >
       Aktuelles Jahr
       </button>
     )}
-    <select 
-    value={selectedYear} 
+    <select
+    value={selectedYear}
     onChange={(e) => setSelectedYear(e.target.value)}
     className="form-select w-24"
     >
@@ -2020,7 +2022,6 @@ function MonthlyOverview() {
     </div>
     </div>
     </div>
-    
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <div className="bg-white p-4 rounded border border-primary-100">
     <div className="flex justify-between items-center mb-2">
@@ -2078,21 +2079,21 @@ function MonthlyOverview() {
     )}
     </div>
     </div>
-    
     <div className="mt-6 w-full">
     <div className="w-full flex flex-col sm:flex-row sm:justify-end gap-2">
     <div className="w-full sm:w-auto">
-    <QuickActions 
+    <QuickActions
     filteredData={filteredData}
     handleStatusUpdate={handleStatusUpdate}
-    className="w-full" 
+    className="w-full"
     />
     </div>
     </div>
     </div>
     </div>
     
-    <div className="bg-white sm:rounded-lg sm:border sm:border-primary-100">
+    {/* Table Container mit weißen Hintergrund */}
+    <div className="table-container bg-white">
     <div className="hidden sm:block overflow-x-auto w-full">
     <table className="w-full">
     <thead>
@@ -2114,8 +2115,8 @@ function MonthlyOverview() {
       const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
       const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
       const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-      Number(month.gemeindeErstattung || 0) + 
+      const originalGesamt = Number(month.kirchenkreisErstattung || 0) +
+      Number(month.gemeindeErstattung || 0) +
       Number(month.mitfahrerErstattung || 0);
       
       return (
@@ -2161,8 +2162,8 @@ function MonthlyOverview() {
       const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
       const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
       const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-      Number(month.gemeindeErstattung || 0) + 
+      const originalGesamt = Number(month.kirchenkreisErstattung || 0) +
+      Number(month.gemeindeErstattung || 0) +
       Number(month.mitfahrerErstattung || 0);
       
       return (
@@ -2223,8 +2224,8 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    <AbrechnungsStatusModal 
-    isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
+    <AbrechnungsStatusModal
+    isOpen={statusModal.open && statusModal.aktion !== 'reset'}
     onClose={() => setStatusModal({})}
     onSubmit={(date) => handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.typ, statusModal.aktion, date)}
     typ={statusModal.typ}
@@ -2641,7 +2642,7 @@ function LoginPage() {
   
   return (
     <div className="min-h-screen flex items-center justify-center">
-    <div className="table-container m-6 bg-primary-25 w-full max-w-md">
+    <div className="table-container m-6 w-full max-w-md">
     <div className="p-6 rounded-lg space-y-6">
     <h2 className="text-2xl font-medium text-primary-900 text-center">
     Fahrtenbuch
@@ -2724,7 +2725,7 @@ function ForgotPasswordForm({ onClose }) {
   
   return (
     <div className="table-container">
-    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <div className="p-6 rounded-lg space-y-6">
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
     <label className="block text-sm font-medium text-primary-600">
