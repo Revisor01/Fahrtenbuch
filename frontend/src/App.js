@@ -735,6 +735,11 @@ function FahrtenListe() {
       
       <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
       <div className="flex items-center justify-end gap-2">
+      {selectedMonth !== currentMonth && (
+        <button onClick={resetToCurrentMonth} className="btn-secondary">
+        Aktueller Monat
+        </button>
+      )}
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
@@ -758,11 +763,6 @@ function FahrtenListe() {
         );
       })}
       </select>
-      {selectedMonth !== currentMonth && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary">
-        Aktueller Monat
-        </button>
-      )}
       </div>
       </div>
       </div>
@@ -1933,6 +1933,14 @@ function MonthlyOverview() {
     </div>
     
     <div className="flex items-center justify-end gap-2">
+    {selectedYear !== currentYear && selectedYear !== 'all' && (
+      <button 
+      onClick={() => setSelectedYear(currentYear)}
+      className="btn-secondary"
+      >
+      Aktuelles Jahr
+      </button>
+    )}
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1946,14 +1954,6 @@ function MonthlyOverview() {
       ))
     }
     </select>
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary"
-      >
-      Aktuelles Jahr
-      </button>
-    )}
     </div>
     </div>
     </div>
