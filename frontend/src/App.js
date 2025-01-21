@@ -381,7 +381,7 @@ function OrtForm() {
   return (
     <div className="mb-4">
     <div className="table-container">
-    <div className="bg-primary-25 p-6">
+    <div className="p-6">
     <form onSubmit={handleSubmit}>
     {/* Alle Eingabefelder in einer Zeile auf Desktop */}
     <div className="flex flex-col sm:flex-row gap-4">
@@ -480,7 +480,7 @@ function DistanzForm() {
   return (
     <div className="mb-4">
     <div className="table-container">
-    <div className="bg-primary-25 p-6">
+    <div className="p-6">
     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
     <div className="w-full sm:flex-1">
     <select
@@ -757,7 +757,7 @@ function FahrtenListe() {
     
     return (
       <div className="table-container mb-4">
-      <div className="bg-primary-25 p-6 space-y-6">
+      <div className="bg-white p-6 space-y-6">
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
       <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Monatsübersicht</h2>
