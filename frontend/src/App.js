@@ -1109,7 +1109,7 @@ function FahrtenListe() {
     className={`${
       detail ? "bg-primary-50" : 
       (fahrt.autosplit ? "bg-primary-25" : "")
-      } hover:bg-primary-25 transition-colors duration-150`}
+      } bg-white rounded-lg hover:bg-primary-25 transition-colors duration-150`}
     >
     <td className="table-cell">
     {editingFahrt?.id === fahrt.id ? (
@@ -2363,7 +2363,7 @@ function OrteListe() {
     <div className="overflow-x-auto w-full">
     <table className="w-full">
     <thead>
-    <tr className="bg-primary-25 border-b border-primary-100">
+    <tr className="border-b border-primary-100">
     <th className="table-header"
     onClick={() => requestSort('name')}>
     Name
@@ -2380,7 +2380,7 @@ function OrteListe() {
     </th>
     </tr>
     </thead>
-    <tbody className="divide-y divide-primary-50">
+    <tbody className="bg-white rounded-lg divide-y divide-primary-50">
     {sortedOrte.map((ort) => (
       <tr key={ort.id} className="hover:bg-primary-25 transition-colors duration-150">
       <td className="px-4 py-3 text-sm text-primary-900">
@@ -2539,7 +2539,7 @@ function DistanzenListe() {
     <div className="overflow-x-auto w-full">
     <table className="w-full">
     <thead>
-    <tr className="bg-primary-25 border-b border-primary-100">
+    <tr className="border-b border-primary-100">
     <th className="table-header" onClick={() => requestSort('von_ort_id')}>
     Von
     </th>
@@ -2555,7 +2555,7 @@ function DistanzenListe() {
     </th>
     </tr>
     </thead>
-    <tbody className="divide-y divide-primary-50">
+    <tbody className="bg-white rounded-lg divide-y divide-primary-50">
     {sortedDistanzen.map((distanz) => (
       <tr key={distanz.id} className="hover:bg-primary-25 transition-colors duration-150">
       <td className="px-4 py-3 text-sm text-primary-900">
