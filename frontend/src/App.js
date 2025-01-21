@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import axios from 'axios';
 import './index.css';
+import './darkMode.css';
 import ProfileModal from './ProfileModal';
 import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
@@ -15,6 +16,8 @@ import VerifyEmail from './VerifyEmail';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ResetPassword from './ResetPassword';
 import SetPassword from './SetPassword';
+import { ThemeProvider } from './ThemeContext';
+import ThemeToggle from './ThemeToggle';
 
 const API_BASE_URL = '/api';
 
@@ -2775,6 +2778,7 @@ function App() {
   }, []);
   
   return (
+    <ThemeProvider>
     <BrowserRouter>
     <AppProvider>
     <Routes>
@@ -2785,6 +2789,7 @@ function App() {
     </Routes>
     </AppProvider>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
@@ -2871,22 +2876,23 @@ function AppContent() {
             </div>
             
             {/* Hilfe und Logout */}
-            <div className="grid grid-cols-2 sm:flex gap-2 w-full">
-              <button
-                onClick={() => setShowHelpModal(true)}
-                className="btn-primary flex items-center justify-center gap-1 whitespace-nowrap w-full"
-              >
-                <HelpCircle size={16} />
-                <span>Hilfe</span>
-              </button>
-              <button 
-                onClick={logout} 
-                className="btn-secondary flex items-center justify-center gap-1 whitespace-nowrap w-full"
-              >
-                <LogOut size={16} />
-                <span>Logout</span>
-              </button>
-            </div>
+<div className="grid grid-cols-3 sm:flex gap-2 w-full">
+  <ThemeToggle />
+  <button
+    onClick={() => setShowHelpModal(true)}
+    className="btn-primary flex items-center justify-center gap-1 whitespace-nowrap w-full"
+  >
+    <HelpCircle size={16} />
+    <span>Hilfe</span>
+  </button>
+  <button 
+    onClick={logout} 
+    className="btn-secondary flex items-center justify-center gap-1 whitespace-nowrap w-full"
+  >
+    <LogOut size={16} />
+    <span>Logout</span>
+  </button>
+</div>
           </div>
         </div>
     
