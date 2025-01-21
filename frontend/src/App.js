@@ -223,10 +223,25 @@ function AppProvider({ children }) {
       const currentYear = currentDate.getFullYear();
       const currentMonth = currentDate.getMonth();
       const promises = [];
+      const months = [];
       
-      // Statt nur vom aktuellen Datum, nehmen wir das ganze Jahr
-      for (let i = 0; i < 24; i++) {
-        const date = new Date(currentYear, currentMonth - i, 1);
+      // 3 Monate nach vorne
+      for (let i = 1; i <= 3; i++) {
+        const futureDate = new Date(currentYear, currentMonth + i, 1);
+        months.push(futureDate);
+      }
+      
+      // Aktueller Monat
+      months.push(new Date(currentYear, currentMonth, 1));
+      
+      // Rückwärts gehen (24 Monate sollten erstmal reichen, werden aber gefiltert)
+      for (let i = 1; i <= 24; i++) {
+        const pastDate = new Date(currentYear, currentMonth - i, 1);
+        months.push(pastDate);
+      }
+      
+      // Für jeden Monat API-Call vorbereiten
+      for (const date of months) {
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
         promises.push(axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`));
@@ -235,7 +250,7 @@ function AppProvider({ children }) {
       const responses = await Promise.all(promises);
       const data = responses
       .map((response, index) => {
-        const date = new Date(currentYear, currentMonth - index, 1);
+        const date = months[index];
         return {
           yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
           monthName: date.toLocaleString('default', { month: 'long' }),
@@ -247,8 +262,18 @@ function AppProvider({ children }) {
           abrechnungsStatus: response.data.summary.abrechnungsStatus
         };
       })
-      // Der Filter hier könnte das Problem sein - wir sollten alle Monate anzeigen
-      .filter(month => month.kirchenkreisErstattung > 0 || month.gemeindeErstattung > 0 || month.mitfahrerErstattung > 0);
+      // Nur Monate mit Daten behalten
+      .filter(month => 
+        month.kirchenkreisErstattung > 0 || 
+        month.gemeindeErstattung > 0 || 
+        month.mitfahrerErstattung > 0
+      )
+      // Nach Datum sortieren (neueste zuerst)
+      .sort((a, b) => {
+        const dateA = new Date(a.year, a.monatNr - 1);
+        const dateB = new Date(b.year, b.monatNr - 1);
+        return dateB - dateA;
+      });
       
       setMonthlyData(data);
     } catch (error) {
@@ -1676,16 +1701,33 @@ function MonthlyOverview() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString()); // Geändert von 'all'
   const [hideCompleted, setHideCompleted] = useState(true);
   
+  // Diese Zeilen direkt darunter einfügen:
+  const [filteredData, setFilteredData] = useState([]);
+  
+  useEffect(() => {
+    const filtered = monthlyData.filter(month => {
+      if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
+        return false;
+      }
+      
+      if (hideCompleted) {
+        const isCompleted = month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
+        month.abrechnungsStatus?.gemeinde?.erhalten_am;
+        if (isCompleted) {
+          return false;
+        }
+      }
+      return true;
+    });
+    setFilteredData(filtered);
+  }, [monthlyData, hideCompleted, selectedYear]);
+  
   // Neue Konstante hier einfügen
   const currentYear = new Date().getFullYear().toString();
 
   useEffect(() => {
     fetchMonthlyData();
   }, []);
-  
-  useEffect(() => {
-    fetchMonthlyData();
-  }, [hideCompleted]);
   
   const handleStatusUpdate = async (jahr, monat, typ, aktion, datum) => {
     try {
@@ -1721,7 +1763,7 @@ function MonthlyOverview() {
   };
     
   const calculateYearTotal = () => {
-    return getFilteredData().reduce((total, month) => {
+    return filteredData.reduce((total, month) => {
       total.originalKirchenkreis += Number(month.kirchenkreisErstattung || 0);
       total.originalGemeinde += Number(month.gemeindeErstattung || 0);
       total.originalMitfahrer += Number(month.mitfahrerErstattung || 0);
@@ -2027,7 +2069,7 @@ function MonthlyOverview() {
     <div className="w-full flex flex-col sm:flex-row sm:justify-end gap-2">
     <div className="w-full sm:w-auto">
     <QuickActions 
-    filteredData={getFilteredData()} 
+    filteredData={filteredData()} 
     handleStatusUpdate={handleStatusUpdate}
     className="w-full" 
     />
@@ -2051,7 +2093,7 @@ function MonthlyOverview() {
     </tr>
     </thead>
     <tbody className="divide-y divide-primary-50">
-    {getFilteredData().map((month) => {
+    {filteredData.map((month) => {
       const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
       const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
       const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
@@ -2098,7 +2140,7 @@ function MonthlyOverview() {
     </div>
     
     <div className="sm:hidden space-y-4">
-    {getFilteredData().map((month) => {
+    {filteredData.map((month) => {
       const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
       const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
       const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
