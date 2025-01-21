@@ -71,14 +71,9 @@ code {
   }
   
   .table-row {
-    @apply hover:bg-primary-25 table-row-dark-hover
-    transition-colors duration-200;
-  }
-  
-  .table-row-dark-hover {
-    @apply dark:hover:bg-primary-900/10; /* /10 für 10% Opazität */
-  }
-  
+        @apply hover:bg-primary-25 dark:hover:bg-primary-900 dark:hover:opacity-10
+            transition-colors duration-200;
+      }
 }
 
 @layer utilities {
