@@ -1918,21 +1918,7 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Jahresübersicht</h2>
     
-    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
-    <div className="text-xs flex items-center justify-end">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.checked)}
-    className="form-checkbox h-4 w-4"
-    />
-    <label htmlFor="hideCompleted" className="ml-2">
-    Abgeschlossene ausblenden
-    </label>
-    </div>
-    
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex items-center justify-end gap-3 text-[11px]">
     {selectedYear !== currentYear && selectedYear !== 'all' && (
       <button 
       onClick={() => setSelectedYear(currentYear)}
@@ -1954,6 +1940,18 @@ function MonthlyOverview() {
       ))
     }
     </select>
+    
+    <div className="flex items-center">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.checked)}
+    className="form-checkbox h-3 w-3"
+    />
+    <label htmlFor="hideCompleted" className="ml-1">
+    Abgeschlossene
+    </label>
     </div>
     </div>
     </div>
@@ -2875,6 +2873,7 @@ function AppContent() {
     isOpen={showHelpModal}
     onClose={() => setShowHelpModal(false)}
     />
+    </div>
     </div>
   );
 }
