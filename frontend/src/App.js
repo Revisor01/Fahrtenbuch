@@ -224,6 +224,7 @@ function AppProvider({ children }) {
       const currentMonth = currentDate.getMonth();
       const promises = [];
       
+      // Statt nur vom aktuellen Datum, nehmen wir das ganze Jahr
       for (let i = 0; i < 24; i++) {
         const date = new Date(currentYear, currentMonth - i, 1);
         const year = date.getFullYear();
@@ -239,13 +240,14 @@ function AppProvider({ children }) {
           yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
           monthName: date.toLocaleString('default', { month: 'long' }),
           year: date.getFullYear(),
-          monatNr: date.getMonth() + 1,  // Hier fügen wir monatNr explizit hinzu
+          monatNr: date.getMonth() + 1,
           kirchenkreisErstattung: response.data.summary.kirchenkreisErstattung,
           gemeindeErstattung: response.data.summary.gemeindeErstattung,
           mitfahrerErstattung: response.data.summary.mitfahrerErstattung || 0,
           abrechnungsStatus: response.data.summary.abrechnungsStatus
         };
       })
+      // Der Filter hier könnte das Problem sein - wir sollten alle Monate anzeigen
       .filter(month => month.kirchenkreisErstattung > 0 || month.gemeindeErstattung > 0 || month.mitfahrerErstattung > 0);
       
       setMonthlyData(data);
@@ -1681,6 +1683,10 @@ function MonthlyOverview() {
     fetchMonthlyData();
   }, []);
   
+  useEffect(() => {
+    fetchMonthlyData();
+  }, [hideCompleted]);
+  
   const handleStatusUpdate = async (jahr, monat, typ, aktion, datum) => {
     try {
       await updateAbrechnungsStatus(jahr, monat, typ, aktion, datum);
@@ -1917,9 +1923,9 @@ function MonthlyOverview() {
   return (
     <div className="w-full max-w-full space-y-6">
     <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
-    <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-6">
-    <div className="flex items-center gap-4 w-full sm:w-auto">
+    <div className="flex flex-col gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
+    <div className="flex flex-wrap items-center justify-between gap-4">
     <div className="flex items-center text-[11px] text-primary-600">
     <input
     type="checkbox"
@@ -1931,7 +1937,6 @@ function MonthlyOverview() {
     <label htmlFor="hideCompleted" className="ml-1">
     Abgeschlossene
     </label>
-    </div>
     </div>
     
     <div className="flex items-center justify-end gap-3 text-[11px]">
@@ -1956,6 +1961,7 @@ function MonthlyOverview() {
       ))
     }
     </select>
+    </div>
     </div>
     </div>
     
