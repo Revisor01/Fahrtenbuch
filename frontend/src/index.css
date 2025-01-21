@@ -19,8 +19,10 @@ code {
 
 @layer components {
   .table-header, .table-header-sm {
-    @apply px-4 py-3 text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer transition-colors duration-200 !important;
-  }
+        @apply px-4 py-3 text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer transition-colors duration-200 !important;
+          border-radius: 0.375rem; /* entspricht 6px */
+          background-color: var(--primary-25);
+        }
   
   .table-header {
     @apply text-left !important;
