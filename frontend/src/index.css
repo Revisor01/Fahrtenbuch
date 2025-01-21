@@ -5,8 +5,8 @@
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   @apply bg-white dark:bg-gray-900 text-primary-900 dark:text-primary-100 transition-colors duration-200;
@@ -14,7 +14,7 @@ body {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  monospace;
 }
 
 @layer components {
@@ -29,52 +29,52 @@ code {
   .table-header-sm {
     @apply text-left hidden sm:table-cell !important;
   }
-
+  
   .btn-primary {
     @apply bg-primary-500 dark:bg-primary-600 text-white px-4 h-8 rounded 
-           hover:bg-primary-600 dark:hover:bg-primary-700 
-           transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
+    hover:bg-primary-600 dark:hover:bg-primary-700 
+    transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
   }
   
   .btn-secondary {
     @apply bg-secondary-400 dark:bg-secondary-500 text-white px-4 h-8 rounded 
-           hover:bg-secondary-500 dark:hover:bg-secondary-600 
-           transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
+    hover:bg-secondary-500 dark:hover:bg-secondary-600 
+    transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
   }
-
+  
   .form-input {
     @apply w-full h-8 px-3 bg-white dark:bg-gray-800 
-           border border-primary-200 dark:border-primary-700 
-           rounded text-sm 
-           focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 
-           focus:border-transparent 
-           shadow-sm 
-           text-primary-900 dark:text-primary-100
-           transition-colors duration-200;
+    border border-primary-200 dark:border-primary-700 
+    rounded text-sm 
+    focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 
+    focus:border-transparent 
+    shadow-sm 
+    text-primary-900 dark:text-primary-100
+    transition-colors duration-200;
   }
-
+  
   .form-select {
     @apply form-input;
   }
-
+  
   .table-container {
     @apply bg-white dark:bg-gray-800 
-           rounded-lg shadow-sm w-full 
-           border border-primary-100 dark:border-primary-800
-           transition-colors duration-200;
+    rounded-lg shadow-sm w-full 
+    border border-primary-100 dark:border-primary-800
+    transition-colors duration-200;
+    background-color: var(--primary-25);
   }
   
   .table-cell {
     @apply px-4 py-3 text-sm 
-           text-primary-900 dark:text-primary-100
-           transition-colors duration-200;
+    text-primary-900 dark:text-primary-100
+    transition-colors duration-200;
   }
-
+  
   .table-row {
-    @apply hover:bg-primary-25 dark:hover:bg-primary-900/50 
-           transition-colors duration-200;
-  }
-
+        @apply hover:bg-primary-25 dark:hover:bg-primary-900 dark:hover:opacity-10
+            transition-colors duration-200;
+      }
 }
 
 @layer utilities {
