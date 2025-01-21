@@ -1907,6 +1907,17 @@ function MonthlyOverview() {
     if (betrag === 0) {
       return (
         <div className="flex items-center justify-between">
+        <span className="text-primary-600 text-xs cursor-pointer flex items-center gap-1">
+        <CheckCircle2 size={14} className="text-primary-600" />
+        <span>Keine Abrechnung</span>
+        </span>
+        </div>
+      );
+    }
+    
+    if (status?.erhalten_am) {
+      return (
+        <div className="flex items-center justify-between">
         <span className="text-primary-600 text-xs cursor-pointer flex items-center gap-1"
         onClick={() => setStatusModal({ 
           open: true, 
@@ -1917,7 +1928,7 @@ function MonthlyOverview() {
         })}
         >
         <CheckCircle2 size={14} className="text-primary-600" />
-        <span>Keine Abrechnung</span>
+        <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
         </span>
         </div>
       );
@@ -1973,7 +1984,7 @@ function MonthlyOverview() {
     type="checkbox"
     id="hideCompleted"
     checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.checked)}
+    onChange={(e) => setHideCompleted(e.target.checked)}  // statt e.checked
     className="form-checkbox h-3 w-3"
     />
     <label htmlFor="hideCompleted" className="ml-1">
