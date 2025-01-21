@@ -6,7 +6,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle } from 'lucide-react';
 import HilfeModal from './HilfeModal';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
@@ -1903,6 +1903,7 @@ function MonthlyOverview() {
         monat: month.monatNr
       })}
       >
+      <AlertCircle size={14} className="inline-block mr-1" />
       Nicht eingereicht
       </span>
       </div>
@@ -2770,53 +2771,61 @@ function AppContent() {
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
     <h1 className="text-2xl font-semibold text-primary-900">Fahrtenabrechnung</h1>
     
-    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-    {/* Primäre Aktionen */}
-    <div className="flex gap-2 w-full sm:w-auto">
+    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+    {/* Hauptnavigation - Verwaltung */}
+    <div className="flex gap-2">
     <button
     onClick={() => setShowOrteModal(true)}
-    className="btn-primary flex-1 sm:flex-initial"
+    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
     >
-    Orte
+    <MapPin size={16} />
+    <span>Orte</span>
     </button>
     <button
     onClick={() => setShowDistanzenModal(true)}
-    className="btn-primary flex-1 sm:flex-initial"
+    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
     >
-    Distanzen
-    </button>
-    <button
-    onClick={() => setShowHelpModal(true)}
-    className="btn-secondary flex-1 sm:flex-initial flex items-center justify-center gap-1"
-    >
-    <HelpCircle size={16} />
-    <span>Hilfe</span>
+    <Ruler size={16} />
+    <span>Distanzen</span>
     </button>
     </div>
     
-    {/* Sekundäre Aktionen - gestapelt auf Mobile */}
-    <div className="flex gap-2 w-full sm:w-auto">
+    {/* Benutzer-bezogene Aktionen */}
+    <div className="flex gap-2">
     {user?.role === 'admin' && (
       <button
       onClick={() => setShowUserManagementModal(true)}
-      className="btn-primary flex-1 sm:flex-initial"
+      className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
       >
-      Benutzerverwaltung
+      <Users size={16} />
+      <span>Benutzerverwaltung</span>
       </button>
     )}
     <button
     onClick={() => setIsProfileModalOpen(true)}
-    className="btn-primary flex-1 sm:flex-initial"
+    className="btn-primary whitespace-nowrap flex items-center justify-center gap-1"
     >
-    Profil
+    <UserCircle size={16} />
+    <span>Profil</span>
+    </button>
+    </div>
+    
+    {/* Hilfe und Logout */}
+    <div className="flex gap-2">
+    <button
+    onClick={() => setShowHelpModal(true)}
+    className="btn-primary flex items-center justify-center gap-1 whitespace-nowrap"
+    >
+    <HelpCircle size={16} />
+    <span>Hilfe</span>
     </button>
     <button 
     onClick={logout} 
-    className="bg-secondary-400 text-white hover:bg-secondary-500 px-4 h-8 rounded transition-colors duration-200 text-sm shadow-sm flex-1 sm:flex-initial"
+    className="bg-secondary-400 text-white hover:bg-secondary-500 px-4 h-8 rounded transition-colors duration-200 text-sm shadow-sm whitespace-nowrap flex items-center justify-center gap-1"
     >
-    Logout
+    <LogOut size={16} />
+    <span>Logout</span>
     </button>
-    </div>
     </div>
     </div>
     </div>
