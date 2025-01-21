@@ -1917,10 +1917,24 @@ function MonthlyOverview() {
   return (
     <div className="w-full max-w-full space-y-6">
     <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Jahresübersicht</h2>
+    <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-6">
+    <div className="flex items-center gap-4 w-full sm:w-auto">
+    <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
+    <div className="flex items-center text-[11px] text-primary-600">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.checked)}
+    className="form-checkbox h-3 w-3"
+    />
+    <label htmlFor="hideCompleted" className="ml-1">
+    Abgeschlossene
+    </label>
+    </div>
+    </div>
     
-    <div className="flex items-center justify-end gap-3 text-[11px] w-full sm:w-auto">
+    <div className="flex items-center justify-end gap-3 text-[11px]">
     {selectedYear !== currentYear && selectedYear !== 'all' && (
       <button 
       onClick={() => setSelectedYear(currentYear)}
@@ -1942,19 +1956,6 @@ function MonthlyOverview() {
       ))
     }
     </select>
-    
-    <div className="flex items-center text-[11px] text-primary-600">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.checked)}
-    className="form-checkbox h-3 w-3"
-    />
-    <label htmlFor="hideCompleted" className="ml-1">
-    Abgeschlossene
-    </label>
-    </div>
     </div>
     </div>
     
