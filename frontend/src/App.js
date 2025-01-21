@@ -730,15 +730,11 @@ function FahrtenListe() {
       <div className="table-container mb-4">
       <div className="bg-primary-25 p-6 space-y-6">
       {/* Header mit Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h2 className="text-lg font-semibold text-primary-900">Monatsübersicht</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
+      <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Monatsübersicht</h2>
       
-      <div className="flex flex-wrap items-center gap-2">
-      {selectedMonth !== currentMonth && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary">
-        Aktueller Monat
-        </button>
-      )}
+      <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
+      <div className="flex items-center justify-end gap-2">
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
@@ -762,6 +758,12 @@ function FahrtenListe() {
         );
       })}
       </select>
+      {selectedMonth !== currentMonth && (
+        <button onClick={resetToCurrentMonth} className="btn-secondary">
+        Aktueller Monat
+        </button>
+      )}
+      </div>
       </div>
       </div>
 
@@ -1912,11 +1914,11 @@ function MonthlyOverview() {
   return (
     <div className="w-full max-w-full space-y-6">
     <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
+    <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-6">
+    <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Jahresübersicht</h2>
     
-    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
-    <div className="text-xs sm:text-sm flex items-center">
+    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
+    <div className="text-xs flex items-center justify-end">
     <input
     type="checkbox"
     id="hideCompleted"
@@ -1924,20 +1926,12 @@ function MonthlyOverview() {
     onChange={(e) => setHideCompleted(e.checked)}
     className="form-checkbox h-4 w-4"
     />
-    <label htmlFor="hideCompleted" className="ml-2 text-xs">
+    <label htmlFor="hideCompleted" className="ml-2">
     Abgeschlossene ausblenden
     </label>
     </div>
     
-    <div className="flex items-center gap-2">
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary whitespace-nowrap text-sm"
-      >
-      Aktuelles Jahr
-      </button>
-    )}
+    <div className="flex items-center justify-end gap-2">
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1951,6 +1945,14 @@ function MonthlyOverview() {
       ))
     }
     </select>
+    {selectedYear !== currentYear && selectedYear !== 'all' && (
+      <button 
+      onClick={() => setSelectedYear(currentYear)}
+      className="btn-secondary"
+      >
+      Aktuelles Jahr
+      </button>
+    )}
     </div>
     </div>
     </div>
