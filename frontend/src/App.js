@@ -755,20 +755,27 @@ function FahrtenListe() {
       <div className="card-container-highlight mb-4">
       <div className="space-y-6">
       {/* Header mit Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="w-full flex justify-between items-center">
       <h2 className="text-lg font-medium text-value">Monatsübersicht</h2>
+      {selectedMonth !== currentMonth && (
+        <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden">
+        Aktueller Monat
+        </button>
+      )}
+      </div>
       
       <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-2 w-full">
       {selectedMonth !== currentMonth && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary">
+        <button onClick={resetToCurrentMonth} className="btn-secondary hidden sm:block">
         Aktueller Monat
         </button>
       )}
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleMonthChange}
-      className="form-select w-28">
+      className="form-select w-32">
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
         {new Date(0, i).toLocaleString("default", { month: "long" })}
