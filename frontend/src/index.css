@@ -47,7 +47,7 @@ code {
   }
   
   .form-row-half {
-    @apply flex flex-col sm:flex-row gap-4 w-full sm:w-auto min-w-[240px];
+    @apply flex sm:flex-row gap-4 w-full sm:w-auto min-w-[240px];
   }
 
   .form-group {
