@@ -27,60 +27,114 @@
   --secondary-950: #1a0909;
 }
 
-/* Ocean Theme */
-:root[data-theme="ocean"] {
-  --primary-25: #f6fbfc;
-  --primary-50: #edf7f8;
-  --primary-100: #d6ebee;
-  --primary-200: #b3d9df;
-  --primary-300: #85bec8;
-  --primary-400: #569cab;
-  --primary-500: #357f8f;
-  --primary-600: #2a6674;
-  --primary-700: #1f4c57;
-  --primary-800: #15333a;
-  --primary-900: #0f252a;
-  --primary-950: #091619;
-
-  --secondary-25: #fdf8f6;
-  --secondary-50: #faf0ec;
-  --secondary-100: #f5dcd3;
-  --secondary-200: #ebbfb2;
-  --secondary-300: #da9882;
-  --secondary-400: #c56f51;
-  --secondary-500: #aa4e2e;
-  --secondary-600: #8c3e25;
-  --secondary-700: #6a2f1c;
-  --secondary-800: #491f12;
-  --secondary-900: #33150c;
-  --secondary-950: #1f0c07;
+:root[data-theme="sunset"] {
+  --primary-25: #fffaf0;
+  --primary-50: #fff0e0;
+  --primary-100: #ffe1b3;
+  --primary-200: #ffce80;
+  --primary-300: #ffb84d;
+  --primary-400: #fca31d;
+  --primary-500: #e97707;
+  --primary-600: #c45f06;
+  --primary-700: #a04a05;
+  --primary-800: #7c3704;
+  --primary-900: #582403;
+  --primary-950: #341202;
+  
+  --secondary-25: #f0f8ff;
+  --secondary-50: #e0f2fe;
+  --secondary-100: #bfddfd;
+  --secondary-200: #9bc8fa;
+  --secondary-300: #75b1f7;
+  --secondary-400: #4e9bf4;
+  --secondary-500: #2481f1;
+  --secondary-600: #1b6ad9;
+  --secondary-700: #1252c2;
+  --secondary-800: #0a3aab;
+  --secondary-900: #052294;
+  --secondary-950: #020b7d;
 }
 
-/* Forest Theme */
-:root[data-theme="forest"] {
-  --primary-25: #f6faf6;
-  --primary-50: #e8f5e9;
-  --primary-100: #c8e6c9;
-  --primary-200: #a5d6a7;
-  --primary-300: #81c784;
-  --primary-400: #66bb6a;
-  --primary-500: #4caf50;
-  --primary-600: #43a047;
-  --primary-700: #388e3c;
-  --primary-800: #2e7d32;
-  --primary-900: #1b5e20;
-  --primary-950: #0a3d0b;
+:root[data-theme="mint"] {
+  --primary-25: #f0f9f4;
+  --primary-50: #e0f2e8;
+  --primary-100: #c1e1d1;
+  --primary-200: #a2d1b9;
+  --primary-300: #83c1a2;
+  --primary-400: #64b08a;
+  --primary-500: #45a073;
+  --primary-600: #3a8b62;
+  --primary-700: #2f7751;
+  --primary-800: #246341;
+  --primary-900: #1a4f30;
+  --primary-950: #0f3b1f;
+  
+  --secondary-25: #f8f8f8;
+  --secondary-50: #f0f0f0;
+  --secondary-100: #e0e0e0;
+  --secondary-200: #d1d1d1;
+  --secondary-300: #c2c2c2;
+  --secondary-400: #b3b3b3;
+  --secondary-500: #a3a3a3;
+  --secondary-600: #8c8c8c;
+  --secondary-700: #757575;
+  --secondary-800: #5e5e5e;
+  --secondary-900: #474747;
+  --secondary-950: #2f2f2f;
+}
 
-  --secondary-25: #fffbeb;
-  --secondary-50: #fef3c7;
-  --secondary-100: #fde68a;
-  --secondary-200: #fcd34d;
-  --secondary-300: #fbbf24;
-  --secondary-400: #f59e0b;
-  --secondary-500: #d97706;
-  --secondary-600: #b45309;
-  --secondary-700: #92400e;
-  --secondary-800: #78350f;
-  --secondary-900: #451a03;
-  --secondary-950: #2e1103;
+:root[data-theme="slate"] {
+  --primary-25: #f8fafc;
+  --primary-50: #f1f5f9;
+  --primary-100: #e2e8f0;
+  --primary-200: #cbd5e1;
+  --primary-300: #a9b3bc;
+  --primary-400: #74828f;
+  --primary-500: #4a5a6a;
+  --primary-600: #3d4c5b;
+  --primary-700: #2f3e4a;
+  --primary-800: #212f3a;
+  --primary-900: #13202a;
+  --primary-950: #0a1319;
+  
+  --secondary-25: #eff6ff;
+  --secondary-50: #dbeafe;
+  --secondary-100: #bfdbfe;
+  --secondary-200: #93c5fd;
+  --secondary-300: #60a5fa;
+  --secondary-400: #3b82f6;
+  --secondary-500: #2563eb;
+  --secondary-600: #1d4ed8;
+  --secondary-700: #1e40af;
+  --secondary-800: #1e3a8a;
+  --secondary-900: #172554;
+  --secondary-950: #0d111c;
+}
+
+:root[data-theme="monochrome"] {
+  --primary-25: #fafafa;
+  --primary-50: #f0f0f0;
+  --primary-100: #e0e0e0;
+  --primary-200: #c0c0c0;
+  --primary-300: #a0a0a0;
+  --primary-400: #808080;
+  --primary-500: #606060;
+  --primary-600: #505050;
+  --primary-700: #404040;
+  --primary-800: #303030;
+  --primary-900: #202020;
+  --primary-950: #101010;
+  
+  --secondary-25: #f0f8ff;
+  --secondary-50: #e0f2fe;
+  --secondary-100: #bfddfd;
+  --secondary-200: #9bc8fa;
+  --secondary-300: #75b1f7;
+  --secondary-400: #4e9bf4;
+  --secondary-500: #2481f1;
+  --secondary-600: #1b6ad9;
+  --secondary-700: #1252c2;
+  --secondary-800: #0a3aab;
+  --secondary-900: #052294;
+  --secondary-950: #020b7d;
 }

@@ -8,8 +8,10 @@ export default function ThemeToggle() {
 
   const themes = [
     { id: 'classic', name: 'Classic' },
-    { id: 'ocean', name: 'Ocean' },
-    { id: 'forest', name: 'Forest' }
+    { id: 'monochrome', name: 'Monochrome' },
+    { id: 'slate', name: 'Slate' },
+    { id: 'sunset', name: 'Sunset' },
+    { id: 'mint', name: 'Mint' }
   ];
 
   return (

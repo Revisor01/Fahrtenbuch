@@ -756,8 +756,8 @@ function FahrtenListe() {
     };
     
     return (
-      <div className="table-container mb-4">
-      <div className="bg-primary-25 p-6 space-y-6">
+      <div className="table-container bg-primary-25 mb-4">
+      <div className="p-6 space-y-6">
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
       <h2 className="text-lg font-medium text-primary-900 w-full sm:w-auto">Monatsübersicht</h2>
