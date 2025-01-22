@@ -60,7 +60,7 @@ code {
   .table-container {
     @apply bg-white dark:bg-gray-800 
     rounded-lg shadow-sm w-full 
-    border border-primary-100 dark:border-primary-800
+    border border-primary-100 dark:border-primary-800 overflow-hidden
     transition-colors duration-200;
   }
   
