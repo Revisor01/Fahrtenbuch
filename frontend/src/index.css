@@ -210,22 +210,16 @@ code {
   }
 
   .table-header {
-    @apply px-4 py-3 
-           text-xs font-medium text-primary-600 dark:text-white
-           uppercase tracking-wider 
-           cursor-pointer 
-           transition-colors duration-200
-           text-left;
+    @apply px-4 py-3 !important
+        text-xs font-medium text-primary-600 dark:text-primary-400 !important
+        uppercase tracking-wider !important
+        cursor-pointer !important
+        transition-colors duration-200 !important
+        text-left !important;
   }
 
   .table-header-sm {
-    @apply px-4 py-3 
-        text-xs text-primary-600 dark:text-white
-        uppercase tracking-wider 
-        cursor-pointer 
-        transition-colors duration-200
-        text-left
-        hidden sm:table-cell;
+    @apply table-header hidden sm:table-cell !important;
   }
 
   .table-cell {
