@@ -191,7 +191,7 @@ function FahrtForm() {
   };
 
   return (
-    <div className="table-container">
+    <div className="table-container bg-primary-25">
     <div className="p-6">
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Erste Zeile: Basis-Informationen */}
