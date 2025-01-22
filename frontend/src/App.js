@@ -2204,7 +2204,7 @@ function MonthlyOverview() {
       Number(month.mitfahrerErstattung || 0);
       
       return (
-        <div className="mobile-card">
+        <div key={month.yearMonth} className="mobile-card">
         <div className="mobile-card-header mb-4">
         <div className="flex justify-between items-center w-full">
         <div className="mobile-card-title">
@@ -2215,14 +2215,12 @@ function MonthlyOverview() {
         </div>
         </div>
         </div>
+        
         {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
           <div className="text-muted text-xs text-right mb-4">
           Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
-        </div>
-        </div>
-        </div>
         
         <div className="space-y-4">
         {/* Kirchenkreis */}
