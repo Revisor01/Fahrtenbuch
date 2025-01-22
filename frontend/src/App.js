@@ -885,7 +885,7 @@ function FahrtenListe() {
       {/* Mitfahrer Card */}
       <div className="card-container">
       <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Mitfahrer</span>
+      <span className="text-sm text-label">Mitfahrer:innen</span>
       <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
       {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
       </span>
