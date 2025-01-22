@@ -477,8 +477,7 @@ function DistanzForm() {
   
   return (
     <div className="mb-4">
-    <div className="table-container">
-    <div className="bg-primary-25 p-6">
+<div className="card-container-highlight">
     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
     <div className="w-full sm:flex-1">
     <select
@@ -522,7 +521,6 @@ function DistanzForm() {
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
-    </div>
     </div>
     </div>
   );
@@ -1160,7 +1158,7 @@ function FahrtenListe() {
     ) : (
       <div>
       <div className="text-primary-900">{detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort || "")}</div>
-      <div className="text-xs text-primary-600">{detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}</div>
+      <div className="mobile-card-label">{detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}</div>
       </div>
     )}
     </td>
@@ -1203,7 +1201,7 @@ function FahrtenListe() {
     ) : (
       <div>
       <div className="text-primary-900">{detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || "")}</div>
-      <div className="text-xs text-primary-600">{detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}</div>
+      <div className="mobile-card-label">{detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}</div>
       </div>
     )}
     </td>
@@ -1560,7 +1558,7 @@ function FahrtenListe() {
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
         <div>
-        <div className="text-primary-900 font-medium">
+        <div className="mobile-card-title">
         {new Date(fahrt.datum).toLocaleDateString()}
         </div>
         <div className="text-sm text-primary-600">
@@ -1597,23 +1595,23 @@ function FahrtenListe() {
         {/* Route */}
         <div className="grid grid-cols-1 gap-2">
         <div>
-        <div className="text-xs text-primary-600">Von</div>
+        <div className="mobile-card-label">Von</div>
         <div className="text-primary-900">
         {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
         </div>
         {fahrt.von_ort_adresse && (
-          <div className="text-xs text-primary-600">
+          <div className="mobile-card-label">
           {fahrt.von_ort_adresse}
           </div>
         )}
         </div>
         <div>
-        <div className="text-xs text-primary-600">Nach</div>
+        <div className="mobile-card-label">Nach</div>
         <div className="text-primary-900">
         {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
         </div>
         {fahrt.nach_ort_adresse && (
-          <div className="text-xs text-primary-600">
+          <div className="mobile-card-label">
           {fahrt.nach_ort_adresse}
           </div>
         )}
@@ -1623,11 +1621,11 @@ function FahrtenListe() {
         {/* Anlass & Kilometer */}
         <div className="grid grid-cols-2 gap-4">
         <div>
-        <div className="text-xs text-primary-600">Anlass</div>
+        <div className="mobile-card-label">Anlass</div>
         <div className="text-primary-900">{fahrt.anlass}</div>
         </div>
         <div>
-        <div className="text-xs text-primary-600">Kilometer</div>
+        <div className="mobile-card-label">Kilometer</div>
         <div className="text-primary-900">
         {formatValue(roundKilometers(fahrt.kilometer))} km
         </div>
@@ -1647,7 +1645,7 @@ function FahrtenListe() {
           <div className="space-y-2">
           {fahrt.details.map((detail, idx) => (
             <div key={idx} className="bg-primary-50 p-2 rounded">
-            <div className="text-xs text-primary-600">
+            <div className="mobile-card-label">
             {detail.abrechnung}
             </div>
             <div className="text-sm">
@@ -2022,13 +2020,13 @@ function MonthlyOverview() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Kirchenkreis</span>
-    <span className="text-primary-900 font-medium">
+    <span className="text-label text-sm">Kirchenkreis</span>
+    <span className="text-value font-medium">
     {yearTotal.kirchenkreis.toFixed(2)} €
     </span>
     </div>
     {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
-      <div className="text-xs text-primary-500">
+      <div className="text-muted text-xs">
       Ursprünglich: {yearTotal.originalKirchenkreis.toFixed(2)} €
       </div>
     )}
@@ -2036,13 +2034,13 @@ function MonthlyOverview() {
     
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Gemeinde</span>
-    <span className="text-primary-900 font-medium">
+    <span className="text-label text-sm">Gemeinde</span>
+    <span className="text-value font-medium">
     {yearTotal.gemeinde.toFixed(2)} €
     </span>
     </div>
     {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
-      <div className="text-xs text-primary-500">
+      <div className="text-muted text-xs">
       Ursprünglich: {yearTotal.originalGemeinde.toFixed(2)} €
       </div>
     )}
@@ -2050,13 +2048,13 @@ function MonthlyOverview() {
     
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Mitfahrer</span>
-    <span className="text-primary-900 font-medium">
+    <span className="text-label text-sm">Mitfahrer:innen</span>
+    <span className="text-value font-medium">
     {yearTotal.mitfahrer.toFixed(2)} €
     </span>
     </div>
     {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
-      <div className="text-xs text-primary-500">
+      <div className="text-muted text-xs">
       Ursprünglich: {yearTotal.originalMitfahrer.toFixed(2)} €
       </div>
     )}
@@ -2064,13 +2062,13 @@ function MonthlyOverview() {
     
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-primary-600">Gesamt</span>
-    <span className="text-primary-900 font-medium">
+    <span className="text-label text-sm">Gesamt</span>
+    <span className="text-value font-medium">
     {yearTotal.gesamt.toFixed(2)} €
     </span>
     </div>
     {yearTotal.originalGesamt !== yearTotal.gesamt && (
-      <div className="text-xs text-primary-500">
+      <div className="text-muted text-xs">
       Ursprünglich: {yearTotal.originalGesamt.toFixed(2)} €
       </div>
     )}
@@ -2139,7 +2137,7 @@ function MonthlyOverview() {
         {ausstehendGesamt.toFixed(2)} €
         </div>
         {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
-          <div className="text-xs text-primary-500">
+          <div className="text-muted text-xs">
           ({originalGesamt.toFixed(2)} €)
           </div>
         )}
@@ -2164,9 +2162,9 @@ function MonthlyOverview() {
       Number(month.mitfahrerErstattung || 0);
       
       return (
-        <div key={month.yearMonth} className="bg-white rounded-lg border border-primary-100 p-4">
+        <div key={month.yearMonth} className="mobile-card">
         <div className="flex justify-between items-start mb-4">
-        <div className="text-primary-900 font-medium">
+        <div className="mobile-card-title">
         {month.monthName} {month.year}
         </div>
         <div className="text-right">
@@ -2174,7 +2172,7 @@ function MonthlyOverview() {
         {ausstehendGesamt.toFixed(2)} €
         </div>
         {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
-          <div className="text-xs text-primary-500">
+          <div className="text-muted text-xs">
           Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
