@@ -297,7 +297,8 @@ function FahrtForm() {
     )}
     </div>
     
-    <div className="form-row gap-4">
+    {/* Kilometer und Abrechnung */}
+    <div className="form-row-half">
     <div className="form-group-half">
     <label className="form-label">Kilometer</label>
     <input
