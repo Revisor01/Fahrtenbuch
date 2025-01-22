@@ -2011,6 +2011,7 @@ function MonthlyOverview() {
   
   return (
     <div className="w-full max-w-full space-y-6">
+    <div className="card-container-highlight">
     <div className="flex flex-col gap-4 mb-6">
     <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
@@ -2118,15 +2119,12 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    <div className="mt-6 w-full">
-    <div className="w-full flex flex-col sm:flex-row sm:justify-end gap-2">
-    <div className="w-full sm:w-auto">
+    <div className="mt-6">
+    <div className="flex justify-end">
     <QuickActions 
     filteredData={filteredData}
     handleStatusUpdate={handleStatusUpdate}
-    className="w-full"
     />
-    </div>
     </div>
     </div>
     </div>
