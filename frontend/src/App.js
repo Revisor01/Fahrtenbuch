@@ -1893,10 +1893,10 @@ function MonthlyOverview() {
     ];
     
     return (
-      <div className="flex flex-col sm:flex-row justify-end gap-2 relative">
+      <div className="relative inline-block">
       <button
       onClick={() => setIsOpen(!isOpen)}
-      className="btn-primary flex justify-between items-center"
+      className="btn-primary flex items-center gap-2"
       >
       <span>Schnellaktionen</span>
       <span className={`transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}>
@@ -1905,7 +1905,7 @@ function MonthlyOverview() {
       </button>
       
       {isOpen && (
-        <div className="card-container absolute right-0 top-full mt-2 w-72 z-10">
+        <div className="absolute right-0 mt-2 py-1 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
         {actions.map((action, index) => (
           <button
           key={index}
@@ -1913,9 +1913,7 @@ function MonthlyOverview() {
             await action.action();
             setIsOpen(false);
           }}
-          className="w-full text-left px-4 py-2 text-sm text-value
-                        hover:bg-primary-25 dark:hover:bg-primary-900
-                        first:rounded-t-lg last:rounded-b-lg"
+          className="w-full text-left px-4 py-2 text-sm text-value hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-150"
           >
           {action.label}
           </button>
@@ -2206,18 +2204,19 @@ function MonthlyOverview() {
       Number(month.mitfahrerErstattung || 0);
       
       return (
-        <div key={month.yearMonth} className="mobile-card">
+        <div className="mobile-card">
         <div className="mobile-card-header mb-4">
-        <div>
+        <div className="flex justify-between items-center w-full">
         <div className="mobile-card-title">
         {month.monthName} {month.year}
         </div>
-        <div className="text-right">
         <div className="text-value font-medium">
         {ausstehendGesamt.toFixed(2)} €
         </div>
+        </div>
+        </div>
         {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
-          <div className="text-muted text-xs">
+          <div className="text-muted text-xs text-right mb-4">
           Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}

@@ -21,10 +21,10 @@ code {
   /* Base Container */
   .base-container {
     @apply bg-white dark:bg-gray-800 
-           rounded-lg shadow-sm 
-           border border-primary-100 dark:border-primary-900 
-           overflow-hidden
-           transition-colors duration-200;
+        rounded-lg shadow-sm 
+        border border-primary-100 dark:border-primary-700
+        overflow-hidden
+        transition-colors duration-200;
   }
 
   /* Container Styles */
@@ -219,8 +219,13 @@ code {
   }
 
   .table-header-sm {
-    @apply table-header 
-           hidden sm:table-cell;
+    @apply px-4 py-3 
+        text-xs font-medium text-primary-600 dark:text-primary-400 
+        uppercase tracking-wider 
+        cursor-pointer 
+        transition-colors duration-200
+        text-left
+        hidden sm:table-cell;
   }
 
   .table-cell {
@@ -235,10 +240,14 @@ code {
   }
 
   .table-head-row {
-    @apply bg-primary-25 dark:bg-primary-600
-           border-b border-primary-100 dark:border-primary-900;
+    @apply bg-primary-25 dark:bg-primary-900
+        border-b border-primary-100 dark:border-primary-700;
   }
 
+tbody {
+  @apply divide-y divide-primary-50 dark:divide-primary-700;
+}
+  
 /* Table Styles Erweiterung */
 .table-action-button {
   @apply h-8 w-8 rounded flex items-center justify-center
