@@ -57,13 +57,13 @@ code {
 
   .status-badge-primary {
     @apply status-badge
-           bg-primary-100 dark:bg-primary-900/30
+           bg-primary-100 dark:bg-primary-900
            text-primary-700 dark:text-primary-300;
   }
 
   .status-badge-secondary {
     @apply status-badge
-           bg-secondary-100 dark:bg-secondary-900/30
+           bg-secondary-100 dark:bg-secondary-900
            text-secondary-700 dark:text-secondary-300;
   }
 
@@ -179,12 +179,12 @@ code {
   }
 
   .table-row {
-    @apply hover:bg-primary-25 dark:hover:bg-primary-900/10
+    @apply hover:bg-primary-25 dark:hover:bg-primary-900
            transition-colors duration-200;
   }
 
   .table-head-row {
-    @apply bg-primary-25 dark:bg-primary-900/30
+    @apply bg-primary-25 dark:bg-primary-900
            border-b border-primary-100 dark:border-primary-800;
   }
 
