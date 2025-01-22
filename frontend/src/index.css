@@ -211,7 +211,7 @@ code {
 
   .table-header {
     @apply px-4 py-3 
-           text-xs font-medium text-primary-600 dark:text-primary-400 
+           text-xs font-medium text-primary-600 dark:text-white
            uppercase tracking-wider 
            cursor-pointer 
            transition-colors duration-200
@@ -236,7 +236,7 @@ code {
 
   .table-head-row {
     @apply bg-primary-25 dark:bg-primary-900
-           border-b border-primary-100 dark:border-primary-800;
+           border-b border-primary-100 dark:border-primary-600;
   }
 
 /* Table Styles Erweiterung */
@@ -274,7 +274,7 @@ code {
   }
   
   .mobile-icon-button {
-    @apply h-8 w-8 rounded-full flex items-center justify-center
+    @apply h-8 w-8 rounded flex items-center justify-center  /* rounded statt rounded-full */
         transition-colors duration-150 text-xs;
   }
   

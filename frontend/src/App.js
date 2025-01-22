@@ -1129,7 +1129,7 @@ function FahrtenListe() {
         })}
         className="checkbox-input"
         />
-        <span className="text-sm text-label">Einmaliger Von-Ort</span>
+        <span className="text-xs text-label">Einmaliger Von-Ort</span>
         </label>
         {editingFahrt.vonOrtTyp === 'gespeichert' ? (
           <select
@@ -1179,7 +1179,7 @@ function FahrtenListe() {
         })}
         className="checkbox-input"
         />
-        <span className="text-sm text-label">Einmaliger Nach-Ort</span>
+        <span className="text-xs text-label">Einmaliger Nach-Ort</span>
         </label>
         {editingFahrt.nachOrtTyp === 'gespeichert' ? (
           <select
