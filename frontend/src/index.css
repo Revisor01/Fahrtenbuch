@@ -220,7 +220,7 @@ code {
 
   .table-header-sm {
     @apply px-4 py-3 
-        text-xs font-medium text-primary-600 dark:text-primary-400 
+        text-xs text-primary-600 dark:text-white
         uppercase tracking-wider 
         cursor-pointer 
         transition-colors duration-200
