@@ -380,8 +380,7 @@ function OrtForm() {
   
   return (
     <div className="mb-4">
-    <div className="table-container">
-    <div className="bg-primary-25 p-6">
+<div className="card-container-highlight">
     <form onSubmit={handleSubmit}>
     {/* Alle Eingabefelder in einer Zeile auf Desktop */}
     <div className="flex flex-col sm:flex-row gap-4">
@@ -434,7 +433,6 @@ function OrtForm() {
     </div>
     </div>
     </form>
-    </div>
     </div>
     </div>
   );
@@ -756,7 +754,7 @@ function FahrtenListe() {
     };
     
     return (
-      <div className="table-container bg-primary-25 mb-4">
+      <div className="card-container-highlight mb-4">
       <div className="p-6 space-y-6">
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4">
@@ -798,7 +796,7 @@ function FahrtenListe() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Kirchenkreis Card */}
-      <div className="bg-white p-4 rounded border border-primary-100">
+      <div className="card-container">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Kirchenkreis</span>
       <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-gray-400" : "font-medium text-primary-900"}>
@@ -839,7 +837,7 @@ function FahrtenListe() {
   </div>
 
   {/* Gemeinde Card */}
-  <div className="bg-white p-4 rounded border border-primary-100">
+  <div className="card-container">
     <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Gemeinde</span>
       <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "font-medium text-gray-400" : "font-medium text-primary-900"}>
@@ -880,7 +878,7 @@ function FahrtenListe() {
   </div>
 
   {/* Mitfahrer Card */}
-  <div className="bg-white p-4 rounded border border-primary-100">
+  <div className="card-container">
     <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Mitfahrer</span>
       <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-gray-400" : "font-medium text-primary-900"}>
@@ -890,7 +888,7 @@ function FahrtenListe() {
   </div>
 
   {/* Gesamt Card */}
-  <div className="bg-white p-4 rounded border border-primary-100">
+  <div className="card-container">
     <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-primary-600">Gesamt</span>
       <span className="font-medium text-primary-900">
@@ -2022,7 +2020,7 @@ function MonthlyOverview() {
     </div>
     
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-sm text-primary-600">Kirchenkreis</span>
     <span className="text-primary-900 font-medium">
@@ -2036,7 +2034,7 @@ function MonthlyOverview() {
     )}
     </div>
     
-    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-sm text-primary-600">Gemeinde</span>
     <span className="text-primary-900 font-medium">
@@ -2050,7 +2048,7 @@ function MonthlyOverview() {
     )}
     </div>
     
-    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-sm text-primary-600">Mitfahrer</span>
     <span className="text-primary-900 font-medium">
@@ -2064,7 +2062,7 @@ function MonthlyOverview() {
     )}
     </div>
     
-    <div className="bg-white p-4 rounded border border-primary-100">
+    <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-sm text-primary-600">Gesamt</span>
     <span className="text-primary-900 font-medium">

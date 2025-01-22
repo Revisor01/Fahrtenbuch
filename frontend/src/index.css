@@ -18,62 +18,103 @@ code {
 }
 
 @layer components {
-  .table-header, .table-header-sm {
-    @apply px-4 py-3 text-xs font-medium text-primary-600 dark:text-primary-300 uppercase tracking-wider cursor-pointer transition-colors duration-200 !important;
+  /* Base Container - Grundlage für Tabellen und Cards */
+  .base-container {
+    @apply bg-white dark:bg-gray-800 
+           rounded-lg shadow-sm 
+           border border-primary-100 dark:border-primary-800 
+           overflow-hidden
+           transition-colors duration-200;
   }
   
+  /* Card mit Padding */
+  .card-container {
+    @apply base-container p-6;
+  }
+
+  /* Card ohne Padding */
+  .card-container-flush {
+    @apply base-container;
+  }
+
+  /* Card mit speziellem Background */
+  .card-container-highlight {
+    @apply base-container p-6 bg-primary-25 dark:bg-primary-900/10;
+  }
+
+  /* Tabellen Container */
+  .table-container {
+    @apply base-container;
+  }
+
+  /* Tabellen Header */
   .table-header {
-    @apply text-left !important;
+    @apply px-4 py-3 text-xs font-medium 
+           text-primary-600 dark:text-primary-300 
+           uppercase tracking-wider cursor-pointer 
+           transition-colors duration-200
+           text-left;
   }
-  
+
+  /* Versteckter Tabellen Header auf Mobile */
   .table-header-sm {
-    @apply text-left hidden sm:table-cell !important;
+    @apply table-header hidden sm:table-cell;
   }
-  
+
+  /* Tabellen Zelle */
+  .table-cell {
+    @apply px-4 py-3 text-sm 
+           text-primary-900 dark:text-primary-100
+           transition-colors duration-200;
+  }
+
+  /* Tabellen Zeile */
+  .table-row {
+    @apply hover:bg-primary-25 dark:hover:bg-primary-900/10
+           transition-colors duration-200;
+  }
+
+  /* Tabellen Head Row */
+  .table-head-row {
+    @apply bg-primary-25 dark:bg-primary-900/10 
+           border-b border-primary-100 dark:border-primary-800;
+  }
+
+  /* Primary Button */
   .btn-primary {
     @apply bg-primary-500 dark:bg-primary-600 text-white px-4 h-8 rounded 
-    hover:bg-primary-600 dark:hover:bg-primary-700 
-    transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
+           hover:bg-primary-600 dark:hover:bg-primary-700 
+           transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
   }
-  
+
+  /* Secondary Button */
   .btn-secondary {
     @apply bg-secondary-400 dark:bg-secondary-500 text-white px-4 h-8 rounded 
-    hover:bg-secondary-500 dark:hover:bg-secondary-600 
-    transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
+           hover:bg-secondary-500 dark:hover:bg-secondary-600 
+           transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
   }
-  
+
+  /* Form Input */
   .form-input {
     @apply w-full h-8 px-3 bg-white dark:bg-gray-800 
-    border border-primary-200 dark:border-primary-700 
-    rounded text-sm 
-    focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 
-    focus:border-transparent 
-    shadow-sm 
-    text-primary-900 dark:text-primary-100
-    transition-colors duration-200;
+           border border-primary-200 dark:border-primary-700 
+           rounded text-sm 
+           focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 
+           focus:border-transparent 
+           shadow-sm 
+           text-primary-900 dark:text-primary-100
+           transition-colors duration-200;
   }
-  
+
+  /* Form Select */
   .form-select {
     @apply form-input;
   }
-  
-  .table-container {
-    @apply bg-white dark:bg-gray-800 
-    rounded-lg shadow-sm w-full 
-    border border-primary-100 dark:border-primary-800 overflow-hidden
-    transition-colors duration-200;
+
+  /* Grid Container für Cards */
+  .card-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4;
   }
-  
-  .table-cell {
-    @apply px-4 py-3 text-sm 
-    text-primary-900 dark:text-primary-100
-    transition-colors duration-200;
-  }
-  
-  .table-row {
-        @apply hover:bg-primary-25 dark:hover:bg-primary-900 dark:hover:opacity-10
-            transition-colors duration-200;
-      }
 }
 
 @layer utilities {
