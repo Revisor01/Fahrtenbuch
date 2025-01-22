@@ -1446,7 +1446,7 @@ function FahrtenListe() {
         })}
         className="checkbox-input"
         />
-        <span className="text-sm text-label">Einmaliger Von-Ort</span>
+        <span className="text-xs text-label">Einmaliger Von-Ort</span>
         </label>
         {editingFahrt.vonOrtTyp === 'einmalig' ? (
           <input
@@ -1482,7 +1482,7 @@ function FahrtenListe() {
         })}
         className="checkbox-input"
         />
-        <span className="text-sm text-label">Einmaliger Nach-Ort</span>
+        <span className="text-xs text-label">Einmaliger Nach-Ort</span>
         </label>
         {editingFahrt.nachOrtTyp === 'einmalig' ? (
           <input
@@ -2004,20 +2004,20 @@ function MonthlyOverview() {
   
   return (
     <div className="w-full max-w-full space-y-6">
-    <div className="table-container bg-primary-25 p-6">
+    <div className="card-container-highlight">
     <div className="flex flex-col gap-4 mb-6">
-    <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
+    <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
     <div className="flex flex-wrap items-center justify-between gap-4">
-    <div className="flex items-center text-[11px] text-primary-600">
+    <div className="flex items-center text-[11px]">
+    <label className="checkbox-label">
     <input
     type="checkbox"
     id="hideCompleted"
     checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}  // statt e.checked
-    className="form-checkbox h-3 w-3"
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
     />
-    <label htmlFor="hideCompleted" className="ml-1">
-    Abgeschlossene
+    <span className="text-label">Abgeschlossene</span>
     </label>
     </div>
     
@@ -2047,7 +2047,8 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="card-grid">
+    {/* Kirchenkreis Card */}
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-label text-sm">Kirchenkreis</span>
@@ -2062,6 +2063,7 @@ function MonthlyOverview() {
     )}
     </div>
     
+    {/* Gemeinde Card */}
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-label text-sm">Gemeinde</span>
@@ -2076,6 +2078,7 @@ function MonthlyOverview() {
     )}
     </div>
     
+    {/* Mitfahrer Card */}
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-label text-sm">Mitfahrer:innen</span>
@@ -2090,6 +2093,7 @@ function MonthlyOverview() {
     )}
     </div>
     
+    {/* Gesamt Card */}
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
     <span className="text-label text-sm">Gesamt</span>
@@ -2111,18 +2115,19 @@ function MonthlyOverview() {
     <QuickActions 
     filteredData={filteredData}
     handleStatusUpdate={handleStatusUpdate}
-    className="w-full" 
+    className="w-full"
     />
     </div>
     </div>
     </div>
     </div>
     
-    <div>
-    <div className="hidden table-container sm:block overflow-x-auto w-full">
+    {/* Desktop View */}
+    <div className="hidden sm:block">
+    <div className="table-container">
     <table className="w-full">
     <thead>
-    <tr className="bg-primary-25 border-b border-primary-100">
+    <tr className="table-head-row">
     <th className="table-header">Monat</th>
     <th className="table-header text-right">Kirchenkreis</th>
     <th className="table-header-sm">Status</th>
@@ -2132,7 +2137,7 @@ function MonthlyOverview() {
     <th className="table-header text-right">Gesamt</th>
     </tr>
     </thead>
-    <tbody className="divide-y divide-primary-50">
+    <tbody className="divide-y divide-primary-50 dark:divide-primary-800">
     {filteredData.map((month) => {
       const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
       const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
@@ -2146,7 +2151,9 @@ function MonthlyOverview() {
       
       return (
         <tr key={month.yearMonth} className="table-row">
-        <td className="table-cell">{month.monthName} {month.year}</td>
+        <td className="table-cell">
+        <span className="text-value">{month.monthName} {month.year}</span>
+        </td>
         <td className="table-cell text-right">
         {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
         </td>
@@ -2163,7 +2170,7 @@ function MonthlyOverview() {
         {renderBetrag(month.mitfahrerErstattung, kkReceived)}
         </td>
         <td className="table-cell text-right">
-        <div className="font-medium">
+        <div className="text-value font-medium">
         {ausstehendGesamt.toFixed(2)} €
         </div>
         {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
@@ -2178,7 +2185,9 @@ function MonthlyOverview() {
     </tbody>
     </table>
     </div>
+    </div>
     
+    {/* Mobile View */}
     <div className="sm:hidden space-y-4">
     {filteredData.map((month) => {
       const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
@@ -2193,12 +2202,13 @@ function MonthlyOverview() {
       
       return (
         <div key={month.yearMonth} className="mobile-card">
-        <div className="flex justify-between items-start mb-4">
+        <div className="mobile-card-header mb-4">
+        <div>
         <div className="mobile-card-title">
         {month.monthName} {month.year}
         </div>
         <div className="text-right">
-        <div className="font-medium text-primary-900">
+        <div className="text-value font-medium">
         {ausstehendGesamt.toFixed(2)} €
         </div>
         {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
@@ -2208,12 +2218,14 @@ function MonthlyOverview() {
         )}
         </div>
         </div>
+        </div>
         
         <div className="space-y-4">
+        {/* Kirchenkreis */}
         <div className="pt-4">
         <div className="flex justify-between items-start mb-2">
-        <span className="text-sm text-primary-600">Kirchenkreis</span>
-        <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
+        <span className="text-label text-sm">Kirchenkreis</span>
+        <span className={kkReceived ? "text-muted" : "text-value"}>
         {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
         </span>
         </div>
@@ -2222,10 +2234,11 @@ function MonthlyOverview() {
         </div>
         </div>
         
+        {/* Gemeinde */}
         <div className="pt-4">
         <div className="flex justify-between items-start mb-2">
-        <span className="text-sm text-primary-600">Gemeinde</span>
-        <span className={gemReceived ? "text-gray-400" : "text-primary-900"}>
+        <span className="text-label text-sm">Gemeinde</span>
+        <span className={gemReceived ? "text-muted" : "text-value"}>
         {Number(month.gemeindeErstattung || 0).toFixed(2)} €
         </span>
         </div>
@@ -2234,10 +2247,11 @@ function MonthlyOverview() {
         </div>
         </div>
         
+        {/* Mitfahrer */}
         <div className="pt-4">
         <div className="flex justify-between items-start">
-        <span className="text-sm text-primary-600">Mitfahrer</span>
-        <span className={kkReceived ? "text-gray-400" : "text-primary-900"}>
+        <span className="text-label text-sm">Mitfahrer</span>
+        <span className={kkReceived ? "text-muted" : "text-value"}>
         {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
         </span>
         </div>
@@ -2247,8 +2261,8 @@ function MonthlyOverview() {
       );
     })}
     </div>
-    </div>
     
+    {/* Modals */}
     <AbrechnungsStatusModal 
     isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
     onClose={() => setStatusModal({})}
@@ -2262,12 +2276,10 @@ function MonthlyOverview() {
     onClose={() => setStatusModal({})}
     title="Status zurücksetzen"
     >
-    <div className="table-container">
-    <div className="bg-primary-25 p-6 rounded-lg">
-    <p className="text-sm text-primary-600 mb-6">
+    <div className="card-container-highlight">
+    <p className="text-value text-sm mb-6">
     Möchten Sie den Status wirklich zurücksetzen?
     </p>
-    <div className="w-full">
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
@@ -2286,8 +2298,6 @@ function MonthlyOverview() {
     >
     Zurücksetzen
     </button>
-    </div>
-    </div>
     </div>
     </div>
     </Modal>

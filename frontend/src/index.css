@@ -22,7 +22,7 @@ code {
   .base-container {
     @apply bg-white dark:bg-gray-800 
            rounded-lg shadow-sm 
-           border border-primary-100 dark:border-primary-800 
+           border border-primary-100 dark:border-primary-900 
            overflow-hidden
            transition-colors duration-200;
   }
@@ -38,7 +38,7 @@ code {
 
   .card-container-highlight {
     @apply base-container p-6 
-           bg-primary-25 dark:bg-gray-900;
+           bg-primary-25 dark:border-primary-900;
   }
 
   /* Form Structure */
@@ -235,8 +235,8 @@ code {
   }
 
   .table-head-row {
-    @apply bg-primary-25 dark:bg-primary-900
-           border-b border-primary-100 dark:border-primary-600;
+    @apply bg-primary-25 dark:bg-primary-600
+           border-b border-primary-100 dark:border-primary-900;
   }
 
 /* Table Styles Erweiterung */
