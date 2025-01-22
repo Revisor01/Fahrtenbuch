@@ -1978,7 +1978,7 @@ function MonthlyOverview() {
   
   return (
     <div className="w-full max-w-full space-y-6">
-    <div className="bg-primary-25 rounded-lg border border-primary-100 p-6">
+    <div className="table-container bg-primary-25 p-6">
     <div className="flex flex-col gap-4 mb-6">
     <h2 className="text-lg font-medium text-primary-900">Jahresübersicht</h2>
     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -2092,8 +2092,8 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    <div className="bg-white sm:rounded-lg sm:border sm:border-primary-100">
-    <div className="hidden sm:block overflow-x-auto w-full">
+    <div>
+    <div className="hidden table-container sm:block overflow-x-auto w-full">
     <table className="w-full">
     <thead>
     <tr className="bg-primary-25 border-b border-primary-100">
