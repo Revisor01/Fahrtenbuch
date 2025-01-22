@@ -18,7 +18,7 @@ code {
 }
 
 @layer components {
-  /* Base Container - Grundlage für Tabellen und Cards */
+  /* Base Container */
   .base-container {
     @apply bg-white dark:bg-gray-800 
            rounded-lg shadow-sm 
@@ -26,49 +26,45 @@ code {
            overflow-hidden
            transition-colors duration-200;
   }
-  
-  /* Card mit Padding */
+
+  /* Main Container Styles */
   .card-container {
     @apply base-container p-6;
   }
 
-  /* Card ohne Padding */
   .card-container-flush {
     @apply base-container;
   }
 
-  /* Card mit speziellem Background */
   .card-container-highlight {
     @apply base-container p-6 
            bg-primary-25 dark:bg-gray-900;
   }
 
-  /* Mobile Card Styles */
-  .mobile-card {
-    @apply bg-white dark:bg-gray-800 
-           rounded-lg shadow-sm
-           border border-primary-100 dark:border-primary-800
-           p-4 space-y-4 
-           transition-colors duration-200;
+  /* Card Grid Layout */
+  .card-grid {
+    @apply grid grid-cols-1 gap-4 
+           sm:grid-cols-2 
+           lg:grid-cols-4;
   }
 
-  .mobile-card-title {
-    @apply text-primary-900 dark:text-primary-100 
-           font-medium;
+  /* Status Badges */
+  .status-badge {
+    @apply inline-flex items-center 
+           px-2 py-0.5 rounded-full 
+           text-xs font-medium;
   }
 
-  .mobile-card-subtitle {
-    @apply text-sm 
-           text-primary-600 dark:text-primary-400;
+  .status-badge-primary {
+    @apply status-badge
+           bg-primary-100 dark:bg-primary-900/30
+           text-primary-700 dark:text-primary-300;
   }
 
-  .mobile-card-label {
-    @apply text-xs 
-           text-primary-600 dark:text-primary-400;
-  }
-
-  .mobile-card-value {
-    @apply text-primary-900 dark:text-primary-100;
+  .status-badge-secondary {
+    @apply status-badge
+           bg-secondary-100 dark:bg-secondary-900/30
+           text-secondary-700 dark:text-secondary-300;
   }
 
   /* Text Styles */
@@ -81,58 +77,29 @@ code {
   }
 
   .text-muted {
-    @apply text-primary-500 dark:text-primary-400;
+    @apply text-primary-500 dark:text-primary-500;
   }
 
-  /* Tabellen Styles */
-  .table-container {
-    @apply base-container;
-  }
-
-  .table-header {
-    @apply px-4 py-3 text-xs font-medium 
-           text-primary-600 dark:text-primary-400 
-           uppercase tracking-wider cursor-pointer 
-           transition-colors duration-200
-           text-left;
-  }
-
-  .table-header-sm {
-    @apply table-header hidden sm:table-cell;
-  }
-
-  .table-cell {
-    @apply px-4 py-3 text-sm 
-           text-primary-900 dark:text-primary-100
-           transition-colors duration-200;
-  }
-
-  .table-row {
-    @apply hover:bg-primary-25 dark:hover:bg-gray-700
-           transition-colors duration-200;
-  }
-
-  .table-head-row {
-    @apply bg-primary-25 dark:bg-gray-900
-           border-b border-primary-100 dark:border-primary-800;
-  }
-
-  /* Button Styles */
+  /* Buttons */
   .btn-primary {
     @apply bg-primary-500 dark:bg-primary-600 
            text-white px-4 h-8 rounded 
            hover:bg-primary-600 dark:hover:bg-primary-700 
-           transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
+           transition-colors duration-200 
+           text-sm shadow-sm whitespace-nowrap
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
     @apply bg-secondary-400 dark:bg-secondary-500 
            text-white px-4 h-8 rounded 
            hover:bg-secondary-500 dark:hover:bg-secondary-600 
-           transition-colors duration-200 text-sm shadow-sm whitespace-nowrap;
+           transition-colors duration-200 
+           text-sm shadow-sm whitespace-nowrap
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* Form Styles */
+  /* Form Elements */
   .form-input {
     @apply w-full h-8 px-3 
            bg-white dark:bg-gray-800 
@@ -142,39 +109,86 @@ code {
            focus:border-transparent 
            shadow-sm 
            text-primary-900 dark:text-primary-100
+           placeholder-primary-400 dark:placeholder-primary-600
            transition-colors duration-200
-           placeholder-primary-400 dark:placeholder-primary-600;
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .form-select {
     @apply form-input;
   }
 
-  /* Grid Container für Cards */
-  .card-grid {
-    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4;
+  /* Mobile Card Styles */
+  .mobile-card {
+    @apply bg-white dark:bg-gray-800 
+           rounded-lg
+           border border-primary-100 dark:border-primary-800 
+           p-4 space-y-4 
+           shadow-sm
+           transition-colors duration-200;
   }
 
-  /* Status Badge Styles */
-  .status-badge {
-    @apply inline-flex items-center px-2 py-1 
-           rounded text-xs font-medium;
+  .mobile-card-header {
+    @apply flex justify-between items-start;
   }
 
-  .status-badge-primary {
-    @apply status-badge
-           bg-primary-100 dark:bg-primary-900
-           text-primary-700 dark:text-primary-300;
+  .mobile-card-title {
+    @apply text-value font-medium;
   }
 
-  .status-badge-secondary {
-    @apply status-badge
-           bg-secondary-100 dark:bg-secondary-900
-           text-secondary-700 dark:text-secondary-300;
+  .mobile-card-subtitle {
+    @apply text-sm text-label;
   }
-}
 
-@layer utilities {
+  .mobile-card-section {
+    @apply space-y-2;
+  }
+
+  .mobile-card-label {
+    @apply text-xs text-label;
+  }
+
+  .mobile-card-content {
+    @apply text-sm text-value;
+  }
+
+  /* Table Styles */
+  .table-container {
+    @apply base-container
+           relative;
+  }
+
+  .table-header {
+    @apply px-4 py-3 
+           text-xs font-medium text-primary-600 dark:text-primary-400 
+           uppercase tracking-wider 
+           cursor-pointer 
+           transition-colors duration-200
+           text-left;
+  }
+
+  .table-header-sm {
+    @apply table-header 
+           hidden sm:table-cell;
+  }
+
+  .table-cell {
+    @apply px-4 py-3 
+           text-sm text-value
+           transition-colors duration-200;
+  }
+
+  .table-row {
+    @apply hover:bg-primary-25 dark:hover:bg-primary-900/10
+           transition-colors duration-200;
+  }
+
+  .table-head-row {
+    @apply bg-primary-25 dark:bg-primary-900/30
+           border-b border-primary-100 dark:border-primary-800;
+  }
+
+  /* Utility Classes */
   .flex-col-mobile {
     @apply flex-col sm:flex-row;
   }
