@@ -119,11 +119,13 @@ code {
   /* Mobile Card Styles */
   .mobile-card {
     @apply bg-white dark:bg-gray-800 
-           rounded-lg
-           border border-primary-100 dark:border-primary-800 
-           p-4 space-y-4 
-           shadow-sm
-           transition-colors duration-200;
+        rounded-lg
+        border border-primary-100 dark:border-primary-800 
+        p-4 space-y-4 
+        shadow-sm
+        transition-all duration-200
+        hover:border-primary-200 dark:hover:border-primary-700
+        hover:shadow-md;
   }
 
   .mobile-card-header {
@@ -237,6 +239,72 @@ code {
            border-b border-primary-100 dark:border-primary-800;
   }
 
+/* Table Styles Erweiterung */
+.table-action-button {
+  @apply h-8 w-8 rounded flex items-center justify-center
+      transition-colors duration-150;
+}
+  
+.table-action-button-primary {
+  @apply table-action-button
+      bg-primary-500 dark:bg-primary-600 
+      hover:bg-primary-600 dark:hover:bg-primary-700
+      text-white;
+}
+  
+.table-action-button-secondary {
+  @apply table-action-button
+      bg-secondary-400 dark:bg-secondary-500
+      hover:bg-secondary-500 dark:hover:bg-secondary-600 
+      text-white;
+}
+  
+/* Details Row Style */
+.table-detail-row {
+  @apply bg-primary-50 dark:bg-primary-900/20 
+      border-l-4 border-l-primary-200 dark:border-l-primary-700;
+}
+  
+/* Split Row Style */
+.table-split-row {
+  @apply bg-primary-25 dark:bg-primary-900/30;
+}
+  .mobile-action-buttons {
+    @apply flex gap-1 items-center;
+  }
+  
+  .mobile-icon-button {
+    @apply h-8 w-8 rounded-full flex items-center justify-center
+        transition-colors duration-150 text-xs;
+  }
+  
+  .mobile-icon-button-primary {
+    @apply mobile-icon-button
+        bg-primary-500 dark:bg-primary-600 
+        hover:bg-primary-600 dark:hover:bg-primary-700
+        text-white;
+  }
+  
+  .mobile-icon-button-secondary {
+    @apply mobile-icon-button
+        bg-secondary-400 dark:bg-secondary-500
+        hover:bg-secondary-500 dark:hover:bg-secondary-600 
+        text-white;
+  }
+  
+/* Address Style */
+.table-address {
+  @apply flex flex-col;
+}
+  
+.table-address-main {
+  @apply text-value;
+}
+  
+.table-address-sub {
+  @apply text-xs text-label;
+}
+  
   /* Utility Classes */
   .flex-col-mobile {
     @apply flex-col sm:flex-row;
