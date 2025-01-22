@@ -1816,8 +1816,8 @@ function MonthlyOverview() {
   
   const renderBetrag = (betrag, isReceived) => {
     return (
-      <span className={isReceived ? "text-gray-400" : ""}>
-        {Number(betrag || 0).toFixed(2)} €
+      <span className={isReceived ? "text-muted" : "text-value"}>
+      {Number(betrag || 0).toFixed(2)} €
       </span>
     );
   };
@@ -1893,33 +1893,35 @@ function MonthlyOverview() {
     ];
     
     return (
-      <div className="flex flex-col sm:flex-row justify-end gap-2">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="btn-primary"
-        >
-          <span>Schnellaktionen</span>
-          <span className={`transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}>
-            ▼
-          </span>
-        </button>
-        
-        {isOpen && (
-          <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-10">
-            {actions.map((action, index) => (
-              <button
-                key={index}
-                onClick={async () => {
-                  await action.action();
-                  setIsOpen(false);
-                }}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-primary-50 first:rounded-t-lg last:rounded-b-lg"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        )}
+      <div className="flex flex-col sm:flex-row justify-end gap-2 relative">
+      <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="btn-primary flex justify-between items-center"
+      >
+      <span>Schnellaktionen</span>
+      <span className={`transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}>
+      ▼
+      </span>
+      </button>
+      
+      {isOpen && (
+        <div className="card-container absolute right-0 top-full mt-2 w-72 z-10">
+        {actions.map((action, index) => (
+          <button
+          key={index}
+          onClick={async () => {
+            await action.action();
+            setIsOpen(false);
+          }}
+          className="w-full text-left px-4 py-2 text-sm text-value
+                        hover:bg-primary-25 dark:hover:bg-primary-900
+                        first:rounded-t-lg last:rounded-b-lg"
+          >
+          {action.label}
+          </button>
+        ))}
+        </div>
+      )}
       </div>
     );
   };
@@ -1936,8 +1938,8 @@ function MonthlyOverview() {
     if (betrag === 0) {
       return (
         <div className="flex items-center justify-between">
-        <span className="text-primary-600 text-xs cursor-pointer flex items-center gap-1">
-        <CheckCircle2 size={14} className="text-primary-600" />
+        <span className="status-badge-secondary">
+        <CheckCircle2 size={14} className="text-secondary-600 dark:text-secondary-400" />
         <span>Keine Abrechnung</span>
         </span>
         </div>
@@ -1947,7 +1949,8 @@ function MonthlyOverview() {
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center justify-between">
-        <span className="text-primary-600 text-xs cursor-pointer flex items-center gap-1"
+        <span 
+        className="status-badge-primary cursor-pointer"
         onClick={() => setStatusModal({ 
           open: true, 
           typ, 
@@ -1956,7 +1959,7 @@ function MonthlyOverview() {
           monat: month.monatNr
         })}
         >
-        <CheckCircle2 size={14} className="text-primary-600" />
+        <CheckCircle2 size={14} />
         <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
         </span>
         </div>
@@ -1966,7 +1969,8 @@ function MonthlyOverview() {
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center justify-between">
-        <span className="text-secondary-500 text-xs cursor-pointer flex items-center gap-1"
+        <span 
+        className="status-badge-secondary cursor-pointer"
         onClick={() => setStatusModal({ 
           open: true, 
           typ, 
@@ -1975,7 +1979,7 @@ function MonthlyOverview() {
           monat: month.monatNr
         })}
         >
-        <Circle size={14} className="text-secondary-500" />
+        <Circle size={14} />
         <span>Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}</span>
         </span>
         </div>
@@ -1984,7 +1988,8 @@ function MonthlyOverview() {
     
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
-      <span className="text-secondary-500 text-xs cursor-pointer flex items-center gap-1"
+      <span 
+      className="status-badge-secondary cursor-pointer"
       onClick={() => setStatusModal({ 
         open: true, 
         typ, 
@@ -1993,7 +1998,7 @@ function MonthlyOverview() {
         monat: month.monatNr
       })}
       >
-      <AlertCircle size={14} className="text-secondary-500" />
+      <AlertCircle size={14} />
       <span>Nicht eingereicht</span>
       </span>
       </div>
