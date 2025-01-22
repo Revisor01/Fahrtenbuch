@@ -1893,10 +1893,10 @@ function MonthlyOverview() {
     ];
     
     return (
-      <div className="relative inline-block">
+      <div className="relative">
       <button
       onClick={() => setIsOpen(!isOpen)}
-      className="btn-primary flex items-center gap-2"
+      className="btn-primary w-full sm:w-auto flex items-center justify-between gap-2"
       >
       <span>Schnellaktionen</span>
       <span className={`transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}>
@@ -1905,7 +1905,10 @@ function MonthlyOverview() {
       </button>
       
       {isOpen && (
-        <div className="absolute right-0 mt-2 py-1 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
+        <>
+        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+        <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
+
         {actions.map((action, index) => (
           <button
           key={index}
@@ -1919,6 +1922,7 @@ function MonthlyOverview() {
           </button>
         ))}
         </div>
+        </>
       )}
       </div>
     );
@@ -2007,9 +2011,19 @@ function MonthlyOverview() {
   
   return (
     <div className="w-full max-w-full space-y-6">
-    <div className="card-container-highlight">
     <div className="flex flex-col gap-4 mb-6">
+    <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
+    {selectedYear !== currentYear && selectedYear !== 'all' && (
+      <button 
+      onClick={() => setSelectedYear(currentYear)}
+      className="btn-secondary text-xs"
+      >
+      Aktuelles Jahr
+      </button>
+    )}
+    </div>
+    
     <div className="flex flex-wrap items-center justify-between gap-4">
     <div className="flex items-center text-[11px]">
     <label className="checkbox-label">
@@ -2025,14 +2039,6 @@ function MonthlyOverview() {
     </div>
     
     <div className="flex items-center justify-end gap-3 text-[11px]">
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary"
-      >
-      Aktuelles Jahr
-      </button>
-    )}
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -2915,23 +2921,25 @@ function AppContent() {
           </div>
           
           {/* Hilfe und Logout */}
-          <div className="grid grid-cols-3 sm:flex gap-2 w-full">
-            <ThemeToggle />
-            <button
-              onClick={() => setShowHelpModal(true)}
-              className="btn-primary flex items-center justify-center gap-2"
-            >
-              <HelpCircle size={16} />
-              <span>Hilfe</span>
-            </button>
-            <button 
-              onClick={logout} 
-              className="btn-secondary flex items-center justify-center gap-2"
-            >
-              <LogOut size={16} />
-              <span>Logout</span>
-            </button>
-          </div>
+<div className="grid grid-cols-3 sm:flex gap-2 w-full sm:w-auto">
+  <div className="flex gap-2 col-span-3 sm:col-span-1">
+    <ThemeToggle />
+  </div>
+  <button
+    onClick={() => setShowHelpModal(true)}
+    className="btn-primary flex items-center justify-center gap-2"
+  >
+    <HelpCircle size={16} />
+    <span>Hilfe</span>
+  </button>
+  <button 
+    onClick={logout} 
+    className="btn-secondary flex items-center justify-center gap-2"
+  >
+    <LogOut size={16} />
+    <span>Logout</span>
+  </button>
+</div>
         </div>
       </div>
       

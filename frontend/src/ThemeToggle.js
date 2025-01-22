@@ -11,7 +11,11 @@ export default function ThemeToggle() {
     { id: 'monochrome', name: 'Monochrome' },
     { id: 'slate', name: 'Slate' },
     { id: 'sunset', name: 'Sunset' },
-    { id: 'mint', name: 'Mint' }
+    { id: 'mint', name: 'Mint' },
+    { id: 'teal', name: 'Teal' },
+    { id: 'vibrant', name: 'Vibrant' },
+    { id: 'deep-purple', name: 'Deep Purple' },
+    { id: 'forest', name: 'Forest' }
   ];
 
   return (
