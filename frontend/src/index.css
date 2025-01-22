@@ -261,13 +261,13 @@ code {
   
 /* Details Row Style */
 .table-detail-row {
-  @apply bg-primary-50 dark:bg-primary-900/20 
+  @apply bg-primary-50 dark:bg-primary-900  /* Entfernt /20 */
       border-l-4 border-l-primary-200 dark:border-l-primary-700;
 }
   
 /* Split Row Style */
 .table-split-row {
-  @apply bg-primary-25 dark:bg-primary-900/30;
+  @apply bg-primary-25 dark:bg-primary-800;  /* Etwas heller als 900 */
 }
   .mobile-action-buttons {
     @apply flex gap-1 items-center;
