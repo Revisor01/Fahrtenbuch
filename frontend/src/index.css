@@ -90,6 +90,37 @@ code {
     @apply flex flex-col sm:flex-row gap-2;
   }
 
+/* Action Buttons für Tabellen */
+.table-action-button {
+  @apply h-8 w-8 rounded flex items-center justify-center
+      transition-colors duration-150;
+}
+  
+.table-action-button-primary {
+  @apply table-action-button
+      bg-primary-500 dark:bg-primary-600 
+      hover:bg-primary-600 dark:hover:bg-primary-700
+      text-white;
+}
+  
+.table-action-button-secondary {
+  @apply table-action-button
+      bg-secondary-400 dark:bg-secondary-500
+      hover:bg-secondary-500 dark:hover:bg-secondary-600 
+      text-white;
+}
+  
+/* Status Styles */
+.status-success {
+  @apply p-4 rounded bg-primary-25 dark:bg-primary-900
+      text-primary-600 dark:text-primary-300 text-xs;
+}
+  
+.status-error {
+  @apply p-4 rounded bg-secondary-25 dark:bg-secondary-900
+      text-secondary-600 dark:text-secondary-300 text-xs;
+}
+  
   /* Form Elements */
   .form-input {
     @apply w-full h-8 px-3 

@@ -380,9 +380,8 @@ function OrtForm() {
   
   return (
     <div className="mb-4">
-<div className="card-container-highlight">
+    <div className="card-container-highlight">
     <form onSubmit={handleSubmit}>
-    {/* Alle Eingabefelder in einer Zeile auf Desktop */}
     <div className="flex flex-col sm:flex-row gap-4">
     <div className="w-full sm:w-1/4">
     <input
@@ -390,7 +389,7 @@ function OrtForm() {
     value={name}
     onChange={(e) => setName(e.target.value)}
     placeholder="Name des Ortes"
-    className="form-input w-full h-8"
+    className="form-input"
     required
     />
     </div>
@@ -400,13 +399,13 @@ function OrtForm() {
     value={adresse}
     onChange={(e) => setAdresse(e.target.value)}
     placeholder="Vollständige Adresse"
-    className="form-input w-full h-8"
+    className="form-input"
     required
     />
     </div>
     <div className="w-full sm:w-1/5">
     <select
-    value={ortTyp} // Das müsste als State definiert sein
+    value={ortTyp}
     onChange={(e) => {
       const value = e.target.value;
       setOrtTyp(value);
@@ -414,7 +413,7 @@ function OrtForm() {
       setIstDienstort(value === 'dienstort');
       setIstKirchspiel(value === 'kirchspiel');
     }}
-    className="form-select w-full h-8"
+    className="form-select"
     >
     <option value="">Art des Ortes</option>
     {!hasWohnort && <option value="wohnort">Wohnort</option>}
@@ -424,10 +423,7 @@ function OrtForm() {
     </select>
     </div>
     <div className="w-full sm:w-auto sm:self-end">
-    <button 
-    type="submit" 
-    className="w-full sm:w-auto bg-primary-500 text-white px-4 h-8 rounded hover:bg-primary-600 transition-colors duration-200 text-sm shadow-sm whitespace-nowrap"
-    >
+    <button type="submit" className="btn-primary w-full sm:w-auto">
     Hinzufügen
     </button>
     </div>
@@ -477,13 +473,13 @@ function DistanzForm() {
   
   return (
     <div className="mb-4">
-<div className="card-container-highlight">
+    <div className="card-container-highlight">
     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
     <div className="w-full sm:flex-1">
     <select
     value={vonOrtId}
     onChange={(e) => setVonOrtId(e.target.value)}
-    className="form-select w-full h-8"
+    className="form-select"
     required
     >
     <option value="">Von Ort auswählen</option>
@@ -495,7 +491,7 @@ function DistanzForm() {
     <select
     value={nachOrtId}
     onChange={(e) => setNachOrtId(e.target.value)}
-    className="form-select w-full h-8"
+    className="form-select"
     required
     >
     <option value="">Nach Ort auswählen</option>
@@ -509,15 +505,12 @@ function DistanzForm() {
     value={distanz}
     onChange={(e) => setDistanz(e.target.value)}
     placeholder="km"
-    className="form-input w-full h-8"
+    className="form-input"
     required
     />
     </div>
     
-    <button 
-    type="submit" 
-    className="bg-primary-500 text-white px-6 h-8 rounded-md hover:bg-primary-600 transition-colors duration-200 text-sm whitespace-nowrap shadow-sm"
-    >
+    <button type="submit" className="btn-primary">
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
     </form>
@@ -2406,62 +2399,59 @@ function OrteListe() {
   
   return (
     <div className="table-container">
-    <div className="overflow-x-auto w-full">
     <table className="w-full">
     <thead>
-    <tr className="bg-primary-25 border-b border-primary-100">
-    <th className="table-header"
-    onClick={() => requestSort('name')}>
-    Name
+    <tr className="table-head-row">
+    <th className="table-header" onClick={() => requestSort('name')}>
+    Name {sortConfig.key === 'name' && (
+      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    )}
     </th>
-    <th className="table-header-sm"
-    onClick={() => requestSort('adresse')}>
-    Adresse
+    <th className="table-header-sm" onClick={() => requestSort('adresse')}>
+    Adresse {sortConfig.key === 'adresse' && (
+      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    )}
     </th>
-    <th className="table-header">
-    Status
-    </th>
-    <th className="table-header text-right">
-    Aktionen
-    </th>
+    <th className="table-header">Status</th>
+    <th className="table-header text-right">Aktionen</th>
     </tr>
     </thead>
-    <tbody className="divide-y divide-primary-50">
+    <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
     {sortedOrte.map((ort) => (
-      <tr key={ort.id} className="hover:bg-primary-25 transition-colors duration-150">
-      <td className="px-4 py-3 text-sm text-primary-900">
+      <tr key={ort.id} className="table-row">
+      <td className="table-cell">
       {editingOrt?.id === ort.id ? (
         <input
         value={editingOrt.name}
         onChange={(e) => setEditingOrt({ ...editingOrt, name: e.target.value })}
-        className="form-input w-full h-8"
+        className="form-input"
         />
       ) : (
         <div className="flex flex-col">
-        <span>{ort.name}</span>
-        <span className="text-xs text-primary-500 sm:hidden">
+        <span className="text-value">{ort.name}</span>
+        <span className="text-muted text-xs sm:hidden">
         {ort.adresse}
         </span>
         </div>
       )}
       </td>
-      <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
+      <td className="table-header-sm">
       {editingOrt?.id === ort.id ? (
         <input
         value={editingOrt.adresse}
         onChange={(e) => setEditingOrt({ ...editingOrt, adresse: e.target.value })}
-        className="form-input w-full h-8"
+        className="form-input"
         />
       ) : (
-        ort.adresse
+        <span className="text-value">{ort.adresse}</span>
       )}
       </td>
-      <td className="px-4 py-3 text-sm text-primary-900">
+      <td className="table-cell">
       {editingOrt?.id === ort.id ? (
         <select
         value={getOrtStatus(editingOrt)}
         onChange={handleStatusChange}
-        className="form-select w-full h-8"
+        className="form-select"
         >
         <option value="">Sonstiger Ort</option>
         <option value="wohnort">Wohnort</option>
@@ -2469,15 +2459,16 @@ function OrteListe() {
         <option value="kirchspiel">Kirchspiel</option>
         </select>
       ) : (
-        getOrtStatusLabel(ort)
+        <span className="text-value">{getOrtStatusLabel(ort)}</span>
       )}
       </td>
-      <td className="px-4 py-3 text-sm">
-      <div className="flex flex-col sm:flex-row items-end sm:justify-end gap-2">
+      <td className="table-cell">
+      <div className="flex justify-end gap-2">
       {editingOrt?.id === ort.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
+        className="table-action-button-primary"
+        title="Speichern"
         >
         ✓
         </button>
@@ -2485,14 +2476,14 @@ function OrteListe() {
         <>
         <button
         onClick={() => handleEdit(ort)}
-        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
+        className="table-action-button-primary"
         title="Bearbeiten"
         >
         ✎
         </button>
         <button
         onClick={() => handleDelete(ort.id)}
-        className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-150"
+        className="table-action-button-secondary"
         title="Löschen"
         >
         ×
@@ -2505,7 +2496,6 @@ function OrteListe() {
     ))}
     </tbody>
     </table>
-    </div>
     </div>
   );
 }
@@ -2582,40 +2572,44 @@ function DistanzenListe() {
   
   return (
     <div className="table-container">
-    <div className="overflow-x-auto w-full">
     <table className="w-full">
     <thead>
-    <tr className="bg-primary-25 border-b border-primary-100">
+    <tr className="table-head-row">
     <th className="table-header" onClick={() => requestSort('von_ort_id')}>
-    Von
+    Von {sortConfig.key === 'von_ort_id' && (
+      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    )}
     </th>
     <th className="table-header-sm" onClick={() => requestSort('nach_ort_id')}>
-    Nach
+    Nach {sortConfig.key === 'nach_ort_id' && (
+      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    )}
     </th>
     <th className="table-header" onClick={() => requestSort('distanz')}>
     <span className="sm:hidden">km</span>
     <span className="hidden sm:inline">Distanz (km)</span>
+    {sortConfig.key === 'distanz' && (
+      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    )}
     </th>
-    <th className="table-header text-right">
-    Aktionen
-    </th>
+    <th className="table-header text-right">Aktionen</th>
     </tr>
     </thead>
-    <tbody className="divide-y divide-primary-50">
+    <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
     {sortedDistanzen.map((distanz) => (
-      <tr key={distanz.id} className="hover:bg-primary-25 transition-colors duration-150">
-      <td className="px-4 py-3 text-sm text-primary-900">
+      <tr key={distanz.id} className="table-row">
+      <td className="table-cell">
       <div className="flex flex-col">
-      <span>{getOrtName(distanz.von_ort_id)}</span>
-      <span className="text-xs text-primary-500 sm:hidden">
+      <span className="text-value">{getOrtName(distanz.von_ort_id)}</span>
+      <span className="text-muted text-xs sm:hidden">
       → {getOrtName(distanz.nach_ort_id)}
       </span>
       </div>
       </td>
-      <td className="hidden sm:table-cell px-4 py-3 text-sm text-primary-900">
-      {getOrtName(distanz.nach_ort_id)}
+      <td className="table-header-sm">
+      <span className="text-value">{getOrtName(distanz.nach_ort_id)}</span>
       </td>
-      <td className="px-4 py-3 text-sm text-right text-primary-900">
+      <td className="table-cell text-right">
       {editingDistanz?.id === distanz.id ? (
         <input
         type="number"
@@ -2629,15 +2623,16 @@ function DistanzenListe() {
         className="form-input w-16"
         />
       ) : (
-        `${distanz.distanz}`
+        <span className="text-value">{distanz.distanz}</span>
       )}
       </td>
-      <td className="px-4 py-3 text-sm">
-      <div className="flex flex-col sm:flex-row items-end sm:justify-end gap-2">
+      <td className="table-cell">
+      <div className="flex justify-end gap-2">
       {editingDistanz?.id === distanz.id ? (
         <button
         onClick={handleSave}
-        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
+        className="table-action-button-primary"
+        title="Speichern"
         >
         ✓
         </button>
@@ -2645,14 +2640,14 @@ function DistanzenListe() {
         <>
         <button
         onClick={() => handleEdit(distanz)}
-        className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
+        className="table-action-button-primary"
         title="Bearbeiten"
         >
         ✎
         </button>
         <button
         onClick={() => handleDelete(distanz.id)}
-        className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-150"
+        className="table-action-button-secondary"
         title="Löschen"
         >
         ×
@@ -2665,7 +2660,6 @@ function DistanzenListe() {
     ))}
     </tbody>
     </table>
-    </div>
     </div>
   );
 }
@@ -2686,16 +2680,15 @@ function LoginPage() {
   };
   
   return (
-    <div className="min-h-screen flex items-center justify-center">
-    <div className="table-container m-6 bg-primary-25 w-full max-w-md">
-    <div className="p-6 rounded-lg space-y-6">
-    <h2 className="text-2xl font-medium text-primary-900 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+    <div className="card-container-highlight m-6 w-full max-w-md">
+    <h2 className="text-lg font-medium text-value text-center mb-6">
     Fahrtenbuch
     </h2>
     
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     Benutzername / E-Mail
     </label>
     <input
@@ -2708,7 +2701,7 @@ function LoginPage() {
     </div>
     
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     Passwort
     </label>
     <input
@@ -2733,7 +2726,6 @@ function LoginPage() {
     </button>
     </div>
     </form>
-    </div>
     </div>
     
     <Modal
@@ -2769,11 +2761,10 @@ function ForgotPasswordForm({ onClose }) {
   };
   
   return (
-    <div className="table-container">
-    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <div className="card-container-highlight">
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     E-Mail-Adresse
     </label>
     <input
@@ -2786,16 +2777,11 @@ function ForgotPasswordForm({ onClose }) {
     </div>
     
     {status && (
-      <div className={`p-4 rounded ${
-        status.type === 'success' 
-        ? 'bg-primary-25 text-primary-600 text-xs' 
-        : 'bg-secondary-25 text-secondary-600 text-xs'
-      }`}>
+      <div className={status.type === 'success' ? 'status-success' : 'status-error'}>
       {status.message}
       </div>
     )}
     
-    <div className="w-full">
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
@@ -2811,9 +2797,7 @@ function ForgotPasswordForm({ onClose }) {
     Anweisungen senden
     </button>
     </div>
-    </div>
     </form>
-    </div>
     </div>
   );
 }
@@ -2881,7 +2865,7 @@ function AppContent() {
     <div className="mb-8"> 
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-    <h1 className="text-lg font-medium text-value">Fahrtenabrechnung</h1>
+    <h1 className="text-lg font-medium text-value">Fahrtenabrechnung Kirchenkreis Dithmarschen</h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
     {/* Hauptnavigation - Verwaltung */}
@@ -2923,23 +2907,26 @@ function AppContent() {
           </div>
           
           {/* Hilfe und Logout */}
-<div className="grid grid-cols-3 sm:flex gap-2 w-full sm:w-auto">
-  <div className="flex gap-2 col-span-3 sm:col-span-1">
+<div className="grid grid-cols-4 sm:flex gap-2 w-full sm:w-auto">
+  <div className="flex gap-2">
     <ThemeToggle />
-  <button
-    onClick={() => setShowHelpModal(true)}
-    className="btn-primary flex items-center justify-center gap-2"
-  >
-    <HelpCircle size={16} />
-    <span>Hilfe</span>
-  </button>
-  <button 
-    onClick={logout} 
-    className="btn-secondary flex items-center justify-center gap-2"
-  >
-    <LogOut size={16} />
-    <span>Logout</span>
-  </button>
+  </div>
+  <div className="col-span-3 flex justify-end gap-2">
+    <button
+      onClick={() => setShowHelpModal(true)}
+      className="btn-primary flex items-center justify-center gap-2"
+    >
+      <HelpCircle size={16} />
+      <span>Hilfe</span>
+    </button>
+    <button 
+      onClick={logout} 
+      className="btn-secondary flex items-center justify-center gap-2"
+    >
+      <LogOut size={16} />
+      <span>Logout</span>
+    </button>
+  </div>
 </div>
   </div>
         </div>
