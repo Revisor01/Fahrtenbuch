@@ -38,7 +38,7 @@ export default function ThemeToggle() {
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-800 z-50">
+          <div className="absolute mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-800 z-50">
             {themes.map((theme) => (
               <button
                 key={theme.id}

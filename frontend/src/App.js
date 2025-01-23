@@ -2922,7 +2922,6 @@ function AppContent() {
 <div className="grid grid-cols-3 sm:flex gap-2 w-full sm:w-auto">
   <div className="flex gap-2 col-span-3 sm:col-span-1">
     <ThemeToggle />
-  </div>
   <button
     onClick={() => setShowHelpModal(true)}
     className="btn-primary flex items-center justify-center gap-2"
@@ -2938,6 +2937,7 @@ function AppContent() {
     <span>Logout</span>
   </button>
 </div>
+  </div>
         </div>
       </div>
       

@@ -233,7 +233,7 @@ code {
   
   @media (prefers-color-scheme: dark) {
     .table-header-sm {
-      color: var(--primary-400) !important;
+      color: var(--primary-600) !important;
     }
   }
   
