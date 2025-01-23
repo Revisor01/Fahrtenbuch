@@ -2018,7 +2018,7 @@ function MonthlyOverview() {
     {selectedYear !== currentYear && selectedYear !== 'all' && (
       <button 
       onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary text-xs"
+      className="btn-secondary text-xs sm:hidden"
       >
       Aktuelles Jahr
       </button>
@@ -2044,6 +2044,12 @@ function MonthlyOverview() {
     </div>
     
     <div className="flex items-center justify-end gap-3 text-[11px]">
+    {selectedYear !== currentYear && selectedYear !== 'all' && (
+      <button 
+      onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
+      Aktueller Jahr
+      </button>
+    )}
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
