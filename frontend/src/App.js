@@ -1907,7 +1907,7 @@ function MonthlyOverview() {
       {isOpen && (
         <>
         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-        <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
+        <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
 
         {actions.map((action, index) => (
           <button
