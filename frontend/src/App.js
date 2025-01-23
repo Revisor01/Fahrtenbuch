@@ -2907,82 +2907,81 @@ function AppContent() {
           </div>
           
           {/* Hilfe und Logout */}
-<div className="grid grid-cols-4 sm:flex gap-2 w-full sm:w-auto">
-  <div className="flex gap-2">
-    <ThemeToggle />
-  </div>
-  <div className="col-span-3 flex justify-end gap-2">
-    <button
-      onClick={() => setShowHelpModal(true)}
-      className="btn-primary flex items-center justify-center gap-2"
-    >
-      <HelpCircle size={16} />
-      <span>Hilfe</span>
-    </button>
-    <button 
-      onClick={logout} 
-      className="btn-secondary flex items-center justify-center gap-2"
-    >
-      <LogOut size={16} />
-      <span>Logout</span>
-    </button>
-  </div>
-</div>
-  </div>
+          <div className="grid grid-cols-4 sm:flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2">
+              <ThemeToggle />
+            </div>
+            <div className="col-span-3 flex justify-end gap-2">
+              <button
+                onClick={() => setShowHelpModal(true)}
+                className="btn-primary flex items-center justify-center gap-2"
+              >
+                <HelpCircle size={16} />
+                <span>Hilfe</span>
+              </button>
+              <button 
+                onClick={logout} 
+                className="btn-secondary flex items-center justify-center gap-2"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      
-      {/* Hauptinhalt */}
-      <div className="space-y-6">
-        <FahrtForm />
-        <FahrtenListe />
-        <MonthlyOverview />
-      </div>
-      
-      {/* Modals */}
-      <ProfileModal 
-        isOpen={isProfileModalOpen} 
-        onClose={() => setIsProfileModalOpen(false)} 
-      />
-      
-      <Modal 
-        isOpen={showUserManagementModal} 
-        onClose={() => setShowUserManagementModal(false)}
-        title="Benutzerverwaltung"
-        size="wide"
-      >
-        <UserManagement />
-      </Modal>
-      
-      <Modal 
-        isOpen={showOrteModal} 
-        onClose={() => setShowOrteModal(false)} 
-        title="Orte" 
-        size="wide"
-      >
-        <div className="space-y-6">
-          <OrtForm />
-          <OrteListe />
-        </div>
-      </Modal>
-      
-      <Modal 
-        isOpen={showDistanzenModal} 
-        onClose={() => setShowDistanzenModal(false)} 
-        title="Distanzen" 
-        size="wide"
-      >
-        <div className="space-y-6">
-          <DistanzForm />
-          <DistanzenListe />
-        </div>
-      </Modal>
-
-      <HilfeModal 
-        isOpen={showHelpModal}
-        onClose={() => setShowHelpModal(false)}
-      />
     </div>
+    
+    {/* Hauptinhalt */}
+    <div className="space-y-6">
+      <FahrtForm />
+      <FahrtenListe />
+      <MonthlyOverview />
+    </div>
+    
+    {/* Modals */}
+    <ProfileModal 
+      isOpen={isProfileModalOpen} 
+      onClose={() => setIsProfileModalOpen(false)} 
+    />
+    
+    <Modal 
+      isOpen={showUserManagementModal} 
+      onClose={() => setShowUserManagementModal(false)}
+      title="Benutzerverwaltung"
+      size="wide"
+    >
+      <UserManagement />
+    </Modal>
+    
+    <Modal 
+      isOpen={showOrteModal} 
+      onClose={() => setShowOrteModal(false)} 
+      title="Orte" 
+      size="wide"
+    >
+      <div className="space-y-6">
+        <OrtForm />
+        <OrteListe />
+      </div>
+    </Modal>
+    
+    <Modal 
+      isOpen={showDistanzenModal} 
+      onClose={() => setShowDistanzenModal(false)} 
+      title="Distanzen" 
+      size="wide"
+    >
+      <div className="space-y-6">
+        <DistanzForm />
+        <DistanzenListe />
+      </div>
+    </Modal>
+
+    <HilfeModal 
+      isOpen={showHelpModal}
+      onClose={() => setShowHelpModal(false)}
+    />
   </div>
 );
 }
