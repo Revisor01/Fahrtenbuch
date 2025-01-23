@@ -31,106 +31,118 @@ const UserForm = ({ onSubmit, isEdit, initialData, onClose }) => {
    };
 
    return (
-       <div className="table-container">
-           <div className="bg-primary-25 p-6 rounded-lg">
-               <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-                   <div className="space-y-4">
-                       <input
-                           type="email"
-                           name="email"
-                           value={formData.email}
-                           onChange={handleChange}
-                           className="form-input"
-                           placeholder="E-Mail *"
-                           required
-                       />
-                       
-                       <input
-                           type="text"
-                           name="username"
-                           value={formData.username}
-                           onChange={handleChange}
-                           className="form-input"
-                           placeholder="Benutzername *"
-                           required
-                       />
-                       
-                       <select
-                           name="role"
-                           value={formData.role}
-                           onChange={handleChange}
-                           className="form-select"
-                       >
-                           <option value="user">Benutzer</option>
-                           <option value="admin">Administrator</option>
-                       </select>
-                       
-                       <input
-                           type="text"
-                           name="fullName"
-                           value={formData.fullName}
-                           onChange={handleChange}
-                           className="form-input"
-                           placeholder="Voller Name"
-                       />
-                       
-                       <input
-                           type="text"
-                           name="iban"
-                           value={formData.iban}
-                           onChange={handleChange}
-                           className="form-input"
-                           placeholder="IBAN"
-                       />
-                       
-                       <input
-                           type="text"
-                           name="kirchengemeinde"
-                           value={formData.kirchengemeinde}
-                           onChange={handleChange}
-                           className="form-input"
-                           placeholder="Kirchengemeinde"
-                       />
-                       
-                       <input
-                           type="text"
-                           name="kirchspiel"
-                           value={formData.kirchspiel}
-                           onChange={handleChange}
-                           className="form-input"
-                           placeholder="Kirchspiel"
-                       />
-                       
-                       <input
-                           type="text"
-                           name="kirchenkreis"
-                           value={formData.kirchenkreis}
-                           onChange={handleChange}
-                           className="form-input"
-                           placeholder="Kirchenkreis"
-                       />
-                   </div>
-                   
-                   <div className="w-full">
-                       <div className="flex flex-col sm:flex-row gap-2">
-                           <button
-                               type="button"
-                               onClick={onClose}
-                               className="btn-secondary w-full"
-                           >
-                               Abbrechen
-                           </button>
-                           <button
-                               type="submit"
-                               className="btn-primary w-full"
-                           >
-                               {isEdit ? 'Aktualisieren' : 'Erstellen'}
-                           </button>
-                       </div>
-                   </div>
-               </form>
-           </div>
-       </div>
+      <div className="card-container-highlight">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+      <div>
+      <input
+      type="email"
+      name="email"
+      value={formData.email}
+      onChange={handleChange}
+      className="form-input"
+      placeholder="E-Mail *"
+      required
+      />
+      </div>
+      
+      <div>
+      <input
+      type="text"
+      name="username"
+      value={formData.username}
+      onChange={handleChange}
+      className="form-input"
+      placeholder="Benutzername *"
+      required
+      />
+      </div>
+      
+      <div>
+      <select
+      name="role"
+      value={formData.role}
+      onChange={handleChange}
+      className="form-select"
+      >
+      <option value="user">Benutzer</option>
+      <option value="admin">Administrator</option>
+      </select>
+      </div>
+      
+      <div>
+      <input
+      type="text"
+      name="fullName"
+      value={formData.fullName}
+      onChange={handleChange}
+      className="form-input"
+      placeholder="Voller Name"
+      />
+      </div>
+      
+      <div>
+      <input
+      type="text"
+      name="iban"
+      value={formData.iban}
+      onChange={handleChange}
+      className="form-input"
+      placeholder="IBAN"
+      />
+      </div>
+      
+      <div>
+      <input
+      type="text"
+      name="kirchengemeinde"
+      value={formData.kirchengemeinde}
+      onChange={handleChange}
+      className="form-input"
+      placeholder="Kirchengemeinde"
+      />
+      </div>
+      
+      <div>
+      <input
+      type="text"
+      name="kirchspiel"
+      value={formData.kirchspiel}
+      onChange={handleChange}
+      className="form-input"
+      placeholder="Kirchspiel"
+      />
+      </div>
+      
+      <div>
+      <input
+      type="text"
+      name="kirchenkreis"
+      value={formData.kirchenkreis}
+      onChange={handleChange}
+      className="form-input"
+      placeholder="Kirchenkreis"
+      />
+      </div>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-2">
+      <button
+      type="button"
+      onClick={onClose}
+      className="btn-secondary w-full"
+      >
+      Abbrechen
+      </button>
+      <button
+      type="submit"
+      className="btn-primary w-full"
+      >
+      {isEdit ? 'Aktualisieren' : 'Erstellen'}
+      </button>
+      </div>
+      </form>
+      </div>
    );
 };
 
@@ -200,110 +212,112 @@ export default function UserManagement() {
    };
 
    return (
-       <div className="w-full max-w-full">
-           <div className="flex justify-end mb-6">
-               <button
-                   onClick={() => setIsCreateModalOpen(true)}
-                   className="btn-primary w-full-mobile"
-               >
-                   + Neuer Benutzer
-               </button>
-           </div>
-           
-           <div className="table-container">
-               <div className="-mx-0 sm:mx-0 overflow-auto">
-                   <table className="min-w-full">
-                       <thead>
-                           <tr className="bg-primary-25 border-b border-primary-100">
-                               <th className="table-header">Benutzername</th>
-                               <th className="table-header-sm">E-Mail</th>
-                               <th className="table-header-sm">Kirchengemeinde</th>
-                               <th className="table-header">Status</th>
-                               <th className="table-header-sm">Rolle</th>
-                               <th className="table-header text-right">Aktionen</th>
-                           </tr>
-                       </thead>
-                       <tbody className="divide-y divide-primary-50">
-                           {users.map(user => (
-                               <tr key={user.id} className="table-row">
-                                   <td className="table-cell">
-                                       <div className="flex flex-col">
-                                           <span>{user.username}</span>
-                                           <span className="text-xs text-primary-500 sm:hidden">{user.email}</span>
-                                       </div>
-                                   </td>
-                                   <td className="table-cell hidden sm:table-cell">{user.email}</td>
-                                   <td className="table-cell hidden md:table-cell">{user.kirchengemeinde || '-'}</td>
-                                   <td className="table-cell">
-                                       {user.email_verified ? (
-                                           <span className="text-primary-600 text-xs">● Verifiziert</span>
-                                       ) : (
-                                           <span className="text-secondary-500 text-xs">○ Ausstehend</span>
-                                       )}
-                                   </td>
-                                   <td className="table-cell hidden sm:table-cell">
-                                       <span className={`text-xs ${user.role === 'admin' ? 'text-primary-700' : 'text-primary-600'}`}>
-                                           {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
-                                       </span>
-                                   </td>
-                                   <td className="table-cell">
-                                       <div className="flex flex-col sm:flex-row items-end sm:justify-end gap-2">
-                                           <button
-                                               onClick={() => openEditModal(user)}
-                                               className="bg-primary-500 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-primary-600 transition-colors duration-150"
-                                               title="Bearbeiten"
-                                           >
-                                               ✎
-                                           </button>
-                                           <button
-                                               onClick={() => {
-                                                   showNotification(
-                                                       'Benutzer löschen',
-                                                       'Möchten Sie diesen Benutzer wirklich löschen?',
-                                                       () => handleDelete(user.id),
-                                                       true
-                                                   );
-                                               }}
-                                               className="bg-secondary-400 text-white h-8 w-8 rounded flex items-center justify-center hover:bg-secondary-500 transition-colors duration-150"
-                                               title="Löschen"
-                                           >
-                                               ×
-                                           </button>
-                                       </div>
-                                   </td>
-                               </tr>
-                           ))}
-                       </tbody>
-                   </table>
-               </div>
-           </div>
-           
-           <Modal
-               isOpen={isCreateModalOpen}
-               onClose={() => setIsCreateModalOpen(false)}
-               title="Neuen Benutzer erstellen"
-               size="compact"
-           >
-               <UserForm 
-                   onSubmit={handleCreate} 
-                   isEdit={false}
-                   onClose={() => setIsCreateModalOpen(false)}
-               />
-           </Modal>
-           
-           <Modal
-               isOpen={isEditModalOpen}
-               onClose={() => setIsEditModalOpen(false)}
-               title="Benutzer bearbeiten"
-               size="compact"
-           >
-               <UserForm 
-                   onSubmit={handleEdit} 
-                   isEdit={true} 
-                   initialData={selectedUser}
-                   onClose={() => setIsEditModalOpen(false)}
-               />
-           </Modal>
-       </div>
+      <div className="w-full max-w-full">
+      <div className="flex justify-end mb-6">
+      <button
+      onClick={() => setIsCreateModalOpen(true)}
+      className="btn-primary w-full-mobile"
+      >
+      + Neuer Benutzer
+      </button>
+      </div>
+      
+      <div className="table-container">
+      <table className="w-full">
+      <thead>
+      <tr className="table-head-row">
+      <th className="table-header">Benutzername</th>
+      <th className="table-header-sm">E-Mail</th>
+      <th className="table-header-sm">Kirchengemeinde</th>
+      <th className="table-header">Status</th>
+      <th className="table-header-sm">Rolle</th>
+      <th className="table-header text-right">Aktionen</th>
+      </tr>
+      </thead>
+      <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
+      {users.map(user => (
+         <tr key={user.id} className="table-row">
+         <td className="table-cell">
+         <div className="flex flex-col">
+         <span className="text-value">{user.username}</span>
+         <span className="text-muted text-xs sm:hidden">{user.email}</span>
+         </div>
+         </td>
+         <td className="table-cell hidden sm:table-cell">
+         <span className="text-value">{user.email}</span>
+         </td>
+         <td className="table-cell hidden md:table-cell">
+         <span className="text-value">{user.kirchengemeinde || '-'}</span>
+         </td>
+         <td className="table-cell">
+         {user.email_verified ? (
+            <span className="status-badge-primary">● Verifiziert</span>
+         ) : (
+            <span className="status-badge-secondary">○ Ausstehend</span>
+         )}
+         </td>
+         <td className="table-cell hidden sm:table-cell">
+         <span className={`status-badge-${user.role === 'admin' ? 'primary' : 'secondary'}`}>
+         {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
+         </span>
+         </td>
+         <td className="table-cell">
+         <div className="flex justify-end gap-2">
+         <button
+         onClick={() => openEditModal(user)}
+         className="table-action-button-primary"
+         title="Bearbeiten"
+         >
+         ✎
+         </button>
+         <button
+         onClick={() => {
+            showNotification(
+               'Benutzer löschen',
+               'Möchten Sie diesen Benutzer wirklich löschen?',
+               () => handleDelete(user.id),
+               true
+            );
+         }}
+         className="table-action-button-secondary"
+         title="Löschen"
+         >
+         ×
+         </button>
+         </div>
+         </td>
+         </tr>
+      ))}
+      </tbody>
+      </table>
+      </div>
+      
+      <Modal
+      isOpen={isCreateModalOpen}
+      onClose={() => setIsCreateModalOpen(false)}
+      title="Neuen Benutzer erstellen"
+      size="compact"
+      >
+      <UserForm 
+      onSubmit={handleCreate} 
+      isEdit={false}
+      onClose={() => setIsCreateModalOpen(false)}
+      />
+      </Modal>
+      
+      <Modal
+      isOpen={isEditModalOpen}
+      onClose={() => setIsEditModalOpen(false)}
+      title="Benutzer bearbeiten"
+      size="compact"
+      >
+      <UserForm 
+      onSubmit={handleEdit} 
+      isEdit={true} 
+      initialData={selectedUser}
+      onClose={() => setIsEditModalOpen(false)}
+      />
+      </Modal>
+      </div>
    );
 }

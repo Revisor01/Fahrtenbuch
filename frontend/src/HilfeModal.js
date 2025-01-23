@@ -4,21 +4,22 @@ import Modal from './Modal';
 
 const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
   return (
-    <div className="border border-primary-100 rounded-lg overflow-hidden mb-2">
-      <button
-        className="w-full text-left p-4 bg-white hover:bg-primary-50 transition-colors duration-200 flex justify-between items-center"
-        onClick={toggleOpen}
-      >
-        <span className="font-medium text-primary-900">{title}</span>
-        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-      </button>
-      {isOpen && (
-        <div className="p-4 bg-white border-t border-primary-100">
-          <div className="text-primary-600 text-sm space-y-2">
-            {children}
-          </div>
-        </div>
-      )}
+    <div className="card-container-flush">
+    <button
+    className="w-full text-left p-4 bg-white dark:bg-gray-800 hover:bg-primary-25 dark:hover:bg-primary-900 
+                    transition-colors duration-200 flex justify-between items-center"
+    onClick={toggleOpen}
+    >
+    <span className="text-value font-medium">{title}</span>
+    {isOpen ? <ChevronUp className="text-label" size={20} /> : <ChevronDown className="text-label" size={20} />}
+    </button>
+    {isOpen && (
+      <div className="p-4 border-t border-primary-100 dark:border-primary-800">
+      <div className="text-label text-sm space-y-2">
+      {children}
+      </div>
+      </div>
+    )}
     </div>
   );
 };
@@ -36,11 +37,11 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
     title={isFirstVisit ? "Herzlich Willkommen!" : "Hilfe & Informationen"}
     size="wide"
     >
-    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <div className="card-container-highlight space-y-6">
     {isFirstVisit && (
-      <div className="mb-6 text-primary-600">
+      <div className="text-value">
       <p className="text-lg">Willkommen in Ihrem persönlichen Fahrtenbuch!</p>
-      <p className="mt-2">
+      <p className="mt-2 text-label">
       Diese Anwendung hilft Ihnen dabei, Ihre dienstlichen Fahrten einfach und übersichtlich zu verwalten. 
       Sie können Fahrten eintragen, Abrechnungen erstellen und den Überblick über Ihre Erstattungen behalten.
       </p>
@@ -194,10 +195,10 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
     </AccordionItem>
     </div>
     
-    <div className="mt-6 flex justify-end">
+    <div className="flex justify-end">
     <button
     onClick={onClose}
-    className="w-full sm:w-auto btn-primary"
+    className="btn-primary w-full sm:w-auto"
     >
     {isFirstVisit ? 'Los geht\'s!' : 'Verstanden'}
     </button>
