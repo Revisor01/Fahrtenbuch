@@ -217,16 +217,6 @@ code {
         transition-colors duration-200
         text-left;
   }
-
-.table-header-sm {
-  @apply px-4 py-3 
-      text-xs font-medium text-primary-600 dark:text-primary-400
-      uppercase tracking-wider 
-      cursor-pointer 
-      transition-colors duration-200
-      text-left
-      hidden sm:table-cell;
-}
   
   .table-header-sm {
     padding: 0.75rem 1rem !important;
@@ -238,9 +228,15 @@ code {
     transition-property: color !important;
     transition-duration: 200ms !important;
     text-align: left !important;
+    color: var(--primary-600);
   }
   
-  
+  @media (prefers-color-scheme: dark) {
+  .table-header-sm {
+  color: var(--primary-400);
+  }
+}
+
   @media (max-width: 640px) {
     .table-header-sm {
       display: none !important;
