@@ -2026,7 +2026,11 @@ function MonthlyOverview() {
     </div>
     
     <div className="flex flex-wrap items-center justify-between gap-4">
-    <div className="flex items-center text-[11px]">
+    <div className="flex items-center gap-4 text-[11px]">
+    <QuickActions 
+    filteredData={filteredData}
+    handleStatusUpdate={handleStatusUpdate}
+    />
     <label className="checkbox-label">
     <input
     type="checkbox"
@@ -2120,12 +2124,6 @@ function MonthlyOverview() {
     </div>
     
     <div className="mt-6">
-    <div className="flex justify-end">
-    <QuickActions 
-    filteredData={filteredData}
-    handleStatusUpdate={handleStatusUpdate}
-    />
-    </div>
     </div>
     </div>
     

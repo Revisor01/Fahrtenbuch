@@ -218,6 +218,16 @@ code {
         text-left;
   }
 
+.table-header-sm {
+  @apply px-4 py-3 
+      text-xs font-medium text-primary-600 dark:text-primary-400
+      uppercase tracking-wider 
+      cursor-pointer 
+      transition-colors duration-200
+      text-left
+      hidden sm:table-cell;
+}
+  
   .table-header-sm {
     padding: 0.75rem 1rem !important;
     font-size: 0.75rem !important;
