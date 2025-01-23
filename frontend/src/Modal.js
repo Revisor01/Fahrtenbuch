@@ -10,9 +10,14 @@ function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
   }[size];
   
   return (
-    <div className="fixed inset-0 bg-primary-950/50 dark:bg-primary-950/70 overflow-y-auto h-full w-full" onClick={onClose}>
+    <div className="fixed inset-0 z-50">
     <div 
-    className={`relative top-20 mx-auto p-6 card-container ${widthClass}`}
+    className="fixed inset-0 bg-primary-950/30 dark:bg-primary-950/40 backdrop-blur-sm"
+    onClick={onClose}
+    />
+    <div className="relative min-h-full flex items-center">
+    <div 
+    className={`relative mx-auto p-6 card-container ${widthClass} my-20`}
     onClick={e => e.stopPropagation()}
     >
     <div className="flex justify-between items-center mb-4">
@@ -29,7 +34,7 @@ function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
     {children}
     </div>
     </div>
+    </div>
   );
-}
 
 export default Modal;

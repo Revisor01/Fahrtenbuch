@@ -163,10 +163,10 @@
       />
       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
       {profile.email_verified ? (
-        <span className="text-label">● Verifiziert</span>
+        <span className="text-label text-xs">● Verifiziert</span>
       ) : (
         <>
-        <span className="text-muted">○ Ausstehend</span>
+        <span className="text-muted text-xs">○ Ausstehend</span>
         <button
         type="button"
         onClick={handleResendVerification}
