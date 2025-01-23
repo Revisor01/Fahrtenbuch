@@ -28,12 +28,15 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
   };
   
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={readOnly ? "Mitfahrer:in Details" : "Mitfahrer:in hinzufügen/bearbeiten"}>
-    <div className="table-container">
-    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+    <Modal 
+    isOpen={isOpen} 
+    onClose={onClose} 
+    title={readOnly ? "Mitfahrer:in Details" : "Mitfahrer:in hinzufügen/bearbeiten"}
+    >
+    <div className="card-container-highlight space-y-6">
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     Name
     </label>
     <input
@@ -47,7 +50,7 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     </div>
     
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     Arbeitsstätte
     </label>
     <input
@@ -61,7 +64,7 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     </div>
     
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     Richtung
     </label>
     <select
@@ -77,7 +80,6 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     </div>
     
     {!readOnly && (
-      <div className="w-full">
       <div className="flex flex-col sm:flex-row gap-2">
       <button
       type="button"
@@ -93,10 +95,8 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
       Speichern
       </button>
       </div>
-      </div>
     )}
     </form>
-    </div>
     </div>
     </Modal>
   );
