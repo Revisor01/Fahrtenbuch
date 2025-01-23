@@ -2682,9 +2682,9 @@ function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
     <div className="card-container-highlight m-6 w-full max-w-md">
-    <h2 className="text-lg font-medium text-value text-center mb-6">
-    Fahrtenbuch
-    </h2>
+    <h1 className="text-lg font-medium text-value text-center mb-6">
+    Fahrtenbuch Kirchenkreis Dithmarschen
+    </h1>
     
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
@@ -2865,7 +2865,7 @@ function AppContent() {
     <div className="mb-8"> 
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-    <h1 className="text-lg font-medium text-value">Fahrtenabrechnung Kirchenkreis Dithmarschen</h1>
+    <h1 className="text-lg font-medium text-value">Fahrtenbuch Kirchenkreis Dithmarschen</h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
     {/* Hauptnavigation - Verwaltung */}
