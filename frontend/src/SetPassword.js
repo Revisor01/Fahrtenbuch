@@ -74,10 +74,9 @@ export default function SetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-    <div className="table-container bg-primary-25 w-full max-w-md">
-    <div className="p-6 rounded-lg space-y-6">
-    <h2 className="text-2xl font-medium text-primary-900 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+    <div className="card-container-highlight w-full max-w-md">
+    <h2 className="text-lg font-medium text-value text-center mb-6">
     {location.pathname.includes('reset-password') 
       ? 'Neues Passwort setzen' 
       : 'Passwort festlegen'}
@@ -85,7 +84,7 @@ export default function SetPassword() {
     
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     Neues Passwort
     </label>
     <input
@@ -97,7 +96,7 @@ export default function SetPassword() {
     disabled={isSubmitting || !token}
     />
     {password && !validatePassword(password) && (
-      <p className="mt-1 text-xs text-secondary-600">
+      <p className="mt-1 text-muted text-xs">
       Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, 
       einen Kleinbuchstaben und eine Zahl enthalten.
       </p>
@@ -105,7 +104,7 @@ export default function SetPassword() {
     </div>
     
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="form-label">
     Passwort bestätigen
     </label>
     <input
@@ -117,18 +116,14 @@ export default function SetPassword() {
     disabled={isSubmitting || !token}
     />
     {confirmPassword && password !== confirmPassword && (
-      <p className="mt-1 text-xs text-secondary-600">
+      <p className="mt-1 text-muted text-xs">
       Die Passwörter stimmen nicht überein.
       </p>
     )}
     </div>
     
     {status.message && (
-      <div className={`p-4 rounded ${
-        status.type === 'success' 
-        ? 'bg-primary-25 text-primary-600 text-xs' 
-        : 'bg-secondary-25 text-secondary-600 text-xs'
-      }`}>
+      <div className={status.type === 'success' ? 'status-success' : 'status-error'}>
       {status.message}
       </div>
     )}
@@ -143,7 +138,6 @@ export default function SetPassword() {
     </button>
     </div>
     </form>
-    </div>
     </div>
     </div>
   );

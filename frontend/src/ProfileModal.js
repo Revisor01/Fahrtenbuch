@@ -146,8 +146,7 @@
       title="Profil"
       size="compact"
       >
-      <div className="table-container">
-      <div className="bg-primary-25 p-6 rounded-lg space-y-6">
+      <div className="card-container-highlight space-y-6">
       {/* Profil-Formular */}
       <form onSubmit={handleProfileUpdate} className="space-y-4">
       <div className="relative">
@@ -158,20 +157,20 @@
       onChange={(e) => setProfile({ ...profile, email: e.target.value })}
       className={`form-input ${
         profile.email_verified 
-        ? 'border-primary-200 bg-primary-50' 
-        : 'border-secondary-200 bg-secondary-50'
+        ? 'border-primary-200 dark:border-primary-700 bg-primary-25 dark:bg-primary-900' 
+        : 'border-secondary-200 dark:border-secondary-700 bg-secondary-25 dark:bg-secondary-900'
       }`}
       />
       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
       {profile.email_verified ? (
-        <span className="text-primary-600 text-xs">● Verifiziert</span>
+        <span className="text-label">● Verifiziert</span>
       ) : (
         <>
-        <span className="text-secondary-600 text-xs">○ Ausstehend</span>
+        <span className="text-muted">○ Ausstehend</span>
         <button
         type="button"
         onClick={handleResendVerification}
-        className="text-primary-600 hover:text-primary-700 text-xs"
+        className="text-label hover:text-value text-xs"
         >
         Erneut senden
         </button>
@@ -225,7 +224,7 @@
       </button>
       </form>
       
-      <div className="border-t border-primary-200"></div>
+      <div className="border-t border-primary-100 dark:border-primary-800"></div>
       
       {/* Passwort-Formular */}
       <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -255,35 +254,34 @@
       </button>
       </form>
       
-      <div className="border-t border-primary-200"></div>
+      <div className="border-t border-primary-100 dark:border-primary-800"></div>
       
       {/* Ortsinfos */}
       <div className="space-y-2">
       {profile.wohnort ? (
-        <p className="text-sm text-primary-600">Heimatort: {profile.wohnort_adresse}</p>
+        <p className="text-sm text-label">Heimatort: {profile.wohnort_adresse}</p>
       ) : (
-        <p className="text-sm text-secondary-600">● Bitte Heimatort festlegen</p>
+        <p className="text-sm text-muted">● Bitte Heimatort festlegen</p>
       )}
       {profile.dienstort ? (
-        <p className="text-sm text-primary-600">Dienstort: {profile.dienstort_adresse}</p>
+        <p className="text-sm text-label">Dienstort: {profile.dienstort_adresse}</p>
       ) : (
-        <p className="text-sm text-secondary-600">● Bitte Dienstort festlegen</p>
+        <p className="text-sm text-muted">● Bitte Dienstort festlegen</p>
       )}
       </div>
       </div>
       
       {/* Benachrichtigung */}
       {showMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowMessage(false)}>
-        <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
-        <p className="mb-4 text-primary-900">{message}</p>
+        <div className="fixed inset-0 bg-primary-950/50 dark:bg-primary-950/70 flex items-center justify-center z-50" onClick={() => setShowMessage(false)}>
+        <div className="card-container max-w-sm mx-4">
+        <p className="mb-4 text-value">{message}</p>
         <button onClick={() => setShowMessage(false)} className="btn-primary w-full">
         OK
         </button>
         </div>
         </div>
       )}
-      </div>
       </Modal>
     );
     }
