@@ -36,5 +36,6 @@ function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
     </div>
     </div>
   );
+}
 
 export default Modal;
