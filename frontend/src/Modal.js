@@ -17,10 +17,10 @@ function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
     />
     <div className="relative min-h-full flex items-center">
     <div 
-    className={`relative mx-auto p-6 card-container ${widthClass} my-20`}
+    className={`relative mx-auto p-6 card-container ${widthClass} my-20 max-h-[80vh] overflow-y-auto`}
     onClick={e => e.stopPropagation()}
     >
-    <div className="flex justify-between items-center mb-4">
+    <div className="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10">
     <h2 className="text-lg font-medium text-value">{title}</h2>
     <button 
     onClick={onClose} 
