@@ -91,7 +91,9 @@ exports.getSimpleList = async (req, res) => {
         name
     `, [userId]);
     
-    res.json(rows);
+    // Hier ändern wir die Ausgabe
+    res.json({ data: rows }); 
+    
   } catch (error) {
     console.error('Fehler beim Abrufen der vereinfachten Ortsliste:', error);
     res.status(500).json({ message: 'Interner Server-Fehler' });
