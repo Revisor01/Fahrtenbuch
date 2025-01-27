@@ -1,4 +1,4 @@
-mport React from 'react';
+import React from 'react';
 
 function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
   if (!isOpen) return null;
