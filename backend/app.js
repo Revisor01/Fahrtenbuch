@@ -5,6 +5,7 @@ const path = require('path'); // Import path
 const orteRoutes = require('./routes/orte');
 const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
+const apiKeyRoutes = require('./routes/apiKeys');
 const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
@@ -52,6 +53,7 @@ app.use(express.static(reactBuildPath));
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/keys', apiKeyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orte', authMiddleware, orteRoutes);
 app.use('/api/fahrten', authMiddleware, fahrtenRoutes);
