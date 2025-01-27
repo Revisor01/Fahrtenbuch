@@ -67,6 +67,36 @@ exports.getOrtById = async (req, res) => {
   }
 };
 
+exports.getSimpleList = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await db.execute(`
+      SELECT 
+        id, 
+        name, 
+        ist_wohnort, 
+        ist_dienstort, 
+        ist_kirchspiel,
+        adresse
+      FROM orte 
+      WHERE user_id = ? 
+      ORDER BY 
+        CASE 
+          WHEN ist_wohnort = 1 THEN 1
+          WHEN ist_dienstort = 1 THEN 2
+          WHEN ist_kirchspiel = 1 THEN 3
+          ELSE 4
+        END,
+        name
+    `, [userId]);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Fehler beim Abrufen der vereinfachten Ortsliste:', error);
+    res.status(500).json({ message: 'Interner Server-Fehler' });
+  }
+};
+
     exports.updateOrt = async (req, res) => {
       try {
         const { id } = req.params;

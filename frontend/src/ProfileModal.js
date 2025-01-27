@@ -15,6 +15,10 @@
   const [oldPassword, setOldPassword] = useState('');
   const [message, setMessage] = useState('');
   const [showMessage, setShowMessage] = useState(false);
+  const [apiKeys, setApiKeys] = useState([]);
+  const [isGeneratingKey, setIsGeneratingKey] = useState(false);
+  const [newKeyDescription, setNewKeyDescription] = useState('');
+  const [generatedKey, setGeneratedKey] = useState(null);
   
   useEffect(() => {
   if (isOpen) {
@@ -67,6 +71,54 @@
         }
       };
       
+    // Füge diese Funktion hinzu um API Keys zu laden
+    const fetchApiKeys = async () => {
+      try {
+        const response = await axios.get('/api/keys');
+        setApiKeys(response.data);
+      } catch (error) {
+        console.error('Fehler beim Laden der API Keys:', error);
+        showErrorMessage('Fehler beim Laden der API Keys');
+      }
+    };
+    
+    // Füge diese useEffect hinzu
+    useEffect(() => {
+      if (isOpen) {
+        fetchApiKeys();
+      }
+    }, [isOpen]);
+    
+    // Füge diese Funktionen für API Key Management hinzu
+    const handleGenerateKey = async () => {
+      try {
+        setIsGeneratingKey(true);
+        const response = await axios.post('/api/keys', {
+          description: newKeyDescription || 'API Key für Kurzbefehle'
+        });
+        setGeneratedKey(response.data.key);
+        fetchApiKeys();
+        setNewKeyDescription('');
+      } catch (error) {
+        console.error('Fehler beim Generieren des API Keys:', error);
+        showErrorMessage('Fehler beim Generieren des API Keys');
+      } finally {
+        setIsGeneratingKey(false);
+      }
+    };
+    
+    const handleRevokeKey = async (keyId) => {
+      try {
+        await axios.delete(`/api/keys/${keyId}`);
+        fetchApiKeys();
+        showSuccessMessage('API Key erfolgreich widerrufen');
+      } catch (error) {
+        console.error('Fehler beim Widerrufen des API Keys:', error);
+        showErrorMessage('Fehler beim Widerrufen des API Keys');
+      }
+    };
+
+
   const handlePasswordChange = async (e) => {
   e.preventDefault();
   if (newPassword !== confirmPassword) {
@@ -253,6 +305,77 @@
       Passwort ändern
       </button>
       </form>
+      
+      <div className="border-t border-primary-100 dark:border-primary-800 pt-4">
+      <h3 className="text-lg font-medium text-value mb-4">API Keys für Kurzbefehle</h3>
+      
+      {/* API Key Generator */}
+      <div className="space-y-4 mb-6">
+      <div className="flex gap-2">
+      <input
+      type="text"
+      placeholder="Beschreibung (optional)"
+      value={newKeyDescription}
+      onChange={(e) => setNewKeyDescription(e.target.value)}
+      className="form-input flex-1"
+      />
+      <button
+      onClick={handleGenerateKey}
+      disabled={isGeneratingKey}
+      className="btn-primary whitespace-nowrap"
+      >
+      {isGeneratingKey ? 'Generiere...' : 'Neuer API Key'}
+      </button>
+      </div>
+      
+      {/* Zeige neu generierten Key an */}
+      {generatedKey && (
+        <div className="bg-primary-25 dark:bg-primary-900 p-4 rounded-lg space-y-2">
+        <p className="text-sm text-label">Dein neuer API Key (kopiere ihn jetzt - er wird nur einmal angezeigt):</p>
+        <div className="flex gap-2 items-center">
+        <code className="flex-1 bg-white dark:bg-gray-800 p-2 rounded text-sm break-all">
+        {generatedKey}
+        </code>
+        <button
+        onClick={() => {
+          navigator.clipboard.writeText(generatedKey);
+          showSuccessMessage('API Key kopiert!');
+        }}
+        className="btn-secondary"
+        >
+        Kopieren
+        </button>
+        </div>
+        </div>
+      )}
+      </div>
+      
+      {/* API Key Liste */}
+      <div className="space-y-2">
+      {apiKeys.map((key) => (
+        <div key={key.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
+        <div className="flex-1">
+        <p className="text-sm text-value font-medium">{key.description}</p>
+        <p className="text-xs text-label">
+        Erstellt: {new Date(key.created_at).toLocaleDateString()}
+        {key.last_used_at && ` • Zuletzt verwendet: ${new Date(key.last_used_at).toLocaleDateString()}`}
+        </p>
+        </div>
+        <button
+        onClick={() => handleRevokeKey(key.id)}
+        className="btn-secondary text-xs"
+        >
+        Widerrufen
+        </button>
+        </div>
+      ))}
+      {apiKeys.length === 0 && (
+        <p className="text-sm text-muted text-center py-4">
+        Noch keine API Keys generiert
+        </p>
+      )}
+      </div>
+      </div>
       
       <div className="border-t border-primary-100 dark:border-primary-800"></div>
       
