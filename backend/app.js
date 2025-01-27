@@ -40,8 +40,15 @@ app.use((err, req, res, next) => {
 
 app.use(cors({
     origin: 'https://fahrtenbuch.godsapp.de',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Origin', 
+        'X-Requested-With', 
+        'Content-Type', 
+        'Accept', 
+        'Authorization',
+        'X-API-Key'  // Hier den neuen Header hinzufügen
+    ]
 }));
 app.use(express.json());
 
