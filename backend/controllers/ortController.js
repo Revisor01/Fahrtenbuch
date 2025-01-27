@@ -1,4 +1,5 @@
 const Ort = require('../models/Ort');
+const db = require('../config/database'); 
 
 exports.createOrt = async (req, res) => {
   try {
