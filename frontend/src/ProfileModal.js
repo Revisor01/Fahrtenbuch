@@ -400,3 +400,5 @@ function ProfileModal({ isOpen, onClose }) {
         </Modal>
     );
 }
+
+export default ProfileModal;
