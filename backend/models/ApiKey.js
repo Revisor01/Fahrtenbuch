@@ -53,6 +53,13 @@ class ApiKey {
         );
         return result.affectedRows > 0;
     }
+    static async delete(id, userId) {
+        const [result] = await db.execute(
+            'DELETE FROM api_keys WHERE id = ? AND user_id = ?',
+            [id, userId]
+        );
+        return result.affectedRows > 0;
+    }
 }
 
 module.exports = ApiKey;
