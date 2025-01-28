@@ -28,6 +28,23 @@ exports.listKeys = async (req, res) => {
     }
 };
 
+exports.permanentlyDelete = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+        
+        const deleted = await ApiKey.permanentlyDelete(id, userId);
+        if (deleted) {
+            res.json({ message: 'API-Schlüssel wurde permanent gelöscht' });
+        } else {
+            res.status(404).json({ message: 'API-Schlüssel nicht gefunden oder noch aktiv' });
+        }
+    } catch (error) {
+        console.error('Error permanently deleting API key:', error);
+        res.status(500).json({ message: 'Fehler beim Löschen des API-Schlüssels' });
+    }
+};
+
 exports.revokeKey = async (req, res) => {
     try {
         const { id } = req.params;
