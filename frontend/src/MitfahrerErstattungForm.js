@@ -34,7 +34,7 @@ export default function MitfahrerErstattungForm() {
         e.preventDefault();
         try {
             await axios.post('/api/mitfahrer-erstattung', {
-                betrag: parseFloat(newBetrag),
+                betrag: newBetrag ? parseFloat(newBetrag) : 0,
                 gueltig_ab: gueltigAb
             });
             showNotification('Erfolg', 'Erstattungssatz wurde aktualisiert');

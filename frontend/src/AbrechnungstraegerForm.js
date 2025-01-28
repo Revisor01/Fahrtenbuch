@@ -1,4 +1,3 @@
-// AbrechnungstraegerForm.js
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { AppContext } from './App';
@@ -61,17 +60,17 @@ export default function AbrechnungstraegerForm() {
     };
 
     const handleToggleActive = async (id, currentActive) => {
-        try {
-            await axios.put(`/api/abrechnungstraeger/${id}`, {
-                active: !currentActive
-            });
-            showNotification('Erfolg', 'Status wurde aktualisiert');
-            fetchAbrechnungstraeger();
-        } catch (error) {
-            console.error('Fehler beim Ändern des Status:', error);
-            showNotification('Fehler', 'Status konnte nicht aktualisiert werden');
-        }
-    };
+          try {
+              await axios.put(`/api/abrechnungstraeger/${id}`, {
+                  active: !currentActive
+              });
+              showNotification('Erfolg', 'Status wurde aktualisiert');
+              fetchAbrechnungstraeger();
+          } catch (error) {
+              console.error('Fehler beim Ändern des Status:', error);
+              showNotification('Fehler', 'Status konnte nicht aktualisiert werden');
+          }
+      };
 
     // Drag & Drop Funktionen
     const handleDragStart = (e, item) => {
@@ -84,31 +83,36 @@ export default function AbrechnungstraegerForm() {
     };
 
     const handleDrop = async (e, targetItem) => {
-        e.preventDefault();
-        setIsDragging(false);
-
-        if (!draggedItem || draggedItem.id === targetItem.id) return;
-
-        const newOrder = [...abrechnungstraeger];
-        const draggedIndex = newOrder.findIndex(item => item.id === draggedItem.id);
-        const targetIndex = newOrder.findIndex(item => item.id === targetItem.id);
-
-        newOrder.splice(draggedIndex, 1);
-        newOrder.splice(targetIndex, 0, draggedItem);
-
-        // Update sort_order für alle Einträge
-        const sortOrderUpdates = newOrder.map((item, index) => ({
-            id: item.id,
-            sort_order: index + 1
-        }));
-
-        try {
-            await axios.put('/api/abrechnungstraeger/sort', { sortOrder: sortOrderUpdates });
-            fetchAbrechnungstraeger();
-        } catch (error) {
-            console.error('Fehler beim Aktualisieren der Reihenfolge:', error);
-            showNotification('Fehler', 'Reihenfolge konnte nicht aktualisiert werden');
-        }
+      e.preventDefault();
+      setIsDragging(false);
+  
+      if (!draggedItem || draggedItem.id === targetItem.id) return;
+  
+      const newOrder = [...abrechnungstraeger];
+      const draggedIndex = newOrder.findIndex(item => item.id === draggedItem.id);
+      const targetIndex = newOrder.findIndex(item => item.id === targetItem.id);
+  
+      // Speichere die Daten des gezogenen Elements
+      const draggedItemData = newOrder[draggedIndex];
+  
+      // Lösche das gezogene Element aus dem Array
+      newOrder.splice(draggedIndex, 1);
+  
+      // Füge das gezogene Element an der neuen Position ein
+      newOrder.splice(targetIndex, 0, draggedItemData);
+  
+      const sortOrderUpdates = newOrder.map((item, index) => ({
+          id: item.id,
+          sort_order: index + 1
+      }));
+  
+      try {
+          await axios.put('/api/abrechnungstraeger/sort', { sortOrder: sortOrderUpdates });
+          fetchAbrechnungstraeger();
+      } catch (error) {
+          console.error('Fehler beim Aktualisieren der Reihenfolge:', error);
+          showNotification('Fehler', 'Reihenfolge konnte nicht aktualisiert werden');
+      }
     };
 
     if (isLoading) return <div>Laden...</div>;
