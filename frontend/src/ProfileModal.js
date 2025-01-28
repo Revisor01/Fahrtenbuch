@@ -67,6 +67,42 @@ function ProfileModal({ isOpen, onClose }) {
         }
     };
 
+    const handleRenewKey = async (keyId) => {
+        try {
+            // Hole Details des alten Keys
+            const oldKey = apiKeys.find(k => k.id === keyId);
+            if (!oldKey) return;
+            
+            // Generiere neuen Key mit gleicher Beschreibung
+            const response = await axios.post('/api/keys', {
+                description: oldKey.description
+            });
+            
+            // Zeige den neuen Key an
+            setGeneratedKey(response.data.key);
+            
+            // Widerrufe den alten Key
+            await handleRevokeKey(keyId);
+            
+            await fetchApiKeys();
+            showNotification('Erfolg', 'Neuer API Key wurde generiert');
+        } catch (error) {
+            console.error('Fehler beim Erneuern des API Keys:', error);
+            showNotification('Fehler', 'API Key konnte nicht erneuert werden');
+        }
+    };
+    
+    const handleDeleteKey = async (keyId) => {
+        try {
+            await axios.delete(`/api/keys/${keyId}/permanent`);
+            await fetchApiKeys();
+            showNotification('Erfolg', 'API Key wurde permanent gelöscht');
+        } catch (error) {
+            console.error('Fehler beim Löschen des API Keys:', error);
+            showNotification('Fehler', 'API Key konnte nicht gelöscht werden');
+        }
+    };
+    
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
         try {
