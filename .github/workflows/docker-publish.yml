@@ -2,42 +2,62 @@ name: Docker
 
 on:
   push:
-    branches: [ master ]
+    branches: [master, abrechnungen]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: revisoren
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
-    - name: Build and push Backend
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend
-        file: ./backend/Dockerfile
-        push: true
-        tags: revisoren/fahrtenbuch-server:latest
-    
-    - name: Build and push Frontend
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend
-        file: ./frontend/Dockerfile
-        push: true
-        tags: revisoren/fahrtenbuch-app:latest
-        
-    - name: Update Service via Webhook Backend
-      uses: newarifrh/portainer-service-webhook@v1
-      with:
-        webhook_url: https://docker.godsapp.de/api/stacks/webhooks/416b7561-cc59-4624-8fc3-daefca2ccea4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get current branch name
+        id: branch-name
+        run: echo "current_branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: revisoren
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: revisoren/fahrtenbuch-server:latest
+
+      - name: Build and push Frontend (Master)
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: revisoren/fahrtenbuch-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Frontend (Abrechnungen)
+        if: ${{ github.ref == 'refs/heads/abrechnungen' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: revisoren/fahrtenbuch-app:beta
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Update Beta Service via Webhook (Abrechnungen)
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/abrechnungen' }}
+        uses: newarifrh/portainer-service-webhook@v1
+        with:
+          webhook_url: https://docker.godsapp.de/api/stacks/webhooks/416b7561-cc59-4624-8fc3-daefca2ccea4
