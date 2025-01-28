@@ -187,7 +187,7 @@ export default function MitfahrerErstattungForm() {
                 ) : (
                     <>
                     <div className="text-value">
-                    {eintrag.betrag.toFixed(2)} €
+                    {parseFloat(eintrag.betrag).toFixed(2)} € €
                     </div>
                     <div className="flex items-center gap-2">
                     <div className="text-xs text-label">
