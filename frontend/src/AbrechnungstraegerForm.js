@@ -11,8 +11,6 @@ function AbrechnungstraegerForm() {
         name: '',
         kennzeichen: '',
     });
-    const [editingId, setEditingId] = useState(null);
-    const [editValues, setEditValues] = useState({name: '', kennzeichen: ''})
 
     useEffect(() => {
         fetchAbrechnungstraeger();
@@ -68,7 +66,6 @@ function AbrechnungstraegerForm() {
         try {
             await axios.put('/api/abrechnungstraeger/sort', { sortOrder });
             setAbrechnungstraeger(newOrder);
-            showNotification('Erfolg', 'Reihenfolge wurde aktualisiert');
         } catch (error) {
             console.error('Fehler beim Sortieren:', error);
             showNotification('Fehler', 'Reihenfolge konnte nicht aktualisiert werden');
@@ -99,30 +96,6 @@ function AbrechnungstraegerForm() {
             showNotification('Fehler', error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden');
         }
     };
-    
-    const handleEdit = (traeger) => {
-        setEditingId(traeger.id);
-        setEditValues({name: traeger.name, kennzeichen: traeger.kennzeichen});
-    };
-
-    const handleCancelEdit = () => {
-        setEditingId(null);
-    };
-    
-     const handleSaveEdit = async (id) => {
-         try {
-             await axios.put(`/api/abrechnungstraeger/${id}`, {
-                 name: editValues.name,
-                 kennzeichen: editValues.kennzeichen
-             });
-             showNotification('Erfolg', 'Abrechnungsträger wurde aktualisiert');
-             setEditingId(null);
-             fetchAbrechnungstraeger();
-         } catch (error) {
-             console.error('Fehler beim Aktualisieren:', error);
-             showNotification('Fehler', 'Abrechnungsträger konnte nicht aktualisiert werden');
-         }
-     };
 
     if (isLoading) {
         return <div className="text-center">Laden...</div>;
@@ -169,37 +142,12 @@ function AbrechnungstraegerForm() {
                     <div key={traeger.id} 
                          className={`card-container flex items-center justify-between p-4 ${!traeger.active ? 'opacity-50' : ''}`}>
                         <div className="flex-1">
-                            {editingId === traeger.id ? (
-                                 <div className="flex items-center gap-4">
-                                    <input
-                                        type="text"
-                                        value={editValues.name}
-                                        onChange={e => setEditValues({...editValues, name: e.target.value})}
-                                        className="form-input"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={editValues.kennzeichen}
-                                        onChange={e => setEditValues({...editValues, kennzeichen: e.target.value})}
-                                        className="form-input w-32"
-                                    />
-                                    <div className="flex gap-2">
-                                        <button onClick={() => handleSaveEdit(traeger.id)} className="table-action-button-primary">
-                                            ✓
-                                        </button>
-                                        <button onClick={handleCancelEdit} className="table-action-button-secondary">
-                                            ×
-                                        </button>
-                                    </div>
+                            <div className="flex items-center gap-4">
+                                <div>
+                                    <div className="font-medium text-value">{traeger.name}</div>
+                                    <div className="text-xs text-label">{traeger.kennzeichen}</div>
                                 </div>
-                            ) : (
-                                 <div className="flex items-center gap-4">
-                                     <div>
-                                        <div className="font-medium text-value">{traeger.name}</div>
-                                         <div className="text-xs text-label">{traeger.kennzeichen}</div>
-                                     </div>
-                                </div>
-                             )}
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -222,11 +170,6 @@ function AbrechnungstraegerForm() {
                                     <ChevronDown size={16} />
                                 </button>
                             </div>
-                            {editingId !== traeger.id && (
-                                 <button onClick={() => handleEdit(traeger)} className="table-action-button-primary" title="Bearbeiten">
-                                    ✎
-                                </button>
-                            )}
 
                             {/* Aktiv/Inaktiv Toggle */}
                             <button
