@@ -12,6 +12,12 @@ export default function MitfahrerErstattungForm() {
         new Date().toISOString().split('T')[0]
     );
 
+    const getDefaultBetrag = (currentBetrag) => {
+        if (!currentBetrag) return 0.05;
+        const betrag = parseFloat(currentBetrag.betrag);
+        return isNaN(betrag) ? 0.05 : betrag;
+    };
+    
     useEffect(() => {
         fetchData();
     }, []);
@@ -34,7 +40,7 @@ export default function MitfahrerErstattungForm() {
         e.preventDefault();
         try {
             await axios.post('/api/mitfahrer-erstattung', {
-                betrag: newBetrag ? parseFloat(newBetrag) : 0,
+                betrag: parseFloat(newBetrag),
                 gueltig_ab: gueltigAb
             });
             showNotification('Erfolg', 'Erstattungssatz wurde aktualisiert');
@@ -54,9 +60,9 @@ export default function MitfahrerErstattungForm() {
                     Aktueller Mitfahrer-Erstattungssatz
                 </h3>
                 <div className="flex items-baseline space-x-2">
-                    <span className="text-2xl font-bold text-value">
-                        {(currentBetrag?.betrag || 0.05).toFixed(2)}
-                    </span>
+        <span className="text-2xl font-bold text-value">
+        {getDefaultBetrag(currentBetrag).toFixed(2)}
+        </span>
                     <span className="text-sm text-label">€ pro km und Mitfahrer:in</span>
                 </div>
                 {currentBetrag?.gueltig_ab && (

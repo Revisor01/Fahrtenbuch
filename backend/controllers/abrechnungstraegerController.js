@@ -40,18 +40,38 @@ exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
         const { name, active, betrag, gueltig_ab } = req.body;
-
-        if (!name) {
-            return res.status(400).json({ message: 'Name ist erforderlich' });
+        
+        // Wenn nur betrag oder active aktualisiert werden soll
+        if (betrag !== undefined) {
+            // Erstattungsbetrag aktualisieren
+            await db.execute(
+                'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
+                [id, betrag, gueltig_ab || new Date().toISOString().split('T')[0]]
+            );
+            return res.json({ message: 'Erstattungsbetrag aktualisiert' });
         }
-
+        
+        if (active !== undefined) {
+            // Nur active-Status aktualisieren
+            await db.execute(
+                'UPDATE abrechnungstraeger SET active = ? WHERE id = ? AND user_id = ?',
+                [active ? 1 : 0, id, req.user.id]
+            );
+            return res.json({ message: 'Status aktualisiert' });
+        }
+        
+        // Falls name dabei ist, komplettes Update
+        if (!name) {
+            return res.status(400).json({ message: 'Name ist erforderlich für vollständiges Update' });
+        }
+        
         const success = await AbrechnungsTraeger.update(id, req.user.id, {
             name,
             active,
             betrag,
             gueltig_ab
         });
-
+        
         if (success) {
             res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
         } else {
