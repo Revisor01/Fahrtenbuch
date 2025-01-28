@@ -8,5 +8,7 @@ router.use(authMiddleware);
 router.get('/current', mitfahrerErstattungController.getCurrentBetrag);
 router.get('/historie', mitfahrerErstattungController.getHistorie);
 router.post('/', mitfahrerErstattungController.setBetrag);
+router.put('/:erstattungssatzId', mitfahrerErstattungController.updateErstattungssatz);
+router.delete('/:erstattungssatzId', mitfahrerErstattungController.deleteErstattungssatz);
 
 module.exports = router;

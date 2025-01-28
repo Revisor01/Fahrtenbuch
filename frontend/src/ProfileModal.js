@@ -11,6 +11,7 @@ function ProfileModal({ isOpen, onClose }) {
     const inputClasses = "w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-sm";
     const buttonClasses = "w-full bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200 transition duration-200 text-sm";
 
+
     const [activeTab, setActiveTab] = useState('profile');
     const [originalProfile, setOriginalProfile] = useState({});
     const [newPassword, setNewPassword] = useState('');
