@@ -259,7 +259,7 @@ export default function AbrechnungstraegerForm() {
                         <>
                         <div>
                         <div className="text-value font-medium">
-                        {eintrag.betrag.toFixed(2)} €/km
+                        {parseFloat(eintrag.betrag).toFixed(2)} €/km
                         </div>
                         <div className="text-label">
                         ab {new Date(eintrag.gueltig_ab).toLocaleDateString()}
