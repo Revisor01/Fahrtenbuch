@@ -120,12 +120,14 @@ function ProfileModal({ isOpen, onClose }) {
 
     const handleRevokeKey = async (keyId) => {
         try {
-            await axios.delete(`/api/keys/${keyId}`);
-            fetchApiKeys();
-            showSuccessMessage('API Key erfolgreich widerrufen');
+            await axios.delete(`/api/keys/${keyId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            await fetchApiKeys(); // Liste neu laden
+            showNotification("Erfolg", "API-Key wurde widerrufen");
         } catch (error) {
             console.error('Fehler beim Widerrufen des API Keys:', error);
-            showErrorMessage('Fehler beim Widerrufen des API Keys');
+            showNotification("Fehler", "API-Key konnte nicht widerrufen werden");
         }
     };
 
@@ -362,11 +364,75 @@ function ProfileModal({ isOpen, onClose }) {
                         </div>
                     )}
 
-                    {activeTab === 'security' && (
-                        <div className="space-y-6">
-                            {/* Bestehende Passwort-Änderung etc. */}
-                        </div>
-                    )}
+        {activeTab === 'security' && (
+            <div className="space-y-6">
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+            <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
+            
+            <div>
+            <label className="form-label">Aktuelles Passwort</label>
+            <input
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            className="form-input"
+            required
+            />
+            </div>
+            
+            <div>
+            <label className="form-label">Neues Passwort</label>
+            <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="form-input"
+            required
+            />
+            </div>
+            
+            <div>
+            <label className="form-label">Passwort bestätigen</label>
+            <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="form-input"
+            required
+            />
+            </div>
+            
+            <button type="submit" className="btn-primary w-full">
+            Passwort ändern
+            </button>
+            </form>
+            
+            {/* Optional: Zusätzliche Sicherheitseinstellungen */}
+            <div className="border-t border-primary-100 dark:border-primary-800 pt-6">
+            <h3 className="text-lg font-medium text-value mb-4">E-Mail-Verifizierung</h3>
+            <div className="space-y-4">
+            <div className="flex items-center justify-between">
+            <span className="text-sm text-label">
+            Status:
+            {profile.email_verified ? (
+                <span className="text-green-500 ml-2">● Verifiziert</span>
+            ) : (
+                <span className="text-yellow-500 ml-2">○ Ausstehend</span>
+            )}
+            </span>
+            {!profile.email_verified && (
+                <button
+                onClick={handleResendVerification}
+                className="btn-secondary text-sm"
+                >
+                Verifizierung erneut senden
+                </button>
+            )}
+            </div>
+            </div>
+            </div>
+            </div>
+        )}
 
                      {activeTab === 'api' && (
                         <div className="space-y-6">
