@@ -5,6 +5,8 @@ const path = require('path'); // Import path
 const orteRoutes = require('./routes/orte');
 const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
+const abrechnungstraegerRoutes = require('./routes/abrechnungstraeger');
+const mitfahrerErstattungRoutes = require('./routes/mitfahrerErstattung');
 const apiKeyRoutes = require('./routes/apiKeys');
 const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
@@ -66,6 +68,8 @@ app.use('/api/orte', authMiddleware, orteRoutes);
 app.use('/api/fahrten', authMiddleware, fahrtenRoutes);
 app.use('/api/distanzen', authMiddleware, distanzenRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/abrechnungstraeger', authMiddleware, abrechnungstraegerRoutes);
+app.use('/api/mitfahrer-erstattung', authMiddleware, mitfahrerErstattungRoutes);
 
 // Catch-all route for SPAs
 app.get('*', (req, res) => {
