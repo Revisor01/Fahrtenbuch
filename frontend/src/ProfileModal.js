@@ -3,7 +3,7 @@ import axios from 'axios';
 import { AppContext } from './App';
 import Modal from './Modal';
 import AbrechnungstraegerForm from './AbrechnungstraegerForm';
-import MitfahrerErstattungForm from './MitfahrerErstattungForm';
+import ErstattungssaetzeForm from './ErstattungssaetzeForm';
 
 function ProfileModal({ isOpen, onClose }) {
     const { token, user, setUser, showNotification } = useContext(AppContext);
@@ -262,14 +262,14 @@ function ProfileModal({ isOpen, onClose }) {
                         </div>
                     )}
 
-                    {activeTab === 'erstattungssaetze' && (
-                        <div>
-                            <div className="text-sm text-muted mb-4">
-                                Hier können Sie die Erstattungssätze für Mitfahrer:innen festlegen.
-                            </div>
-                            <MitfahrerErstattungForm />
-                        </div>
-                    )}
+        {activeTab === 'erstattungssaetze' && (
+            <div>
+            <div className="text-sm text-muted mb-4">
+            Hier können Sie die Erstattungssätze für alle Abrechnungsarten verwalten.
+            </div>
+            <ErstattungssaetzeForm />
+            </div>
+        )}
 
                     {activeTab === 'security' && (
                         <div className="space-y-6">
@@ -316,85 +316,119 @@ function ProfileModal({ isOpen, onClose }) {
                         </div>
                     )}
 
-                    {activeTab === 'api' && (
-                        <div className="space-y-6">
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-value">API Keys für Kurzbefehle</h3>
-                                <div className="text-sm text-muted">
-                                    Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
-                                </div>
-
-                                {/* API Key Generator */}
-                                <div className="space-y-4 mb-6">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Beschreibung (optional)"
-                                            value={newKeyDescription}
-                                            onChange={(e) => setNewKeyDescription(e.target.value)}
-                                            className="form-input flex-1"
-                                        />
-                                        <button
-                                            onClick={handleGenerateKey}
-                                            disabled={isGeneratingKey}
-                                            className="btn-primary whitespace-nowrap"
-                                        >
-                                            {isGeneratingKey ? 'Generiere...' : 'Neuer API Key'}
-                                        </button>
-                                    </div>
-
-                                    {/* Zeige neu generierten Key an */}
-                                    {generatedKey && (
-                                        <div className="bg-primary-25 dark:bg-primary-900 p-4 rounded-lg space-y-2">
-                                            <p className="text-sm text-label">
-                                                Dein neuer API Key (kopiere ihn jetzt - er wird nur einmal angezeigt):
-                                            </p>
-                                            <div className="flex gap-2 items-center">
-                                                <code className="flex-1 bg-white dark:bg-gray-800 p-2 rounded text-sm break-all">
-                                                    {generatedKey}
-                                                </code>
-                                                <button
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(generatedKey);
-                                                        showNotification('Erfolg', 'API Key wurde kopiert');
-                                                    }}
-                                        className="btn-secondary"
-                                        >
-                                        Kopieren
-                                        </button>
-                                        </div>
-                                        </div>
-                                    )}
-                        </div>
-                        
-                        {/* API Key Liste */}
-                        <div className="space-y-2">
-                        {apiKeys.map((key) => (
-                            <div key={key.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
-                            <div className="flex-1">
-                            <p className="text-sm text-value font-medium">{key.description}</p>
-                            <p className="text-xs text-label">
-                            Erstellt: {new Date(key.created_at).toLocaleDateString()}
-                            {key.last_used_at && ` • Zuletzt verwendet: ${new Date(key.last_used_at).toLocaleDateString()}`}
-                            </p>
-                            </div>
-                            <button
-                            onClick={() => handleRevokeKey(key.id)}
-                            className="btn-secondary text-xs"
-                            >
-                            Widerrufen
-                            </button>
-                            </div>
-                        ))}
-                        {apiKeys.length === 0 && (
-                            <p className="text-sm text-muted text-center py-4">
-                            Noch keine API Keys generiert!
-                            </p>
-                        )}
-                        </div>
-                        </div>
-                        </div>
-                    )}
+        {activeTab === 'api' && (
+            <div className="space-y-6">
+            <div className="space-y-4">
+            <h3 className="text-lg font-medium text-value">API Keys für Kurzbefehle</h3>
+            <div className="text-sm text-muted">
+            Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
+            </div>
+            
+            {/* API Key Generator */}
+            <div className="space-y-4 mb-6">
+            <div className="flex gap-2">
+            <input
+            type="text"
+            placeholder="Beschreibung (optional)"
+            value={newKeyDescription}
+            onChange={(e) => setNewKeyDescription(e.target.value)}
+            className="form-input flex-1"
+            />
+            <button
+            onClick={handleGenerateKey}
+            disabled={isGeneratingKey}
+            className="btn-primary whitespace-nowrap"
+            >
+            {isGeneratingKey ? 'Generiere...' : 'Neuer API Key'}
+            </button>
+            </div>
+            
+            {/* Zeige neu generierten Key an */}
+            {generatedKey && (
+                <div className="bg-primary-25 dark:bg-primary-900 p-4 rounded-lg space-y-2">
+                <p className="text-sm text-label">
+                Dein neuer API Key (kopiere ihn jetzt - er wird nur einmal angezeigt):
+                </p>
+                <div className="flex gap-2 items-center">
+                <code className="flex-1 bg-white dark:bg-gray-800 p-2 rounded text-sm break-all">
+                {generatedKey}
+                </code>
+                <button
+                onClick={() => {
+                    navigator.clipboard.writeText(generatedKey);
+                    showNotification('Erfolg', 'API Key wurde kopiert');
+                }}
+                className="btn-secondary"
+                >
+                Kopieren
+                </button>
+                </div>
+                </div>
+            )}
+            </div>
+            
+            {/* API Key Liste */}
+            <div className="space-y-2">
+            {/* Aktive Keys */}
+            {apiKeys.filter(key => key.is_active).map((key) => (
+                <div key={key.id} className="flex items-center justify-between p-4 bg-primary-25 dark:bg-primary-900 rounded">
+                <div className="flex-1">
+                <p className="text-sm text-value font-medium">
+                <span className="text-green-500">●</span> {key.description}
+                </p>
+                <p className="text-xs text-label">
+                Erstellt: {new Date(key.created_at).toLocaleDateString()}
+                {key.last_used_at && ` • Zuletzt verwendet: ${new Date(key.last_used_at).toLocaleDateString()}`}
+                </p>
+                </div>
+                <button
+                onClick={() => handleRevokeKey(key.id)}
+                className="btn-secondary text-xs"
+                >
+                Widerrufen
+                </button>
+                </div>
+            ))}
+            
+            {/* Inaktive/Widerrufene Keys */}
+            {apiKeys.filter(key => !key.is_active).map((key) => (
+                <div key={key.id} className="flex items-center justify-between p-4 bg-secondary-25 dark:bg-secondary-900/20 rounded opacity-75">
+                <div className="flex-1">
+                <p className="text-sm text-value font-medium">
+                <span className="text-secondary-500">○</span> {key.description}
+                </p>
+                <p className="text-xs text-label">
+                Erstellt: {new Date(key.created_at).toLocaleDateString()}
+                {key.last_used_at && ` • Zuletzt verwendet: ${new Date(key.last_used_at).toLocaleDateString()}`}
+                </p>
+                </div>
+                <div className="flex gap-2">
+                <button
+                onClick={() => handleRenewKey(key.id)}
+                className="btn-primary text-xs"
+                title="Erstellt einen neuen Key mit den gleichen Berechtigungen"
+                >
+                Erneuern
+                </button>
+                <button
+                onClick={() => handleDeleteKey(key.id)}
+                className="btn-secondary text-xs"
+                >
+                Entfernen
+                </button>
+                </div>
+                </div>
+            ))}
+            
+            {apiKeys.length === 0 && (
+                <p className="text-sm text-muted text-center py-4">
+                Noch keine API Keys generiert!
+                </p>
+            )}
+            </div>
+            </div>
+            </div>
+        )}
         </div>
         </div>
         </Modal>
