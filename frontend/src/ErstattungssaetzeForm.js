@@ -65,11 +65,12 @@ function ErstattungssaetzeForm() {
         }
     };
 
-    const handleEdit = (satz, typ, id) => {
+    const handleEdit = (satz, typ) => {
         setEditingSatz({
-            ...satz,
-            typ,
-            id
+            id: satz.id,
+            typ: typ,
+            betrag: parseFloat(satz.betrag),
+            gueltig_ab: satz.gueltig_ab
         });
     };
 

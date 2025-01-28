@@ -32,9 +32,23 @@ exports.updateErstattungssatz = async (req, res) => {
         const { id, erstattungssatzId } = req.params;
         const { betrag, gueltig_ab } = req.body;
         
-        if (!betrag || isNaN(parseFloat(betrag))) {
-            return res.status(400).json({ message: 'Ungültiger Betrag' });
+        // Validierung der Eingabewerte
+        if (betrag === undefined || betrag === null || isNaN(parseFloat(betrag))) {
+            return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
         }
+        
+        // Validierung des Datums
+        if (!gueltig_ab) {
+            return res.status(400).json({ message: 'Gültigkeitsdatum ist erforderlich' });
+        }
+        
+        console.log('Update Erstattungssatz:', {
+            betrag,
+            gueltig_ab,
+            id,
+            erstattungssatzId,
+            parsed: parseFloat(betrag)
+        });
         
         await db.execute(
             'UPDATE erstattungsbetraege SET betrag = ?, gueltig_ab = ? WHERE id = ? AND abrechnungstraeger_id = ?',
@@ -44,7 +58,12 @@ exports.updateErstattungssatz = async (req, res) => {
         res.json({ message: 'Erstattungssatz erfolgreich aktualisiert' });
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Erstattungssatzes:', error);
-        res.status(500).json({ message: 'Erstattungssatz konnte nicht aktualisiert werden' });
+        console.error('Request body:', req.body);
+        console.error('Request params:', req.params);
+        res.status(500).json({ 
+            message: 'Erstattungssatz konnte nicht aktualisiert werden',
+            error: error.message 
+        });
     }
 };
 
