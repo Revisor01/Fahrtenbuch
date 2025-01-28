@@ -44,3 +44,20 @@ exports.revokeKey = async (req, res) => {
         res.status(500).json({ message: 'Fehler beim Widerrufen des API-Schlüssels' });
     }
 };
+
+exports.testKey = async (req, res) => {
+    try {
+        res.json({
+            success: true,
+            message: 'API Key ist gültig',
+            user: {
+                id: req.user.id,
+                username: req.user.username,
+                email: req.user.email
+            }
+        });
+    } catch (error) {
+        console.error('Error testing API key:', error);
+        res.status(500).json({ message: 'Interner Server-Fehler' });
+    }
+};
