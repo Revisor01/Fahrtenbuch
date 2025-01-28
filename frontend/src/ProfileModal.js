@@ -435,7 +435,7 @@ function ProfileModal({ isOpen, onClose }) {
                                     ))}
                                     {apiKeys.length === 0 && (
                                         <p className="text-sm text-muted text-center py-4">
-                                            Noch keine API Keys generiert
+                                            Noch keine API Keys generiert!
                                         </p>
                                     )}
                                 </div>
