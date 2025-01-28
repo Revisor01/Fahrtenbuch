@@ -62,21 +62,20 @@ class AbrechnungsTraeger {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
-
-            // Abrechnungsträger erstellen
+            
             const [result] = await connection.execute(
                 'INSERT INTO abrechnungstraeger (user_id, name, kennzeichen) VALUES (?, ?, ?)',
                 [userData.userId, userData.name, userData.kennzeichen]
             );
             
             const abrechnungsTraegerId = result.insertId;
-
-            // Erstattungsbetrag hinzufügen
+            
+            // Setze Standardwert von 0.30€ ab 1.1.2024
             await connection.execute(
-                'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-                [abrechnungsTraegerId, userData.betrag || 0.30, userData.gueltig_ab || new Date().toISOString().split('T')[0]]
+                'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, 0.30, "2024-01-01")',
+                [abrechnungsTraegerId]
             );
-
+            
             await connection.commit();
             return abrechnungsTraegerId;
         } catch (error) {

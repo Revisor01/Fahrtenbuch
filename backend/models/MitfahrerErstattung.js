@@ -22,6 +22,21 @@ class MitfahrerErstattung {
         return rows;
     }
 
+    static async getOrCreateDefault(userId) {
+        const [existing] = await db.execute(
+            'SELECT * FROM mitfahrer_erstattung WHERE user_id = ? ORDER BY gueltig_ab DESC LIMIT 1',
+            [userId]
+        );
+        
+        if (existing.length === 0) {
+            // Setze Standardwert von 0.05€ ab 1.1.2024
+            await db.execute(
+                'INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab) VALUES (?, 0.05, "2024-01-01")',
+                [userId]
+            );
+        }
+    }
+    
     static async setBetrag(userId, betrag, gueltig_ab = null) {
         const datum = gueltig_ab || new Date().toISOString().split('T')[0];
         const [result] = await db.execute(
