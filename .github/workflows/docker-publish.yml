@@ -26,13 +26,23 @@ jobs:
           username: revisoren
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Backend
+      - name: Build and push Backend (Master)
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
           tags: revisoren/fahrtenbuch-server:latest
+
+      - name: Build and push Backend (Abrechnungen)
+        if: ${{ github.ref == 'refs/heads/abrechnungen' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: revisoren/fahrtenbuch-server:beta
 
       - name: Build and push Frontend (Master)
         if: ${{ github.ref == 'refs/heads/master' }}
