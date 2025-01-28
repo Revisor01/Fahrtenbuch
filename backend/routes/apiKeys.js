@@ -7,6 +7,7 @@ router.use(authMiddleware);
 
 router.post('/', apiKeyController.generateKey);
 router.get('/', apiKeyController.listKeys);
+router.get('/test', apiKeyController.testKey);
 router.delete('/:id', apiKeyController.revokeKey);
 
 module.exports = router;
