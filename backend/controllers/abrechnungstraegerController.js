@@ -4,7 +4,10 @@ const AbrechnungsTraeger = require('../models/AbrechnungsTraeger');
 exports.getAllAbrechnungstraeger = async (req, res) => {
     try {
         const traeger = await AbrechnungsTraeger.findAllForUser(req.user.id);
-        res.json(traeger);
+      res.json(traeger.map(t => ({
+          ...t,
+          erstattungssaetze: t.erstattungssaetze || []
+      })));
     } catch (error) {
         console.error('Fehler beim Abrufen der Abrechnungsträger:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
@@ -31,25 +34,17 @@ exports.updateErstattungssatz = async (req, res) => {
     try {
         const { id, erstattungssatzId } = req.params;
         const { betrag, gueltig_ab } = req.body;
-        
+       
         // Validierung der Eingabewerte
-        if (betrag === undefined || betrag === null || isNaN(parseFloat(betrag))) {
-            return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
-        }
-        
-        // Validierung des Datums
-        if (!gueltig_ab) {
-            return res.status(400).json({ message: 'Gültigkeitsdatum ist erforderlich' });
-        }
-        
-        console.log('Update Erstattungssatz:', {
-            betrag,
-            gueltig_ab,
-            id,
-            erstattungssatzId,
-            parsed: parseFloat(betrag)
-        });
-        
+         if (betrag === undefined || betrag === null || isNaN(parseFloat(betrag))) {
+             return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
+         }
+
+         // Validierung des Datums
+         if (!gueltig_ab) {
+             return res.status(400).json({ message: 'Gültigkeitsdatum ist erforderlich' });
+         }
+
         await db.execute(
             'UPDATE erstattungsbetraege SET betrag = ?, gueltig_ab = ? WHERE id = ? AND abrechnungstraeger_id = ?',
             [parseFloat(betrag), gueltig_ab, erstattungssatzId, id]
@@ -68,33 +63,33 @@ exports.updateErstattungssatz = async (req, res) => {
 };
 
 exports.deleteErstattungssatz = async (req, res) => {
-    const connection = await db.getConnection();
+     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-        
+
         const { id, erstattungssatzId } = req.params;
-        
+
         // Prüfen ob es der letzte Satz ist
         const [saetze] = await connection.execute(
             'SELECT COUNT(*) as count FROM erstattungsbetraege WHERE abrechnungstraeger_id = ?',
             [id]
         );
-        
+
         if (saetze[0].count <= 1) {
-            return res.status(400).json({ message: 'Der letzte Erstattungssatz kann nicht gelöscht werden' });
+             return res.status(400).json({ message: 'Der letzte Erstattungssatz kann nicht gelöscht werden' });
         }
-        
+
         await connection.execute(
             'DELETE FROM erstattungsbetraege WHERE id = ? AND abrechnungstraeger_id = ?',
             [erstattungssatzId, id]
         );
-        
+
         await connection.commit();
         res.json({ message: 'Erstattungssatz erfolgreich gelöscht' });
     } catch (error) {
         await connection.rollback();
         console.error('Fehler beim Löschen des Erstattungssatzes:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler' });
+         res.status(500).json({ message: 'Interner Server-Fehler' });
     } finally {
         connection.release();
     }
@@ -146,17 +141,17 @@ exports.createAbrechnungstraeger = async (req, res) => {
 exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, active, betrag, gueltig_ab } = req.body;
+        const { name, active, betrag, gueltig_ab, kennzeichen } = req.body;
         
-        // Wenn nur betrag oder active aktualisiert werden soll
-        if (betrag !== undefined) {
-            // Erstattungsbetrag aktualisieren
-            await db.execute(
-                'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-                [id, betrag, gueltig_ab || new Date().toISOString().split('T')[0]]
-            );
+         // Wenn nur betrag aktualisiert werden soll, wird ein neuer Satz erstellt
+         if (betrag !== undefined) {
+             // Erstattungsbetrag aktualisieren
+             await db.execute(
+                 'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
+                 [id, betrag, gueltig_ab || new Date().toISOString().split('T')[0]]
+             );
             return res.json({ message: 'Erstattungsbetrag aktualisiert' });
-        }
+         }
         
         if (active !== undefined) {
             // Nur active-Status aktualisieren
@@ -167,23 +162,23 @@ exports.updateAbrechnungstraeger = async (req, res) => {
             return res.json({ message: 'Status aktualisiert' });
         }
         
-        // Falls name dabei ist, komplettes Update
-        if (!name) {
+           // Wenn name oder kennzeichen dabei sind, komplettes Update
+           if (name || kennzeichen) {
+             const success = await AbrechnungsTraeger.update(id, req.user.id, {
+                 name,
+                 active,
+                 kennzeichen
+            });
+
+            if (success) {
+                return res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
+            } else {
+                return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
+            }
+           }
+
             return res.status(400).json({ message: 'Name ist erforderlich für vollständiges Update' });
-        }
-        
-        const success = await AbrechnungsTraeger.update(id, req.user.id, {
-            name,
-            active,
-            betrag,
-            gueltig_ab
-        });
-        
-        if (success) {
-            res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
-        } else {
-            res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
-        }
+
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Abrechnungsträgers:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
@@ -209,30 +204,4 @@ exports.updateSortOrder = async (req, res) => {
             }
             
             await connection.commit();
-            res.json({ message: 'Sortierung aktualisiert' });
-        } catch (error) {
-            await connection.rollback();
-            throw error;
-        } finally {
-            connection.release();
-        }
-    } catch (error) {
-        console.error('Fehler beim Aktualisieren der Sortierung:', error);
-        res.status(500).json({ message: 'Fehler beim Aktualisieren der Sortierung' });
-    }
-};
-
-exports.deleteAbrechnungstraeger = async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        await AbrechnungsTraeger.delete(id, req.user.id);
-        res.json({ message: 'Abrechnungsträger erfolgreich gelöscht' });
-    } catch (error) {
-        if (error.message.includes('wird noch in Fahrten verwendet')) {
-            return res.status(400).json({ message: error.message });
-        }
-        console.error('Fehler beim Löschen des Abrechnungsträgers:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler' });
-    }
-};
+            res.json({ message: '

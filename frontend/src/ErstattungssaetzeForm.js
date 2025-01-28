@@ -37,40 +37,43 @@ function ErstattungssaetzeForm() {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            if (newErstattung.typ === 'mitfahrer') {
-                await axios.post('/api/mitfahrer-erstattung', {
-                    betrag: parseFloat(newErstattung.betrag),
-                    gueltig_ab: newErstattung.gueltig_ab
-                });
-            } else {
-                await axios.put(`/api/abrechnungstraeger/${newErstattung.typ}/erstattung/${newErstattung.id}`, {
-                    betrag: parseFloat(newErstattung.betrag),
-                    gueltig_ab: newErstattung.gueltig_ab
-                });
-            }
-            
-            showNotification('Erfolg', 'Erstattungssatz wurde gespeichert');
-            setNewErstattung({
-                typ: 'mitfahrer',
-                betrag: '',
-                gueltig_ab: new Date().toISOString().split('T')[0]
-            });
-            fetchAllErstattungssaetze();
-        } catch (error) {
-            console.error('Fehler beim Speichern:', error);
-            showNotification('Fehler', 'Erstattungssatz konnte nicht gespeichert werden');
-        }
-    };
+     const handleSubmit = async (e) => {
+         e.preventDefault();
+         try {
+             if (newErstattung.typ === 'mitfahrer') {
+                 await axios.post('/api/mitfahrer-erstattung', {
+                     betrag: parseFloat(newErstattung.betrag),
+                     gueltig_ab: newErstattung.gueltig_ab
+                 });
+             } else {
+                 const traegerId = newErstattung.typ;
+                 await axios.post(`/api/abrechnungstraeger/${traegerId}`, {
+                     betrag: parseFloat(newErstattung.betrag),
+                     gueltig_ab: newErstattung.gueltig_ab
+                 });
+             }
+
+             showNotification('Erfolg', 'Erstattungssatz wurde gespeichert');
+             setNewErstattung({
+                 typ: 'mitfahrer',
+                 betrag: '',
+                 gueltig_ab: new Date().toISOString().split('T')[0]
+             });
+             fetchAllErstattungssaetze();
+         } catch (error) {
+             console.error('Fehler beim Speichern:', error);
+             showNotification('Fehler', 'Erstattungssatz konnte nicht gespeichert werden');
+         }
+     };
+
 
     const handleEdit = (satz, typ) => {
         setEditingSatz({
             id: satz.id,
+            erstattungssatzId: satz.erstattungssatzId,
             typ: typ,
             betrag: parseFloat(satz.betrag),
-            gueltig_ab: satz.gueltig_ab
+            gueltig_ab: satz.gueltig_ab ? satz.gueltig_ab.split('T')[0] : new Date().toISOString().split('T')[0] // Übernehmen oder heutiges Datum
         });
     };
 
@@ -82,7 +85,8 @@ function ErstattungssaetzeForm() {
                     gueltig_ab: editingSatz.gueltig_ab
                 });
             } else {
-                await axios.put(`/api/abrechnungstraeger/${editingSatz.id}/erstattung/${editingSatz.erstattungssatzId}`, {
+                const traegerId = editingSatz.typ;
+                await axios.put(`/api/abrechnungstraeger/${traegerId}/erstattung/${editingSatz.erstattungssatzId}`, {
                     betrag: parseFloat(editingSatz.betrag),
                     gueltig_ab: editingSatz.gueltig_ab
                 });
@@ -97,18 +101,18 @@ function ErstattungssaetzeForm() {
         }
     };
 
-    const handleDelete = async (id, typ) => {
+    const handleDelete = async (id, typ, erstattungssatzId) => {
         try {
             if (typ === 'mitfahrer') {
                 await axios.delete(`/api/mitfahrer-erstattung/${id}`);
             } else {
-                await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
+                await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${erstattungssatzId}`);
             }
             showNotification('Erfolg', 'Erstattungssatz wurde gelöscht');
             fetchAllErstattungssaetze();
         } catch (error) {
             console.error('Fehler beim Löschen:', error);
-            showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
+             showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
         }
     };
 
@@ -181,7 +185,7 @@ function ErstattungssaetzeForm() {
                                     <input
                                         type="date"
                                         value={editingSatz.gueltig_ab}
-                                        onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
+                                         onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
                                         className="form-input w-40"
                                     />
                                     <div className="flex gap-2">
@@ -218,7 +222,7 @@ function ErstattungssaetzeForm() {
                 </div>
             </div>
 
-            {/* Abrechnungsträger Erstattungssätze */}
+           {/* Abrechnungsträger Erstattungssätze */}
             {erstattungssaetze.abrechnungstraeger.map(traeger => (
                 <div key={traeger.id} className="card-container">
                     <h3 className="text-lg font-medium text-value mb-4">{traeger.name}</h3>
@@ -238,10 +242,10 @@ function ErstattungssaetzeForm() {
                                         <input
                                             type="date"
                                             value={editingSatz.gueltig_ab}
-                                            onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
+                                             onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
                                             className="form-input w-40"
                                         />
-                                        <div className="flex gap-2">
+                                         <div className="flex gap-2">
                                             <button onClick={handleSaveEdit} className="table-action-button-primary">
                                                 ✓
                                             </button>
@@ -252,23 +256,23 @@ function ErstattungssaetzeForm() {
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="flex-1">
-                                            <div className="text-value font-medium">
-                                                {parseFloat(satz.betrag).toFixed(2)} € pro km
-                                            </div>
-                                            <div className="text-xs text-label">
-                                                Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
-                                            </div>
+                                    <div className="flex-1">
+                                        <div className="text-value font-medium">
+                                           {satz.betrag ? parseFloat(satz.betrag).toFixed(2) : '0.00'} € pro km
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <button onClick={() => handleEdit(satz, traeger.id)} className="table-action-button-primary">
-                                                ✎
-                                            </button>
-                                            <button onClick={() => handleDelete(satz.id, traeger.id)} className="table-action-button-secondary">
-                                                ×
-                                            </button>
+                                        <div className="text-xs text-label">
+                                           Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
                                         </div>
-                                    </>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => handleEdit(satz, traeger.id)} className="table-action-button-primary">
+                                            ✎
+                                        </button>
+                                        <button onClick={() => handleDelete(satz.id, traeger.id, satz.id)} className="table-action-button-secondary">
+                                             ×
+                                        </button>
+                                    </div>
+                                </>
                                 )}
                             </div>
                         ))}
