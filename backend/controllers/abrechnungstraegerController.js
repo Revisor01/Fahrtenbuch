@@ -28,36 +28,23 @@ exports.getSimpleList = async (req, res) => {
 };
 
 exports.updateErstattungssatz = async (req, res) => {
-    const connection = await db.getConnection();
     try {
-        await connection.beginTransaction();
-        
         const { id, erstattungssatzId } = req.params;
         const { betrag, gueltig_ab } = req.body;
         
-        // Prüfen ob der Satz dem User gehört
-        const [berechtigung] = await connection.execute(
-            'SELECT 1 FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
-            [id, req.user.id]
-        );
-        
-        if (berechtigung.length === 0) {
-            return res.status(403).json({ message: 'Keine Berechtigung' });
+        if (!betrag || isNaN(parseFloat(betrag))) {
+            return res.status(400).json({ message: 'Ungültiger Betrag' });
         }
         
-        await connection.execute(
+        await db.execute(
             'UPDATE erstattungsbetraege SET betrag = ?, gueltig_ab = ? WHERE id = ? AND abrechnungstraeger_id = ?',
-            [betrag, gueltig_ab, erstattungssatzId, id]
+            [parseFloat(betrag), gueltig_ab, erstattungssatzId, id]
         );
         
-        await connection.commit();
         res.json({ message: 'Erstattungssatz erfolgreich aktualisiert' });
     } catch (error) {
-        await connection.rollback();
         console.error('Fehler beim Aktualisieren des Erstattungssatzes:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler' });
-    } finally {
-        connection.release();
+        res.status(500).json({ message: 'Erstattungssatz konnte nicht aktualisiert werden' });
     }
 };
 
@@ -186,17 +173,33 @@ exports.updateAbrechnungstraeger = async (req, res) => {
 
 exports.updateSortOrder = async (req, res) => {
     try {
-        const { sortOrder } = req.body;
-
+        const { sortOrder } = req.body; // Array von {id, sort_order}
         if (!Array.isArray(sortOrder)) {
-            return res.status(400).json({ message: 'Ungültiges Format für Sortierreihenfolge' });
+            return res.status(400).json({ message: 'Ungültiges Format' });
         }
-
-        await AbrechnungsTraeger.updateSortOrder(req.user.id, sortOrder);
-        res.json({ message: 'Sortierreihenfolge aktualisiert' });
+        
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
+            
+            for (const item of sortOrder) {
+                await connection.execute(
+                    'UPDATE abrechnungstraeger SET sort_order = ? WHERE id = ? AND user_id = ?',
+                    [item.sort_order, item.id, req.user.id]
+                );
+            }
+            
+            await connection.commit();
+            res.json({ message: 'Sortierung aktualisiert' });
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
     } catch (error) {
-        console.error('Fehler beim Aktualisieren der Sortierreihenfolge:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler' });
+        console.error('Fehler beim Aktualisieren der Sortierung:', error);
+        res.status(500).json({ message: 'Fehler beim Aktualisieren der Sortierung' });
     }
 };
 
