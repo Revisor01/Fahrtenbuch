@@ -37,10 +37,47 @@ exports.updateErstattungssatz = async (req, res) => {
             return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
         }
         
-        await db.execute(
-            'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-            [id, parseFloat(betrag), gueltig_ab || new Date().toISOString().split('T')[0]]
+        // Prüfen ob für das neue Datum bereits ein anderer Eintrag existiert
+        if (gueltig_ab) {
+            const [existing] = await db.execute(
+                'SELECT id FROM erstattungsbetraege WHERE abrechnungstraeger_id = ? AND gueltig_ab = ? AND id != ?',
+                [id, gueltig_ab, erstattungssatzId]
+            );
+            
+            if (existing.length > 0) {
+                return res.status(400).json({ 
+                    message: 'Es existiert bereits ein Eintrag für dieses Datum',
+                    error: 'Duplicate entry'
+                });
+            }
+        }
+        
+        // Update nur die Felder, die wirklich geändert wurden
+        const updates = [];
+        const values = [];
+        
+        if (betrag !== undefined) {
+            updates.push('betrag = ?');
+            values.push(parseFloat(betrag));
+        }
+        if (gueltig_ab !== undefined) {
+            updates.push('gueltig_ab = ?');
+            values.push(gueltig_ab);
+        }
+        
+        values.push(erstattungssatzId);
+        values.push(id);
+        
+        const [result] = await db.execute(
+            `UPDATE erstattungsbetraege 
+            SET ${updates.join(', ')} 
+            WHERE id = ? AND abrechnungstraeger_id = ?`,
+            values
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Erstattungssatz nicht gefunden' });
+        }
         
         res.json({ message: 'Erstattungssatz erfolgreich aktualisiert' });
     } catch (error) {
