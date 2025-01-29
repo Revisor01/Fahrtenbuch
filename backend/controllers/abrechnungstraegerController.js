@@ -192,6 +192,31 @@ exports.updateAbrechnungstraeger = async (req, res) => {
     }
 };
 
+exports.addErstattungssatz = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { betrag, gueltig_ab } = req.body;
+        
+        // Validierung der Eingabewerte
+        if (betrag === undefined || betrag === null || isNaN(parseFloat(betrag))) {
+            return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
+        }
+        
+        await db.execute(
+            'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
+            [id, parseFloat(betrag), gueltig_ab || new Date().toISOString().split('T')[0]]
+        );
+        
+        res.status(201).json({ message: 'Erstattungssatz erfolgreich hinzugefügt' });
+    } catch (error) {
+        console.error('Fehler beim Hinzufügen des Erstattungssatzes:', error);
+        res.status(500).json({ 
+            message: 'Erstattungssatz konnte nicht hinzugefügt werden',
+            error: error.message 
+        });
+    }
+};
+
 exports.updateSortOrder = async (req, res) => {
     try {
         const { sortOrder } = req.body;

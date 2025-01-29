@@ -225,62 +225,62 @@ function ErstattungssaetzeForm() {
             <h3 className="text-lg font-medium text-value mb-4">
             {traeger.name}
             <span className="text-sm text-label ml-2">
-            Aktuell: {parseFloat(traeger.aktueller_betrag).toFixed(2)} €/km
+            Aktuell: {parseFloat(traeger.aktueller_betrag || 0).toFixed(2)} €/km
             </span>
             </h3>
-                    <div className="space-y-2">
-                        {traeger.erstattungssaetze?.map((satz) => (
-                            <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
-                                {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
-                                    <div className="flex items-center gap-4 w-full">
-                                        <input
-                                            type="number"
-                                            value={editingSatz.betrag}
-                                            onChange={(e) => setEditingSatz({...editingSatz, betrag: e.target.value})}
-                                            step="0.01"
-                                            min="0"
-                                            className="form-input w-24"
-                                        />
-                                        <input
-                                            type="date"
-                                            value={editingSatz.gueltig_ab}
-                                            onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
-                                            className="form-input w-40"
-                                        />
-                                        <div className="flex gap-2">
-                                            <button onClick={handleSaveEdit} className="table-action-button-primary">
-                                                ✓
-                                            </button>
-                                            <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary">
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="flex-1">
-                                            <div className="text-value font-medium">
-                                                {parseFloat(satz.betrag).toFixed(2)} € pro km
-                                            </div>
-                                            <div className="text-xs text-label">
-                                                Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <button onClick={() => handleEdit(satz, traeger.id)} className="table-action-button-primary">
-                                                ✎
-                                            </button>
-                                            <button onClick={() => handleDelete(satz.id, traeger.id)} className="table-action-button-secondary">
-                                                ×
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        ))}
+            <div className="space-y-2">
+            {traeger.erstattungsbetraege?.map((satz) => (
+                <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
+                {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
+                    <div className="flex items-center gap-4 w-full">
+                    <input
+                    type="number"
+                    value={editingSatz.betrag}
+                    onChange={(e) => setEditingSatz({...editingSatz, betrag: e.target.value})}
+                    step="0.01"
+                    min="0"
+                    className="form-input w-24"
+                    />
+                    <input
+                    type="date"
+                    value={editingSatz.gueltig_ab}
+                    onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
+                    className="form-input w-40"
+                    />
+                    <div className="flex gap-2">
+                    <button onClick={handleSaveEdit} className="table-action-button-primary">
+                    ✓
+                    </button>
+                    <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary">
+                    ×
+                    </button>
                     </div>
+                    </div>
+                ) : (
+                    <>
+                    <div className="flex-1">
+                    <div className="text-value font-medium">
+                    {parseFloat(satz.betrag).toFixed(2)} € pro km
+                    </div>
+                    <div className="text-xs text-label">
+                    Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
+                    </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                    <button onClick={() => handleEdit(satz, traeger.id)} className="table-action-button-primary">
+                    ✎
+                    </button>
+                    <button onClick={() => handleDelete(satz.id, traeger.id)} className="table-action-button-secondary">
+                    ×
+                    </button>
+                    </div>
+                    </>
+                )}
                 </div>
             ))}
+            </div>
+            </div>
+        ))}
         </div>
     );
 }
