@@ -37,29 +37,14 @@ exports.updateErstattungssatz = async (req, res) => {
             return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
         }
         
-        // Validierung des Datums
-        if (!gueltig_ab) {
-            return res.status(400).json({ message: 'Gültigkeitsdatum ist erforderlich' });
-        }
-        
-        console.log('Update Erstattungssatz:', {
-            betrag,
-            gueltig_ab,
-            id,
-            erstattungssatzId,
-            parsed: parseFloat(betrag)
-        });
-        
         await db.execute(
-            'UPDATE erstattungsbetraege SET betrag = ?, gueltig_ab = ? WHERE id = ? AND abrechnungstraeger_id = ?',
-            [parseFloat(betrag), gueltig_ab, erstattungssatzId, id]
+            'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
+            [id, parseFloat(betrag), gueltig_ab || new Date().toISOString().split('T')[0]]
         );
         
         res.json({ message: 'Erstattungssatz erfolgreich aktualisiert' });
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Erstattungssatzes:', error);
-        console.error('Request body:', req.body);
-        console.error('Request params:', req.params);
         res.status(500).json({ 
             message: 'Erstattungssatz konnte nicht aktualisiert werden',
             error: error.message 

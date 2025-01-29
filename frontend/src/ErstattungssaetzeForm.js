@@ -46,7 +46,8 @@ function ErstattungssaetzeForm() {
                     gueltig_ab: newErstattung.gueltig_ab
                 });
             } else {
-                await axios.put(`/api/abrechnungstraeger/${newErstattung.typ}/erstattung/${newErstattung.id}`, {
+                const id = newErstattung.typ; // ID des Abrechnungsträgers
+                await axios.post(`/api/abrechnungstraeger/${id}/erstattung`, {
                     betrag: parseFloat(newErstattung.betrag),
                     gueltig_ab: newErstattung.gueltig_ab
                 });
@@ -70,7 +71,7 @@ function ErstattungssaetzeForm() {
             id: satz.id,
             typ: typ,
             betrag: parseFloat(satz.betrag),
-            gueltig_ab: satz.gueltig_ab
+            gueltig_ab: new Date(satz.gueltig_ab).toISOString().split('T')[0]  // Datum korrekt formatieren
         });
     };
 
@@ -219,9 +220,14 @@ function ErstattungssaetzeForm() {
             </div>
 
             {/* Abrechnungsträger Erstattungssätze */}
-            {erstattungssaetze.abrechnungstraeger.map(traeger => (
-                <div key={traeger.id} className="card-container">
-                    <h3 className="text-lg font-medium text-value mb-4">{traeger.name}</h3>
+        {erstattungssaetze.abrechnungstraeger.map(traeger => (
+            <div key={traeger.id} className="card-container">
+            <h3 className="text-lg font-medium text-value mb-4">
+            {traeger.name}
+            <span className="text-sm text-label ml-2">
+            Aktuell: {parseFloat(traeger.aktueller_betrag).toFixed(2)} €/km
+            </span>
+            </h3>
                     <div className="space-y-2">
                         {traeger.erstattungssaetze?.map((satz) => (
                             <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
