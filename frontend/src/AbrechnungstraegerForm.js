@@ -73,6 +73,34 @@ function AbrechnungstraegerForm() {
         }
     };
 
+    const [editingTraeger, setEditingTraeger] = useState(null);
+    
+    const handleEdit = async (id) => {
+        try {
+            const response = await axios.get(`/api/abrechnungstraeger/${id}`);
+            setEditingTraeger(response.data);
+        } catch (error) {
+            console.error('Fehler beim Laden des Abrechnungsträgers:', error);
+            showNotification('Fehler', 'Abrechnungsträger konnte nicht geladen werden');
+        }
+    };
+    
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(`/api/abrechnungstraeger/${editingTraeger.id}`, {
+                name: editingTraeger.name,
+                kennzeichen: editingTraeger.kennzeichen
+            });
+            showNotification('Erfolg', 'Abrechnungsträger wurde aktualisiert');
+            setEditingTraeger(null);
+            fetchAbrechnungstraeger();
+        } catch (error) {
+            console.error('Fehler beim Aktualisieren:', error);
+            showNotification('Fehler', 'Abrechnungsträger konnte nicht aktualisiert werden');
+        }
+    };
+    
     const handleToggleActive = async (id, currentActive) => {
         try {
             await axios.put(`/api/abrechnungstraeger/${id}`, {
@@ -138,68 +166,91 @@ function AbrechnungstraegerForm() {
 
             {/* Liste der Abrechnungsträger */}
             <div className="space-y-2">
-                {abrechnungstraeger.map((traeger, index) => (
-                    <div key={traeger.id} 
-                         className={`card-container flex items-center justify-between p-4 ${!traeger.active ? 'opacity-50' : ''}`}>
-                        <div className="flex-1">
-                            <div className="flex items-center gap-4">
-                                <div>
-                                    <div className="font-medium text-value">{traeger.name}</div>
-                                    <div className="text-xs text-label">{traeger.kennzeichen}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                    <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                    <button
-                    onClick={() => handleMoveItem(index, 'up')}
-                    disabled={index === 0}
-                    className="table-action-button-primary p-1"
-                    title="Nach oben"
-                    >
-                    <ChevronUp size={16} />
-                    </button>
-                    <button
-                    onClick={() => handleMoveItem(index, 'down')}
-                    disabled={index === abrechnungstraeger.length - 1}
-                    className="table-action-button-primary p-1"
-                    title="Nach unten"
-                    >
-                    <ChevronDown size={16} />
-                    </button>
-                    </div>
-                    
-                    {/* Edit Button */}
-                    <button
-                    onClick={() => handleEdit(traeger.id)}
-                    className="table-action-button-primary"
-                    title="Bearbeiten"
-                    >
-                    ✎
-                    </button>
-                    
-                    {/* Aktiv/Inaktiv Toggle */}
-                    <button
-                    onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                    className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
-                    title={traeger.active ? 'Aktiv' : 'Inaktiv'}
-                    >
-                    {traeger.active ? '●' : '○'}
-                    </button>
-                    
-                    {/* Löschen Button */}
-                    <button
-                    onClick={() => handleDelete(traeger.id)}
-                    className="table-action-button-secondary"
-                    title="Löschen"
-                    >
-                    ×
-                    </button>
-                    </div>
-                    </div>
-                ))}
+        {abrechnungstraeger.map((traeger, index) => (
+            <div key={traeger.id} className="card-container flex items-center justify-between p-4">
+            <div className="flex-1">
+            {editingTraeger?.id === traeger.id ? (
+                // Edit Form
+                <form onSubmit={handleUpdate} className="flex gap-4">
+                <input
+                type="text"
+                value={editingTraeger.name}
+                onChange={(e) => setEditingTraeger({...editingTraeger, name: e.target.value})}
+                className="form-input flex-1"
+                placeholder="Name"
+                required
+                />
+                <input
+                type="text"
+                value={editingTraeger.kennzeichen}
+                onChange={(e) => setEditingTraeger({...editingTraeger, kennzeichen: e.target.value})}
+                className="form-input w-32"
+                placeholder="Kennzeichen"
+                required
+                />
+                <button type="submit" className="btn-primary">Speichern</button>
+                <button type="button" onClick={() => setEditingTraeger(null)} className="btn-secondary">Abbrechen</button>
+                </form>
+            ) : (
+                // Display
+                <div className="flex items-center gap-4">
+                <div>
+                <div className="font-medium text-value">{traeger.name}</div>
+                <div className="text-xs text-label">{traeger.kennzeichen}</div>
+                </div>
+                </div>
+            )}
             </div>
+            
+            <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+            <button
+            onClick={() => handleMoveItem(index, 'up')}
+            disabled={index === 0}
+            className="table-action-button-primary p-1"
+            title="Nach oben"
+            >
+            <ChevronUp size={16} />
+            </button>
+            <button
+            onClick={() => handleMoveItem(index, 'down')}
+            disabled={index === abrechnungstraeger.length - 1}
+            className="table-action-button-primary p-1"
+            title="Nach unten"
+            >
+            <ChevronDown size={16} />
+            </button>
+            </div>
+            
+            {!editingTraeger && (
+                <>
+                <button
+                onClick={() => handleEdit(traeger.id)}
+                className="table-action-button-primary"
+                title="Bearbeiten"
+                >
+                ✎
+                </button>
+                <button
+                onClick={() => handleToggleActive(traeger.id, traeger.active)}
+                className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
+                title={traeger.active ? 'Aktiv' : 'Inaktiv'}
+                >
+                {traeger.active ? '●' : '○'}
+                </button>
+                <button
+                onClick={() => handleDelete(traeger.id)}
+                className="table-action-button-secondary"
+                title="Löschen"
+                >
+                ×
+                </button>
+                </>
+            )}
+            </div>
+            </div>
+        ))}
+        </div>
         </div>
     );
 }

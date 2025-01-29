@@ -128,6 +128,25 @@ exports.createAbrechnungstraeger = async (req, res) => {
     }
 };
 
+exports.getById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await db.execute(
+            'SELECT * FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            [id, req.user.id]
+        );
+        
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
+        }
+        
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('Fehler beim Abrufen des Abrechnungsträgers:', error);
+        res.status(500).json({ message: 'Interner Server-Fehler' });
+    }
+};
+
 exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;

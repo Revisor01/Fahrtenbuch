@@ -14,5 +14,6 @@ router.get('/:id/historie', abrechnungstraegerController.getErstattungshistorie)
 router.put('/:id/erstattung/:erstattungssatzId', abrechnungstraegerController.updateErstattungssatz);
 router.delete('/:id/erstattung/:erstattungssatzId', abrechnungstraegerController.deleteErstattungssatz);
 router.put('/sort', abrechnungstraegerController.updateSortOrder);
+router.get('/:id', abrechnungstraegerController.getById);
 
 module.exports = router;
