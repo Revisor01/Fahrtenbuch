@@ -146,10 +146,13 @@ class AbrechnungsTraeger {
     }
     
     static async delete(id, userId) {
-        // Prüfen ob Fahrten existieren
-        const hasFahrten = await this.checkForFahrten(id);
-        if (hasFahrten) {
-            throw new Error('Der Abrechnungsträger kann nicht gelöscht werden, da bereits Fahrten damit verknüpft sind.');
+        const [fahrten] = await db.execute(
+            'SELECT COUNT(*) as count FROM fahrten f JOIN abrechnungstraeger a ON f.abrechnung = a.kennzeichen COLLATE utf8mb4_unicode_ci WHERE a.id = ?',
+            [id]
+        );
+        
+        if (fahrten[0].count > 0) {
+            throw new Error('Abrechnungsträger wird noch in Fahrten verwendet.');
         }
         
         const [result] = await db.execute(

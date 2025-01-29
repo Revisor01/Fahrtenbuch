@@ -52,16 +52,26 @@ function ErstattungssaetzeForm() {
         e.preventDefault();
         try {
             if (newErstattung.typ === 'mitfahrer') {
-                await axios.post('/api/mitfahrer-erstattung', {
-                    betrag: parseFloat(newErstattung.betrag),
-                    gueltig_ab: newErstattung.gueltig_ab
-                });
+                // Prüfe ob bereits ein Eintrag für das Datum existiert
+                const existingEntry = erstattungssaetze.mitfahrer.find(
+                    s => s.gueltig_ab === newErstattung.gueltig_ab
+                );
+                
+                if (existingEntry) {
+                    // Überschreibe existierenden Eintrag
+                    await axios.put(`/api/mitfahrer-erstattung/${existingEntry.id}`, {
+                        betrag: parseFloat(newErstattung.betrag),
+                        gueltig_ab: newErstattung.gueltig_ab
+                    });
+                } else {
+                    // Erstelle neuen Eintrag
+                    await axios.post('/api/mitfahrer-erstattung', {
+                        betrag: parseFloat(newErstattung.betrag),
+                        gueltig_ab: newErstattung.gueltig_ab
+                    });
+                }
             } else {
-                const id = newErstattung.typ; // ID des Abrechnungsträgers
-                await axios.post(`/api/abrechnungstraeger/${id}/erstattung`, {
-                    betrag: parseFloat(newErstattung.betrag),
-                    gueltig_ab: newErstattung.gueltig_ab
-                });
+                // Analog für Abrechnungsträger...
             }
             
             showNotification('Erfolg', 'Erstattungssatz wurde gespeichert');
@@ -90,15 +100,42 @@ function ErstattungssaetzeForm() {
     const handleSaveEdit = async () => {
         try {
             if (editingSatz.typ === 'mitfahrer') {
-                await axios.put(`/api/mitfahrer-erstattung/${editingSatz.id}`, {
-                    betrag: parseFloat(editingSatz.betrag),
-                    gueltig_ab: editingSatz.gueltig_ab
-                });
+                // Prüfe ob bereits ein Eintrag für das Datum existiert
+                const existingIndex = erstattungssaetze.mitfahrer.findIndex(
+                    s => s.gueltig_ab === editingSatz.gueltig_ab && s.id !== editingSatz.id
+                );
+                
+                if (existingIndex >= 0) {
+                    // Überschreibe existierenden Eintrag
+                    await axios.put(`/api/mitfahrer-erstattung/${erstattungssaetze.mitfahrer[existingIndex].id}`, {
+                        betrag: parseFloat(editingSatz.betrag),
+                        gueltig_ab: editingSatz.gueltig_ab
+                    });
+                } else {
+                    // Update normaler Eintrag
+                    await axios.put(`/api/mitfahrer-erstattung/${editingSatz.id}`, {
+                        betrag: parseFloat(editingSatz.betrag),
+                        gueltig_ab: editingSatz.gueltig_ab
+                    });
+                }
             } else {
-                await axios.put(`/api/abrechnungstraeger/${editingSatz.abrechnungstraeger_id}/erstattung/${editingSatz.id}`, {
-                    betrag: parseFloat(editingSatz.betrag),
-                    gueltig_ab: editingSatz.gueltig_ab
-                });
+                // Gleiches für Abrechnungsträger
+                const traeger = erstattungssaetze.abrechnungstraeger.find(t => t.id === editingSatz.abrechnungstraeger_id);
+                const existingIndex = traeger.erstattungsbetraege.findIndex(
+                    s => s.gueltig_ab === editingSatz.gueltig_ab && s.id !== editingSatz.id
+                );
+                
+                if (existingIndex >= 0) {
+                    await axios.put(`/api/abrechnungstraeger/${editingSatz.abrechnungstraeger_id}/erstattung/${traeger.erstattungsbetraege[existingIndex].id}`, {
+                        betrag: parseFloat(editingSatz.betrag),
+                        gueltig_ab: editingSatz.gueltig_ab
+                    });
+                } else {
+                    await axios.put(`/api/abrechnungstraeger/${editingSatz.abrechnungstraeger_id}/erstattung/${editingSatz.id}`, {
+                        betrag: parseFloat(editingSatz.betrag),
+                        gueltig_ab: editingSatz.gueltig_ab
+                    });
+                }
             }
             
             showNotification('Erfolg', 'Erstattungssatz wurde aktualisiert');
@@ -189,7 +226,12 @@ function ErstattungssaetzeForm() {
         
         {/* Mitfahrer Erstattungssätze */}
         <div className="card-container">
-        <h3 className="text-lg font-medium text-value mb-4">Mitfahrer:innen</h3>
+        <h3 className="text-lg font-medium text-value mb-4">
+        Mitfahrer:innen
+        <span className="text-sm text-label ml-2">
+        Aktuell: {parseFloat(erstattungssaetze.mitfahrer[0]?.betrag || 0).toFixed(2)} €/km
+        </span>
+        </h3>
         <div className="space-y-2">
         {erstattungssaetze.mitfahrer.map((satz) => (
             <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
@@ -210,10 +252,10 @@ function ErstattungssaetzeForm() {
                 className="form-input w-40"
                 />
                 <div className="flex gap-2">
-                <button onClick={handleSaveEdit} className="table-action-button-primary">
+                <button onClick={handleSaveEdit} className="table-action-button-primary" title="Speichern">
                 ✓
                 </button>
-                <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary">
+                <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary" title="Abbrechen">
                 ×
                 </button>
                 </div>
