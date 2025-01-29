@@ -200,7 +200,7 @@ function AbrechnungstraegerForm() {
             )}
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex ml-4 items-center gap-2">
             {/* Sortier-Buttons und Action-Buttons */}
             {!editingTraeger?.id && (
                 <>
