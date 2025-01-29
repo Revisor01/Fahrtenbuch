@@ -81,7 +81,7 @@ function ProfileModal({ isOpen, onClose }) {
                     showNotification('Fehler', 'API Key konnte nicht gelöscht werden');
                 }
             },
-            true // showCancel
+            true
         );
     };
     
@@ -158,101 +158,137 @@ function ProfileModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="compact">
+        <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="wide">
         <div className="modal-content">
-        <div className="modal-header">
-        <nav className="flex overflow-x-auto">
+        <div className="modal-header sticky top-0">
+        {/* Tabs Desktop */}
+        <div className="hidden sm:flex space-x-1 border-b border-primary-100 dark:border-primary-800">
         {tabs.map(tab => (
             <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-                                py-2 px-4 text-sm font-medium whitespace-nowrap
+                                py-2 px-4 text-sm font-medium 
+                                border-b-2 -mb-px
                                 ${activeTab === tab.id
-                ? 'text-primary-600 border-b-2 border-primary-500'
-                : 'text-muted hover:text-value hover:border-b-2 hover:border-primary-200'
+                ? 'border-primary-500 text-primary-600 dark:text-primary-100'
+                : 'border-transparent text-muted hover:text-value hover:border-primary-200'
                 }
                             `}
             >
             {tab.name}
             </button>
         ))}
-        </nav>
         </div>
         
-        <div className="modal-body p-4">
+        {/* Tabs Mobile */}
+        <div className="sm:hidden">
+        <select
+        value={activeTab}
+        onChange={(e) => setActiveTab(e.target.value)}
+        className="form-select w-full"
+        >
+        {tabs.map(tab => (
+            <option key={tab.id} value={tab.id}>
+            {tab.name}
+            </option>
+        ))}
+        </select>
+        </div>
+        </div>
+        
+        <div className="modal-body p-4 space-y-4">
         {activeTab === 'profile' && (
+            <div className="space-y-4">
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Persönliche Daten</h3>
+            <p className="text-sm text-muted mb-6">
+            Ihre persönlichen Daten werden für die Abrechnungen benötigt. 
+            Bitte stellen Sie sicher, dass diese Daten aktuell sind.
+            </p>
             <form onSubmit={handleProfileUpdate} className="space-y-4">
             <div className="relative">
+            <label className="form-label">E-Mail</label>
             <input
             type="email"
-            placeholder="E-Mail"
             value={profile.email || ''}
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
             className={`form-input ${
                 profile.email_verified
-                ? 'border-primary-200 dark:border-primary-700 bg-primary-25 dark:bg-primary-900'
-                : 'border-secondary-200 dark:border-secondary-700 bg-secondary-25 dark:bg-secondary-900'
+                ? 'border-primary-200 dark:border-primary-700'
+                : 'border-secondary-200 dark:border-secondary-700'
             }`}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
             {profile.email_verified ? (
-                <span className="text-label text-xs">● Verifiziert</span>
+                <span className="status-badge-primary">Verifiziert</span>
             ) : (
-                <>
-                <span className="text-muted text-xs">○ Ausstehend</span>
+                <div className="flex items-center gap-2">
+                <span className="status-badge-secondary">Ausstehend</span>
                 <button
                 type="button"
                 onClick={handleResendVerification}
-                className="text-label hover:text-value text-xs"
+                className="text-label hover:text-value text-xs underline"
                 >
                 Erneut senden
                 </button>
-                </>
+                </div>
             )}
             </div>
             </div>
             
+            <div>
+            <label className="form-label">Voller Name</label>
             <input
             type="text"
-            placeholder="Voller Name"
             value={profile.fullName || ''}
             onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
             className="form-input"
+            placeholder="z.B. Max Mustermann"
             />
+            </div>
             
+            <div>
+            <label className="form-label">IBAN</label>
             <input
             type="text"
-            placeholder="IBAN"
             value={profile.iban || ''}
             onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
             className="form-input"
+            placeholder="DE12 3456 7890 1234 5678 90"
             />
+            </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+            <label className="form-label">Kirchengemeinde</label>
             <input
             type="text"
-            placeholder="Kirchengemeinde"
             value={profile.kirchengemeinde || ''}
             onChange={(e) => setProfile({ ...profile, kirchengemeinde: e.target.value })}
             className="form-input"
             />
+            </div>
             
+            <div>
+            <label className="form-label">Kirchspiel</label>
             <input
             type="text"
-            placeholder="Kirchspiel"
             value={profile.kirchspiel || ''}
             onChange={(e) => setProfile({ ...profile, kirchspiel: e.target.value })}
             className="form-input"
             />
+            </div>
             
+            <div>
+            <label className="form-label">Kirchenkreis</label>
             <input
             type="text"
-            placeholder="Kirchenkreis"
             value={profile.kirchenkreis || ''}
             onChange={(e) => setProfile({ ...profile, kirchenkreis: e.target.value })}
             className="form-input"
             />
+            </div>
             </div>
             
             <div className="flex justify-end">
@@ -261,6 +297,8 @@ function ProfileModal({ isOpen, onClose }) {
             </button>
             </div>
             </form>
+            </div>
+            </div>
         )}
         
         {activeTab === 'abrechnungen' && (
@@ -394,14 +432,7 @@ function ProfileModal({ isOpen, onClose }) {
                 </p>
                 </div>
                 <button
-                onClick={() => {
-                    showNotification(
-                        'API-Key löschen',
-                        'Möchten Sie diesen API-Key wirklich löschen?',
-                        () => handleDeleteKey(key.id),
-                        true
-                    );
-                }}
+                onClick={() => handleDeleteKey(key.id)}
                 className="table-action-button-secondary"
                 title="Löschen"
                 >
