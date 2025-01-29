@@ -151,7 +151,7 @@ function ProfileModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="wide">
+        <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="compact">
             <div className="space-y-6">
                 {/* Tab Navigation */}
                 <div className="border-b border-primary-100 dark:border-primary-800">
