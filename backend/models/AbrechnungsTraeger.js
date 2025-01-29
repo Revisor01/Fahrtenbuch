@@ -137,14 +137,19 @@ class AbrechnungsTraeger {
         }
     }
 
-    static async delete(id, userId) {
-        const [fahrten] = await db.execute(
-            'SELECT COUNT(*) as count FROM fahrten f JOIN abrechnungstraeger a ON f.abrechnung COLLATE utf8mb4_unicode_ci = a.kennzeichen WHERE a.id = ?',
+    static async checkForFahrten(id) {
+        const [rows] = await db.execute(
+            'SELECT COUNT(*) as count FROM fahrten WHERE abrechnung = (SELECT kennzeichen FROM abrechnungstraeger WHERE id = ?)',
             [id]
         );
-        
-        if (fahrten[0].count > 0) {
-            throw new Error('Abrechnungsträger wird noch in Fahrten verwendet.');
+        return rows[0].count > 0;
+    }
+    
+    static async delete(id, userId) {
+        // Prüfen ob Fahrten existieren
+        const hasFahrten = await this.checkForFahrten(id);
+        if (hasFahrten) {
+            throw new Error('Der Abrechnungsträger kann nicht gelöscht werden, da bereits Fahrten damit verknüpft sind.');
         }
         
         const [result] = await db.execute(
