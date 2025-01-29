@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
 function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
   if (!isOpen) return null;
@@ -8,22 +8,30 @@ function Modal({ isOpen, onClose, title, children, size = 'compact' }) {
     'wide': 'w-[95%] sm:w-[80%]',
   }[size];
 
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
 
   return (
-    <div 
-      className="fixed inset-0 z-50"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 z-50">
       <div
         className="fixed inset-0 bg-primary-950/30 dark:bg-primary-950/40 backdrop-blur-sm pointer-events-none"
       />
       <div className="relative min-h-full flex items-center pointer-events-auto">
-        <div 
+        <div
+          ref={modalRef}
           className={`relative mx-auto p-6 card-container ${widthClass} my-20 max-h-[80vh] overflow-y-auto`}
         >
           <div className="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 z-10 py-2">
