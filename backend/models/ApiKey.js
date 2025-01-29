@@ -29,14 +29,6 @@ class ApiKey {
         return rows;
     }
     
-    static async revoke(id, userId) {
-        const [result] = await db.execute(
-            'UPDATE api_keys SET is_active = 0 WHERE id = ? AND user_id = ?',
-            [id, userId]
-        );
-        return result.affectedRows > 0;
-    }
-    
     static async updateLastUsed(id) {
         await db.execute(
             'UPDATE api_keys SET last_used_at = NOW() WHERE id = ?',
@@ -44,13 +36,6 @@ class ApiKey {
         );
     }
 
-    static async permanentlyDelete(id, userId) {
-        const [result] = await db.execute(
-            'DELETE FROM api_keys WHERE id = ? AND user_id = ? AND is_active = 0',
-            [id, userId]
-        );
-        return result.affectedRows > 0;
-    }
     static async delete(id, userId) {
         const [result] = await db.execute(
             'DELETE FROM api_keys WHERE id = ? AND user_id = ?',
