@@ -26,10 +26,21 @@ function ErstattungssaetzeForm() {
                 axios.get('/api/mitfahrer-erstattung/historie'),
                 axios.get('/api/abrechnungstraeger')
             ]);
-
+            
+            // Für jeden Abrechnungsträger die Historie abrufen
+            const traegerMitHistorie = await Promise.all(
+                traegerRes.data.map(async (traeger) => {
+                    const historieRes = await axios.get(`/api/abrechnungstraeger/${traeger.id}/historie`);
+                    return {
+                        ...traeger,
+                        erstattungsbetraege: historieRes.data
+                    };
+                })
+            );
+            
             setErstattungssaetze({
                 mitfahrer: mitfahrerRes.data,
-                abrechnungstraeger: traegerRes.data
+                abrechnungstraeger: traegerMitHistorie
             });
         } catch (error) {
             console.error('Fehler beim Laden der Erstattungssätze:', error);
@@ -71,7 +82,8 @@ function ErstattungssaetzeForm() {
             id: satz.id,
             typ: typ,
             betrag: parseFloat(satz.betrag),
-            gueltig_ab: new Date(satz.gueltig_ab).toISOString().split('T')[0]  // Datum korrekt formatieren
+            gueltig_ab: new Date(satz.gueltig_ab).toISOString().split('T')[0],
+            abrechnungstraeger_id: typeof typ === 'number' ? typ : null // Für Abrechnungsträger die ID speichern
         });
     };
 
@@ -83,7 +95,7 @@ function ErstattungssaetzeForm() {
                     gueltig_ab: editingSatz.gueltig_ab
                 });
             } else {
-                await axios.put(`/api/abrechnungstraeger/${editingSatz.id}/erstattung/${editingSatz.erstattungssatzId}`, {
+                await axios.put(`/api/abrechnungstraeger/${editingSatz.abrechnungstraeger_id}/erstattung/${editingSatz.id}`, {
                     betrag: parseFloat(editingSatz.betrag),
                     gueltig_ab: editingSatz.gueltig_ab
                 });
@@ -98,25 +110,19 @@ function ErstattungssaetzeForm() {
         }
     };
 
-    const handleDelete = async (id) => {
-        showNotification(
-            "Abrechnungsträger löschen",
-            "Möchten Sie diesen Abrechnungsträger wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-            async () => {
-                try {
-                    await axios.delete(`/api/abrechnungstraeger/${id}`);
-                    showNotification('Erfolg', 'Abrechnungsträger wurde gelöscht');
-                    fetchAbrechnungstraeger();
-                } catch (error) {
-                    console.error('Fehler beim Löschen:', error);
-                    showNotification(
-                        'Fehler', 
-                        error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden'
-                    );
-                }
-            },
-            true  // showCancel = true für den Bestätigungsdialog
-        );
+    const handleDelete = async (id, typ) => {
+        try {
+            if (typ === 'mitfahrer') {
+                await axios.delete(`/api/mitfahrer-erstattung/${id}`);
+            } else {
+                await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
+            }
+            showNotification('Erfolg', 'Erstattungssatz wurde gelöscht');
+            fetchAllErstattungssaetze();
+        } catch (error) {
+            console.error('Fehler beim Löschen:', error);
+            showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
+        }
     };
 
     return (
@@ -238,6 +244,7 @@ function ErstattungssaetzeForm() {
             {traeger.erstattungsbetraege?.map((satz) => (
                 <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
                 {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
+                    // Edit-Modus
                     <div className="flex items-center gap-4 w-full">
                     <input
                     type="number"
@@ -263,6 +270,7 @@ function ErstattungssaetzeForm() {
                     </div>
                     </div>
                 ) : (
+                    // Anzeige-Modus
                     <>
                     <div className="flex-1">
                     <div className="text-value font-medium">
@@ -283,6 +291,9 @@ function ErstattungssaetzeForm() {
                     </>
                 )}
                 </div>
+            ))}
+            </div>
+            </div>
             ))}
             </div>
             </div>

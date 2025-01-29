@@ -115,19 +115,25 @@ function AbrechnungstraegerForm() {
     };
 
     const handleDelete = async (id) => {
-        try {
-            await axios.delete(`/api/abrechnungstraeger/${id}`);
-            showNotification('Erfolg', 'Abrechnungsträger wurde gelöscht');
-            fetchAbrechnungstraeger();
-        } catch (error) {
-            console.error('Fehler beim Löschen:', error);
-            showNotification('Fehler', error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden');
-        }
+        showNotification(
+            "Abrechnungsträger löschen",
+            "Möchten Sie diesen Abrechnungsträger wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+            async () => {
+                try {
+                    await axios.delete(`/api/abrechnungstraeger/${id}`);
+                    showNotification('Erfolg', 'Abrechnungsträger wurde gelöscht');
+                    fetchAbrechnungstraeger();
+                } catch (error) {
+                    console.error('Fehler beim Löschen:', error);
+                    showNotification(
+                        'Fehler', 
+                        error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden'
+                    );
+                }
+            },
+            true  // showCancel = true für den Bestätigungsdialog
+        );
     };
-
-    if (isLoading) {
-        return <div className="text-center">Laden...</div>;
-    }
 
     return (
         <div className="space-y-6">
