@@ -2435,7 +2435,7 @@ function OrteListe() {
         </div>
       )}
       </td>
-      <td className="table-header-sm">
+      <td className="table-cell hidden md:table-cell">
       {editingOrt?.id === ort.id ? (
         <input
         value={editingOrt.adresse}
@@ -2606,7 +2606,7 @@ function DistanzenListe() {
       </span>
       </div>
       </td>
-      <td className="table-header-sm">
+      <td className="table-cell hidden md:table-cell">
       <span className="text-value">{getOrtName(distanz.nach_ort_id)}</span>
       </td>
       <td className="table-cell text-right">
