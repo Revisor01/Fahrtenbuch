@@ -171,7 +171,7 @@ function AbrechnungstraegerForm() {
             <div className="flex-1">
             {editingTraeger?.id === traeger.id ? (
                 // Edit Form
-                <form onSubmit={handleUpdate} className="flex gap-4">
+                <div className="flex gap-4">
                 <input
                 type="text"
                 value={editingTraeger.name}
@@ -188,9 +188,7 @@ function AbrechnungstraegerForm() {
                 placeholder="Kennzeichen"
                 required
                 />
-                <button type="submit" className="btn-primary">Speichern</button>
-                <button type="button" onClick={() => setEditingTraeger(null)} className="btn-secondary">Abbrechen</button>
-                </form>
+                </div>
             ) : (
                 // Display
                 <div className="flex items-center gap-4">
@@ -203,7 +201,9 @@ function AbrechnungstraegerForm() {
             </div>
             
             <div className="flex items-center gap-2">
-            {!editingTraeger?.id && (  // Sortier-Buttons nur anzeigen, wenn nicht im Edit-Modus
+            {/* Sortier-Buttons und Action-Buttons */}
+            {!editingTraeger?.id && (
+                <>
                 <div className="flex gap-1">
                 <button
                 onClick={() => handleMoveItem(index, 'up')}
@@ -222,27 +222,7 @@ function AbrechnungstraegerForm() {
                 <ChevronDown size={16} />
                 </button>
                 </div>
-            )}
-            
-            {editingTraeger?.id === traeger.id ? (
-                <div className="flex gap-2">
-                <button 
-                type="submit" 
-                className="btn-primary"
-                onClick={handleUpdate}
-                >
-                Speichern
-                </button>
-                <button 
-                type="button" 
-                className="btn-secondary"
-                onClick={() => setEditingTraeger(null)}
-                >
-                Abbrechen
-                </button>
-                </div>
-            ) : (
-                <div className="flex gap-2">
+                
                 <button
                 onClick={() => handleEdit(traeger.id)}
                 className="table-action-button-primary"
@@ -263,6 +243,26 @@ function AbrechnungstraegerForm() {
                 title="Löschen"
                 >
                 ×
+                </button>
+                </>
+            )}
+            
+            {/* Edit Buttons */}
+            {editingTraeger?.id === traeger.id && (
+                <div className="flex gap-2">
+                <button 
+                type="button" 
+                className="btn-primary"
+                onClick={handleUpdate}
+                >
+                Speichern
+                </button>
+                <button 
+                type="button" 
+                className="btn-secondary"
+                onClick={() => setEditingTraeger(null)}
+                >
+                Abbrechen
                 </button>
                 </div>
             )}
