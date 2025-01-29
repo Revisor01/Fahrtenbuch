@@ -87,15 +87,23 @@ exports.deleteErstattungssatz = async (req, res) => {
 
 exports.getErstattungshistorie = async (req, res) => {
     try {
-        const { id } = req.params;
         const [rows] = await db.execute(`
             SELECT id, betrag, gueltig_ab, created_at
             FROM erstattungsbetraege
             WHERE abrechnungstraeger_id = ?
-            ORDER BY gueltig_ab DESC`,
-            [id]
+            ORDER BY gueltig_ab DESC, created_at DESC`,
+            [req.params.id]
         );
-        res.json(rows);
+        // Entferne Duplikate basierend auf gueltig_ab
+        const uniqueRows = rows.reduce((acc, current) => {
+            const x = acc.find(item => item.gueltig_ab === current.gueltig_ab);
+            if (!x) {
+                return acc.concat([current]);
+            } else {
+                return acc;
+            }
+        }, []);
+        res.json(uniqueRows);
     } catch (error) {
         console.error('Fehler beim Abrufen der Historie:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
