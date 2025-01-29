@@ -112,13 +112,25 @@ function ErstattungssaetzeForm() {
 
     const handleDelete = async (id, typ) => {
         try {
-            if (typ === 'mitfahrer') {
-                await axios.delete(`/api/mitfahrer-erstattung/${id}`);
-            } else {
-                await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
-            }
-            showNotification('Erfolg', 'Erstattungssatz wurde gelöscht');
-            fetchAllErstattungssaetze();
+            showNotification(
+                'Löschen bestätigen',
+                'Möchten Sie diesen Erstattungssatz wirklich löschen?',
+                async () => {
+                    try {
+                        if (typ === 'mitfahrer') {
+                            await axios.delete(`/api/mitfahrer-erstattung/${id}`);
+                        } else {
+                            await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
+                        }
+                        showNotification('Erfolg', 'Erstattungssatz wurde gelöscht');
+                        fetchAllErstattungssaetze();
+                    } catch (error) {
+                        console.error('Fehler beim Löschen:', error);
+                        showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
+                    }
+                },
+                true // showCancel
+            );
         } catch (error) {
             console.error('Fehler beim Löschen:', error);
             showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
@@ -127,111 +139,111 @@ function ErstattungssaetzeForm() {
 
     return (
         <div className="space-y-6">
-            {/* Formular für neue Erstattungssätze */}
-            <form onSubmit={handleSubmit} className="card-container-highlight space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                        <label className="form-label">Typ</label>
-                        <select
-                            value={newErstattung.typ}
-                            onChange={(e) => setNewErstattung({...newErstattung, typ: e.target.value})}
-                            className="form-select"
-                        >
-                            <option value="mitfahrer">Mitfahrer:innen</option>
-                            {erstattungssaetze.abrechnungstraeger.map(traeger => (
-                                <option key={traeger.id} value={traeger.id}>
-                                    {traeger.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="w-32">
-                        <label className="form-label">Betrag (€/km)</label>
-                        <input
-                            type="number"
-                            value={newErstattung.betrag}
-                            onChange={(e) => setNewErstattung({...newErstattung, betrag: e.target.value})}
-                            step="0.01"
-                            min="0"
-                            className="form-input"
-                            required
-                        />
-                    </div>
-                    <div className="w-40">
-                        <label className="form-label">Gültig ab</label>
-                        <input
-                            type="date"
-                            value={newErstattung.gueltig_ab}
-                            onChange={(e) => setNewErstattung({...newErstattung, gueltig_ab: e.target.value})}
-                            className="form-input"
-                            required
-                        />
-                    </div>
-                    <div className="flex items-end">
-                        <button type="submit" className="btn-primary w-full sm:w-auto">
-                            Speichern
-                        </button>
-                    </div>
+        {/* Formular für neue Erstattungssätze */}
+        <form onSubmit={handleSubmit} className="card-container-highlight space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+        <label className="form-label">Typ</label>
+        <select
+        value={newErstattung.typ}
+        onChange={(e) => setNewErstattung({...newErstattung, typ: e.target.value})}
+        className="form-select"
+        >
+        <option value="mitfahrer">Mitfahrer:innen</option>
+        {erstattungssaetze.abrechnungstraeger.map(traeger => (
+            <option key={traeger.id} value={traeger.id}>
+            {traeger.name}
+            </option>
+        ))}
+        </select>
+        </div>
+        <div className="w-32">
+        <label className="form-label">Betrag (€/km)</label>
+        <input
+        type="number"
+        value={newErstattung.betrag}
+        onChange={(e) => setNewErstattung({...newErstattung, betrag: e.target.value})}
+        step="0.01"
+        min="0"
+        className="form-input"
+        required
+        />
+        </div>
+        <div className="w-40">
+        <label className="form-label">Gültig ab</label>
+        <input
+        type="date"
+        value={newErstattung.gueltig_ab}
+        onChange={(e) => setNewErstattung({...newErstattung, gueltig_ab: e.target.value})}
+        className="form-input"
+        required
+        />
+        </div>
+        <div className="flex items-end">
+        <button type="submit" className="btn-primary w-full sm:w-auto">
+        Speichern
+        </button>
+        </div>
+        </div>
+        </form>
+        
+        {/* Mitfahrer Erstattungssätze */}
+        <div className="card-container">
+        <h3 className="text-lg font-medium text-value mb-4">Mitfahrer:innen Erstattungssätze</h3>
+        <div className="space-y-2">
+        {erstattungssaetze.mitfahrer.map((satz) => (
+            <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
+            {editingSatz?.id === satz.id && editingSatz?.typ === 'mitfahrer' ? (
+                <div className="flex items-center gap-4 w-full">
+                <input
+                type="number"
+                value={editingSatz.betrag}
+                onChange={(e) => setEditingSatz({...editingSatz, betrag: e.target.value})}
+                step="0.01"
+                min="0"
+                className="form-input w-24"
+                />
+                <input
+                type="date"
+                value={editingSatz.gueltig_ab}
+                onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
+                className="form-input w-40"
+                />
+                <div className="flex gap-2">
+                <button onClick={handleSaveEdit} className="table-action-button-primary">
+                ✓
+                </button>
+                <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary">
+                ×
+                </button>
                 </div>
-            </form>
-
-            {/* Mitfahrer Erstattungssätze */}
-            <div className="card-container">
-                <h3 className="text-lg font-medium text-value mb-4">Mitfahrer:innen Erstattungssätze</h3>
-                <div className="space-y-2">
-                    {erstattungssaetze.mitfahrer.map((satz) => (
-                        <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
-                            {editingSatz?.id === satz.id && editingSatz?.typ === 'mitfahrer' ? (
-                                <div className="flex items-center gap-4 w-full">
-                                    <input
-                                        type="number"
-                                        value={editingSatz.betrag}
-                                        onChange={(e) => setEditingSatz({...editingSatz, betrag: e.target.value})}
-                                        step="0.01"
-                                        min="0"
-                                        className="form-input w-24"
-                                    />
-                                    <input
-                                        type="date"
-                                        value={editingSatz.gueltig_ab}
-                                        onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
-                                        className="form-input w-40"
-                                    />
-                                    <div className="flex gap-2">
-                                        <button onClick={handleSaveEdit} className="table-action-button-primary">
-                                            ✓
-                                        </button>
-                                        <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary">
-                                            ×
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="flex-1">
-                                        <div className="text-value font-medium">
-                                            {parseFloat(satz.betrag).toFixed(2)} € pro km
-                                        </div>
-                                        <div className="text-xs text-label">
-                                            Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button onClick={() => handleEdit(satz, 'mitfahrer')} className="table-action-button-primary">
-                                            ✎
-                                        </button>
-                                        <button onClick={() => handleDelete(satz.id, 'mitfahrer')} className="table-action-button-secondary">
-                                            ×
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    ))}
                 </div>
+            ) : (
+                <>
+                <div className="flex-1">
+                <div className="text-value font-medium">
+                {parseFloat(satz.betrag).toFixed(2)} € pro km
+                </div>
+                <div className="text-xs text-label">
+                Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
+                </div>
+                </div>
+                <div className="flex items-center gap-2">
+                <button onClick={() => handleEdit(satz, 'mitfahrer')} className="table-action-button-primary">
+                ✎
+                </button>
+                <button onClick={() => handleDelete(satz.id, 'mitfahrer')} className="table-action-button-secondary">
+                ×
+                </button>
+                </div>
+                </>
+            )}
             </div>
-
-            {/* Abrechnungsträger Erstattungssätze */}
+        ))}
+        </div>
+        </div>
+        
+        {/* Abrechnungsträger Erstattungssätze */}
         {erstattungssaetze.abrechnungstraeger.map(traeger => (
             <div key={traeger.id} className="card-container">
             <h3 className="text-lg font-medium text-value mb-4">
@@ -244,7 +256,6 @@ function ErstattungssaetzeForm() {
             {traeger.erstattungsbetraege?.map((satz) => (
                 <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">
                 {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
-                    // Edit-Modus
                     <div className="flex items-center gap-4 w-full">
                     <input
                     type="number"
@@ -270,7 +281,6 @@ function ErstattungssaetzeForm() {
                     </div>
                     </div>
                 ) : (
-                    // Anzeige-Modus
                     <>
                     <div className="flex-1">
                     <div className="text-value font-medium">
@@ -291,9 +301,6 @@ function ErstattungssaetzeForm() {
                     </>
                 )}
                 </div>
-            ))}
-            </div>
-            </div>
             ))}
             </div>
             </div>
