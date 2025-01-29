@@ -98,19 +98,25 @@ function ErstattungssaetzeForm() {
         }
     };
 
-    const handleDelete = async (id, typ) => {
-        try {
-            if (typ === 'mitfahrer') {
-                await axios.delete(`/api/mitfahrer-erstattung/${id}`);
-            } else {
-                await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
-            }
-            showNotification('Erfolg', 'Erstattungssatz wurde gelöscht');
-            fetchAllErstattungssaetze();
-        } catch (error) {
-            console.error('Fehler beim Löschen:', error);
-            showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
-        }
+    const handleDelete = async (id) => {
+        showNotification(
+            "Abrechnungsträger löschen",
+            "Möchten Sie diesen Abrechnungsträger wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+            async () => {
+                try {
+                    await axios.delete(`/api/abrechnungstraeger/${id}`);
+                    showNotification('Erfolg', 'Abrechnungsträger wurde gelöscht');
+                    fetchAbrechnungstraeger();
+                } catch (error) {
+                    console.error('Fehler beim Löschen:', error);
+                    showNotification(
+                        'Fehler', 
+                        error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden'
+                    );
+                }
+            },
+            true  // showCancel = true für den Bestätigungsdialog
+        );
     };
 
     return (
