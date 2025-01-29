@@ -56,13 +56,13 @@ function AbrechnungstraegerForm() {
         } else {
             return;
         }
-
+        
         // Aktualisiere sort_order für alle Einträge
         const sortOrder = newOrder.map((item, idx) => ({
             id: item.id,
             sort_order: idx + 1
         }));
-
+        
         try {
             await axios.put('/api/abrechnungstraeger/sort', { sortOrder });
             setAbrechnungstraeger(newOrder);
@@ -203,27 +203,46 @@ function AbrechnungstraegerForm() {
             </div>
             
             <div className="flex items-center gap-2">
-            <div className="flex gap-1">
-            <button
-            onClick={() => handleMoveItem(index, 'up')}
-            disabled={index === 0}
-            className="table-action-button-primary p-1"
-            title="Nach oben"
-            >
-            <ChevronUp size={16} />
-            </button>
-            <button
-            onClick={() => handleMoveItem(index, 'down')}
-            disabled={index === abrechnungstraeger.length - 1}
-            className="table-action-button-primary p-1"
-            title="Nach unten"
-            >
-            <ChevronDown size={16} />
-            </button>
-            </div>
+            {!editingTraeger?.id && (  // Sortier-Buttons nur anzeigen, wenn nicht im Edit-Modus
+                <div className="flex gap-1">
+                <button
+                onClick={() => handleMoveItem(index, 'up')}
+                disabled={index === 0}
+                className="table-action-button-primary p-1"
+                title="Nach oben"
+                >
+                <ChevronUp size={16} />
+                </button>
+                <button
+                onClick={() => handleMoveItem(index, 'down')}
+                disabled={index === abrechnungstraeger.length - 1}
+                className="table-action-button-primary p-1"
+                title="Nach unten"
+                >
+                <ChevronDown size={16} />
+                </button>
+                </div>
+            )}
             
-            {!editingTraeger && (
-                <>
+            {editingTraeger?.id === traeger.id ? (
+                <div className="flex gap-2">
+                <button 
+                type="submit" 
+                className="btn-primary"
+                onClick={handleUpdate}
+                >
+                Speichern
+                </button>
+                <button 
+                type="button" 
+                className="btn-secondary"
+                onClick={() => setEditingTraeger(null)}
+                >
+                Abbrechen
+                </button>
+                </div>
+            ) : (
+                <div className="flex gap-2">
                 <button
                 onClick={() => handleEdit(traeger.id)}
                 className="table-action-button-primary"
@@ -245,7 +264,7 @@ function AbrechnungstraegerForm() {
                 >
                 ×
                 </button>
-                </>
+                </div>
             )}
             </div>
             </div>

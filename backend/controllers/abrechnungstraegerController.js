@@ -150,44 +150,34 @@ exports.getById = async (req, res) => {
 exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, active, betrag, gueltig_ab } = req.body;
+        const { name, kennzeichen, active, sortOrder } = req.body;
         
-        // Wenn nur betrag oder active aktualisiert werden soll
-        if (betrag !== undefined) {
-            // Erstattungsbetrag aktualisieren
-            await db.execute(
-                'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-                [id, betrag, gueltig_ab || new Date().toISOString().split('T')[0]]
-            );
-            return res.json({ message: 'Erstattungsbetrag aktualisiert' });
+        // Wenn sortOrder vorhanden ist, handelt es sich um ein Sortierungs-Update
+        if (sortOrder) {
+            await Promise.all(sortOrder.map(item => 
+                db.execute(
+                    'UPDATE abrechnungstraeger SET sort_order = ? WHERE id = ? AND user_id = ?',
+                    [item.sort_order, item.id, req.user.id]
+                )
+            ));
+            return res.json({ message: 'Sortierung aktualisiert' });
         }
         
-        if (active !== undefined) {
-            // Nur active-Status aktualisieren
-            await db.execute(
-                'UPDATE abrechnungstraeger SET active = ? WHERE id = ? AND user_id = ?',
-                [active ? 1 : 0, id, req.user.id]
-            );
-            return res.json({ message: 'Status aktualisiert' });
+        // Normales Update
+        if (!name || !kennzeichen) {
+            return res.status(400).json({ message: 'Name und Kennzeichen sind erforderlich' });
         }
         
-        // Falls name dabei ist, komplettes Update
-        if (!name) {
-            return res.status(400).json({ message: 'Name ist erforderlich für vollständiges Update' });
+        const [result] = await db.execute(
+            'UPDATE abrechnungstraeger SET name = ?, kennzeichen = ? WHERE id = ? AND user_id = ?',
+            [name, kennzeichen, id, req.user.id]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
         }
         
-        const success = await AbrechnungsTraeger.update(id, req.user.id, {
-            name,
-            active,
-            betrag,
-            gueltig_ab
-        });
-        
-        if (success) {
-            res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
-        } else {
-            res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
-        }
+        res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Abrechnungsträgers:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
@@ -196,33 +186,19 @@ exports.updateAbrechnungstraeger = async (req, res) => {
 
 exports.updateSortOrder = async (req, res) => {
     try {
-        const { sortOrder } = req.body; // Array von {id, sort_order}
-        if (!Array.isArray(sortOrder)) {
-            return res.status(400).json({ message: 'Ungültiges Format' });
-        }
+        const { sortOrder } = req.body;
         
-        const connection = await db.getConnection();
-        try {
-            await connection.beginTransaction();
-            
-            for (const item of sortOrder) {
-                await connection.execute(
-                    'UPDATE abrechnungstraeger SET sort_order = ? WHERE id = ? AND user_id = ?',
-                    [item.sort_order, item.id, req.user.id]
-                );
-            }
-            
-            await connection.commit();
-            res.json({ message: 'Sortierung aktualisiert' });
-        } catch (error) {
-            await connection.rollback();
-            throw error;
-        } finally {
-            connection.release();
-        }
+        await Promise.all(sortOrder.map(item => 
+            db.execute(
+                'UPDATE abrechnungstraeger SET sort_order = ? WHERE id = ? AND user_id = ?',
+                [item.sort_order, item.id, req.user.id]
+            )
+        ));
+        
+        res.json({ message: 'Sortierung aktualisiert' });
     } catch (error) {
         console.error('Fehler beim Aktualisieren der Sortierung:', error);
-        res.status(500).json({ message: 'Fehler beim Aktualisieren der Sortierung' });
+        res.status(500).json({ message: 'Sortierung konnte nicht aktualisiert werden' });
     }
 };
 
