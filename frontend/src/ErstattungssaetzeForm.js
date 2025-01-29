@@ -8,6 +8,7 @@ function ErstattungssaetzeForm() {
         mitfahrer: [],
         abrechnungstraeger: []
     });
+    const [isLoading, setIsLoading] = useState(false);
     const [showHistorie, setShowHistorie] = useState({});
     const [editingSatz, setEditingSatz] = useState(null);
     const [newErstattung, setNewErstattung] = useState({
@@ -27,19 +28,26 @@ function ErstattungssaetzeForm() {
                 axios.get('/api/abrechnungstraeger')
             ]);
             
-            // Für jeden Abrechnungsträger die Historie abrufen
+            // Für jeden Abrechnungsträger die Historie abrufen und sortieren
             const traegerMitHistorie = await Promise.all(
                 traegerRes.data.map(async (traeger) => {
                     const historieRes = await axios.get(`/api/abrechnungstraeger/${traeger.id}/historie`);
                     return {
                         ...traeger,
-                        erstattungsbetraege: historieRes.data
+                        erstattungsbetraege: historieRes.data.sort((a, b) => 
+                            new Date(b.gueltig_ab) - new Date(a.gueltig_ab)
+                        )
                     };
                 })
             );
             
+            // Auch Mitfahrer-Historie sortieren
+            const sortedMitfahrer = mitfahrerRes.data.sort((a, b) => 
+                new Date(b.gueltig_ab) - new Date(a.gueltig_ab)
+            );
+            
             setErstattungssaetze({
-                mitfahrer: mitfahrerRes.data,
+                mitfahrer: sortedMitfahrer,
                 abrechnungstraeger: traegerMitHistorie
             });
         } catch (error) {
@@ -51,27 +59,25 @@ function ErstattungssaetzeForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const betrag = parseFloat(newErstattung.betrag);
+            if (isNaN(betrag) || betrag <= 0) {
+                showNotification('Fehler', 'Bitte geben Sie einen gültigen Betrag größer 0 ein');
+                return;
+            }
+            
+            const updateData = {
+                betrag: betrag,
+                gueltig_ab: newErstattung.gueltig_ab
+            };
+            // ... Rest bleibt gleich
+            
             if (newErstattung.typ === 'mitfahrer') {
-                // Prüfe ob bereits ein Eintrag für das Datum existiert
-                const existingEntry = erstattungssaetze.mitfahrer.find(
-                    s => s.gueltig_ab === newErstattung.gueltig_ab
-                );
-                
-                if (existingEntry) {
-                    // Überschreibe existierenden Eintrag
-                    await axios.put(`/api/mitfahrer-erstattung/${existingEntry.id}`, {
-                        betrag: parseFloat(newErstattung.betrag),
-                        gueltig_ab: newErstattung.gueltig_ab
-                    });
-                } else {
-                    // Erstelle neuen Eintrag
-                    await axios.post('/api/mitfahrer-erstattung', {
-                        betrag: parseFloat(newErstattung.betrag),
-                        gueltig_ab: newErstattung.gueltig_ab
-                    });
-                }
+                await axios.post('/api/mitfahrer-erstattung', updateData);
             } else {
-                // Analog für Abrechnungsträger...
+                await axios.post(
+                    `/api/abrechnungstraeger/${newErstattung.typ}/erstattung`, 
+                    updateData
+                );
             }
             
             showNotification('Erfolg', 'Erstattungssatz wurde gespeichert');
@@ -80,10 +86,16 @@ function ErstattungssaetzeForm() {
                 betrag: '',
                 gueltig_ab: new Date().toISOString().split('T')[0]
             });
-            fetchAllErstattungssaetze();
+            await fetchAllErstattungssaetze();
         } catch (error) {
             console.error('Fehler beim Speichern:', error);
-            showNotification('Fehler', 'Erstattungssatz konnte nicht gespeichert werden');
+            if (error.response?.data?.error?.includes('Duplicate entry')) {
+                showNotification('Fehler', `Es existiert bereits ein Erstattungssatz für den ${
+                    new Date(newErstattung.gueltig_ab).toLocaleDateString()
+                }`);
+            } else {
+                showNotification('Fehler', 'Erstattungssatz konnte nicht gespeichert werden');
+            }
         }
     };
 
@@ -99,43 +111,27 @@ function ErstattungssaetzeForm() {
 
     const handleSaveEdit = async () => {
         try {
+            const betrag = parseFloat(editingSatz.betrag);
+            if (isNaN(betrag) || betrag <= 0) {
+                showNotification('Fehler', 'Bitte geben Sie einen gültigen Betrag größer 0 ein');
+                return;
+            }
+            
+            const updateData = {
+                betrag: betrag,
+                gueltig_ab: editingSatz.gueltig_ab
+            };
+            
             if (editingSatz.typ === 'mitfahrer') {
-                // Prüfe ob bereits ein Eintrag für das Datum existiert
-                const existingIndex = erstattungssaetze.mitfahrer.findIndex(
-                    s => s.gueltig_ab === editingSatz.gueltig_ab && s.id !== editingSatz.id
+                await axios.put(
+                    `/api/mitfahrer-erstattung/${editingSatz.id}`, 
+                    updateData
                 );
-                
-                if (existingIndex >= 0) {
-                    // Überschreibe existierenden Eintrag
-                    await axios.put(`/api/mitfahrer-erstattung/${erstattungssaetze.mitfahrer[existingIndex].id}`, {
-                        betrag: parseFloat(editingSatz.betrag),
-                        gueltig_ab: editingSatz.gueltig_ab
-                    });
-                } else {
-                    // Update normaler Eintrag
-                    await axios.put(`/api/mitfahrer-erstattung/${editingSatz.id}`, {
-                        betrag: parseFloat(editingSatz.betrag),
-                        gueltig_ab: editingSatz.gueltig_ab
-                    });
-                }
             } else {
-                // Gleiches für Abrechnungsträger
-                const traeger = erstattungssaetze.abrechnungstraeger.find(t => t.id === editingSatz.abrechnungstraeger_id);
-                const existingIndex = traeger.erstattungsbetraege.findIndex(
-                    s => s.gueltig_ab === editingSatz.gueltig_ab && s.id !== editingSatz.id
+                await axios.put(
+                    `/api/abrechnungstraeger/${editingSatz.abrechnungstraeger_id}/erstattung/${editingSatz.id}`, 
+                    updateData
                 );
-                
-                if (existingIndex >= 0) {
-                    await axios.put(`/api/abrechnungstraeger/${editingSatz.abrechnungstraeger_id}/erstattung/${traeger.erstattungsbetraege[existingIndex].id}`, {
-                        betrag: parseFloat(editingSatz.betrag),
-                        gueltig_ab: editingSatz.gueltig_ab
-                    });
-                } else {
-                    await axios.put(`/api/abrechnungstraeger/${editingSatz.abrechnungstraeger_id}/erstattung/${editingSatz.id}`, {
-                        betrag: parseFloat(editingSatz.betrag),
-                        gueltig_ab: editingSatz.gueltig_ab
-                    });
-                }
             }
             
             showNotification('Erfolg', 'Erstattungssatz wurde aktualisiert');
@@ -143,7 +139,13 @@ function ErstattungssaetzeForm() {
             fetchAllErstattungssaetze();
         } catch (error) {
             console.error('Fehler beim Aktualisieren:', error);
-            showNotification('Fehler', 'Erstattungssatz konnte nicht aktualisiert werden');
+            if (error.response?.data?.error?.includes('Duplicate entry')) {
+                showNotification('Fehler', `Es existiert bereits ein Erstattungssatz für den ${
+                    new Date(newErstattung.gueltig_ab).toLocaleDateString()
+                }`);
+            } else {
+                showNotification('Fehler', 'Erstattungssatz konnte nicht aktualisiert werden');
+            }
         }
     };
 
@@ -217,8 +219,8 @@ function ErstattungssaetzeForm() {
         />
         </div>
         <div className="flex items-end">
-        <button type="submit" className="btn-primary w-full sm:w-auto">
-        Speichern
+        <button type="submit" className="btn-primary w-full sm:w-auto" disabled={isLoading}>
+        {isLoading ? 'Wird gespeichert...' : 'Speichern'}
         </button>
         </div>
         </div>
