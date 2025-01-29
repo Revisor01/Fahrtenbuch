@@ -156,13 +156,12 @@ class AbrechnungsTraeger {
 
     static async getErstattungshistorie(id, userId) {
         const [rows] = await db.execute(`
-            SELECT betrag, gueltig_ab, created_at
-            FROM erstattungsbetraege
-            WHERE abrechnungstraeger_id = ? 
-            AND abrechnungstraeger_id IN (
-                SELECT id FROM abrechnungstraeger WHERE user_id = ?
-            )
-            ORDER BY gueltig_ab DESC`,
+        SELECT eb.id, eb.betrag, eb.gueltig_ab, eb.created_at
+        FROM erstattungsbetraege eb
+        JOIN abrechnungstraeger a ON eb.abrechnungstraeger_id = a.id
+        WHERE eb.abrechnungstraeger_id = ? 
+        AND a.user_id = ?
+        ORDER BY eb.gueltig_ab DESC`,
             [id, userId]
         );
         return rows;

@@ -13,6 +13,7 @@ router.put('/:id', abrechnungstraegerController.updateAbrechnungstraeger);
 router.delete('/:id', abrechnungstraegerController.deleteAbrechnungstraeger);
 router.get('/:id/historie', abrechnungstraegerController.getErstattungshistorie);
 router.put('/:id/erstattung/:erstattungssatzId', abrechnungstraegerController.updateErstattungssatz);
+router.post('/:id/erstattung', abrechnungstraegerController.addErstattungssatz);
 router.delete('/:id/erstattung/:erstattungssatzId', abrechnungstraegerController.deleteErstattungssatz);
 router.get('/:id', abrechnungstraegerController.getById);
 
