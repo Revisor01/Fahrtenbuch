@@ -214,7 +214,7 @@ function AbrechnungstraegerForm() {
                 <button
                 onClick={() => handleMoveItem(index, 'up')}
                 disabled={index === 0}
-                className="table-action-button-primary p-1"
+                className="table-action-button-primary"
                 title="Nach oben"
                 >
                 <ChevronUp size={16} />
@@ -222,7 +222,7 @@ function AbrechnungstraegerForm() {
                 <button
                 onClick={() => handleMoveItem(index, 'down')}
                 disabled={index === abrechnungstraeger.length - 1}
-                className="table-action-button-primary p-1"
+                className="table-action-button-primary"
                 title="Nach unten"
                 >
                 <ChevronDown size={16} />
@@ -238,7 +238,7 @@ function AbrechnungstraegerForm() {
                 </button>
                 <button
                 onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
+                className="table-action-button-primary"
                 title={traeger.active ? 'Aktiv' : 'Inaktiv'}
                 >
                 {traeger.active ? '●' : '○'}
@@ -258,17 +258,19 @@ function AbrechnungstraegerForm() {
                 <div className="flex gap-2">
                 <button 
                 type="button" 
-                className="btn-primary"
                 onClick={handleUpdate}
+                className="table-action-button-primary"
+                title="Speichern"
                 >
-                Speichern
+                ✓
                 </button>
                 <button 
                 type="button" 
-                className="btn-secondary"
                 onClick={() => setEditingTraeger(null)}
+                className="table-action-button-secondary"
+                title="Abbrechen"
                 >
-                Abbrechen
+                ×
                 </button>
                 </div>
             )}
