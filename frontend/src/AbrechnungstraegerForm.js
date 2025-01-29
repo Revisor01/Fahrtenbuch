@@ -150,45 +150,53 @@ function AbrechnungstraegerForm() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            {/* Sortier-Buttons */}
-                            <div className="flex flex-col gap-1">
-                                <button
-                                    onClick={() => handleMoveItem(index, 'up')}
-                                    disabled={index === 0}
-                                    className="table-action-button-primary p-1"
-                                    title="Nach oben"
-                                >
-                                    <ChevronUp size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleMoveItem(index, 'down')}
-                                    disabled={index === abrechnungstraeger.length - 1}
-                                    className="table-action-button-primary p-1"
-                                    title="Nach unten"
-                                >
-                                    <ChevronDown size={16} />
-                                </button>
-                            </div>
-
-                            {/* Aktiv/Inaktiv Toggle */}
-                            <button
-                                onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                                className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
-                                title={traeger.active ? 'Aktiv' : 'Inaktiv'}
-                            >
-                                {traeger.active ? '●' : '○'}
-                            </button>
-
-                            {/* Löschen Button */}
-                            <button
-                                onClick={() => handleDelete(traeger.id)}
-                                className="table-action-button-secondary"
-                                title="Löschen"
-                            >
-                                ×
-                            </button>
-                        </div>
+                    <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                    <button
+                    onClick={() => handleMoveItem(index, 'up')}
+                    disabled={index === 0}
+                    className="table-action-button-primary p-1"
+                    title="Nach oben"
+                    >
+                    <ChevronUp size={16} />
+                    </button>
+                    <button
+                    onClick={() => handleMoveItem(index, 'down')}
+                    disabled={index === abrechnungstraeger.length - 1}
+                    className="table-action-button-primary p-1"
+                    title="Nach unten"
+                    >
+                    <ChevronDown size={16} />
+                    </button>
+                    </div>
+                    
+                    {/* Edit Button */}
+                    <button
+                    onClick={() => handleEdit(traeger.id)}
+                    className="table-action-button-primary"
+                    title="Bearbeiten"
+                    >
+                    ✎
+                    </button>
+                    
+                    {/* Aktiv/Inaktiv Toggle */}
+                    <button
+                    onClick={() => handleToggleActive(traeger.id, traeger.active)}
+                    className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
+                    title={traeger.active ? 'Aktiv' : 'Inaktiv'}
+                    >
+                    {traeger.active ? '●' : '○'}
+                    </button>
+                    
+                    {/* Löschen Button */}
+                    <button
+                    onClick={() => handleDelete(traeger.id)}
+                    className="table-action-button-secondary"
+                    title="Löschen"
+                    >
+                    ×
+                    </button>
+                    </div>
                     </div>
                 ))}
             </div>
