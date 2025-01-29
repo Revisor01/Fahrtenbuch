@@ -374,3 +374,27 @@ tbody {
     @apply w-full sm:w-auto;
   }
 }
+
+/* Modal Content Fixes */
+.modal-content {
+  @apply flex flex-col max-h-[calc(100vh-6rem)];
+}
+
+.modal-header {
+  @apply sticky top-0 bg-white dark:bg-gray-800 z-10 py-4 border-b border-primary-100 dark:border-primary-800;
+}
+
+.modal-body {
+  @apply flex-1 overflow-y-auto;
+}
+
+/* Mobile Optimierungen */
+@media (max-width: 640px) {
+  .tab-nav {
+    @apply -mx-6 px-6;
+  }
+  
+  .tab-content {
+    @apply -mx-6 px-6;
+  }
+}

@@ -67,15 +67,22 @@ function ProfileModal({ isOpen, onClose }) {
         }
     };
     
-    const handleDeleteKey = async (keyId) => {
-        try {
-            await axios.delete(`/api/keys/${keyId}/permanent`);
-            await fetchApiKeys();
-            showNotification('Erfolg', 'API Key wurde permanent gelöscht');
-        } catch (error) {
-            console.error('Fehler beim Löschen des API Keys:', error);
-            showNotification('Fehler', 'API Key konnte nicht gelöscht werden');
-        }
+    const handleDeleteKey = (keyId) => {
+        showNotification(
+            'API-Key löschen',
+            'Möchten Sie diesen API-Key wirklich löschen?',
+            async () => {
+                try {
+                    await axios.delete(`/api/keys/${keyId}`);
+                    await fetchApiKeys();
+                    showNotification('Erfolg', 'API Key wurde gelöscht');
+                } catch (error) {
+                    console.error('Fehler beim Löschen des API Keys:', error);
+                    showNotification('Fehler', 'API Key konnte nicht gelöscht werden');
+                }
+            },
+            true // showCancel
+        );
     };
     
     const handleProfileUpdate = async (e) => {
@@ -152,118 +159,120 @@ function ProfileModal({ isOpen, onClose }) {
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="compact">
-            <div className="space-y-6">
-                {/* Tab Navigation */}
-                <div className="border-b border-primary-100 dark:border-primary-800">
-                    <nav className="-mb-px flex space-x-8">
-                        {tabs.map(tab => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`
-                                    py-2 px-1 border-b-2 font-medium text-sm
-                                    ${activeTab === tab.id
-                                        ? 'border-primary-500 text-primary-600'
-                                        : 'border-transparent text-muted hover:text-value hover:border-primary-300'
-                                    }
-                                `}
-                            >
-                                {tab.name}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-
-                {/* Tab Inhalte */}
-                <div className="mt-6">
-                    {activeTab === 'profile' && (
-                        <form onSubmit={handleProfileUpdate} className="space-y-4">
-                            <div className="relative">
-                                <input
-                                    type="email"
-                                    placeholder="E-Mail"
-                                    value={profile.email || ''}
-                                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                                    className={`form-input ${
-                                        profile.email_verified
-                                            ? 'border-primary-200 dark:border-primary-700 bg-primary-25 dark:bg-primary-900'
-                                            : 'border-secondary-200 dark:border-secondary-700 bg-secondary-25 dark:bg-secondary-900'
-                                    }`}
-                                />
-                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                                    {profile.email_verified ? (
-                                        <span className="text-label text-xs">● Verifiziert</span>
-                                    ) : (
-                                        <>
-                                            <span className="text-muted text-xs">○ Ausstehend</span>
-                                            <button
-                                                type="button"
-                                                onClick={handleResendVerification}
-                                                className="text-label hover:text-value text-xs"
-                                            >
-                                                Erneut senden
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            <input
-                                type="text"
-                                placeholder="Voller Name"
-                                value={profile.fullName || ''}
-                                onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                                className="form-input"
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="IBAN"
-                                value={profile.iban || ''}
-                                onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
-                                className="form-input"
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="Kirchengemeinde"
-                                value={profile.kirchengemeinde || ''}
-                                onChange={(e) => setProfile({ ...profile, kirchengemeinde: e.target.value })}
-                                className="form-input"
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="Kirchspiel"
-                                value={profile.kirchspiel || ''}
-                                onChange={(e) => setProfile({ ...profile, kirchspiel: e.target.value })}
-                                className="form-input"
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="Kirchenkreis"
-                                value={profile.kirchenkreis || ''}
-                                onChange={(e) => setProfile({ ...profile, kirchenkreis: e.target.value })}
-                                className="form-input"
-                            />
-
-                            <button type="submit" className="btn-primary w-full">
-                                Profil aktualisieren
-                            </button>
-                        </form>
-                    )}
-
-                    {activeTab === 'abrechnungen' && (
-                        <div>
-                            <div className="text-sm text-muted mb-4">
-                                Hier können Sie Ihre Abrechnungsträger verwalten. Ein Abrechnungsträger 
-                                ist eine Organisation oder Institution, die Ihre Fahrtkosten erstattet.
-                            </div>
-                            <AbrechnungstraegerForm />
-                        </div>
-                    )}
-
+        <div className="modal-content">
+        <div className="modal-header">
+        <nav className="flex overflow-x-auto">
+        {tabs.map(tab => (
+            <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`
+                                py-2 px-4 text-sm font-medium whitespace-nowrap
+                                ${activeTab === tab.id
+                ? 'text-primary-600 border-b-2 border-primary-500'
+                : 'text-muted hover:text-value hover:border-b-2 hover:border-primary-200'
+                }
+                            `}
+            >
+            {tab.name}
+            </button>
+        ))}
+        </nav>
+        </div>
+        
+        <div className="modal-body p-4">
+        {activeTab === 'profile' && (
+            <form onSubmit={handleProfileUpdate} className="space-y-4">
+            <div className="relative">
+            <input
+            type="email"
+            placeholder="E-Mail"
+            value={profile.email || ''}
+            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+            className={`form-input ${
+                profile.email_verified
+                ? 'border-primary-200 dark:border-primary-700 bg-primary-25 dark:bg-primary-900'
+                : 'border-secondary-200 dark:border-secondary-700 bg-secondary-25 dark:bg-secondary-900'
+            }`}
+            />
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+            {profile.email_verified ? (
+                <span className="text-label text-xs">● Verifiziert</span>
+            ) : (
+                <>
+                <span className="text-muted text-xs">○ Ausstehend</span>
+                <button
+                type="button"
+                onClick={handleResendVerification}
+                className="text-label hover:text-value text-xs"
+                >
+                Erneut senden
+                </button>
+                </>
+            )}
+            </div>
+            </div>
+            
+            <input
+            type="text"
+            placeholder="Voller Name"
+            value={profile.fullName || ''}
+            onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+            className="form-input"
+            />
+            
+            <input
+            type="text"
+            placeholder="IBAN"
+            value={profile.iban || ''}
+            onChange={(e) => setProfile({ ...profile, iban: e.target.value })}
+            className="form-input"
+            />
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <input
+            type="text"
+            placeholder="Kirchengemeinde"
+            value={profile.kirchengemeinde || ''}
+            onChange={(e) => setProfile({ ...profile, kirchengemeinde: e.target.value })}
+            className="form-input"
+            />
+            
+            <input
+            type="text"
+            placeholder="Kirchspiel"
+            value={profile.kirchspiel || ''}
+            onChange={(e) => setProfile({ ...profile, kirchspiel: e.target.value })}
+            className="form-input"
+            />
+            
+            <input
+            type="text"
+            placeholder="Kirchenkreis"
+            value={profile.kirchenkreis || ''}
+            onChange={(e) => setProfile({ ...profile, kirchenkreis: e.target.value })}
+            className="form-input"
+            />
+            </div>
+            
+            <div className="flex justify-end">
+            <button type="submit" className="btn-primary">
+            Speichern
+            </button>
+            </div>
+            </form>
+        )}
+        
+        {activeTab === 'abrechnungen' && (
+            <div>
+            <div className="text-sm text-muted mb-4">
+            Hier können Sie Ihre Abrechnungsträger verwalten. Ein Abrechnungsträger 
+            ist eine Organisation oder Institution, die Ihre Fahrtkosten erstattet.
+            </div>
+            <AbrechnungstraegerForm />
+            </div>
+        )}
+        
         {activeTab === 'erstattungssaetze' && (
             <div>
             <div className="text-sm text-muted mb-4">
@@ -272,62 +281,61 @@ function ProfileModal({ isOpen, onClose }) {
             <ErstattungssaetzeForm />
             </div>
         )}
-
-                    {activeTab === 'security' && (
-                        <div className="space-y-6">
-                            <form onSubmit={handlePasswordChange} className="space-y-4">
-                                <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
-                                
-                                <div>
-                                    <label className="form-label">Aktuelles Passwort</label>
-                                    <input
-                                        type="password"
-                                        value={oldPassword}
-                                        onChange={(e) => setOldPassword(e.target.value)}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="form-label">Neues Passwort</label>
-                                    <input
-                                        type="password"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="form-label">Passwort bestätigen</label>
-                                    <input
-                                        type="password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                                
-                                <button type="submit" className="btn-primary w-full">
-                                    Passwort ändern
-                                </button>
-                            </form>
-                        </div>
-                    )}
-
+        
+        {activeTab === 'security' && (
+            <div className="space-y-6">
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+            <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
+            
+            <div>
+            <label className="form-label">Aktuelles Passwort</label>
+            <input
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            className="form-input"
+            required
+            />
+            </div>
+            
+            <div>
+            <label className="form-label">Neues Passwort</label>
+            <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="form-input"
+            required
+            />
+            </div>
+            
+            <div>
+            <label className="form-label">Passwort bestätigen</label>
+            <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="form-input"
+            required
+            />
+            </div>
+            
+            <div className="flex justify-end">
+            <button type="submit" className="btn-primary">
+            Passwort ändern
+            </button>
+            </div>
+            </form>
+            </div>
+        )}
+        
         {activeTab === 'api' && (
             <div className="space-y-6">
-            <div className="space-y-4">
             <h3 className="text-lg font-medium text-value">API Keys für Kurzbefehle</h3>
             <div className="text-sm text-muted">
             Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
             </div>
             
-            {/* API Key Generator */}
-            <div className="space-y-4 mb-6">
             <div className="flex gap-2">
             <input
             type="text"
@@ -367,26 +375,37 @@ function ProfileModal({ isOpen, onClose }) {
                 </div>
                 </div>
             )}
-            </div>
             
             {/* API Key Liste */}
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
             {apiKeys.map((key) => (
-                <div key={key.id} className="flex items-center justify-between p-4 bg-primary-25 dark:bg-primary-900 rounded">
-                <div className="flex-1">
-                <p className="text-sm text-value font-medium">
+                <div key={key.id} className="flex items-center gap-4 p-3 bg-primary-25 dark:bg-primary-900 rounded">
+                <div className="flex-1 min-w-0">
+                <p className="text-sm text-value font-medium truncate">
                 {key.description}
                 </p>
                 <p className="text-xs text-label">
-                Erstellt: {new Date(key.created_at).toLocaleDateString()}
-                {key.last_used_at && ` • Zuletzt verwendet: ${new Date(key.last_used_at).toLocaleDateString()}`}
+                {new Date(key.created_at).toLocaleDateString()}
+                {key.last_used_at && 
+                    <span className="ml-2 text-primary-500">
+                    Zuletzt: {new Date(key.last_used_at).toLocaleDateString()}
+                    </span>
+                }
                 </p>
                 </div>
                 <button
-                onClick={() => handleDeleteKey(key.id)}
-                className="btn-secondary text-xs"
+                onClick={() => {
+                    showNotification(
+                        'API-Key löschen',
+                        'Möchten Sie diesen API-Key wirklich löschen?',
+                        () => handleDeleteKey(key.id),
+                        true
+                    );
+                }}
+                className="table-action-button-secondary"
+                title="Löschen"
                 >
-                Löschen
+                ×
                 </button>
                 </div>
             ))}
@@ -396,7 +415,6 @@ function ProfileModal({ isOpen, onClose }) {
                 Noch keine API Keys generiert!
                 </p>
             )}
-            </div>
             </div>
             </div>
         )}
