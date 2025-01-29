@@ -150,34 +150,42 @@ exports.getById = async (req, res) => {
 exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, kennzeichen, active, sortOrder } = req.body;
+        const { name, kennzeichen, active } = req.body;
         
-        // Wenn sortOrder vorhanden ist, handelt es sich um ein Sortierungs-Update
-        if (sortOrder) {
-            await Promise.all(sortOrder.map(item => 
-                db.execute(
-                    'UPDATE abrechnungstraeger SET sort_order = ? WHERE id = ? AND user_id = ?',
-                    [item.sort_order, item.id, req.user.id]
-                )
-            ));
-            return res.json({ message: 'Sortierung aktualisiert' });
+        // Wenn nur active aktualisiert werden soll
+        if (active !== undefined && Object.keys(req.body).length === 1) {
+            const [result] = await db.execute(
+                'UPDATE abrechnungstraeger SET active = ? WHERE id = ? AND user_id = ?',
+                [active ? 1 : 0, id, req.user.id]
+            );
+            
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
+            }
+            
+            return res.json({ message: 'Status erfolgreich aktualisiert' });
         }
         
-        // Normales Update
-        if (!name || !kennzeichen) {
-            return res.status(400).json({ message: 'Name und Kennzeichen sind erforderlich' });
+        // Vollständiges Update
+        if (name !== undefined && kennzeichen !== undefined) {
+            if (!name || !kennzeichen) {
+                return res.status(400).json({ message: 'Name und Kennzeichen sind erforderlich' });
+            }
+            
+            const [result] = await db.execute(
+                'UPDATE abrechnungstraeger SET name = ?, kennzeichen = ? WHERE id = ? AND user_id = ?',
+                [name, kennzeichen, id, req.user.id]
+            );
+            
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
+            }
+            
+            return res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
         }
         
-        const [result] = await db.execute(
-            'UPDATE abrechnungstraeger SET name = ?, kennzeichen = ? WHERE id = ? AND user_id = ?',
-            [name, kennzeichen, id, req.user.id]
-        );
+        res.status(400).json({ message: 'Ungültige Aktualisierungsanfrage' });
         
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
-        }
-        
-        res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Abrechnungsträgers:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
