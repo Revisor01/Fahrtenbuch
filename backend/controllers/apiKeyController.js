@@ -28,6 +28,23 @@ exports.listKeys = async (req, res) => {
     }
 };
 
+exports.deleteKey = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+        
+        const deleted = await ApiKey.delete(id, userId);
+        if (deleted) {
+            res.json({ message: 'API-Schlüssel wurde gelöscht' });
+        } else {
+            res.status(404).json({ message: 'API-Schlüssel nicht gefunden' });
+        }
+    } catch (error) {
+        console.error('Error deleting API key:', error);
+        res.status(500).json({ message: 'Fehler beim Löschen des API-Schlüssels' });
+    }
+};
+
 exports.testKey = async (req, res) => {
     try {
         res.json({
