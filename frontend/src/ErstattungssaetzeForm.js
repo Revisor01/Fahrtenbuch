@@ -189,7 +189,7 @@ function ErstattungssaetzeForm() {
         
         {/* Mitfahrer Erstattungssätze */}
         <div className="card-container">
-        <h3 className="text-lg font-medium text-value mb-4">Mitfahrer:innen Erstattungssätze</h3>
+        <h3 className="text-lg font-medium text-value mb-4">Mitfahrer:innen</h3>
         <div className="space-y-2">
         {erstattungssaetze.mitfahrer.map((satz) => (
             <div key={satz.id} className="flex items-center justify-between p-2 bg-primary-25 dark:bg-primary-900 rounded">

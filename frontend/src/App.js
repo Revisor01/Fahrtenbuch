@@ -904,6 +904,9 @@ function FahrtenListe() {
       {/* Export Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2">
       <button
+      event-name="Dateiexport"
+      event-button-name="Export Kirchenkreis geklickt"
+      event-bereich="Fahrten Liste"
       onClick={() => handleExportToExcel("kirchenkreis", selectedYear, selectedMonth.split("-")[1])}
       className="btn-primary">
       Export Kirchenkreis / Mitfaher:innen
