@@ -381,7 +381,7 @@ tbody {
 }
 
 .modal-header {
-  @apply sticky top-0 bg-white dark:bg-gray-800 z-10 py-4 border-b border-primary-100 dark:border-primary-800;
+  @apply sticky top-0 bg-white dark:bg-gray-800 z-10;
 }
 
 .modal-body {
