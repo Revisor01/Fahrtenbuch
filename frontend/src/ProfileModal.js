@@ -66,31 +66,6 @@ function ProfileModal({ isOpen, onClose }) {
             showNotification('Fehler', 'API Keys konnten nicht geladen werden');
         }
     };
-
-    const handleRenewKey = async (keyId) => {
-        try {
-            // Hole Details des alten Keys
-            const oldKey = apiKeys.find(k => k.id === keyId);
-            if (!oldKey) return;
-            
-            // Generiere neuen Key mit gleicher Beschreibung
-            const response = await axios.post('/api/keys', {
-                description: oldKey.description
-            });
-            
-            // Zeige den neuen Key an
-            setGeneratedKey(response.data.key);
-            
-            // Widerrufe den alten Key
-            await handleRevokeKey(keyId);
-            
-            await fetchApiKeys();
-            showNotification('Erfolg', 'Neuer API Key wurde generiert');
-        } catch (error) {
-            console.error('Fehler beim Erneuern des API Keys:', error);
-            showNotification('Fehler', 'API Key konnte nicht erneuert werden');
-        }
-    };
     
     const handleDeleteKey = async (keyId) => {
         try {
@@ -159,16 +134,7 @@ function ProfileModal({ isOpen, onClose }) {
         }
     };
 
-    const handleRevokeKey = async (keyId) => {
-        try {
-            await axios.delete(`/api/keys/${keyId}`);
-            await fetchApiKeys();
-            showNotification('Erfolg', 'API Key wurde widerrufen');
-        } catch (error) {
-            console.error('Fehler beim Widerrufen des API Keys:', error);
-            showNotification('Fehler', 'API Key konnte nicht widerrufen werden');
-        }
-    };
+
 
     const handleResendVerification = async () => {
         try {
@@ -405,54 +371,23 @@ function ProfileModal({ isOpen, onClose }) {
             
             {/* API Key Liste */}
             <div className="space-y-2">
-            {/* Aktive Keys */}
-            {apiKeys.filter(key => key.is_active).map((key) => (
+            {apiKeys.map((key) => (
                 <div key={key.id} className="flex items-center justify-between p-4 bg-primary-25 dark:bg-primary-900 rounded">
                 <div className="flex-1">
                 <p className="text-sm text-value font-medium">
-                <span className="text-green-500">●</span> {key.description}
+                {key.description}
                 </p>
                 <p className="text-xs text-label">
                 Erstellt: {new Date(key.created_at).toLocaleDateString()}
                 {key.last_used_at && ` • Zuletzt verwendet: ${new Date(key.last_used_at).toLocaleDateString()}`}
                 </p>
                 </div>
-                <button
-                onClick={() => handleRevokeKey(key.id)}
-                className="btn-secondary text-xs"
-                >
-                Widerrufen
-                </button>
-                </div>
-            ))}
-            
-            {/* Inaktive/Widerrufene Keys */}
-            {apiKeys.filter(key => !key.is_active).map((key) => (
-                <div key={key.id} className="flex items-center justify-between p-4 bg-secondary-25 dark:bg-secondary-900/20 rounded opacity-75">
-                <div className="flex-1">
-                <p className="text-sm text-value font-medium">
-                <span className="text-secondary-500">○</span> {key.description}
-                </p>
-                <p className="text-xs text-label">
-                Erstellt: {new Date(key.created_at).toLocaleDateString()}
-                {key.last_used_at && ` • Zuletzt verwendet: ${new Date(key.last_used_at).toLocaleDateString()}`}
-                </p>
-                </div>
-                <div className="flex gap-2">
-                <button
-                onClick={() => handleRenewKey(key.id)}
-                className="btn-primary text-xs"
-                title="Erstellt einen neuen Key mit den gleichen Berechtigungen"
-                >
-                Erneuern
-                </button>
                 <button
                 onClick={() => handleDeleteKey(key.id)}
                 className="btn-secondary text-xs"
                 >
-                Entfernen
+                Löschen
                 </button>
-                </div>
                 </div>
             ))}
             
