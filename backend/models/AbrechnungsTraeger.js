@@ -3,27 +3,44 @@ const db = require('../config/database');
 class AbrechnungsTraeger {
     static async findAllForUser(userId) {
         try {
-            const [rows] = await db.execute(`
-                SELECT 
-                    at.*,
-                    eb.betrag as aktueller_betrag,
-                    eb.gueltig_ab as betrag_gueltig_ab
-                FROM abrechnungstraeger at
-                LEFT JOIN (
-                    SELECT abrechnungstraeger_id, betrag, gueltig_ab
-                    FROM erstattungsbetraege eb1
-                    WHERE gueltig_ab = (
-                        SELECT MAX(gueltig_ab)
-                        FROM erstattungsbetraege eb2
-                        WHERE eb2.abrechnungstraeger_id = eb1.abrechnungstraeger_id
-                        AND eb2.gueltig_ab <= CURRENT_DATE()
-                    )
-                ) eb ON at.id = eb.abrechnungstraeger_id
-                WHERE at.user_id = ?
-                ORDER BY at.sort_order ASC`,
+            // Erst die Basis-Abrechnungsträger holen
+            const [traeger] = await db.execute(`
+            SELECT at.*
+            FROM abrechnungstraeger at
+            WHERE at.user_id = ?
+            ORDER BY at.sort_order ASC`,
                 [userId]
             );
-            return rows;
+            
+            // Dann für jeden Abrechnungsträger den aktuellen Betrag holen
+            const [aktuelleBetraege] = await db.execute(`
+            SELECT 
+                eb.abrechnungstraeger_id,
+                eb.betrag as aktueller_betrag,
+                eb.gueltig_ab as betrag_gueltig_ab
+            FROM erstattungsbetraege eb
+            INNER JOIN (
+                SELECT abrechnungstraeger_id, MAX(gueltig_ab) as max_gueltig_ab
+                FROM erstattungsbetraege
+                WHERE gueltig_ab <= CURRENT_DATE()
+                GROUP BY abrechnungstraeger_id
+            ) max_dates 
+            ON eb.abrechnungstraeger_id = max_dates.abrechnungstraeger_id 
+            AND eb.gueltig_ab = max_dates.max_gueltig_ab`
+            );
+            
+            // Aktuelle Beträge den Trägern zuordnen
+            return traeger.map(t => {
+                const aktuellerBetrag = aktuelleBetraege.find(
+                    b => b.abrechnungstraeger_id === t.id
+                );
+                return {
+                    ...t,
+                    aktueller_betrag: aktuellerBetrag?.aktueller_betrag || null,
+                    betrag_gueltig_ab: aktuellerBetrag?.betrag_gueltig_ab || null
+                };
+            });
+            
         } catch (error) {
             console.error('Fehler in findAllForUser:', error);
             throw error;
