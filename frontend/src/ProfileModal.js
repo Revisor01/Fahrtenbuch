@@ -158,23 +158,26 @@ function ProfileModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="wide">
-        <div className="modal-content">
-        <div className="modal-header sticky top-0">
+        <<Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="wide">
+        <div className="flex flex-col h-full">
+        {/* Header - fixiert */}
+        <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 border-b border-primary-100 dark:border-primary-800">
+        <h2 className="text-lg font-medium text-value mb-4">Einstellungen</h2>
+        
         {/* Tabs Desktop */}
-        <div className="hidden sm:flex space-x-1 border-b border-primary-100 dark:border-primary-800">
+        <div className="hidden sm:flex space-x-1">
         {tabs.map(tab => (
             <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-                                py-2 px-4 text-sm font-medium 
-                                border-b-2 -mb-px
-                                ${activeTab === tab.id
+                            py-2 px-4 text-sm font-medium 
+                            border-b-2 -mb-px
+                            ${activeTab === tab.id
                 ? 'border-primary-500 text-primary-600 dark:text-primary-100'
                 : 'border-transparent text-muted hover:text-value hover:border-primary-200'
                 }
-                            `}
+                        `}
             >
             {tab.name}
             </button>
@@ -182,7 +185,7 @@ function ProfileModal({ isOpen, onClose }) {
         </div>
         
         {/* Tabs Mobile */}
-        <div className="sm:hidden">
+        <div className="sm:hidden pb-2">
         <select
         value={activeTab}
         onChange={(e) => setActiveTab(e.target.value)}
@@ -197,7 +200,7 @@ function ProfileModal({ isOpen, onClose }) {
         </div>
         </div>
         
-        <div className="modal-body p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {activeTab === 'profile' && (
             <div className="space-y-4">
             <div className="card-container-highlight">
