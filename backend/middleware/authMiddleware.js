@@ -13,7 +13,7 @@ const authMiddleware = async (req, res, next) => {
         const user = await User.findById(keyData.user_id);
         if (user) {
           req.user = user;
-          await ApiKey.updateLastUsed(keyData.id);
+          await ApiKey.updateLastUsed(keyData.api_key_id);
           return next();
         }
       }
