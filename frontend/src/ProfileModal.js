@@ -4,6 +4,10 @@ import { AppContext } from './App';
 import Modal from './Modal';
 import AbrechnungstraegerForm from './AbrechnungstraegerForm';
 import ErstattungssaetzeForm from './ErstattungssaetzeForm';
+import OrtForm from './OrtForm';
+import OrteListe from './OrteListe';
+import DistanzForm from './DistanzForm';
+import DistanzenListe from './DistanzenListe';
 
 function ProfileModal({ isOpen, onClose }) {
     const { token, user, setUser, showNotification } = useContext(AppContext);
@@ -19,6 +23,8 @@ function ProfileModal({ isOpen, onClose }) {
 
     const tabs = [
         { id: 'profile', name: 'Profil' },
+        { id: 'orte', name: 'Orte' },
+        { id: 'distanzen', name: 'Distanzen' },
         { id: 'abrechnungen', name: 'Abrechnungsträger' },
         { id: 'erstattungssaetze', name: 'Erstattungssätze' },
         { id: 'security', name: 'Sicherheit' },
@@ -303,21 +309,32 @@ function ProfileModal({ isOpen, onClose }) {
             </div>
         )}
         
+        {activeTab === 'orte' && (
+            <div>
+            <OrtForm />
+            <div className="mt-6">
+            <OrteListe />
+            </div>
+            </div>
+        )}
+        
+        {activeTab === 'distanzen' && (
+            <div>
+            <DistanzForm />
+            <div className="mt-6">
+            <DistanzenListe />
+            </div>
+            </div>
+        )}
+        
         {activeTab === 'abrechnungen' && (
             <div>
-            <div className="text-sm text-muted mb-4">
-            Hier können Sie Ihre Abrechnungsträger verwalten. Ein Abrechnungsträger 
-            ist eine Organisation oder Institution, die Ihre Fahrtkosten erstattet.
-            </div>
             <AbrechnungstraegerForm />
             </div>
         )}
         
         {activeTab === 'erstattungssaetze' && (
             <div>
-            <div className="text-sm text-muted mb-4">
-            Hier können Sie die Erstattungssätze für alle Abrechnungsarten verwalten.
-            </div>
             <ErstattungssaetzeForm />
             </div>
         )}

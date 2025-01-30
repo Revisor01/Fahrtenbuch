@@ -2833,8 +2833,6 @@ function App() {
 
 function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
-  const [showOrteModal, setShowOrteModal] = useState(false);
-  const [showDistanzenModal, setShowDistanzenModal] = useState(false);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   
@@ -2876,43 +2874,25 @@ function AppContent() {
     <h1 className="text-lg font-medium text-value">Fahrtenbuch Kirchenkreis Dithmarschen</h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-    {/* Hauptnavigation - Verwaltung */}
-    <div className="grid grid-cols-2 sm:flex gap-2 w-full">
-    <button
-    onClick={() => setShowOrteModal(true)}
-    className="btn-primary flex items-center justify-center gap-2"
-    >
-    <MapPin size={16} />
-    <span>Orte</span>
-    </button>
-    <button
-    onClick={() => setShowDistanzenModal(true)}
-    className="btn-primary flex items-center justify-center gap-2"
-    >
-    <Ruler size={16} />
-    <span>Distanzen</span>
-    </button>
-    </div>
-    
-    {/* Benutzer-bezogene Aktionen */}
+    {/* Nur noch Einstellungen und Admin-Button */}
     <div className={`grid ${user?.role === 'admin' ? 'grid-cols-2' : 'grid-cols-1'} sm:flex gap-2 w-full`}>
-            {user?.role === 'admin' && (
-              <button
-                onClick={() => setShowUserManagementModal(true)}
-                className="btn-primary flex items-center justify-center gap-2"
-              >
-                <Users size={16} />
-                <span>Benutzerverwaltung</span>
-              </button>
-            )}
-            <button
-              onClick={() => setIsProfileModalOpen(true)}
-              className="btn-primary flex items-center justify-center gap-2"
-            >
-              <UserCircle size={16} />
-              <span>Profil</span>
-            </button>
-          </div>
+    {user?.role === 'admin' && (
+      <button
+        onClick={() => setShowUserManagementModal(true)}
+        className="btn-primary flex items-center justify-center gap-2"
+      >
+        <Users size={16} />
+        <span>Benutzerverwaltung</span>
+      </button>
+    )}
+    <button
+      onClick={() => setIsProfileModalOpen(true)}
+      className="btn-primary flex items-center justify-center gap-2"
+    >
+      <Settings size={16} />
+      <span>Einstellungen</span>
+    </button>
+  </div>
           
           {/* Hilfe und Logout */}
           <div className="grid grid-cols-4 sm:flex gap-2 w-full sm:w-auto">
@@ -2962,30 +2942,6 @@ function AppContent() {
       <UserManagement />
     </Modal>
     
-    <Modal 
-      isOpen={showOrteModal} 
-      onClose={() => setShowOrteModal(false)} 
-      title="Orte" 
-      size="wide"
-    >
-      <div className="space-y-6">
-        <OrtForm />
-        <OrteListe />
-      </div>
-    </Modal>
-    
-    <Modal 
-      isOpen={showDistanzenModal} 
-      onClose={() => setShowDistanzenModal(false)} 
-      title="Distanzen" 
-      size="wide"
-    >
-      <div className="space-y-6">
-        <DistanzForm />
-        <DistanzenListe />
-      </div>
-    </Modal>
-
     <HilfeModal 
       isOpen={showHelpModal}
       onClose={() => setShowHelpModal(false)}
