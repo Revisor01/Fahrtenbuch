@@ -379,31 +379,42 @@ function OrtForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
-    <div className="mb-4">
+    <div className="space-y-6">
     <div className="card-container-highlight">
-    <form onSubmit={handleSubmit}>
-    <div className="flex flex-col sm:flex-row gap-4">
-    <div className="w-full sm:w-1/4">
+    <h3 className="text-lg font-medium text-value mb-4">Ort hinzufügen</h3>
+    <p className="text-sm text-muted mb-6">
+    Hier können Sie neue Orte für Ihre Fahrten anlegen. Besonders wichtig sind dabei 
+    Ihr Wohnort und Ihr Dienstort, da diese für die automatische Abrechnung benötigt werden.
+    </p>
+    
+    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div>
+    <label className="form-label">Name des Ortes</label>
     <input
     type="text"
     value={name}
     onChange={(e) => setName(e.target.value)}
-    placeholder="Name des Ortes"
     className="form-input"
+    placeholder="z.B. Meldorf"
     required
     />
     </div>
-    <div className="w-full sm:w-2/5">
+    
+    <div className="sm:col-span-2">
+    <label className="form-label">Adresse</label>
     <input
     type="text"
     value={adresse}
     onChange={(e) => setAdresse(e.target.value)}
-    placeholder="Vollständige Adresse"
     className="form-input"
+    placeholder="Vollständige Adresse eingeben"
     required
     />
     </div>
-    <div className="w-full sm:w-1/5">
+    
+    <div>
+    <label className="form-label">Art des Ortes</label>
     <select
     value={ortTyp}
     onChange={(e) => {
@@ -415,18 +426,19 @@ function OrtForm() {
     }}
     className="form-select"
     >
-    <option value="">Art des Ortes</option>
+    <option value="">Bitte wählen</option>
     {!hasWohnort && <option value="wohnort">Wohnort</option>}
     {!hasDienstort && <option value="dienstort">Dienstort</option>}
     <option value="kirchspiel">Kirchspiel</option>
     <option value="none">Sonstiger Ort</option>
     </select>
     </div>
-    <div className="w-full sm:w-auto sm:self-end">
-    <button type="submit" className="btn-primary w-full sm:w-auto">
-    Hinzufügen
-    </button>
     </div>
+    
+    <div className="flex justify-end">
+    <button type="submit" className="btn-primary">
+    Ort hinzufügen
+    </button>
     </div>
     </form>
     </div>
