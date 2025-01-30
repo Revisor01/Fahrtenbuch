@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from './App';
 import Modal from './Modal';
-import AbrechnungstraegerForm from './AbrechnungstraegerForm';
-import ErstattungssaetzeForm from './ErstattungssaetzeForm';
-import OrtForm from './OrtForm';
-import OrteListe from './OrteListe';
-import DistanzForm from './DistanzForm';
-import DistanzenListe from './DistanzenListe';
+import AbrechnungstraegerForm from './components/AbrechnungstraegerForm';
+import ErstattungssaetzeForm from './components/ErstattungssaetzeForm';
+import OrtForm from './components/OrtForm';
+import OrteListe from './components/OrteListe';
+import DistanzForm from './components/DistanzForm';
+import DistanzenListe from './components/DistanzenListe';
 
 function ProfileModal({ isOpen, onClose }) {
     const { token, user, setUser, showNotification } = useContext(AppContext);
