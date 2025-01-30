@@ -215,20 +215,20 @@ function ProfileModal({ isOpen, onClose }) {
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
             className={`form-input ${
                 profile.email_verified
-                ? 'border-primary-200 dark:border-primary-700'
-                : 'border-secondary-200 dark:border-secondary-700'
+                ? 'border-primary-200 bg-primary-25 dark:border-primary-700 dark:bg-primary-900/20'
+                : 'border-secondary-200 bg-secondary-25 dark:border-secondary-700 dark:bg-secondary-900/20'
             }`}
             />
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+            <div className="verify-badge">
             {profile.email_verified ? (
-                <span className="status-badge-primary">Verifiziert</span>
+                <span className="text-primary-600 dark:text-primary-400 text-xs">● Verifiziert</span>
             ) : (
                 <div className="flex items-center gap-2">
-                <span className="status-badge-secondary">Ausstehend</span>
+                <span className="text-secondary-600 dark:text-secondary-400 text-xs">○ Ausstehend</span>
                 <button
                 type="button"
                 onClick={handleResendVerification}
-                className="text-label hover:text-value text-xs underline"
+                className="text-secondary-600 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-300 text-xs underline"
                 >
                 Erneut senden
                 </button>
@@ -292,7 +292,7 @@ function ProfileModal({ isOpen, onClose }) {
             </div>
             
             <div className="flex justify-end">
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn-primary mobile-full">
             Speichern
             </button>
             </div>
@@ -422,14 +422,17 @@ function ProfileModal({ isOpen, onClose }) {
                 <p className="text-sm text-value font-medium truncate">
                 {key.description}
                 </p>
-                <p className="text-xs text-label">
-                {new Date(key.created_at).toLocaleDateString()}
-                {key.last_used_at && 
-                    <span className="ml-2 text-primary-500">
-                    Zuletzt: {new Date(key.last_used_at).toLocaleDateString()}
+                <div className="text-xs text-label flex items-center gap-2">
+                <span>Erstellt: {new Date(key.created_at).toLocaleDateString()}</span>
+                {key.last_used_at && (
+                    <>
+                    <span className="text-primary-300">•</span>
+                    <span>
+                    Zuletzt benutzt: {new Date(key.last_used_at).toLocaleDateString()}
                     </span>
-                }
-                </p>
+                    </>
+                )}
+                </div>
                 </div>
                 <button
                 onClick={() => handleDeleteKey(key.id)}

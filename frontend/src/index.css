@@ -385,7 +385,23 @@ tbody {
 }
 
 .modal-body {
-  @apply flex-1 overflow-y-auto;
+  @apply flex-1 overflow-y-auto pt-4;
+}
+
+/* Verify Badge im Input */
+.verify-badge {
+  @apply absolute right-2 top-[70%] -translate-y-1/2 flex items-center gap-2;
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 640px) {
+  .modal-body {
+    @apply px-2;  /* weniger Abstand zu den Rändern */
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
 }
 
 /* Mobile Optimierungen */
