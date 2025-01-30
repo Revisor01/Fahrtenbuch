@@ -7,7 +7,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-import { HelpCircle, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
 import HilfeModal from './HilfeModal';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
