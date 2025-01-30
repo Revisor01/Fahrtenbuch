@@ -158,7 +158,7 @@ function ProfileModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <<Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="wide">
+        <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="wide">
         <div className="flex flex-col h-full">
         {/* Header - fixiert */}
         <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 border-b border-primary-100 dark:border-primary-800">

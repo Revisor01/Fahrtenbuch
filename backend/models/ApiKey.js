@@ -13,9 +13,18 @@ class ApiKey {
     
     static async validate(key) {
         const [rows] = await db.execute(
-            `SELECT ak.*, u.* FROM api_keys ak 
-            JOIN users u ON ak.user_id = u.id 
-            WHERE ak.api_key = ? AND ak.is_active = 1`,
+            `SELECT 
+            ak.id as api_key_id,
+            ak.user_id,
+            ak.api_key,
+            ak.description,
+            ak.created_at,
+            ak.last_used_at,
+            ak.is_active,
+            u.* 
+        FROM api_keys ak 
+        JOIN users u ON ak.user_id = u.id 
+        WHERE ak.api_key = ? AND ak.is_active = 1`,
             [key]
         );
         return rows[0];
