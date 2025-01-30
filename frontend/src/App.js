@@ -383,13 +383,12 @@ function OrtForm() {
     <div className="card-container-highlight">
     <h3 className="text-lg font-medium text-value mb-4">Ort hinzufügen</h3>
     <p className="text-sm text-muted mb-6">
-    Hier können Sie neue Orte für Ihre Fahrten anlegen. Besonders wichtig sind dabei 
-    Ihr Wohnort und Ihr Dienstort, da diese für die automatische Abrechnung benötigt werden.
+    Hier können Sie neue Orte für Ihre Fahrten anlegen. Für die Struktur der Orteauswahl ist es Hilfreich den Orten Label zuzuordnen: Dienstort, Heimatort, Kirchspiel. Diese werden im Auswahlfeld weiter oben angezeigt.
     </p>
     
-    <form onSubmit={handleSubmit} className="space-y-4">
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-    <div>
+    <form onSubmit={handleSubmit}>
+    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="w-full sm:w-1/3">  {/* Breite angepasst */}
     <label className="form-label">Name des Ortes</label>
     <input
     type="text"
@@ -400,20 +399,18 @@ function OrtForm() {
     required
     />
     </div>
-    
-    <div className="sm:col-span-2">
+    <div className="w-full sm:w-1/3">  {/* Breite angepasst */}
     <label className="form-label">Adresse</label>
     <input
     type="text"
     value={adresse}
     onChange={(e) => setAdresse(e.target.value)}
     className="form-input"
-    placeholder="Vollständige Adresse eingeben"
+    placeholder="Vollständige Adresse"
     required
     />
     </div>
-    
-    <div>
+    <div className="w-full sm:w-1/4">  {/* Breite angepasst */}
     <label className="form-label">Art des Ortes</label>
     <select
     value={ortTyp}
@@ -433,12 +430,11 @@ function OrtForm() {
     <option value="none">Sonstiger Ort</option>
     </select>
     </div>
-    </div>
-    
-    <div className="flex justify-end">
-    <button type="submit" className="btn-primary">
-    Ort hinzufügen
+    <div className="flex items-end w-full sm:w-auto">
+    <button type="submit" className="btn-primary w-full sm:w-auto">
+    Hinzufügen
     </button>
+    </div>
     </div>
     </form>
     </div>
