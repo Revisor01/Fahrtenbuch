@@ -162,7 +162,6 @@ function ProfileModal({ isOpen, onClose }) {
         <div className="flex flex-col h-full">
         {/* Header - fixiert */}
         <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 border-b border-primary-100 dark:border-primary-800">
-        <h2 className="text-lg font-medium text-value mb-4">Einstellungen</h2>
         
         {/* Tabs Desktop */}
         <div className="hidden sm:flex space-x-1">

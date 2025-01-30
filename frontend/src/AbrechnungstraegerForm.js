@@ -137,46 +137,55 @@ function AbrechnungstraegerForm() {
 
     return (
         <div className="space-y-6">
-            {/* Formular für neue Einträge */}
-            <form onSubmit={handleAddNew} className="card-container-highlight">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                        <label className="form-label">Name des Abrechnungsträgers</label>
-                        <input
-                            type="text"
-                            value={newEntry.name}
-                            onChange={e => setNewEntry({...newEntry, name: e.target.value})}
-                            className="form-input"
-                            placeholder="z.B. Kirchenkreis Dithmarschen"
-                            required
-                        />
-                    </div>
-                    <div className="w-32">
-                        <label className="form-label">Kennzeichen</label>
-                        <input
-                            type="text"
-                            value={newEntry.kennzeichen}
-                            onChange={e => setNewEntry({...newEntry, kennzeichen: e.target.value})}
-                            className="form-input"
-                            placeholder="z.B. kkdith"
-                            required
-                        />
-                    </div>
-                    <div className="flex items-end">
-                        <button type="submit" className="btn-primary w-full sm:w-auto">
-                            Hinzufügen
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-            {/* Liste der Abrechnungsträger */}
-            <div className="space-y-2">
+        {/* Formular für neue Einträge */}
+        <div className="card-container-highlight">
+        <h3 className="text-lg font-medium text-value mb-4">Abrechnungsträger hinzufügen</h3>
+        <p className="text-sm text-muted mb-6">
+        Ein Abrechnungsträger ist eine Organisation, die Ihre Fahrtkosten erstattet. 
+        Häufige Abrechnungsträger sind der Kirchenkreis oder die Kirchengemeinde.
+        </p>
+        
+        <form onSubmit={handleAddNew}>
+        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="w-full sm:w-1/2">
+        <label className="form-label">Name des Abrechnungsträgers</label>
+        <input
+        type="text"
+        value={newEntry.name}
+        onChange={e => setNewEntry({...newEntry, name: e.target.value})}
+        className="form-input"
+        placeholder="z.B. Kirchenkreis Dithmarschen"
+        required
+        />
+        </div>
+        <div className="w-full sm:w-1/3">
+        <label className="form-label">Kennzeichen</label>
+        <input
+        type="text"
+        value={newEntry.kennzeichen}
+        onChange={e => setNewEntry({...newEntry, kennzeichen: e.target.value})}
+        className="form-input"
+        placeholder="z.B. kkdith"
+        required
+        />
+        </div>
+        <div className="flex items-end w-full sm:w-auto">
+        <button type="submit" className="btn-primary w-full sm:w-auto">
+        Hinzufügen
+        </button>
+        </div>
+        </div>
+        </form>
+        </div>
+        
+        {/* Liste der Abrechnungsträger */}
+        <div className="card-container">
+        <h3 className="text-lg font-medium text-value mb-4">Vorhandene Abrechnungsträger</h3>
+        <div className="space-y-2">
         {abrechnungstraeger.map((traeger, index) => (
-            <div key={traeger.id} className="card-container flex items-center justify-between p-4">
+            <div key={traeger.id} className="flex items-center justify-between p-4 bg-primary-25 dark:bg-primary-900 rounded">
             <div className="flex-1">
             {editingTraeger?.id === traeger.id ? (
-                // Edit Form
                 <div className="flex gap-4">
                 <input
                 type="text"
@@ -196,7 +205,6 @@ function AbrechnungstraegerForm() {
                 />
                 </div>
             ) : (
-                // Display
                 <div className="flex items-center gap-4">
                 <div>
                 <div className="font-medium text-value">{traeger.name}</div>
@@ -238,7 +246,7 @@ function AbrechnungstraegerForm() {
                 </button>
                 <button
                 onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                className="table-action-button-primary"
+                className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
                 title={traeger.active ? 'Aktiv' : 'Inaktiv'}
                 >
                 {traeger.active ? '●' : '○'}
@@ -277,6 +285,7 @@ function AbrechnungstraegerForm() {
             </div>
             </div>
         ))}
+        </div>
         </div>
         </div>
     );
