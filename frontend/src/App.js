@@ -41,12 +41,16 @@ function AppProvider({ children }) {
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
   
+  const [hasActiveNotification, setHasActiveNotification] = useState(false);
+  
   const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
+    setHasActiveNotification(true);
     setNotification({ isOpen: true, title, message, onConfirm, showCancel });
   };
   
   const closeNotification = () => {
     setNotification(prev => ({ ...prev, isOpen: false }));
+    setHasActiveNotification(false);
   };
   
   useEffect(() => {
@@ -340,7 +344,7 @@ function AppProvider({ children }) {
       isLoggedIn, login, logout, token, updateFahrt, user, setUser, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
-      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification, setFahrten
+      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, hasActiveNotification, showNotification, closeNotification, setFahrten
     }}>
     {children}
     <NotificationModal
