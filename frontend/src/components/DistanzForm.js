@@ -40,34 +40,44 @@ function DistanzForm() {
   const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
   
   return (
-    <div className="mb-4">
+    <div className="space-y-6">
     <div className="card-container-highlight">
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
-    <div className="w-full sm:flex-1">
+    <h3 className="text-lg font-medium text-value mb-4">Distanz hinzufügen</h3>
+    <p className="text-sm text-muted mb-6">
+    Hier können Sie die Entfernungen zwischen zwei Orten festlegen. Die Distanzen werden automatisch 
+    für beide Richtungen gespeichert und beim Anlegen neuer Fahrten verwendet.
+    </p>
+    
+    <form onSubmit={handleSubmit}>
+    <div className="flex flex-col sm:flex-row gap-4 w-full">
+    <div className="w-full sm:w-1/3">
+    <label className="form-label">Von</label>
     <select
     value={vonOrtId}
     onChange={(e) => setVonOrtId(e.target.value)}
     className="form-select"
     required
     >
-    <option value="">Von Ort auswählen</option>
+    <option value="">Ort auswählen</option>
     {renderOrteOptions(orte)}
     </select>
     </div>
     
-    <div className="w-full sm:flex-1">
+    <div className="w-full sm:w-1/3">
+    <label className="form-label">Nach</label>
     <select
     value={nachOrtId}
     onChange={(e) => setNachOrtId(e.target.value)}
     className="form-select"
     required
     >
-    <option value="">Nach Ort auswählen</option>
+    <option value="">Ort auswählen</option>
     {renderOrteOptions(orte)}
     </select>
     </div>
     
-    <div className="w-full sm:w-36">
+    <div className="w-full sm:w-1/6">
+    <label className="form-label">Kilometer</label>
     <input
     type="number"
     value={distanz}
@@ -78,9 +88,12 @@ function DistanzForm() {
     />
     </div>
     
-    <button type="submit" className="btn-primary">
+    <div className="flex items-end w-full sm:w-auto">
+    <button type="submit" className="btn-primary w-full">
     {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
     </button>
+    </div>
+    </div>
     </form>
     </div>
     </div>
