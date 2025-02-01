@@ -516,11 +516,12 @@ function ProfileModal({ isOpen, onClose }) {
                 ))
             )}
             </div>
-        )}
-        </div>
-        </div>
-        </Modal>
-    );
+            </div>
+            </div>
+            </div>
+            </div>
+            </Modal>
+        );
 }
 
 export default ProfileModal;
