@@ -166,9 +166,8 @@ function ProfileModal({ isOpen, onClose }) {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Einstellungen" size="wide">
         <div className="flex flex-col h-full">
-        {/* Header - fixiert */}
-        <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 border-b border-primary-100 dark:border-primary-800">
-        
+        {/* Sticky Navigation */}
+        <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 -mt-4 mb-4 border-b border-primary-100 dark:border-primary-800">
         {/* Tabs Desktop */}
         <div className="hidden sm:flex space-x-1">
         {tabs.map(tab => (
@@ -176,13 +175,13 @@ function ProfileModal({ isOpen, onClose }) {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-                            py-2 px-4 text-sm font-medium 
-                            border-b-2 -mb-px
-                            ${activeTab === tab.id
+                                py-2 px-4 text-sm font-medium 
+                                border-b-2 -mb-px
+                                ${activeTab === tab.id
                 ? 'border-primary-500 text-primary-600 dark:text-primary-100'
                 : 'border-transparent text-muted hover:text-value hover:border-primary-200'
                 }
-                        `}
+                            `}
             >
             {tab.name}
             </button>
@@ -190,7 +189,7 @@ function ProfileModal({ isOpen, onClose }) {
         </div>
         
         {/* Tabs Mobile */}
-        <div className="sm:hidden pb-2">
+        <div className="sm:hidden py-2">
         <select
         value={activeTab}
         onChange={(e) => setActiveTab(e.target.value)}
@@ -205,7 +204,8 @@ function ProfileModal({ isOpen, onClose }) {
         </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto pt-4 space-y-4">
+        {/* Content-Bereich */}
+        <div className="flex-1">
         {activeTab === 'profile' && (
             <div className="space-y-4">
             <div className="card-container-highlight">
@@ -217,31 +217,33 @@ function ProfileModal({ isOpen, onClose }) {
             <form onSubmit={handleProfileUpdate} className="space-y-4">
             <div className="relative">
             <label className="form-label">E-Mail</label>
+            <div className="flex flex-col sm:flex-row gap-2">
             <input
             type="email"
             value={profile.email || ''}
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
             className={`form-input ${
                 profile.email_verified
-                ? 'border-primary-200 bg-primary-25 dark:border-primary-700 dark:bg-primary-900/20'
-                : 'border-secondary-200 bg-secondary-25 dark:border-secondary-700 dark:bg-secondary-900/20'
+                ? 'border-primary-200 bg-primary-25'
+                : 'border-secondary-200 bg-secondary-25'
             }`}
             />
-            <div className="verify-badge">
+            <div className="flex items-center justify-end sm:justify-start gap-2 min-w-[120px]">
             {profile.email_verified ? (
-                <span className="text-primary-600 dark:text-primary-400 text-xs">● Verifiziert</span>
+                <span className="text-primary-600 text-xs whitespace-nowrap">● Verifiziert</span>
             ) : (
                 <div className="flex items-center gap-2">
-                <span className="text-secondary-600 dark:text-secondary-400 text-xs">○ Ausstehend</span>
+                <span className="text-secondary-600 text-xs whitespace-nowrap">○ Ausstehend</span>
                 <button
                 type="button"
                 onClick={handleResendVerification}
-                className="text-secondary-600 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-300 text-xs underline"
+                className="text-secondary-600 hover:text-secondary-700 text-xs underline whitespace-nowrap"
                 >
                 Erneut senden
                 </button>
                 </div>
             )}
+            </div>
             </div>
             </div>
             
@@ -417,6 +419,7 @@ function ProfileModal({ isOpen, onClose }) {
         {activeTab === 'api' && (
             <div className="space-y-6">
             <div className="card-container-highlight">
+            <div>
             <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
             <p className="text-sm text-muted mb-6">
             Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
@@ -424,7 +427,7 @@ function ProfileModal({ isOpen, onClose }) {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-2/3">
+            <div className="w-full">
             <label className="form-label">Beschreibung</label>
             <input
             type="text"
@@ -434,7 +437,7 @@ function ProfileModal({ isOpen, onClose }) {
             className="form-input"
             />
             </div>
-            <div className="w-full sm:w-1/3 flex items-end">
+            <div className="w-full sm:w-1/6 flex items-end">
             <button
             type="button"
             onClick={handleGenerateKey}
@@ -446,7 +449,6 @@ function ProfileModal({ isOpen, onClose }) {
             </div>
             </div>
             
-            {/* Neuer Key Anzeige */}
             {generatedKey && (
                 <div className="mt-6 p-4 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
                 <p className="text-sm text-value font-medium mb-2">
@@ -472,8 +474,8 @@ function ProfileModal({ isOpen, onClose }) {
                 </div>
             )}
             </div>
+            </div>
             
-            {/* Liste der API Keys */}
             <div className="card-container">
             <h3 className="text-lg font-medium text-value mb-4">Vorhandene API Keys</h3>
             <div className="space-y-3">
@@ -482,11 +484,12 @@ function ProfileModal({ isOpen, onClose }) {
                 Noch keine API Keys generiert
                 </p>
             ) : (
-                apiKeys.map((key) => (
+                apiKeys.map(key => (
                     <div key={key.id} 
                     className="p-4 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
                     <div className="flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="flex-1">
+                    <div className="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
                     <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-value">
                     {key.description || 'API Key'}
@@ -502,7 +505,7 @@ function ProfileModal({ isOpen, onClose }) {
                     )}
                     </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="self-end sm:self-center">
                     <button
                     onClick={() => handleDeleteKey(key.id)}
                     className="table-action-button-secondary"
@@ -510,6 +513,7 @@ function ProfileModal({ isOpen, onClose }) {
                     >
                     ×
                     </button>
+                    </div>
                     </div>
                     </div>
                     </div>

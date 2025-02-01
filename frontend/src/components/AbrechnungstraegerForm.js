@@ -137,17 +137,16 @@ function AbrechnungstraegerForm() {
 
     return (
         <div className="space-y-6">
-        {/* Formular für neue Einträge */}
+        {/* Form Card */}
         <div className="card-container-highlight">
         <h3 className="text-lg font-medium text-value mb-4">Abrechnungsträger hinzufügen</h3>
         <p className="text-sm text-muted mb-6">
         Ein Abrechnungsträger ist eine Organisation, die Ihre Fahrtkosten erstattet. 
         Häufige Abrechnungsträger sind der Kirchenkreis oder die Kirchengemeinde.
         </p>
-        
         <form onSubmit={handleAddNew}>
-        <div className="flex flex-col sm:flex-row gap-4">
-        <div className="w-full sm:w-1/2">
+        <div className="flex flex-col sm:flex-row gap-4 w-full">
+        <div className="w-full">
         <label className="form-label">Name des Abrechnungsträgers</label>
         <input
         type="text"
@@ -170,7 +169,7 @@ function AbrechnungstraegerForm() {
         />
         </div>
         <div className="flex items-end w-full sm:w-auto">
-        <button type="submit" className="btn-primary w-full sm:w-auto">
+        <button type="submit" className="btn-primary w-full">
         Hinzufügen
         </button>
         </div>
@@ -178,106 +177,90 @@ function AbrechnungstraegerForm() {
         </form>
         </div>
         
-        {/* Liste der Abrechnungsträger */}
-        <div className="card-container">
-        <h3 className="text-lg font-medium text-value mb-4">Vorhandene Abrechnungsträger</h3>
-        <div className="space-y-2">
+        {/* List Grid */}
+        <div className="grid grid-cols-1 gap-6">
         {abrechnungstraeger.map((traeger, index) => (
-            <div key={traeger.id} className="flex items-center justify-between p-4 bg-primary-25 dark:bg-primary-900 rounded">
+            <div key={traeger.id} className="card-container">
+            <div className="flex items-start justify-between">
             <div className="flex-1">
             {editingTraeger?.id === traeger.id ? (
-                <div className="flex gap-4">
+                <div className="space-y-4 w-full">
+                <div>
+                <label className="form-label">Name</label>
                 <input
                 type="text"
                 value={editingTraeger.name}
                 onChange={(e) => setEditingTraeger({...editingTraeger, name: e.target.value})}
-                className="form-input flex-1"
+                className="form-input w-full"
                 placeholder="Name"
                 required
                 />
+                </div>
+                <div>
+                <label className="form-label">Kennzeichen</label>
                 <input
                 type="text"
                 value={editingTraeger.kennzeichen}
                 onChange={(e) => setEditingTraeger({...editingTraeger, kennzeichen: e.target.value})}
-                className="form-input w-32"
+                className="form-input w-full"
                 placeholder="Kennzeichen"
                 required
                 />
                 </div>
+                <div className="flex gap-2 justify-end">
+                <button 
+                onClick={handleUpdate}
+                className="btn-primary">
+                Speichern
+                </button>
+                <button 
+                onClick={() => setEditingTraeger(null)}
+                className="btn-secondary">
+                Abbrechen
+                </button>
+                </div>
+                </div>
             ) : (
-                <div className="flex items-center gap-4">
-                <div>
+                <>
                 <div className="font-medium text-value">{traeger.name}</div>
-                <div className="text-xs text-label">{traeger.kennzeichen}</div>
-                </div>
-                </div>
+                <div className="text-xs text-label mt-1">{traeger.kennzeichen}</div>
+                </>
             )}
             </div>
-            
-            <div className="flex ml-4 items-center gap-2">
-            {/* Sortier-Buttons und Action-Buttons */}
             {!editingTraeger?.id && (
-                <>
+                <div className="flex gap-2">
                 <div className="flex gap-1">
                 <button
                 onClick={() => handleMoveItem(index, 'up')}
                 disabled={index === 0}
                 className="table-action-button-primary"
-                title="Nach oben"
-                >
+                title="Nach oben">
                 <ChevronUp size={16} />
                 </button>
                 <button
                 onClick={() => handleMoveItem(index, 'down')}
                 disabled={index === abrechnungstraeger.length - 1}
                 className="table-action-button-primary"
-                title="Nach unten"
-                >
+                title="Nach unten">
                 <ChevronDown size={16} />
                 </button>
                 </div>
-                
-                <button
-                onClick={() => handleEdit(traeger.id)}
-                className="table-action-button-primary"
-                title="Bearbeiten"
-                >
-                ✎
-                </button>
                 <button
                 onClick={() => handleToggleActive(traeger.id, traeger.active)}
                 className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
-                title={traeger.active ? 'Aktiv' : 'Inaktiv'}
-                >
+                title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
                 {traeger.active ? '●' : '○'}
+                </button>
+                <button
+                onClick={() => handleEdit(traeger.id)}
+                className="table-action-button-primary"
+                title="Bearbeiten">
+                ✎
                 </button>
                 <button
                 onClick={() => handleDelete(traeger.id)}
                 className="table-action-button-secondary"
-                title="Löschen"
-                >
-                ×
-                </button>
-                </>
-            )}
-            
-            {/* Edit Buttons */}
-            {editingTraeger?.id === traeger.id && (
-                <div className="flex gap-2">
-                <button 
-                type="button" 
-                onClick={handleUpdate}
-                className="table-action-button-primary"
-                title="Speichern"
-                >
-                ✓
-                </button>
-                <button 
-                type="button" 
-                onClick={() => setEditingTraeger(null)}
-                className="table-action-button-secondary"
-                title="Abbrechen"
-                >
+                title="Löschen">
                 ×
                 </button>
                 </div>
@@ -285,7 +268,6 @@ function AbrechnungstraegerForm() {
             </div>
             </div>
         ))}
-        </div>
         </div>
         </div>
     );

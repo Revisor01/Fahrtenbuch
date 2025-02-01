@@ -33,10 +33,12 @@ function Modal({ isOpen, onClose, title, children, size = 'compact', preventOuts
         <div className="fixed inset-0 flex justify-center pt-20">
         <div 
         ref={modalRef}
-        className={`${widthClass} card-container h-fit max-h-[calc(100vh-10rem)] overflow-y-auto`}
+        className={`${widthClass} card-container h-fit max-h-[calc(100vh-10rem)] overflow-hidden flex flex-col`} // Changed this line
         >
-        <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 -m-6 mb-0 p-6 pb-4 border-b border-primary-100 dark:border-primary-800">
-        <div className="flex justify-between items-center">
+        {/* Der Header-Bereich ist jetzt komplett sticky */}
+        <div className="sticky top-0 z-20 bg-white dark:bg-gray-800">
+        {/* Titel-Bereich */}
+        <div className="flex justify-between items-center pb-4">
         <h2 className="text-lg font-medium text-value">{title}</h2>
         <button 
         onClick={onClose} 
@@ -47,10 +49,16 @@ function Modal({ isOpen, onClose, title, children, size = 'compact', preventOuts
         </svg>
         </button>
         </div>
+        
+        {/* Shadow-Effekt für bessere visuelle Trennung */}
+        <div className="h-px bg-gradient-to-b from-primary-100/50 to-transparent dark:from-primary-800/50"></div>
         </div>
         
-        <div className="p-6 pt-4">
+        {/* Scroll-Bereich für den Content */}
+        <div className="overflow-y-auto">
+        <div className="pt-4">
         {children}
+        </div>
         </div>
         </div>
         </div>
