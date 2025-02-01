@@ -518,7 +518,6 @@ function ProfileModal({ isOpen, onClose }) {
             </div>
             </div>
             </div>
-            </div>
             </Modal>
         );
 }
