@@ -234,63 +234,74 @@ function ErstattungssaetzeForm() {
         </form>
         </div>
         
-        {/* Card Grid für bestehende Erstattungssätze */}
-        <div className="grid grid-cols-1 gap-6">
+        {/* Card Grid für alle Erstattungssätze */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Mitfahrer Card */}
         <div className="card-container">
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4">
         <h3 className="text-lg font-medium text-value">Mitfahrer:innen</h3>
-        <span className="text-sm text-label">
-        Aktuell: {parseFloat(erstattungssaetze.mitfahrer[0]?.betrag || 0).toFixed(2)} €/km
+        <div className="flex items-center gap-2 mt-1">
+        <span className="text-sm text-label">Aktueller Satz:</span>
+        <span className="text-lg font-medium text-value">
+        {parseFloat(erstattungssaetze.mitfahrer[0]?.betrag || 0).toFixed(2)} €/km
         </span>
         </div>
-        <div className="space-y-2">
+        </div>
+        
+        <div className="space-y-3">
         {erstattungssaetze.mitfahrer.map((satz) => (
-            <div key={satz.id} className="flex items-center justify-between p-3 bg-primary-25 dark:bg-primary-900 rounded">
+            <div key={satz.id} 
+            className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
             {editingSatz?.id === satz.id && editingSatz?.typ === 'mitfahrer' ? (
-                <div className="flex items-center gap-4 w-full">
+                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                <label className="form-label">Betrag (€/km)</label>
                 <input
                 type="number"
                 value={editingSatz.betrag}
                 onChange={(e) => setEditingSatz({...editingSatz, betrag: e.target.value})}
                 step="0.01"
                 min="0"
-                className="form-input w-32"
+                className="form-input"
                 />
+                </div>
+                <div className="flex-1">
+                <label className="form-label">Gültig ab</label>
                 <input
                 type="date"
                 value={editingSatz.gueltig_ab}
                 onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
-                className="form-input w-40"
+                className="form-input"
                 />
-                <div className="flex gap-2 ml-auto">
-                <button onClick={handleSaveEdit} className="table-action-button-primary" title="Speichern">
-                ✓
-                </button>
-                <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary" title="Abbrechen">
-                ×
-                </button>
+                </div>
+                <div className="flex items-end gap-2">
+                <button onClick={handleSaveEdit} 
+                className="table-action-button-primary" 
+                title="Speichern">✓</button>
+                <button onClick={() => setEditingSatz(null)} 
+                className="table-action-button-secondary" 
+                title="Abbrechen">×</button>
                 </div>
                 </div>
             ) : (
-                <>
-                <div className="flex-1">
-                <div className="text-value font-medium">
-                {parseFloat(satz.betrag).toFixed(2)} € pro km
+                <div className="flex justify-between items-start">
+                <div>
+                <div className="text-lg font-medium text-value">
+                {parseFloat(satz.betrag).toFixed(2)} €/km
                 </div>
-                <div className="text-xs text-label">
+                <div className="text-xs text-label mt-1">
                 Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
                 </div>
                 </div>
-                <div className="flex items-center gap-2">
-                <button onClick={() => handleEdit(satz, 'mitfahrer')} className="table-action-button-primary" title="Bearbeiten">
-                ✎
-                </button>
-                <button onClick={() => handleDelete(satz.id, 'mitfahrer')} className="table-action-button-secondary" title="Löschen">
-                ×
-                </button>
+                <div className="flex gap-2">
+                <button onClick={() => handleEdit(satz, 'mitfahrer')}
+                className="table-action-button-primary"
+                title="Bearbeiten">✎</button>
+                <button onClick={() => handleDelete(satz.id, 'mitfahrer')}
+                className="table-action-button-secondary"
+                title="Löschen">×</button>
                 </div>
-                </>
+                </div>
             )}
             </div>
         ))}
@@ -300,59 +311,68 @@ function ErstattungssaetzeForm() {
         {/* Abrechnungsträger Cards */}
         {erstattungssaetze.abrechnungstraeger.map(traeger => (
             <div key={traeger.id} className="card-container">
-            <div className="flex justify-between items-center mb-4">
+            <div className="mb-4">
             <h3 className="text-lg font-medium text-value">{traeger.name}</h3>
-            <span className="text-sm text-label">
-            Aktuell: {parseFloat(traeger.aktueller_betrag || 0).toFixed(2)} €/km
+            <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-label">Aktueller Satz:</span>
+            <span className="text-lg font-medium text-value">
+            {parseFloat(traeger.aktueller_betrag || 0).toFixed(2)} €/km
             </span>
             </div>
-            <div className="space-y-2">
+            </div>
+            
+            <div className="space-y-3">
             {traeger.erstattungsbetraege?.map((satz) => (
-                <div key={satz.id} className="flex items-center justify-between p-3 bg-primary-25 dark:bg-primary-900 rounded">
+                <div key={satz.id} 
+                className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
                 {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
-                    <div className="flex items-center gap-4 w-full">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1">
+                    <label className="form-label">Betrag (€/km)</label>
                     <input
                     type="number"
                     value={editingSatz.betrag}
                     onChange={(e) => setEditingSatz({...editingSatz, betrag: e.target.value})}
                     step="0.01"
                     min="0"
-                    className="form-input w-32"
+                    className="form-input"
                     />
+                    </div>
+                    <div className="flex-1">
+                    <label className="form-label">Gültig ab</label>
                     <input
                     type="date"
                     value={editingSatz.gueltig_ab}
                     onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
-                    className="form-input w-40"
+                    className="form-input"
                     />
-                    <div className="flex gap-2 ml-auto">
-                    <button onClick={handleSaveEdit} className="table-action-button-primary">
-                    ✓
-                    </button>
-                    <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary">
-                    ×
-                    </button>
+                    </div>
+                    <div className="flex items-end gap-2">
+                    <button onClick={handleSaveEdit} 
+                    className="table-action-button-primary">✓</button>
+                    <button onClick={() => setEditingSatz(null)} 
+                    className="table-action-button-secondary">×</button>
                     </div>
                     </div>
                 ) : (
-                    <>
-                    <div className="flex-1">
-                    <div className="text-value font-medium">
-                    {parseFloat(satz.betrag).toFixed(2)} € pro km
+                    <div className="flex justify-between items-start">
+                    <div>
+                    <div className="text-lg font-medium text-value">
+                    {parseFloat(satz.betrag).toFixed(2)} €/km
                     </div>
-                    <div className="text-xs text-label">
+                    <div className="text-xs text-label mt-1">
                     Gültig ab: {new Date(satz.gueltig_ab).toLocaleDateString()}
                     </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                    <button onClick={() => handleEdit(satz, traeger.id)} className="table-action-button-primary">
-                    ✎
-                    </button>
-                    <button onClick={() => handleDelete(satz.id, traeger.id)} className="table-action-button-secondary">
-                    ×
-                    </button>
+                    <div className="flex gap-2">
+                    <button onClick={() => handleEdit(satz, traeger.id)}
+                    className="table-action-button-primary"
+                    title="Bearbeiten">✎</button>
+                    <button onClick={() => handleDelete(satz.id, traeger.id)}
+                    className="table-action-button-secondary"
+                    title="Löschen">×</button>
                     </div>
-                    </>
+                    </div>
                 )}
                 </div>
             ))}

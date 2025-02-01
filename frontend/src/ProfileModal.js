@@ -8,7 +8,7 @@ import OrtForm from './components/OrtForm';
 import OrteListe from './components/OrteListe';
 import DistanzForm from './components/DistanzForm';
 import DistanzenListe from './components/DistanzenListe';
-
+    
 function ProfileModal({ isOpen, onClose }) {
     const { token, user, setUser, showNotification } = useContext(AppContext);
     const [profile, setProfile] = useState({});
@@ -205,7 +205,7 @@ function ProfileModal({ isOpen, onClose }) {
         </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto pt-4 space-y-4">
         {activeTab === 'profile' && (
             <div className="space-y-4">
             <div className="card-container-highlight">
@@ -341,9 +341,14 @@ function ProfileModal({ isOpen, onClose }) {
         
         {activeTab === 'security' && (
             <div className="space-y-6">
-            <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
+            <p className="text-sm text-muted mb-6">
+            Aus Sicherheitsgründen sollten Sie Ihr Passwort regelmäßig ändern. 
+            Wählen Sie ein sicheres Passwort mit mindestens 8 Zeichen.
+            </p>
             
+            <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
             <label className="form-label">Aktuelles Passwort</label>
             <input
@@ -364,6 +369,28 @@ function ProfileModal({ isOpen, onClose }) {
             className="form-input"
             required
             />
+            {newPassword && (
+                <div className="mt-2">
+                <div className="text-xs space-y-1">
+                <div className={`flex items-center gap-2 ${newPassword.length >= 8 ? 'text-primary-600' : 'text-secondary-600'}`}>
+                <span>{newPassword.length >= 8 ? '●' : '○'}</span>
+                <span>Mindestens 8 Zeichen</span>
+                </div>
+                <div className={`flex items-center gap-2 ${/[A-Z]/.test(newPassword) ? 'text-primary-600' : 'text-secondary-600'}`}>
+                <span>{/[A-Z]/.test(newPassword) ? '●' : '○'}</span>
+                <span>Großbuchstaben</span>
+                </div>
+                <div className={`flex items-center gap-2 ${/[a-z]/.test(newPassword) ? 'text-primary-600' : 'text-secondary-600'}`}>
+                <span>{/[a-z]/.test(newPassword) ? '●' : '○'}</span>
+                <span>Kleinbuchstaben</span>
+                </div>
+                <div className={`flex items-center gap-2 ${/\d/.test(newPassword) ? 'text-primary-600' : 'text-secondary-600'}`}>
+                <span>{/\d/.test(newPassword) ? '●' : '○'}</span>
+                <span>Mindestens eine Zahl</span>
+                </div>
+                </div>
+                </div>
+            )}
             </div>
             
             <div>
@@ -378,46 +405,58 @@ function ProfileModal({ isOpen, onClose }) {
             </div>
             
             <div className="flex justify-end">
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn-primary w-full sm:w-auto">
             Passwort ändern
             </button>
             </div>
             </form>
             </div>
+            </div>
         )}
         
         {activeTab === 'api' && (
             <div className="space-y-6">
-            <h3 className="text-lg font-medium text-value">API Keys für Kurzbefehle</h3>
-            <div className="text-sm text-muted">
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
+            <p className="text-sm text-muted mb-6">
             Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
-            </div>
+            Jeder Key sollte einen eindeutigen Verwendungszweck haben.
+            </p>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:w-2/3">
+            <label className="form-label">Beschreibung</label>
             <input
             type="text"
-            placeholder="Beschreibung (optional)"
+            placeholder="z.B. iOS Shortcuts"
             value={newKeyDescription}
             onChange={(e) => setNewKeyDescription(e.target.value)}
-            className="form-input flex-1"
+            className="form-input"
             />
+            </div>
+            <div className="w-full sm:w-1/3 flex items-end">
             <button
+            type="button"
             onClick={handleGenerateKey}
             disabled={isGeneratingKey}
-            className="btn-primary whitespace-nowrap"
+            className="btn-primary w-full"
             >
             {isGeneratingKey ? 'Generiere...' : 'Neuer API Key'}
             </button>
             </div>
+            </div>
             
-            {/* Zeige neu generierten Key an */}
+            {/* Neuer Key Anzeige */}
             {generatedKey && (
-                <div className="bg-primary-25 dark:bg-primary-900 p-4 rounded-lg space-y-2">
-                <p className="text-sm text-label">
-                Dein neuer API Key (kopiere ihn jetzt - er wird nur einmal angezeigt):
+                <div className="mt-6 p-4 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
+                <p className="text-sm text-value font-medium mb-2">
+                Neuer API Key erstellt
+                </p>
+                <p className="text-sm text-label mb-4">
+                Kopieren Sie den Key jetzt - er wird nur einmal angezeigt!
                 </p>
                 <div className="flex gap-2 items-center">
-                <code className="flex-1 bg-white dark:bg-gray-800 p-2 rounded text-sm break-all">
+                <code className="flex-1 bg-white dark:bg-gray-800 p-3 rounded text-sm break-all">
                 {generatedKey}
                 </code>
                 <button
@@ -425,50 +464,57 @@ function ProfileModal({ isOpen, onClose }) {
                     navigator.clipboard.writeText(generatedKey);
                     showNotification('Erfolg', 'API Key wurde kopiert');
                 }}
-                className="btn-secondary"
+                className="btn-secondary whitespace-nowrap"
                 >
                 Kopieren
                 </button>
                 </div>
                 </div>
             )}
-            
-            {/* API Key Liste */}
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-            {apiKeys.map((key) => (
-                <div key={key.id} className="flex items-center gap-4 p-3 bg-primary-25 dark:bg-primary-900 rounded">
-                <div className="flex-1 min-w-0">
-                <p className="text-sm text-value font-medium truncate">
-                {key.description}
-                </p>
-                <div className="text-xs text-label flex items-center gap-2">
-                <span>Erstellt: {new Date(key.created_at).toLocaleDateString()}</span>
-                {key.last_used_at && (
-                    <>
-                    <span className="text-primary-300">•</span>
-                    <span>
-                    Zuletzt benutzt: {new Date(key.last_used_at).toLocaleDateString()}
-                    </span>
-                    </>
-                )}
-                </div>
-                </div>
-                <button
-                onClick={() => handleDeleteKey(key.id)}
-                className="table-action-button-secondary"
-                title="Löschen"
-                >
-                ×
-                </button>
-                </div>
-            ))}
-            
-            {apiKeys.length === 0 && (
-                <p className="text-sm text-muted text-center py-4">
-                Noch keine API Keys generiert!
-                </p>
-            )}
             </div>
+            
+            {/* Liste der API Keys */}
+            <div className="card-container">
+            <h3 className="text-lg font-medium text-value mb-4">Vorhandene API Keys</h3>
+            <div className="space-y-3">
+            {apiKeys.length === 0 ? (
+                <p className="text-sm text-muted text-center py-4">
+                Noch keine API Keys generiert
+                </p>
+            ) : (
+                apiKeys.map((key) => (
+                    <div key={key.id} 
+                    className="p-4 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
+                    <div className="flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-value">
+                    {key.description || 'API Key'}
+                    </span>
+                    <span className="text-xs text-label bg-primary-100 dark:bg-primary-800 px-2 py-0.5 rounded">
+                    {key.is_active ? '● Aktiv' : '○ Inaktiv'}
+                    </span>
+                    </div>
+                    <div className="text-xs text-label flex flex-wrap gap-x-4 gap-y-1">
+                    <span>Erstellt: {new Date(key.created_at).toLocaleDateString()}</span>
+                    {key.last_used_at && (
+                        <span>Zuletzt verwendet: {new Date(key.last_used_at).toLocaleDateString()}</span>
+                    )}
+                    </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                    <button
+                    onClick={() => handleDeleteKey(key.id)}
+                    className="table-action-button-secondary"
+                    title="Löschen"
+                    >
+                    ×
+                    </button>
+                    </div>
+                    </div>
+                    </div>
+                ))
+            )}
             </div>
         )}
         </div>
