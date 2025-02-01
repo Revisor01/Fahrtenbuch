@@ -8,7 +8,7 @@ import OrtForm from './components/OrtForm';
 import OrteListe from './components/OrteListe';
 import DistanzForm from './components/DistanzForm';
 import DistanzenListe from './components/DistanzenListe';
-    
+
 function ProfileModal({ isOpen, onClose }) {
     const { token, user, setUser, showNotification } = useContext(AppContext);
     const [profile, setProfile] = useState({});
@@ -521,8 +521,7 @@ function ProfileModal({ isOpen, onClose }) {
             </div>
             </div>
             </Modal>
-            </div>
-        ); //Hier war der Fehler!
+        );
         }
 
 export default ProfileModal;
