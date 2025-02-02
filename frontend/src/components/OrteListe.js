@@ -219,8 +219,9 @@ function OrteListe() {
       </div>
     ))}
     </div>
-    
+    </>
   );
 }
+
 
 export default OrteListe;
