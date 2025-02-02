@@ -72,6 +72,9 @@ function DistanzenListe() {
     };
     
     return (
+      <div className="space-y-6">
+      {/* Desktop View */}
+      <div className="hidden md:block">
         <div className="table-container">
         <table className="w-full">
         <thead>
@@ -160,8 +163,72 @@ function DistanzenListe() {
             </tr>
             ))}
         </tbody>
-        </table>
+      </table>
+      </div>
+      </div>
+      {/* Mobile View */}
+      <div className="md:hidden space-y-4">
+      {sortedDistanzen.map((distanz) => (
+        <div key={distanz.id} className="card-container">
+        {editingDistanz?.id === distanz.id ? (
+          <div className="space-y-4">
+          <div>
+          <label className="form-label">Von</label>
+          <div className="text-value">{getOrtName(distanz.von_ort_id)}</div>
+          </div>
+          <div>
+          <label className="form-label">Nach</label>
+          <div className="text-value">{getOrtName(distanz.nach_ort_id)}</div>
+          </div>
+          <div>
+          <label className="form-label">Kilometer</label>
+          <input
+          type="number"
+          value={editingDistanz.distanz}
+          onChange={(e) => setEditingDistanz({
+            ...editingDistanz,
+            distanz: parseInt(e.target.value),
+          })}
+          className="form-input"
+          />
+          </div>
+          <div className="flex justify-end gap-2">
+          <button onClick={handleSave} className="btn-primary">Speichern</button>
+          <button onClick={() => setEditingDistanz(null)} className="btn-secondary">Abbrechen</button>
+          </div>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+          <div className="flex justify-between items-start">
+          <div>
+          <div className="text-lg font-medium text-value">
+          {getOrtName(distanz.von_ort_id)} → {getOrtName(distanz.nach_ort_id)}
+          </div>
+          <div className="mt-1 text-sm text-label">
+          {distanz.distanz} km
+          </div>
+          </div>
+          <div className="flex gap-2">
+          <button
+          onClick={() => handleEdit(distanz)}
+          className="btn-secondary"
+          >
+          Bearbeiten
+          </button>
+          <button
+          onClick={() => handleDelete(distanz.id)}
+          className="btn-secondary"
+          >
+          Löschen
+          </button>
+          </div>
+          </div>
+          </div>
+        )}
         </div>
+      ))}
+      </div>
+      </div>
     );
 }
 

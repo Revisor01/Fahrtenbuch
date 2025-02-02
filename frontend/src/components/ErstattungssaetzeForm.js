@@ -379,9 +379,6 @@ function ErstattungssaetzeForm() {
             ))}
             </div>
             </div>
-        ))}
-        </div>
-        </div>
     ); 
 }
 

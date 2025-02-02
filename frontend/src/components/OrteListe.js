@@ -89,6 +89,7 @@ function OrteListe() {
   };
   
   return (
+    <div className="hidden md:block">
     <div className="table-container">
     <table className="w-full">
     <thead>
@@ -188,6 +189,37 @@ function OrteListe() {
     </tbody>
     </table>
     </div>
+    </div>
+    
+    {/* Mobile View */}
+    <div className="md:hidden space-y-4">
+    {sortedOrte.map((ort) => (
+      <div key={ort.id} className="card-container">
+      <div className="flex justify-between items-start">
+      <div>
+      <div className="font-medium text-value">{ort.name}</div>
+      <div className="text-sm text-label mt-1">{ort.adresse}</div>
+      <div className="text-xs text-label mt-2">
+      {getOrtStatusLabel(ort)}
+      </div>
+      </div>
+      <div className="flex gap-2">
+      <button
+      onClick={() => handleEdit(ort)}
+      className="btn-secondary">
+      Bearbeiten
+      </button>
+      <button
+      onClick={() => handleDelete(ort.id)}
+      className="btn-secondary">
+      Löschen
+      </button>
+      </div>
+      </div>
+      </div>
+    ))}
+    </div>
+    
   );
 }
 

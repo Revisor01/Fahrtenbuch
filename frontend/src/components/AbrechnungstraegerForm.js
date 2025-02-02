@@ -178,10 +178,10 @@ function AbrechnungstraegerForm() {
         </div>
         
         {/* List Grid */}
-        <div className="grid grid-cols-1 gap-6">
+        <div className="space-y-4">  {/* Statt grid grid-cols-2 */}
         {abrechnungstraeger.map((traeger, index) => (
             <div key={traeger.id} className="card-container">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div className="flex-1">
             {editingTraeger?.id === traeger.id ? (
                 <div className="space-y-4 w-full">
@@ -228,7 +228,7 @@ function AbrechnungstraegerForm() {
             )}
             </div>
             {!editingTraeger?.id && (
-                <div className="flex gap-2">
+                <div className="hidden sm:flex gap-2">
                 <div className="flex gap-1">
                 <button
                 onClick={() => handleMoveItem(index, 'up')}
@@ -264,6 +264,39 @@ function AbrechnungstraegerForm() {
                 ×
                 </button>
                 </div>
+                {/* Mobile Buttons */}
+                <div className="sm:hidden flex flex-wrap gap-2 justify-end">
+                {/* Action Buttons in einer Reihe */}
+                <button
+                onClick={() => handleEdit(traeger.id)}
+                className="btn-secondary flex-1"
+                title="Bearbeiten">
+                Bearbeiten
+                </button>
+                <button
+                onClick={() => handleDelete(traeger.id)}
+                className="btn-secondary flex-1"
+                title="Löschen">
+                Löschen
+                </button>
+                {/* Bewegungs-Buttons in zweiter Reihe */}
+                <button
+                onClick={() => handleMoveItem(index, 'up')}
+                disabled={index === 0}
+                className="btn-secondary flex-1">
+                Nach oben
+                </button>
+                <button
+                onClick={() => handleMoveItem(index, 'down')}
+                disabled={index === abrechnungstraeger.length - 1}
+                className="btn-secondary flex-1">
+                Nach unten
+                </button>
+                </div>
+                </div>
+                </div>
+            ))}
+            </div>
             )}
             </div>
             </div>

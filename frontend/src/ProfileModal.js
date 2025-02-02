@@ -215,9 +215,8 @@ function ProfileModal({ isOpen, onClose }) {
             Bitte stellen Sie sicher, dass diese Daten aktuell sind.
             </p>
             <form onSubmit={handleProfileUpdate} className="space-y-4">
-            <div className="relative">
+            <div className="relative w-full">
             <label className="form-label">E-Mail</label>
-            <div className="flex flex-col sm:flex-row gap-2">
             <input
             type="email"
             value={profile.email || ''}
@@ -228,22 +227,21 @@ function ProfileModal({ isOpen, onClose }) {
                 : 'border-secondary-200 bg-secondary-25'
             }`}
             />
-            <div className="flex items-center justify-end sm:justify-start gap-2 min-w-[120px]">
+            <div className="flex justify-end mt-1">
             {profile.email_verified ? (
-                <span className="text-primary-600 text-xs whitespace-nowrap">● Verifiziert</span>
+                <span className="text-primary-600 text-xs">● Verifiziert</span>
             ) : (
                 <div className="flex items-center gap-2">
-                <span className="text-secondary-600 text-xs whitespace-nowrap">○ Ausstehend</span>
+                <span className="text-secondary-600 text-xs">○ Ausstehend</span>
                 <button
                 type="button"
                 onClick={handleResendVerification}
-                className="text-secondary-600 hover:text-secondary-700 text-xs underline whitespace-nowrap"
+                className="text-secondary-600 hover:text-secondary-700 text-xs underline"
                 >
                 Erneut senden
                 </button>
                 </div>
             )}
-            </div>
             </div>
             </div>
             
