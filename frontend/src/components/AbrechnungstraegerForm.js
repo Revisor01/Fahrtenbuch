@@ -136,169 +136,170 @@ function AbrechnungstraegerForm() {
     };
 
     return (
-        <div className="space-y-6">
+    <div className="space-y-6">
         {/* Form Card */}
         <div className="card-container-highlight">
-        <h3 className="text-lg font-medium text-value mb-4">Abrechnungsträger hinzufügen</h3>
-        <p className="text-sm text-muted mb-6">
-        Ein Abrechnungsträger ist eine Organisation, die Ihre Fahrtkosten erstattet. 
-        Häufige Abrechnungsträger sind der Kirchenkreis oder die Kirchengemeinde.
-        </p>
-        <form onSubmit={handleAddNew}>
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-        <div className="w-full">
-        <label className="form-label">Name des Abrechnungsträgers</label>
-        <input
-        type="text"
-        value={newEntry.name}
-        onChange={e => setNewEntry({...newEntry, name: e.target.value})}
-        className="form-input"
-        placeholder="z.B. Kirchenkreis Dithmarschen"
-        required
-        />
-        </div>
-        <div className="w-full sm:w-1/3">
-        <label className="form-label">Kennzeichen</label>
-        <input
-        type="text"
-        value={newEntry.kennzeichen}
-        onChange={e => setNewEntry({...newEntry, kennzeichen: e.target.value})}
-        className="form-input"
-        placeholder="z.B. kkdith"
-        required
-        />
-        </div>
-        <div className="flex items-end w-full sm:w-auto">
-        <button type="submit" className="btn-primary w-full">
-        Hinzufügen
-        </button>
-        </div>
-        </div>
-        </form>
+            <h3 className="text-lg font-medium text-value mb-4">Abrechnungsträger hinzufügen</h3>
+            <p className="text-sm text-muted mb-6">
+                Ein Abrechnungsträger ist eine Organisation, die Ihre Fahrtkosten erstattet. 
+                Häufige Abrechnungsträger sind der Kirchenkreis oder die Kirchengemeinde.
+            </p>
+            <form onSubmit={handleAddNew}>
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                    <div className="w-full">
+                        <label className="form-label">Name des Abrechnungsträgers</label>
+                        <input
+                            type="text"
+                            value={newEntry.name}
+                            onChange={e => setNewEntry({...newEntry, name: e.target.value})}
+                        className="form-input"
+                        placeholder="z.B. Kirchenkreis Dithmarschen"
+                        required
+                        />
+                    </div>
+                    <div className="w-full sm:w-1/3">
+                        <label className="form-label">Kennzeichen</label>
+                        <input
+                            type="text"
+                            value={newEntry.kennzeichen}
+                            onChange={e => setNewEntry({...newEntry, kennzeichen: e.target.value})}
+                        className="form-input"
+                        placeholder="z.B. kkdith"
+                        required
+                        />
+                    </div>
+                    <div className="flex items-end w-full sm:w-auto">
+                        <button type="submit" className="btn-primary w-full">
+                            Hinzufügen
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
         
         {/* List Grid */}
         <div className="space-y-4">
-        {abrechnungstraeger.map((traeger, index) => (
+            {abrechnungstraeger.map((traeger, index) => (
             <div key={traeger.id} className="card-container">
-            <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <div className="flex-1">
-            {editingTraeger?.id === traeger.id ? (
-                <div className="space-y-4 w-full">
-                <div>
-                <label className="form-label">Name</label>
-                <input
-                type="text"
-                value={editingTraeger.name}
-                onChange={(e) => setEditingTraeger({...editingTraeger, name: e.target.value})}
-                className="form-input w-full"
-                placeholder="Name"
-                required
-                />
+                <div className="flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="flex-1">
+                        {editingTraeger?.id === traeger.id ? (
+                        <div className="space-y-4 w-full">
+                            <div>
+                                <label className="form-label">Name</label>
+                                <input
+                                    type="text"
+                                    value={editingTraeger.name}
+                                    onChange={(e) => setEditingTraeger({...editingTraeger, name: e.target.value})}
+                                className="form-input w-full"
+                                placeholder="Name"
+                                required
+                                />
+                            </div>
+                            <div>
+                                <label className="form-label">Kennzeichen</label>
+                                <input
+                                    type="text"
+                                    value={editingTraeger.kennzeichen}
+                                    onChange={(e) => setEditingTraeger({...editingTraeger, kennzeichen: e.target.value})}
+                                className="form-input w-full"
+                                placeholder="Kennzeichen"
+                                required
+                                />
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                                <button 
+                                    onClick={handleUpdate}
+                                    className="btn-primary">
+                                    Speichern
+                                </button>
+                                <button 
+                                    onClick={() => setEditingTraeger(null)}
+                                    className="btn-secondary">
+                                    Abbrechen
+                                </button>
+                            </div>
+                        </div>
+                        ) : (
+                        <>
+                        <div className="font-medium text-value">{traeger.name}</div>
+                        <div className="text-xs text-label mt-1">{traeger.kennzeichen}</div>
+                        </>
+                        )}
+                    </div>
+                    {!editingTraeger?.id && (
+                    <div className="hidden sm:flex gap-2">
+                        <div className="flex gap-1">
+                            <button
+                                onClick={() => handleMoveItem(index, 'up')}
+                                disabled={index === 0}
+                                className="table-action-button-primary"
+                                title="Nach oben">
+                                <ChevronUp size={16} />
+                            </button>
+                            <button
+                                onClick={() => handleMoveItem(index, 'down')}
+                                disabled={index === abrechnungstraeger.length - 1}
+                                className="table-action-button-primary"
+                                title="Nach unten">
+                                <ChevronDown size={16} />
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => handleToggleActive(traeger.id, traeger.active)}
+                            className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
+                            title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
+                            {traeger.active ? '●' : '○'}
+                        </button>
+                        <button
+                            onClick={() => handleEdit(traeger.id)}
+                            className="table-action-button-primary"
+                            title="Bearbeiten">
+                            ✎
+                        </button>
+                        <button
+                            onClick={() => handleDelete(traeger.id)}
+                            className="table-action-button-secondary"
+                            title="Löschen">
+                            ×
+                        </button>
+                    </div>
+                    {/* Mobile Buttons */}
+                    <div className="sm:hidden flex flex-wrap gap-2 justify-end">
+                        {/* Action Buttons in einer Reihe */}
+                        <button
+                            onClick={() => handleEdit(traeger.id)}
+                            className="btn-secondary flex-1"
+                            title="Bearbeiten">
+                            Bearbeiten
+                        </button>
+                        <button
+                            onClick={() => handleDelete(traeger.id)}
+                            className="btn-secondary flex-1"
+                            title="Löschen">
+                            Löschen
+                        </button>
+                        {/* Bewegungs-Buttons in zweiter Reihe */}
+                        <button
+                            onClick={() => handleMoveItem(index, 'up')}
+                            disabled={index === 0}
+                            className="btn-secondary flex-1">
+                            Nach oben
+                        </button>
+                        <button
+                            onClick={() => handleMoveItem(index, 'down')}
+                            disabled={index === abrechnungstraeger.length - 1}
+                            className="btn-secondary flex-1">
+                            Nach unten
+                        </button>
+                    </div>
+                    )}
                 </div>
-                <div>
-                <label className="form-label">Kennzeichen</label>
-                <input
-                type="text"
-                value={editingTraeger.kennzeichen}
-                onChange={(e) => setEditingTraeger({...editingTraeger, kennzeichen: e.target.value})}
-                className="form-input w-full"
-                placeholder="Kennzeichen"
-                required
-                />
-                </div>
-                <div className="flex gap-2 justify-end">
-                <button 
-                onClick={handleUpdate}
-                className="btn-primary">
-                Speichern
-                </button>
-                <button 
-                onClick={() => setEditingTraeger(null)}
-                className="btn-secondary">
-                Abbrechen
-                </button>
-                </div>
-                </div>
-            ) : (
-                <>
-                <div className="font-medium text-value">{traeger.name}</div>
-                <div className="text-xs text-label mt-1">{traeger.kennzeichen}</div>
-                </>
-            )}
             </div>
-            {!editingTraeger?.id && (
-                <div className="hidden sm:flex gap-2">
-                <div className="flex gap-1">
-                <button
-                onClick={() => handleMoveItem(index, 'up')}
-                disabled={index === 0}
-                className="table-action-button-primary"
-                title="Nach oben">
-                <ChevronUp size={16} />
-                </button>
-                <button
-                onClick={() => handleMoveItem(index, 'down')}
-                disabled={index === abrechnungstraeger.length - 1}
-                className="table-action-button-primary"
-                title="Nach unten">
-                <ChevronDown size={16} />
-                </button>
-                </div>
-                <button
-                onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
-                title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
-                {traeger.active ? '●' : '○'}
-                </button>
-                <button
-                onClick={() => handleEdit(traeger.id)}
-                className="table-action-button-primary"
-                title="Bearbeiten">
-                ✎
-                </button>
-                <button
-                onClick={() => handleDelete(traeger.id)}
-                className="table-action-button-secondary"
-                title="Löschen">
-                ×
-                </button>
-                </div>
-                {/* Mobile Buttons */}
-                <div className="sm:hidden flex flex-wrap gap-2 justify-end">
-                {/* Action Buttons in einer Reihe */}
-                <button
-                onClick={() => handleEdit(traeger.id)}
-                className="btn-secondary flex-1"
-                title="Bearbeiten">
-                Bearbeiten
-                </button>
-                <button
-                onClick={() => handleDelete(traeger.id)}
-                className="btn-secondary flex-1"
-                title="Löschen">
-                Löschen
-                </button>
-                {/* Bewegungs-Buttons in zweiter Reihe */}
-                <button
-                onClick={() => handleMoveItem(index, 'up')}
-                disabled={index === 0}
-                className="btn-secondary flex-1">
-                Nach oben
-                </button>
-                <button
-                onClick={() => handleMoveItem(index, 'down')}
-                disabled={index === abrechnungstraeger.length - 1}
-                className="btn-secondary flex-1">
-                Nach unten
-                </button>
-                </div>
-                </div>
-                </div>
             ))}
-            </div>
-            </div>
-        );
-            }
+        </div>
+    </div>
+    );
+    }
             
 export default AbrechnungsTraegerForm;
