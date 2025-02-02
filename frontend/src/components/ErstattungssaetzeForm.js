@@ -374,12 +374,11 @@ function ErstattungssaetzeForm() {
                     title="Löschen">×</button>
                     </div>
                     </div>
-                )}
+                    </div>
+                ))}
                 </div>
-            ))}
-            </div>
-            </div>
-    ); 
-}
-
-export default ErstattungssaetzeForm;
+                </div>
+            );
+                }
+                
+                export default ErstattungssaetzeForm;

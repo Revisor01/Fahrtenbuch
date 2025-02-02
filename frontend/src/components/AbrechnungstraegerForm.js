@@ -178,7 +178,7 @@ function AbrechnungstraegerForm() {
         </div>
         
         {/* List Grid */}
-        <div className="space-y-4">  {/* Statt grid grid-cols-2 */}
+        <div className="space-y-4">
         {abrechnungstraeger.map((traeger, index) => (
             <div key={traeger.id} className="card-container">
             <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -297,13 +297,8 @@ function AbrechnungstraegerForm() {
                 </div>
             ))}
             </div>
-            )}
             </div>
-            </div>
-        ))}
-        </div>
-        </div>
-    );
-}
-
-export default AbrechnungstraegerForm;
+        );
+            }
+            
+export default AbrechnungsTraegerForm;
