@@ -76,7 +76,7 @@ function DistanzForm() {
     </select>
     </div>
     
-    <div className="w-full sm:w-1/6">
+    <div className="w-full sm:w-1/4">
     <label className="form-label">Kilometer</label>
     <input
     type="number"
