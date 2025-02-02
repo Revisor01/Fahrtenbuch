@@ -264,9 +264,7 @@ function AbrechnungstraegerForm() {
                             ×
                         </button>
                     </div>
-                    {/* Mobile Buttons */}
                     <div className="sm:hidden flex flex-wrap gap-2 justify-end">
-                        {/* Action Buttons in einer Reihe */}
                         <button
                             onClick={() => handleEdit(traeger.id)}
                             className="btn-secondary flex-1"
@@ -279,7 +277,6 @@ function AbrechnungstraegerForm() {
                             title="Löschen">
                             Löschen
                         </button>
-                        {/* Bewegungs-Buttons in zweiter Reihe */}
                         <button
                             onClick={() => handleMoveItem(index, 'up')}
                             disabled={index === 0}
@@ -300,6 +297,6 @@ function AbrechnungstraegerForm() {
         </div>
     </div>
     );
-    }
+}
             
 export default AbrechnungsTraegerForm;
