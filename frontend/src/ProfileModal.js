@@ -418,16 +418,16 @@ function ProfileModal({ isOpen, onClose }) {
         
         {activeTab === 'api' && (
             <div className="space-y-6">
+            {/* Form Card */}
             <div className="card-container-highlight">
-            <div>
             <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
             <p className="text-sm text-muted mb-6">
             Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
             Jeder Key sollte einen eindeutigen Verwendungszweck haben.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full">
+            <div className="flex flex-col sm:flex-row gap-4 w-full">
+            <div className="w-full sm:w-2/3">
             <label className="form-label">Beschreibung</label>
             <input
             type="text"
@@ -437,13 +437,12 @@ function ProfileModal({ isOpen, onClose }) {
             className="form-input"
             />
             </div>
-            <div className="w-full sm:w-1/6 flex items-end">
+            <div className="flex items-end w-full sm:w-1/3">
             <button
             type="button"
             onClick={handleGenerateKey}
             disabled={isGeneratingKey}
-            className="btn-primary w-full"
-            >
+            className="btn-primary w-full">
             {isGeneratingKey ? 'Generiere...' : 'Neuer API Key'}
             </button>
             </div>
@@ -451,12 +450,8 @@ function ProfileModal({ isOpen, onClose }) {
             
             {generatedKey && (
                 <div className="mt-6 p-4 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
-                <p className="text-sm text-value font-medium mb-2">
-                Neuer API Key erstellt
-                </p>
-                <p className="text-sm text-label mb-4">
-                Kopieren Sie den Key jetzt - er wird nur einmal angezeigt!
-                </p>
+                <p className="text-sm text-value font-medium mb-2">Neuer API Key erstellt</p>
+                <p className="text-sm text-label mb-4">Kopieren Sie den Key jetzt - er wird nur einmal angezeigt!</p>
                 <div className="flex gap-2 items-center">
                 <code className="flex-1 bg-white dark:bg-gray-800 p-3 rounded text-sm break-all">
                 {generatedKey}
@@ -466,54 +461,53 @@ function ProfileModal({ isOpen, onClose }) {
                     navigator.clipboard.writeText(generatedKey);
                     showNotification('Erfolg', 'API Key wurde kopiert');
                 }}
-                className="btn-secondary whitespace-nowrap"
-                >
+                className="btn-secondary whitespace-nowrap">
                 Kopieren
                 </button>
                 </div>
                 </div>
             )}
             </div>
-            </div>
             
-            <div className="card-container">
-            <h3 className="text-lg font-medium text-value mb-4">Vorhandene API Keys</h3>
-            <div className="space-y-3">
+            {/* List Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {apiKeys.length === 0 ? (
+                <div className="card-container col-span-2">
                 <p className="text-sm text-muted text-center py-4">
                 Noch keine API Keys generiert
                 </p>
+                </div>
             ) : (
                 apiKeys.map(key => (
-                    <div key={key.id} 
-                    className="p-4 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
-                    <div className="flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div key={key.id} className="card-container">
+                    <div className="flex items-start justify-between">
                     <div>
-                    <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-value">
+                    <div className="font-medium text-value">
                     {key.description || 'API Key'}
-                    </span>
-                    <span className="text-xs text-label bg-primary-100 dark:bg-primary-800 px-2 py-0.5 rounded">
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        key.is_active 
+                        ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300' 
+                        : 'bg-secondary-100 text-secondary-700 dark:bg-secondary-900 dark:text-secondary-300'
+                    }`}>
                     {key.is_active ? '● Aktiv' : '○ Inaktiv'}
                     </span>
                     </div>
-                    <div className="text-xs text-label flex flex-wrap gap-x-4 gap-y-1">
-                    <span>Erstellt: {new Date(key.created_at).toLocaleDateString()}</span>
+                    <div className="text-xs text-label mt-2">
+                    <div>Erstellt: {new Date(key.created_at).toLocaleDateString()}</div>
                     {key.last_used_at && (
-                        <span>Zuletzt verwendet: {new Date(key.last_used_at).toLocaleDateString()}</span>
+                        <div>Zuletzt verwendet: {new Date(key.last_used_at).toLocaleDateString()}</div>
                     )}
                     </div>
                     </div>
-                    <div className="self-end sm:self-center">
+                    <div>
                     <button
                     onClick={() => handleDeleteKey(key.id)}
                     className="table-action-button-secondary"
-                    title="Löschen"
-                    >
+                    title="Löschen">
                     ×
                     </button>
-                    </div>
                     </div>
                     </div>
                     </div>
@@ -521,7 +515,7 @@ function ProfileModal({ isOpen, onClose }) {
             )}
             </div>
             </div>
-            </div>
+
         )}
         </div>
         </div>
