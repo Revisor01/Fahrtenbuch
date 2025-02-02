@@ -425,7 +425,7 @@ function ProfileModal({ isOpen, onClose }) {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full">
-            <div className="w-full sm:w-2/3">
+            <div className="w-full">
             <label className="form-label">Beschreibung</label>
             <input
             type="text"
@@ -435,7 +435,7 @@ function ProfileModal({ isOpen, onClose }) {
             className="form-input"
             />
             </div>
-            <div className="flex items-end w-full sm:w-1/3">
+            <div className="flex items-end w-full sm:w-1/6">
             <button
             type="button"
             onClick={handleGenerateKey}
