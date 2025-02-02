@@ -178,7 +178,7 @@ function ErstattungssaetzeForm() {
 
     return (
         <div className="space-y-6">
-        {/* Formular für neue Erstattungssätze */}
+        {/* Form Card */}
         <div className="card-container-highlight">
         <h3 className="text-lg font-medium text-value mb-4">Neuen Erstattungssatz hinzufügen</h3>
         <p className="text-sm text-muted mb-6">
@@ -187,7 +187,7 @@ function ErstattungssaetzeForm() {
         </p>
         
         <form onSubmit={handleSubmit}>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 w-full">
         <div className="w-full sm:w-1/3">
         <label className="form-label">Typ</label>
         <select
@@ -226,7 +226,7 @@ function ErstattungssaetzeForm() {
         />
         </div>
         <div className="flex items-end w-full sm:w-auto">
-        <button type="submit" className="btn-primary w-full sm:w-auto" disabled={isLoading}>
+        <button type="submit" className="btn-primary w-full" disabled={isLoading}>
         {isLoading ? 'Wird gespeichert...' : 'Speichern'}
         </button>
         </div>
@@ -234,24 +234,24 @@ function ErstattungssaetzeForm() {
         </form>
         </div>
         
-        {/* Card Grid für alle Erstattungssätze */}
+        {/* Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Mitfahrer Card */}
         <div className="card-container">
-        <div className="mb-4">
+        <div className="flex items-start justify-between mb-4">
+        <div>
         <h3 className="text-lg font-medium text-value">Mitfahrer:innen</h3>
         <div className="flex items-center gap-2 mt-1">
         <span className="text-sm text-label">Aktueller Satz:</span>
-        <span className="text-lg font-medium text-value">
+        <span className="text-value font-medium">
         {parseFloat(erstattungssaetze.mitfahrer[0]?.betrag || 0).toFixed(2)} €/km
         </span>
         </div>
         </div>
-        
+        </div>
         <div className="space-y-3">
         {erstattungssaetze.mitfahrer.map((satz) => (
-            <div key={satz.id} 
-            className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
+            <div key={satz.id} className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
             {editingSatz?.id === satz.id && editingSatz?.typ === 'mitfahrer' ? (
                 <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
@@ -311,20 +311,21 @@ function ErstattungssaetzeForm() {
         {/* Abrechnungsträger Cards */}
         {erstattungssaetze.abrechnungstraeger.map(traeger => (
             <div key={traeger.id} className="card-container">
-            <div className="mb-4">
+            <div className="flex items-start justify-between mb-4">
+            <div>
             <h3 className="text-lg font-medium text-value">{traeger.name}</h3>
             <div className="flex items-center gap-2 mt-1">
             <span className="text-sm text-label">Aktueller Satz:</span>
-            <span className="text-lg font-medium text-value">
+            <span className="text-value font-medium">
             {parseFloat(traeger.aktueller_betrag || 0).toFixed(2)} €/km
             </span>
+            </div>
             </div>
             </div>
             
             <div className="space-y-3">
             {traeger.erstattungsbetraege?.map((satz) => (
-                <div key={satz.id} 
-                className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
+                <div key={satz.id} className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
                 {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
                     <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex-1">
@@ -381,7 +382,7 @@ function ErstattungssaetzeForm() {
         ))}
         </div>
         </div>
-    );
+    ); 
 }
 
 export default ErstattungssaetzeForm;
