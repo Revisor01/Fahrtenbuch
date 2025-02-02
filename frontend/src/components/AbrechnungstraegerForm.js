@@ -228,68 +228,68 @@ function AbrechnungstraegerForm() {
                         )}
                     </div>
                     {!editingTraeger?.id && (
+                    <>
                     <div className="hidden sm:flex gap-2">
-                        <div className="flex gap-1">
-                            <button
-                                onClick={() => handleMoveItem(index, 'up')}
-                                disabled={index === 0}
-                                className="table-action-button-primary"
-                                title="Nach oben">
-                                <ChevronUp size={16} />
-                            </button>
-                            <button
-                                onClick={() => handleMoveItem(index, 'down')}
-                                disabled={index === abrechnungstraeger.length - 1}
-                                className="table-action-button-primary"
-                                title="Nach unten">
-                                <ChevronDown size={16} />
-                            </button>
-                        </div>
-                        <button
-                            onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                            className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
-                            title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
-                            {traeger.active ? '●' : '○'}
-                        </button>
-                        <button
-                            onClick={() => handleEdit(traeger.id)}
-                            className="table-action-button-primary"
-                            title="Bearbeiten">
-                            ✎
-                        </button>
-                        <button
-                            onClick={() => handleDelete(traeger.id)}
-                            className="table-action-button-secondary"
-                            title="Löschen">
-                            ×
-                        </button>
-                    </div>
-                    <div className="sm:hidden flex flex-wrap gap-2 justify-end">
-                        <button
-                            onClick={() => handleEdit(traeger.id)}
-                            className="btn-secondary flex-1"
-                            title="Bearbeiten">
-                            Bearbeiten
-                        </button>
-                        <button
-                            onClick={() => handleDelete(traeger.id)}
-                            className="btn-secondary flex-1"
-                            title="Löschen">
-                            Löschen
-                        </button>
-                        <button
-                            onClick={() => handleMoveItem(index, 'up')}
-                            disabled={index === 0}
-                            className="btn-secondary flex-1">
-                            Nach oben
-                        </button>
-                        <button
-                            onClick={() => handleMoveItem(index, 'down')}
-                            disabled={index === abrechnungstraeger.length - 1}
-                            className="btn-secondary flex-1">
-                            Nach unten
-                        </button>
-                    </div>
+                                <div className="flex gap-1">
+                                    <button
+                                        onClick={() => handleMoveItem(index, 'up')}
+                                        disabled={index === 0}
+                                        className="table-action-button-primary"
+                                        title="Nach oben">
+                                        <ChevronUp size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleMoveItem(index, 'down')}
+                                        disabled={index === abrechnungstraeger.length - 1}
+                                        className="table-action-button-primary"
+                                        title="Nach unten">
+                                        <ChevronDown size={16} />
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => handleToggleActive(traeger.id, traeger.active)}
+                                    className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
+                                    title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
+                                    {traeger.active ? '●' : '○'}
+                                </button>
+                                <button
+                                    onClick={() => handleEdit(traeger.id)}
+                                    className="table-action-button-primary"
+                                    title="Bearbeiten">
+                                    ✎
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(traeger.id)}
+                                    className="table-action-button-secondary"
+                                    title="Löschen">
+                                    ×
+                                </button>
+                            </div><div className="sm:hidden flex flex-wrap gap-2 justify-end">
+                                    <button
+                                        onClick={() => handleEdit(traeger.id)}
+                                        className="btn-secondary flex-1"
+                                        title="Bearbeiten">
+                                        Bearbeiten
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(traeger.id)}
+                                        className="btn-secondary flex-1"
+                                        title="Löschen">
+                                        Löschen
+                                    </button>
+                                    <button
+                                        onClick={() => handleMoveItem(index, 'up')}
+                                        disabled={index === 0}
+                                        className="btn-secondary flex-1">
+                                        Nach oben
+                                    </button>
+                                    <button
+                                        onClick={() => handleMoveItem(index, 'down')}
+                                        disabled={index === abrechnungstraeger.length - 1}
+                                        className="btn-secondary flex-1">
+                                        Nach unten
+                                    </button>
+                                </div></>
                     )}
                 </div>
             </div>
