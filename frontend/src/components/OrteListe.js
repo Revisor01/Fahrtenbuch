@@ -203,12 +203,21 @@ function OrteListe() {
       <div className="text-xs text-label mt-2">{getOrtStatusLabel(ort)}</div>
       </div>
       <div className="flex gap-2">
-      <button onClick={() => handleEdit(ort)} className="btn-secondary">
-      Bearbeiten
+      <button
+      onClick={() => handleEdit(ort)}
+      className="table-action-button-primary"
+      title="Bearbeiten"
+      >
+      ✎
       </button>
-      <button onClick={() => handleDelete(ort.id)} className="btn-secondary">
-      Löschen
+      <button
+      onClick={() => handleDelete(ort.id)}
+      className="table-action-button-secondary"
+      title="Löschen"
+      >
+      ×
       </button>
+
       </div>
       </div>
       </div>

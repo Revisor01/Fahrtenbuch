@@ -211,15 +211,17 @@ function DistanzenListe() {
           <div className="flex gap-2">
           <button
           onClick={() => handleEdit(distanz)}
-          className="btn-secondary"
+          className="table-action-button-primary"
+          title="Bearbeiten"
           >
-          Bearbeiten
+          ✎
           </button>
           <button
           onClick={() => handleDelete(distanz.id)}
-          className="btn-secondary"
+          className="table-action-button-secondary"
+          title="Löschen"
           >
-          Löschen
+          ×
           </button>
           </div>
           </div>

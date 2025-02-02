@@ -267,19 +267,6 @@ function AbrechnungstraegerForm() {
                             </div>
                             <div className="sm:hidden flex flex-wrap gap-2 justify-end">
 
-                        
-                        <button
-                        onClick={() => handleEdit(traeger.id)}
-                        className="table-action-button-primary"
-                        title="Bearbeiten">
-                        ✎
-                        </button>
-                        <button
-                        onClick={() => handleDelete(traeger.id)}
-                        className="table-action-button-secondary"
-                        title="Löschen">
-                        ×
-                        </button>
                         <button
                         onClick={() => handleMoveItem(index, 'up')}
                         disabled={index === 0}
@@ -294,6 +281,25 @@ function AbrechnungstraegerForm() {
                         title="Nach unten">
                         <ChevronDown size={16} />
                         </button>
+                        <button
+                        onClick={() => handleToggleActive(traeger.id, traeger.active)}
+                        className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
+                        title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
+                        {traeger.active ? '●' : '○'}
+                        </button>
+                        <button
+                        onClick={() => handleEdit(traeger.id)}
+                        className="table-action-button-primary"
+                        title="Bearbeiten">
+                        ✎
+                        </button>
+                        <button
+                        onClick={() => handleDelete(traeger.id)}
+                        className="table-action-button-secondary"
+                        title="Löschen">
+                        ×
+                        </button>
+
                                 </div></>
                     )}
                 </div>
