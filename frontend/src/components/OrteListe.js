@@ -89,19 +89,26 @@ function OrteListe() {
   };
   
   return (
+    <>
     <div className="hidden md:block">
     <div className="table-container">
     <table className="w-full">
     <thead>
     <tr className="table-head-row">
     <th className="table-header" onClick={() => requestSort('name')}>
-    Name {sortConfig.key === 'name' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    Name
+    {sortConfig.key === 'name' && (
+      <span className="text-muted">
+      {sortConfig.direction === 'ascending' ? '↑' : '↓'}
+      </span>
     )}
     </th>
     <th className="table-header-sm" onClick={() => requestSort('adresse')}>
-    Adresse {sortConfig.key === 'adresse' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    Adresse
+    {sortConfig.key === 'adresse' && (
+      <span className="text-muted">
+      {sortConfig.direction === 'ascending' ? '↑' : '↓'}
+      </span>
     )}
     </th>
     <th className="table-header">Status</th>
@@ -121,9 +128,7 @@ function OrteListe() {
       ) : (
         <div className="flex flex-col">
         <span className="text-value">{ort.name}</span>
-        <span className="text-muted text-xs sm:hidden">
-        {ort.adresse}
-        </span>
+        <span className="text-muted text-xs sm:hidden">{ort.adresse}</span>
         </div>
       )}
       </td>
@@ -157,11 +162,7 @@ function OrteListe() {
       <td className="table-cell">
       <div className="flex justify-end gap-2">
       {editingOrt?.id === ort.id ? (
-        <button
-        onClick={handleSave}
-        className="table-action-button-primary"
-        title="Speichern"
-        >
+        <button onClick={handleSave} className="table-action-button-primary" title="Speichern">
         ✓
         </button>
       ) : (
@@ -199,19 +200,13 @@ function OrteListe() {
       <div>
       <div className="font-medium text-value">{ort.name}</div>
       <div className="text-sm text-label mt-1">{ort.adresse}</div>
-      <div className="text-xs text-label mt-2">
-      {getOrtStatusLabel(ort)}
-      </div>
+      <div className="text-xs text-label mt-2">{getOrtStatusLabel(ort)}</div>
       </div>
       <div className="flex gap-2">
-      <button
-      onClick={() => handleEdit(ort)}
-      className="btn-secondary">
+      <button onClick={() => handleEdit(ort)} className="btn-secondary">
       Bearbeiten
       </button>
-      <button
-      onClick={() => handleDelete(ort.id)}
-      className="btn-secondary">
+      <button onClick={() => handleDelete(ort.id)} className="btn-secondary">
       Löschen
       </button>
       </div>
