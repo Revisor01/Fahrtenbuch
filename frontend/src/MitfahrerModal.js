@@ -80,7 +80,7 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     </div>
     
     {!readOnly && (
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-row gap-2">
       <button
       type="button"
       onClick={onClose}
