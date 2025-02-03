@@ -207,7 +207,7 @@ function AbrechnungstraegerForm() {
                                 required
                                 />
                             </div>
-                            <div className="mobile-edit-actions">
+                            <div className="flex gap-2 justify-end">
                                 <button 
                                     onClick={handleUpdate}
                                     className="btn-primary">

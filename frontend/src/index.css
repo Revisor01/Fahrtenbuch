@@ -235,7 +235,7 @@ code {
 }
   
 .mobile-edit-actions {
-  @apply flex flex-col sm:flex-row gap-2 mt-4;
+  @apply flex flex-row gap-2 mt-4;
 }
   
 .mobile-edit-actions button {
