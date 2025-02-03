@@ -351,7 +351,8 @@ function ErstattungssaetzeForm() {
                     className="form-input"
                     />
                     </div>
-                    <div className="hidden sm:flex gap-2">
+                    </div>
+                    <div className="hidden sm:flex justify-center gap-2 mt-4">
                     <button onClick={handleSaveEdit} className="table-action-button-primary" title="Speichern">✓</button>
                     <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
                     </div>
