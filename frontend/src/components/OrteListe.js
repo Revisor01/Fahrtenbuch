@@ -4,7 +4,6 @@ import { AppContext } from '../App';
 function OrteListe() {
   const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
   const [editingOrt, setEditingOrt] = useState(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
 
   const handleEdit = (ort) => {
@@ -12,17 +11,11 @@ function OrteListe() {
   };
   
   const handleSave = () => {
-    const updatedOrt = {
-      ...editingOrt,
-      ist_wohnort: editingOrt.ist_wohnort !== undefined ? editingOrt.ist_wohnort : false,
-      ist_dienstort: editingOrt.ist_dienstort !== undefined ? editingOrt.ist_dienstort : false,
-      ist_kirchspiel: editingOrt.ist_kirchspiel !== undefined ? editingOrt.ist_kirchspiel : false
-    };
-    updateOrt(editingOrt.id, updatedOrt);
+    updateOrt(editingOrt.id, editingOrt);
     setEditingOrt(null);
     showNotification("Erfolg", "Der Ort wurde erfolgreich aktualisiert.");
   };
-  
+
   const handleDelete = async (id) => {
     showNotification(
       "Ort löschen",
@@ -40,29 +33,39 @@ function OrteListe() {
     );
   };
   
-    const sortedOrte = useMemo(() => {
-        let sortableOrte = [...orte];
-        if (sortConfig.key !== null) {
-            sortableOrte.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? -1 : 1;
-                }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? 1 : -1;
-                }
-                return 0;
-            });
+  const sortedOrte = useMemo(() => {
+    let sortableOrte = [...orte];
+    if (sortConfig.key !== null) {
+      sortableOrte.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
         }
-        return sortableOrte;
-    }, [orte, sortConfig]);
-    
-    const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
         }
-        setSortConfig({ key, direction });
-    };
+        return 0;
+      });
+    }
+    return sortableOrte;
+  }, [orte, sortConfig]);
+  
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const handleStatusChange = (e) => {
+    const value = e.target.value;
+    setEditingOrt({
+      ...editingOrt,
+      ist_wohnort: value === 'wohnort',
+      ist_dienstort: value === 'dienstort',
+      ist_kirchspiel: value === 'kirchspiel'
+    });
+  };
 
   const getOrtStatus = (ort) => {
     if (ort.ist_wohnort) return 'wohnort';
@@ -78,74 +81,72 @@ function OrteListe() {
     return 'Sonstiger Ort';
   };
   
-  const handleStatusChange = (e) => {
-    const value = e.target.value;
-    setEditingOrt({
-      ...editingOrt,
-      ist_wohnort: value === 'wohnort',
-      ist_dienstort: value === 'dienstort',
-      ist_kirchspiel: value === 'kirchspiel'
-    });
-  };
-  
   return (
-    <>
-    <div className="hidden md:block">
-    <div className="table-container">
-    <table className="w-full">
-    <thead>
-    <tr className="table-head-row">
-    <th className="table-header" onClick={() => requestSort('name')}>
-    Name
-    {sortConfig.key === 'name' && (
-      <span className="text-muted">
-      {sortConfig.direction === 'ascending' ? '↑' : '↓'}
-      </span>
-    )}
-    </th>
-    <th className="table-header-sm" onClick={() => requestSort('adresse')}>
-    Adresse
-    {sortConfig.key === 'adresse' && (
-      <span className="text-muted">
-      {sortConfig.direction === 'ascending' ? '↑' : '↓'}
-      </span>
-    )}
-    </th>
-    <th className="table-header">Status</th>
-    <th className="table-header text-right">Aktionen</th>
-    </tr>
-    </thead>
-    <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
+    <div className="space-y-4">
+      {/* Desktop View */}
+      <div className="hidden md:block table-container">
+        <table className="w-full">
+          <thead>
+            <tr className="table-head-row">
+              <th className="table-header" onClick={() => requestSort('name')}>
+                Name {sortConfig.key === 'name' && (
+                  <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+                )}
+              </th>
+              <th className="table-header" onClick={() => requestSort('adresse')}>
+                Adresse {sortConfig.key === 'adresse' && (
+                  <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+                )}
+              </th>
+              <th className="table-header">Status</th>
+              <th className="table-header text-right">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedOrte.map((ort) => (
+              <tr key={ort.id} className="table-row">
+                <td className="table-cell">{ort.name}</td>
+                <td className="table-cell">{ort.adresse}</td>
+                <td className="table-cell">{getOrtStatusLabel(ort)}</td>
+                <td className="table-cell">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => handleEdit(ort)} className="table-action-button-primary">✎</button>
+                    <button onClick={() => handleDelete(ort.id)} className="table-action-button-secondary">×</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+    {/* Mobile View */}
+    <div className="md:hidden space-y-4">
     {sortedOrte.map((ort) => (
-      <tr key={ort.id} className="table-row">
-      <td className="table-cell">
+      <div key={ort.id} className="card-container">
       {editingOrt?.id === ort.id ? (
+        <div className="mobile-edit-container">
+        <div className="form-group">
+        <label className="form-label">Name</label>
         <input
+        type="text"
         value={editingOrt.name}
-        onChange={(e) => setEditingOrt({ ...editingOrt, name: e.target.value })}
+        onChange={(e) => setEditingOrt({...editingOrt, name: e.target.value})}
         className="form-input"
         />
-      ) : (
-        <div className="flex flex-col">
-        <span className="text-value">{ort.name}</span>
-        <span className="text-muted text-xs sm:hidden">{ort.adresse}</span>
         </div>
-      )}
-      </td>
-      <td className="table-cell hidden md:table-cell">
-      {editingOrt?.id === ort.id ? (
+        <div className="form-group">
+        <label className="form-label">Adresse</label>
         <input
+        type="text"
         value={editingOrt.adresse}
-        onChange={(e) => setEditingOrt({ ...editingOrt, adresse: e.target.value })}
+        onChange={(e) => setEditingOrt({...editingOrt, adresse: e.target.value})}
         className="form-input"
         />
-      ) : (
-        <span className="text-value">{ort.adresse}</span>
-      )}
-      </td>
-      <td className="table-cell">
-      {editingOrt?.id === ort.id ? (
-        <select
+        </div>
+        <div className="form-group">
+        <label className="form-label">Status</label>
+        <select 
         value={getOrtStatus(editingOrt)}
         onChange={handleStatusChange}
         className="form-select"
@@ -155,18 +156,20 @@ function OrteListe() {
         <option value="dienstort">Dienstort</option>
         <option value="kirchspiel">Kirchspiel</option>
         </select>
+        </div>
+        <div className="mobile-edit-actions">
+        <button onClick={() => setEditingOrt(null)} className="btn-secondary">Abbrechen</button>
+        <button onClick={handleSave} className="btn-primary">Speichern</button>
+        </div>
+        </div>
       ) : (
-        <span className="text-value">{getOrtStatusLabel(ort)}</span>
-      )}
-      </td>
-      <td className="table-cell">
-      <div className="flex justify-end gap-2">
-      {editingOrt?.id === ort.id ? (
-        <button onClick={handleSave} className="table-action-button-primary" title="Speichern">
-        ✓
-        </button>
-      ) : (
-        <>
+        <div className="flex justify-between items-start">
+        <div>
+        <div className="font-medium text-value">{ort.name}</div>
+        <div className="text-sm text-label mt-1">{ort.adresse}</div>
+        <div className="text-xs text-label mt-2">{getOrtStatusLabel(ort)}</div>
+        </div>
+        <div className="flex gap-2">
         <button
         onClick={() => handleEdit(ort)}
         className="table-action-button-primary"
@@ -181,51 +184,14 @@ function OrteListe() {
         >
         ×
         </button>
-        </>
+        </div>
+        </div>
       )}
       </div>
-      </td>
-      </tr>
-    ))}
-    </tbody>
-    </table>
-    </div>
-    </div>
-    
-    {/* Mobile View */}
-    <div className="md:hidden space-y-4">
-    {sortedOrte.map((ort) => (
-      <div key={ort.id} className="card-container">
-      <div className="flex justify-between items-start">
-      <div>
-      <div className="font-medium text-value">{ort.name}</div>
-      <div className="text-sm text-label mt-1">{ort.adresse}</div>
-      <div className="text-xs text-label mt-2">{getOrtStatusLabel(ort)}</div>
-      </div>
-      <div className="flex gap-2">
-      <button
-      onClick={() => handleEdit(ort)}
-      className="table-action-button-primary"
-      title="Bearbeiten"
-      >
-      ✎
-      </button>
-      <button
-      onClick={() => handleDelete(ort.id)}
-      className="table-action-button-secondary"
-      title="Löschen"
-      >
-      ×
-      </button>
-
-      </div>
-      </div>
-      </div>
     ))}
     </div>
-    </>
+    </div>
   );
 }
-
 
 export default OrteListe;

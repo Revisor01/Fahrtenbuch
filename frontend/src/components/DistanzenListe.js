@@ -167,11 +167,11 @@ function DistanzenListe() {
       </div>
       </div>
       {/* Mobile View */}
-      <div className="md:hidden space-y-4">
+      <div className="mobile-edit-container">
       {sortedDistanzen.map((distanz) => (
         <div key={distanz.id} className="card-container">
         {editingDistanz?.id === distanz.id ? (
-          <div className="space-y-4">
+          <div className="mobile-edit-container">
           <div>
           <label className="form-label">Von</label>
           <div className="text-value">{getOrtName(distanz.von_ort_id)}</div>
@@ -192,7 +192,7 @@ function DistanzenListe() {
           className="form-input"
           />
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="mobile-edit-actions">
           <button onClick={handleSave} className="btn-primary">Speichern</button>
           <button onClick={() => setEditingDistanz(null)} className="btn-secondary">Abbrechen</button>
           </div>
