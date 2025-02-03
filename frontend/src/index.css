@@ -215,6 +215,33 @@ code {
     @apply text-primary-500 dark:text-primary-300;
   }
 
+  
+/* Action Button Group */
+.action-button-group {
+  @apply flex flex-col sm:flex-row gap-2 w-full;
+}
+  
+.action-button-group button {
+  @apply w-full;
+}
+  
+/* Mobile Edit Container */
+.mobile-edit-container {
+  @apply space-y-4 w-full;
+}
+  
+.mobile-edit-container .form-group {
+  @apply space-y-2;
+}
+  
+.mobile-edit-actions {
+  @apply flex flex-col sm:flex-row gap-2 mt-4;
+}
+  
+.mobile-edit-actions button {
+  @apply w-full;
+}
+  
   /* Buttons */
   .btn-primary {
     @apply bg-primary-500 dark:bg-primary-600 
@@ -253,7 +280,6 @@ code {
   @apply px-4 py-3 
       dark:text-primary-400
 }
-  
   .table-header-sm {
     padding: 0.75rem 1rem !important;
     font-size: 0.75rem !important;
