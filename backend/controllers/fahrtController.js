@@ -18,7 +18,6 @@ exports.createFahrt = async (req, res) => {
       datum, 
       anlass, 
       kilometer, 
-      autosplit, 
       abrechnung,
       einmaligerVonOrt,
       einmaligerNachOrt,
@@ -26,50 +25,20 @@ exports.createFahrt = async (req, res) => {
     } = req.body;
     const userId = req.user.id;
     
-    let details = [];
-    let gesamtKilometer = kilometer;
-    
-    if (autosplit) {
-      const splitResult = await calculateAutoSplit(vonOrtId, nachOrtId, userId);
-      gesamtKilometer = splitResult.kirchenkreis + splitResult.gemeinde;
-      
-      if (splitResult.kirchenkreis > 0) {
-        details.push({
-          vonOrtId: splitResult.kirchenkreisVonOrtId,
-          nachOrtId: splitResult.kirchenkreisNachOrtId,
-          kilometer: splitResult.kirchenkreis,
-          abrechnung: 'Kirchenkreis'
-        });
-      }
-      
-      if (splitResult.gemeinde > 0) {
-        details.push({
-          vonOrtId: splitResult.gemeindeVonOrtId,
-          nachOrtId: splitResult.gemeindeNachOrtId,
-          kilometer: splitResult.gemeinde,
-          abrechnung: 'Gemeinde'
-        });
-      }
-    } else if (!gesamtKilometer && !einmaligerVonOrt && !einmaligerNachOrt) {
-      gesamtKilometer = await getDistance(vonOrtId, nachOrtId, userId);
-    }
-    
     const fahrtData = {
       datum,
       anlass,
-      autosplit: autosplit || false,
-      kilometer: gesamtKilometer,
-      abrechnung: autosplit ? 'Autosplit' : (abrechnung || 'Gemeinde'),
-      vonOrtId,
-      nachOrtId,
-      einmaligerVonOrt,
-      einmaligerNachOrt
+      kilometer,
+      abrechnung,
+      vonOrtId: vonOrtId || null,
+      nachOrtId: nachOrtId || null,
+      einmaligerVonOrt: einmaligerVonOrt || null,
+      einmaligerNachOrt: einmaligerNachOrt || null
     };
     
     console.log('Processed fahrt data:', fahrtData);
-    console.log('Details for autosplit:', details);
     
-    const id = await Fahrt.create(fahrtData, details, userId);
+    const id = await Fahrt.create(fahrtData, null, userId);
     if (mitfahrer && mitfahrer.length > 0) {
       for (const person of mitfahrer) {
         await Mitfahrer.create(id, person.name, person.arbeitsstaette, person.richtung);
