@@ -130,43 +130,45 @@ function DistanzenListe() {
                         <span className="text-value">{distanz.distanz}</span>
                     )}
                 </td>
-                <td className="table-cell">
-                    <div className="flex justify-end gap-2">
-                        {editingDistanz?.id === distanz.id ? (
-                            <button
-                                onClick={handleSave}
-                                className="table-action-button-primary"
-                                title="Speichern"
-                            >
-                                ✓
-                            </button>
-                          <button
-                          onClick={() => handleDelete(distanz.id)}
-                          className="table-action-button-secondary"
-                          title="Löschen"
-                          >
-                          ×
-                          </button>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={() => handleEdit(distanz)}
-                                    className="table-action-button-primary"
-                                    title="Bearbeiten"
-                                >
-                                    ✎
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(distanz.id)}
-                                    className="table-action-button-secondary"
-                                    title="Löschen"
-                                >
-                                    ×
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </td>
+              <td className="table-cell">
+              <div className="flex justify-end gap-2">
+              {editingDistanz?.id === distanz.id ? (
+                <>
+                <button
+                onClick={handleSave}
+                className="table-action-button-primary"
+                title="Speichern"
+                >
+                ✓
+                </button>
+                <button
+                onClick={() => setEditingDistanz(null)}
+                className="table-action-button-secondary"
+                title="Abbrechen"
+                >
+                ×
+                </button>
+                </>
+              ) : (
+                <>
+                <button
+                onClick={() => handleEdit(distanz)}
+                className="table-action-button-primary"
+                title="Bearbeiten"
+                >
+                ✎
+                </button>
+                <button
+                onClick={() => handleDelete(distanz.id)}
+                className="table-action-button-secondary"
+                title="Löschen"
+                >
+                ×
+                </button>
+                </>
+              )}
+              </div>
+              </td>
             </tr>
             ))}
         </tbody>
