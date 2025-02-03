@@ -140,6 +140,13 @@ function DistanzenListe() {
                             >
                                 ✓
                             </button>
+                          <button
+                          onClick={() => handleDelete(distanz.id)}
+                          className="table-action-button-secondary"
+                          title="Löschen"
+                          >
+                          ×
+                          </button>
                         ) : (
                             <>
                                 <button
@@ -193,8 +200,8 @@ function DistanzenListe() {
           />
           </div>
           <div className="mobile-edit-actions">
-          <button onClick={handleSave} className="btn-primary">Speichern</button>
           <button onClick={() => setEditingDistanz(null)} className="btn-secondary">Abbrechen</button>
+          <button onClick={handleSave} className="btn-primary">Speichern</button>
           </div>
           </div>
         ) : (
