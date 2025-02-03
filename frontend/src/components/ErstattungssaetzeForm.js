@@ -253,6 +253,7 @@ function ErstattungssaetzeForm() {
         {erstattungssaetze.mitfahrer.map((satz) => (
             <div key={satz.id} className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
             {editingSatz?.id === satz.id && editingSatz?.typ === 'mitfahrer' ? (
+                <div className="mobile-edit-container">
                 <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
                 <label className="form-label">Betrag (€/km)</label>
@@ -274,13 +275,14 @@ function ErstattungssaetzeForm() {
                 className="form-input"
                 />
                 </div>
-                <div className="mobile-edit-actions">
-                <button onClick={handleSaveEdit} 
-                className="btn-primary" 
-                title="Speichern">Speichern</button>
-                <button onClick={() => setEditingSatz(null)} 
-                className="btn-secondary" 
-                title="Abbrechen">Abbrechen</button>
+                </div>
+                <div className="sm:hidden mobile-edit-actions">
+                <button onClick={() => setEditingSatz(null)} className="btn-secondary">Abbrechen</button>
+                <button onClick={handleSaveEdit} className="btn-primary">Speichern</button>
+                </div>
+                <div className="hidden sm:flex justify-center gap-2 mt-4">
+                <button onClick={handleSaveEdit} className="table-action-button-primary" title="Speichern">✓</button>
+                <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
                 </div>
                 </div>
             ) : (
@@ -327,6 +329,7 @@ function ErstattungssaetzeForm() {
             {traeger.erstattungsbetraege?.map((satz) => (
                 <div key={satz.id} className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
                 {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
+                    <div className="mobile-edit-container">
                     <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex-1">
                     <label className="form-label">Betrag (€/km)</label>
@@ -348,11 +351,14 @@ function ErstattungssaetzeForm() {
                     className="form-input"
                     />
                     </div>
-                    <div className="flex items-end gap-2">
-                    <button onClick={handleSaveEdit} 
-                    className="table-action-button-primary">✓</button>
-                    <button onClick={() => setEditingSatz(null)} 
-                    className="table-action-button-secondary">×</button>
+                    </div>
+                    <div className="sm:hidden mobile-edit-actions">
+                    <button onClick={() => setEditingSatz(null)} className="btn-secondary">Abbrechen</button>
+                    <button onClick={handleSaveEdit} className="btn-primary">Speichern</button>
+                    </div>
+                    <div className="hidden sm:flex justify-center gap-2 mt-4">
+                    <button onClick={handleSaveEdit} className="table-action-button-primary" title="Speichern">✓</button>
+                    <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
                     </div>
                     </div>
                 ) : (
