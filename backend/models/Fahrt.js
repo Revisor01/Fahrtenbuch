@@ -9,7 +9,6 @@ class Fahrt {
       const { 
         datum, 
         anlass, 
-        autosplit, 
         kilometer, 
         abrechnung, 
         vonOrtId, 
@@ -20,26 +19,18 @@ class Fahrt {
       
       const [result] = await conn.execute(
         `INSERT INTO fahrten (
-          datum, anlass, autosplit, kilometer, abrechnung, 
-          von_ort_id, nach_ort_id, einmaliger_von_ort, einmaliger_nach_ort, user_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        datum, anlass, kilometer, abrechnung, 
+        von_ort_id, nach_ort_id, einmaliger_von_ort, einmaliger_nach_ort, user_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          datum, anlass, autosplit ? 1 : 0, kilometer, abrechnung, 
-          vonOrtId || null, nachOrtId || null, einmaligerVonOrt || null, einmaligerNachOrt || null, userId
+          datum, anlass, kilometer, abrechnung, 
+          vonOrtId || null, nachOrtId || null, 
+          einmaligerVonOrt || null, einmaligerNachOrt || null, 
+          userId
         ]
       );
       
       const fahrtId = result.insertId;
-      
-      if (autosplit && details && details.length) {
-        for (const detail of details) {
-          console.log('Inserting detail:', detail);
-          await conn.execute(
-            'INSERT INTO fahrt_details (fahrt_id, von_ort_id, nach_ort_id, kilometer, abrechnung) VALUES (?, ?, ?, ?, ?)',
-            [fahrtId, detail.vonOrtId, detail.nachOrtId, detail.kilometer, detail.abrechnung]
-          );
-        }
-      }
       
       await conn.commit();
       return fahrtId;

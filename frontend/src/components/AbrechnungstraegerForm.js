@@ -218,6 +218,14 @@ return (
                     </div>
                 ) : (
                         <>
+                            <div className="font-medium text-value">{traeger.name}</div>
+                            <div className="text-xs text-label mt-1">{traeger.kennzeichen}</div>
+                        </>
+                        )}
+                    </div>
+                    {editingTraeger?.id === traeger.id ? (
+                    ) : (
+                        <>
                             <div className="hidden sm:flex gap-2">
                                 <div className="flex gap-1">
                                     <button
