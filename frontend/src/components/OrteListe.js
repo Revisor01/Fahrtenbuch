@@ -83,42 +83,71 @@ function OrteListe() {
   
   return (
     <div className="space-y-4">
-      {/* Desktop View */}
-      <div className="hidden md:block table-container">
-        <table className="w-full">
-          <thead>
-            <tr className="table-head-row">
-              <th className="table-header" onClick={() => requestSort('name')}>
-                Name {sortConfig.key === 'name' && (
-                  <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-                )}
-              </th>
-              <th className="table-header" onClick={() => requestSort('adresse')}>
-                Adresse {sortConfig.key === 'adresse' && (
-                  <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-                )}
-              </th>
-              <th className="table-header">Status</th>
-              <th className="table-header text-right">Aktionen</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedOrte.map((ort) => (
-              <tr key={ort.id} className="table-row">
-                <td className="table-cell">{ort.name}</td>
-                <td className="table-cell">{ort.adresse}</td>
-                <td className="table-cell">{getOrtStatusLabel(ort)}</td>
-                <td className="table-cell">
-                  <div className="flex justify-end gap-2">
-                    <button onClick={() => handleEdit(ort)} className="table-action-button-primary">✎</button>
-                    <button onClick={() => handleDelete(ort.id)} className="table-action-button-secondary">×</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    {/* Desktop View */}
+    <div className="hidden md:block table-container">
+    <table className="w-full">
+    <thead>...</thead>
+    <tbody>
+    {sortedOrte.map((ort) => (
+      <tr key={ort.id} className="table-row">
+      <td className="table-cell">
+      {editingOrt?.id === ort.id ? (
+        <input
+        value={editingOrt.name}
+        onChange={(e) => setEditingOrt({...editingOrt, name: e.target.value})}
+        className="form-input"
+        />
+      ) : (
+        <span className="text-value">{ort.name}</span>
+      )}
+      </td>
+      <td className="table-cell">
+      {editingOrt?.id === ort.id ? (
+        <input
+        value={editingOrt.adresse}
+        onChange={(e) => setEditingOrt({...editingOrt, adresse: e.target.value})}
+        className="form-input"
+        />
+      ) : (
+        <span className="text-value">{ort.adresse}</span>
+      )}
+      </td>
+      <td className="table-cell">
+      {editingOrt?.id === ort.id ? (
+        <select
+        value={getOrtStatus(editingOrt)}
+        onChange={handleStatusChange}
+        className="form-select"
+        >
+        <option value="">Sonstiger Ort</option>
+        <option value="wohnort">Wohnort</option>
+        <option value="dienstort">Dienstort</option>
+        <option value="kirchspiel">Kirchspiel</option>
+        </select>
+      ) : (
+        <span className="text-value">{getOrtStatusLabel(ort)}</span>
+      )}
+      </td>
+      <td className="table-cell">
+      <div className="flex justify-end gap-2">
+      {editingOrt?.id === ort.id ? (
+        <>
+        <button onClick={handleSave} className="table-action-button-primary">✓</button>
+        <button onClick={() => setEditingOrt(null)} className="table-action-button-secondary">×</button>
+        </>
+      ) : (
+        <>
+        <button onClick={() => handleEdit(ort)} className="table-action-button-primary">✎</button>
+        <button onClick={() => handleDelete(ort.id)} className="table-action-button-secondary">×</button>
+        </>
+      )}
       </div>
+      </td>
+      </tr>
+    ))}
+    </tbody>
+    </table>
+    </div>
 
     {/* Mobile View */}
     <div className="md:hidden space-y-4">

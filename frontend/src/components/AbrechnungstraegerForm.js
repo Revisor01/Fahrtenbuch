@@ -207,17 +207,9 @@ function AbrechnungstraegerForm() {
                                 required
                                 />
                             </div>
-                            <div className="flex gap-2 justify-end">
-                                <button 
-                                    onClick={handleUpdate}
-                                    className="btn-primary">
-                                    Speichern
-                                </button>
-                                <button 
-                                    onClick={() => setEditingTraeger(null)}
-                                    className="btn-secondary">
-                                    Abbrechen
-                                </button>
+                            <div className="mobile-edit-actions">
+                            <button onClick={() => setEditingTraeger(null)} className="btn-secondary">Abbrechen</button>
+                            <button onClick={handleUpdate} className="btn-primary">Speichern</button>
                             </div>
                         </div>
                         ) : (
