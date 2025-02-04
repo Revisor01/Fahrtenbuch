@@ -72,8 +72,8 @@ class AbrechnungsTraeger {
             }
             
             const [result] = await connection.execute(
-                'INSERT INTO abrechnungstraeger (user_id, name) VALUES (?, ?)',
-                [userData.userId, userData.name]
+                'INSERT INTO abrechnungstraeger (user_id, name, sort_order) VALUES (?, ?, ?)',
+                [userData.userId, userData.name, userData.sortOrder]
             );
             
             const abrechnungsTraegerId = result.insertId;
