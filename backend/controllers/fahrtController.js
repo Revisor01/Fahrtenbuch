@@ -34,7 +34,8 @@ exports.createFahrt = async (req, res) => {
       vonOrtId: vonOrtId || null,
       nachOrtId: nachOrtId || null,
       einmaligerVonOrt: einmaligerVonOrt || null,
-      einmaligerNachOrt: einmaligerNachOrt || null
+      einmaligerNachOrt: einmaligerNachOrt || null,
+      userId
     };
     
     console.log('Processed fahrt data:', fahrtData);
@@ -154,41 +155,40 @@ exports.getMonthlyReport = async (req, res) => {
       fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
     }
     
-    // Hole die Erstattungssätze für alle Abrechnungsträger im relevanten Zeitraum
-    const [erstattungssaetze] = await db.execute(`
-  SELECT 
-    at.kennzeichen,
-    eb.betrag,
-    eb.gueltig_ab
-  FROM abrechnungstraeger at
-  INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-  WHERE at.user_id = ? 
-    AND at.active = true
-    AND eb.gueltig_ab <= LAST_DAY(?)
-  UNION
-  SELECT 
-    'mitfahrer' as kennzeichen,
-    betrag,
-    gueltig_ab 
-  FROM mitfahrer_erstattung
-  WHERE user_id = ?
-    AND gueltig_ab <= LAST_DAY(?)
-  ORDER BY gueltig_ab DESC
+   const [erstattungssaetze] = await db.execute(`
+      SELECT 
+        at.id,
+        eb.betrag,
+        eb.gueltig_ab
+      FROM abrechnungstraeger at
+      INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
+      WHERE at.user_id = ? 
+        AND at.active = true
+        AND eb.gueltig_ab <= LAST_DAY(?)
+      UNION
+      SELECT 
+        'mitfahrer' as id,
+        betrag,
+        gueltig_ab 
+      FROM mitfahrer_erstattung
+      WHERE user_id = ?
+        AND gueltig_ab <= LAST_DAY(?)
+      ORDER BY gueltig_ab DESC
 `, [userId, `${year}-${month.toString().padStart(2, '0')}-01`, userId, `${year}-${month.toString().padStart(2, '0')}-01`]);
-    // Gruppiere Erstattungssätze nach Kennzeichen
+    // Gruppiere Erstattungssätze nach ID
     const saetzeProTraeger = {};
     erstattungssaetze.forEach(satz => {
-      if (!saetzeProTraeger[satz.kennzeichen]) {
-        saetzeProTraeger[satz.kennzeichen] = [];
+      if (!saetzeProTraeger[satz.id]) {
+        saetzeProTraeger[satz.id] = [];
       }
-      saetzeProTraeger[satz.kennzeichen].push(satz);
+      saetzeProTraeger[satz.id].push(satz);
     });
     
     // Finde den korrekten Erstattungssatz für ein bestimmtes Datum
-    const getErstattungssatz = (kennzeichen, datum) => {
-      if (!saetzeProTraeger[kennzeichen]) return 0;
+    const getErstattungssatz = (id, datum) => {
+      if (!saetzeProTraeger[id]) return 0;
       
-      const saetze = saetzeProTraeger[kennzeichen];
+      const saetze = saetzeProTraeger[id];
       const passenderSatz = saetze.find(satz => 
         new Date(satz.gueltig_ab) <= new Date(datum)
       );
@@ -255,7 +255,7 @@ exports.getMonthlySummary = async (req, res) => {
     f.kilometer,
     f.mitfahrer_count,
     f.datum,
-    at.kennzeichen,
+    at.id,
     eb.betrag
   FROM (
     SELECT 
@@ -270,27 +270,27 @@ exports.getMonthlySummary = async (req, res) => {
     GROUP BY yearMonth, abrechnung
   ) f
   LEFT JOIN (
-    SELECT 'mitfahrer' as kennzeichen, betrag, gueltig_ab
+    SELECT 'mitfahrer' as id, betrag, gueltig_ab
     FROM mitfahrer_erstattung
     WHERE user_id = ?
     UNION 
-    SELECT at.kennzeichen, eb.betrag, eb.gueltig_ab
+    SELECT at.id, eb.betrag, eb.gueltig_ab
     FROM abrechnungstraeger at
     INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
     WHERE at.user_id = ? AND at.active = true
   ) as eb ON eb.gueltig_ab <= f.datum
   WHERE NOT EXISTS (
     SELECT 1 FROM (
-      SELECT 'mitfahrer' as kennzeichen, gueltig_ab
+      SELECT 'mitfahrer' as id, gueltig_ab
       FROM mitfahrer_erstattung
       WHERE user_id = ?
       UNION
-      SELECT at.kennzeichen, eb.gueltig_ab
+      SELECT at.id, eb.gueltig_ab
       FROM abrechnungstraeger at
       INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id 
       WHERE at.user_id = ? AND at.active = true
     ) as newer_rates
-    WHERE newer_rates.kennzeichen = eb.kennzeichen
+    WHERE newer_rates.id = eb.id
     AND newer_rates.gueltig_ab > eb.gueltig_ab
     AND newer_rates.gueltig_ab <= f.datum
   )
@@ -390,7 +390,7 @@ exports.getYearSummary = async (req, res) => {
     // Hole zuerst alle Abrechnungsträger mit ihren Erstattungssätzen
     const [erstattungssaetze] = await db.execute(`
       SELECT 
-        at.kennzeichen,
+        at.id,
         eb.betrag,
         eb.gueltig_ab
       FROM abrechnungstraeger at
@@ -414,20 +414,20 @@ exports.getYearSummary = async (req, res) => {
       GROUP BY f.id
     `, [year, userId]);
     
-    // Gruppiere Erstattungssätze nach Kennzeichen
+    // Gruppiere Erstattungssätze nach AbrechnungTraegerId
     const saetzeProTraeger = {};
     erstattungssaetze.forEach(satz => {
-      if (!saetzeProTraeger[satz.kennzeichen]) {
-        saetzeProTraeger[satz.kennzeichen] = [];
+      if (!saetzeProTraeger[satz.id]) {
+        saetzeProTraeger[satz.id] = [];
       }
-      saetzeProTraeger[satz.kennzeichen].push(satz);
+      saetzeProTraeger[satz.id].push(satz);
     });
     
     // Finde den korrekten Erstattungssatz für ein bestimmtes Datum
-    const getErstattungssatz = (kennzeichen, datum) => {
-      if (!saetzeProTraeger[kennzeichen]) return 0;
+    const getErstattungssatz = (abrechnung, datum) => {
+      if (!saetzeProTraeger[abrechnung]) return 0;
       
-      const saetze = saetzeProTraeger[kennzeichen];
+      const saetze = saetzeProTraeger[abrechnung];
       const passenderSatz = saetze.find(satz => 
         new Date(satz.gueltig_ab) <= new Date(datum)
       );

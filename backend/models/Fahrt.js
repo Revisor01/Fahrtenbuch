@@ -14,7 +14,8 @@ class Fahrt {
         vonOrtId, 
         nachOrtId, 
         einmaligerVonOrt, 
-        einmaligerNachOrt 
+        einmaligerNachOrt,
+        userId
       } = fahrtData;
       
       const [result] = await conn.execute(
@@ -74,7 +75,6 @@ class Fahrt {
   `, [id, userId]);
     return rows[0];
   }
-
 
   static async update(id, updateData, userId) {
     const {
