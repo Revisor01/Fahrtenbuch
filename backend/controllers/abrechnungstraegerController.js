@@ -175,16 +175,15 @@ exports.getErstattungshistorie = async (req, res) => {
 
 exports.createAbrechnungstraeger = async (req, res) => {
     try {
-        const { name, kennzeichen, betrag, gueltig_ab } = req.body;
+        const { name, betrag, gueltig_ab } = req.body;
         
-        if (!name || !kennzeichen) {
-            return res.status(400).json({ message: 'Name und Kennzeichen sind erforderlich' });
+        if (!name) {
+            return res.status(400).json({ message: 'Name ist erforderlich' });
         }
 
         const id = await AbrechnungsTraeger.create({
             userId: req.user.id,
             name,
-            kennzeichen,
             betrag,
             gueltig_ab
         });
@@ -203,7 +202,7 @@ exports.getById = async (req, res) => {
     try {
         const { id } = req.params;
         const [rows] = await db.execute(
-            'SELECT * FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            'SELECT id, name, active FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
             [id, req.user.id]
         );
         
@@ -221,7 +220,7 @@ exports.getById = async (req, res) => {
 exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, kennzeichen, active } = req.body;
+        const { name, active } = req.body;
         
         // Wenn nur active aktualisiert werden soll
         if (active !== undefined && Object.keys(req.body).length === 1) {
@@ -238,14 +237,14 @@ exports.updateAbrechnungstraeger = async (req, res) => {
         }
         
         // Vollständiges Update
-        if (name !== undefined && kennzeichen !== undefined) {
-            if (!name || !kennzeichen) {
-                return res.status(400).json({ message: 'Name und Kennzeichen sind erforderlich' });
+        if (name !== undefined) {
+            if (!name) {
+                return res.status(400).json({ message: 'Name ist erforderlich' });
             }
             
             const [result] = await db.execute(
-                'UPDATE abrechnungstraeger SET name = ?, kennzeichen = ? WHERE id = ? AND user_id = ?',
-                [name, kennzeichen, id, req.user.id]
+                'UPDATE abrechnungstraeger SET name = ? WHERE id = ? AND user_id = ?',
+                [name, id, req.user.id]
             );
             
             if (result.affectedRows === 0) {

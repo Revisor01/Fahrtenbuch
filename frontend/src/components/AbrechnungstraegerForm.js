@@ -184,8 +184,8 @@ function AbrechnungstraegerForm() {
                                         </div>
                                         {/* Buttons (nur wenn im Bearbeitungsmodus) */}
                                         <div className="flex gap-2">
-                                            <button onClick={handleUpdate} className="table-action-button-primary w-full sm:w-auto" title="Speichern">✓</button>
-                                            <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary w-full sm:w-auto" title="Abbrechen">×</button>
+                                            <button onClick={handleUpdate} className="btn-primary flex-1" title="Speichern">Speichern</button>
+                                            <button onClick={() => setEditingTraeger(null)} className="btn-secondary flex-1" title="Abbrechen">Abbrechen</button>
                                         </div>
                                     </div>
                                 ) : (

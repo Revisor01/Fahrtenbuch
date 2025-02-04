@@ -893,6 +893,11 @@ function FahrtenListe() {
   };
   
   const renderFahrtRow = (fahrt, detail = null) => {
+    // Finde den Namen des Abrechnungsträgers
+    const abrechnungstraegerName = useMemo(() => {
+      const traeger = abrechnungstraeger.find(at => at.id === fahrt.abrechnung);
+      return traeger ? traeger.name : 'Unbekannt';
+    }, [fahrt.abrechnung, abrechnungstraeger]);
     return (
       <tr key={fahrt.id} className="table-row">
       <td className="table-cell">
@@ -1051,8 +1056,8 @@ function FahrtenListe() {
         </select>
       ) : (
         <span className="text-value">
-        {/* Name des Abrechnungsträgers anzeigen (aus der Fahrt-Daten) */}
-        {abrechnungstraeger.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt'}
+        {/* Abrechnungsträger Namen ausgeben */}
+        {abrechnungstraegerName}
         </span>
       )}
       </td>
