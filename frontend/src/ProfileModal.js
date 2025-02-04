@@ -25,9 +25,9 @@ function ProfileModal({ isOpen, onClose }) {
         { id: 'profile', name: 'Profil' },
         { id: 'orte', name: 'Orte' },
         { id: 'distanzen', name: 'Distanzen' },
-        { id: 'abrechnungen', name: 'Abrechnungsträger' },
-        { id: 'erstattungssaetze', name: 'Erstattungssätze' },
-        { id: 'security', name: 'Sicherheit' },
+        { id: 'abrechnungen', name: 'Träger' },
+        { id: 'erstattungssaetze', name: 'Erstattungen' },
+        { id: 'security', name: 'Passwort' },
         { id: 'api', name: 'API-Zugriff' }
     ];
 

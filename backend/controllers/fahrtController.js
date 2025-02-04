@@ -26,6 +26,13 @@ exports.createFahrt = async (req, res) => {
     } = req.body;
     const userId = req.user.id;
     
+    // Check abrechnung
+    const [abrechnungCheck] = await db.execute('SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?', [abrechnung, userId]);
+    
+    if (!abrechnungCheck || abrechnungCheck.length === 0) {
+      return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
+    }
+    
     const fahrtData = {
       datum,
       anlass,
@@ -69,6 +76,13 @@ exports.updateFahrt = async (req, res) => {
       mitfahrer
     } = req.body;
     const userId = req.user.id;
+    
+    // Check abrechnung
+    const [abrechnungCheck] = await db.execute('SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?', [abrechnung, userId]);
+    
+    if (!abrechnungCheck || abrechnungCheck.length === 0) {
+      return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
+    }
     
     const updateData = {
       vonOrtId: vonOrtId || null,
