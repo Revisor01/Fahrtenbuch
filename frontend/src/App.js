@@ -555,41 +555,25 @@ function FahrtenListe() {
     setSelectedMonth(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
   };
   
+  const getKategorienMitErstattung = () => {
+    const kategorien = [];
+    Object.entries(summary.erstattungen || {}).forEach(([key, value]) => {
+      if (value > 0) {
+        // Kategorie-Namen formatieren
+        let displayName = key.charAt(0).toUpperCase() + key.slice(1);
+        if (key === 'mitfahrer') displayName = 'Mitfahrer:innen';
+        
+        kategorien.push([key, displayName, value]);
+      }
+    });
+    return kategorien;
+  };
+  
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
     
-    const kkReceived = summary.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-    const gemReceived = summary.abrechnungsStatus?.gemeinde?.erhalten_am;
-    
-    const currentTotal = (
-      (!kkReceived ? Number(summary.kirchenkreisErstattung || 0) : 0) +
-      (!gemReceived ? Number(summary.gemeindeErstattung || 0) : 0) +
-      (!kkReceived ? Number(summary.mitfahrerErstattung || 0) : 0)
-    ).toFixed(2);
-    
-    const originalTotal = (
-      Number(summary.kirchenkreisErstattung || 0) +
-      Number(summary.gemeindeErstattung || 0) +
-      Number(summary.mitfahrerErstattung || 0)
-    ).toFixed(2);
-    
-    const renderStatusIcon = (status) => {
-      if (status?.erhalten_am) {
-        return <span className="text-green-500">✓</span>;
-      }
-      if (status?.eingereicht_am) {
-        return <span className="text-yellow-500">○</span>;
-      }
-      return null;
-    };
-    
-    const getKategorienMitErstattung = () => {
-      return Object.entries(summary.erstattungen || {}).filter(([_, value]) => value > 0);
-    };
-    
     return (
-      <div>
       <div className="card-container-highlight mb-4">
       <div className="space-y-6">
       {/* Header mit Navigation */}
@@ -607,7 +591,7 @@ function FahrtenListe() {
       <div className="flex items-center justify-end gap-2 w-full">
       {selectedMonth !== currentMonth && (
         <button onClick={resetToCurrentMonth} className="btn-secondary hidden sm:block">
-        Aktueller Jahr
+        Aktueller Monat
         </button>
       )}
       <select
@@ -637,51 +621,71 @@ function FahrtenListe() {
       </div>
       </div>
       
-      {/* Nur Kategorien mit Erstattung anzeigen */}
+      {/* Cards Grid */}
       <div className="card-grid">
-      {getKategorienMitErstattung().map(([kategorie, erstattung]) => (
-        <div key={kategorie} className="card-container">
+      {getKategorienMitErstattung().map(([key, displayName, value]) => (
+        <div key={key} className="card-container">
         <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-label">{kategorie}</span>
-        <span className={abrechnungsStatus?.[kategorie]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
-        {Number(erstattung).toFixed(2)} €
+        <span className="text-sm text-label">{displayName}</span>
+        <span className={summary.abrechnungsStatus?.[key]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
+        {Number(value).toFixed(2)} €
         </span>
         </div>
         
-        {(abrechnungsStatus?.[kategorie]?.eingereicht_am || abrechnungsStatus?.[kategorie]?.erhalten_am) && (
+        {value > 0 && (
           <div className="text-xs space-y-1">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
           <span className="text-label">Status</span>
-          {abrechnungsStatus?.[kategorie]?.erhalten_am ? (
-            <span className="status-badge-primary">● Erhalten</span>
+          {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
+            <span 
+            className="status-badge-primary cursor-pointer"
+            onClick={() => setStatusModal({ 
+              open: true, 
+              typ: key, 
+              aktion: 'reset', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
+            <CheckCircle2 size={14} />
+            <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
+            </span>
+          ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
+            <span 
+            className="status-badge-secondary cursor-pointer"
+            onClick={() => setStatusModal({ 
+              open: true, 
+              typ: key, 
+              aktion: 'erhalten', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
+            <Circle size={14} />
+            <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
+            </span>
           ) : (
-            <span className="status-badge-secondary">○ Eingereicht</span>
+            <span 
+            className="status-badge-secondary cursor-pointer"
+            onClick={() => setStatusModal({ 
+              open: true, 
+              typ: key, 
+              aktion: 'eingereicht', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
+            <AlertCircle size={14} />
+            <span>Nicht eingereicht</span>
+            </span>
           )}
           </div>
-          
-          {abrechnungsStatus?.[kategorie]?.eingereicht_am && (
-            <div className="flex justify-between items-center">
-            <span className="text-label">Eingereicht</span>
-            <span className="text-value">
-            {new Date(abrechnungsStatus[kategorie].eingereicht_am).toLocaleDateString()}
-            </span>
-            </div>
-          )}
-          
-          {abrechnungsStatus?.[kategorie]?.erhalten_am && (
-            <div className="flex justify-between items-center">
-            <span className="text-label">Erhalten</span>
-            <span className="text-value">
-            {new Date(abrechnungsStatus[kategorie].erhalten_am).toLocaleDateString()}
-            </span>
-            </div>
-          )}
           </div>
         )}
         </div>
       ))}
       
-      {/* Gesamt-Card immer anzeigen */}
+      {/* Gesamt Card */}
       <div className="card-container">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
@@ -694,12 +698,12 @@ function FahrtenListe() {
       
       {/* Export Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2">
-      {getKategorienMitErstattung().map(([kategorie]) => (
+      {getKategorienMitErstattung().map(([key, displayName]) => (
         <button
-        key={kategorie}
-        onClick={() => handleExportToExcel(kategorie.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
+        key={key}
+        onClick={() => handleExportToExcel(key.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
         className="btn-primary">
-        Export {kategorie}
+        Export {displayName}
         </button>
       ))}
       </div>

@@ -7,7 +7,17 @@ class Abrechnung {
                 'SELECT * FROM abrechnungen WHERE user_id = ? AND jahr = ? AND monat = ?',
                 [userId, jahr, monat]
             );
-            return rows;
+            
+            // Konvertiere die Zeilen in ein strukturiertes Objekt
+            const status = {};
+            rows.forEach(row => {
+                status[row.typ] = {
+                    eingereicht_am: row.eingereicht_am,
+                    erhalten_am: row.erhalten_am
+                };
+            });
+            
+            return status;
         } catch (error) {
             console.error('Fehler beim Abrufen des Abrechnungsstatus:', error);
             throw error;
@@ -16,6 +26,16 @@ class Abrechnung {
 
     static async updateStatus(userId, jahr, monat, typ, aktion, datum) {
         try {
+            // Prüfen ob der Abrechnungsträger existiert
+            const [traeger] = await db.execute(
+                'SELECT id FROM abrechnungstraeger WHERE kennzeichen = ? AND user_id = ?',
+                [typ, userId]
+            );
+
+            if (traeger.length === 0 && typ !== 'mitfahrer') {
+                throw new Error('Ungültiger Abrechnungsträger');
+            }
+
             if (aktion === 'eingereicht') {
                 const [result] = await db.execute(
                     `INSERT INTO abrechnungen (user_id, jahr, monat, typ, eingereicht_am)
@@ -52,7 +72,20 @@ class Abrechnung {
                 'SELECT * FROM abrechnungen WHERE user_id = ? AND jahr = ?',
                 [userId, jahr]
             );
-            return rows;
+
+            // Gruppiere nach Monaten
+            const statusByMonth = {};
+            rows.forEach(row => {
+                if (!statusByMonth[row.monat]) {
+                    statusByMonth[row.monat] = {};
+                }
+                statusByMonth[row.monat][row.typ] = {
+                    eingereicht_am: row.eingereicht_am,
+                    erhalten_am: row.erhalten_am
+                };
+            });
+
+            return statusByMonth;
         } catch (error) {
             console.error('Fehler beim Abrufen der Jahres-Status:', error);
             throw error;
