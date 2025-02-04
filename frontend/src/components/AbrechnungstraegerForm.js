@@ -173,6 +173,7 @@ function AbrechnungstraegerForm() {
                         <div className="flex flex-col w-full gap-4">
                         <div className="w-full">
                         <label className="form-label">Name</label>
+                        
                         <input
                         type="text"
                         value={editingTraeger.name}
