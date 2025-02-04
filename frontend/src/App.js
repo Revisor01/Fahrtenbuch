@@ -601,7 +601,7 @@ function FahrtenListe() {
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
     
     const getAbrechnungTraegerName = (id) => {
-      const traeger = abrechnungstraeger.find(t => t.id === id)
+      const traeger = abrechnungstraeger?.find(t => t.id === id);
       return traeger ? traeger.name : 'Unbekannt';
     }
     
@@ -654,11 +654,13 @@ function FahrtenListe() {
       </div>
       
       {/* Cards Grid */}
-      <div className="card-grid">
+      <div className={`card-grid grid-cols-${Math.min(getKategorienMitErstattung().length, 4)}`}>
       {getKategorienMitErstattung().map(([key, displayName, value]) => (
         <div key={key} className="card-container">
         <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-label">{displayName}</span>
+        
+        
         <span className={summary.abrechnungsStatus?.[key]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
         {Number(value).toFixed(2)} €
         </span>
@@ -671,13 +673,6 @@ function FahrtenListe() {
           {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
             <span 
             className="status-badge-primary cursor-pointer"
-            onClick={() => setStatusModal({ 
-              open: true, 
-              typ: key, 
-              aktion: 'reset', 
-              jahr: selectedYear,
-              monat: selectedMonth.split('-')[1]
-            })}
             >
             <CheckCircle2 size={14} />
             <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
@@ -685,27 +680,13 @@ function FahrtenListe() {
           ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
             <span 
             className="status-badge-secondary cursor-pointer"
-            onClick={() => setStatusModal({ 
-              open: true, 
-              typ: key, 
-              aktion: 'erhalten', 
-              jahr: selectedYear,
-              monat: selectedMonth.split('-')[1]
-            })}
             >
             <Circle size={14} />
             <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
             </span>
           ) : (
             <span 
-            className="status-badge-secondary cursor-pointer"
-            onClick={() => setStatusModal({ 
-              open: true, 
-              typ: key, 
-              aktion: 'eingereicht', 
-              jahr: selectedYear,
-              monat: selectedMonth.split('-')[1]
-            })}
+            className="status-badge-secondary"
             >
             <AlertCircle size={14} />
             <span>Nicht eingereicht</span>
