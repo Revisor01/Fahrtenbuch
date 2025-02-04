@@ -6,6 +6,7 @@ const ExcelJS = require('exceljs');
 const path = require('path');
 const JSZip = require('jszip');
 const { exportToExcel } = require('../utils/excelExport');
+const db = require('../config/database');
 
 exports.exportToExcel = exportToExcel;
 
