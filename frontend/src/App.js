@@ -584,7 +584,12 @@ function FahrtenListe() {
       return null;
     };
     
+    const getKategorienMitErstattung = () => {
+      return Object.entries(summary.erstattungen || {}).filter(([_, value]) => value > 0);
+    };
+    
     return (
+      <div>
       <div className="card-container-highlight mb-4">
       <div className="space-y-6">
       {/* Header mit Navigation */}
@@ -602,7 +607,7 @@ function FahrtenListe() {
       <div className="flex items-center justify-end gap-2 w-full">
       {selectedMonth !== currentMonth && (
         <button onClick={resetToCurrentMonth} className="btn-secondary hidden sm:block">
-        Aktueller Monat
+        Aktueller Jahr
         </button>
       )}
       <select
@@ -632,127 +637,71 @@ function FahrtenListe() {
       </div>
       </div>
       
+      {/* Nur Kategorien mit Erstattung anzeigen */}
       <div className="card-grid">
-      {/* Kirchenkreis Card */}
-      <div className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Kirchenkreis</span>
-      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
-      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-      </span>
-      </div>
-      
-      <div className="text-xs space-y-1">
-      {(summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am || summary.abrechnungsStatus?.kirchenkreis?.erhalten_am) && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Status</span>
-        {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-          <span className="status-badge-primary">● Erhalten</span>
-        ) : (
-          <span className="status-badge-secondary">○ Eingereicht</span>
+      {getKategorienMitErstattung().map(([kategorie, erstattung]) => (
+        <div key={kategorie} className="card-container">
+        <div className="flex justify-between items-center mb-2">
+        <span className="text-sm text-label">{kategorie}</span>
+        <span className={abrechnungsStatus?.[kategorie]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
+        {Number(erstattung).toFixed(2)} €
+        </span>
+        </div>
+        
+        {(abrechnungsStatus?.[kategorie]?.eingereicht_am || abrechnungsStatus?.[kategorie]?.erhalten_am) && (
+          <div className="text-xs space-y-1">
+          <div className="flex justify-between items-center">
+          <span className="text-label">Status</span>
+          {abrechnungsStatus?.[kategorie]?.erhalten_am ? (
+            <span className="status-badge-primary">● Erhalten</span>
+          ) : (
+            <span className="status-badge-secondary">○ Eingereicht</span>
+          )}
+          </div>
+          
+          {abrechnungsStatus?.[kategorie]?.eingereicht_am && (
+            <div className="flex justify-between items-center">
+            <span className="text-label">Eingereicht</span>
+            <span className="text-value">
+            {new Date(abrechnungsStatus[kategorie].eingereicht_am).toLocaleDateString()}
+            </span>
+            </div>
+          )}
+          
+          {abrechnungsStatus?.[kategorie]?.erhalten_am && (
+            <div className="flex justify-between items-center">
+            <span className="text-label">Erhalten</span>
+            <span className="text-value">
+            {new Date(abrechnungsStatus[kategorie].erhalten_am).toLocaleDateString()}
+            </span>
+            </div>
+          )}
+          </div>
         )}
         </div>
-      )}
+      ))}
       
-      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Eingereicht</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Erhalten</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      </div>
-      </div>
-      
-      {/* Gemeinde Card */}
-      <div className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Gemeinde</span>
-      <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
-      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
-      </span>
-      </div>
-      
-      <div className="text-xs space-y-1">
-      {(summary.abrechnungsStatus?.gemeinde?.eingereicht_am || summary.abrechnungsStatus?.gemeinde?.erhalten_am) && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Status</span>
-        {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
-          <span className="status-badge-primary">● Erhalten</span>
-        ) : (
-          <span className="status-badge-secondary">○ Eingereicht</span>
-        )}
-        </div>
-      )}
-      
-      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Eingereicht</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      
-      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Erhalten</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      </div>
-      </div>
-      
-      {/* Mitfahrer Card */}
-      <div className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Mitfahrer:innen</span>
-      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
-      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
-      </span>
-      </div>
-      </div>
-      
-      {/* Gesamt Card */}
+      {/* Gesamt-Card immer anzeigen */}
       <div className="card-container">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
-      {currentTotal} €
+      {Object.values(summary.erstattungen || {}).reduce((a, b) => a + b, 0).toFixed(2)} €
       </span>
       </div>
-      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
-        <div className="text-xs text-muted text-right">
-        Ursprünglich: {originalTotal} €
-        </div>
-      )}
       </div>
       </div>
       
       {/* Export Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-2">
-      <button
-      onClick={() => handleExportToExcel("kirchenkreis", selectedYear, selectedMonth.split("-")[1])}
-      className="btn-primary plausible-event-name=Export KK">
-      Export Kirchenkreis / Mitfaher:innen
-      </button>
-      <button
-      onClick={() => handleExportToExcel("gemeinde", selectedYear, selectedMonth.split("-")[1])}
-      className="btn-primary">
-      Export Gemeinde
-      </button>
+      {getKategorienMitErstattung().map(([kategorie]) => (
+        <button
+        key={kategorie}
+        onClick={() => handleExportToExcel(kategorie.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
+        className="btn-primary">
+        Export {kategorie}
+        </button>
+      ))}
       </div>
       </div>
       </div>
@@ -927,13 +876,7 @@ function FahrtenListe() {
   
   const renderFahrtRow = (fahrt, detail = null) => {
     return (
-      <tr 
-      key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
-      className={`${
-        detail ? "table-detail-row" : 
-        fahrt.autosplit ? "table-split-row" : ""
-        } table-row`}
-      >
+      <tr key={fahrt.id} className="table-row">
       <td className="table-cell">
       {editingFahrt?.id === fahrt.id ? (
         <input
@@ -986,11 +929,11 @@ function FahrtenListe() {
       ) : (
         <div className="table-address">
         <div className="table-address-main">
-        {detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort || "")}
+        {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
         </div>
-        {(detail ? detail.von_ort_adresse : fahrt.von_ort_adresse) && (
+        {fahrt.von_ort_adresse && (
           <div className="table-address-sub">
-          {detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}
+          {fahrt.von_ort_adresse}
           </div>
         )}
         </div>
@@ -1036,11 +979,11 @@ function FahrtenListe() {
       ) : (
         <div className="table-address">
         <div className="table-address-main">
-        {detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || "")}
+        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
         </div>
-        {(detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse) && (
+        {fahrt.nach_ort_adresse && (
           <div className="table-address-sub">
-          {detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}
+          {fahrt.nach_ort_adresse}
           </div>
         )}
         </div>
@@ -1070,7 +1013,7 @@ function FahrtenListe() {
         />
       ) : (
         <span className="text-value">
-        {formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))}
+        {formatValue(roundKilometers(fahrt.kilometer))}
         </span>
       )}
       </td>
@@ -1082,14 +1025,14 @@ function FahrtenListe() {
         onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
         className="form-select"
         >
-        <option value="Kirchenkreis">Kirchenkreis</option>
-        <option value="Gemeinde">Gemeinde</option>
-        <option value="Autosplit">Autosplit</option>
+        {abrechnungstraeger.map(traeger => (
+          <option key={traeger.id} value={traeger.kennzeichen}>
+          {traeger.name}
+          </option>
+        ))}
         </select>
       ) : (
-        <span className="text-value">
-        {detail ? detail.abrechnung : fahrt.abrechnung}
-        </span>
+        <span className="text-value">{fahrt.abrechnung}</span>
       )}
       </td>
       
@@ -1146,15 +1089,13 @@ function FahrtenListe() {
         </>
       ) : (
         <>
-        {!fahrt.autosplit && (
-          <button 
-          onClick={() => handleEdit(fahrt)} 
-          className="table-action-button-primary"
-          title="Bearbeiten"
-          >
-          ✎
-          </button>
-        )}
+        <button 
+        onClick={() => handleEdit(fahrt)} 
+        className="table-action-button-primary"
+        title="Bearbeiten"
+        >
+        ✎
+        </button>
         <button 
         onClick={() => handleDelete(fahrt.id)} 
         className="table-action-button-secondary"
@@ -1162,23 +1103,13 @@ function FahrtenListe() {
         >
         ×
         </button>
-        {fahrt.autosplit === 1 && (
-          <button 
-          onClick={() => toggleFahrtDetails(fahrt.id)} 
-          className="table-action-button-primary"
-          title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
-          >
-          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
-          </button>
-        )}
         </>
       )}
       </div>
       </td>
       </tr>
     );
-  };
-  
+    
   return (
     <div>
     {renderAbrechnungsStatus(summary)}

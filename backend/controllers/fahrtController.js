@@ -156,18 +156,25 @@ exports.getMonthlyReport = async (req, res) => {
     
     // Hole die Erstattungssätze für alle Abrechnungsträger im relevanten Zeitraum
     const [erstattungssaetze] = await db.execute(`
-      SELECT 
-        at.kennzeichen,
-        eb.betrag,
-        eb.gueltig_ab
-      FROM abrechnungstraeger at
-      INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-      WHERE at.user_id = ? 
-        AND at.active = true
-        AND eb.gueltig_ab <= LAST_DAY(?)
-      ORDER BY eb.gueltig_ab DESC
-    `, [userId, `${year}-${month.toString().padStart(2, '0')}-01`]);
-    
+  SELECT 
+    at.kennzeichen,
+    eb.betrag,
+    eb.gueltig_ab
+  FROM abrechnungstraeger at
+  INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
+  WHERE at.user_id = ? 
+    AND at.active = true
+    AND eb.gueltig_ab <= LAST_DAY(?)
+  UNION
+  SELECT 
+    'mitfahrer' as kennzeichen,
+    betrag,
+    gueltig_ab 
+  FROM mitfahrer_erstattung
+  WHERE user_id = ?
+    AND gueltig_ab <= LAST_DAY(?)
+  ORDER BY gueltig_ab DESC
+`, [userId, `${year}-${month.toString().padStart(2, '0')}-01`, userId, `${year}-${month.toString().padStart(2, '0')}-01`]);
     // Gruppiere Erstattungssätze nach Kennzeichen
     const saetzeProTraeger = {};
     erstattungssaetze.forEach(satz => {
@@ -242,37 +249,53 @@ exports.getMonthlySummary = async (req, res) => {
     
     // Hole aktive Abrechnungsträger und deren aktuelle Erstattungssätze
     const [rows] = await db.execute(`
-      SELECT 
-        f.yearMonth,
-        f.abrechnung,
-        f.kilometer,
-        f.mitfahrer_count,
-        f.datum,
-        at.kennzeichen,
-        eb.betrag
-      FROM (
-        SELECT 
-          DATE_FORMAT(datum, '%Y-%m') as yearMonth,
-          abrechnung,
-          SUM(kilometer) as kilometer,
-          COUNT(m.id) as mitfahrer_count,
-          MIN(datum) as datum
-        FROM fahrten f
-        LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
-        WHERE f.user_id = ?
-        GROUP BY yearMonth, abrechnung
-      ) f
-      LEFT JOIN abrechnungstraeger at ON at.kennzeichen = f.abrechnung
-      LEFT JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-      WHERE eb.gueltig_ab <= f.datum
-      AND NOT EXISTS (
-        SELECT 1 FROM erstattungsbetraege eb2
-        WHERE eb2.abrechnungstraeger_id = at.id
-        AND eb2.gueltig_ab > eb.gueltig_ab
-        AND eb2.gueltig_ab <= f.datum
-      )
-      ORDER BY yearMonth DESC
-    `, [userId]);
+  SELECT 
+    f.yearMonth,
+    f.abrechnung,
+    f.kilometer,
+    f.mitfahrer_count,
+    f.datum,
+    at.kennzeichen,
+    eb.betrag
+  FROM (
+    SELECT 
+      DATE_FORMAT(datum, '%Y-%m') as yearMonth,
+      abrechnung,
+      SUM(kilometer) as kilometer,
+      COUNT(DISTINCT m.id) as mitfahrer_count,
+      MIN(datum) as datum
+    FROM fahrten f
+    LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
+    WHERE f.user_id = ?
+    GROUP BY yearMonth, abrechnung
+  ) f
+  LEFT JOIN (
+    SELECT 'mitfahrer' as kennzeichen, betrag, gueltig_ab
+    FROM mitfahrer_erstattung
+    WHERE user_id = ?
+    UNION 
+    SELECT at.kennzeichen, eb.betrag, eb.gueltig_ab
+    FROM abrechnungstraeger at
+    INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
+    WHERE at.user_id = ? AND at.active = true
+  ) as eb ON eb.gueltig_ab <= f.datum
+  WHERE NOT EXISTS (
+    SELECT 1 FROM (
+      SELECT 'mitfahrer' as kennzeichen, gueltig_ab
+      FROM mitfahrer_erstattung
+      WHERE user_id = ?
+      UNION
+      SELECT at.kennzeichen, eb.gueltig_ab
+      FROM abrechnungstraeger at
+      INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id 
+      WHERE at.user_id = ? AND at.active = true
+    ) as newer_rates
+    WHERE newer_rates.kennzeichen = eb.kennzeichen
+    AND newer_rates.gueltig_ab > eb.gueltig_ab
+    AND newer_rates.gueltig_ab <= f.datum
+  )
+  ORDER BY yearMonth DESC
+`, [userId, userId, userId, userId, userId]);
     
     if (!rows.length) {
       return res.status(404).json({ message: 'Keine Daten für die monatliche Zusammenfassung gefunden' });
