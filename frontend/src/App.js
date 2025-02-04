@@ -369,6 +369,7 @@ function FahrtenListe() {
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
+  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   
   useEffect(() => {
     fetchFahrten();
@@ -379,6 +380,23 @@ function FahrtenListe() {
       setSortConfig({ key: 'datum', direction: 'descending' });
     }
   }, [fahrten]);
+  
+  useEffect(() => {
+    fetchFahrten();
+  }, [selectedMonth]);
+  
+  useEffect(() => {
+    const fetchAbrechnungstraeger = async () => {
+      try {
+        const response = await axios.get('/api/abrechnungstraeger/simple');
+        setAbrechnungstraeger(response.data);
+      } catch (error) {
+        console.error('Fehler beim Laden der Abrechnungsträger:', error);
+        // Optional: Fehlerbenachrichtigung anzeigen
+      }
+    };
+    fetchAbrechnungstraeger();
+  }, []);
   
   const handleMonthChange = (e) => {
     const monthIndex = e.target.value;
@@ -572,6 +590,13 @@ function FahrtenListe() {
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    const [statusModal, setStatusModal] = useState({
+      open: false,
+      typ: null,
+      aktion: null,
+      jahr: null,
+      monat: null
+    });
     
     return (
       <div className="card-container-highlight mb-4">
