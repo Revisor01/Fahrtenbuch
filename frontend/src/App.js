@@ -397,6 +397,7 @@ function FahrtenListe() {
       try {
         const response = await axios.get('/api/abrechnungstraeger/simple');
         setAbrechnungstraeger(response.data.data);
+        console.log('Abrechnungsträger Daten:', response.data.data); // Hinzugefügt
       } catch (error) {
         console.error('Fehler beim Laden der Abrechnungsträger:', error);
         // Optional: Fehlerbenachrichtigung anzeigen
@@ -598,6 +599,11 @@ function FahrtenListe() {
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    
+    const getAbrechnungTraegerName = (id) => {
+      const traeger = abrechnungstraeger.find(t => t.id === id)
+      return traeger ? traeger.name : 'Unbekannt';
+    }
     
     return (
       <div className="card-container-highlight mb-4">
@@ -895,7 +901,7 @@ function FahrtenListe() {
   
   const renderFahrtRow = (fahrt, detail = null) => {
     // Finde den Namen des Abrechnungsträgers
-    const abrechnungstraegerName =  abrechnungstraeger.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt';
+    const abrechnungstraegerName =  abrechnungstraeger?.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt';
     return (
       <tr key={fahrt.id} className="table-row">
       <td className="table-cell">
@@ -1046,7 +1052,7 @@ function FahrtenListe() {
         onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
         className="form-select"
         >
-        {abrechnungstraeger.map(traeger => (
+        {abrechnungstraeger?.map(traeger => (
           <option key={traeger.id} value={traeger.id}>
           {traeger.name}
           </option>
