@@ -370,6 +370,13 @@ function FahrtenListe() {
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
+  const [statusModal, setStatusModal] = useState({
+    open: false,
+    typ: null,
+    aktion: null,
+    jahr: null,
+    monat: null
+  });
   
   useEffect(() => {
     fetchFahrten();
@@ -590,13 +597,6 @@ function FahrtenListe() {
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    const [statusModal, setStatusModal] = useState({
-      open: false,
-      typ: null,
-      aktion: null,
-      jahr: null,
-      monat: null
-    });
     
     return (
       <div className="card-container-highlight mb-4">
