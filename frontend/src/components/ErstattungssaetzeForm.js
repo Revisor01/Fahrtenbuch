@@ -330,7 +330,7 @@ function ErstattungssaetzeForm() {
                 <div key={satz.id} className="p-3 bg-primary-25 dark:bg-primary-900 rounded-lg border border-primary-100 dark:border-primary-800">
                 {editingSatz?.id === satz.id && editingSatz?.typ === traeger.id ? (
                     <div className="mobile-edit-container">
-                    <div className="flex gap-4 items-end">
+                    <div className="flex flex-col sm:flex-row gap-4 items-end">
                     <div className="flex-1">
                     <label className="form-label">Betrag (€/km)</label>
                     <input
@@ -339,7 +339,7 @@ function ErstattungssaetzeForm() {
                     onChange={(e) => setEditingSatz({...editingSatz, betrag: e.target.value})}
                     step="0.01"
                     min="0"
-                    className="form-input"
+                    className="form-input w-full"
                     />
                     </div>
                     <div className="flex-1">
@@ -348,17 +348,17 @@ function ErstattungssaetzeForm() {
                     type="date"
                     value={editingSatz.gueltig_ab}
                     onChange={(e) => setEditingSatz({...editingSatz, gueltig_ab: e.target.value})}
-                    className="form-input"
+                    className="form-input w-full"
                     />
                     </div>
-                    </div>
-                    <div className="hidden sm:flex justify-center gap-2 mt-4">
+                    <div className="hidden sm:flex gap-2">
                     <button onClick={handleSaveEdit} className="table-action-button-primary" title="Speichern">✓</button>
                     <button onClick={() => setEditingSatz(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
                     </div>
-                    <div className="sm:hidden mobile-edit-actions">
-                    <button onClick={() => setEditingSatz(null)} className="btn-secondary">Abbrechen</button>
-                    <button onClick={handleSaveEdit} className="btn-primary">Speichern</button>
+                    </div>
+                    <div className="sm:hidden mobile-edit-actions mt-3">
+                    <button onClick={() => setEditingSatz(null)} className="btn-secondary w-full">Abbrechen</button>
+                    <button onClick={handleSaveEdit} className="btn-primary w-full">Speichern</button>
                     </div>
                     </div>
                 ) : (
