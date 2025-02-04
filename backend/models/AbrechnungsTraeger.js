@@ -70,7 +70,7 @@ class AbrechnungsTraeger {
             if (!userData.name) {
                 throw new Error('Ein Name muss vorhanden sein!')
             }
-
+            
             const [result] = await connection.execute(
                 'INSERT INTO abrechnungstraeger (user_id, name) VALUES (?, ?)',
                 [userData.userId, userData.name]
@@ -88,6 +88,7 @@ class AbrechnungsTraeger {
             return abrechnungsTraegerId;
         } catch (error) {
             await connection.rollback();
+            console.error('Fehler in create:', error);
             throw error;
         } finally {
             connection.release();

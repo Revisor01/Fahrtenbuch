@@ -485,7 +485,8 @@ function FahrtenListe() {
       datum: formatDateForInput(fahrt.datum),
       vonOrtTyp: getOrtTyp(fahrt, true),
       nachOrtTyp: getOrtTyp(fahrt, false),
-      abrechnung: fahrt.abrechnung
+      abrechnung: fahrt.abrechnung,
+      kilometer: fahrt.kilometer
     });
   };
   
