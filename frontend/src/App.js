@@ -898,10 +898,8 @@ function FahrtenListe() {
   };
   
   const renderFahrtRow = (fahrt, detail = null) => {
-    const traeger = abrechnungstraeger?.find(at => {
-      console.log('at.id type:', typeof at.id, 'fahrt.abrechnung type:', typeof fahrt.abrechnung);
-      return at.id === fahrt.abrechnung;
-    });
+    // Finde den Namen des Abrechnungsträgers
+    const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
     const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
     
     return (
@@ -1062,7 +1060,6 @@ function FahrtenListe() {
         </select>
       ) : (
         <span className="text-value">
-        {/* Abrechnungsträger Namen ausgeben */}
         {abrechnungstraegerName}
         </span>
       )}
