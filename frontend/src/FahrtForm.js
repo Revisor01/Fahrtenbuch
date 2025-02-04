@@ -10,6 +10,7 @@ function FahrtForm() {
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
+  const [isKilometerLocked, setIsKilometerLocked] = useState(false);
   const [formData, setFormData] = useState({
     datum: '',
     vonOrtId: '',
@@ -23,6 +24,36 @@ function FahrtForm() {
   const [addRueckfahrt, setAddRueckfahrt] = useState(false);
   const [useEinmaligenVonOrt, setUseEinmaligenVonOrt] = useState(false);
   const [useEinmaligenNachOrt, setUseEinmaligenNachOrt] = useState(false);
+
+  useEffect(() => {
+    const fetchDistanz = async () => {
+      if (formData.vonOrtId && formData.nachOrtId && !useEinmaligenVonOrt && !useEinmaligenNachOrt) {
+        try {
+          const response = await axios.get(`/api/distanzen/between`, {
+            params: { 
+              vonOrtId: formData.vonOrtId, 
+              nachOrtId: formData.nachOrtId 
+            }
+          });
+          if (response.data.distanz) {
+            setFormData(prev => ({ 
+              ...prev, 
+              manuelleKilometer: response.data.distanz.toString() 
+            }));
+            setIsKilometerLocked(true);
+          } else {
+            setIsKilometerLocked(false);
+          }
+        } catch (error) {
+          console.error('Fehler beim Abrufen der Distanz:', error);
+          setIsKilometerLocked(false);
+        }
+      } else {
+        setIsKilometerLocked(false);
+      }
+    };
+    fetchDistanz();
+  }, [formData.vonOrtId, formData.nachOrtId, useEinmaligenVonOrt, useEinmaligenNachOrt]);
 
   useEffect(() => {
     const fetchAbrechnungstraeger = async () => {
@@ -247,16 +278,17 @@ function FahrtForm() {
           <div className="form-row-half">
             <div className="form-group-half">
               <label className="form-label">Kilometer</label>
-              <input
-                type="number"
-                name="manuelleKilometer"
-                value={formData.manuelleKilometer}
-                onChange={handleChange}
-                placeholder="km"
-                className="form-input"
-                required
-                step="1"
-              />
+    <input
+    type="number"
+    name="manuelleKilometer"
+    value={formData.manuelleKilometer}
+    onChange={handleChange}
+    placeholder="km"
+    className="form-input"
+    required
+    disabled={isKilometerLocked}
+    step="1"
+    />
             </div>
             <div className="form-group-half">
               <label className="form-label">Abrechnung</label>

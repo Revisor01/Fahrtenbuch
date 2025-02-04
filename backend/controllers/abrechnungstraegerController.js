@@ -89,6 +89,32 @@ exports.updateErstattungssatz = async (req, res) => {
     }
 };
 
+const updateKennzeichen = async (oldKennzeichen, newKennzeichen) => {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        
+        // Update alle Fahrten
+        await connection.execute(
+            'UPDATE fahrten SET abrechnung = ? WHERE abrechnung = ?',
+            [newKennzeichen, oldKennzeichen]
+        );
+        
+        // Update den Abrechnungsträger
+        await connection.execute(
+            'UPDATE abrechnungstraeger SET kennzeichen = ? WHERE kennzeichen = ?',
+            [newKennzeichen, oldKennzeichen]
+        );
+        
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
+
 exports.deleteErstattungssatz = async (req, res) => {
     const connection = await db.getConnection();
     try {

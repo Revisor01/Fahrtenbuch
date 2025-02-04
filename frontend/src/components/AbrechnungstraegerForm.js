@@ -134,7 +134,7 @@ function AbrechnungstraegerForm() {
             true  // showCancel = true für den Bestätigungsdialog
         );
     };
-
+    
 return (
     <div className="space-y-6">
         {/* Form Card */}
@@ -183,36 +183,38 @@ return (
             <div key={traeger.id} className="card-container">
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                     <div className="flex-1">
-                        {editingTraeger?.id === traeger.id ? (
-                        <div className="space-y-4 w-full">
-                            <div>
-                                <label className="form-label">Name</label>
-                                <input
-                                    type="text"
-                                    value={editingTraeger.name}
-                                    onChange={(e) => setEditingTraeger({...editingTraeger, name: e.target.value})}
-                                    className="form-input w-full"
-                                    placeholder="Name"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="form-label">Kennzeichen</label>
-                                <input
-                                    type="text"
-                                    value={editingTraeger.kennzeichen}
-                                    onChange={(e) => setEditingTraeger({...editingTraeger, kennzeichen: e.target.value})}
-                                    className="form-input w-full"
-                                    placeholder="Kennzeichen"
-                                    required
-                                />
-                            </div>
-                            <div className="sm:hidden mobile-edit-actions">
-                                <button onClick={() => setEditingTraeger(null)} className="btn-secondary">Abbrechen</button>
-                                <button onClick={handleUpdate} className="btn-primary">Speichern</button>
-                            </div>
-                        </div>
-                        ) : (
+                {editingTraeger?.id === traeger.id ? (
+                    <div className="flex flex-col sm:flex-row w-full gap-4">
+                    <div className="flex-1 flex flex-col gap-4">
+                    <div className="w-full">
+                    <label className="form-label">Name</label>
+                    <input
+                    type="text"
+                    value={editingTraeger.name}
+                    onChange={(e) => setEditingTraeger({...editingTraeger, name: e.target.value})}
+                    className="form-input w-full"
+                    placeholder="Name"
+                    required
+                    />
+                    </div>
+                    <div className="w-full">
+                    <label className="form-label">Kennzeichen</label>
+                    <input
+                    type="text"
+                    value={editingTraeger.kennzeichen}
+                    onChange={(e) => setEditingTraeger({...editingTraeger, kennzeichen: e.target.value})}
+                    className="form-input w-full"
+                    placeholder="Kennzeichen"
+                    required
+                    />
+                    </div>
+                    </div>
+                    <div className="flex sm:items-end gap-2">
+                    <button onClick={handleUpdate} className="table-action-button-primary w-full sm:w-auto" title="Speichern">✓</button>
+                    <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary w-full sm:w-auto" title="Abbrechen">×</button>
+                    </div>
+                    </div>
+                ) : (
                         <>
                             <div className="font-medium text-value">{traeger.name}</div>
                             <div className="text-xs text-label mt-1">{traeger.kennzeichen}</div>
