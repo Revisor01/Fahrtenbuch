@@ -5,7 +5,7 @@ import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 
 function FahrtForm() {
-  const { orte, addFahrt, fetchMonthlyData, showNotification } = useContext(AppContext);
+  const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten } = useContext(AppContext);
   const [mitfahrer, setMitfahrer] = useState([]);
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
@@ -87,7 +87,7 @@ function FahrtForm() {
       alert('Bitte geben Sie die Kilometer manuell ein, wenn Sie einen einmaligen Ort verwenden.');
       return;
     }
-
+    
     if (!formData.abrechnung) {
       showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus");
       return;
@@ -106,7 +106,10 @@ function FahrtForm() {
     };
     
     try {
-      await addFahrt(fahrtData);
+      const newFahrt = await addFahrt(fahrtData); // Speichere die neue Fahrt
+      
+      // Hier wird die Fahrt in den lokalen Zustand eingefügt, anstatt die gesamten Fahrten neu zu laden
+      setFahrten(prevFahrten => [...prevFahrten, { ...fahrtData, id: newFahrt.id }]);
       
       if (addRueckfahrt) {
         const rueckfahrtData = {
@@ -118,7 +121,8 @@ function FahrtForm() {
           anlass: `Rückfahrt: ${fahrtData.anlass}`,
           mitfahrer: mitfahrer.filter(m => m.richtung === 'rueck' || m.richtung === 'hin_rueck')
         };
-        await addFahrt(rueckfahrtData);
+        const newRueckfahrt = await addFahrt(rueckfahrtData); // Speichere die Rückfahrt
+        setFahrten(prevFahrten => [...prevFahrten, { ...rueckfahrtData, id: newRueckfahrt.id }]);
       }
       
       // Reset form data and states
@@ -165,115 +169,114 @@ function FahrtForm() {
     const updatedMitfahrer = mitfahrer.filter((_, i) => i !== index);
     setMitfahrer(updatedMitfahrer);
   };
-
+  
   return (
     <div className="card-container-highlight">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basis-Informationen */}
-        <div className="form-row">
-          <div className="form-group-fixed">
-            <label className="form-label">Datum</label>
-            <input
-              type="date"
-              name="datum"
-              value={formData.datum}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Anlass der Fahrt</label>
-            <input
-              type="text"
-              name="anlass"
-              value={formData.anlass}
-              onChange={handleChange}
-              placeholder="z.B. Dienstbesprechung, Hausbesuch..."
-              className="form-input"
-              required
-            />
-          </div>
-        </div>
-        
-        {/* Orte und Kilometer */}
-        <div className="form-row">
-          <div className="form-group">
-            <div className="form-label-with-checkbox">
-              <label className="text-xs text-label">Startort</label>
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={useEinmaligenVonOrt}
-                  onChange={(e) => setUseEinmaligenVonOrt(e.target.checked)}
-                  className="checkbox-input"
-                />
-                <span className="text-xs text-label">Einmaliger Ort</span>
-              </label>
-            </div>
-            {useEinmaligenVonOrt ? (
-              <input
-                type="text"
-                name="einmaligerVonOrt"
-                value={formData.einmaligerVonOrt}
-                onChange={handleChange}
-                placeholder="Adresse eingeben"
-                className="form-input"
-                required
-              />
-            ) : (
-              <select
-                name="vonOrtId"
-                value={formData.vonOrtId}
-                onChange={handleChange}
-                className="form-select"
-                required
-              >
-                <option value="">Ort auswählen</option>
-                {renderOrteOptions(orte)}
-              </select>
-            )}
-          </div>
-          
-          <div className="form-group">
-            <div className="form-label-with-checkbox">
-              <label className="text-xs text-label">Zielort</label>
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={useEinmaligenNachOrt}
-                  onChange={(e) => setUseEinmaligenNachOrt(e.target.checked)}
-                  className="checkbox-input"
-                />
-                <span className="text-xs text-label">Einmaliger Ort</span>
-              </label>
-            </div>
-            {useEinmaligenNachOrt ? (
-              <input
-                type="text"
-                name="einmaligerNachOrt"
-                value={formData.einmaligerNachOrt}
-                onChange={handleChange}
-                placeholder="Adresse eingeben"
-                className="form-input"
-                required
-              />
-            ) : (
-              <select
-                name="nachOrtId"
-                value={formData.nachOrtId}
-                onChange={handleChange}
-                className="form-select"
-                required
-              >
-                <option value="">Ort auswählen</option>
-                {renderOrteOptions(orte)}
-              </select>
-            )}
-          </div>
-          
-          {/* Kilometer und Abrechnung */}
+    <form onSubmit={handleSubmit} className="space-y-6">
+    {/* Basis-Informationen */}
+    <div className="form-row">
+    <div className="form-group-fixed">
+    <label className="form-label">Datum</label>
+    <input
+    type="date"
+    name="datum"
+    value={formData.datum}
+    onChange={handleChange}
+    className="form-input"
+    required
+    />
+    </div>
+    
+    <div className="form-group">
+    <label className="form-label">Anlass der Fahrt</label>
+    <input
+    type="text"
+    name="anlass"
+    value={formData.anlass}
+    onChange={handleChange}
+    placeholder="z.B. Dienstbesprechung, Hausbesuch..."
+    className="form-input"
+    required
+    />
+    </div>
+    </div>
+    
+    {/* Orte und Kilometer */}
+    <div className="form-row">
+    <div className="form-group">
+    <div className="form-label-with-checkbox">
+    <label className="text-xs text-label">Startort</label>
+    <label className="checkbox-label">
+    <input
+    type="checkbox"
+    checked={useEinmaligenVonOrt}
+    onChange={(e) => setUseEinmaligenVonOrt(e.target.checked)}
+    className="checkbox-input"
+    />
+    <span className="text-xs text-label">Einmaliger Ort</span>
+    </label>
+    </div>
+    {useEinmaligenVonOrt ? (
+      <input
+      type="text"
+      name="einmaligerVonOrt"
+      value={formData.einmaligerVonOrt}
+      onChange={handleChange}
+      placeholder="Adresse eingeben"
+      className="form-input"
+      required
+      />
+    ) : (
+      <select
+      name="vonOrtId"
+      value={formData.vonOrtId}
+      onChange={handleChange}
+      className="form-select"
+      required
+      >
+      <option value="">Ort auswählen</option>
+      {renderOrteOptions(orte)}
+      </select>
+    )}
+    </div>
+    
+    <div className="form-group">
+    <div className="form-label-with-checkbox">
+    <label className="text-xs text-label">Zielort</label>
+    <label className="checkbox-label">
+    <input
+    type="checkbox"
+    checked={useEinmaligenNachOrt}
+    onChange={(e) => setUseEinmaligenNachOrt(e.target.checked)}
+    className="checkbox-input"
+    />
+    <span className="text-xs text-label">Einmaliger Ort</span>
+    </label>
+    </div>
+    {useEinmaligenNachOrt ? (
+      <input
+      type="text"
+      name="einmaligerNachOrt"
+      value={formData.einmaligerNachOrt}
+      onChange={handleChange}
+      placeholder="Adresse eingeben"
+      className="form-input"
+      required
+      />
+    ) : (
+      <select
+      name="nachOrtId"
+      value={formData.nachOrtId}
+      onChange={handleChange}
+      className="form-select"
+      required
+      >
+      <option value="">Ort auswählen</option>
+      {renderOrteOptions(orte)}
+      </select>
+    )}
+    </div>
+    
     {/* Kilometer und Abrechnung */}
     <div className="form-row">
     <div className="form-group-fixed">
@@ -301,10 +304,9 @@ function FahrtForm() {
       className="form-select"
       required
       >
+      <option value="">Bitte wählen</option>
       {abrechnungstraeger.map(traeger => (
-        <option key={traeger.id} value={traeger.id}>
-        {traeger.name}
-        </option>
+        <option key={traeger.id} value={traeger.id}>{traeger.name}</option>
       ))}
       </select>
     ) : (
@@ -314,69 +316,69 @@ function FahrtForm() {
     )}
     </div>
     </div>
-        </div>
-        
-        {/* Checkboxen und Buttons */}
-        <div className="flex flex-wrap items-center gap-4">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={addRueckfahrt}
-              onChange={(e) => setAddRueckfahrt(e.target.checked)}
-              className="checkbox-input"
-            />
-            <span className="text-xs text-label">Rückfahrt anlegen</span>
-          </label>
-          
-          <div className="button-group">
-            <div className="button-group-stack">
-              <button
-                type="button"
-                onClick={() => setShowMitfahrerModal(true)}
-                className="btn-secondary"
-              >
-                Mitfahrer:in
-              </button>
-              <button type="submit" className="btn-primary">
-                Speichern
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Mitfahrer Liste */}
-        {mitfahrer.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {mitfahrer.map((person, index) => (
-              <span key={index} className="status-badge-primary">
-                {person.name}
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDeleteMitfahrer(index);
-                  }}
-                  className="text-secondary-500 hover:text-secondary-600"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-      </form>
-      
-      {/* Mitfahrer Modal */}
-      {showMitfahrerModal && (
-        <MitfahrerModal
-          isOpen={showMitfahrerModal}
-          onClose={() => {
-            setShowMitfahrerModal(false);
-            setEditingMitfahrerIndex(null);
-          }}
-          onSave={handleAddMitfahrer}
-          initialData={editingMitfahrerIndex !== null ? mitfahrer[editingMitfahrerIndex] : null}
-        />
-      )}
+    </div>
+    
+    {/* Checkboxen und Buttons */}
+    <div className="flex flex-wrap items-center gap-4">
+    <label className="checkbox-label">
+    <input
+    type="checkbox"
+    checked={addRueckfahrt}
+    onChange={(e) => setAddRueckfahrt(e.target.checked)}
+    className="checkbox-input"
+    />
+    <span className="text-xs text-label">Rückfahrt anlegen</span>
+    </label>
+    
+    <div className="button-group">
+    <div className="button-group-stack">
+    <button
+    type="button"
+    onClick={() => setShowMitfahrerModal(true)}
+    className="btn-secondary"
+    >
+    Mitfahrer:in
+    </button>
+    <button type="submit" className="btn-primary">
+    Speichern
+    </button>
+    </div>
+    </div>
+    </div>
+    
+    {/* Mitfahrer Liste */}
+    {mitfahrer.length > 0 && (
+      <div className="flex flex-wrap gap-2">
+      {mitfahrer.map((person, index) => (
+        <span key={index} className="status-badge-primary">
+        {person.name}
+        <button
+        onClick={(e) => {
+          e.preventDefault();
+          handleDeleteMitfahrer(index);
+        }}
+        className="text-secondary-500 hover:text-secondary-600"
+        >
+        ×
+        </button>
+        </span>
+      ))}
+      </div>
+    )}
+    </form>
+    
+    {/* Mitfahrer Modal */}
+    {showMitfahrerModal && (
+      <MitfahrerModal
+      isOpen={showMitfahrerModal}
+      onClose={() => {
+        setShowMitfahrerModal(false);
+        setEditingMitfahrerIndex(null);
+      }}
+      onSave={handleAddMitfahrer}
+      initialData={editingMitfahrerIndex !== null ? mitfahrer[editingMitfahrerIndex] : null}
+      />
+    )}
     </div>
   );
 }
