@@ -215,7 +215,6 @@ class Fahrt {
       // Hole die Erstattungssätze
       const [erstattungssaetze] = await db.execute(`
       SELECT 
-        at.kennzeichen,
         eb.betrag,
         eb.gueltig_ab
       FROM abrechnungstraeger at
