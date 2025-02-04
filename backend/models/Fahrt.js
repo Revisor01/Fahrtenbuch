@@ -285,5 +285,6 @@ class Fahrt {
       throw error;
     }
   }
-  
+}
+
 module.exports = Fahrt;
