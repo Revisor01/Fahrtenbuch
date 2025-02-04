@@ -9,7 +9,6 @@ function AbrechnungstraegerForm() {
     const [isLoading, setIsLoading] = useState(true);
     const [newEntry, setNewEntry] = useState({
         name: '',
-        kennzeichen: '',
     });
 
     useEffect(() => {
@@ -38,7 +37,6 @@ function AbrechnungstraegerForm() {
             showNotification('Erfolg', 'Abrechnungsträger wurde hinzugefügt');
             setNewEntry({
                 name: '',
-                kennzeichen: ''
             });
             fetchAbrechnungstraeger();
         } catch (error) {
@@ -56,13 +54,13 @@ function AbrechnungstraegerForm() {
         } else {
             return;
         }
-        
+
         // Aktualisiere sort_order für alle Einträge
         const sortOrder = newOrder.map((item, idx) => ({
             id: item.id,
             sort_order: idx + 1
         }));
-        
+
         try {
             await axios.put('/api/abrechnungstraeger/sort', { sortOrder });
             setAbrechnungstraeger(newOrder);
@@ -74,7 +72,7 @@ function AbrechnungstraegerForm() {
     };
 
     const [editingTraeger, setEditingTraeger] = useState(null);
-    
+
     const handleEdit = async (id) => {
         try {
             const response = await axios.get(`/api/abrechnungstraeger/${id}`);
@@ -84,13 +82,12 @@ function AbrechnungstraegerForm() {
             showNotification('Fehler', 'Abrechnungsträger konnte nicht geladen werden');
         }
     };
-    
+
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
             await axios.put(`/api/abrechnungstraeger/${editingTraeger.id}`, {
                 name: editingTraeger.name,
-                kennzeichen: editingTraeger.kennzeichen
             });
             showNotification('Erfolg', 'Abrechnungsträger wurde aktualisiert');
             setEditingTraeger(null);
@@ -100,7 +97,7 @@ function AbrechnungstraegerForm() {
             showNotification('Fehler', 'Abrechnungsträger konnte nicht aktualisiert werden');
         }
     };
-    
+
     const handleToggleActive = async (id, currentActive) => {
         try {
             await axios.put(`/api/abrechnungstraeger/${id}`, {
@@ -126,7 +123,7 @@ function AbrechnungstraegerForm() {
                 } catch (error) {
                     console.error('Fehler beim Löschen:', error);
                     showNotification(
-                        'Fehler', 
+                        'Fehler',
                         error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden'
                     );
                 }
@@ -134,178 +131,111 @@ function AbrechnungstraegerForm() {
             true  // showCancel = true für den Bestätigungsdialog
         );
     };
-    
-return (
-    <div className="space-y-6">
-        {/* Form Card */}
-        <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Abrechnungsträger hinzufügen</h3>
-            <p className="text-sm text-muted mb-6">
-                Ein Abrechnungsträger ist eine Organisation, die Ihre Fahrtkosten erstattet. 
-                Häufige Abrechnungsträger sind der Kirchenkreis oder die Kirchengemeinde.
-            </p>
-            <form onSubmit={handleAddNew}>
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                    <div className="w-full">
-                        <label className="form-label">Name des Abrechnungsträgers</label>
-                        <input
-                            type="text"
-                            value={newEntry.name}
-                            onChange={e => setNewEntry({...newEntry, name: e.target.value})}
-                            className="form-input"
-                            placeholder="z.B. Kirchenkreis Dithmarschen"
-                            required
-                        />
-                    </div>
-                    <div className="w-full sm:w-1/3">
-                        <label className="form-label">Kennzeichen</label>
-                        <input
-                            type="text"
-                            value={newEntry.kennzeichen}
-                            onChange={e => setNewEntry({...newEntry, kennzeichen: e.target.value})}
-                            className="form-input"
-                            placeholder="z.B. kkdith"
-                            required
-                        />
-                    </div>
-                    <div className="flex items-end w-full sm:w-auto">
-                        <button type="submit" className="btn-primary w-full">
-                            Hinzufügen
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        
-        {/* List Grid */}
-        <div className="space-y-4">
-            {abrechnungstraeger.map((traeger, index) => (
-            <div key={traeger.id} className="card-container">
-                <div className="flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="flex-1">
-                {editingTraeger?.id === traeger.id ? (
-                    <div className="flex flex-col sm:flex-row w-full gap-4">
-                    <div className="flex-1 flex flex-col gap-4">
-                    <div className="w-full">
-                    <label className="form-label">Name</label>
-                    <input
-                    type="text"
-                    value={editingTraeger.name}
-                    onChange={(e) => setEditingTraeger({...editingTraeger, name: e.target.value})}
-                    className="form-input w-full"
-                    placeholder="Name"
-                    required
-                    />
-                    </div>
-                    <div className="w-full">
-                    <label className="form-label">Kennzeichen</label>
-                    <input
-                    type="text"
-                    value={editingTraeger.kennzeichen}
-                    onChange={(e) => setEditingTraeger({...editingTraeger, kennzeichen: e.target.value})}
-                    className="form-input w-full"
-                    placeholder="Kennzeichen"
-                    required
-                    />
-                    </div>
-                    </div>
-                    <div className="flex sm:items-end gap-2">
-                    <button onClick={handleUpdate} className="table-action-button-primary w-full sm:w-auto" title="Speichern">✓</button>
-                    <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary w-full sm:w-auto" title="Abbrechen">×</button>
-                    </div>
-                    </div>
-                ) : (
-                        <>
-                            <div className="font-medium text-value">{traeger.name}</div>
-                            <div className="text-xs text-label mt-1">{traeger.kennzeichen}</div>
-                        </>
-                        )}
-                    </div>
-                    {editingTraeger?.id === traeger.id ? (
-                        <div className="hidden sm:flex gap-2">
-                            <button onClick={handleUpdate} className="table-action-button-primary" title="Speichern">✓</button>
-                            <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
+
+    return (
+        <div className="space-y-6">
+            {/* Form Card */}
+            <div className="card-container-highlight">
+                <h3 className="text-lg font-medium text-value mb-4">Abrechnungsträger hinzufügen</h3>
+                <p className="text-sm text-muted mb-6">
+                    Ein Abrechnungsträger ist eine Organisation, die Ihre Fahrtkosten erstattet.
+                    Häufige Abrechnungsträger sind der Kirchenkreis oder die Kirchengemeinde.
+                </p>
+                <form onSubmit={handleAddNew}>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <div className="w-full">
+                            <label className="form-label">Name des Abrechnungsträgers</label>
+                            <input
+                                type="text"
+                                value={newEntry.name}
+                                onChange={(e) => setNewEntry({ ...newEntry, name: e.target.value })}
+                                className="form-input"
+                                placeholder="z.B. Kirchenkreis Dithmarschen"
+                                required
+                            />
                         </div>
-                    ) : (
-                        <>
-                            <div className="hidden sm:flex gap-2">
-                                <div className="flex gap-1">
+                        <div className="flex items-end w-full sm:w-auto">
+                            <button type="submit" className="btn-primary w-full">
+                                Hinzufügen
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {/* List Grid */}
+            <div className="space-y-4">
+                {abrechnungstraeger.map((traeger, index) => (
+                    <div key={traeger.id} className="card-container">
+                        <div className="flex flex-col sm:flex-row justify-between gap-4">
+                            <div className="flex-1">
+                                {editingTraeger?.id === traeger.id ? (
+                                    <div className="flex flex-col w-full gap-4">
+                                        <div className="w-full">
+                                            <label className="form-label">Name</label>
+                                            <input
+                                                type="text"
+                                                value={editingTraeger.name}
+                                                onChange={(e) => setEditingTraeger({ ...editingTraeger, name: e.target.value })}
+                                                className="form-input w-full"
+                                                placeholder="Name"
+                                                required
+                                            />
+                                        </div>
+                                        {/* Buttons (nur wenn im Bearbeitungsmodus) */}
+                                        <div className="flex gap-2">
+                                            <button onClick={handleUpdate} className="table-action-button-primary w-full sm:w-auto" title="Speichern">✓</button>
+                                            <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary w-full sm:w-auto" title="Abbrechen">×</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="font-medium text-value">{traeger.name}</div>
+                                )}
+                            </div>
+                            {editingTraeger?.id !== traeger.id && (
+                                <div className="flex gap-2">
+                                    <div className="flex gap-1">
+                                        <button
+                                            onClick={() => handleMoveItem(index, 'up')}
+                                            disabled={index === 0}
+                                            className="table-action-button-primary"
+                                            title="Nach oben">
+                                            <ChevronUp size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleMoveItem(index, 'down')}
+                                            disabled={index === abrechnungstraeger.length - 1}
+                                            className="table-action-button-primary"
+                                            title="Nach unten">
+                                            <ChevronDown size={16} />
+                                        </button>
+                                    </div>
                                     <button
-                                        onClick={() => handleMoveItem(index, 'up')}
-                                        disabled={index === 0}
-                                        className="table-action-button-primary"
-                                        title="Nach oben">
-                                        <ChevronUp size={16} />
+                                        onClick={() => handleToggleActive(traeger.id, traeger.active)}
+                                        className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
+                                        title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
+                                        {traeger.active ? '●' : '○'}
                                     </button>
                                     <button
-                                        onClick={() => handleMoveItem(index, 'down')}
-                                        disabled={index === abrechnungstraeger.length - 1}
+                                        onClick={() => handleEdit(traeger.id)}
                                         className="table-action-button-primary"
-                                        title="Nach unten">
-                                        <ChevronDown size={16} />
+                                        title="Bearbeiten">
+                                        ✎
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(traeger.id)}
+                                        className="table-action-button-secondary"
+                                        title="Löschen">
+                                        ×
                                     </button>
                                 </div>
-                                <button
-                                    onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                                    className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
-                                    title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
-                                    {traeger.active ? '●' : '○'}
-                                </button>
-                                <button
-                                    onClick={() => handleEdit(traeger.id)}
-                                    className="table-action-button-primary"
-                                    title="Bearbeiten">
-                                    ✎
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(traeger.id)}
-                                    className="table-action-button-secondary"
-                                    title="Löschen">
-                                    ×
-                                </button>
-                            </div>
-                            <div className="sm:hidden flex flex-wrap gap-2 justify-end">
-                                <button
-                                    onClick={() => handleMoveItem(index, 'up')}
-                                    disabled={index === 0}
-                                    className="table-action-button-primary"
-                                    title="Nach oben">
-                                    <ChevronUp size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleMoveItem(index, 'down')}
-                                    disabled={index === abrechnungstraeger.length - 1}
-                                    className="table-action-button-primary"
-                                    title="Nach unten">
-                                    <ChevronDown size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleToggleActive(traeger.id, traeger.active)}
-                                    className={`table-action-button-${traeger.active ? 'primary' : 'secondary'}`}
-                                    title={traeger.active ? 'Aktiv' : 'Inaktiv'}>
-                                    {traeger.active ? '●' : '○'}
-                                </button>
-                                <button
-                                    onClick={() => handleEdit(traeger.id)}
-                                    className="table-action-button-primary"
-                                    title="Bearbeiten">
-                                    ✎
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(traeger.id)}
-                                    className="table-action-button-secondary"
-                                    title="Löschen">
-                                    ×
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
-            ))}
         </div>
-    </div>
-);
+    );
 }
-            
+
 export default AbrechnungstraegerForm;

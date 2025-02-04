@@ -59,11 +59,10 @@ function FahrtForm() {
     const fetchAbrechnungstraeger = async () => {
       try {
         const response = await axios.get('/api/abrechnungstraeger/simple');
-        const traeger = response.data.data.sort((a, b) => a.sort_order - b.sort_order);
-        setAbrechnungstraeger(traeger);
+        setAbrechnungstraeger(response.data.data.sort((a, b) => a.sort_order - b.sort_order));
         // Setze den ersten Abrechnungsträger als Default, falls vorhanden
-        if (traeger.length > 0) {
-          setFormData(prev => ({...prev, abrechnung: traeger[0].kennzeichen}));
+        if (response.data.data.length > 0) {
+          setFormData(prev => ({...prev, abrechnung: response.data.data[0].id}));
         }
       } catch (error) {
         console.error('Fehler beim Laden der Abrechnungsträger:', error);
@@ -102,7 +101,7 @@ function FahrtForm() {
       einmaligerNachOrt: useEinmaligenNachOrt ? formData.einmaligerNachOrt : null,
       anlass: formData.anlass,
       kilometer: parseFloat(formData.manuelleKilometer),
-      abrechnung: formData.abrechnung,
+      abrechnung: parseInt(formData.abrechnung),
       mitfahrer: mitfahrer.filter(m => m.richtung === 'hin' || m.richtung === 'hin_rueck')
     };
     
@@ -131,7 +130,7 @@ function FahrtForm() {
         einmaligerNachOrt: '',
         anlass: '',
         manuelleKilometer: '',
-        abrechnung: abrechnungstraeger.length > 0 ? abrechnungstraeger[0].kennzeichen : ''
+        abrechnung: abrechnungstraeger.length > 0 ? abrechnungstraeger[0].id : ''
       });
       setUseEinmaligenVonOrt(false);
       setUseEinmaligenNachOrt(false);
@@ -303,7 +302,7 @@ function FahrtForm() {
       required
       >
       {abrechnungstraeger.map(traeger => (
-        <option key={traeger.id} value={traeger.kennzeichen}>
+        <option key={traeger.id} value={traeger.id}>
         {traeger.name}
         </option>
       ))}

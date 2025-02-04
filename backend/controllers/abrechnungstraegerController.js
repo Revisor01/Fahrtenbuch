@@ -14,7 +14,7 @@ exports.getAllAbrechnungstraeger = async (req, res) => {
 exports.getSimpleList = async (req, res) => {
     try {
         const [rows] = await db.execute(`
-            SELECT id, name, kennzeichen, active
+            SELECT id, name, active
             FROM abrechnungstraeger 
             WHERE user_id = ? AND active = TRUE
             ORDER BY sort_order ASC`,

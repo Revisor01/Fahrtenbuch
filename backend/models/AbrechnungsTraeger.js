@@ -11,7 +11,7 @@ class AbrechnungsTraeger {
             ORDER BY at.sort_order ASC`,
                 [userId]
             );
-            
+
             // Dann für jeden Abrechnungsträger den aktuellen Betrag holen
             const [aktuelleBetraege] = await db.execute(`
             SELECT 
@@ -28,7 +28,7 @@ class AbrechnungsTraeger {
             ON eb.abrechnungstraeger_id = max_dates.abrechnungstraeger_id 
             AND eb.gueltig_ab = max_dates.max_gueltig_ab`
             );
-            
+
             // Aktuelle Beträge den Trägern zuordnen
             return traeger.map(t => {
                 const aktuellerBetrag = aktuelleBetraege.find(
@@ -40,7 +40,7 @@ class AbrechnungsTraeger {
                     betrag_gueltig_ab: aktuellerBetrag?.betrag_gueltig_ab || null
                 };
             });
-            
+
         } catch (error) {
             console.error('Fehler in findAllForUser:', error);
             throw error;
@@ -50,22 +50,9 @@ class AbrechnungsTraeger {
     static async findById(id, userId) {
         try {
             const [rows] = await db.execute(`
-                SELECT 
-                    at.*,
-                    eb.betrag as aktueller_betrag,
-                    eb.gueltig_ab as betrag_gueltig_ab
-                FROM abrechnungstraeger at
-                LEFT JOIN (
-                    SELECT abrechnungstraeger_id, betrag, gueltig_ab
-                    FROM erstattungsbetraege eb1
-                    WHERE gueltig_ab = (
-                        SELECT MAX(gueltig_ab)
-                        FROM erstattungsbetraege eb2
-                        WHERE eb2.abrechnungstraeger_id = eb1.abrechnungstraeger_id
-                        AND eb2.gueltig_ab <= CURRENT_DATE()
-                    )
-                ) eb ON at.id = eb.abrechnungstraeger_id
-                WHERE at.id = ? AND at.user_id = ?`,
+                SELECT id, name, active
+                FROM abrechnungstraeger 
+                WHERE id = ? AND user_id = ?`,
                 [id, userId]
             );
             return rows[0];
@@ -80,9 +67,13 @@ class AbrechnungsTraeger {
         try {
             await connection.beginTransaction();
             
+            if (!userData.name) {
+                throw new Error('Ein Name muss vorhanden sein!')
+            }
+
             const [result] = await connection.execute(
-                'INSERT INTO abrechnungstraeger (user_id, name, kennzeichen) VALUES (?, ?, ?)',
-                [userData.userId, userData.name, userData.kennzeichen]
+                'INSERT INTO abrechnungstraeger (user_id, name) VALUES (?, ?)',
+                [userData.userId, userData.name]
             );
             
             const abrechnungsTraegerId = result.insertId;
@@ -156,22 +147,13 @@ class AbrechnungsTraeger {
 
     static async checkForFahrten(id) {
         const [rows] = await db.execute(
-            'SELECT COUNT(*) as count FROM fahrten WHERE abrechnung = (SELECT kennzeichen FROM abrechnungstraeger WHERE id = ?)',
+            'SELECT COUNT(*) as count FROM fahrten WHERE abrechnung = ?',
             [id]
         );
         return rows[0].count > 0;
     }
-    
+
     static async delete(id, userId) {
-        const [fahrten] = await db.execute(
-            'SELECT COUNT(*) as count FROM fahrten f JOIN abrechnungstraeger a ON f.abrechnung = a.kennzeichen COLLATE utf8mb4_unicode_ci WHERE a.id = ?',
-            [id]
-        );
-        
-        if (fahrten[0].count > 0) {
-            throw new Error('Abrechnungsträger wird noch in Fahrten verwendet.');
-        }
-        
         const [result] = await db.execute(
             'DELETE FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
             [id, userId]
