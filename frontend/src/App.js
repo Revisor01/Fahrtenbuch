@@ -588,14 +588,19 @@ function FahrtenListe() {
       if (value > 0) {
         // Kategorie-Namen formatieren
         let displayName = key.charAt(0).toUpperCase() + key.slice(1);
-        if (key === 'mitfahrer') displayName = 'Mitfahrer:innen';
+        if (key === 'mitfahrer') {
+          displayName = 'Mitfahrer:innen';
+        } else {
+          // Versuche, den Abrechnungsträgernamen anhand der ID zu finden
+          const traeger = abrechnungstraeger.find(at => at.id === parseInt(key));
+          displayName = traeger ? traeger.name : displayName;
+        }
         
         kategorien.push([key, displayName, value]);
       }
     });
     return kategorien;
-  };
-  
+  };  
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
