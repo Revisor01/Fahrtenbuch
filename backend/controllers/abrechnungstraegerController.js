@@ -175,26 +175,24 @@ exports.getErstattungshistorie = async (req, res) => {
 
 exports.createAbrechnungstraeger = async (req, res) => {
     try {
-        const { name, betrag, gueltig_ab } = req.body;
+        const { name} = req.body; // Kennzeichen wird nicht mehr aus dem Request geholt
         
         if (!name) {
             return res.status(400).json({ message: 'Name ist erforderlich' });
         }
-
+        
         const id = await AbrechnungsTraeger.create({
             userId: req.user.id,
             name,
-            betrag,
-            gueltig_ab
         });
-
-        res.status(201).json({ 
-            id, 
-            message: 'Abrechnungsträger erfolgreich erstellt' 
+        
+        res.status(201).json({
+            id,
+            message: 'Abrechnungsträger erfolgreich erstellt',
         });
     } catch (error) {
         console.error('Fehler beim Erstellen des Abrechnungsträgers:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler' });
+        res.status(500).json({ message: 'Interner Server-Fehler', error: error.message }); // Füge error.message hinzu
     }
 };
 
