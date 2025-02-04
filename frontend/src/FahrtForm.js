@@ -290,15 +290,6 @@ function FahrtForm() {
     disabled={isKilometerLocked}
     step="1"
     />
-    {isKilometerLocked && (
-      <button
-      type="button"
-      onClick={() => setIsKilometerLocked(false)}
-      className="text-xs text-secondary-600 hover:text-secondary-700 mt-1"
-      >
-      Kilometer manuell eingeben
-      </button>
-    )}
     </div>
     
     <div className="form-group">

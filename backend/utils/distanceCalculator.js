@@ -73,72 +73,8 @@ exports.updateDistanz = async (req, res) => {
   }
 };
 
-async function calculateAutoSplit(vonOrtId, nachOrtId, userId) {
-  try {
-    console.log('calculateAutoSplit input:', { vonOrtId, nachOrtId, userId });
-    
-    const dienstortId = await getDienstort(userId);
-    const wohnortId = await getWohnort(userId);
-    
-    console.log('Dienstort and Wohnort:', { dienstortId, wohnortId });
-    
-    if (!dienstortId || !wohnortId) {
-      throw new Error('Dienstort oder Wohnort nicht gefunden');
-    }
-    
-    const distanzWohnortDienstort = await getDistance(wohnortId, dienstortId, userId);
-    const distanzVonDienstort = await getDistance(vonOrtId, dienstortId, userId);
-    const distanzNachDienstort = await getDistance(dienstortId, nachOrtId, userId);
-    
-    console.log('Distances:', { distanzWohnortDienstort, distanzVonDienstort, distanzNachDienstort });
-    
-    const distanzVonNach = distanzVonDienstort + distanzNachDienstort;
-    
-    let kirchenkreisKm = 0, gemeindeKm = 0, 
-    kirchenkreisVonOrtId = null, kirchenkreisNachOrtId = null, 
-    gemeindeVonOrtId = null, gemeindeNachOrtId = null;
-    
-    if (vonOrtId == wohnortId) {
-      kirchenkreisKm = distanzWohnortDienstort;
-      gemeindeKm = distanzVonNach - distanzWohnortDienstort;
-      kirchenkreisVonOrtId = wohnortId;
-      kirchenkreisNachOrtId = dienstortId;
-      gemeindeVonOrtId = dienstortId;
-      gemeindeNachOrtId = nachOrtId;
-    } else if (nachOrtId == wohnortId) {
-      gemeindeKm = distanzVonNach - distanzWohnortDienstort;
-      kirchenkreisKm = distanzWohnortDienstort;
-      gemeindeVonOrtId = vonOrtId;
-      gemeindeNachOrtId = dienstortId;
-      kirchenkreisVonOrtId = dienstortId;
-      kirchenkreisNachOrtId = wohnortId;
-    } else {
-      gemeindeKm = distanzVonNach;
-      gemeindeVonOrtId = vonOrtId;
-      gemeindeNachOrtId = nachOrtId;
-    }
-    
-    const result = {
-      kirchenkreis: Math.max(kirchenkreisKm, 0),
-      gemeinde: Math.max(gemeindeKm, 0),
-      gesamt: distanzVonNach,
-      kirchenkreisVonOrtId,
-      kirchenkreisNachOrtId,
-      gemeindeVonOrtId,
-      gemeindeNachOrtId
-    };
-    
-    console.log('calculateAutoSplit result:', result);
-    return result;
-  } catch (error) {
-    console.error('Fehler in calculateAutoSplit:', error);
-    throw error;
-  }
-}
-
 module.exports = {
   getDistance,
   getDienstort,
-  getWohnort,
-  calculateAutoSplit
+  getWohnort
 };
