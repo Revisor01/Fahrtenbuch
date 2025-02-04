@@ -89,32 +89,6 @@ exports.updateErstattungssatz = async (req, res) => {
     }
 };
 
-const updateKennzeichen = async (oldKennzeichen, newKennzeichen) => {
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-        
-        // Update alle Fahrten
-        await connection.execute(
-            'UPDATE fahrten SET abrechnung = ? WHERE abrechnung = ?',
-            [newKennzeichen, oldKennzeichen]
-        );
-        
-        // Update den Abrechnungsträger
-        await connection.execute(
-            'UPDATE abrechnungstraeger SET kennzeichen = ? WHERE kennzeichen = ?',
-            [newKennzeichen, oldKennzeichen]
-        );
-        
-        await connection.commit();
-    } catch (error) {
-        await connection.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
-};
-
 exports.deleteErstattungssatz = async (req, res) => {
     const connection = await db.getConnection();
     try {
@@ -175,15 +149,24 @@ exports.getErstattungshistorie = async (req, res) => {
 
 exports.createAbrechnungstraeger = async (req, res) => {
     try {
-        const { name} = req.body; // Kennzeichen wird nicht mehr aus dem Request geholt
+        const { name } = req.body;
         
         if (!name) {
             return res.status(400).json({ message: 'Name ist erforderlich' });
         }
         
+        // Hole aktuelle maximale sort_order
+        const [maxSort] = await db.execute(
+            'SELECT MAX(sort_order) as maxSort FROM abrechnungstraeger WHERE user_id = ?',
+            [req.user.id]
+        );
+        
+        const nextSortOrder = (maxSort[0].maxSort || 0) + 1;
+        
         const id = await AbrechnungsTraeger.create({
             userId: req.user.id,
             name,
+            sortOrder: nextSortOrder
         });
         
         res.status(201).json({
@@ -192,7 +175,7 @@ exports.createAbrechnungstraeger = async (req, res) => {
         });
     } catch (error) {
         console.error('Fehler beim Erstellen des Abrechnungsträgers:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler', error: error.message }); // Füge error.message hinzu
+        res.status(500).json({ message: 'Interner Server-Fehler', error: error.message });
     }
 };
 
