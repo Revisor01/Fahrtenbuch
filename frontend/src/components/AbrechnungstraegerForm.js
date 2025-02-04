@@ -169,34 +169,35 @@ function AbrechnungstraegerForm() {
                     <div key={traeger.id} className="card-container">
                         <div className="flex flex-col sm:flex-row justify-between gap-4">
                             <div className="flex-1">
-                                {editingTraeger?.id === traeger.id ? (
-                                    <div className="flex flex-col w-full gap-4">
-                                        <div className="w-full">
-                                            <label className="form-label">Name</label>
-                                            <input
-                                                type="text"
-                                                value={editingTraeger.name}
-                                                onChange={(e) => setEditingTraeger({ ...editingTraeger, name: e.target.value })}
-                                                className="form-input w-full"
-                                                placeholder="Name"
-                                                required
-                                            />
-                                        </div>
-                                        {/* Buttons (nur wenn im Bearbeitungsmodus) */}
-                                    <div className="hidden sm:flex gap-2">
-                                    <button onClick={handleUpdate} className="table-action-button-primary" title="Speichern">✓</button>
-                                    <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
-                                    </div>
-                                    </div>
-                                    <div className="sm:hidden mobile-edit-actions mt-3">
-                                    <button onClick={() => setEditingTraeger(null)} className="btn-secondary w-full">Abbrechen</button>
-                                    <button onClick={handleUpdate} className="btn-primary w-full">Speichern</button>
-                                    </div>
-                                    </div>
-                                ) : (
-                                    <div className="font-medium text-value">{traeger.name}</div>
-                                )}
-                            </div>
+                    {editingTraeger?.id === traeger.id ? (
+                        <div className="flex flex-col w-full gap-4">
+                        <div className="w-full">
+                        <label className="form-label">Name</label>
+                        <input
+                        type="text"
+                        value={editingTraeger.name}
+                        onChange={(e) => setEditingTraeger({ ...editingTraeger, name: e.target.value })}
+                        className="form-input w-full"
+                        placeholder="Name"
+                        required
+                        />
+                        </div>
+                        {/* Buttons (nur wenn im Bearbeitungsmodus) */}
+                        <div className="flex gap-2 justify-end">
+                        <div className="hidden sm:flex gap-2">
+                        <button onClick={handleUpdate} className="table-action-button-primary" title="Speichern">✓</button>
+                        <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
+                        </div>
+                        <div className="sm:hidden flex gap-2">
+                        <button onClick={handleUpdate} className="btn-primary flex-1">Speichern</button>
+                        <button onClick={() => setEditingTraeger(null)} className="btn-secondary flex-1">Abbrechen</button>
+                        </div>
+                        </div>
+                        </div>
+                    ) : (
+                        <div className="font-medium text-value">{traeger.name}</div>
+                    )}
+                    </div>
                             {editingTraeger?.id !== traeger.id && (
                                 <div className="flex gap-2">
                                     <div className="flex gap-1">
