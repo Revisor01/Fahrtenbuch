@@ -752,19 +752,17 @@ function FahrtenListe() {
   const exportToCSV = (type) => {
     const csvContent = [
       ['Datum', 'Von Adresse', 'Nach Adresse', 'Anlass', 'Kilometer', 'Abrechnung'],
-      ...fahrten.map(fahrt => {
-        if (type === 'all' || fahrt.abrechnung.toLowerCase() === type) {
-          return [
-            new Date(fahrt.datum).toLocaleDateString(),
-            fahrt.einmaliger_von_ort || fahrt.von_ort_adresse || fahrt.von_ort_name,
-            fahrt.einmaliger_nach_ort || fahrt.nach_ort_adresse || fahrt.nach_ort_name,
-            fahrt.anlass,
-            roundKilometers(fahrt.kilometer),
-            abrechnungstraeger.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt'
-          ];
-        }
-        return null;
-      }).filter(row => row !== null)  // Entferne null-Einträge
+      ...sortedFahrten.map(fahrt => {
+        const abrechnungName = abrechnungstraeger.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt';
+        return [
+          new Date(fahrt.datum).toLocaleDateString(),
+          fahrt.einmaliger_von_ort || fahrt.von_ort_adresse || fahrt.von_ort_name,
+          fahrt.einmaliger_nach_ort || fahrt.nach_ort_adresse || fahrt.nach_ort_name,
+          fahrt.anlass,
+          roundKilometers(fahrt.kilometer),
+          abrechnungName
+        ];
+      })
     ].map(row => row.join(';')).join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -901,8 +899,11 @@ function FahrtenListe() {
   
   const renderFahrtRow = (fahrt, detail = null) => {
     // Finde den Namen des Abrechnungsträgers
-    const traeger = abrechnungstraeger?.find(at => at.id === fahrt.abrechnung);
-    const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
+    const abrechnungstraegerName = useMemo(() => {
+      const traeger = abrechnungstraeger?.find(at => at.id === fahrt.abrechnung);
+      return traeger ? traeger.name : 'Unbekannt';
+    }, [fahrt.abrechnung, abrechnungstraeger]);
+
     return (
       <tr key={fahrt.id} className="table-row">
       <td className="table-cell">
