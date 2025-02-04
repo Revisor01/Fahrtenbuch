@@ -275,9 +275,10 @@ function FahrtForm() {
           </div>
           
           {/* Kilometer und Abrechnung */}
-          <div className="form-row-half">
-            <div className="form-group-half">
-              <label className="form-label">Kilometer</label>
+    {/* Kilometer und Abrechnung */}
+    <div className="form-row">
+    <div className="form-group-fixed">
+    <label className="form-label">Kilometer</label>
     <input
     type="number"
     name="manuelleKilometer"
@@ -289,30 +290,40 @@ function FahrtForm() {
     disabled={isKilometerLocked}
     step="1"
     />
-            </div>
-            <div className="form-group-half">
-              <label className="form-label">Abrechnung</label>
-              {abrechnungstraeger.length > 0 ? (
-                <select
-                  name="abrechnung"
-                  value={formData.abrechnung}
-                  onChange={handleChange}
-                  className="form-select"
-                  required
-                >
-                  {abrechnungstraeger.map(traeger => (
-                    <option key={traeger.id} value={traeger.kennzeichen}>
-                      {traeger.name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div className="text-secondary-600 text-sm">
-                  Keine Abrechnungsträger verfügbar
-                </div>
-              )}
-            </div>
-          </div>
+    {isKilometerLocked && (
+      <button
+      type="button"
+      onClick={() => setIsKilometerLocked(false)}
+      className="text-xs text-secondary-600 hover:text-secondary-700 mt-1"
+      >
+      Kilometer manuell eingeben
+      </button>
+    )}
+    </div>
+    
+    <div className="form-group">
+    <label className="form-label">Abrechnung</label>
+    {abrechnungstraeger.length > 0 ? (
+      <select
+      name="abrechnung"
+      value={formData.abrechnung}
+      onChange={handleChange}
+      className="form-select"
+      required
+      >
+      {abrechnungstraeger.map(traeger => (
+        <option key={traeger.id} value={traeger.kennzeichen}>
+        {traeger.name}
+        </option>
+      ))}
+      </select>
+    ) : (
+      <div className="text-secondary-600 text-sm">
+      Keine Abrechnungsträger verfügbar
+      </div>
+    )}
+    </div>
+    </div>
         </div>
         
         {/* Checkboxen und Buttons */}
