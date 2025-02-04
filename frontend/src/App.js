@@ -901,7 +901,8 @@ function FahrtenListe() {
   
   const renderFahrtRow = (fahrt, detail = null) => {
     // Finde den Namen des Abrechnungsträgers
-    const abrechnungstraegerName =  abrechnungstraeger?.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt';
+    const traeger = abrechnungstraeger?.find(at => at.id === fahrt.abrechnung);
+    const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
     return (
       <tr key={fahrt.id} className="table-row">
       <td className="table-cell">
