@@ -643,6 +643,9 @@ function FahrtenListe() {
         return;
       }
       
+      // Formatierung des Kilometers
+      const kilometerString = kilometer.toFixed(2); // Umwandlung in String mit 2 Dezimalstellen
+      
       const updatedFahrt = {
         datum: editingFahrt.datum,
         vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
@@ -650,15 +653,14 @@ function FahrtenListe() {
         einmaligerVonOrt: editingFahrt.vonOrtTyp === 'einmalig' ? editingFahrt.einmaliger_von_ort : null,
         einmaligerNachOrt: editingFahrt.nachOrtTyp === 'einmalig' ? editingFahrt.einmaliger_nach_ort : null,
         anlass: editingFahrt.anlass,
-        kilometer: parseFloat(editingFahrt.kilometer),
+        kilometer: kilometerString, // Verwende den formatierten String
         abrechnung: parseInt(editingFahrt.abrechnung)
       };
       
-      console.log('Sende Fahrt-Update:', updatedFahrt); // Debug-Log
+      console.log('Sende Fahrt-Update:', updatedFahrt);
       
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
-      //await refreshAllData();  ENTFERNE DIESE ZEILE!
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
