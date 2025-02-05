@@ -4,7 +4,7 @@ import { AppContext } from '../App';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 function AbrechnungstraegerForm() {
-    const { showNotification } = useContext(AppContext);
+    const { showNotification, refreshAllData } = useContext(AppContext);
     const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [newEntry, setNewEntry] = useState({
@@ -38,7 +38,7 @@ function AbrechnungstraegerForm() {
             setNewEntry({
                 name: '',
             });
-            fetchAbrechnungstraeger();
+            await refreshAllData(); // Hier aufrufen
         } catch (error) {
             console.error('Fehler beim Hinzufügen:', error);
             showNotification('Fehler', 'Abrechnungsträger konnte nicht hinzugefügt werden');
