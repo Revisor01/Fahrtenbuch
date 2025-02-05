@@ -87,9 +87,12 @@ exports.exportToExcel = async (req, res) => {
 
      const mitnahmeWorksheet = workbook.getWorksheet('Mitnahmeentschädigung');
      if(mitnahmeWorksheet) {
-       mitnahmeWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth))} ${year}`;
-       
+         console.log('Zu schreibende Mitfahrer-Daten:', uniqueMitfahrerData);
+         mitnahmeWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth))} ${year}`;
+
+            
        uniqueMitfahrerData.forEach((mitfahrer, index) => {
+         console.log('Schreibe Mitfahrer:', mitfahrer, 'in Zeile:', index + 10);
          if (index < 15) {
            const row = mitnahmeWorksheet.getRow(index + 10);
            row.getCell('A').value = mitfahrer.datum;
