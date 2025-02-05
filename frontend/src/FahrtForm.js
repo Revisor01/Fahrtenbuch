@@ -5,11 +5,10 @@ import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 
 function FahrtForm() {
-  const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger } = useContext(AppContext);
+  const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger, setAbrechnungstraeger } = useContext(AppContext);
   const [mitfahrer, setMitfahrer] = useState([]);
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
-  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [isKilometerLocked, setIsKilometerLocked] = useState(false);
   const [formData, setFormData] = useState({
     datum: '',
