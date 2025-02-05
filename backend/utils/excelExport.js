@@ -49,27 +49,28 @@ exports.exportToExcel = async (req, res) => {
    const userProfile = await getUserProfile(userId);
    console.log('User profile:', userProfile);
 
-   const mitfahrerData = fahrten.map(fahrt => {
-      if (fahrt.mitfahrer_id) {
-         return {
-            datum: formatDate(fahrt.datum),
-            anlass: fahrt.anlass,
-            name: fahrt.mitfahrer_name,
-            arbeitsstaette: fahrt.arbeitsstaette,
-            hinweg: fahrt.richtung === 'hin' || fahrt.richtung === 'hin_rueck' ? 
-            `${fahrt.von_ort_name}-${fahrt.nach_ort_name}` : '',
-            rueckweg: fahrt.richtung === 'rueck' || fahrt.richtung === 'hin_rueck' ? 
-            `${fahrt.nach_ort_name}-${fahrt.von_ort_name}` : '',
-            kilometer: Math.round(parseFloat(fahrt.kilometer))
-         };
-      }
-      return null;
-   }).filter(Boolean);
-
-     // Duplikate entfernen
-     const uniqueMitfahrerData = mitfahrerData.filter((mitfahrer, index, self) =>
-       index === self.findIndex((t) => t.datum === mitfahrer.datum && t.name === mitfahrer.name)
-     );
+   if(type === 'mitfahrer') {
+      const mitfahrerData = fahrten.map(fahrt => {
+         if (fahrt.mitfahrer_id) {
+            return {
+               datum: formatDate(fahrt.datum),
+               anlass: fahrt.anlass,
+               name: fahrt.mitfahrer_name,
+               arbeitsstaette: fahrt.arbeitsstaette,
+               hinweg: fahrt.richtung === 'hin' || fahrt.richtung === 'hin_rueck' ? 
+               `${fahrt.von_ort_name}-${fahrt.nach_ort_name}` : '',
+               rueckweg: fahrt.richtung === 'rueck' || fahrt.richtung === 'hin_rueck' ? 
+               `${fahrt.nach_ort_name}-${fahrt.von_ort_name}` : '',
+               kilometer: Math.round(parseFloat(fahrt.kilometer))
+            };
+         }
+         return null;
+      }).filter(Boolean);
+      
+      // Duplikate entfernen
+      const uniqueMitfahrerData = mitfahrerData.filter((mitfahrer, index, self) =>
+         index === self.findIndex((t) => t.datum === mitfahrer.datum && t.name === mitfahrer.name)
+      );
 
      const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
      const workbook = new ExcelJS.Workbook();
