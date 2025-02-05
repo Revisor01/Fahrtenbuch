@@ -84,14 +84,9 @@ class Fahrt {
       einmaligerNachOrt,
       anlass,
       kilometer,
-      manuelleKilometer,
       abrechnung,
       datum
     } = updateData;
-    
-    if (id === null || anlass === null || datum === null) {
-      throw new Error('Ungültige Parameter für update');
-    }
     
     const [result] = await db.execute(
       `UPDATE fahrten SET 
@@ -101,7 +96,6 @@ class Fahrt {
       einmaliger_nach_ort = ?,
       anlass = ?, 
       kilometer = ?, 
-      manuelle_kilometer = ?, 
       abrechnung = ?, 
       datum = ? 
     WHERE id = ? AND user_id = ?`,
@@ -112,7 +106,6 @@ class Fahrt {
         einmaligerNachOrt || null,
         anlass, 
         kilometer, 
-        manuelleKilometer, 
         abrechnung,
         datum, 
         id, 

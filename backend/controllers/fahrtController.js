@@ -78,15 +78,13 @@ exports.updateFahrt = async (req, res) => {
     const userId = req.user.id;
     
     // Check abrechnung
-    const [abrechnungCheck] = await db.execute('SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?', [abrechnung, userId]);
+    const [abrechnungCheck] = await db.execute(
+      'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?', 
+      [abrechnung, userId]
+    );
     
     if (!abrechnungCheck || abrechnungCheck.length === 0) {
       return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
-    }
-    
-    // Kilometer Validierung
-    if (!kilometer || typeof kilometer !== 'string' || isNaN(Number(kilometer))) {
-      return res.status(400).json({ message: 'Kilometer ist ungültig.' });
     }
     
     const updateData = {
@@ -95,15 +93,16 @@ exports.updateFahrt = async (req, res) => {
       einmaligerVonOrt: einmaligerVonOrt || null,
       einmaligerNachOrt: einmaligerNachOrt || null,
       anlass: anlass || null,
-      kilometer: kilometer, // Kilomter nicht verändern
+      kilometer: kilometer.toString(), // Wichtige Änderung
       abrechnung: abrechnung || null,
       datum: datum || null
     };
     
     const updated = await Fahrt.update(id, updateData, userId);
+    
     if (updated) {
       await Mitfahrer.deleteByFahrtId(id);
-      if (mitfahrer && mitfahrer.length > 0) {
+      if (mitfahrer?.length > 0) {
         for (const person of mitfahrer) {
           await Mitfahrer.create(id, person.name, person.arbeitsstaette, person.richtung);
         }
