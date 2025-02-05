@@ -101,11 +101,8 @@ exports.updateFahrt = async (req, res) => {
     const updated = await Fahrt.update(id, updateData, userId);
     
     if (updated) {
-      await Mitfahrer.deleteByFahrtId(id);
       if (mitfahrer?.length > 0) {
-        for (const person of mitfahrer) {
-          await Mitfahrer.create(id, person.name, person.arbeitsstaette, person.richtung);
-        }
+        await Mitfahrer.updateMitfahrerForFahrt(id, mitfahrer);
       }
       res.status(200).json({ message: 'Fahrt erfolgreich aktualisiert' });
     } else {
