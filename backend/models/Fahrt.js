@@ -155,38 +155,35 @@ class Fahrt {
 
 
   static async getMonthlyReport(year, month, userId) {
-    try {
-      const [rows] = await db.execute(`
-      SELECT f.*, 
-        COALESCE(v.name, f.einmaliger_von_ort) AS von_ort_name, 
-        COALESCE(v.adresse, f.einmaliger_von_ort) AS von_ort_adresse, 
-        COALESCE(n.name, f.einmaliger_nach_ort) AS nach_ort_name, 
-        COALESCE(n.adresse, f.einmaliger_nach_ort) AS nach_ort_adresse
-      FROM fahrten f
-      LEFT JOIN orte v ON f.von_ort_id = v.id
-      LEFT JOIN orte n ON f.nach_ort_id = n.id
-      WHERE YEAR(f.datum) = ? AND MONTH(f.datum) = ? AND f.user_id = ?
-      ORDER BY f.datum
-    `, [year, month, userId]);
+    const [rows] = await db.execute(`
+    SELECT 
+      f.*,
+      COALESCE(v.name, f.einmaliger_von_ort) AS von_ort_name,
+      COALESCE(v.adresse, f.einmaliger_von_ort) AS von_ort_adresse,
+      COALESCE(n.name, f.einmaliger_nach_ort) AS nach_ort_name,
+      COALESCE(n.adresse, f.einmaliger_nach_ort) AS nach_ort_adresse
+    FROM fahrten f
+    LEFT JOIN orte v ON f.von_ort_id = v.id
+    LEFT JOIN orte n ON f.nach_ort_id = n.id
+    WHERE YEAR(f.datum) = ? AND MONTH(f.datum) = ? AND f.user_id = ?
+  `, [year, month, userId]);
+    
+    // Separat Mitfahrer laden
+    if(rows.length > 0) {
+      const fahrtIds = rows.map(row => row.id);
+      const [mitfahrer] = await db.execute(
+        'SELECT * FROM mitfahrer WHERE fahrt_id IN (?)',
+        [fahrtIds]
+      );
       
-      // Hole Mitfahrer separat
-      const fahrtIds = rows.map(r => r.id);
-      if (fahrtIds.length > 0) {
-        const [mitfahrerRows] = await db.execute(`
-        SELECT * FROM mitfahrer WHERE fahrt_id IN (?)
-      `, [fahrtIds]);
-        
-        // Füge Mitfahrer zu den Fahrten hinzu
-        rows.forEach(fahrt => {
-          fahrt.mitfahrer = mitfahrerRows.filter(m => m.fahrt_id === fahrt.id);
-        });
-      }
-      
-      return rows;
-    } catch (error) {
-      console.error('Fehler beim Abrufen des Monatsberichts:', error);
-      throw error;
+      // Mitfahrer den Fahrten zuordnen
+      return rows.map(fahrt => ({
+        ...fahrt,
+        mitfahrer: mitfahrer.filter(m => m.fahrt_id === fahrt.id)
+      }));
     }
+    
+    return rows;
   }
   
   
