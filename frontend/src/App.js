@@ -186,8 +186,7 @@ function AppProvider({ children }) {
     try {
       const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
       if (response.status === 201) {
-        fetchFahrten();
-        fetchMonthlyData();
+        return response.data; // Dies enthält die ID der neuen Fahrt
       } else {
         console.error('Unerwarteter Statuscode beim Hinzufügen der Fahrt:', response.status);
       }
@@ -207,10 +206,31 @@ function AppProvider({ children }) {
   
   const updateFahrt = async (id, updatedFahrt) => {
     try {
-      await axios.put(`${API_BASE_URL}/fahrten/${id}`, updatedFahrt);
-      fetchFahrten();
+      // Sicherstellen, dass alle erforderlichen Felder vorhanden sind
+      const fahrtData = {
+        datum: updatedFahrt.datum,
+        vonOrtId: updatedFahrt.vonOrtId || null,
+        nachOrtId: updatedFahrt.nachOrtId || null,
+        einmaligerVonOrt: updatedFahrt.einmaligerVonOrt || null,
+        einmaligerNachOrt: updatedFahrt.einmaligerNachOrt || null,
+        anlass: updatedFahrt.anlass,
+        kilometer: parseFloat(updatedFahrt.kilometer),
+        abrechnung: parseInt(updatedFahrt.abrechnung),
+        mitfahrer: updatedFahrt.mitfahrer || []
+      };
+      
+      const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, fahrtData);
+      
+      if (response.status === 200) {
+        await fetchFahrten(); // Nur neu laden wenn Update erfolgreich
+        return response.data;
+      }
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
+      if (error.response) {
+        console.error('Server-Fehler:', error.response.data);
+      }
+      throw error; // Fehler weiterwerfen damit er in der UI behandelt werden kann
     }
   };
   
@@ -543,30 +563,43 @@ function FahrtenListe() {
   };
   
   const handleSave = async () => {
+    // Validierung vor dem Update
+    if (!editingFahrt.anlass || !editingFahrt.datum || !editingFahrt.kilometer || !editingFahrt.abrechnung) {
+      showNotification("Fehler", "Bitte füllen Sie alle erforderlichen Felder aus.");
+      return;
+    }
+    
+    // Typenkonvertierung und Validierung
+    const kilometer = parseFloat(editingFahrt.kilometer);
+    if (isNaN(kilometer) || kilometer <= 0) {
+      showNotification("Fehler", "Bitte geben Sie eine gültige Kilometerzahl ein.");
+      return;
+    }
+    
+    const abrechnung = parseInt(editingFahrt.abrechnung);
+    if (isNaN(abrechnung)) {
+      showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
+      return;
+    }
+    
     try {
       const updatedFahrt = {
         datum: editingFahrt.datum,
-        vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? editingFahrt.von_ort_id : null,
-        nachOrtId: editingFahrt.nachOrtTyp === 'gespeichert' ? editingFahrt.nach_ort_id : null,
+        vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
+        nachOrtId: editingFahrt.nachOrtTyp === 'gespeichert' ? parseInt(editingFahrt.nach_ort_id) : null,
         einmaligerVonOrt: editingFahrt.vonOrtTyp === 'einmalig' ? editingFahrt.einmaliger_von_ort : null,
         einmaligerNachOrt: editingFahrt.nachOrtTyp === 'einmalig' ? editingFahrt.einmaliger_nach_ort : null,
         anlass: editingFahrt.anlass,
-        kilometer: editingFahrt.kilometer,
-        abrechnung: editingFahrt.abrechnung
+        kilometer: kilometer, // Hier die validierte Variable verwenden
+        abrechnung: abrechnung // Hier die validierte Variable verwenden
       };
-      const updatedFahrten = fahrten.map(f => 
-        f.id === editingFahrt.id ? { ...f, ...updatedFahrt } : f);
       
-      setFahrten(updatedFahrten);
       await updateFahrt(editingFahrt.id, updatedFahrt);
-      
       setEditingFahrt(null);
-      fetchFahrten();
-      fetchMonthlyData();
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
-      showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
+      showNotification("Fehler", error.response?.data?.message || "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
     }
   };
   

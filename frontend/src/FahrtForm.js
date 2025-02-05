@@ -106,10 +106,7 @@ function FahrtForm() {
     };
     
     try {
-      const newFahrt = await addFahrt(fahrtData); // Speichere die neue Fahrt
-      
-      // Hier wird die Fahrt in den lokalen Zustand eingefügt, anstatt die gesamten Fahrten neu zu laden
-      setFahrten(prevFahrten => [...prevFahrten, { ...fahrtData, id: newFahrt.id }]);
+      await addFahrt(fahrtData);
       
       if (addRueckfahrt) {
         const rueckfahrtData = {
@@ -121,8 +118,7 @@ function FahrtForm() {
           anlass: `Rückfahrt: ${fahrtData.anlass}`,
           mitfahrer: mitfahrer.filter(m => m.richtung === 'rueck' || m.richtung === 'hin_rueck')
         };
-        const newRueckfahrt = await addFahrt(rueckfahrtData); // Speichere die Rückfahrt
-        setFahrten(prevFahrten => [...prevFahrten, { ...rueckfahrtData, id: newRueckfahrt.id }]);
+        await addFahrt(rueckfahrtData);
       }
       
       // Reset form data and states
@@ -139,7 +135,6 @@ function FahrtForm() {
       setUseEinmaligenVonOrt(false);
       setUseEinmaligenNachOrt(false);
       setAddRueckfahrt(false);
-      fetchMonthlyData();
       setMitfahrer([]);
       showNotification("Erfolg", "Die neue Fahrt wurde erfolgreich hinzugefügt.");
     } catch (error) {
