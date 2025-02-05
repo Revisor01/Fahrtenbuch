@@ -92,6 +92,7 @@ function AbrechnungstraegerForm() {
             showNotification('Erfolg', 'Abrechnungsträger wurde aktualisiert');
             setEditingTraeger(null);
             fetchAbrechnungstraeger();
+            await refreshAllData(); // Hinzufügen!
         } catch (error) {
             console.error('Fehler beim Aktualisieren:', error);
             showNotification('Fehler', 'Abrechnungsträger konnte nicht aktualisiert werden');
@@ -105,6 +106,7 @@ function AbrechnungstraegerForm() {
             });
             showNotification('Erfolg', 'Status wurde aktualisiert');
             fetchAbrechnungstraeger();
+            await refreshAllData(); // Hinzufügen!
         } catch (error) {
             console.error('Fehler beim Ändern des Status:', error);
             showNotification('Fehler', 'Status konnte nicht aktualisiert werden');
@@ -120,6 +122,7 @@ function AbrechnungstraegerForm() {
                     await axios.delete(`/api/abrechnungstraeger/${id}`);
                     showNotification('Erfolg', 'Abrechnungsträger wurde gelöscht');
                     fetchAbrechnungstraeger();
+                    await refreshAllData(); // Hinzufügen!
                 } catch (error) {
                     console.error('Fehler beim Löschen:', error);
                     showNotification(
