@@ -46,6 +46,7 @@ function AppProvider({ children }) {
   
   const refreshAllData = async () => {
     try {
+      console.log('Starte refreshAllData...'); // Debug-Log
       const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
         fetchFahrten(),
         fetchMonthlyData(),
@@ -56,11 +57,14 @@ function AppProvider({ children }) {
       
       // Setze den State für die Abrechnungsträger
       if (abrechnungstraegerRes.data) {
+        console.log('Abrechnungsträger geladen:', abrechnungstraegerRes.data.data); // Debug-Log
+        setAbrechnungstraeger(abrechnungstraegerRes.data.data);
         setSummary(prev => ({
           ...prev,
           abrechnungstraeger: abrechnungstraegerRes.data.data
         }));
       }
+      console.log('refreshAllData abgeschlossen.'); // Debug-Log
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Daten:', error);
       showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
@@ -661,6 +665,7 @@ function FahrtenListe() {
       
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
+      await refreshAllData(); // HIER IST refreshAllData WIEDER
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
