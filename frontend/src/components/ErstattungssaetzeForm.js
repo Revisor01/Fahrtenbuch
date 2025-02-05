@@ -3,7 +3,7 @@ import axios from 'axios';
 import { AppContext } from '../App';
 
 function ErstattungssaetzeForm() {
-    const { showNotification } = useContext(AppContext);
+    const { showNotification, refreshAllData } = useContext(AppContext);
     const [erstattungssaetze, setErstattungssaetze] = useState({
         mitfahrer: [],
         abrechnungstraeger: []
