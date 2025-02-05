@@ -1220,255 +1220,247 @@ function FahrtenListe() {
     
     {/* Mobile View */}
     <div className="md:hidden space-y-4">
-    {sortedFahrten.map((fahrt) => (
-      <div key={fahrt.id} className="mobile-card">
-      {editingFahrt?.id === fahrt.id ? (
-        // Edit Mode
-        <div className="space-y-4">
-        <div>
-        <label className="form-label">Datum</label>
-        <input
-        type="date"
-        value={editingFahrt.datum}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
-        className="form-input w-full"
-        />
-        </div>
-        
-        {/* Von-Ort */}
-        <div>
-        <label className="checkbox-label mb-2">
-        <input
-        type="checkbox"
-        checked={editingFahrt.vonOrtTyp === 'einmalig'}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-          von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
-          einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
-        })}
-        className="checkbox-input"
-        />
-        <span className="text-xs text-label">Einmaliger Von-Ort</span>
-        </label>
-        {editingFahrt.vonOrtTyp === 'einmalig' ? (
+    {sortedFahrten.map((fahrt) => {
+      const traeger = abrechnungstraeger?.find(at => at.id === (editingFahrt?.id === fahrt.id ? parseInt(editingFahrt.abrechnung) : fahrt.abrechnung));
+      const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
+      
+      return (
+        <div key={fahrt.id} className="mobile-card">
+        {editingFahrt?.id === fahrt.id ? (
+          // Edit Mode
+          <div className="space-y-4">
+          <div>
+          <label className="form-label">Datum</label>
+          <input
+          type="date"
+          value={editingFahrt.datum}
+          onChange={(e) => handleEditChange('datum', e.target.value)}
+          className="form-input w-full"
+          />
+          </div>
+          
+          {/* Von-Ort */}
+          <div>
+          <label className="checkbox-label mb-2">
+          <input
+          type="checkbox"
+          checked={editingFahrt.vonOrtTyp === 'einmalig'}
+          onChange={(e) => handleEditChange('vonOrtTyp', e.target.checked ? 'einmalig' : 'gespeichert')}
+          className="checkbox-input"
+          />
+          <span className="text-xs text-label">Einmaliger Von-Ort</span>
+          </label>
+          {editingFahrt.vonOrtTyp === 'einmalig' ? (
+            <input
+            type="text"
+            value={editingFahrt.einmaliger_von_ort || ''}
+            onChange={(e) => handleEditChange('einmaliger_von_ort', e.target.value)}
+            className="form-input w-full"
+            placeholder="Von (einmalig)"
+            />
+          ) : (
+            <select
+            value={editingFahrt.von_ort_id || ''}
+            onChange={(e) => handleEditChange('von_ort_id', e.target.value)}
+            className="form-select w-full"
+            >
+            <option value="">Bitte wählen</option>
+            {renderOrteOptions(orte)}
+            </select>
+          )}
+          </div>
+          
+          {/* Nach-Ort */}
+          <div>
+          <label className="checkbox-label mb-2">
+          <input
+          type="checkbox"
+          checked={editingFahrt.nachOrtTyp === 'einmalig'}
+          onChange={(e) => handleEditChange('nachOrtTyp', e.target.checked ? 'einmalig' : 'gespeichert')}
+          className="checkbox-input"
+          />
+          <span className="text-xs text-label">Einmaliger Nach-Ort</span>
+          </label>
+          {editingFahrt.nachOrtTyp === 'einmalig' ? (
+            <input
+            type="text"
+            value={editingFahrt.einmaliger_nach_ort || ''}
+            onChange={(e) => handleEditChange('einmaliger_nach_ort', e.target.value)}
+            className="form-input w-full"
+            placeholder="Nach (einmalig)"
+            />
+          ) : (
+            <select
+            value={editingFahrt.nach_ort_id || ''}
+            onChange={(e) => handleEditChange('nach_ort_id', e.target.value)}
+            className="form-select w-full"
+            >
+            <option value="">Bitte wählen</option>
+            {renderOrteOptions(orte)}
+            </select>
+          )}
+          </div>
+          
+          {/* Anlass */}
+          <div>
+          <label className="form-label">Anlass</label>
           <input
           type="text"
-          value={editingFahrt.einmaliger_von_ort || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
+          value={editingFahrt.anlass}
+          onChange={(e) => handleEditChange('anlass', e.target.value)}
           className="form-input w-full"
-          placeholder="Von (einmalig)"
           />
-        ) : (
-          <select
-          value={editingFahrt.von_ort_id || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
-          className="form-select w-full"
-          >
-          <option value="">Bitte wählen</option>
-          {renderOrteOptions(orte)}
-          </select>
-        )}
-        </div>
-        
-        {/* Nach-Ort */}
-        <div>
-        <label className="checkbox-label mb-2">
-        <input
-        type="checkbox"
-        checked={editingFahrt.nachOrtTyp === 'einmalig'}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-          nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
-          einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
-        })}
-        className="checkbox-input"
-        />
-        <span className="text-xs text-label">Einmaliger Nach-Ort</span>
-        </label>
-        {editingFahrt.nachOrtTyp === 'einmalig' ? (
+          </div>
+          
+          {/* Kilometer */}
+          <div>
+          <label className="form-label">Kilometer</label>
           <input
-          type="text"
-          value={editingFahrt.einmaliger_nach_ort || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
+          type="number"
+          value={editingFahrt.kilometer}
+          onChange={(e) => handleEditChange('kilometer', e.target.value)}
           className="form-input w-full"
-          placeholder="Nach (einmalig)"
           />
-        ) : (
+          </div>
+          
+          {/* Abrechnung */}
+          <div>
+          <label className="form-label">Abrechnung</label>
           <select
-          value={editingFahrt.nach_ort_id || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
+          value={editingFahrt.abrechnung}
+          onChange={(e) => handleEditChange('abrechnung', e.target.value)}
           className="form-select w-full"
           >
-          <option value="">Bitte wählen</option>
-          {renderOrteOptions(orte)}
+          {abrechnungstraeger?.map(traeger => (
+            <option key={traeger.id} value={traeger.id}>
+            {traeger.name}
+            </option>
+          ))}
           </select>
-        )}
-        </div>
-        
-        {/* Anlass */}
-        <div>
-        <label className="form-label">Anlass</label>
-        <input
-        type="text"
-        value={editingFahrt.anlass}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
-        className="form-input w-full"
-        />
-        </div>
-        
-        {/* Kilometer */}
-        <div>
-        <label className="form-label">Kilometer</label>
-        <input
-        type="number"
-        value={editingFahrt.kilometer}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          kilometer: parseFloat(e.target.value),
-        })}
-        className="form-input w-full"
-        />
-        </div>
-        
-        {/* Abrechnung */}
-        <div>
-        <label className="form-label">Abrechnung</label>
-        <select
-        value={editingFahrt.abrechnung}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
-        className="form-select w-full"
-        >
-        {abrechnungstraeger.map(traeger => (
-          <option key={traeger.id} value={traeger.id}>
-          {traeger.name}
-          </option>
-        ))}
-        </select>
-        </div>
-        
-        {/* Mitfahrer */}
-        <div>
-        <label className="form-label">Mitfahrer:innen</label>
-        <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-        {fahrt.mitfahrer?.map((person, index) => (
-          <span key={index} className="status-badge-primary">
-          {person.name}
+          </div>
+          
+          {/* Mitfahrer */}
+          <div>
+          <label className="form-label">Mitfahrer:innen</label>
+          <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+          {fahrt.mitfahrer?.map((person, index) => (
+            <span key={index} className="status-badge-primary">
+            {person.name}
+            <button
+            onClick={(e) => {
+              e.preventDefault();
+              handleDeleteMitfahrer(fahrt.id, person.id);
+            }}
+            className="text-secondary-500 hover:text-secondary-600"
+            >
+            ×
+            </button>
+            </span>
+          ))}
+          </div>
           <button
-          onClick={(e) => {
-            e.preventDefault();
-            handleDeleteMitfahrer(fahrt.id, person.id);
-          }}
-          className="text-secondary-500 hover:text-secondary-600"
+          onClick={() => handleAddMitfahrer(fahrt.id)}
+          className="btn-primary text-xs w-full"
+          >
+          + Mitfahrer:in
+          </button>
+          </div>
+          </div>
+          
+          {/* Buttons */}
+          <div className="flex gap-2">
+          <button onClick={handleSave} className="btn-primary flex-1">
+          Speichern
+          </button>
+          <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">
+          Abbrechen
+          </button>
+          </div>
+          </div>
+        ) : (
+          // View Mode
+          <div>
+          {/* Header */}
+          <div className="mobile-card-header mb-4">
+          <div>
+          <div className="mobile-card-title">
+          {new Date(fahrt.datum).toLocaleDateString()}
+          </div>
+          <div className="mobile-card-subtitle">
+          {abrechnungstraegerName}
+          </div>
+          </div>
+          <div className="mobile-action-buttons">
+          <button
+          onClick={() => handleEdit(fahrt)}
+          className="mobile-icon-button-primary"
+          >
+          ✎
+          </button>
+          <button
+          onClick={() => handleDelete(fahrt.id)}
+          className="mobile-icon-button-secondary"
           >
           ×
           </button>
-          </span>
-        ))}
-        </div>
-        <button
-        onClick={() => handleAddMitfahrer(fahrt.id)}
-        className="btn-primary text-xs w-full"
-        >
-        + Mitfahrer:in
-        </button>
-        </div>
-        </div>
-        
-        {/* Buttons */}
-        <div className="flex gap-2">
-        <button onClick={handleSave} className="btn-primary flex-1">
-        Speichern
-        </button>
-        <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">
-        Abbrechen
-        </button>
-        </div>
-        </div>
-      ) : (
-        // View Mode
-        <div>
-        {/* Header */}
-        <div className="mobile-card-header mb-4">
-        <div>
-        <div className="mobile-card-title">
-        {new Date(fahrt.datum).toLocaleDateString()}
-        </div>
-        <div className="mobile-card-subtitle">
-        {abrechnungstraeger.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt'}
-        </div>
-        </div>
-        <div className="mobile-action-buttons">
-        <button
-        onClick={() => handleEdit(fahrt)}
-        className="mobile-icon-button-primary"
-        >
-        ✎
-        </button>
-        <button
-        onClick={() => handleDelete(fahrt.id)}
-        className="mobile-icon-button-secondary"
-        >
-        ×
-        </button>
-        </div>
-        </div>
-        
-        <div className="space-y-4">
-        {/* Route */}
-        <div className="grid grid-cols-1 gap-2">
-        <div>
-        <div className="mobile-card-label">Von</div>
-        <div className="mobile-card-content">
-        {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
-        </div>
-        {fahrt.von_ort_adresse && (
-          <div className="mobile-card-label">
-          {fahrt.von_ort_adresse}
           </div>
-        )}
-        </div>
-        <div>
-        <div className="mobile-card-label">Nach</div>
-        <div className="mobile-card-content">
-        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
-        </div>
-        {fahrt.nach_ort_adresse && (
-          <div className="mobile-card-label">
-          {fahrt.nach_ort_adresse}
           </div>
-        )}
-        </div>
-        </div>
-        
-        {/* Anlass & Kilometer */}
-        <div className="grid grid-cols-2 gap-4">
-        <div>
-        <div className="mobile-card-label">Anlass</div>
-        <div className="mobile-card-content">{fahrt.anlass}</div>
-        </div>
-        <div>
-        <div className="mobile-card-label">Kilometer</div>
-        <div className="mobile-card-content">
-        {formatValue(roundKilometers(fahrt.kilometer))} km
-        </div>
-        </div>
-        </div>
-        
-        {/* Mitfahrer */}
-        {fahrt.mitfahrer?.length > 0 && (
+          
+          <div className="space-y-4">
+          {/* Route */}
+          <div className="grid grid-cols-1 gap-2">
           <div>
-          <div className="mobile-card-label mb-1">Mitfahrer:innen</div>
-          {renderMitfahrer(fahrt)}
+          <div className="mobile-card-label">Von</div>
+          <div className="mobile-card-content">
+          {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
+          </div>
+          {fahrt.von_ort_adresse && (
+            <div className="mobile-card-label">
+            {fahrt.von_ort_adresse}
+            </div>
+          )}
+          </div>
+          <div>
+          <div className="mobile-card-label">Nach</div>
+          <div className="mobile-card-content">
+          {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
+          </div>
+          {fahrt.nach_ort_adresse && (
+            <div className="mobile-card-label">
+            {fahrt.nach_ort_adresse}
+            </div>
+          )}
+          </div>
+          </div>
+          
+          {/* Anlass & Kilometer */}
+          <div className="grid grid-cols-2 gap-4">
+          <div>
+          <div className="mobile-card-label">Anlass</div>
+          <div className="mobile-card-content">{fahrt.anlass}</div>
+          </div>
+          <div>
+          <div className="mobile-card-label">Kilometer</div>
+          <div className="mobile-card-content">
+          {formatValue(roundKilometers(fahrt.kilometer))} km
+          </div>
+          </div>
+          </div>
+          
+          {/* Mitfahrer */}
+          {fahrt.mitfahrer?.length > 0 && (
+            <div>
+            <div className="mobile-card-label mb-1">Mitfahrer:innen</div>
+            {renderMitfahrer(fahrt)}
+            </div>
+          )}
+          </div>
           </div>
         )}
         </div>
-        </div>
-      )}
-      </div>
-    ))}
+      );
+    })}
     </div>
     
     {/* Modals */}
