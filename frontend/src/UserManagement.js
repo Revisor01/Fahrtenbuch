@@ -222,47 +222,27 @@ export default function UserManagement() {
       </button>
       </div>
       
-      <div className="table-container">
-      <table className="w-full">
-      <thead>
-      <tr className="table-head-row">
-      <th className="table-header">Benutzername</th>
-      <th className="table-header-sm">E-Mail</th>
-      <th className="table-header-sm">Kirchengemeinde</th>
-      <th className="table-header">Status</th>
-      <th className="table-header-sm">Rolle</th>
-      <th className="table-header text-right">Aktionen</th>
-      </tr>
-      </thead>
-      <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {users.map(user => (
-         <tr key={user.id} className="table-row">
-         <td className="table-cell">
-         <div className="flex flex-col">
-         <span className="text-value">{user.username}</span>
-         <span className="text-muted text-xs sm:hidden">{user.email}</span>
+         <div key={user.id} className="card-container">
+         <h3 className="text-lg font-medium text-value mb-2">{user.username}</h3>
+         <div className="text-muted text-sm mb-2">{user.email}</div>
+         <div className="text-sm mb-2">
+         Kirchengemeinde: {user.kirchengemeinde || '-'}
          </div>
-         </td>
-         <td className="table-cell hidden sm:table-cell">
-         <span className="text-value">{user.email}</span>
-         </td>
-         <td className="table-cell hidden md:table-cell">
-         <span className="text-value">{user.kirchengemeinde || '-'}</span>
-         </td>
-         <td className="table-cell">
-         {user.email_verified ? (
+         <div className="mb-2">
+         Status: {user.email_verified ? (
             <span className="status-badge-primary">● Verifiziert</span>
          ) : (
             <span className="status-badge-secondary">○ Ausstehend</span>
          )}
-         </td>
-         <td className="table-cell hidden sm:table-cell">
-         <span className={`status-badge-${user.role === 'admin' ? 'primary' : 'secondary'}`}>
+         </div>
+         <div>
+         Rolle: <span className={`status-badge-${user.role === 'admin' ? 'primary' : 'secondary'}`}>
          {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
          </span>
-         </td>
-         <td className="table-cell">
-         <div className="flex justify-end gap-2">
+         </div>
+         <div className="flex justify-end gap-2 mt-4">
          <button
          onClick={() => openEditModal(user)}
          className="table-action-button-primary"
@@ -285,11 +265,8 @@ export default function UserManagement() {
          ×
          </button>
          </div>
-         </td>
-         </tr>
+         </div>
       ))}
-      </tbody>
-      </table>
       </div>
       
       <Modal
@@ -298,8 +275,8 @@ export default function UserManagement() {
       title="Neuen Benutzer erstellen"
       size="compact"
       >
-      <UserForm 
-      onSubmit={handleCreate} 
+      <UserForm
+      onSubmit={handleCreate}
       isEdit={false}
       onClose={() => setIsCreateModalOpen(false)}
       />
@@ -311,9 +288,9 @@ export default function UserManagement() {
       title="Benutzer bearbeiten"
       size="compact"
       >
-      <UserForm 
-      onSubmit={handleEdit} 
-      isEdit={true} 
+      <UserForm
+      onSubmit={handleEdit}
+      isEdit={true}
       initialData={selectedUser}
       onClose={() => setIsEditModalOpen(false)}
       />
