@@ -654,7 +654,17 @@ function FahrtenListe() {
       }
     });
     return kategorien;
-  };  
+  };
+  
+  const allCategories = () => {
+    // Sammle alle einzigartigen Kategorien
+    const categories = new Set([
+      ...Object.keys(summary.erstattungen || {}),
+      ...Object.keys(summary.mitfahrerErstattungen || {})
+    ]);
+    return categories.size; // Gibt die tatsächliche Anzahl der Kategorien zurück
+  };
+  
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
@@ -714,9 +724,9 @@ function FahrtenListe() {
       
       {/* Cards Grid */}
       <div className={`grid grid-cols-1 gap-4 ${
-        getKategorienMitErstattung().length === 2 
+        allCategories() === 2 
         ? 'sm:grid-cols-2' 
-        : getKategorienMitErstattung().length === 3
+        : allCategories() === 3
         ? 'sm:grid-cols-3'
         : 'sm:grid-cols-2 lg:grid-cols-4'
       }`}>
