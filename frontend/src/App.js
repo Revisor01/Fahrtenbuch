@@ -38,11 +38,11 @@ function AppProvider({ children }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
+  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
   
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
-  
   
   const refreshAllData = async () => {
     try {
@@ -70,6 +70,20 @@ function AppProvider({ children }) {
       showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
     }
   };
+  
+  const fetchAbrechnungstraeger = async () => {
+    try {
+      const response = await axios.get('/api/abrechnungstraeger/simple');
+      setAbrechnungstraeger(response.data.data);
+    } catch (error) {
+      console.error('Fehler beim Laden der Abrechnungsträger:', error);
+      showNotification('Fehler', 'Abrechnungsträger konnten nicht geladen werden');
+    }
+  };
+  
+  useEffect(() => {  // Initiales Laden beim Start
+    fetchAbrechnungstraeger();
+  }, []);
   
   const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
     setHasActiveNotification(true);
