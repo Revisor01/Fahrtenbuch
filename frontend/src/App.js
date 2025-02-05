@@ -363,7 +363,6 @@ function AppProvider({ children }) {
   
   const refreshAllData = async () => {
     try {
-      setIsRefreshing(true);
       await Promise.all([
         fetchFahrten(),
         fetchMonthlyData(),
@@ -373,8 +372,6 @@ function AppProvider({ children }) {
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Daten:', error);
       showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
-    } finally {
-      setIsRefreshing(false);
     }
   };
   
