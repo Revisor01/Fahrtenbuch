@@ -258,7 +258,7 @@ function ErstattungssaetzeForm() {
             {editingSatz?.id === satz.id && editingSatz?.typ === 'mitfahrer' ? (
                 <div className="mobile-edit-container">
                 <div className="flex flex-col sm:flex-row gap-3 items-end">
-                <div className="flex-1">
+                <div className="w-full sm:w-1/3">
                 <label className="form-label">Betrag (€/km)</label>
                 <input
                 type="number"
@@ -269,7 +269,7 @@ function ErstattungssaetzeForm() {
                 className="form-input"
                 />
                 </div>
-                <div className="flex-1">
+                <div className="w-full sm:w-2/3">
                 <label className="form-label">Gültig ab</label>
                 <input
                 type="date"

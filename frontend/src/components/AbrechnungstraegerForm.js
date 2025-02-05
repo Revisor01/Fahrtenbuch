@@ -173,10 +173,10 @@ function AbrechnungstraegerForm() {
                         <div className="flex flex-col sm:flex-row justify-between gap-4">
                             <div className="flex-1">
                     {editingTraeger?.id === traeger.id ? (
-                        <div className="flex flex-col w-full gap-4">
+                        <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row gap-4 items-end">
                         <div className="w-full">
                         <label className="form-label">Name</label>
-                        
                         <input
                         type="text"
                         value={editingTraeger.name}
@@ -186,11 +186,10 @@ function AbrechnungstraegerForm() {
                         required
                         />
                         </div>
-                        {/* Buttons im Edit-Modus */}
-                        
                         <div className="hidden sm:flex gap-2">
                         <button onClick={handleUpdate} className="table-action-button-primary" title="Speichern">✓</button>
                         <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
+                        </div>
                         </div>
                         <div className="sm:hidden mobile-edit-actions mt-3">
                         <button onClick={() => setEditingTraeger(null)} className="btn-secondary w-full">Abbrechen</button>
