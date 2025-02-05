@@ -218,14 +218,18 @@ function AppProvider({ children }) {
         einmaligerNachOrt: updatedFahrt.einmaligerNachOrt || null,
         anlass: updatedFahrt.anlass || '',
         kilometer: parseFloat(updatedFahrt.kilometer) || 0,
-        abrechnung: parseInt(updatedFahrt.abrechnung) || null
+        abrechnung: parseInt(updatedFahrt.abrechnung)
       };
+      
+      console.log('Sende Update-Daten:', cleanedFahrt); // Debug-Log
       
       const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, cleanedFahrt);
       
       if (response.status === 200) {
-        await fetchFahrten(); // Neu laden nach erfolgreicher Aktualisierung
+        await fetchFahrten();
         return response.data;
+      } else {
+        throw new Error('Unerwarteter Statuscode: ' + response.status);
       }
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
@@ -363,12 +367,21 @@ function AppProvider({ children }) {
   
   const refreshAllData = async () => {
     try {
-      await Promise.all([
+      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
         fetchFahrten(),
         fetchMonthlyData(),
         fetchOrte(),
-        fetchDistanzen()
+        fetchDistanzen(),
+        axios.get('/api/abrechnungstraeger/simple')  // Abrechnungsträger mit laden
       ]);
+      
+      // Setze den State für die Abrechnungsträger
+      if (abrechnungstraegerRes.data) {
+        setSummary(prev => ({
+          ...prev,
+          abrechnungstraeger: abrechnungstraegerRes.data.data
+        }));
+      }
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Daten:', error);
       showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
@@ -636,19 +649,16 @@ function FahrtenListe() {
         einmaligerVonOrt: editingFahrt.vonOrtTyp === 'einmalig' ? editingFahrt.einmaliger_von_ort : null,
         einmaligerNachOrt: editingFahrt.nachOrtTyp === 'einmalig' ? editingFahrt.einmaliger_nach_ort : null,
         anlass: editingFahrt.anlass,
-        kilometer: kilometer,
-        abrechnung: abrechnung
+        kilometer: parseFloat(editingFahrt.kilometer),
+        abrechnung: parseInt(editingFahrt.abrechnung)
       };
       
+      console.log('Sende Fahrt-Update:', updatedFahrt); // Debug-Log
+      
       await updateFahrt(editingFahrt.id, updatedFahrt);
-      
-      // State zurücksetzen
       setEditingFahrt(null);
+      await refreshAllData(); // Statt fetchFahrten
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
-      
-      // Explizit die Fahrten neu laden
-      await fetchFahrten();
-      
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
       showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
