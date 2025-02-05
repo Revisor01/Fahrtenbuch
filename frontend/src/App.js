@@ -658,7 +658,7 @@ function FahrtenListe() {
       
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
-      await refreshAllData(); // Statt fetchFahrten
+      //await refreshAllData();  ENTFERNE DIESE ZEILE!
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
