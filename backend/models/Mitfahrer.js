@@ -29,6 +29,14 @@ class Mitfahrer {
     const [result] = await db.execute('DELETE FROM mitfahrer WHERE id = ?', [id]);
     return result.affectedRows > 0;
   }
+
+  static async deleteByFahrtId(fahrtId) {
+    const [result] = await db.execute(
+      'DELETE FROM mitfahrer WHERE fahrt_id = ?', 
+      [fahrtId]
+    );
+    return result.affectedRows > 0;
+  }
 }
 
 module.exports = Mitfahrer;
