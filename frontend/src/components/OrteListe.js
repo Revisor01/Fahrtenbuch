@@ -86,7 +86,22 @@ function OrteListe() {
     {/* Desktop View */}
     <div className="hidden md:block table-container">
     <table className="w-full">
-    <thead>...</thead>
+    <thead>
+    <tr className="table-head-row">
+    <th className="table-header" onClick={() => requestSort('name')}>
+    Name {sortConfig.key === 'name' && (
+      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    )}
+    </th>
+    <th className="table-header-sm" onClick={() => requestSort('adresse')}>
+    Adresse {sortConfig.key === 'adresse' && (
+      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
+    )}
+    </th>
+    <th className="table-header">Status</th>
+    <th className="table-header text-right">Aktionen</th>
+    </tr>
+    </thead>
     <tbody>
     {sortedOrte.map((ort) => (
       <tr key={ort.id} className="table-row">
