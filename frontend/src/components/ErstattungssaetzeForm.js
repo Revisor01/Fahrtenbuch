@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { AppContext } from '../App';
+import { AppContext, refreshAllData } from '../App';
 
 function ErstattungssaetzeForm() {
     const { showNotification } = useContext(AppContext);
@@ -87,6 +87,7 @@ function ErstattungssaetzeForm() {
                 gueltig_ab: new Date().toISOString().split('T')[0]
             });
             await fetchAllErstattungssaetze();
+            await refreshAllData();
         } catch (error) {
             console.error('Fehler beim Speichern:', error);
             if (error.response?.data?.error?.includes('Duplicate entry')) {
@@ -136,7 +137,8 @@ function ErstattungssaetzeForm() {
             
             showNotification('Erfolg', 'Erstattungssatz wurde aktualisiert');
             setEditingSatz(null);
-            fetchAllErstattungssaetze();
+            await fetchAllErstattungssaetze();
+            await refreshAllData();
         } catch (error) {
             console.error('Fehler beim Aktualisieren:', error);
             if (error.response?.data?.error?.includes('Duplicate entry')) {
@@ -162,7 +164,8 @@ function ErstattungssaetzeForm() {
                             await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
                         }
                         showNotification('Erfolg', 'Erstattungssatz wurde gelöscht');
-                        fetchAllErstattungssaetze();
+                        await fetchAllErstattungssaetze();
+                        await refreshAllData(); // Hier hinzufügen
                     } catch (error) {
                         console.error('Fehler beim Löschen:', error);
                         showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');

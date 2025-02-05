@@ -104,6 +104,7 @@ function ProfileModal({ isOpen, onClose }) {
             await axios.put('/api/profile', cleanProfile);
             showNotification('Erfolg', 'Profil wurde aktualisiert');
             fetchProfile();
+            await refreshAllData(); // Hier aufrufen
         } catch (error) {
             console.error('Fehler beim Aktualisieren des Profils:', error);
             showNotification('Fehler', 'Profil konnte nicht aktualisiert werden');

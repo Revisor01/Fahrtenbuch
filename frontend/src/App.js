@@ -184,45 +184,47 @@ function AppProvider({ children }) {
   
   const addFahrt = async (fahrt, retries = 3) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
+      const cleanedFahrt = {
+        datum: fahrt.datum,
+        vonOrtId: fahrt.vonOrtId || null,
+        nachOrtId: fahrt.nachOrtId || null,
+        einmaligerVonOrt: fahrt.einmaligerVonOrt || null,
+        einmaligerNachOrt: fahrt.einmaligerNachOrt || null,
+        anlass: fahrt.anlass || '',
+        kilometer: parseFloat(fahrt.kilometer) || 0,
+        abrechnung: parseInt(fahrt.abrechnung) || null,
+        mitfahrer: fahrt.mitfahrer || []
+      };
+      
+      const response = await axios.post(`${API_BASE_URL}/fahrten`, cleanedFahrt);
       if (response.status === 201) {
-        return response.data; // Dies enthält die ID der neuen Fahrt
-      } else {
-        console.error('Unerwarteter Statuscode beim Hinzufügen der Fahrt:', response.status);
+        await fetchFahrten();
+        return response.data;
       }
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Fahrt:', error);
-      if (error.response) {
-        console.error('Fehlerdetails:', error.response.data);
-      }
-      if (retries > 0 && error.response && error.response.data.code === 'ER_LOCK_DEADLOCK') {
-        console.log(`Wiederhole Hinzufügen der Fahrt. Verbleibende Versuche: ${retries - 1}`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return addFahrt(fahrt, retries - 1);
-      }
       throw error;
     }
   };
   
   const updateFahrt = async (id, updatedFahrt) => {
     try {
-      // Sicherstellen, dass alle erforderlichen Felder vorhanden sind
-      const fahrtData = {
+      // Sicherstellen dass keine undefined-Werte gesendet werden
+      const cleanedFahrt = {
         datum: updatedFahrt.datum,
         vonOrtId: updatedFahrt.vonOrtId || null,
         nachOrtId: updatedFahrt.nachOrtId || null,
         einmaligerVonOrt: updatedFahrt.einmaligerVonOrt || null,
         einmaligerNachOrt: updatedFahrt.einmaligerNachOrt || null,
-        anlass: updatedFahrt.anlass,
-        kilometer: parseFloat(updatedFahrt.kilometer),
-        abrechnung: parseInt(updatedFahrt.abrechnung),
-        mitfahrer: updatedFahrt.mitfahrer || []
+        anlass: updatedFahrt.anlass || '',
+        kilometer: parseFloat(updatedFahrt.kilometer) || 0,
+        abrechnung: parseInt(updatedFahrt.abrechnung) || null
       };
       
-      const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, fahrtData);
+      const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, cleanedFahrt);
       
       if (response.status === 200) {
-        await fetchFahrten(); // Nur neu laden wenn Update erfolgreich
+        await fetchFahrten(); // Neu laden nach erfolgreicher Aktualisierung
         return response.data;
       }
     } catch (error) {
@@ -230,7 +232,7 @@ function AppProvider({ children }) {
       if (error.response) {
         console.error('Server-Fehler:', error.response.data);
       }
-      throw error; // Fehler weiterwerfen damit er in der UI behandelt werden kann
+      throw error;
     }
   };
   
@@ -350,6 +352,20 @@ function AppProvider({ children }) {
     }
   };
   
+  const refreshAllData = async () => {
+    try {
+      await Promise.all([
+        fetchFahrten(),
+        fetchMonthlyData(),
+        fetchOrte(),
+        fetchDistanzen()
+      ]);
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren der Daten:', error);
+      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
+    }
+  };
+  
   const deleteDistanz = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/distanzen/${id}`);
@@ -364,7 +380,7 @@ function AppProvider({ children }) {
       isLoggedIn, login, logout, token, updateFahrt, user, setUser, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
       setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
       fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
-      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, hasActiveNotification, showNotification, closeNotification, setFahrten
+      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, refreshAllData, hasActiveNotification, showNotification, closeNotification, setFahrten
     }}>
     {children}
     <NotificationModal
@@ -563,26 +579,25 @@ function FahrtenListe() {
   };
   
   const handleSave = async () => {
-    // Validierung vor dem Update
-    if (!editingFahrt.anlass || !editingFahrt.datum || !editingFahrt.kilometer || !editingFahrt.abrechnung) {
-      showNotification("Fehler", "Bitte füllen Sie alle erforderlichen Felder aus.");
-      return;
-    }
-    
-    // Typenkonvertierung und Validierung
-    const kilometer = parseFloat(editingFahrt.kilometer);
-    if (isNaN(kilometer) || kilometer <= 0) {
-      showNotification("Fehler", "Bitte geben Sie eine gültige Kilometerzahl ein.");
-      return;
-    }
-    
-    const abrechnung = parseInt(editingFahrt.abrechnung);
-    if (isNaN(abrechnung)) {
-      showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
-      return;
-    }
-    
     try {
+      // Validierung
+      if (!editingFahrt.anlass || !editingFahrt.datum || !editingFahrt.kilometer || !editingFahrt.abrechnung) {
+        showNotification("Fehler", "Bitte füllen Sie alle erforderlichen Felder aus.");
+        return;
+      }
+      
+      const kilometer = parseFloat(editingFahrt.kilometer);
+      if (isNaN(kilometer) || kilometer <= 0) {
+        showNotification("Fehler", "Bitte geben Sie eine gültige Kilometerzahl ein.");
+        return;
+      }
+      
+      const abrechnung = parseInt(editingFahrt.abrechnung);
+      if (isNaN(abrechnung)) {
+        showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
+        return;
+      }
+      
       const updatedFahrt = {
         datum: editingFahrt.datum,
         vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
@@ -590,16 +605,22 @@ function FahrtenListe() {
         einmaligerVonOrt: editingFahrt.vonOrtTyp === 'einmalig' ? editingFahrt.einmaliger_von_ort : null,
         einmaligerNachOrt: editingFahrt.nachOrtTyp === 'einmalig' ? editingFahrt.einmaliger_nach_ort : null,
         anlass: editingFahrt.anlass,
-        kilometer: kilometer, // Hier die validierte Variable verwenden
-        abrechnung: abrechnung // Hier die validierte Variable verwenden
+        kilometer: kilometer,
+        abrechnung: abrechnung
       };
       
       await updateFahrt(editingFahrt.id, updatedFahrt);
+      
+      // State zurücksetzen
       setEditingFahrt(null);
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
+      
+      // Explizit die Fahrten neu laden
+      await fetchFahrten();
+      
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
-      showNotification("Fehler", error.response?.data?.message || "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
+      showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
     }
   };
   
