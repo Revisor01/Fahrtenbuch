@@ -41,33 +41,28 @@ function AppProvider({ children }) {
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
-  
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
   
   const refreshAllData = async () => {
     try {
-      console.log('Starte refreshAllData...'); // Debug-Log
       const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
         fetchFahrten(),
         fetchMonthlyData(),
         fetchOrte(),
         fetchDistanzen(),
-        axios.get('/api/abrechnungstraeger/simple')  // Abrechnungsträger mit laden
+        axios.get('/api/abrechnungstraeger/simple')
       ]);
       
-      // Setze den State für die Abrechnungsträger
-      if (abrechnungstraegerRes.data) {
-        console.log('Abrechnungsträger geladen:', abrechnungstraegerRes.data.data); // Debug-Log
+      // Hier die tatsächlichen Daten setzen
+      if (fahrtenRes) setFahrten(fahrtenRes);
+      if (monthlyDataRes) setMonthlyData(monthlyDataRes);
+      if (orteRes) setOrte(orteRes);
+      if (distanzenRes) setDistanzen(distanzenRes);
+      if (abrechnungstraegerRes?.data) {
         setAbrechnungstraeger(abrechnungstraegerRes.data.data);
-        setSummary(prev => ({
-          ...prev,
-          abrechnungstraeger: abrechnungstraegerRes.data.data
-        }));
       }
-      console.log('refreshAllData abgeschlossen.'); // Debug-Log
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Daten:', error);
-      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
     }
   };
   
@@ -443,7 +438,9 @@ function AppProvider({ children }) {
       showNotification, 
       closeNotification, 
       setFahrten,
-      refreshAllData // Hier hinzufügen
+      refreshAllData,
+      abrechnungstraeger,
+      setAbrechnungstraeger
     }}>
     {children}
     <NotificationModal
@@ -485,10 +482,6 @@ function FahrtenListe() {
       setSortConfig({ key: 'datum', direction: 'descending' });
     }
   }, [fahrten]);
-  
-  useEffect(() => {
-    fetchFahrten();
-  }, [selectedMonth]);
   
   useEffect(() => {
     const fetchAbrechnungstraeger = async () => {
