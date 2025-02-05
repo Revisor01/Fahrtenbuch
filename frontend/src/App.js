@@ -725,7 +725,7 @@ function FahrtenListe() {
       {/* Cards Grid */}
       <div className={`grid grid-cols-1 gap-4 ${
         allCategories() === 1 
-        ? '' // volle Breite bei 1 Kategorie
+        ? 'sm:grid-cols-1' // volle Breite bei 1 Kategorie
         : allCategories() === 2 
         ? 'sm:grid-cols-2' 
         : allCategories() === 3
