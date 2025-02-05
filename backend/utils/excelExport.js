@@ -77,12 +77,13 @@ exports.exportToExcel = async (req, res) => {
      const workbook = new ExcelJS.Workbook();
      await workbook.xlsx.readFile(templatePath);
 
-     const vorlageWorksheet = workbook.getWorksheet('Vorlage');
-     if(vorlageWorksheet) {
-       vorlageWorksheet.getCell('C11').value = userProfile.full_name;
-       vorlageWorksheet.getCell('C12').value = userProfile.home_address;
-       vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
-     }
+      const vorlageWorksheet = workbook.getWorksheet('Vorlage');
+      if(vorlageWorksheet) {
+         vorlageWorksheet.getCell('C7').value = "Mitfahrer:innen";
+         vorlageWorksheet.getCell('C11').value = userProfile.full_name;
+         vorlageWorksheet.getCell('C12').value = userProfile.home_address;
+         vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
+      }
 
      const mitnahmeWorksheet = workbook.getWorksheet('Mitnahmeentschädigung');
      if(mitnahmeWorksheet) {
@@ -126,7 +127,7 @@ exports.exportToExcel = async (req, res) => {
          anlass: fahrt.anlass,
          kilometer: Math.round(detail.kilometer)
        }));
-     } else if (fahrt.abrechnung.toString() === type) {
+     } else if (fahrt.abrechnung === type) {
        return [{
          datum: new Date(fahrt.datum),
          formattedDatum: formatDate(fahrt.datum),
@@ -167,13 +168,17 @@ exports.exportToExcel = async (req, res) => {
      const workbook = new ExcelJS.Workbook();
      await workbook.xlsx.readFile(templatePath);
      
-     const vorlageWorksheet = workbook.getWorksheet('Vorlage');
-     if (vorlageWorksheet) {
-       vorlageWorksheet.getCell('C7').value = type === 'kirchenkreis' ? userProfile.kirchenkreis : userProfile.kirchengemeinde;
-       vorlageWorksheet.getCell('C11').value = userProfile.full_name;
-       vorlageWorksheet.getCell('C12').value = userProfile.home_address;
-       vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
-     }
+      const vorlageWorksheet = workbook.getWorksheet('Vorlage');
+      if (vorlageWorksheet) {
+         const [abrechnungstraeger] = await db.execute(
+            'SELECT name FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            [type, userId]
+         );
+         vorlageWorksheet.getCell('C7').value = abrechnungstraeger[0]?.name;
+         vorlageWorksheet.getCell('C11').value = userProfile.full_name;
+         vorlageWorksheet.getCell('C12').value = userProfile.home_address;
+         vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
+      }
      
      const abrechnungWorksheet = workbook.getWorksheet('monatliche Abrechnung');
      if (abrechnungWorksheet) {
