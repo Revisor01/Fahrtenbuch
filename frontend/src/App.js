@@ -459,7 +459,7 @@ function AppProvider({ children }) {
 }
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -468,7 +468,6 @@ function FahrtenListe() {
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
-  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [statusModal, setStatusModal] = useState({
     open: false,
     typ: null,
