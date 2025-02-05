@@ -102,7 +102,7 @@ exports.exportToExcel = async (req, res) => {
         return {
           datum: formatDate(fahrt.datum),
           anlass: fahrt.anlass,
-          name: mitfahrer.name,
+          name: mitfahrer.name, 
           arbeitsstaette: mitfahrer.arbeitsstaette,
           hinweg: mitfahrer.richtung === 'hin' || mitfahrer.richtung === 'hin_rueck' ? `${vonOrt}-${nachOrt}` : '',
           rueckweg: mitfahrer.richtung === 'rueck' || mitfahrer.richtung === 'hin_rueck' ? `${nachOrt}-${vonOrt}` : '',
@@ -162,12 +162,11 @@ exports.exportToExcel = async (req, res) => {
             row.getCell('A').value = mitfahrer.datum;
             row.getCell('B').value = mitfahrer.anlass;
             row.getCell('C').value = mitfahrer.hinweg;
-            row.getCell('D').value = mitfahrer.rueckweg;
+            row.getCell('D').value = mitfahrer.rueckweg; 
             row.getCell('E').value = mitfahrer.name;
             row.getCell('F').value = mitfahrer.arbeitsstaette;
             row.getCell('G').value = mitfahrer.kilometer;
             
-            // Setze alle Zellen auf Arial 10
             ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(col => {
               const cell = row.getCell(col);
               cell.font = { name: 'Arial', size: 10 };
