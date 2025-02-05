@@ -713,13 +713,12 @@ function FahrtenListe() {
       </div>
       
       {/* Cards Grid */}
-      <div className={`card-grid grid-cols-${Math.min(getKategorienMitErstattung().length, 4)}`}>
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {getKategorienMitErstattung().map(([key, displayName, value]) => (
         <div key={key} className="card-container">
         <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-label">{displayName}</span>
-        
-        
         <span className={summary.abrechnungsStatus?.[key]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
         {Number(value).toFixed(2)} €
         </span>
@@ -730,23 +729,17 @@ function FahrtenListe() {
           <div className="flex items-center justify-between">
           <span className="text-label">Status</span>
           {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
-            <span 
-            className="status-badge-primary cursor-pointer"
-            >
+            <span className="status-badge-primary cursor-pointer">
             <CheckCircle2 size={14} />
             <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
             </span>
           ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
-            <span 
-            className="status-badge-secondary cursor-pointer"
-            >
+            <span className="status-badge-secondary cursor-pointer">
             <Circle size={14} />
             <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
             </span>
           ) : (
-            <span 
-            className="status-badge-secondary"
-            >
+            <span className="status-badge-secondary">
             <AlertCircle size={14} />
             <span>Nicht eingereicht</span>
             </span>
@@ -758,7 +751,7 @@ function FahrtenListe() {
       ))}
       
       {/* Gesamt Card */}
-      <div className="card-container">
+      <div className="col-span-1 sm:col-span-2 lg:col-span-3 card-container">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
@@ -768,17 +761,17 @@ function FahrtenListe() {
       </div>
       </div>
       
-        {/* Export Buttons */}
-        <div className="flex flex-col sm:flex-row justify-end gap-2">
-        {getKategorienMitErstattung().map(([key, displayName]) => (
-          <button
-          key={key}
-          onClick={() => handleExportToExcel(key.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
-          className="btn-primary">
-          Export {displayName}
-          </button>
-        ))}
-        </div>
+      {/* Export Buttons */}
+      <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
+      {getKategorienMitErstattung().map(([key, displayName]) => (
+        <button
+        key={key}
+        onClick={() => handleExportToExcel(key.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
+        className="btn-primary">
+        Export {displayName}
+        </button>
+      ))}
+      </div>
         </div>
         </div>
       );
