@@ -1396,7 +1396,7 @@ function FahrtenListe() {
           {new Date(fahrt.datum).toLocaleDateString()}
           </div>
           <div className="mobile-card-subtitle">
-          {abrechnungstraeger?.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt'}
+          {abrechnungstraegerName}
           </div>
           </div>
           <div className="mobile-action-buttons">
