@@ -44,7 +44,7 @@ exports.exportToExcel = async (req, res) => {
    const correctedMonth = month.split('-')[1] || month;
    
    const fahrten = await Fahrt.getMonthlyReport(year, correctedMonth, userId);
-   console.log(`Retrieved ${fahrten.length} fahrten for the month`);
+   console.log('Raw fahrten data:', fahrten);
    
    const userProfile = await getUserProfile(userId);
    console.log('User profile:', userProfile);
@@ -52,21 +52,22 @@ exports.exportToExcel = async (req, res) => {
    // Spezialbehandlung für Mitfahrer-Export
    if(type === 'mitfahrer') {
      // Mitfahrer aus Fahrten extrahieren
-     const mitfahrerData = fahrten.flatMap(fahrt => 
-       (fahrt.mitfahrer || []).map(mitfahrer => {
-         const vonOrt = fahrt.von_ort_adresse || fahrt.einmaliger_von_ort || fahrt.von_ort_name;
-         const nachOrt = fahrt.nach_ort_adresse || fahrt.einmaliger_nach_ort || fahrt.nach_ort_name;
-         return {
-           datum: formatDate(fahrt.datum),
-           anlass: fahrt.anlass,
-           name: mitfahrer.name,
-           arbeitsstaette: mitfahrer.arbeitsstaette,
-           hinweg: mitfahrer.richtung === 'hin' || mitfahrer.richtung === 'hin_rueck' ? `${vonOrt}-${nachOrt}` : '',
-           rueckweg: mitfahrer.richtung === 'rueck' || mitfahrer.richtung === 'hin_rueck' ? `${nachOrt}-${vonOrt}` : '',
-           kilometer: Math.round(mitfahrer.richtung === 'hin_rueck' ? fahrt.kilometer * 2 : fahrt.kilometer)
-         };
-       })
-     );
+      const mitfahrerData = fahrten.flatMap(fahrt => 
+         (Array.isArray(fahrt.mitfahrer) ? fahrt.mitfahrer : []).map(mitfahrer => {
+            console.log('Processing mitfahrer:', mitfahrer);
+            const vonOrt = fahrt.von_ort_name || fahrt.einmaliger_von_ort;
+            const nachOrt = fahrt.nach_ort_name || fahrt.einmaliger_nach_ort;
+            return {
+               datum: formatDate(fahrt.datum),
+               anlass: fahrt.anlass,
+               name: mitfahrer.name,
+               arbeitsstaette: mitfahrer.arbeitsstaette,
+               hinweg: mitfahrer.richtung === 'hin' || mitfahrer.richtung === 'hin_rueck' ? `${vonOrt}-${nachOrt}` : '',
+               rueckweg: mitfahrer.richtung === 'rueck' || mitfahrer.richtung === 'hin_rueck' ? `${nachOrt}-${vonOrt}` : '',
+               kilometer: Math.round(fahrt.kilometer)
+            };
+         })
+      );
 
      // Duplikate entfernen
      const uniqueMitfahrerData = mitfahrerData.filter((mitfahrer, index, self) =>
