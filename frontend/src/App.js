@@ -352,20 +352,6 @@ function AppProvider({ children }) {
     }
   };
   
-  const refreshAllData = async () => {
-    try {
-      await Promise.all([
-        fetchFahrten(),
-        fetchMonthlyData(),
-        fetchOrte(),
-        fetchDistanzen()
-      ]);
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Daten:', error);
-      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
-    }
-  };
-  
   const deleteDistanz = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/distanzen/${id}`);
@@ -375,12 +361,60 @@ function AppProvider({ children }) {
     }
   };
   
+  const refreshAllData = async () => {
+    try {
+      setIsRefreshing(true);
+      await Promise.all([
+        fetchFahrten(),
+        fetchMonthlyData(),
+        fetchOrte(),
+        fetchDistanzen()
+      ]);
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren der Daten:', error);
+      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+  
   return (
     <AppContext.Provider value={{ 
-      isLoggedIn, login, logout, token, updateFahrt, user, setUser, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
-      setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
-      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
-      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, refreshAllData, hasActiveNotification, showNotification, closeNotification, setFahrten
+      isLoggedIn, 
+      login, 
+      logout, 
+      token, 
+      updateFahrt, 
+      user, 
+      setUser, 
+      orte, 
+      distanzen, 
+      fahrten, 
+      selectedMonth, 
+      gesamtKirchenkreis, 
+      gesamtGemeinde,
+      setSelectedMonth, 
+      addOrt, 
+      addFahrt, 
+      addDistanz, 
+      updateOrt, 
+      updateDistanz, 
+      fetchFahrten, 
+      deleteFahrt, 
+      deleteDistanz, 
+      deleteOrt, 
+      monthlyData, 
+      fetchMonthlyData, 
+      summary, 
+      setSummary,
+      setIsProfileModalOpen, 
+      isProfileModalOpen, 
+      updateAbrechnungsStatus, 
+      hasActiveNotification, 
+      showNotification, 
+      closeNotification, 
+      setFahrten,
+      refreshAllData // Hier hinzufügen
     }}>
     {children}
     <NotificationModal
