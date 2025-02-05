@@ -76,6 +76,29 @@ function AppProvider({ children }) {
     }
   };
   
+  const refreshAllData = async () => {
+    try {
+      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
+        fetchFahrten(),
+        fetchMonthlyData(),
+        fetchOrte(),
+        fetchDistanzen(),
+        axios.get('/api/abrechnungstraeger/simple')  // Abrechnungsträger mit laden
+      ]);
+      
+      // Setze den State für die Abrechnungsträger
+      if (abrechnungstraegerRes.data) {
+        setSummary(prev => ({
+          ...prev,
+          abrechnungstraeger: abrechnungstraegerRes.data.data
+        }));
+      }
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren der Daten:', error);
+      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
+    }
+  };
+  
   const setupAxiosInterceptors = () => {
     axios.interceptors.response.use(
       (response) => response,
@@ -362,29 +385,6 @@ function AppProvider({ children }) {
       fetchDistanzen();
     } catch (error) {
       console.error('Fehler beim Löschen der Distanz:', error);
-    }
-  };
-  
-  const refreshAllData = async () => {
-    try {
-      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
-        fetchFahrten(),
-        fetchMonthlyData(),
-        fetchOrte(),
-        fetchDistanzen(),
-        axios.get('/api/abrechnungstraeger/simple')  // Abrechnungsträger mit laden
-      ]);
-      
-      // Setze den State für die Abrechnungsträger
-      if (abrechnungstraegerRes.data) {
-        setSummary(prev => ({
-          ...prev,
-          abrechnungstraeger: abrechnungstraegerRes.data.data
-        }));
-      }
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Daten:', error);
-      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
     }
   };
   
