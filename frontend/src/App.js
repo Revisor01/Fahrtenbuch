@@ -724,11 +724,13 @@ function FahrtenListe() {
       
       {/* Cards Grid */}
       <div className={`grid grid-cols-1 gap-4 ${
-        allCategories() === 2 
+        allCategories() === 1 
+        ? '' // volle Breite bei 1 Kategorie
+        : allCategories() === 2 
         ? 'sm:grid-cols-2' 
         : allCategories() === 3
         ? 'sm:grid-cols-3'
-        : 'sm:grid-cols-2 lg:grid-cols-4'
+        : 'sm:grid-cols-2 lg:grid-cols-4' // 4+ Kategorien: immer 25% mit Umbruch
       }`}>
       {getKategorienMitErstattung().map(([key, displayName, value]) => (
         <div key={key} className="card-container">
@@ -1229,7 +1231,7 @@ function FahrtenListe() {
     {/* Mobile View */}
     <div className="md:hidden space-y-4">
     {sortedFahrten.map((fahrt) => {
-      const traeger = abrechnungstraeger?.find(at => at.id === (editingFahrt?.id === fahrt.id ? parseInt(editingFahrt.abrechnung) : fahrt.abrechnung));
+      const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
       const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
       
       return (
