@@ -789,35 +789,6 @@ function FahrtenListe() {
     return numValue % 1 < 0.5 ? Math.floor(numValue) : Math.ceil(numValue);
   };
   
-  const exportToCSV = (type) => {
-    const csvContent = [
-      ['Datum', 'Von Adresse', 'Nach Adresse', 'Anlass', 'Kilometer', 'Abrechnung'],
-      ...sortedFahrten.map(fahrt => {
-        const abrechnungName = abrechnungstraeger.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt';
-        return [
-          new Date(fahrt.datum).toLocaleDateString(),
-          fahrt.einmaliger_von_ort || fahrt.von_ort_adresse || fahrt.von_ort_name,
-          fahrt.einmaliger_nach_ort || fahrt.nach_ort_adresse || fahrt.nach_ort_name,
-          fahrt.anlass,
-          roundKilometers(fahrt.kilometer),
-          abrechnungName
-        ];
-      })
-    ].map(row => row.join(';')).join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `fahrten_${type}_${selectedMonth}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-  
   const sortedFahrten = React.useMemo(() => {
     let sortableFahrten = [...fahrten];
     if (sortConfig.key !== null) {
