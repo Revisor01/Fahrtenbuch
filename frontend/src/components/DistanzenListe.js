@@ -176,7 +176,7 @@ function DistanzenListe() {
       </div>
       </div>
       {/* Mobile View */}
-      <div className="mobile-edit-container">
+      <div className="md:hidden mobile-edit-container">
       {sortedDistanzen.map((distanz) => (
         <div key={distanz.id} className="card-container">
         {editingDistanz?.id === distanz.id ? (
