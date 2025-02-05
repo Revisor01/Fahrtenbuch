@@ -713,8 +713,7 @@ function FahrtenListe() {
       </div>
       
       {/* Cards Grid */}
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {getKategorienMitErstattung().map(([key, displayName, value]) => (
         <div key={key} className="card-container">
         <div className="flex justify-between items-center mb-2">
@@ -751,7 +750,7 @@ function FahrtenListe() {
       ))}
       
       {/* Gesamt Card */}
-      <div className="col-span-1 sm:col-span-2 lg:col-span-3 card-container">
+      <div className="col-span-1 sm:col-span-2 card-container">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
