@@ -1219,6 +1219,7 @@ function FahrtenListe() {
       
       return (
         <div key={fahrt.id} className="mobile-card">
+        {renderAbrechnungsStatus(summary)}
         {editingFahrt?.id === fahrt.id ? (
           // Edit Mode
           <div className="space-y-4">
@@ -1381,7 +1382,7 @@ function FahrtenListe() {
           {new Date(fahrt.datum).toLocaleDateString()}
           </div>
           <div className="mobile-card-subtitle">
-          {abrechnungstraegerName}
+          {abrechnungstraeger?.find(at => at.id === fahrt.abrechnung)?.name || 'Unbekannt'}
           </div>
           </div>
           <div className="mobile-action-buttons">
