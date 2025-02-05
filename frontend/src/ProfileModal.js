@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { AppContext, refreshAllData } from './App';
+import { AppContext } from './App';
 import Modal from './Modal';
 import AbrechnungstraegerForm from './components/AbrechnungstraegerForm';
 import ErstattungssaetzeForm from './components/ErstattungssaetzeForm';
@@ -10,7 +10,7 @@ import DistanzForm from './components/DistanzForm';
 import DistanzenListe from './components/DistanzenListe';
     
 function ProfileModal({ isOpen, onClose }) {
-    const { token, user, setUser, showNotification } = useContext(AppContext);
+    const { token, user, setUser, showNotification, refreshAllData } = useContext(AppContext);
     const [profile, setProfile] = useState({});
     const [activeTab, setActiveTab] = useState('profile');
     const [oldPassword, setOldPassword] = useState('');
