@@ -43,6 +43,30 @@ function AppProvider({ children }) {
   
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
   
+  
+  const refreshAllData = async () => {
+    try {
+      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
+        fetchFahrten(),
+        fetchMonthlyData(),
+        fetchOrte(),
+        fetchDistanzen(),
+        axios.get('/api/abrechnungstraeger/simple')  // Abrechnungsträger mit laden
+      ]);
+      
+      // Setze den State für die Abrechnungsträger
+      if (abrechnungstraegerRes.data) {
+        setSummary(prev => ({
+          ...prev,
+          abrechnungstraeger: abrechnungstraegerRes.data.data
+        }));
+      }
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren der Daten:', error);
+      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
+    }
+  };
+  
   const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
     setHasActiveNotification(true);
     setNotification({ isOpen: true, title, message, onConfirm, showCancel });
@@ -73,29 +97,6 @@ function AppProvider({ children }) {
     } catch (error) {
       console.error('Error fetching user data:', error);
       logout();
-    }
-  };
-  
-  const refreshAllData = async () => {
-    try {
-      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
-        fetchFahrten(),
-        fetchMonthlyData(),
-        fetchOrte(),
-        fetchDistanzen(),
-        axios.get('/api/abrechnungstraeger/simple')  // Abrechnungsträger mit laden
-      ]);
-      
-      // Setze den State für die Abrechnungsträger
-      if (abrechnungstraegerRes.data) {
-        setSummary(prev => ({
-          ...prev,
-          abrechnungstraeger: abrechnungstraegerRes.data.data
-        }));
-      }
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Daten:', error);
-      showNotification('Fehler', 'Daten konnten nicht vollständig aktualisiert werden');
     }
   };
   
