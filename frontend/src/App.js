@@ -71,20 +71,6 @@ function AppProvider({ children }) {
     }
   };
   
-  const fetchAbrechnungstraeger = async () => {
-    try {
-      const response = await axios.get('/api/abrechnungstraeger/simple');
-      setAbrechnungstraeger(response.data.data);
-    } catch (error) {
-      console.error('Fehler beim Laden der Abrechnungsträger:', error);
-      showNotification('Fehler', 'Abrechnungsträger konnten nicht geladen werden');
-    }
-  };
-  
-  useEffect(() => {  // Initiales Laden beim Start
-    fetchAbrechnungstraeger();
-  }, []);
-  
   const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
     setHasActiveNotification(true);
     setNotification({ isOpen: true, title, message, onConfirm, showCancel });
@@ -170,6 +156,20 @@ function AppProvider({ children }) {
       console.error('Fehler beim Abrufen der Orte:', error);
     }
   };
+  
+  const fetchAbrechnungstraeger = async () => {
+    try {
+      const response = await axios.get('/api/abrechnungstraeger/simple');
+      setAbrechnungstraeger(response.data.data);
+    } catch (error) {
+      console.error('Fehler beim Laden der Abrechnungsträger:', error);
+      showNotification('Fehler', 'Abrechnungsträger konnten nicht geladen werden');
+    }
+  };
+  
+  useEffect(() => {  // Initiales Laden beim Start
+    fetchAbrechnungstraeger();
+  }, []);
   
   const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum) => {
     try {
