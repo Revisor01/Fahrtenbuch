@@ -84,13 +84,18 @@ exports.updateFahrt = async (req, res) => {
       return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
     }
     
+    // Kilometer Validierung
+    if (!kilometer || typeof kilometer !== 'string' || isNaN(Number(kilometer))) {
+      return res.status(400).json({ message: 'Kilometer ist ungültig.' });
+    }
+    
     const updateData = {
       vonOrtId: vonOrtId || null,
       nachOrtId: nachOrtId || null,
       einmaligerVonOrt: einmaligerVonOrt || null,
       einmaligerNachOrt: einmaligerNachOrt || null,
       anlass: anlass || null,
-      kilometer: parseFloat(kilometer),
+      kilometer: kilometer, // Kilomter nicht verändern
       abrechnung: abrechnung || null,
       datum: datum || null
     };
