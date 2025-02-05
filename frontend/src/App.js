@@ -1218,7 +1218,6 @@ function FahrtenListe() {
       
       return (
         <div key={fahrt.id} className="mobile-card">
-        {renderAbrechnungsStatus(summary)}
         {editingFahrt?.id === fahrt.id ? (
           // Edit Mode
           <div className="space-y-4">
