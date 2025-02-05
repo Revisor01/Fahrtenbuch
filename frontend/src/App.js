@@ -232,33 +232,13 @@ function AppProvider({ children }) {
   
   const updateFahrt = async (id, updatedFahrt) => {
     try {
-      // Sicherstellen dass keine undefined-Werte gesendet werden
-      const cleanedFahrt = {
-        datum: updatedFahrt.datum,
-        vonOrtId: updatedFahrt.vonOrtId || null,
-        nachOrtId: updatedFahrt.nachOrtId || null,
-        einmaligerVonOrt: updatedFahrt.einmaligerVonOrt || null,
-        einmaligerNachOrt: updatedFahrt.einmaligerNachOrt || null,
-        anlass: updatedFahrt.anlass || '',
-        kilometer: parseFloat(updatedFahrt.kilometer) || 0,
-        abrechnung: parseInt(updatedFahrt.abrechnung)
-      };
-      
-      console.log('Sende Update-Daten:', cleanedFahrt); // Debug-Log
-      
-      const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, cleanedFahrt);
-      
+      const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, updatedFahrt);
       if (response.status === 200) {
         await fetchFahrten();
         return response.data;
-      } else {
-        throw new Error('Unerwarteter Statuscode: ' + response.status);
       }
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
-      if (error.response) {
-        console.error('Server-Fehler:', error.response.data);
-      }
       throw error;
     }
   };
@@ -624,10 +604,7 @@ function FahrtenListe() {
         showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
         return;
       }
-      
-      // Formatierung des Kilometers
-      const kilometerString = kilometer.toFixed(2); // Umwandlung in String mit 2 Dezimalstellen
-      
+
       const updatedFahrt = {
         datum: editingFahrt.datum,
         vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
@@ -635,17 +612,14 @@ function FahrtenListe() {
         einmaligerVonOrt: editingFahrt.vonOrtTyp === 'einmalig' ? editingFahrt.einmaliger_von_ort : null,
         einmaligerNachOrt: editingFahrt.nachOrtTyp === 'einmalig' ? editingFahrt.einmaliger_nach_ort : null,
         anlass: editingFahrt.anlass,
-        kilometer: kilometerString, // Verwende den formatierten String
+        kilometer: kilometer.toFixed(2),
         abrechnung: parseInt(editingFahrt.abrechnung)
       };
-      
-      console.log('Sende Fahrt-Update:', updatedFahrt);
       
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
-      console.error('Fehler beim Aktualisieren der Fahrt:', error);
       showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
     }
   };
@@ -794,21 +768,21 @@ function FahrtenListe() {
       </div>
       </div>
       
-      {/* Export Buttons */}
-      <div className="flex flex-col sm:flex-row justify-end gap-2">
-      {getKategorienMitErstattung().map(([key, displayName]) => (
-        <button
-        key={key}
-        onClick={() => handleExportToExcel(key.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
-        className="btn-primary">
-        Export {displayName}
-        </button>
-      ))}
-      </div>
-      </div>
-      </div>
-    );
-  };
+        {/* Export Buttons */}
+        <div className="flex flex-col sm:flex-row justify-end gap-2">
+        {getKategorienMitErstattung().map(([key, displayName]) => (
+          <button
+          key={key}
+          onClick={() => handleExportToExcel(key.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
+          className="btn-primary">
+          Export {displayName}
+          </button>
+        ))}
+        </div>
+        </div>
+        </div>
+      );
+    };
   
   const roundKilometers = (value) => {
     const numValue = Number(value ?? 0);
