@@ -393,7 +393,7 @@ function AppProvider({ children }) {
       deleteOrt, 
       monthlyData,
       setMonthlyData,
-      fetchMonthlyData, 
+      fetchMonthlyData,
       summary, 
       setSummary,
       setIsProfileModalOpen, 
@@ -1567,40 +1567,8 @@ function MonthlyOverview() {
   };
   
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const monthPromises = Array.from({ length: 12 }, (_, i) => {
-          const month = i + 1;
-          return axios.get(`/api/fahrten/report/${selectedYear}/${month}`);
-        });
-        
-        const responses = await Promise.all(monthPromises);
-        
-        const transformedData = responses.map((response, index) => {
-          const month = index + 1;
-          return {
-            year: parseInt(selectedYear),
-            monatNr: month,
-            monthName: getMonthName(month),
-            yearMonth: `${selectedYear}-${month}`,
-            erstattungen: response.data.summary.erstattungen || {},
-            abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
-            totalErstattung: response.data.summary.gesamtErstattung || 0
-          };
-        }).filter(month => {
-          const hatErstattungen = Object.values(month.erstattungen).some(betrag => betrag > 0);
-          const hatMitfahrer = month.erstattungen?.mitfahrer > 0;
-          return hatErstattungen || hatMitfahrer;
-        });
-        
-        setMonthlyData(transformedData);
-      } catch (error) {
-        console.error('Fehler beim Laden der Monatsdaten:', error);
-      }
-    };
-    
     if (selectedYear !== 'all') {
-      fetchData();
+      fetchMonthlyData(selectedYear); // Jetzt mit Jahr als Parameter
     }
   }, [selectedYear]);
   
@@ -1908,6 +1876,7 @@ function MonthlyOverview() {
       </div>
     ))}
     
+    {/* Gesamt Card am Ende - volle Breite auf Mobile */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
       <div className="card-container col-span-full sm:col-span-1">
       <div className="flex justify-between items-center mb-2">
@@ -1923,7 +1892,6 @@ function MonthlyOverview() {
       )}
       </div>
     )}
-    </div>
     </div>
     
     {/* Desktop View */}
