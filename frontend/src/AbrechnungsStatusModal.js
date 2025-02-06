@@ -30,6 +30,16 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }
     }
     return 'Wählen Sie das entsprechende Datum aus.';
   };
+
+  const handleAbbrechenClick = (e) => {
+    e.stopPropagation(); // Hinzugefügt: Stoppt die Event Propagation
+    onClose();
+  };
+
+  const handleSpeichernClick = (e) => {
+    e.stopPropagation(); // Hinzugefügt: Stoppt die Event Propagation
+    handleSubmit(e);
+  };
   
   return (
     <Modal
@@ -61,13 +71,14 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
-    onClick={onClose}
+    onClick={handleAbbrechenClick} // Geändert
     className="btn-secondary w-full"
     >
     Abbrechen
     </button>
     <button
     type="submit"
+    onClick={handleSpeichernClick} // Geändert
     className="btn-primary w-full"
     >
     Speichern
