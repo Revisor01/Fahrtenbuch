@@ -702,24 +702,25 @@ function FahrtenListe() {
   const getKategorienMitErstattung = () => {
     const kategorien = [];
     
-    const yearTotal = summary.erstattungen || {};
+    // Ist das aktuelle Monats-Summary
+    const erstattungen = summary.erstattungen || {};
     
     // Erst sortierte Abrechnungsträger
     abrechnungstraeger.forEach(traeger => {
-      const data = yearTotal[traeger.id];
-      if (data && (data.original > 0 || data.ausstehend > 0)) {
+      const betrag = erstattungen[traeger.id];
+      if (betrag > 0) {
         kategorien.push([
           traeger.id.toString(),
           traeger.name,
-          data
+          betrag // Hier direkt den Betrag verwenden, nicht data.original/ausstehend
         ]);
       }
     });
     
     // Dann Mitfahrer am Ende
-    const mitfahrerData = yearTotal['mitfahrer'];
-    if (mitfahrerData && (mitfahrerData.original > 0 || mitfahrerData.ausstehend > 0)) {
-      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerData]);
+    const mitfahrerBetrag = erstattungen['mitfahrer'];
+    if (mitfahrerBetrag > 0) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerBetrag]);
     }
     
     return kategorien;
@@ -1631,24 +1632,25 @@ function MonthlyOverview() {
   const getKategorienMitErstattung = () => {
     const kategorien = [];
     
-    const yearTotal = summary.erstattungen || {};
+    // Ist das aktuelle Monats-Summary
+    const erstattungen = summary.erstattungen || {};
     
     // Erst sortierte Abrechnungsträger
     abrechnungstraeger.forEach(traeger => {
-      const data = yearTotal[traeger.id];
-      if (data && (data.original > 0 || data.ausstehend > 0)) {
+      const betrag = erstattungen[traeger.id];
+      if (betrag > 0) {
         kategorien.push([
           traeger.id.toString(),
           traeger.name,
-          data
+          betrag // Hier direkt den Betrag verwenden, nicht data.original/ausstehend
         ]);
       }
     });
     
     // Dann Mitfahrer am Ende
-    const mitfahrerData = yearTotal['mitfahrer'];
-    if (mitfahrerData && (mitfahrerData.original > 0 || mitfahrerData.ausstehend > 0)) {
-      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerData]);
+    const mitfahrerBetrag = erstattungen['mitfahrer'];
+    if (mitfahrerBetrag > 0) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerBetrag]);
     }
     
     return kategorien;
