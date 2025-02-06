@@ -252,37 +252,67 @@ function AppProvider({ children }) {
     }
   };
   
-  const fetchMonthlyData = async (selectedYear) => {
+  const fetchMonthlyData = async () => {
     try {
-      const monthPromises = Array.from({ length: 12 }, (_, i) => {
-        const month = i + 1;
-        return axios.get(`/api/fahrten/report/${selectedYear}/${month}`);
-      });
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
+      const promises = [];
+      const months = [];
       
-      const responses = await Promise.all(monthPromises);
+      // 3 Monate nach vorne
+      for (let i = 1; i <= 3; i++) {
+        const futureDate = new Date(currentYear, currentMonth + i, 1);
+        months.push(futureDate);
+      }
       
-      const transformedData = responses.map((response, index) => {
-        const month = index + 1;
+      // Aktueller Monat
+      months.push(new Date(currentYear, currentMonth, 1));
+      
+      // Rückwärts gehen (24 Monate)
+      for (let i = 1; i <= 24; i++) {
+        const pastDate = new Date(currentYear, currentMonth - i, 1);
+        months.push(pastDate);
+      }
+      
+      // API-Calls vorbereiten
+      for (const date of months) {
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        promises.push(axios.get(`/api/fahrten/report/${year}/${month}`));
+      }
+      
+      const responses = await Promise.all(promises);
+      const data = responses
+      .map((response, index) => {
+        const date = months[index];
         return {
-          year: parseInt(selectedYear),
-          monatNr: month,
-          monthName: getMonthName(month),
-          yearMonth: `${selectedYear}-${month}`,
+          yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
+          monthName: date.toLocaleString('default', { month: 'long' }),
+          year: date.getFullYear(),
+          monatNr: date.getMonth() + 1,
           erstattungen: response.data.summary.erstattungen || {},
           abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
           totalErstattung: response.data.summary.gesamtErstattung || 0
         };
-      }).filter(month => {
-        const hatErstattungen = Object.values(response.data.summary.erstattungen || {}).some(betrag => betrag > 0);
-        const hatMitfahrer = response.data.summary.erstattungen?.mitfahrer > 0;
-        return hatErstattungen || hatMitfahrer;
+      })
+      // Nur Monate mit Erstattungen behalten
+      .filter(month => {
+        const hasErstattungen = Object.values(month.erstattungen).some(betrag => betrag > 0);
+        return hasErstattungen;
+      })
+      // Nach Datum sortieren (neueste zuerst)
+      .sort((a, b) => {
+        const dateA = new Date(a.year, a.monatNr - 1);
+        const dateB = new Date(b.year, b.monatNr - 1);
+        return dateB - dateA;
       });
       
-      setMonthlyData(transformedData);
+      setMonthlyData(data);
     } catch (error) {
-      console.error('Fehler beim Laden der Monatsdaten:', error);
+      console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
     }
-  };
+  };  
   
   const updateOrt = async (id, ort) => {
     try {
