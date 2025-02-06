@@ -1564,26 +1564,39 @@ function MonthlyOverview() {
     
   const calculateYearTotal = () => {
     return filteredData.reduce((total, month) => {
-      total.originalKirchenkreis += Number(month.kirchenkreisErstattung || 0);
-      total.originalGemeinde += Number(month.gemeindeErstattung || 0);
-      total.originalMitfahrer += Number(month.mitfahrerErstattung || 0);
+      // Dynamisch für alle Abrechnungsträger
+      Object.entries(month.erstattungen).forEach(([traegerId, data]) => {
+        if (!total[traegerId]) {
+          total[traegerId] = {
+            original: 0,
+            ausstehend: 0 
+          };
+        }
+        
+        total[traegerId].original += Number(data.erstattung || 0);
+        
+        // Nur wenn nicht als erhalten markiert
+        if (!month.abrechnungsStatus?.[traegerId]?.erhalten_am) {
+          total[traegerId].ausstehend += Number(data.erstattung || 0);
+        }
+      });
       
-      if (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
-        total.kirchenkreis += Number(month.kirchenkreisErstattung || 0);
-        total.mitfahrer += Number(month.mitfahrerErstattung || 0);
+      // Separate Behandlung der Mitfahrer
+      if (month.mitfahrerErstattung > 0) {
+        if (!total.mitfahrer) {
+          total.mitfahrer = {
+            original: 0,
+            ausstehend: 0
+          };
+        }
+        total.mitfahrer.original += Number(month.mitfahrerErstattung || 0);
+        if (!month.abrechnungsStatus?.mitfahrer?.erhalten_am) {
+          total.mitfahrer.ausstehend += Number(month.mitfahrerErstattung || 0);
+        }
       }
-      if (!month.abrechnungsStatus?.gemeinde?.erhalten_am) {
-        total.gemeinde += Number(month.gemeindeErstattung || 0);
-      }
-      
-      total.originalGesamt = total.originalKirchenkreis + total.originalGemeinde + total.originalMitfahrer;
-      total.gesamt = total.kirchenkreis + total.gemeinde + total.mitfahrer;
       
       return total;
-    }, {
-      kirchenkreis: 0, gemeinde: 0, mitfahrer: 0, gesamt: 0,
-      originalKirchenkreis: 0, originalGemeinde: 0, originalMitfahrer: 0, originalGesamt: 0
-    });
+    }, {});
   };
   
   const renderBetrag = (betrag, isReceived) => {
@@ -1594,7 +1607,7 @@ function MonthlyOverview() {
     );
   };
   
-  const QuickActions = ({ filteredData, handleStatusUpdate }) => {
+  const QuickActions = ({ filteredData, handleStatusUpdate, abrechnungstraeger }) => {
     const [isOpen, setIsOpen] = useState(false);
     
     const actions = [
@@ -1604,23 +1617,27 @@ function MonthlyOverview() {
           const today = new Date().toISOString().split('T')[0];
           try {
             for (const month of filteredData) {
-              if (month.kirchenkreisErstattung > 0 && 
-                !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
+              // Für jeden Abrechnungsträger
+              for (const traeger of abrechnungstraeger) {
+                if (month.erstattungen?.[traeger.id]?.erstattung > 0 && 
+                  !month.abrechnungsStatus?.[traeger.id]?.eingereicht_am) {
+                    await handleStatusUpdate(
+                      month.year, 
+                      month.monatNr, 
+                      traeger.id, 
+                      'eingereicht', 
+                      today
+                    );
+                  }
+              }
+              // Für Mitfahrer
+              if (month.mitfahrerErstattung > 0 && 
+                !month.abrechnungsStatus?.mitfahrer?.eingereicht_am) {
                   await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Kirchenkreis', 
-                    'eingereicht', 
-                    today
-                  );
-                }
-              if (month.gemeindeErstattung > 0 && 
-                !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
-                  await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Gemeinde', 
-                    'eingereicht', 
+                    month.year,
+                    month.monatNr,
+                    'mitfahrer',
+                    'eingereicht',
                     today
                   );
                 }
@@ -1636,23 +1653,27 @@ function MonthlyOverview() {
           const today = new Date().toISOString().split('T')[0];
           try {
             for (const month of filteredData) {
-              if (month.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
-                !month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
+              // Für jeden Abrechnungsträger
+              for (const traeger of abrechnungstraeger) {
+                if (month.abrechnungsStatus?.[traeger.id]?.eingereicht_am && 
+                  !month.abrechnungsStatus?.[traeger.id]?.erhalten_am) {
+                    await handleStatusUpdate(
+                      month.year,
+                      month.monatNr,
+                      traeger.id,
+                      'erhalten',
+                      today
+                    );
+                  }
+              }
+              // Für Mitfahrer
+              if (month.abrechnungsStatus?.mitfahrer?.eingereicht_am && 
+                !month.abrechnungsStatus?.mitfahrer?.erhalten_am) {
                   await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Kirchenkreis', 
-                    'erhalten', 
-                    today
-                  );
-                }
-              if (month.abrechnungsStatus?.gemeinde?.eingereicht_am && 
-                !month.abrechnungsStatus?.gemeinde?.erhalten_am) {
-                  await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Gemeinde', 
-                    'erhalten', 
+                    month.year,
+                    month.monatNr,
+                    'mitfahrer',
+                    'erhalten',
                     today
                   );
                 }
@@ -1680,7 +1701,6 @@ function MonthlyOverview() {
         <>
         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
         <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
-
         {actions.map((action, index) => (
           <button
           key={index}
@@ -1700,13 +1720,9 @@ function MonthlyOverview() {
     );
   };
   
-  const renderStatusCell = (month, typ) => {
-    const status = typ === 'Kirchenkreis' ? 
-    month.abrechnungsStatus?.kirchenkreis : 
-    month.abrechnungsStatus?.gemeinde;
-    const betrag = typ === 'Kirchenkreis' ? 
-    month.kirchenkreisErstattung : 
-    month.gemeindeErstattung;
+  const renderStatusCell = (month, traegerId) => {
+    const status = month.abrechnungsStatus?.[traegerId];
+    const betrag = month.erstattungen?.[traegerId]?.erstattung || 0;
     
     // Wenn Betrag 0 ist
     if (betrag === 0) {
@@ -1727,7 +1743,7 @@ function MonthlyOverview() {
         className="status-badge-primary cursor-pointer"
         onClick={() => setStatusModal({ 
           open: true, 
-          typ, 
+          typ: traegerId, 
           aktion: 'reset', 
           jahr: month.year,
           monat: month.monatNr
