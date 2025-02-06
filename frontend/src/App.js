@@ -252,67 +252,35 @@ function AppProvider({ children }) {
     }
   };
   
-  const fetchMonthlyData = async () => {
+  const fetchMonthlyData = async (selectedYear) => {
     try {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth();
-      const promises = [];
-      const months = [];
-      
-      // 3 Monate nach vorne
-      for (let i = 1; i <= 3; i++) {
-        const futureDate = new Date(currentYear, currentMonth + i, 1);
-        months.push(futureDate);
-      }
-      
-      // Aktueller Monat
-      months.push(new Date(currentYear, currentMonth, 1));
-      
-      // Rückwärts gehen (24 Monate sollten erstmal reichen, werden aber gefiltert)
-      for (let i = 1; i <= 24; i++) {
-        const pastDate = new Date(currentYear, currentMonth - i, 1);
-        months.push(pastDate);
-      }
-      
-      // Für jeden Monat API-Call vorbereiten
-      for (const date of months) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        promises.push(axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`));
-      }
-      
-      const responses = await Promise.all(promises);
-      const data = responses
-      .map((response, index) => {
-        const date = months[index];
-        return {
-          yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
-          monthName: date.toLocaleString('default', { month: 'long' }),
-          year: date.getFullYear(),
-          monatNr: date.getMonth() + 1,
-          kirchenkreisErstattung: response.data.summary.kirchenkreisErstattung,
-          gemeindeErstattung: response.data.summary.gemeindeErstattung,
-          mitfahrerErstattung: response.data.summary.mitfahrerErstattung || 0,
-          abrechnungsStatus: response.data.summary.abrechnungsStatus
-        };
-      })
-      // Nur Monate mit Daten behalten
-      .filter(month => 
-        month.kirchenkreisErstattung > 0 || 
-        month.gemeindeErstattung > 0 || 
-        month.mitfahrerErstattung > 0
-      )
-      // Nach Datum sortieren (neueste zuerst)
-      .sort((a, b) => {
-        const dateA = new Date(a.year, a.monatNr - 1);
-        const dateB = new Date(b.year, b.monatNr - 1);
-        return dateB - dateA;
+      const monthPromises = Array.from({ length: 12 }, (_, i) => {
+        const month = i + 1;
+        return axios.get(`/api/fahrten/report/${selectedYear}/${month}`);
       });
       
-      setMonthlyData(data);
+      const responses = await Promise.all(monthPromises);
+      
+      const transformedData = responses.map((response, index) => {
+        const month = index + 1;
+        return {
+          year: parseInt(selectedYear),
+          monatNr: month,
+          monthName: getMonthName(month),
+          yearMonth: `${selectedYear}-${month}`,
+          erstattungen: response.data.summary.erstattungen || {},
+          abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
+          totalErstattung: response.data.summary.gesamtErstattung || 0
+        };
+      }).filter(month => {
+        const hatErstattungen = Object.values(response.data.summary.erstattungen || {}).some(betrag => betrag > 0);
+        const hatMitfahrer = response.data.summary.erstattungen?.mitfahrer > 0;
+        return hatErstattungen || hatMitfahrer;
+      });
+      
+      setMonthlyData(transformedData);
     } catch (error) {
-      console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
+      console.error('Fehler beim Laden der Monatsdaten:', error);
     }
   };
   
@@ -393,7 +361,8 @@ function AppProvider({ children }) {
       deleteFahrt, 
       deleteDistanz, 
       deleteOrt, 
-      monthlyData, 
+      monthlyData,
+      setMonthlyData,
       fetchMonthlyData, 
       summary, 
       setSummary,
