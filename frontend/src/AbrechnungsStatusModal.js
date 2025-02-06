@@ -1,6 +1,7 @@
 // AbrechnungsStatusModal.js (diese Komponente fehlt noch)
 import React, { useState } from 'react';
 import Modal from './Modal';
+import { AppContext } from './App';
 
 function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }) {
   const [selectedDate, setSelectedDate] = useState(
