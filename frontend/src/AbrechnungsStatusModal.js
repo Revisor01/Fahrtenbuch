@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 
-function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, typ, aktion }) {
+function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
+  
+  const { abrechnungstraeger } = useContext(AppContext);
   
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -13,21 +15,32 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, typ, aktion }) {
     onClose();
   };
   
+  // Bestimme den Anzeigenamen des Abrechnungsträgers
+  const displayName = traegerId === 'mitfahrer' 
+  ? 'Mitfahrer:innen' 
+  : abrechnungstraeger.find(t => t.id === traegerId)?.name || 'Unbekannt';
+  
+  // Text je nach Aktion
+  const getActionText = () => {
+    if (aktion === 'eingereicht') {
+      return `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${displayName} eingereicht wurden.`;
+    }
+    if (aktion === 'erhalten') {
+      return `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${displayName} erhalten wurden.`;
+    }
+    return 'Wählen Sie das entsprechende Datum aus.';
+  };
+  
   return (
     <Modal
     isOpen={isOpen}
     onClose={onClose}
-    title={`${typ} als ${aktion} markieren`}
+    title={`${displayName} als ${aktion} markieren`}
     >
     <div className="table-container">
     <div className="bg-primary-25 p-6 rounded-lg space-y-6">
     <p className="text-sm text-primary-600">
-    {aktion === 'eingereicht' 
-      ? `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${typ} eingereicht wurden.`
-      : aktion === 'erhalten'
-      ? `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${typ} erhalten wurden.`
-      : 'Wählen Sie das entsprechende Datum aus.'
-    }
+    {getActionText()}
     </p>
     
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -45,7 +58,6 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, typ, aktion }) {
     />
     </div>
     
-    <div className="w-full">
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
@@ -60,7 +72,6 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, typ, aktion }) {
     >
     Speichern
     </button>
-    </div>
     </div>
     </form>
     </div>
