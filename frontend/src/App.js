@@ -1799,22 +1799,21 @@ function MonthlyOverview() {
   
   return (
     <div className="w-full max-w-full space-y-6">
-    <div className="card-container-highlight">
-    <div className="flex flex-col gap-4 mb-6">
-    <div className="flex justify-between items-center">
+    <div className="card-container-highlight mb-4">
+    <div className="space-y-6">
+    {/* Header mit Navigation - wie in der Monatsübersicht */}
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="w-full flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary text-xs sm:hidden"
-      >
+    {selectedYear !== currentYear && (
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary sm:hidden">
       Aktuelles Jahr
       </button>
     )}
     </div>
     
-    <div className="flex flex-wrap items-center justify-between gap-4">
-    <div className="flex items-center gap-4 text-[11px]">
+    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
+    <div className="flex items-center justify-end gap-2 w-full">
     <QuickActions 
     filteredData={filteredData}
     handleStatusUpdate={handleStatusUpdate}
@@ -1830,14 +1829,8 @@ function MonthlyOverview() {
     />
     <span className="text-label">Abgeschlossene</span>
     </label>
-    </div>
-    
-    <div className="flex items-center justify-end gap-3 text-[11px]">
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)} 
-      className="btn-secondary hidden sm:block"
-      >
+    {selectedYear !== currentYear && (
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
       Aktuelles Jahr
       </button>
     )}
@@ -1858,11 +1851,18 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    {/* Gesamtübersicht am Anfang */}
-    <div className="card-container-highlight w-full mb-6">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {/* Cards Grid - wie in der Monatsübersicht */}
+    <div className={`grid grid-cols-1 gap-4 ${
+      allCategories() === 1 
+      ? 'sm:grid-cols-1' 
+      : allCategories() === 2 
+      ? 'sm:grid-cols-2' 
+      : allCategories() === 3
+      ? 'sm:grid-cols-3'
+      : 'sm:grid-cols-2 lg:grid-cols-4'
+    }`}>
     {getKategorienMitErstattung().map(([key, displayName, data]) => (
-      <div key={key} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+      <div key={key} className="card-container">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">{displayName}</span>
       <span className="text-value font-medium">
@@ -1877,9 +1877,9 @@ function MonthlyOverview() {
       </div>
     ))}
     
-    {/* Gesamt Card - volle Breite auf Mobile */}
+    {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm col-span-full sm:col-span-2 lg:col-span-1">
+      <div className="card-container col-span-full">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="text-value font-medium">
