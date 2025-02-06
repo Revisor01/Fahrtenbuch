@@ -1895,6 +1895,7 @@ function MonthlyOverview() {
     )}
     </div>
     </div>
+    </div>
     
     {/* Desktop View - neue Card-basierte Ansicht */}
     <div className="hidden sm:block space-y-4">
