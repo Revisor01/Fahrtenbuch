@@ -43,6 +43,14 @@ function AppProvider({ children }) {
   const [summary, setSummary] = useState({});
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
   
+  const [abrechnungsStatusModal, setAbrechnungsStatusModal] = useState({
+    open: false,
+    traegerId: null,
+    aktion: null,
+    jahr: null,
+    monat: null
+  });
+  
   const refreshAllData = async () => {
     try {
       const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
@@ -252,6 +260,17 @@ function AppProvider({ children }) {
     }
   };
   
+  const handleAbrechnungsStatus = async (jahr, monat, traegerId, aktion, datum) => {
+    try {
+      await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum);
+      await fetchMonthlyData();
+      showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Status:', error);
+      showNotification("Fehler", "Status konnte nicht aktualisiert werden");
+    }
+  };
+  
   const fetchMonthlyData = async () => {
     try {
       const currentDate = new Date();
@@ -404,6 +423,9 @@ function AppProvider({ children }) {
       closeNotification, 
       setFahrten,
       refreshAllData,
+      abrechnungsStatusModal,
+      setAbrechnungsStatusModal,
+      handleAbrechnungsStatus,
       abrechnungstraeger,
       setAbrechnungstraeger
     }}>
@@ -416,12 +438,61 @@ function AppProvider({ children }) {
     onConfirm={notification.onConfirm}
     showCancel={notification.showCancel}
     />
+    <AbrechnungsStatusModal 
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
+    onClose={() => setAbrechnungsStatusModal({})}
+    onSubmit={(date) => handleAbrechnungsStatus(
+      abrechnungsStatusModal.jahr, 
+      abrechnungsStatusModal.monat,
+      abrechnungsStatusModal.traegerId, 
+      abrechnungsStatusModal.aktion,
+      date
+    )}
+    traegerId={abrechnungsStatusModal.traegerId}
+    aktion={abrechnungsStatusModal.aktion}
+    />
+    
+    <Modal
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion === 'reset'}
+    onClose={() => setAbrechnungsStatusModal({})}
+    title="Status zurücksetzen"
+    >
+    <div className="card-container-highlight">
+    <p className="text-value text-sm mb-6">
+    Möchten Sie den Status wirklich zurücksetzen?
+    </p>
+    <div className="flex flex-col sm:flex-row gap-2">
+    <button
+    type="button"
+    onClick={() => setAbrechnungsStatusModal({})}
+    className="btn-secondary w-full"
+    >
+    Abbrechen
+    </button>
+    <button
+    type="button"
+    onClick={() => {
+      handleAbrechnungsStatus(
+        abrechnungsStatusModal.jahr,
+        abrechnungsStatusModal.monat,
+        abrechnungsStatusModal.traegerId,
+        'reset'
+      );
+      setAbrechnungsStatusModal({});
+    }}
+    className="btn-primary w-full"
+    >
+    Zurücksetzen
+    </button>
+    </div>
+    </div>
+    </Modal>
     </AppContext.Provider>
   );
 }
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -430,13 +501,6 @@ function FahrtenListe() {
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
-  const [statusModal, setStatusModal] = useState({
-    open: false,
-    typ: null,
-    aktion: null,
-    jahr: null,
-    monat: null
-  });
   
   useEffect(() => {
     fetchFahrten();
@@ -637,21 +701,25 @@ function FahrtenListe() {
   
   const getKategorienMitErstattung = () => {
     const kategorien = [];
-    Object.entries(summary.erstattungen || {}).forEach(([key, value]) => {
-      if (value > 0) {
-        // Kategorie-Namen formatieren
-        let displayName = key.charAt(0).toUpperCase() + key.slice(1);
-        if (key === 'mitfahrer') {
-          displayName = 'Mitfahrer:innen';
-        } else {
-          // Versuche, den Abrechnungsträgernamen anhand der ID zu finden
-          const traeger = abrechnungstraeger.find(at => at.id === parseInt(key));
-          displayName = traeger ? traeger.name : displayName;
-        }
-        
-        kategorien.push([key, displayName, value]);
+    
+    // Erst sortierte Abrechnungsträger
+    abrechnungstraeger.forEach(traeger => {
+      const data = yearTotal[traeger.id];
+      if (data && (data.original > 0 || data.ausstehend > 0)) {
+        kategorien.push([
+          traeger.id.toString(),
+          traeger.name,
+          data
+        ]);
       }
     });
+    
+    // Dann Mitfahrer am Ende
+    const mitfahrerData = yearTotal['mitfahrer'];
+    if (mitfahrerData && (mitfahrerData.original > 0 || mitfahrerData.ausstehend > 0)) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerData]);
+    }
+    
     return kategorien;
   };
   
@@ -724,12 +792,12 @@ function FahrtenListe() {
       {/* Cards Grid */}
       <div className={`grid grid-cols-1 gap-4 ${
         allCategories() === 1 
-        ? 'sm:grid-cols-1' // volle Breite bei 1 Kategorie
+        ? 'sm:grid-cols-1'
         : allCategories() === 2 
         ? 'sm:grid-cols-2' 
         : allCategories() === 3
         ? 'sm:grid-cols-3'
-        : 'sm:grid-cols-2 lg:grid-cols-4' // 4+ Kategorien: immer 25% mit Umbruch
+        : 'sm:grid-cols-2 lg:grid-cols-4'
       }`}>
       {getKategorienMitErstattung().map(([key, displayName, value]) => (
         <div key={key} className="card-container">
@@ -745,17 +813,44 @@ function FahrtenListe() {
           <div className="flex items-center justify-between">
           <span className="text-label">Status</span>
           {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
-            <span className="status-badge-primary cursor-pointer">
+            <span 
+            className="status-badge-primary cursor-pointer"
+            onClick={() => setAbrechnungsStatusModal({ 
+              open: true, 
+              traegerId: key,
+              aktion: 'reset', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
             <CheckCircle2 size={14} />
             <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
             </span>
           ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
-            <span className="status-badge-secondary cursor-pointer">
+            <span 
+            className="status-badge-secondary cursor-pointer"
+            onClick={() => setAbrechnungsStatusModal({ 
+              open: true, 
+              traegerId: key,
+              aktion: 'erhalten', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
             <Circle size={14} />
             <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
             </span>
           ) : (
-            <span className="status-badge-secondary">
+            <span 
+            className="status-badge-secondary cursor-pointer"
+            onClick={() => setAbrechnungsStatusModal({ 
+              open: true, 
+              traegerId: key,
+              aktion: 'eingereicht', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
             <AlertCircle size={14} />
             <span>Nicht eingereicht</span>
             </span>
@@ -767,7 +862,7 @@ function FahrtenListe() {
       ))}
       
       {/* Gesamt Card */}
-      <div className="col-span-full card-container">
+      <div className="card-container col-span-full">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
@@ -788,9 +883,9 @@ function FahrtenListe() {
         </button>
       ))}
       </div>
-        </div>
-        </div>
-      );
+      </div>
+      </div>
+    );
     };
   
   const roundKilometers = (value) => {
@@ -1492,27 +1587,11 @@ function FahrtenListe() {
   }
 
 function MonthlyOverview() {
-  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, summary } = React.useContext(AppContext);
-  const [statusModal, setStatusModal] = useState({
-    open: false,
-    traegerId: null,
-    aktion: null,
-    jahr: null,
-    monat: null
-  });
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, abrechnungsStatusModal, setAbrechnungsStatusModal, handleAbrechnungsStatus , summary } = useContext(AppContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [hideCompleted, setHideCompleted] = useState(true);
   const [filteredData, setFilteredData] = useState([]);
   const currentYear = new Date().getFullYear().toString();
-  
-  const handleStatusUpdate = async (jahr, monat, typ, aktion, datum) => {
-    try {
-      await updateAbrechnungsStatus(jahr, monat, typ, aktion, datum);
-      await fetchMonthlyData();
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Status:', error);
-    }
-  };
     
   const getMonthName = (month) => {
     return new Date(2000, month - 1, 1).toLocaleString('de-DE', { month: 'long' });
@@ -1549,20 +1628,25 @@ function MonthlyOverview() {
   
   const getKategorienMitErstattung = () => {
     const kategorien = [];
-    Object.entries(yearTotal || {}).forEach(([key, data]) => {
-      if (key !== 'gesamt' && (data.original > 0 || data.ausstehend > 0)) {
-        let displayName = key.charAt(0).toUpperCase() + key.slice(1);
-        if (key === 'mitfahrer') {
-          displayName = 'Mitfahrer:innen';
-        } else {
-          const traeger = abrechnungstraeger.find(at => at.id.toString() === key);
-          if (traeger) {
-            displayName = traeger.name;
-          }
-        }
-        kategorien.push([key, displayName, data]);
+    
+    // Erst sortierte Abrechnungsträger
+    abrechnungstraeger.forEach(traeger => {
+      const data = yearTotal[traeger.id];
+      if (data && (data.original > 0 || data.ausstehend > 0)) {
+        kategorien.push([
+          traeger.id.toString(),
+          traeger.name,
+          data
+        ]);
       }
     });
+    
+    // Dann Mitfahrer am Ende
+    const mitfahrerData = yearTotal['mitfahrer'];
+    if (mitfahrerData && (mitfahrerData.original > 0 || mitfahrerData.ausstehend > 0)) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerData]);
+    }
+    
     return kategorien;
   };
   
@@ -1861,14 +1945,10 @@ function MonthlyOverview() {
     </div>
     
     {/* Cards Grid - wie in der Monatsübersicht */}
-    <div className={`grid grid-cols-1 gap-4 ${
-      allCategories() === 1 
-      ? 'sm:grid-cols-1' 
-      : allCategories() === 2 
-      ? 'sm:grid-cols-2' 
-      : allCategories() === 3
-      ? 'sm:grid-cols-3'
-      : 'sm:grid-cols-2 lg:grid-cols-4'
+    <div className={`grid gap-4 ${
+      getKategorienMitErstattung().length === 3 
+      ? 'grid-cols-1 sm:grid-cols-3' 
+      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
     }`}>
     {getKategorienMitErstattung().map(([key, displayName, data]) => (
       <div key={key} className="card-container">
@@ -1888,7 +1968,9 @@ function MonthlyOverview() {
     
     {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
-      <div className="card-container col-span-full">
+      <div className={`card-container ${
+        getKategorienMitErstattung().length === 3 ? 'col-span-full' : 'col-span-full sm:col-span-2 lg:col-span-1'
+      }`}>
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="text-value font-medium">
@@ -2038,16 +2120,22 @@ function MonthlyOverview() {
     </div>
     
     <AbrechnungsStatusModal 
-    isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
-    onClose={() => setStatusModal({})}
-    onSubmit={(date) => handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.traegerId, statusModal.aktion, date)}
-    traegerId={statusModal.traegerId}
-    aktion={statusModal.aktion}
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
+    onClose={() => setAbrechnungsStatusModal({})}
+    onSubmit={(date) => handleAbrechnungsStatus(
+      abrechnungsStatusModal.jahr, 
+      abrechnungsStatusModal.monat,
+      abrechnungsStatusModal.traegerId, 
+      abrechnungsStatusModal.aktion,
+      date
+    )}
+    traegerId={abrechnungsStatusModal.traegerId}
+    aktion={abrechnungsStatusModal.aktion}
     />
     
     <Modal
-    isOpen={statusModal.open && statusModal.aktion === 'reset'}
-    onClose={() => setStatusModal({})}
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion === 'reset'}
+    onClose={() => setAbrechnungsStatusModal({})}
     title="Status zurücksetzen"
     >
     <div className="card-container-highlight">
