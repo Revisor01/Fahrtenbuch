@@ -38,7 +38,7 @@ function AppProvider({ children }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
-  const [abrechnungstraeger, setAbrechnungs aeger] = useState([]);
+  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
