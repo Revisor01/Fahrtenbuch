@@ -1568,9 +1568,9 @@ function MonthlyOverview() {
   };
     
   const calculateYearTotal = () => {
-    return filteredData.reduce((total, month) => {
+    const totals = filteredData.reduce((total, month) => {
       // Dynamisch für alle Abrechnungsträger
-      Object.entries(month.erstattungen).forEach(([traegerId, data]) => {
+      Object.entries(month.erstattungen || {}).forEach(([traegerId, data]) => {
         if (!total[traegerId]) {
           total[traegerId] = {
             original: 0,
@@ -1602,13 +1602,15 @@ function MonthlyOverview() {
       
       return total;
     }, {});
-    // Gesamt-Werte berechnen
+    
+    // Berechne Gesamt-Werte, aber filtere den gesamt-Key raus
+    const relevantKeys = Object.keys(totals).filter(key => key !== 'gesamt');
     totals.gesamt = {
-      original: Object.values(totals).reduce((sum, data) => 
-        sum + (data.original || 0), 0
+      original: relevantKeys.reduce((sum, key) => 
+        sum + (totals[key].original || 0), 0
       ),
-      ausstehend: Object.values(totals).reduce((sum, data) => 
-        sum + (data.ausstehend || 0), 0
+      ausstehend: relevantKeys.reduce((sum, key) => 
+        sum + (totals[key].ausstehend || 0), 0
       )
     };
     
