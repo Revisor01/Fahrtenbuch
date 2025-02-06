@@ -1492,7 +1492,7 @@ function FahrtenListe() {
   }
 
 function MonthlyOverview() {
-  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger } = React.useContext(AppContext);
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, summary } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({
     open: false,
     traegerId: null,
