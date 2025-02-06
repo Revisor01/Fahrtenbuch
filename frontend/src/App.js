@@ -1566,6 +1566,15 @@ function MonthlyOverview() {
     return kategorien;
   };
   
+  const allCategories = () => {
+    // Sammle alle einzigartigen Kategorien
+    const categories = new Set([
+      ...Object.keys(summary.erstattungen || {}),
+      ...Object.keys(summary.mitfahrerErstattungen || {})
+    ]);
+    return categories.size; // Gibt die tatsächliche Anzahl der Kategorien zurück
+  };
+  
   // MonthlyOverview - nur diese useEffects
   useEffect(() => {
     fetchMonthlyData(); // Dieser holt die Daten für alle relevanten Monate
