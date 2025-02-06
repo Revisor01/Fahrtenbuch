@@ -1858,9 +1858,11 @@ function MonthlyOverview() {
     </div>
     </div>
     
+    {/* Gesamtübersicht am Anfang */}
+    <div className="card-container-highlight w-full mb-6">
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     {getKategorienMitErstattung().map(([key, displayName, data]) => (
-      <div key={key} className="card-container">
+      <div key={key} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">{displayName}</span>
       <span className="text-value font-medium">
@@ -1875,9 +1877,9 @@ function MonthlyOverview() {
       </div>
     ))}
     
-    {/* Gesamt Card am Ende - volle Breite auf Mobile */}
+    {/* Gesamt Card - volle Breite auf Mobile */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
-      <div className="card-container col-span-full sm:col-span-1">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm col-span-full sm:col-span-2 lg:col-span-1">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="text-value font-medium">
@@ -1894,24 +1896,8 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    {/* Desktop View */}
-    <div className="hidden sm:block">
-    <div className="table-container">
-    <table className="w-full">
-    <thead>
-    <tr className="table-head-row">
-    <th className="table-header">Monat</th>
-    {abrechnungstraeger.map(traeger => (
-      <React.Fragment key={traeger.id}>
-      <th className="table-header text-right">{traeger.name}</th>
-      <th className="table-header-sm">Status</th>
-      </React.Fragment>
-    ))}
-    <th className="table-header text-right">Mitfahrer</th>
-    <th className="table-header text-right">Gesamt</th>
-    </tr>
-    </thead>
-    <tbody className="divide-y divide-primary-50 dark:divide-primary-800">
+    {/* Desktop View - neue Card-basierte Ansicht */}
+    <div className="hidden sm:block space-y-4">
     {filteredData.map((month) => {
       const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
         const received = month.abrechnungsStatus?.[id]?.erhalten_am;
@@ -1923,48 +1909,58 @@ function MonthlyOverview() {
       );
       
       return (
-        <tr key={month.yearMonth} className="table-row">
-        <td className="table-cell">
-        <span className="text-value">{month.monthName} {month.year}</span>
-        </td>
-        
-        {abrechnungstraeger.map(traeger => (
-          <React.Fragment key={traeger.id}>
-          <td className="table-cell text-right">
-          {renderBetrag(
-            month.erstattungen?.[traeger.id] || 0, 
-            month.abrechnungsStatus?.[traeger.id]?.erhalten_am
-          )}
-          </td>
-          <td className="table-cell">
-          {renderStatusCell(month, traeger.id)}
-          </td>
-          </React.Fragment>
-        ))}
-        
-        <td className="table-cell text-right">
-        {renderBetrag(
-          month.erstattungen?.mitfahrer || 0, 
-          month.abrechnungsStatus?.mitfahrer?.erhalten_am
-        )}
-        </td>
-        
-        <td className="table-cell text-right">
+        <div key={month.yearMonth} className="card-container">
+        {/* Header mit Monat und Gesamtsumme */}
+        <div className="flex justify-between items-center mb-4 pb-4 border-b border-primary-100 dark:border-primary-700">
+        <h3 className="text-lg font-medium text-value">
+        {month.monthName} {month.year}
+        </h3>
+        <div className="text-right">
         <div className="text-value font-medium">
         {gesamtAusstehend.toFixed(2)} €
         </div>
         {gesamtAusstehend !== originalGesamt && (
-          <div className="text-muted text-xs">
-          ({originalGesamt.toFixed(2)} €)
+          <div className="text-xs text-muted">
+          Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
-        </td>
-        </tr>
+        </div>
+        </div>
+        
+        {/* Grid für Abrechnungsträger */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {abrechnungstraeger.map(traeger => (
+          <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+          <div className="flex justify-between items-start mb-2">
+          <span className="text-sm font-medium text-value">{traeger.name}</span>
+          <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
+          {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
+          </span>
+          </div>
+          <div className="mt-2">
+          {renderStatusCell(month, traeger.id)}
+          </div>
+          </div>
+        ))}
+        
+        {/* Mitfahrer Card wenn vorhanden */}
+        {month.erstattungen?.mitfahrer > 0 && (
+          <div className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+          <div className="flex justify-between items-start mb-2">
+          <span className="text-sm font-medium text-value">Mitfahrer:innen</span>
+          <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
+          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
+          </span>
+          </div>
+          <div className="mt-2">
+          {renderStatusCell(month, 'mitfahrer')}
+          </div>
+          </div>
+        )}
+        </div>
+        </div>
       );
     })}
-    </tbody>
-    </table>
-    </div>
     </div>
     
     {/* Mobile View */}
