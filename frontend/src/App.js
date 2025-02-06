@@ -1632,25 +1632,38 @@ function MonthlyOverview() {
   const getKategorienMitErstattung = () => {
     const kategorien = [];
     
-    // Ist das aktuelle Monats-Summary
-    const erstattungen = summary.erstattungen || {};
+    // Jahres-Summen aus dem yearTotal berechnen
+    const yearTotals = abrechnungstraeger.reduce((acc, traeger) => {
+      const traegerSumme = filteredData.reduce((sum, month) => {
+        return sum + (month.erstattungen?.[traeger.id] || 0);
+      }, 0);
+      
+      if (traegerSumme > 0) {
+        acc[traeger.id] = traegerSumme;
+      }
+      return acc;
+    }, {});
     
-    // Erst sortierte Abrechnungsträger
+    // Mitfahrer-Summe
+    const mitfahrerSumme = filteredData.reduce((sum, month) => {
+      return sum + (month.erstattungen?.mitfahrer || 0);
+    }, 0);
+    
+    // Abrechnungsträger Cards
     abrechnungstraeger.forEach(traeger => {
-      const betrag = erstattungen[traeger.id];
-      if (betrag > 0) {
+      const summe = yearTotals[traeger.id];
+      if (summe > 0) {
         kategorien.push([
           traeger.id.toString(),
           traeger.name,
-          betrag // Hier direkt den Betrag verwenden, nicht data.original/ausstehend
+          summe
         ]);
       }
     });
     
-    // Dann Mitfahrer am Ende
-    const mitfahrerBetrag = erstattungen['mitfahrer'];
-    if (mitfahrerBetrag > 0) {
-      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerBetrag]);
+    // Mitfahrer Card
+    if (mitfahrerSumme > 0) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerSumme]);
     }
     
     return kategorien;
@@ -1952,8 +1965,10 @@ function MonthlyOverview() {
     
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid gap-4 ${
-      getKategorienMitErstattung().length === 3 
-      ? 'grid-cols-1 sm:grid-cols-3' 
+      getKategorienMitErstattung().length <= 2 
+      ? 'grid-cols-1 sm:grid-cols-2' 
+      : getKategorienMitErstattung().length === 3
+      ? 'grid-cols-1 sm:grid-cols-3'
       : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
     }`}>
     {getKategorienMitErstattung().map(([key, displayName, data]) => (
@@ -1974,9 +1989,7 @@ function MonthlyOverview() {
     
     {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
-      <div className={`card-container ${
-        getKategorienMitErstattung().length === 3 ? 'col-span-full' : 'col-span-full sm:col-span-2 lg:col-span-1'
-      }`}>
+      <div className="card-container col-span-1 sm:col-span-2 lg:col-span-full">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="text-value font-medium">
