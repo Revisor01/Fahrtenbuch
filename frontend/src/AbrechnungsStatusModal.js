@@ -1,5 +1,5 @@
 // AbrechnungsStatusModal.js (diese Komponente fehlt noch)
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Modal from './Modal';
 import { AppContext } from './App';
 
