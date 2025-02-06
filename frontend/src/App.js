@@ -1496,7 +1496,7 @@ function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({
     open: false,
-    typ: null,
+    traegerId: null,  // statt typ
     aktion: null,
     jahr: null,
     monat: null
@@ -1515,11 +1515,16 @@ function MonthlyOverview() {
       }
       
       if (hideCompleted) {
-        const kkCompleted = month.kirchenkreisErstattung === 0 || 
-        month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-        const gemCompleted = month.gemeindeErstattung === 0 || 
-        month.abrechnungsStatus?.gemeinde?.erhalten_am;
-        if (kkCompleted && gemCompleted) {
+        // Prüfe ob alle Abrechnungsträger completed sind
+        const allCompleted = Object.entries(month.erstattungen || {}).every(([id, data]) => {
+          return data === 0 || month.abrechnungsStatus?.[id]?.erhalten_am;
+        });
+        
+        // Prüfe auch Mitfahrer
+        const mitfahrerCompleted = !month.erstattungen?.mitfahrer || 
+        month.abrechnungsStatus?.mitfahrer?.erhalten_am;
+        
+        if (allCompleted && mitfahrerCompleted) {
           return false;
         }
       }
@@ -1597,6 +1602,17 @@ function MonthlyOverview() {
       
       return total;
     }, {});
+    // Gesamt-Werte berechnen
+    totals.gesamt = {
+      original: Object.values(totals).reduce((sum, data) => 
+        sum + (data.original || 0), 0
+      ),
+      ausstehend: Object.values(totals).reduce((sum, data) => 
+        sum + (data.ausstehend || 0), 0
+      )
+    };
+    
+    return totals;
   };
   
   const renderBetrag = (betrag, isReceived) => {
@@ -1802,6 +1818,34 @@ function MonthlyOverview() {
   
   const yearTotal = calculateYearTotal();
   
+  const getKategorienMitErstattung = () => {
+    const kategorien = [];
+    Object.entries(yearTotal || {}).forEach(([key, data]) => {
+      if (key !== 'gesamt' && (data.original > 0 || data.ausstehend > 0)) {
+        // Kategorie-Namen formatieren
+        let displayName = key.charAt(0).toUpperCase() + key.slice(1);
+        if (key === 'mitfahrer') {
+          displayName = 'Mitfahrer:innen';
+        } else {
+          // Versuche, den Abrechnungsträgernamen anhand der ID zu finden
+          const traeger = abrechnungstraeger.find(at => at.id === parseInt(key));
+          displayName = traeger ? traeger.name : displayName;
+        }
+        
+        kategorien.push([key, displayName, data]);
+      }
+    });
+    return kategorien;
+  };
+  
+  const allCategories = () => {
+    // Sammle alle einzigartigen Kategorien (ohne gesamt)
+    const categories = new Set(
+      Object.keys(yearTotal || {}).filter(key => key !== 'gesamt')
+    );
+    return categories.size;
+  };
+  
   return (
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight">
@@ -1862,64 +1906,45 @@ function MonthlyOverview() {
     </div>
     
     <div className="card-grid">
-    {/* Kirchenkreis Card */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Kirchenkreis</span>
-    <span className="text-value font-medium">
-    {yearTotal.kirchenkreis.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalKirchenkreis.toFixed(2)} €
+    <div className={`grid grid-cols-1 gap-4 ${
+      allCategories() === 1 
+      ? 'sm:grid-cols-1' // volle Breite bei 1 Kategorie
+      : allCategories() === 2 
+      ? 'sm:grid-cols-2' 
+      : allCategories() === 3
+      ? 'sm:grid-cols-3'
+      : 'sm:grid-cols-2 lg:grid-cols-4' // 4+ Kategorien: immer 25% mit Umbruch
+    }`}>
+    {getKategorienMitErstattung().map(([key, displayName, data]) => (
+      <div key={key} className="card-container">
+      <div className="flex justify-between items-center mb-2">
+      <span className="text-sm text-label">{displayName}</span>
+      <span className="text-value font-medium">
+      {(data.ausstehend || 0).toFixed(2)} €
+      </span>
       </div>
-    )}
-    </div>
+      {data.original !== data.ausstehend && (
+        <div className="text-muted text-xs">
+        Ursprünglich: {(data.original || 0).toFixed(2)} €
+        </div>
+      )}
+      </div>
+    ))}
     
-    {/* Gemeinde Card */}
+    {/* Gesamt Card - immer am Ende */}
     <div className="card-container">
     <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Gemeinde</span>
+    <span className="text-sm text-label">Gesamt</span>
     <span className="text-value font-medium">
-    {yearTotal.gemeinde.toFixed(2)} €
+    {(yearTotal.gesamt?.ausstehend || 0).toFixed(2)} €
     </span>
     </div>
-    {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
+    {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
       <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalGemeinde.toFixed(2)} €
+      Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
       </div>
     )}
     </div>
-    
-    {/* Mitfahrer Card */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Mitfahrer:innen</span>
-    <span className="text-value font-medium">
-    {yearTotal.mitfahrer.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalMitfahrer.toFixed(2)} €
-      </div>
-    )}
-    </div>
-    
-    {/* Gesamt Card */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Gesamt</span>
-    <span className="text-value font-medium">
-    {yearTotal.gesamt.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalGesamt !== yearTotal.gesamt && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalGesamt.toFixed(2)} €
-      </div>
-    )}
     </div>
     </div>
     
@@ -2093,7 +2118,7 @@ function MonthlyOverview() {
     <button
     type="button"
     onClick={() => {
-      handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.typ, 'reset');
+      handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.traegerId, 'reset');  // statt typ
       setStatusModal({});
     }}
     className="btn-primary w-full"
