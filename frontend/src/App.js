@@ -1892,6 +1892,7 @@ function MonthlyOverview() {
       </div>
     )}
     </div>
+    </div>
     
     {/* Desktop View */}
     <div className="hidden sm:block">
