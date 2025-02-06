@@ -264,6 +264,7 @@ function AppProvider({ children }) {
     try {
       await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum);
       await fetchMonthlyData();
+      await fetchFahrten();
       showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Status:', error);
@@ -818,7 +819,7 @@ function FahrtenListe() {
           {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
             <span 
             className="status-badge-primary cursor-pointer"
-            onClick={() => AbrechnungsStatusModal({ 
+            onClick={() => setAbrechnungsStatusModal({ 
               open: true, 
               traegerId: key,
               aktion: 'reset', 
