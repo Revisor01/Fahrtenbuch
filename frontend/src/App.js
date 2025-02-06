@@ -702,6 +702,8 @@ function FahrtenListe() {
   const getKategorienMitErstattung = () => {
     const kategorien = [];
     
+    const yearTotal = summary.erstattungen || {};
+    
     // Erst sortierte Abrechnungsträger
     abrechnungstraeger.forEach(traeger => {
       const data = yearTotal[traeger.id];
@@ -1629,6 +1631,8 @@ function MonthlyOverview() {
   const getKategorienMitErstattung = () => {
     const kategorien = [];
     
+    const yearTotal = summary.erstattungen || {};
+    
     // Erst sortierte Abrechnungsträger
     abrechnungstraeger.forEach(traeger => {
       const data = yearTotal[traeger.id];
@@ -1695,7 +1699,7 @@ function MonthlyOverview() {
     );
   };
   
-  const QuickActions = ({ filteredData, handleStatusUpdate, abrechnungstraeger }) => {
+  const QuickActions = ({ filteredData, handleAbrechnungsStatus, abrechnungstraeger }) => {
     const [isOpen, setIsOpen] = useState(false);
     
     const actions = [
@@ -1709,7 +1713,7 @@ function MonthlyOverview() {
               for (const traeger of abrechnungstraeger) {
                 if (month.erstattungen?.[traeger.id]?.erstattung > 0 && 
                   !month.abrechnungsStatus?.[traeger.id]?.eingereicht_am) {
-                    await handleStatusUpdate(
+                    await handleAbrechnungsStatus(
                       month.year, 
                       month.monatNr, 
                       traeger.id, 
@@ -1721,7 +1725,7 @@ function MonthlyOverview() {
               // Für Mitfahrer
               if (month.mitfahrerErstattung > 0 && 
                 !month.abrechnungsStatus?.mitfahrer?.eingereicht_am) {
-                  await handleStatusUpdate(
+                  await handleAbrechnungsStatus(
                     month.year,
                     month.monatNr,
                     'mitfahrer',
@@ -1745,7 +1749,7 @@ function MonthlyOverview() {
               for (const traeger of abrechnungstraeger) {
                 if (month.abrechnungsStatus?.[traeger.id]?.eingereicht_am && 
                   !month.abrechnungsStatus?.[traeger.id]?.erhalten_am) {
-                    await handleStatusUpdate(
+                    await handleAbrechnungsStatus(
                       month.year,
                       month.monatNr,
                       traeger.id,
@@ -1757,7 +1761,7 @@ function MonthlyOverview() {
               // Für Mitfahrer
               if (month.abrechnungsStatus?.mitfahrer?.eingereicht_am && 
                 !month.abrechnungsStatus?.mitfahrer?.erhalten_am) {
-                  await handleStatusUpdate(
+                  await handleAbrechnungsStatus(
                     month.year,
                     month.monatNr,
                     'mitfahrer',
@@ -1909,7 +1913,7 @@ function MonthlyOverview() {
     <div className="flex items-center justify-end gap-2 w-full">
     <QuickActions 
     filteredData={filteredData}
-    handleStatusUpdate={handleStatusUpdate}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
     />
     <label className="checkbox-label">
