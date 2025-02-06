@@ -1496,31 +1496,126 @@ function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({
     open: false,
-    traegerId: null,  // statt typ
+    traegerId: null,
     aktion: null,
     jahr: null,
     monat: null
   });
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString()); // Geändert von 'all'
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [hideCompleted, setHideCompleted] = useState(true);
-  
-  // Diese Zeilen direkt darunter einfügen:
   const [filteredData, setFilteredData] = useState([]);
+  const currentYear = new Date().getFullYear().toString();
+  
+  const handleStatusUpdate = async (jahr, monat, typ, aktion, datum) => {
+    try {
+      await updateAbrechnungsStatus(jahr, monat, typ, aktion, datum);
+      await fetchMonthlyData();
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Status:', error);
+    }
+  };
+    
+  const getMonthName = (month) => {
+    return new Date(2000, month - 1, 1).toLocaleString('de-DE', { month: 'long' });
+  };
+  
+  const calculateYearTotal = () => {
+    const totals = filteredData.reduce((total, month) => {
+      Object.entries(month.erstattungen || {}).forEach(([traegerId, betrag]) => {
+        if (!total[traegerId]) {
+          total[traegerId] = {
+            original: 0,
+            ausstehend: 0 
+          };
+        }
+        
+        total[traegerId].original += Number(betrag || 0);
+        
+        if (!month.abrechnungsStatus?.[traegerId]?.erhalten_am) {
+          total[traegerId].ausstehend += Number(betrag || 0);
+        }
+      });
+      
+      return total;
+    }, {});
+    
+    const relevantKeys = Object.keys(totals).filter(key => key !== 'gesamt');
+    totals.gesamt = {
+      original: relevantKeys.reduce((sum, key) => sum + (totals[key].original || 0), 0),
+      ausstehend: relevantKeys.reduce((sum, key) => sum + (totals[key].ausstehend || 0), 0)
+    };
+    
+    return totals;
+  };
+  
+  const getKategorienMitErstattung = () => {
+    const kategorien = [];
+    Object.entries(yearTotal || {}).forEach(([key, data]) => {
+      if (key !== 'gesamt' && (data.original > 0 || data.ausstehend > 0)) {
+        let displayName = key.charAt(0).toUpperCase() + key.slice(1);
+        if (key === 'mitfahrer') {
+          displayName = 'Mitfahrer:innen';
+        } else {
+          const traeger = abrechnungstraeger.find(at => at.id.toString() === key);
+          if (traeger) {
+            displayName = traeger.name;
+          }
+        }
+        kategorien.push([key, displayName, data]);
+      }
+    });
+    return kategorien;
+  };
   
   useEffect(() => {
-    console.log('hideCompleted changed:', hideCompleted); // Debug
+    const fetchData = async () => {
+      try {
+        const monthPromises = Array.from({ length: 12 }, (_, i) => {
+          const month = i + 1;
+          return axios.get(`/api/fahrten/report/${selectedYear}/${month}`);
+        });
+        
+        const responses = await Promise.all(monthPromises);
+        
+        const transformedData = responses.map((response, index) => {
+          const month = index + 1;
+          return {
+            year: parseInt(selectedYear),
+            monatNr: month,
+            monthName: getMonthName(month),
+            yearMonth: `${selectedYear}-${month}`,
+            erstattungen: response.data.summary.erstattungen || {},
+            abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
+            totalErstattung: response.data.summary.gesamtErstattung || 0
+          };
+        }).filter(month => {
+          const hatErstattungen = Object.values(month.erstattungen).some(betrag => betrag > 0);
+          const hatMitfahrer = month.erstattungen?.mitfahrer > 0;
+          return hatErstattungen || hatMitfahrer;
+        });
+        
+        setMonthlyData(transformedData);
+      } catch (error) {
+        console.error('Fehler beim Laden der Monatsdaten:', error);
+      }
+    };
+    
+    if (selectedYear !== 'all') {
+      fetchData();
+    }
+  }, [selectedYear]);
+  
+  useEffect(() => {
     const filtered = monthlyData.filter(month => {
       if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
         return false;
       }
       
       if (hideCompleted) {
-        // Prüfe ob alle Abrechnungsträger completed sind
-        const allCompleted = Object.entries(month.erstattungen || {}).every(([id, data]) => {
-          return data === 0 || month.abrechnungsStatus?.[id]?.erhalten_am;
+        const allCompleted = Object.entries(month.erstattungen || {}).every(([id, betrag]) => {
+          return betrag === 0 || month.abrechnungsStatus?.[id]?.erhalten_am;
         });
         
-        // Prüfe auch Mitfahrer
         const mitfahrerCompleted = !month.erstattungen?.mitfahrer || 
         month.abrechnungsStatus?.mitfahrer?.erhalten_am;
         
@@ -1532,90 +1627,6 @@ function MonthlyOverview() {
     });
     setFilteredData(filtered);
   }, [monthlyData, hideCompleted, selectedYear]);
-  
-  // Neue Konstante hier einfügen
-  const currentYear = new Date().getFullYear().toString();
-
-  useEffect(() => {
-    fetchMonthlyData();
-  }, []);
-  
-  const handleStatusUpdate = async (jahr, monat, typ, aktion, datum) => {
-    try {
-      await updateAbrechnungsStatus(jahr, monat, typ, aktion, datum);
-      await fetchMonthlyData();
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Status:', error);
-    }
-  };
-  
-  const getFilteredData = () => {
-    return monthlyData.filter(month => {
-      if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
-        return false;
-      }
-      
-      if (hideCompleted) {
-        const isCompleted = month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-        month.abrechnungsStatus?.gemeinde?.erhalten_am;
-        if (isCompleted) {
-          return false;
-        }
-      }
-      
-      return true;
-    });
-  };
-    
-  const calculateYearTotal = () => {
-    const totals = filteredData.reduce((total, month) => {
-      // Dynamisch für alle Abrechnungsträger
-      Object.entries(month.erstattungen || {}).forEach(([traegerId, data]) => {
-        if (!total[traegerId]) {
-          total[traegerId] = {
-            original: 0,
-            ausstehend: 0 
-          };
-        }
-        
-        total[traegerId].original += Number(data.erstattung || 0);
-        
-        // Nur wenn nicht als erhalten markiert
-        if (!month.abrechnungsStatus?.[traegerId]?.erhalten_am) {
-          total[traegerId].ausstehend += Number(data.erstattung || 0);
-        }
-      });
-      
-      // Separate Behandlung der Mitfahrer
-      if (month.mitfahrerErstattung > 0) {
-        if (!total.mitfahrer) {
-          total.mitfahrer = {
-            original: 0,
-            ausstehend: 0
-          };
-        }
-        total.mitfahrer.original += Number(month.mitfahrerErstattung || 0);
-        if (!month.abrechnungsStatus?.mitfahrer?.erhalten_am) {
-          total.mitfahrer.ausstehend += Number(month.mitfahrerErstattung || 0);
-        }
-      }
-      
-      return total;
-    }, {});
-    
-    // Berechne Gesamt-Werte, aber filtere den gesamt-Key raus
-    const relevantKeys = Object.keys(totals).filter(key => key !== 'gesamt');
-    totals.gesamt = {
-      original: relevantKeys.reduce((sum, key) => 
-        sum + (totals[key].original || 0), 0
-      ),
-      ausstehend: relevantKeys.reduce((sum, key) => 
-        sum + (totals[key].ausstehend || 0), 0
-      )
-    };
-    
-    return totals;
-  };
   
   const renderBetrag = (betrag, isReceived) => {
     return (
@@ -1820,34 +1831,6 @@ function MonthlyOverview() {
   
   const yearTotal = calculateYearTotal();
   
-  const getKategorienMitErstattung = () => {
-    const kategorien = [];
-    Object.entries(yearTotal || {}).forEach(([key, data]) => {
-      if (key !== 'gesamt' && (data.original > 0 || data.ausstehend > 0)) {
-        // Kategorie-Namen formatieren
-        let displayName = key.charAt(0).toUpperCase() + key.slice(1);
-        if (key === 'mitfahrer') {
-          displayName = 'Mitfahrer:innen';
-        } else {
-          // Versuche, den Abrechnungsträgernamen anhand der ID zu finden
-          const traeger = abrechnungstraeger.find(at => at.id === parseInt(key));
-          displayName = traeger ? traeger.name : displayName;
-        }
-        
-        kategorien.push([key, displayName, data]);
-      }
-    });
-    return kategorien;
-  };
-  
-  const allCategories = () => {
-    // Sammle alle einzigartigen Kategorien (ohne gesamt)
-    const categories = new Set(
-      Object.keys(yearTotal || {}).filter(key => key !== 'gesamt')
-    );
-    return categories.size;
-  };
-  
   return (
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight">
@@ -1869,7 +1852,7 @@ function MonthlyOverview() {
     <QuickActions 
     filteredData={filteredData}
     handleStatusUpdate={handleStatusUpdate}
-    abrechnungstraeger={abrechnungstraeger} // Neue Prop
+    abrechnungstraeger={abrechnungstraeger}
     />
     <label className="checkbox-label">
     <input
@@ -1886,8 +1869,10 @@ function MonthlyOverview() {
     <div className="flex items-center justify-end gap-3 text-[11px]">
     {selectedYear !== currentYear && selectedYear !== 'all' && (
       <button 
-      onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
-      Aktueller Jahr
+      onClick={() => setSelectedYear(currentYear)} 
+      className="btn-secondary hidden sm:block"
+      >
+      Aktuelles Jahr
       </button>
     )}
     <select 
@@ -1907,16 +1892,7 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    <div className="card-grid">
-    <div className={`grid grid-cols-1 gap-4 ${
-      allCategories() === 1 
-      ? 'sm:grid-cols-1' // volle Breite bei 1 Kategorie
-      : allCategories() === 2 
-      ? 'sm:grid-cols-2' 
-      : allCategories() === 3
-      ? 'sm:grid-cols-3'
-      : 'sm:grid-cols-2 lg:grid-cols-4' // 4+ Kategorien: immer 25% mit Umbruch
-    }`}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     {getKategorienMitErstattung().map(([key, displayName, data]) => (
       <div key={key} className="card-container">
       <div className="flex justify-between items-center mb-2">
@@ -1933,24 +1909,21 @@ function MonthlyOverview() {
       </div>
     ))}
     
-    {/* Gesamt Card - immer am Ende */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-sm text-label">Gesamt</span>
-    <span className="text-value font-medium">
-    {(yearTotal.gesamt?.ausstehend || 0).toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
+    {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
+      <div className="card-container col-span-full sm:col-span-1">
+      <div className="flex justify-between items-center mb-2">
+      <span className="text-sm text-label">Gesamt</span>
+      <span className="text-value font-medium">
+      {(yearTotal.gesamt?.ausstehend || 0).toFixed(2)} €
+      </span>
+      </div>
+      {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
+        <div className="text-muted text-xs">
+        Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
+        </div>
+      )}
       </div>
     )}
-    </div>
-    </div>
-    </div>
-    
-    <div className="mt-6">
     </div>
     </div>
     
@@ -2091,7 +2064,6 @@ function MonthlyOverview() {
     })}
     </div>
     
-    {/* Modals */}
     <AbrechnungsStatusModal 
     isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
     onClose={() => setStatusModal({})}
@@ -2120,7 +2092,7 @@ function MonthlyOverview() {
     <button
     type="button"
     onClick={() => {
-      handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.traegerId, 'reset');  // statt typ
+      handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.traegerId, 'reset');
       setStatusModal({});
     }}
     className="btn-primary w-full"
