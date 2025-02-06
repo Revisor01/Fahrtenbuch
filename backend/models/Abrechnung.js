@@ -26,36 +26,48 @@ class Abrechnung {
 
     static async updateStatus(userId, jahr, monat, typ, aktion, datum) {
         try {
-            // Prüfen ob der Abrechnungsträger existiert
-            const [traeger] = await db.execute(
-                'SELECT id FROM abrechnungstraeger WHERE kennzeichen = ? AND user_id = ?',
-                [typ, userId]
-            );
-
-            if (traeger.length === 0 && typ !== 'mitfahrer') {
-                throw new Error('Ungültiger Abrechnungsträger');
+            // Prüfen ob der Abrechnungsträger existiert - hier auf ID prüfen!
+            if (typ !== 'mitfahrer') {
+                const [traeger] = await db.execute(
+                    'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+                    [typ, userId]
+                );
+                
+                if (traeger.length === 0) {
+                    throw new Error('Ungültiger Abrechnungsträger');
+                }
             }
-
+            
             if (aktion === 'eingereicht') {
                 const [result] = await db.execute(
                     `INSERT INTO abrechnungen (user_id, jahr, monat, typ, eingereicht_am)
-                     VALUES (?, ?, ?, ?, ?)
-                     ON DUPLICATE KEY UPDATE eingereicht_am = ?`,
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE eingereicht_am = ?`,
                     [userId, jahr, monat, typ, datum, datum]
                 );
                 return result;
             } else if (aktion === 'erhalten') {
+                // Prüfen ob bereits eingereicht wurde
+                const [current] = await db.execute(
+                    'SELECT eingereicht_am FROM abrechnungen WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?',
+                    [userId, jahr, monat, typ]
+                );
+                
+                if (!current || !current[0]?.eingereicht_am) {
+                    throw new Error('Abrechnung muss erst eingereicht werden');
+                }
+                
                 const [result] = await db.execute(
                     `UPDATE abrechnungen 
-                     SET erhalten_am = ?
-                     WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?`,
+                SET erhalten_am = ?
+                WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?`,
                     [datum, userId, jahr, monat, typ]
                 );
                 return result;
             } else if (aktion === 'reset') {
                 const [result] = await db.execute(
                     `DELETE FROM abrechnungen 
-                     WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?`,
+                WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?`,
                     [userId, jahr, monat, typ]
                 );
                 return result;
@@ -65,7 +77,7 @@ class Abrechnung {
             throw error;
         }
     }
-
+    
     static async getAllStatusForYear(userId, jahr) {
         try {
             const [rows] = await db.execute(
