@@ -1566,11 +1566,10 @@ function MonthlyOverview() {
     return kategorien;
   };
   
+  // MonthlyOverview - nur diese useEffects
   useEffect(() => {
-    if (selectedYear !== 'all') {
-      fetchMonthlyData(selectedYear); // Jetzt mit Jahr als Parameter
-    }
-  }, [selectedYear]);
+    fetchMonthlyData(); // Dieser holt die Daten für alle relevanten Monate
+  }, []);  // Nur einmal beim Mount
   
   useEffect(() => {
     const filtered = monthlyData.filter(month => {
