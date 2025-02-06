@@ -818,7 +818,7 @@ function FahrtenListe() {
           {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
             <span 
             className="status-badge-primary cursor-pointer"
-            onClick={() => setAbrechnungsStatusModal({ 
+            onClick={() => AbrechnungsStatusModal({ 
               open: true, 
               traegerId: key,
               aktion: 'reset', 
