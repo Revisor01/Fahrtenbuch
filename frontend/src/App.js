@@ -1832,7 +1832,7 @@ function MonthlyOverview() {
         <div className="flex items-center justify-between">
         <span 
         className="status-badge-primary cursor-pointer"
-        onClick={() => setStatusModal({ 
+        onClick={() => setAbrechnungsStatusModal({ 
           open: true, 
           traegerId,
           aktion: 'reset', 
@@ -1853,7 +1853,7 @@ function MonthlyOverview() {
         <div className="flex items-center justify-between">
         <span 
         className="status-badge-secondary cursor-pointer"
-        onClick={() => setStatusModal({ 
+        onClick={() => setAbrechnungsStatusModal({ 
           open: true, 
           traegerId,
           aktion: 'erhalten', 
@@ -1873,7 +1873,7 @@ function MonthlyOverview() {
       <div className="flex items-center justify-between">
       <span 
       className="status-badge-secondary cursor-pointer"
-      onClick={() => setStatusModal({ 
+      onClick={() => setAbrechnungsStatusModal({ 
         open: true, 
         traegerId,
         aktion: 'eingereicht', 
@@ -2145,7 +2145,7 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
-    onClick={() => setStatusModal({})}
+    onClick={() => setAbrechnungsStatusModal({})}
     className="btn-secondary w-full"
     >
     Abbrechen
@@ -2153,8 +2153,13 @@ function MonthlyOverview() {
     <button
     type="button"
     onClick={() => {
-      handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.traegerId, 'reset');
-      setStatusModal({});
+      handleAbrechnungsStatus(
+        abrechnungsStatusModal.jahr, 
+        abrechnungsStatusModal.monat, 
+        abrechnungsStatusModal.traegerId, 
+        'reset'
+      );
+      setAbrechnungsStatusModal({});
     }}
     className="btn-primary w-full"
     >
