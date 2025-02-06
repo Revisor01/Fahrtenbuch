@@ -38,7 +38,7 @@ function AppProvider({ children }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
-  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
+  const [abrechnungstraeger, setAbrechnungs aeger] = useState([]);
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
@@ -1493,7 +1493,7 @@ function FahrtenListe() {
   }
 
 function MonthlyOverview() {
-  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger } = React.useContext(AppContext);
   const [statusModal, setStatusModal] = useState({
     open: false,
     typ: null,
