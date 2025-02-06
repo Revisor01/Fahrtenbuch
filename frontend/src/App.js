@@ -1722,7 +1722,9 @@ function MonthlyOverview() {
   
   const renderStatusCell = (month, traegerId) => {
     const status = month.abrechnungsStatus?.[traegerId];
-    const betrag = month.erstattungen?.[traegerId]?.erstattung || 0;
+    const betrag = traegerId === 'mitfahrer' 
+    ? month.erstattungen?.mitfahrer || 0
+    : month.erstattungen?.[traegerId] || 0;
     
     // Wenn Betrag 0 ist
     if (betrag === 0) {
@@ -1736,6 +1738,7 @@ function MonthlyOverview() {
       );
     }
     
+    // Wenn erhalten
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center justify-between">
@@ -1743,7 +1746,7 @@ function MonthlyOverview() {
         className="status-badge-primary cursor-pointer"
         onClick={() => setStatusModal({ 
           open: true, 
-          typ: traegerId, 
+          traegerId,
           aktion: 'reset', 
           jahr: month.year,
           monat: month.monatNr
@@ -1756,6 +1759,7 @@ function MonthlyOverview() {
       );
     }
     
+    // Wenn eingereicht aber nicht erhalten
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center justify-between">
@@ -1763,7 +1767,7 @@ function MonthlyOverview() {
         className="status-badge-secondary cursor-pointer"
         onClick={() => setStatusModal({ 
           open: true, 
-          typ, 
+          traegerId,
           aktion: 'erhalten', 
           jahr: month.year,
           monat: month.monatNr
@@ -1776,13 +1780,14 @@ function MonthlyOverview() {
       );
     }
     
+    // Wenn noch nicht eingereicht
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
       <span 
       className="status-badge-secondary cursor-pointer"
       onClick={() => setStatusModal({ 
         open: true, 
-        typ, 
+        traegerId,
         aktion: 'eingereicht', 
         jahr: month.year,
         monat: month.monatNr
@@ -1818,6 +1823,7 @@ function MonthlyOverview() {
     <QuickActions 
     filteredData={filteredData}
     handleStatusUpdate={handleStatusUpdate}
+    abrechnungstraeger={abrechnungstraeger} // Neue Prop
     />
     <label className="checkbox-label">
     <input
@@ -1928,51 +1934,59 @@ function MonthlyOverview() {
     <thead>
     <tr className="table-head-row">
     <th className="table-header">Monat</th>
-    <th className="table-header text-right">Kirchenkreis</th>
-    <th className="table-header-sm">Status</th>
-    <th className="table-header text-right">Gemeinde</th>
-    <th className="table-header-sm">Status</th>
+    {abrechnungstraeger.map(traeger => (
+      <React.Fragment key={traeger.id}>
+      <th className="table-header text-right">{traeger.name}</th>
+      <th className="table-header-sm">Status</th>
+      </React.Fragment>
+    ))}
     <th className="table-header text-right">Mitfahrer</th>
     <th className="table-header text-right">Gesamt</th>
     </tr>
     </thead>
     <tbody className="divide-y divide-primary-50 dark:divide-primary-800">
     {filteredData.map((month) => {
-      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
-      const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
-      const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
-      const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
-      const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-      Number(month.gemeindeErstattung || 0) + 
-      Number(month.mitfahrerErstattung || 0);
+      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const received = month.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (received ? 0 : Number(betrag || 0));
+      }, 0);
+      
+      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+        sum + Number(betrag || 0), 0
+      );
       
       return (
         <tr key={month.yearMonth} className="table-row">
         <td className="table-cell">
         <span className="text-value">{month.monthName} {month.year}</span>
         </td>
+        
+        {abrechnungstraeger.map(traeger => (
+          <React.Fragment key={traeger.id}>
+          <td className="table-cell text-right">
+          {renderBetrag(
+            month.erstattungen?.[traeger.id] || 0, 
+            month.abrechnungsStatus?.[traeger.id]?.erhalten_am
+          )}
+          </td>
+          <td className="table-cell">
+          {renderStatusCell(month, traeger.id)}
+          </td>
+          </React.Fragment>
+        ))}
+        
         <td className="table-cell text-right">
-        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
+        {renderBetrag(
+          month.erstattungen?.mitfahrer || 0, 
+          month.abrechnungsStatus?.mitfahrer?.erhalten_am
+        )}
         </td>
-        <td className="table-cell">
-        {renderStatusCell(month, 'Kirchenkreis')}
-        </td>
-        <td className="table-cell text-right">
-        {renderBetrag(month.gemeindeErstattung, gemReceived)}
-        </td>
-        <td className="table-cell">
-        {renderStatusCell(month, 'Gemeinde')}
-        </td>
-        <td className="table-cell text-right">
-        {renderBetrag(month.mitfahrerErstattung, kkReceived)}
-        </td>
+        
         <td className="table-cell text-right">
         <div className="text-value font-medium">
-        {ausstehendGesamt.toFixed(2)} €
+        {gesamtAusstehend.toFixed(2)} €
         </div>
-        {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
+        {gesamtAusstehend !== originalGesamt && (
           <div className="text-muted text-xs">
           ({originalGesamt.toFixed(2)} €)
           </div>
@@ -1989,15 +2003,14 @@ function MonthlyOverview() {
     {/* Mobile View */}
     <div className="sm:hidden space-y-4">
     {filteredData.map((month) => {
-      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
-      const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
-      const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
-      const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
-      const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-      Number(month.gemeindeErstattung || 0) + 
-      Number(month.mitfahrerErstattung || 0);
+      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const received = month.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (received ? 0 : Number(betrag || 0));
+      }, 0);
+      
+      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+        sum + Number(betrag || 0), 0
+      );
       
       return (
         <div key={month.yearMonth} className="mobile-card">
@@ -2007,51 +2020,42 @@ function MonthlyOverview() {
         {month.monthName} {month.year}
         </div>
         <div className="text-value font-medium">
-        {ausstehendGesamt.toFixed(2)} €
+        {gesamtAusstehend.toFixed(2)} €
         </div>
         </div>
         </div>
         
-        {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
+        {gesamtAusstehend !== originalGesamt && (
           <div className="text-muted text-xs text-right mb-4">
           Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
         
         <div className="space-y-4">
-        {/* Kirchenkreis */}
-        <div className="pt-4">
-        <div className="flex justify-between items-start mb-2">
-        <span className="text-label text-sm">Kirchenkreis</span>
-        <span className={kkReceived ? "text-muted" : "text-value"}>
-        {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
-        </span>
-        </div>
-        <div className="mt-2">
-        {renderStatusCell(month, 'Kirchenkreis')}
-        </div>
-        </div>
-        
-        {/* Gemeinde */}
-        <div className="pt-4">
-        <div className="flex justify-between items-start mb-2">
-        <span className="text-label text-sm">Gemeinde</span>
-        <span className={gemReceived ? "text-muted" : "text-value"}>
-        {Number(month.gemeindeErstattung || 0).toFixed(2)} €
-        </span>
-        </div>
-        <div className="mt-2">
-        {renderStatusCell(month, 'Gemeinde')}
-        </div>
-        </div>
+        {abrechnungstraeger.map(traeger => (
+          <div key={traeger.id} className="pt-4">
+          <div className="flex justify-between items-start mb-2">
+          <span className="text-label text-sm">{traeger.name}</span>
+          <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
+          {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
+          </span>
+          </div>
+          <div className="mt-2">
+          {renderStatusCell(month, traeger.id)}
+          </div>
+          </div>
+        ))}
         
         {/* Mitfahrer */}
         <div className="pt-4">
         <div className="flex justify-between items-start">
         <span className="text-label text-sm">Mitfahrer</span>
-        <span className={kkReceived ? "text-muted" : "text-value"}>
-        {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
+        <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
+        {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
         </span>
+        </div>
+        <div className="mt-2">
+        {renderStatusCell(month, 'mitfahrer')}
         </div>
         </div>
         </div>
@@ -2064,8 +2068,8 @@ function MonthlyOverview() {
     <AbrechnungsStatusModal 
     isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
     onClose={() => setStatusModal({})}
-    onSubmit={(date) => handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.typ, statusModal.aktion, date)}
-    typ={statusModal.typ}
+    onSubmit={(date) => handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.traegerId, statusModal.aktion, date)}
+    traegerId={statusModal.traegerId}
     aktion={statusModal.aktion}
     />
     
