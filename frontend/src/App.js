@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import axios from 'axios';
 import './index.css';
 import './darkMode.css';
@@ -7,7 +7,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-import { HelpCircle, Settings, Users, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
 import HilfeModal from './HilfeModal';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
@@ -36,6 +36,8 @@ function AppProvider({ children }) {
   const [fahrten, setFahrten] = useState([]);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
+  const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
@@ -91,7 +93,7 @@ function AppProvider({ children }) {
         fetchCurrentUser();
       }
     }
-  }, [token, user, fetchCurrentUser]); 
+  }, [token]);
   
   const fetchCurrentUser = async () => {
     try {
@@ -103,6 +105,19 @@ function AppProvider({ children }) {
       console.error('Error fetching user data:', error);
       logout();
     }
+  };
+  
+  const setupAxiosInterceptors = () => {
+    axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          console.log('Unauthorized, logging out...');
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
   };
   
   useEffect(() => {
