@@ -5,7 +5,7 @@ import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 
 function FahrtForm() {
-  const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger, setAbrechnungstraeger } = useContext(AppContext);
+  const { orte, addFahrt, showNotification, abrechnungstraeger, setAbrechnungstraeger } = useContext(AppContext);
   const [mitfahrer, setMitfahrer] = useState([]);
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
@@ -54,22 +54,22 @@ function FahrtForm() {
     fetchDistanz();
   }, [formData.vonOrtId, formData.nachOrtId, useEinmaligenVonOrt, useEinmaligenNachOrt]);
 
-  useEffect(() => {
-    const fetchAbrechnungstraeger = async () => {
-      try {
-        const response = await axios.get('/api/abrechnungstraeger/simple');
-        setAbrechnungstraeger(response.data.data.sort((a, b) => a.sort_order - b.sort_order));
-        // Setze den ersten Abrechnungsträger als Default, falls vorhanden
-        if (response.data.data.length > 0) {
-          setFormData(prev => ({...prev, abrechnung: response.data.data[0].id}));
-        }
-      } catch (error) {
-        console.error('Fehler beim Laden der Abrechnungsträger:', error);
-        showNotification('Fehler', 'Abrechnungsträger konnten nicht geladen werden');
-      }
-    };
-    fetchAbrechnungstraeger();
-  }, []);
+    useEffect(() => {
+        const fetchAbrechnungstraeger = async () => {
+            try {
+                const response = await axios.get('/api/abrechnungstraeger/simple');
+                setAbrechnungstraeger(response.data.data.sort((a, b) => a.sort_order - b.sort_order));
+                // Setze den ersten Abrechnungsträger als Default, falls vorhanden
+                if (response.data.data.length > 0) {
+                    setFormData(prev => ({...prev, abrechnung: response.data.data[0].id}));
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Abrechnungsträger:', error);
+                showNotification('Fehler', 'Abrechnungsträger konnten nicht geladen werden');
+            }
+        };
+        fetchAbrechnungstraeger();
+    }, [setAbrechnungstraeger, showNotification]); // Abhängigkeiten hinzugefügt
   
   const handleChange = (e) => {
     const { name, value } = e.target;
