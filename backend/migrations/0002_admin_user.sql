@@ -24,7 +24,7 @@ AFTER INSERT ON users
 FOR EACH ROW
 BEGIN
     INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
-    VALUES (NEW.id, '@default_erstattung_mitfahrer', '@default_erstattung_datum');
+    VALUES (NEW.id, '${DEFAULT_ERSTATTUNG_MITFAHRER}', '${DEFAULT_ERSTATTUNG_DATUM}');
 END;
 
 DROP TRIGGER IF EXISTS after_abrechnungstraeger_create;
@@ -34,5 +34,5 @@ AFTER INSERT ON abrechnungstraeger
 FOR EACH ROW
 BEGIN
     INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
-    VALUES (NEW.id, '@default_erstattung_traeger', '@default_erstattung_datum');
+    VALUES (NEW.id, '${DEFAULT_ERSTATTUNG_TRAEGER}', '${DEFAULT_ERSTATTUNG_DATUM}');
 END;
