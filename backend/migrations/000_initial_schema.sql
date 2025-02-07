@@ -3,7 +3,7 @@ SET @default_erstattung_traeger = '0.30';
 SET @default_erstattung_mitfahrer = '0.05';
 SET @default_erstattung_datum = '2024-01-01';
 
-USE fahrtenabrechnung;
+USE ${DB_NAME};
 
 -- Datenbank erstellen
 CREATE DATABASE IF NOT EXISTS ${DB_NAME}
