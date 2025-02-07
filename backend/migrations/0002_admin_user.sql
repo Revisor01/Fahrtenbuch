@@ -1,7 +1,6 @@
--- Setze Standardwerte aus ENV-Variablen (als Strings behandeln)
-SET @default_erstattung_traeger = '${DEFAULT_ERSTATTUNG_TRAEGER}';
-SET @default_erstattung_mitfahrer = '${DEFAULT_ERSTATTUNG_MITFAHRER}';
-SET @default_erstattung_datum = '${DEFAULT_ERSTATTUNG_DATUM}';
+SET @DEFAULT_ERSTATTUNG_MITFAHRER = '${DEFAULT_ERSTATTUNG_MITFAHRER}';
+SET @DEFAULT_ERSTATTUNG_DATUM = '${DEFAULT_ERSTATTUNG_DATUM}';
+SET @DEFAULT_ERSTATTUNG_TRAEGER = '${DEFAULT_ERSTATTUNG_TRAEGER}';
 
 -- Insert Initial Admin User
 INSERT INTO users (username, password, role, email_verified)
@@ -28,7 +27,7 @@ CREATE TRIGGER after_user_create
 AFTER INSERT ON users
 FOR EACH ROW
 INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
-VALUES (NEW.id, @default_erstattung_mitfahrer, @default_erstattung_datum);
+VALUES (NEW.id, @DEFAULT_ERSTATTUNG_MITFAHRER, @DEFAULT_ERSTATTUNG_DATUM);
 
 DROP TRIGGER IF EXISTS after_abrechnungstraeger_create;
 
@@ -36,4 +35,4 @@ CREATE TRIGGER after_abrechnungstraeger_create
 AFTER INSERT ON abrechnungstraeger
 FOR EACH ROW
 INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
-VALUES (NEW.id, @default_erstattung_traeger, @default_erstattung_datum);
+VALUES (NEW.id, @DEFAULT_ERSTATTUNG_TRAEGER, @DEFAULT_ERSTATTUNG_DATUM);

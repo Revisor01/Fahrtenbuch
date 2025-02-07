@@ -1,4 +1,3 @@
-// Migrator.js
 const db = require('../config/database');
 const fs = require('fs').promises;
 const path = require('path');
@@ -29,19 +28,19 @@ class Migrator {
         content = content.replace(/\${DB_NAME}/g, process.env.DB_NAME);
         content = content.replace(/\${INITIAL_ADMIN_USERNAME}/g, process.env.INITIAL_ADMIN_USERNAME);
         content = content.replace(/\${INITIAL_ADMIN_EMAIL}/g, process.env.INITIAL_ADMIN_EMAIL);
-        
-        // Split content into individual statements
+
         const statements = content
         .split(';')
         .map(stmt => stmt.trim())
         .filter(stmt => stmt.length > 0);
-        
+
         for (let statement of statements) {
             try {
+                console.log("Executing statement:", statement); // Zeige jede SQL-Anweisung an
                 await connection.query(statement);
             } catch (error) {
-                console.error('Error executing SQL statement:', statement);
-                throw error;
+                console.error('Error executing SQL statement:', statement, error); // Zeige den Fehler an
+                throw error; // Wichtig: Wirf den Fehler erneut, damit die Migration fehlschlägt
             }
         }
     }
@@ -78,7 +77,8 @@ class Migrator {
                         console.log(`Migration ${file} successful`);
                     } catch (error) {
                         await connection.rollback();
-                        throw error;
+                        console.error(`Migration ${file} failed: ${error}`);
+                        throw error; // Wichtig: Wirf den Fehler erneut, damit die Migration fehlschlägt
                     } finally {
                         connection.release();
                     }
