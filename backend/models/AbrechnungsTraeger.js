@@ -76,16 +76,8 @@ class AbrechnungsTraeger {
                 [userData.userId, userData.name, userData.sortOrder]
             );
             
-            const abrechnungsTraegerId = result.insertId;
-            
-            // Setze Standardwert von 0.30€ ab 1.1.2024
-            await connection.execute(
-                'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, 0.30, "2024-01-01")',
-                [abrechnungsTraegerId]
-            );
-            
             await connection.commit();
-            return abrechnungsTraegerId;
+            return result.insertId;
         } catch (error) {
             await connection.rollback();
             console.error('Fehler in create:', error);
