@@ -338,7 +338,6 @@ function AppProvider({ children }) {
   
   const updateOrt = async (id, ort) => {
     try {
-      console.log('Sending update request for Ort:', id, ort); // Überprüfen, was gesendet wird
       await axios.put(`${API_BASE_URL}/orte/${id}`, ort);
       fetchOrte();
     } catch (error) {
@@ -348,7 +347,6 @@ function AppProvider({ children }) {
   
   const updateDistanz = async (id, distanz) => {
     try {
-      console.log('Sending update request for Distanz:', id, distanz);
       await axios.put(`${API_BASE_URL}/distanzen/${id}`, {
         vonOrtId: distanz.von_ort_id,
         nachOrtId: distanz.nach_ort_id,
@@ -624,8 +622,6 @@ function FahrtenListe() {
         throw new Error('Unerwarteter Dateityp vom Server erhalten');
       }
       
-      console.log('Received file:', { contentType, filename, size: response.data.size });
-      
       const blob = new Blob([response.data], { type: contentType });
       
       if (blob.size === 22) {
@@ -642,7 +638,6 @@ function FahrtenListe() {
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log('File download initiated');
     } catch (error) {
       console.error('Fehler beim Exportieren nach Excel:', error);
       if (error.response) {

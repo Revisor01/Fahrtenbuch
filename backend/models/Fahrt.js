@@ -173,9 +173,7 @@ class Fahrt {
       LEFT JOIN mitfahrer m ON m.fahrt_id = f.id
       WHERE YEAR(f.datum) = ? AND MONTH(f.datum) = ? AND f.user_id = ?
     `;
-      console.log("Executing query:", query, [year, month, userId]);
       const [rows] = await db.execute(query, [year, month, userId]);
-      console.log("Query results:", rows);
       
       return rows;
     } catch (error) {

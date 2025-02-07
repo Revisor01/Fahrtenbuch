@@ -17,30 +17,6 @@ const util = require('util');
 
 const app = express();
 
-function detailedLog(obj) {
-    console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }));
-}
-
-// Logging Middleware
-app.use((req, res, next) => {
-    console.log(`\n${new Date().toISOString()} - ${req.method} ${req.url}`);
-    console.log('Query parameters:');
-    detailedLog(req.query);
-    console.log('Request body:');
-    detailedLog(req.body);
-    next();
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Error occurred:', err);
-    res.status(500).json({
-        message: 'Ein Fehler ist aufgetreten',
-        error: err.message,
-        stack: err.stack
-    });
-});
-
 app.use(cors({
     origin: 'https://fahrtenbuch.godsapp.de',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

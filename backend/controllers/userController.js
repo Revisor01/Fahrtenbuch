@@ -113,14 +113,6 @@ exports.createUser = async (req, res) => {
             kirchenkreis
         });
         
-        // Debug-Logging für Mail-Service
-        console.log('Sending welcome email with data:', {
-            email,
-            username,
-            verificationToken,
-            FRONTEND_URL: process.env.FRONTEND_URL
-        });
-        
         // Sende Willkommens-E-Mail
         await mailService.sendWelcomeEmail(email, username, verificationToken);
         
@@ -282,14 +274,11 @@ exports.verifyEmail = async (req, res) => {
 
 exports.requestPasswordReset = async (req, res) => {
     const { email } = req.body;
-    console.log('Password reset requested for email:', email);
     
     try {
         // Erst prüfen ob User existiert
         const user = await User.findByEmail(email);
         if (!user) {
-            // Wir geben die gleiche Nachricht zurück wie bei Erfolg (Sicherheit)
-            console.log('No user found for email:', email);
             return res.json({ 
                 message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' 
             });
@@ -297,11 +286,9 @@ exports.requestPasswordReset = async (req, res) => {
         
         // Token generieren
         const resetToken = await User.initiatePasswordReset(email);
-        console.log('Reset token generated for user:', user.username);
         
         // Mail senden
         await mailService.sendPasswordReset(email, user.username, resetToken);
-        console.log('Password reset email sent to:', email);
         
         res.json({ 
             message: 'Wenn ein Account mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts versendet.' 

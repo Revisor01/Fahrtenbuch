@@ -12,7 +12,6 @@ exports.exportToExcel = exportToExcel;
 
 exports.createFahrt = async (req, res) => {
   try {
-    console.log('Received fahrt data:', req.body);
     const { 
       vonOrtId, 
       nachOrtId, 
@@ -44,8 +43,6 @@ exports.createFahrt = async (req, res) => {
       einmaligerNachOrt: einmaligerNachOrt || null,
       userId
     };
-    
-    console.log('Processed fahrt data:', fahrtData);
     
     const id = await Fahrt.create(fahrtData, null, userId);
     if (mitfahrer && mitfahrer.length > 0) {

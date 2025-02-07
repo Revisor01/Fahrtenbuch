@@ -24,7 +24,6 @@ const authMiddleware = async (req, res, next) => {
   
   // Wenn kein API Key oder ungültig, prüfe JWT Token
   const authHeader = req.header('Authorization');
-  console.log('Received Authorization header:', authHeader);
   
   if (!authHeader) {
     return res.status(401).json({ message: 'Keine Authentifizierung vorhanden' });
@@ -34,7 +33,6 @@ const authMiddleware = async (req, res, next) => {
   
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded token:', decoded);
     
     // Lade aktuelle User-Daten aus der Datenbank
     const user = await User.findById(decoded.id);

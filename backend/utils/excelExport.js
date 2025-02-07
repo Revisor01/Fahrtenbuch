@@ -35,19 +35,14 @@ function formatDate(dateString) {
 
 exports.exportToExcel = async (req, res) => {
  try {
-   console.log('Starting Excel export');
    const { year, month, type } = req.params;
    const userId = req.user.id;
-   
-   console.log(`Export parameters: year=${year}, month=${month}, type=${type}, userId=${userId}`);
    
    const correctedMonth = month.split('-')[1] || month;
    
    const fahrten = await Fahrt.getMonthlyReport(year, correctedMonth, userId);
-   console.log('Raw fahrten data:', fahrten);
    
    const userProfile = await getUserProfile(userId);
-   console.log('User profile:', userProfile);
 
    if(type === 'mitfahrer') {
       const mitfahrerData = fahrten.map(fahrt => {
@@ -86,12 +81,10 @@ exports.exportToExcel = async (req, res) => {
 
      const mitnahmeWorksheet = workbook.getWorksheet('Mitnahmeentschädigung');
      if(mitnahmeWorksheet) {
-         console.log('Zu schreibende Mitfahrer-Daten:', uniqueMitfahrerData);
          mitnahmeWorksheet.getCell('B2').value = `${getMonthName(parseInt(correctedMonth))} ${year}`;
 
             
        uniqueMitfahrerData.forEach((mitfahrer, index) => {
-         console.log('Schreibe Mitfahrer:', mitfahrer, 'in Zeile:', index + 10);
          if (index < 15) {
            const row = mitnahmeWorksheet.getRow(index + 10);
            row.getCell('A').value = mitfahrer.datum;

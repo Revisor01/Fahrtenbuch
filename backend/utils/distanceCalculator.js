@@ -2,17 +2,14 @@ const db = require('../config/database');
 
 async function getDistance(vonOrtId, nachOrtId, userId) {
   try {
-    console.log('getDistance input:', { vonOrtId, nachOrtId, userId });
     const [rows] = await db.execute(
       'SELECT distanz FROM distanzen WHERE ((von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)) AND user_id = ?',
       [vonOrtId, nachOrtId, nachOrtId, vonOrtId, userId]
     );
     
     if (rows.length > 0) {
-      console.log('Distance found:', rows[0].distanz);
       return rows[0].distanz;
     } else {
-      console.log('No distance found');
       return 0; // Rückgabe von 0 statt null
     }
   } catch (error) {

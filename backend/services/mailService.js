@@ -55,12 +55,6 @@ class MailService {
         try {
             const resetLink = `${process.env.FRONTEND_URL}/set-password?token=${token}`;
             
-            console.log('Sending password reset email with data:', {
-                email,
-                username,
-                resetLink
-            });
-            
             const info = await this.transporter.sendMail({
                 from: process.env.MAIL_FROM,
                 to: email,
@@ -75,7 +69,6 @@ class MailService {
                 <p>Mit freundlichen Grüßen<br>Ihr Fahrtenbuch-Team</p>
             `
             });
-            console.log("Nachricht verschickt: %s", info.messageId);
         } catch (error) {
             console.error('Fehler beim senden des Passwort Reset Links:', error);
             throw error;

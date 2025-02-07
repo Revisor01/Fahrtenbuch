@@ -48,15 +48,11 @@ class Ort {
   }
 
   static async update(id, name, adresse, istWohnort, istDienstort, istKirchspiel, userId) {
-    console.log('Updating Ort:', { id, name, adresse, istWohnort, istDienstort, istKirchspiel, userId });
     
     const [result] = await db.execute(
       'UPDATE orte SET name = ?, adresse = ?, ist_wohnort = ?, ist_dienstort = ?, ist_kirchspiel = ? WHERE id = ? AND user_id = ?',
       [name, adresse, istWohnort ? 1 : 0, istDienstort ? 1 : 0, istKirchspiel ? 1 : 0, id, userId]
     );
-    
-    // Logging des Ergebnisses
-    console.log('Update Result:', result);
     
     return result.affectedRows > 0;
   }
