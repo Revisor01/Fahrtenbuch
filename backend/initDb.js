@@ -7,32 +7,20 @@ async function initializeDatabase() {
     try {
         await connection.beginTransaction();
 
-        // Erstelle und wähle Datenbank
+        // Erstelle Datenbank wenn nicht existiert
         await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}
             CHARACTER SET utf8mb4
             COLLATE utf8mb4_unicode_ci`
         );
+        
+        // Wähle Datenbank aus
         await connection.query(`USE ${process.env.DB_NAME}`);
 
-        // Setze Standardwerte
-        await connection.query(
-            'SET @default_erstattung_traeger = ?', 
-            [process.env.DEFAULT_ERSTATTUNG_TRAEGER || '0.30']
-        );
-        await connection.query(
-            'SET @default_erstattung_mitfahrer = ?', 
-            [process.env.DEFAULT_ERSTATTUNG_MITFAHRER || '0.05']
-        );
-        await connection.query(
-            'SET @default_erstattung_datum = ?', 
-            [process.env.DEFAULT_ERSTATTUNG_DATUM || '2024-01-01']
-        );
-
-        // Führe Migrationen aus
+        // Warte auf Migrationen
         await migrator.runMigrations();
 
-        // Warte kurz bis Tabellen erstellt sind
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Warte einen Moment bis Tabellen erstellt sind
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Prüfe auf Admin
         const [existingAdmins] = await connection.execute(
@@ -48,25 +36,17 @@ async function initializeDatabase() {
 
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(
-                process.env.INITIAL_ADMIN_PASSWORD,
+                process.env.INITIAL_ADMIN_PASSWORD, 
                 salt
             );
 
             const [userResult] = await connection.execute(
-                `INSERT INTO users (
-                    username, 
-                    password, 
-                    role, 
-                    email_verified
-                ) VALUES (?, ?, 'admin', TRUE)`,
+                'INSERT INTO users (username, password, role, email_verified) VALUES (?, ?, "admin", TRUE)',
                 [process.env.INITIAL_ADMIN_USERNAME, hashedPassword]
             );
 
             await connection.execute(
-                `INSERT INTO user_profiles (
-                    user_id, 
-                    email
-                ) VALUES (?, ?)`,
+                'INSERT INTO user_profiles (user_id, email) VALUES (?, ?)',
                 [userResult.insertId, process.env.INITIAL_ADMIN_EMAIL]
             );
 
@@ -74,20 +54,15 @@ async function initializeDatabase() {
         }
 
         await connection.commit();
+        console.log('Database initialization completed successfully');
+
     } catch (error) {
         await connection.rollback();
+        console.error('Database initialization error:', error);
         throw error;
     } finally {
         connection.release();
     }
 }
 
-module.exports = async function() {
-    try {
-        await initializeDatabase();
-        console.log('Database initialized successfully');
-    } catch (error) {
-        console.error('Database initialization failed:', error);
-        throw error;
-    }
-};
+module.exports = initializeDatabase;
