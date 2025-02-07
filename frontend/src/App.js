@@ -1591,7 +1591,7 @@ function FahrtenListe() {
   }
 
 function MonthlyOverview() {
-  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, abrechnungsStatusModal, setAbrechnungsStatusModal, handleAbrechnungsStatus , summary } = useContext(AppContext);
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, abrechnungsStatusModal, setAbrechnungsStatusModal, handleAbrechnungsStatus , summary, showNotification } = useContext(AppContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [hideCompleted, setHideCompleted] = useState(true);
   const [filteredData, setFilteredData] = useState([]);
@@ -2034,19 +2034,25 @@ function MonthlyOverview() {
         
         {/* Grid für Abrechnungsträger */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {abrechnungstraeger.map(traeger => (
-          <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
-          <div className="flex justify-between items-start mb-2">
-          <span className="text-sm font-medium text-value">{traeger.name}</span>
-          <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
-          {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
-          </span>
-          </div>
-          <div className="mt-2">
-          {renderStatusCell(month, traeger.id)}
-          </div>
-          </div>
-        ))}
+        {abrechnungstraeger
+          .filter(traeger => {
+            // Nur anzeigen wenn ein Betrag > 0 existiert
+            const betrag = month.erstattungen?.[traeger.id] || 0;
+            return betrag > 0;
+          })
+          .map(traeger => (
+            <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+            <div className="flex justify-between items-start mb-2">
+            <span className="text-sm font-medium text-value">{traeger.name}</span>
+            <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
+            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
+            </span>
+            </div>
+            <div className="mt-2">
+            {renderStatusCell(month, traeger.id)}
+            </div>
+            </div>
+          ))}
         
         {/* Mitfahrer Card wenn vorhanden */}
         {month.erstattungen?.mitfahrer > 0 && (
@@ -2100,19 +2106,24 @@ function MonthlyOverview() {
         )}
         
         <div className="space-y-4">
-        {abrechnungstraeger.map(traeger => (
-          <div key={traeger.id} className="pt-4">
-          <div className="flex justify-between items-start mb-2">
-          <span className="text-label text-sm">{traeger.name}</span>
-          <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
-          {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
-          </span>
-          </div>
-          <div className="mt-2">
-          {renderStatusCell(month, traeger.id)}
-          </div>
-          </div>
-        ))}
+        {abrechnungstraeger
+          .filter(traeger => {
+            const betrag = month.erstattungen?.[traeger.id] || 0;
+            return betrag > 0;
+          })
+          .map(traeger => (
+            <div key={traeger.id} className="pt-4">
+            <div className="flex justify-between items-start mb-2">
+            <span className="text-label text-sm">{traeger.name}</span>
+            <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
+            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
+            </span>
+            </div>
+            <div className="mt-2">
+            {renderStatusCell(month, traeger.id)}
+            </div>
+            </div>
+          ))}
         
         {/* Mitfahrer */}
         <div className="pt-4">
