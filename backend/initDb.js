@@ -6,31 +6,31 @@ async function initializeDatabase() {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-
-        // Erstelle Datenbank falls nicht vorhanden
-        await connection.execute(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}
+        
+        // Erstelle Datenbank falls nicht vorhanden - mit query statt execute
+        await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}
             CHARACTER SET utf8mb4
             COLLATE utf8mb4_unicode_ci`
         );
-
-        // Wechsle zur Datenbank
-        await connection.execute(`USE ${process.env.DB_NAME}`);
-
+        
+        // Wechsle zur Datenbank - mit query statt execute
+        await connection.query(`USE ${process.env.DB_NAME}`);
+        
         // Führe Migrationen aus
         await migrator.runMigrations();
-
-        // Setze Standardwerte für Erstattungen
-        await connection.execute(`
+        
+        // Setze Standardwerte für Erstattungen - mit query statt execute
+        await connection.query(`
             SET @default_erstattung_traeger = ?;
             SET @default_erstattung_mitfahrer = ?;
             SET @default_erstattung_datum = ?;
         `, [
-            process.env.DEFAULT_ERSTATTUNG_TRAEGER || '0.30',
-            process.env.DEFAULT_ERSTATTUNG_MITFAHRER || '0.05',
-            process.env.DEFAULT_ERSTATTUNG_DATUM || '2024-01-01'
-        ]);
-
-        // Prüfe ob bereits ein Admin existiert
+                process.env.DEFAULT_ERSTATTUNG_TRAEGER || '0.30',
+                process.env.DEFAULT_ERSTATTUNG_MITFAHRER || '0.05',
+                process.env.DEFAULT_ERSTATTUNG_DATUM || '2024-01-01'
+            ]);
+        
+        // Rest des Codes bleibt gleich mit execute
         const [existingAdmins] = await connection.execute(
             'SELECT COUNT(*) as count FROM users WHERE role = "admin"'
         );
