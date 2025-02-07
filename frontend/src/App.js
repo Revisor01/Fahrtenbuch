@@ -960,6 +960,7 @@ function FahrtenListe() {
         try {
           await axios.delete(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer/${mitfahrerId}`);
           fetchFahrten();
+          await refreshAllData(); // Hier hinzufügen
           showNotification("Erfolg", "Der Mitfahrer wurde erfolgreich gelöscht.");
         } catch (error) {
           console.error('Fehler beim Löschen des Mitfahrers:', error);
@@ -985,6 +986,7 @@ function FahrtenListe() {
       }
       setEditingMitfahrer(null);
       fetchFahrten();
+      await refreshAllData(); // Hier hinzufügen
     } catch (error) {
       console.error('Fehler beim Speichern des Mitfahrers:', error);
       showNotification("Fehler", `Fehler beim Speichern des Mitfahrers: ${error.message}`);
