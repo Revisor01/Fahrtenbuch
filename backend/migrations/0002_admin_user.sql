@@ -1,12 +1,14 @@
+-- Setze Standardwerte aus ENV-Variablen
 SET @default_erstattung_traeger = 0.30;
 SET @default_erstattung_mitfahrer = 0.05;
 SET @default_erstattung_datum = '2024-01-01';
 
 -- Insert Initial Admin User
+-- Insert Initial Admin User
 INSERT INTO users (username, password, role, email_verified)
 SELECT * FROM (SELECT
     '${INITIAL_ADMIN_USERNAME}',
-    '${INITIAL_ADMIN_PASSWORD}', -- This is the plain password
+    'PLACEHOLDER_PASSWORD_HASH', -- Placeholder Passwort
     'admin',
     TRUE
 ) AS tmp
