@@ -1634,37 +1634,24 @@ function MonthlyOverview() {
     const kategorien = [];
     
     // Jahres-Summen aus dem yearTotal berechnen
-    const yearTotals = abrechnungstraeger.reduce((acc, traeger) => {
-      const traegerSumme = filteredData.reduce((sum, month) => {
-        return sum + (month.erstattungen?.[traeger.id] || 0);
-      }, 0);
-      
-      if (traegerSumme > 0) {
-        acc[traeger.id] = traegerSumme;
-      }
-      return acc;
-    }, {});
-    
-    // Mitfahrer-Summe
-    const mitfahrerSumme = filteredData.reduce((sum, month) => {
-      return sum + (month.erstattungen?.mitfahrer || 0);
-    }, 0);
+    const yearTotals = calculateYearTotal();
     
     // Abrechnungsträger Cards
     abrechnungstraeger.forEach(traeger => {
-      const summe = yearTotals[traeger.id];
-      if (summe > 0) {
+      const data = yearTotals[traeger.id];
+      if (data && (data.original > 0 || data.ausstehend > 0)) {
         kategorien.push([
           traeger.id.toString(),
           traeger.name,
-          summe
+          data  // Hier übergeben wir das komplette Objekt mit original/ausstehend
         ]);
       }
     });
     
     // Mitfahrer Card
-    if (mitfahrerSumme > 0) {
-      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerSumme]);
+    const mitfahrerData = yearTotals['mitfahrer'];
+    if (mitfahrerData && (mitfahrerData.original > 0 || mitfahrerData.ausstehend > 0)) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerData]);
     }
     
     return kategorien;
@@ -1852,13 +1839,19 @@ function MonthlyOverview() {
         <div className="flex items-center justify-between">
         <span 
         className="status-badge-primary cursor-pointer"
-        onClick={() => setAbrechnungsStatusModal({ 
-          open: true, 
-          traegerId,
-          aktion: 'reset', 
-          jahr: month.year,
-          monat: month.monatNr
-        })}
+        onClick={() => {
+          showNotification(
+            "Status zurücksetzen",
+            "Möchten Sie den Status wirklich zurücksetzen?",
+            () => handleAbrechnungsStatus(
+              month.year,
+              month.monatNr,
+              traegerId,
+              'reset'
+            ),
+            true // showCancel
+          );
+        }}
         >
         <CheckCircle2 size={14} />
         <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
@@ -2153,41 +2146,6 @@ function MonthlyOverview() {
     aktion={abrechnungsStatusModal.aktion}
     />
     
-    <Modal
-    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion === 'reset'}
-    onClose={() => setAbrechnungsStatusModal({})}
-    title="Status zurücksetzen"
-    >
-    <div className="card-container-highlight">
-    <p className="text-value text-sm mb-6">
-    Möchten Sie den Status wirklich zurücksetzen?
-    </p>
-    <div className="flex flex-col sm:flex-row gap-2">
-    <button
-    type="button"
-    onClick={() => setAbrechnungsStatusModal({})}
-    className="btn-secondary w-full"
-    >
-    Abbrechen
-    </button>
-    <button
-    type="button"
-    onClick={() => {
-      handleAbrechnungsStatus(
-        abrechnungsStatusModal.jahr, 
-        abrechnungsStatusModal.monat, 
-        abrechnungsStatusModal.traegerId, 
-        'reset'
-      );
-      setAbrechnungsStatusModal({});
-    }}
-    className="btn-primary w-full"
-    >
-    Zurücksetzen
-    </button>
-    </div>
-    </div>
-    </Modal>
     </div>
   );
 }
