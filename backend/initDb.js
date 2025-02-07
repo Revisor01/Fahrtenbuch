@@ -13,16 +13,12 @@ async function initializeDatabase() {
         await connection.query(`USE ${process.env.DB_NAME}`);
 
         // Warte auf Migrationen
-        await migrator.runMigrations({
-            erstattung_traeger: process.env.DEFAULT_ERSTATTUNG_TRAEGER,
-            erstattung_mitfahrer: process.env.DEFAULT_ERSTATTUNG_MITFAHRER,
-            erstattung_datum: process.env.DEFAULT_ERSTATTUNG_DATUM
-        });
+        await migrator.runMigrations();
 
         // Hash Passwort und ersetze Platzhalter
         const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(process.env.INITIAL_ADMIN_PASSWORD, salt);
-        
+
         // Update Passwort nur, wenn der Benutzer existiert
         const [existingUsers] = await connection.execute('SELECT id FROM users WHERE username = ?', [process.env.INITIAL_ADMIN_USERNAME]);
         if (existingUsers.length > 0) {
