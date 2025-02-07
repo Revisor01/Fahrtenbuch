@@ -32,7 +32,9 @@ FOR EACH ROW
 BEGIN
 INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
 VALUES (NEW.id, @default_erstattung_mitfahrer, @default_erstattung_datum);
-END//
+END// -- Hier das END// hinzufügen
+
+DELIMITER ;
 
 DROP TRIGGER IF EXISTS after_abrechnungstraeger_create//
 CREATE TRIGGER after_abrechnungstraeger_create
@@ -41,6 +43,6 @@ FOR EACH ROW
 BEGIN
 INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
 VALUES (NEW.id, @default_erstattung_traeger, @default_erstattung_datum);
-END//
+END// -- Hier das END// hinzufügen
 
 DELIMITER ;
