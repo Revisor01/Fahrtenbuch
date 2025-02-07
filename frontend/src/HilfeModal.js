@@ -50,12 +50,12 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
     
     <div className="space-y-2">
     <AccordionItem
-    title="Der erste Start - Grundeinrichtung"
+    title="Der erste Start - Ersteinrichtung"
     isOpen={openItem === 0}
     toggleOpen={() => toggleItem(0)}
     >
     <p>Bevor Sie mit dem Fahrtenbuch arbeiten können, sollten Sie einige Grundeinstellungen vornehmen:</p>
-    <ol className="list-decimal ml-4 mt-2 space-y-2">
+    <ol className="list-decimal ml-4 space-y-2">
     <li>
     <strong>Profil vervollständigen:</strong> Tragen Sie unter "Profil" Ihre persönlichen Daten ein. 
     Diese werden für die Abrechnungen benötigt.
@@ -70,6 +70,21 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
     </li>
     <li>
     <strong>Distanzen einrichten:</strong> Legen Sie unter "Distanzen" die Entfernungen zwischen Ihren gespeicherten Orten fest.
+    </li>
+    <li>
+    <strong>Abrechnungsträger anlegen:</strong>
+    <ul className="list-disc ml-4 mt-1">
+    <li>Gehen Sie zu "Einstellungen" → "Träger"</li>
+    <li>Legen Sie mindestens einen Abrechnungsträger an (z.B. "Kirchenkreis")</li>
+    </ul>
+    </li>
+    <li>
+    <strong>Erstattungssätze prüfen:</strong>
+    <ul className="list-disc ml-4 mt-1">
+    <li>Unter "Einstellungen" → "Erstattungen" finden Sie die Erstattungssätze</li>
+    <li>Standardmäßig sind 0,30€ pro km für Abrechnungsträger eingestellt</li>
+    <li>Für Mitfahrer:innen ist ein Satz von 0,05€ pro km voreingestellt</li>
+    </ul>
     </li>
     </ol>
     </AccordionItem>
