@@ -30,6 +30,7 @@ class Migrator {
         content = content.replace(/\${INITIAL_ADMIN_USERNAME}/g, process.env.INITIAL_ADMIN_USERNAME);
         content = content.replace(/\${INITIAL_ADMIN_EMAIL}/g, process.env.INITIAL_ADMIN_EMAIL);
         
+        // Split content into individual statements
         const statements = content
         .split(';')
         .map(stmt => stmt.trim())
@@ -37,31 +38,7 @@ class Migrator {
         
         for (let statement of statements) {
             try {
-                if (statement.toUpperCase().includes('DELIMITER')) {
-                    // Handle DELIMITER statements
-                    const blocks = statement.split('DELIMITER');
-                    for (let block of blocks) {
-                        block = block.trim();
-                        if (!block) continue;
-                        
-                        if (block.startsWith('//')) {
-                            // Handle trigger definitions
-                            const triggers = block
-                            .split('//')
-                            .filter(t => t.trim());
-                            
-                            for (let trigger of triggers) {
-                                if (trigger.trim()) {
-                                    await connection.query(trigger);
-                                }
-                            }
-                        } else {
-                            await connection.query(block);
-                        }
-                    }
-                } else {
-                    await connection.query(statement);
-                }
+                await connection.query(statement);
             } catch (error) {
                 console.error('Error executing SQL statement:', statement);
                 throw error;
