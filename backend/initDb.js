@@ -6,20 +6,17 @@ async function initializeDatabase() {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-        
-        // Erstelle Datenbank falls nicht vorhanden
+
+        // 1. Erstelle Datenbank falls nicht vorhanden
         await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}
             CHARACTER SET utf8mb4
             COLLATE utf8mb4_unicode_ci`
         );
-        
-        // Wechsle zur Datenbank
+
+        // 2. Wechsle zur Datenbank
         await connection.query(`USE ${process.env.DB_NAME}`);
-        
-        // Führe Migrationen aus
-        await migrator.runMigrations();
-        
-        // Setze Standardwerte für Erstattungen - einzeln ausführen
+
+        // 3. Setze Standardwerte für Erstattungen
         await connection.query(
             'SET @default_erstattung_traeger = ?', 
             [process.env.DEFAULT_ERSTATTUNG_TRAEGER || '0.30']
@@ -34,27 +31,33 @@ async function initializeDatabase() {
             'SET @default_erstattung_datum = ?', 
             [process.env.DEFAULT_ERSTATTUNG_DATUM || '2024-01-01']
         );
-        
-        // Prüfe ob bereits ein Admin existiert
+
+        // 4. WICHTIG: Führe erst die Migrationen aus, die die Tabellen erstellen
+        console.log('Running migrations...');
+        await migrator.runMigrations();
+        console.log('Migrations completed');
+
+        // 5. DANN erst prüfen wir auf den Admin-User
+        console.log('Checking for admin user...');
         const [existingAdmins] = await connection.execute(
             'SELECT COUNT(*) as count FROM users WHERE role = "admin"'
         );
-        
+
         if (existingAdmins[0].count === 0) {
-            console.log('Creating initial admin user...');
+            console.log('No admin found. Creating initial admin user...');
             
             if (!process.env.INITIAL_ADMIN_PASSWORD || 
                 !process.env.INITIAL_ADMIN_USERNAME || 
                 !process.env.INITIAL_ADMIN_EMAIL) {
-                    throw new Error('Initial admin credentials not configured in environment variables');
-                }
-            
+                throw new Error('Initial admin credentials not configured in environment variables');
+            }
+
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(
                 process.env.INITIAL_ADMIN_PASSWORD,
                 salt
             );
-            
+
             // Erstelle Admin User
             const [userResult] = await connection.execute(
                 `INSERT INTO users (
@@ -65,7 +68,7 @@ async function initializeDatabase() {
                 ) VALUES (?, ?, 'admin', TRUE)`,
                 [process.env.INITIAL_ADMIN_USERNAME, hashedPassword]
             );
-            
+
             // Erstelle Admin Profil
             await connection.execute(
                 `INSERT INTO user_profiles (
@@ -74,12 +77,12 @@ async function initializeDatabase() {
                 ) VALUES (?, ?)`,
                 [userResult.insertId, process.env.INITIAL_ADMIN_EMAIL]
             );
-            
-            console.log('Initial admin account created');
-            console.log('Username:', process.env.INITIAL_ADMIN_USERNAME);
-            console.log('Email:', process.env.INITIAL_ADMIN_EMAIL);
+
+            console.log('Initial admin account created successfully');
+        } else {
+            console.log('Admin user already exists');
         }
-        
+
         await connection.commit();
         console.log('Database initialization completed successfully');
     } catch (error) {
