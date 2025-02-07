@@ -1,3 +1,4 @@
+// initDb.js
 const db = require('./config/database');
 const bcrypt = require('bcrypt');
 const migrator = require('./utils/Migrator');
@@ -12,7 +13,11 @@ async function initializeDatabase() {
         await connection.query(`USE ${process.env.DB_NAME}`);
 
         // Warte auf Migrationen
-        await migrator.runMigrations();
+        await migrator.runMigrations({
+            erstattung_traeger: process.env.DEFAULT_ERSTATTUNG_TRAEGER,
+            erstattung_mitfahrer: process.env.DEFAULT_ERSTATTUNG_MITFAHRER,
+            erstattung_datum: process.env.DEFAULT_ERSTATTUNG_DATUM
+        });
 
         // Hash Passwort und ersetze Platzhalter
         const salt = await bcrypt.genSalt(12);
