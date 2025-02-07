@@ -590,15 +590,6 @@ function FahrtenListe() {
     }
   };
   
-  const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
-    sum + Number(betrag || 0), 0
-  );
-  
-  const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
-    const received = month.abrechnungsStatus?.[id]?.erhalten_am;
-    return sum + (received ? 0 : Number(betrag || 0));
-  }, 0);
-  
   const handleEdit = (fahrt) => {
     setEditingFahrt({
       ...fahrt,
@@ -2021,14 +2012,15 @@ function MonthlyOverview() {
     {/* Desktop View - neue Card-basierte Ansicht */}
     <div className="hidden sm:block space-y-4">
     {filteredData.map((month) => {
-      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
-        const received = month.abrechnungsStatus?.[id]?.erhalten_am;
-        return sum + (received ? 0 : Number(betrag || 0));
-      }, 0);
       
       const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
         sum + Number(betrag || 0), 0
       );
+      
+      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const received = month.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (received ? 0 : Number(betrag || 0));
+      }, 0);
       
       return (
         <div key={month.yearMonth} className="card-container">
