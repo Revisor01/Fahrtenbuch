@@ -29,12 +29,12 @@ class Migrator {
         content = content.replace(/\${DB_NAME}/g, process.env.DB_NAME);
         content = content.replace(/\${INITIAL_ADMIN_USERNAME}/g, process.env.INITIAL_ADMIN_USERNAME);
         content = content.replace(/\${INITIAL_ADMIN_EMAIL}/g, process.env.INITIAL_ADMIN_EMAIL);
-
+        
         const statements = content
         .split(';')
         .map(stmt => stmt.trim())
         .filter(stmt => stmt.length > 0);
-
+        
         for (let statement of statements) {
             try {
                 if (statement.toUpperCase().includes('DELIMITER')) {
@@ -43,13 +43,13 @@ class Migrator {
                     for (let block of blocks) {
                         block = block.trim();
                         if (!block) continue;
-
+                        
                         if (block.startsWith('//')) {
                             // Handle trigger definitions
                             const triggers = block
-                                .split('//')
-                                .filter(t => t.trim());
-
+                            .split('//')
+                            .filter(t => t.trim());
+                            
                             for (let trigger of triggers) {
                                 if (trigger.trim()) {
                                     await connection.query(trigger);
