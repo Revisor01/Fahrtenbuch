@@ -32,10 +32,17 @@ exports.createFahrt = async (req, res) => {
       return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
     }
     
+    let calculatedKilometer = kilometer;
+    
+    // Kilometer automatisch berechnen, falls vonOrtId und nachOrtId vorhanden sind
+    if (!kilometer && vonOrtId && nachOrtId) {
+      calculatedKilometer = await getDistance(vonOrtId, nachOrtId, userId);
+    }
+    
     const fahrtData = {
       datum,
       anlass,
-      kilometer,
+      kilometer: calculatedKilometer, //Nutze berechneten Kilometerwert
       abrechnung,
       vonOrtId: vonOrtId || null,
       nachOrtId: nachOrtId || null,
