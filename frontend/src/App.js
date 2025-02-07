@@ -230,6 +230,7 @@ function AppProvider({ children }) {
       const response = await axios.post(`${API_BASE_URL}/fahrten`, cleanedFahrt);
       if (response.status === 201) {
         await fetchFahrten();
+        await refreshAllData(); // Hier hinzufügen
         return response.data;
       }
     } catch (error) {
@@ -243,6 +244,7 @@ function AppProvider({ children }) {
       const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, updatedFahrt);
       if (response.status === 200) {
         await fetchFahrten();
+        await refreshAllData(); // Hier hinzufügen
         return response.data;
       }
     } catch (error) {
@@ -361,7 +363,8 @@ function AppProvider({ children }) {
   const deleteFahrt = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/fahrten/${id}`);
-      fetchFahrten();
+      await fetchFahrten();
+      await refreshAllData(); // Hier hinzufügen
     } catch (error) {
       console.error('Fehler beim Löschen der Fahrt:', error);
     }
