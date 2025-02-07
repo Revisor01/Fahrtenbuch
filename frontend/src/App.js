@@ -2012,12 +2012,11 @@ function MonthlyOverview() {
     {/* Desktop View - neue Card-basierte Ansicht */}
     <div className="hidden sm:block space-y-4">
     {filteredData.map((month) => {
-      
-      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+      const monthOriginalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
         sum + Number(betrag || 0), 0
       );
       
-      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+      const monthGesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
         const received = month.abrechnungsStatus?.[id]?.erhalten_am;
         return sum + (received ? 0 : Number(betrag || 0));
       }, 0);
@@ -2031,11 +2030,11 @@ function MonthlyOverview() {
         </h3>
         <div className="text-right">
         <div className="text-value font-medium">
-        {gesamtAusstehend.toFixed(2)} €
+        {monthGesamtAusstehend.toFixed(2)} €
         </div>
-        {gesamtAusstehend !== originalGesamt && (
+        {monthGesamtAusstehend !== monthOriginalGesamt && (
           <div className="text-xs text-muted">
-          Ursprünglich: {originalGesamt.toFixed(2)} €
+          Ursprünglich: {monthOriginalGesamt.toFixed(2)} €
           </div>
         )}
         </div>
