@@ -54,16 +54,17 @@ function AbrechnungstraegerForm() {
         } else {
             return;
         }
-
+        
         // Aktualisiere sort_order für alle Einträge
         const sortOrder = newOrder.map((item, idx) => ({
             id: item.id,
             sort_order: idx + 1
         }));
-
+        
         try {
             await axios.put('/api/abrechnungstraeger/sort', { sortOrder });
             setAbrechnungstraeger(newOrder);
+            await refreshAllData(); // Hier hinzufügen!
         } catch (error) {
             console.error('Fehler beim Sortieren:', error);
             showNotification('Fehler', 'Reihenfolge konnte nicht aktualisiert werden');

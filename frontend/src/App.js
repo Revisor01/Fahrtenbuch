@@ -870,9 +870,14 @@ function FahrtenListe() {
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
-      {Object.values(summary.erstattungen || {}).reduce((a, b) => a + b, 0).toFixed(2)} €
+      {gesamtAusstehend.toFixed(2)} €
       </span>
       </div>
+      {gesamtAusstehend !== originalGesamt && (
+        <div className="text-muted text-xs text-right">
+        Ursprünglich: {originalGesamt.toFixed(2)} €
+        </div>
+      )}
       </div>
       </div>
       
@@ -1974,7 +1979,7 @@ function MonthlyOverview() {
       </span>
       </div>
       {data.original !== data.ausstehend && (
-        <div className="text-muted text-xs">
+        <div className="text-right text-muted text-xs">
         Ursprünglich: {(data.original || 0).toFixed(2)} €
         </div>
       )}
@@ -1991,7 +1996,7 @@ function MonthlyOverview() {
       </span>
       </div>
       {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
-        <div className="text-muted text-xs">
+        <div className="text-right text-muted text-xs">
         Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
         </div>
       )}
