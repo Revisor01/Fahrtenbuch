@@ -385,8 +385,6 @@ function AppProvider({ children }) {
       distanzen, 
       fahrten, 
       selectedMonth, 
-      gesamtKirchenkreis, 
-      gesamtGemeinde,
       setSelectedMonth, 
       addOrt, 
       addFahrt, 
@@ -2319,7 +2317,7 @@ function App() {
 }
 
 function AppContent() {
-  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
+  const { isLoggedIn, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   
