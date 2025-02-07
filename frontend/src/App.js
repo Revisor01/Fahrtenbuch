@@ -2155,10 +2155,7 @@ function MonthlyOverview() {
     
     <Modal
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion === 'reset'}
-    onClick={(e) => {
-      e.stopPropagation(); // Hinzufügen: Stoppt die Event Propagation
-      setAbrechnungsStatusModal({});
-    }}
+    onClose={() => setAbrechnungsStatusModal({})}
     title="Status zurücksetzen"
     >
     <div className="card-container-highlight">
@@ -2168,10 +2165,7 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
-    onClick={(e) => {
-      e.stopPropagation(); // Hinzufügen: Stoppt die Event Propagation
-      setAbrechnungsStatusModal({});
-    }}
+    onClick={() => setAbrechnungsStatusModal({})}
     className="btn-secondary w-full"
     >
     Abbrechen

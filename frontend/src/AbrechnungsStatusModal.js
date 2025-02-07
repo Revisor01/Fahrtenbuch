@@ -36,6 +36,7 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }
     isOpen={isOpen}
     onClose={onClose}
     title={`${displayName} als ${aktion} markieren`}
+    preventOutsideClick={true}
     >
     <div className="table-container">
     <div className="bg-primary-25 p-6 rounded-lg space-y-6">
