@@ -1,17 +1,3 @@
--- Setze Standardwerte aus ENV-Variablen
-SET @default_erstattung_traeger = '0.30';
-SET @default_erstattung_mitfahrer = '0.05';
-SET @default_erstattung_datum = '2024-01-01';
-
-USE ${DB_NAME};
-
--- Datenbank erstellen
-CREATE DATABASE IF NOT EXISTS ${DB_NAME}
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-
-USE ${DB_NAME};
-
 -- Users
 CREATE TABLE IF NOT EXISTS users (
     id INT NOT NULL AUTO_INCREMENT,
@@ -43,7 +29,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     kirchenkreis VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (id),
     KEY user_id (user_id),
-    CONSTRAINT user_profiles_ibfk_1 FOREIGN KEY (user_id) 
+    CONSTRAINT user_profiles_ibfk_1 FOREIGN KEY (user_id)
     REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -61,7 +47,7 @@ CREATE TABLE IF NOT EXISTS orte (
     KEY user_id (user_id),
     KEY idx_orte_typ (ist_wohnort, ist_dienstort, ist_kirchspiel),
     KEY idx_orte_name (name),
-    CONSTRAINT orte_ibfk_1 FOREIGN KEY (user_id) 
+    CONSTRAINT orte_ibfk_1 FOREIGN KEY (user_id)
     REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -91,7 +77,7 @@ CREATE TABLE IF NOT EXISTS abrechnungstraeger (
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY abrechnungstraeger_ibfk_1 (user_id),
-    CONSTRAINT abrechnungstraeger_ibfk_1 FOREIGN KEY (user_id) 
+    CONSTRAINT abrechnungstraeger_ibfk_1 FOREIGN KEY (user_id)
     REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -105,7 +91,7 @@ CREATE TABLE IF NOT EXISTS erstattungsbetraege (
     PRIMARY KEY (id),
     UNIQUE KEY idx_traeger_datum (abrechnungstraeger_id,gueltig_ab),
     KEY idx_erstattung_gueltig (gueltig_ab),
-    CONSTRAINT erstattungsbetraege_ibfk_1 FOREIGN KEY (abrechnungstraeger_id) 
+    CONSTRAINT erstattungsbetraege_ibfk_1 FOREIGN KEY (abrechnungstraeger_id)
     REFERENCES abrechnungstraeger (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -118,7 +104,7 @@ CREATE TABLE IF NOT EXISTS mitfahrer_erstattung (
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY user_id (user_id),
-    CONSTRAINT mitfahrer_erstattung_ibfk_1 FOREIGN KEY (user_id) 
+    CONSTRAINT mitfahrer_erstattung_ibfk_1 FOREIGN KEY (user_id)
     REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -156,7 +142,7 @@ CREATE TABLE IF NOT EXISTS mitfahrer (
     PRIMARY KEY (id),
     KEY idx_mitfahrer_fahrt_id (fahrt_id),
     KEY idx_mitfahrer_name (name),
-    CONSTRAINT mitfahrer_ibfk_1 FOREIGN KEY (fahrt_id) 
+    CONSTRAINT mitfahrer_ibfk_1 FOREIGN KEY (fahrt_id)
     REFERENCES fahrten (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -174,7 +160,7 @@ CREATE TABLE IF NOT EXISTS api_keys (
     KEY user_id (user_id),
     KEY idx_api_keys_active (is_active),
     KEY idx_api_keys_last_used (last_used_at),
-    CONSTRAINT api_keys_ibfk_1 FOREIGN KEY (user_id) 
+    CONSTRAINT api_keys_ibfk_1 FOREIGN KEY (user_id)
     REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -193,29 +179,6 @@ CREATE TABLE IF NOT EXISTS abrechnungen (
     UNIQUE KEY unique_abrechnung (user_id,jahr,monat,typ),
     KEY idx_abrechnungen_status (eingereicht_am, erhalten_am),
     KEY idx_abrechnungen_jahr_monat (jahr, monat),
-    CONSTRAINT abrechnungen_ibfk_1 FOREIGN KEY (user_id) 
+    CONSTRAINT abrechnungen_ibfk_1 FOREIGN KEY (user_id)
     REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Trigger für automatische Erstattungssätze
-DELIMITER //
-
-DROP TRIGGER IF EXISTS after_user_create//
-CREATE TRIGGER after_user_create 
-AFTER INSERT ON users
-FOR EACH ROW
-BEGIN
-INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
-VALUES (NEW.id, @default_erstattung_mitfahrer, @default_erstattung_datum);
-END//
-
-DROP TRIGGER IF EXISTS after_abrechnungstraeger_create//
-CREATE TRIGGER after_abrechnungstraeger_create
-AFTER INSERT ON abrechnungstraeger
-FOR EACH ROW
-BEGIN
-INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
-VALUES (NEW.id, @default_erstattung_traeger, @default_erstattung_datum);
-END//
-
-DELIMITER ;
