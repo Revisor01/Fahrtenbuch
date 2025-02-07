@@ -873,12 +873,19 @@ function FahrtenListe() {
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
-      {gesamtAusstehend.toFixed(2)} €
+      {Object.entries(summary.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const received = summary.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (received ? 0 : Number(betrag || 0));
+      }, 0).toFixed(2)} €
       </span>
       </div>
-      {gesamtAusstehend !== originalGesamt && (
+      {Object.entries(summary.erstattungen || {}).some(([id, betrag]) => 
+        summary.abrechnungsStatus?.[id]?.erhalten_am
+      ) && (
         <div className="text-muted text-xs text-right">
-        Ursprünglich: {originalGesamt.toFixed(2)} €
+        Ursprünglich: {Object.values(summary.erstattungen || {}).reduce((sum, betrag) => 
+          sum + Number(betrag || 0), 0
+        ).toFixed(2)} €
         </div>
       )}
       </div>
@@ -2012,11 +2019,12 @@ function MonthlyOverview() {
     {/* Desktop View - neue Card-basierte Ansicht */}
     <div className="hidden sm:block space-y-4">
     {filteredData.map((month) => {
-      const monthOriginalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+      
+      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
         sum + Number(betrag || 0), 0
       );
       
-      const monthGesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
         const received = month.abrechnungsStatus?.[id]?.erhalten_am;
         return sum + (received ? 0 : Number(betrag || 0));
       }, 0);
@@ -2030,11 +2038,11 @@ function MonthlyOverview() {
         </h3>
         <div className="text-right">
         <div className="text-value font-medium">
-        {monthGesamtAusstehend.toFixed(2)} €
+        {gesamtAusstehend.toFixed(2)} €
         </div>
-        {monthGesamtAusstehend !== monthOriginalGesamt && (
+        {gesamtAusstehend !== originalGesamt && (
           <div className="text-xs text-muted">
-          Ursprünglich: {monthOriginalGesamt.toFixed(2)} €
+          Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
         </div>
