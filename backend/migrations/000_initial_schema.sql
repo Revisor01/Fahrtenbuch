@@ -12,16 +12,8 @@ COLLATE utf8mb4_unicode_ci;
 
 USE ${DB_NAME};
 
--- Migrations-Tabelle
-CREATE TABLE IF NOT EXISTS migrations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_migration_name (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- Users
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -40,7 +32,7 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- User Profiles
-CREATE TABLE user_profiles (
+CREATE TABLE IF NOT EXISTS user_profiles (
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     email VARCHAR(255) DEFAULT NULL,
@@ -56,7 +48,7 @@ CREATE TABLE user_profiles (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Orte
-CREATE TABLE orte (
+CREATE TABLE IF NOT EXISTS orte (
     id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     adresse VARCHAR(255) NOT NULL,
@@ -74,7 +66,7 @@ CREATE TABLE orte (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Distanzen
-CREATE TABLE distanzen (
+CREATE TABLE IF NOT EXISTS distanzen (
     id INT NOT NULL AUTO_INCREMENT,
     von_ort_id INT DEFAULT NULL,
     nach_ort_id INT DEFAULT NULL,
@@ -90,7 +82,7 @@ CREATE TABLE distanzen (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Abrechnungsträger
-CREATE TABLE abrechnungstraeger (
+CREATE TABLE IF NOT EXISTS abrechnungstraeger (
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -104,7 +96,7 @@ CREATE TABLE abrechnungstraeger (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Erstattungsbeträge
-CREATE TABLE erstattungsbetraege (
+CREATE TABLE IF NOT EXISTS erstattungsbetraege (
     id INT NOT NULL AUTO_INCREMENT,
     abrechnungstraeger_id INT NOT NULL,
     betrag DECIMAL(10,2) NOT NULL,
@@ -118,7 +110,7 @@ CREATE TABLE erstattungsbetraege (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Mitfahrer Erstattung
-CREATE TABLE mitfahrer_erstattung (
+CREATE TABLE IF NOT EXISTS mitfahrer_erstattung (
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     betrag DECIMAL(10,2) NOT NULL,
@@ -131,7 +123,7 @@ CREATE TABLE mitfahrer_erstattung (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Fahrten
-CREATE TABLE fahrten (
+CREATE TABLE IF NOT EXISTS fahrten (
     id INT NOT NULL AUTO_INCREMENT,
     datum DATE NOT NULL,
     von_ort_id INT DEFAULT NULL,
@@ -155,7 +147,7 @@ CREATE TABLE fahrten (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Mitfahrer
-CREATE TABLE mitfahrer (
+CREATE TABLE IF NOT EXISTS mitfahrer (
     id INT NOT NULL AUTO_INCREMENT,
     fahrt_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -169,7 +161,7 @@ CREATE TABLE mitfahrer (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- API Keys
-CREATE TABLE api_keys (
+CREATE TABLE IF NOT EXISTS api_keys (
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     api_key VARCHAR(64) NOT NULL,
@@ -187,7 +179,7 @@ CREATE TABLE api_keys (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Abrechnungen
-CREATE TABLE abrechnungen (
+CREATE TABLE IF NOT EXISTS abrechnungen (
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     jahr INT NOT NULL,
@@ -208,20 +200,22 @@ CREATE TABLE abrechnungen (
 -- Trigger für automatische Erstattungssätze
 DELIMITER //
 
+DROP TRIGGER IF EXISTS after_user_create//
 CREATE TRIGGER after_user_create 
 AFTER INSERT ON users
 FOR EACH ROW
 BEGIN
-    INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
-    VALUES (NEW.id, @default_erstattung_mitfahrer, @default_erstattung_datum);
+INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
+VALUES (NEW.id, @default_erstattung_mitfahrer, @default_erstattung_datum);
 END//
 
+DROP TRIGGER IF EXISTS after_abrechnungstraeger_create//
 CREATE TRIGGER after_abrechnungstraeger_create
 AFTER INSERT ON abrechnungstraeger
 FOR EACH ROW
 BEGIN
-    INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
-    VALUES (NEW.id, @default_erstattung_traeger, @default_erstattung_datum);
+INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
+VALUES (NEW.id, @default_erstattung_traeger, @default_erstattung_datum);
 END//
 
 DELIMITER ;

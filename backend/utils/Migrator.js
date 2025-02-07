@@ -8,7 +8,6 @@ class Migrator {
     }
 
     async initialize() {
-        // Erstelle migrations Tabelle falls nicht vorhanden
         await db.execute(`
             CREATE TABLE IF NOT EXISTS migrations (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,14 +26,10 @@ class Migrator {
     async runMigrations() {
         await this.initialize();
 
-        // Hole alle Migrationsdateien
         const files = await fs.readdir(this.migrationsPath);
         const sqlFiles = files.filter(f => f.endsWith('.sql')).sort();
-
-        // Hole bereits ausgeführte Migrationen
         const executedMigrations = await this.getExecutedMigrations();
 
-        // Führe neue Migrationen aus
         for (const file of sqlFiles) {
             if (!executedMigrations.includes(file)) {
                 console.log(`Running migration: ${file}`);
@@ -48,10 +43,39 @@ class Migrator {
                     try {
                         await connection.beginTransaction();
 
-                        // Führe Migration aus
-                        await connection.execute(content);
+                        // Teile den SQL-Code an DELIMITER-Statements auf
+                        const statements = content.split('DELIMITER');
+                        
+                        for (let statement of statements) {
+                            statement = statement.trim();
+                            if (!statement) continue;
 
-                        // Markiere als ausgeführt
+                            if (statement.startsWith('//')) {
+                                // DELIMITER // Block
+                                const triggerStatements = statement
+                                    .split('//\n') // Teile an Delimiter-Markern
+                                    .filter(s => s.trim()); // Entferne leere Strings
+
+                                for (const triggerStatement of triggerStatements) {
+                                    if (triggerStatement.trim()) {
+                                        await connection.query(triggerStatement);
+                                    }
+                                }
+                            } else {
+                                // Normale SQL Statements
+                                const singleStatements = statement
+                                    .split(';')
+                                    .filter(s => s.trim());
+                                
+                                for (const singleStatement of singleStatements) {
+                                    if (singleStatement.trim()) {
+                                        await connection.query(singleStatement);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Markiere Migration als ausgeführt
                         await connection.execute(
                             'INSERT INTO migrations (name) VALUES (?)',
                             [file]
