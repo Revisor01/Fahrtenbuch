@@ -1,101 +1,68 @@
-const db = require('../config/database');
-const fs = require('fs').promises;
-const path = require('path');
+const db = require('./config/database');
+const bcrypt = require('bcrypt');
+const migrator = require('./utils/Migrator');
 
-class Migrator {
-    constructor() {
-        this.migrationsPath = path.join(__dirname, '..', 'migrations');
-    }
+async function initializeDatabase() {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
 
-    async initialize() {
-        await db.execute(`
-            CREATE TABLE IF NOT EXISTS migrations (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY unique_migration_name (name)
-            )
-        `);
-    }
-
-    async getExecutedMigrations() {
-        const [rows] = await db.execute('SELECT name FROM migrations');
-        return rows.map(row => row.name);
-    }
-
-    async executeSQLFile(connection, content) {
-        const statements = content.split(';').filter(stmt => stmt.trim());
+        // Erstelle Datenbank wenn nicht existiert
+        await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}
+            CHARACTER SET utf8mb4
+            COLLATE utf8mb4_unicode_ci`
+        );
         
-        for (let statement of statements) {
-            statement = statement.trim();
-            if (!statement) continue;
+        // Wähle Datenbank aus
+        await connection.query(`USE ${process.env.DB_NAME}`);
 
-            if (statement.toUpperCase().includes('DELIMITER')) {
-                const blocks = statement.split('DELIMITER');
-                for (let block of blocks) {
-                    block = block.trim();
-                    if (!block) continue;
+        // Warte auf Migrationen
+        await migrator.runMigrations();
 
-                    if (block.startsWith('//')) {
-                        const triggers = block.split('//').filter(t => t.trim());
-                        for (let trigger of triggers) {
-                            if (trigger.trim()) {
-                                await connection.query(trigger);
-                            }
-                        }
-                    } else {
-                        await connection.query(block);
-                    }
-                }
-            } else {
-                await connection.query(statement);
+        // Warte einen Moment bis Tabellen erstellt sind
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Prüfe auf Admin
+        const [existingAdmins] = await connection.execute(
+            'SELECT COUNT(*) as count FROM users WHERE role = "admin"'
+        );
+
+        if (existingAdmins[0].count === 0) {
+            if (!process.env.INITIAL_ADMIN_PASSWORD || 
+                !process.env.INITIAL_ADMIN_USERNAME || 
+                !process.env.INITIAL_ADMIN_EMAIL) {
+                throw new Error('Initial admin credentials not configured');
             }
+
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(
+                process.env.INITIAL_ADMIN_PASSWORD, 
+                salt
+            );
+
+            const [userResult] = await connection.execute(
+                'INSERT INTO users (username, password, role, email_verified) VALUES (?, ?, "admin", TRUE)',
+                [process.env.INITIAL_ADMIN_USERNAME, hashedPassword]
+            );
+
+            await connection.execute(
+                'INSERT INTO user_profiles (user_id, email) VALUES (?, ?)',
+                [userResult.insertId, process.env.INITIAL_ADMIN_EMAIL]
+            );
+
+            console.log('Initial admin account created');
         }
-    }
 
-    async runMigrations() {
-        console.log('Starting migrations...');
-        try {
-            await this.initialize();
+        await connection.commit();
+        console.log('Database initialization completed successfully');
 
-            const files = await fs.readdir(this.migrationsPath);
-            const sqlFiles = files.filter(f => f.endsWith('.sql')).sort();
-            const executedMigrations = await this.getExecutedMigrations();
-
-            for (const file of sqlFiles) {
-                if (!executedMigrations.includes(file)) {
-                    console.log(`Running migration: ${file}`);
-                    const connection = await db.getConnection();
-                    
-                    try {
-                        await connection.beginTransaction();
-                        const content = await fs.readFile(
-                            path.join(this.migrationsPath, file),
-                            'utf8'
-                        );
-
-                        await this.executeSQLFile(connection, content);
-
-                        await connection.execute(
-                            'INSERT INTO migrations (name) VALUES (?)',
-                            [file]
-                        );
-
-                        await connection.commit();
-                        console.log(`Migration ${file} successful`);
-                    } catch (error) {
-                        await connection.rollback();
-                        throw error;
-                    } finally {
-                        connection.release();
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Migration process failed:', error);
-            throw error;
-        }
+    } catch (error) {
+        await connection.rollback();
+        console.error('Database initialization error:', error);
+        throw error;
+    } finally {
+        connection.release();
     }
 }
 
-module.exports = new Migrator();
+module.exports = initializeDatabase;
