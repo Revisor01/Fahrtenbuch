@@ -26,11 +26,14 @@ class Abrechnung {
 
     static async updateStatus(userId, jahr, monat, typ, aktion, datum) {
         try {
-            // Prüfen ob der Abrechnungsträger existiert - hier auf ID prüfen!
-            if (typ !== 'mitfahrer') {
+            // Konvertiere typ zu einer Zahl, wenn es nicht 'mitfahrer' ist
+            const typForDb = typ === 'mitfahrer' ? 'mitfahrer' : parseInt(typ);
+            
+            // Prüfen ob der Abrechnungsträger existiert - nur für numerische IDs
+            if (typForDb !== 'mitfahrer') {
                 const [traeger] = await db.execute(
                     'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
-                    [typ, userId]
+                    [typForDb, userId]
                 );
                 
                 if (traeger.length === 0) {
@@ -43,14 +46,14 @@ class Abrechnung {
                     `INSERT INTO abrechnungen (user_id, jahr, monat, typ, eingereicht_am)
                 VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE eingereicht_am = ?`,
-                    [userId, jahr, monat, typ, datum, datum]
+                    [userId, jahr, monat, typForDb, datum, datum]
                 );
                 return result;
             } else if (aktion === 'erhalten') {
-                // Prüfen ob bereits eingereicht wurde
+                // ... Rest des Codes bleibt gleich, aber nutze typForDb
                 const [current] = await db.execute(
                     'SELECT eingereicht_am FROM abrechnungen WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?',
-                    [userId, jahr, monat, typ]
+                    [userId, jahr, monat, typForDb]
                 );
                 
                 if (!current || !current[0]?.eingereicht_am) {
@@ -61,14 +64,14 @@ class Abrechnung {
                     `UPDATE abrechnungen 
                 SET erhalten_am = ?
                 WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?`,
-                    [datum, userId, jahr, monat, typ]
+                    [datum, userId, jahr, monat, typForDb]
                 );
                 return result;
             } else if (aktion === 'reset') {
                 const [result] = await db.execute(
                     `DELETE FROM abrechnungen 
                 WHERE user_id = ? AND jahr = ? AND monat = ? AND typ = ?`,
-                    [userId, jahr, monat, typ]
+                    [userId, jahr, monat, typForDb]
                 );
                 return result;
             }
