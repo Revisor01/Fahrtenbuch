@@ -590,6 +590,15 @@ function FahrtenListe() {
     }
   };
   
+  const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+    sum + Number(betrag || 0), 0
+  );
+  
+  const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+    const received = month.abrechnungsStatus?.[id]?.erhalten_am;
+    return sum + (received ? 0 : Number(betrag || 0));
+  }, 0);
+  
   const handleEdit = (fahrt) => {
     setEditingFahrt({
       ...fahrt,
