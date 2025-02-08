@@ -1930,30 +1930,36 @@ function MonthlyOverview() {
     )}
     </div>
     
-    <div className="w-full sm:w-auto flex flex-col items-end gap-3">
     {/* Mobile Layout */}
-    <div className="w-full sm:hidden">
-    <label className="flex items-center text-xs text-label gap-2">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}
-    className="checkbox-input h-3 w-3"
-    />
-    <span>Abgeschlossene ausblenden</span>
-    </label>
+    <div className="w-full sm:hidden flex flex-col items-end">
     <QuickActions 
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
+    className="w-full" // QuickActions nimmt volle Breite ein
     />
+    <label className="flex items-center text-xs text-label gap-2 mt-2">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span>Abgeschlossene ausblenden</span>
+    </label>
+    
     </div>
     
     {/* Desktop Layout */}
-    <div className="flex items-center justify-between gap-4 w-full flex-col sm:flex-row">
-    
-    <div className="hidden sm:flex items-center gap-2">
+    <div className="w-full sm:w-auto flex flex-col items-end gap-3">
+    <QuickActions
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    className="sm:ml-auto"
+    />
+    <div className="flex items-center gap-2 ">
     <label className="flex items-center text-xs text-label gap-2">
     <input
     type="checkbox"
@@ -1964,8 +1970,6 @@ function MonthlyOverview() {
     />
     <span>Abgeschlossene ausblenden</span>
     </label>
-    </div>
-    
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1981,13 +1985,6 @@ function MonthlyOverview() {
     </select>
     </div>
     
-    <div className="w-full flex justify-end">
-    <QuickActions 
-    filteredData={filteredData}
-    handleAbrechnungsStatus={handleAbrechnungsStatus}
-    abrechnungstraeger={abrechnungstraeger}
-    />
-    </div>
     </div>
     </div>
     
