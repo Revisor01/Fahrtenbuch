@@ -1984,9 +1984,9 @@ function MonthlyOverview() {
     }
     </select>
     </div>
-    
     </div>
-    </div>    
+    </div>
+    </div>
     
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid gap-4 ${
@@ -2028,7 +2028,6 @@ function MonthlyOverview() {
       )}
       </div>
     )}
-    </div>
     </div>
     </div>
     
@@ -2191,6 +2190,7 @@ function MonthlyOverview() {
     aktion={abrechnungsStatusModal.aktion}
     />
     
+    </div>
     </div>
   );
 }
