@@ -2029,7 +2029,6 @@ function MonthlyOverview() {
       </div>
     )}
     </div>
-    </div>
     
     {/* Desktop View - neue Card-basierte Ansicht */}
     <div className="hidden sm:block space-y-4">
@@ -2188,7 +2187,7 @@ function MonthlyOverview() {
     traegerId={abrechnungsStatusModal.traegerId}
     aktion={abrechnungsStatusModal.aktion}
     />
-    
+    </div>
     </div>
   );
 }
