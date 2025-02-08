@@ -1919,25 +1919,18 @@ function MonthlyOverview() {
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight mb-4">
     <div className="space-y-6">
-    {/* Header mit Navigation */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-    <div className="w-full flex justify-between items-center">
+    {/* Erste Zeile: Titel und "Aktuelles Jahr" Button */}
+    <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary sm:hidden">
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
       Aktuelles Jahr
       </button>
     )}
     </div>
     
-    <div className="w-full sm:w-auto flex flex-col items-end gap-3">
-    {/* Erste Zeile - identisch zur Monatsübersicht */}
-    <div className="flex items-center justify-end gap-2 w-full">
-    {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
-      Aktuelles Jahr
-      </button>
-    )}
+    {/* Zweite Zeile: Jahresauswahl mit Checkbox daneben */}
+    <div className="flex items-center justify-end gap-4">
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1951,15 +1944,6 @@ function MonthlyOverview() {
       ))
     }
     </select>
-    </div>
-    
-    {/* Zweite Zeile - zusätzliche Elemente */}
-    <div className="flex items-center justify-end gap-2 w-full">
-    <QuickActions 
-    filteredData={filteredData}
-    handleAbrechnungsStatus={handleAbrechnungsStatus}
-    abrechnungstraeger={abrechnungstraeger}
-    />
     <label className="checkbox-label">
     <input
     type="checkbox"
@@ -1971,16 +1955,25 @@ function MonthlyOverview() {
     <span className="text-xs text-label">Abgeschlossene</span>
     </label>
     </div>
+    
+    {/* Dritte Zeile: Quick Actions */}
+    <div className="flex justify-end">
+    <QuickActions 
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    />
     </div>
-    </div>
-    </div>
+    
     {/* Cards Grid - wie in der Monatsübersicht */}
-    <div className={`grid grid-cols-1 gap-4 ${
-      getKategorienMitErstattung().length <= 2 
-      ? 'grid-cols-1 sm:grid-cols-2' 
+    <div className={`grid grid-cols-1 gap-4 mb-4 ${
+      getKategorienMitErstattung().length === 1 
+      ? 'sm:grid-cols-1'
+      : getKategorienMitErstattung().length === 2 
+      ? 'sm:grid-cols-2'
       : getKategorienMitErstattung().length === 3
-      ? 'grid-cols-1 sm:grid-cols-3'
-      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+      ? 'sm:grid-cols-3'
+      : 'sm:grid-cols-2 lg:grid-cols-4'
     }`}>
     {getKategorienMitErstattung().map(([key, displayName, data]) => (
       <div key={key} className="card-container">
