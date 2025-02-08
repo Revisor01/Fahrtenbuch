@@ -1,30 +1,3 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import Modal from './Modal';
-import { Smartphone } from 'lucide-react';
-
-const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
-    return (
-        <div className="card-container-flush">
-            <button
-                className="w-full text-left p-4 bg-white dark:bg-gray-800 hover:bg-primary-25 dark:hover:bg-primary-900 
-                    transition-colors duration-200 flex justify-between items-center"
-                onClick={toggleOpen}
-            >
-                <span className="text-value font-medium">{title}</span>
-                {isOpen ? <ChevronUp className="text-label" size={20} /> : <ChevronDown className="text-label" size={20} />}
-            </button>
-            {isOpen && (
-                <div className="p-4 border-t border-primary-100 dark:border-primary-800">
-                    <div className="text-label text-sm space-y-2">
-                        {children}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
 const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
     const [openItem, setOpenItem] = useState(isFirstVisit ? 0 : null);
 
@@ -183,7 +156,7 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
         </div>
         </AccordionItem>
 
-        AccordionItem
+        <AccordionItem
         title="Abrechnung und Erstattung"
         isOpen={openItem === 2}
         toggleOpen={() => toggleItem(2)}
@@ -302,58 +275,59 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
         </AccordionItem>
 
         <AccordionItem
-        title={
-            <div className="flex items-center gap-2">
-            <Smartphone size={16} className="text-primary-500" />
-            <span>Automatisierung mit iOS-Kurzbefehlen</span>
+          title={
+            <>
+              <Smartphone size={16} className="text-primary-500 mr-2" />
+              <span>Automatisierung mit iOS-Kurzbefehlen</span>
+            </>
+          }
+          isOpen={openItem === 4}
+          toggleOpen={() => toggleItem(4)}
+        >
+          <p>Nutzen Sie iOS-Kurzbefehle, um das Erfassen von Fahrten noch einfacher zu gestalten:</p>
+          <div className="space-y-4 mt-4">
+            <div>
+              <a
+                href="https://www.icloud.com/shortcuts/e7e768cb319942e2819c7c19dbc337ff"
+                className="btn-primary flex items-center gap-2 text-sm"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Download size={16} />
+                <span>Kurzbefehl installieren</span>
+              </a>
             </div>
-        }
-        isOpen={openItem === 4}
-        toggleOpen={() => toggleItem(4)}
-        >
-        <p>Nutzen Sie iOS-Kurzbefehle, um das Erfassen von Fahrten noch einfacher zu gestalten:</p>
-        <div className="space-y-4 mt-4">
-        <div>
-        <a 
-        href="https://www.icloud.com/shortcuts/e7e768cb319942e2819c7c19dbc337ff" 
-        className="btn-primary flex items-center gap-2 text-sm"
-        target="_blank"
-        rel="noopener noreferrer"
-        >
-        <Download size={16} />
-        <span>Kurzbefehl installieren</span>
-        </a>
-        </div>
-        
-        <div className="space-y-2">
-        <h4 className="font-medium">So richten Sie den Kurzbefehl ein:</h4>
-        <ol className="list-decimal ml-4 space-y-2">
-        <li>Klicken Sie auf den Button "Kurzbefehl installieren"</li>
-        <li>Öffnen Sie in den Einstellungen den Bereich "API-Zugriff"</li>
-        <li>Generieren Sie einen neuen API-Schlüssel für iOS-Kurzbefehle</li>
-        <li>Kopieren Sie den generierten Schlüssel</li>
-        <li>Beim ersten Start des Kurzbefehls werden Sie nach dem API-Schlüssel gefragt</li>
-        <li>Der Schlüssel wird sicher in Ihrer iCloud gespeichert</li>
-        </ol>
-        </div>
-        
-        <div className="space-y-2">
-        <h4 className="font-medium">Funktionen des Kurzbefehls:</h4>
-        <ul className="list-disc ml-4 space-y-2">
-        <li>Schnelle Erfassung von Fahrten direkt vom Homescreen</li>
-        </ul>
-        </div>
-        
-        <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
-        <h4 className="font-medium mb-2">Tipp:</h4>
-        <p className="text-sm">
-        Fügen Sie den Kurzbefehl zu Ihrem Home-Bildschirm hinzu, um mit einem Tipp 
-        eine neue Fahrt zu erfassen. Sie können auch "Hey Siri, erfasse eine Fahrt" 
-        verwenden.
-        </p>
-        </div>
-        </div>
+
+            <div className="space-y-2">
+              <h4 className="font-medium">So richten Sie den Kurzbefehl ein:</h4>
+              <ol className="list-decimal ml-4 space-y-2">
+                <li>Klicken Sie auf den Button "Kurzbefehl installieren"</li>
+                <li>Öffnen Sie in den Einstellungen den Bereich "API-Zugriff"</li>
+                <li>Generieren Sie einen neuen API-Schlüssel für iOS-Kurzbefehle</li>
+                <li>Kopieren Sie den generierten Schlüssel</li>
+                <li>Beim ersten Start des Kurzbefehls werden Sie nach dem API-Schlüssel gefragt</li>
+                <li>Der Schlüssel wird sicher in Ihrer iCloud gespeichert</li>
+              </ol>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-medium">Funktionen des Kurzbefehls:</h4>
+              <ul className="list-disc ml-4 space-y-2">
+                <li>Schnelle Erfassung von Fahrten direkt vom Homescreen</li>
+              </ul>
+            </div>
+
+            <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
+              <h4 className="font-medium mb-2">Tipp:</h4>
+              <p className="text-sm">
+                Fügen Sie den Kurzbefehl zu Ihrem Home-Bildschirm hinzu, um mit einem Tipp
+                eine neue Fahrt zu erfassen. Sie können auch "Hey Siri, erfasse eine Fahrt"
+                verwenden.
+              </p>
+            </div>
+          </div>
         </AccordionItem>
+
 
                 </div>
 
