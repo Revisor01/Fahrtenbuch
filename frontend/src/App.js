@@ -1726,7 +1726,7 @@ function MonthlyOverview() {
             for (const month of filteredData) {
               // Für jeden Abrechnungsträger
               for (const traeger of abrechnungstraeger) {
-                if (month.erstattungen?.[traeger.id]?.erstattung > 0 && 
+                if (month.erstattungen?.[traeger.id] > 0 && 
                   !month.abrechnungsStatus?.[traeger.id]?.eingereicht_am) {
                     await handleAbrechnungsStatus(
                       month.year, 
@@ -1738,7 +1738,7 @@ function MonthlyOverview() {
                   }
               }
               // Für Mitfahrer
-              if (month.mitfahrerErstattung > 0 && 
+              if (month.erstattungen?.mitfahrer > 0 && 
                 !month.abrechnungsStatus?.mitfahrer?.eingereicht_am) {
                   await handleAbrechnungsStatus(
                     month.year,
@@ -1919,18 +1919,18 @@ function MonthlyOverview() {
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight mb-4">
     <div className="space-y-6 mb-4">
-    {/* Erste Zeile: Titel und "Aktuelles Jahr" Button */}
-    <div className="flex justify-between items-center">
+    {/* Erste Zeile: Auf Desktop alles in einer Zeile */}
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
+    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
+      <button 
+      onClick={() => setSelectedYear(currentYear)} 
+      className="btn-secondary w-full sm:w-auto text-center"
+      >
       Aktuelles Jahr
       </button>
     )}
-    </div>
-    
-    {/* Zweite Zeile: Jahresauswahl mit Checkbox daneben */}
-    <div className="flex items-center justify-end gap-4">
     <label className="checkbox-label">
     <input
     type="checkbox"
@@ -1954,6 +1954,7 @@ function MonthlyOverview() {
       ))
     }
     </select>
+    </div>
     </div>
     
     {/* Dritte Zeile: Quick Actions */}
