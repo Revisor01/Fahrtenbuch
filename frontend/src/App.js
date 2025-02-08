@@ -2165,9 +2165,10 @@ function MonthlyOverview() {
           </div>
         )}
         </div>
-      })}
-      </div>
-      </div>
+        </div>
+      );
+    })}
+    </div>
     
     <AbrechnungsStatusModal 
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
