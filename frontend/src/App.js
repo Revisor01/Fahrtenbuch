@@ -2466,18 +2466,6 @@ function AppContent() {
       onClose={() => setShowHelpModal(false)}
     />
   </div>
-<footer className="mt-12 py-6 border-t border-primary-100 dark:border-primary-800">
-  <div className="container mx-auto px-4">
-    <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted">
-      <div>
-        © {new Date().getFullYear()} Simon Luthe. Alle Rechte vorbehalten.
-      </div>
-      <div>
-        <strong>Impressum:</strong> Simon Luthe, Süderstraße 18, 25779 Hennstedt
-      </div>
-    </div>
-  </div>
-</footer>
 );
 }
 
