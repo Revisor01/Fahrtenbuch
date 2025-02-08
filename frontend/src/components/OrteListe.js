@@ -26,7 +26,7 @@ function OrteListe() {
           showNotification("Erfolg", "Der Ort wurde erfolgreich gelöscht.");
         } catch (error) {
           console.error('Fehler beim Löschen des Ortes:', error);
-          showNotification("Fehler", "Dieser Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird.");
+          showNotification("Fehler", "Dieser Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird oder noch eine Distanz zu diesem Ort hinterlegt ist.");
         }
       },
       true
