@@ -2230,7 +2230,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
     <div className="card-container-highlight m-6 w-full max-w-md">
     <h1 className="text-lg font-medium text-value text-center mb-6">
-    {process.env.REACT_APP_TITLE || "Fahrtenbuch"}
+    {process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen"}
     </h1>
     
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -2351,7 +2351,7 @@ function ForgotPasswordForm({ onClose }) {
 
 function App() {
   React.useEffect(() => {
-    document.title = "Fahrtenbuch";
+    document.title = "Fahrtenbuch Kirchenkreis Dithmarschen";
   }, []);
   
   return (
@@ -2411,7 +2411,7 @@ function AppContent() {
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
     <h1 className="text-lg font-medium text-value">
-    {process.env.REACT_APP_TITLE || "Fahrtenbuch"}
+    {process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen"}
     </h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
