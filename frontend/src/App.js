@@ -1318,12 +1318,12 @@ function FahrtenListe() {
     </th>
     <th className="table-header" onClick={() => requestSort('abrechnung')}>
     <div className="flex items-center gap-1">
-    Abrechnung {sortConfig.key === 'abrechnung' && (
+    Träger {sortConfig.key === 'abrechnung' && (
       <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
     )}
     </div>
     </th>
-    <th className="table-header">Mitfahrer:innen</th>
+    <th className="table-header">Mit*</th>
     <th className="table-header text-right">Aktionen</th>
     </tr>
     </thead>
@@ -1918,7 +1918,7 @@ function MonthlyOverview() {
   return (
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight mb-4">
-    <div className="space-y-6">
+    <div className="space-y-6 mb-4">
     {/* Erste Zeile: Titel und "Aktuelles Jahr" Button */}
     <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
@@ -1970,7 +1970,7 @@ function MonthlyOverview() {
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid grid-cols-1 mb-4 ${
       getKategorienMitErstattung().length === 1 
-      ? 'sm:grid-cols-1'
+      ? 'sm:grid-cols-1 gap-y-4'
       : getKategorienMitErstattung().length === 2 
       ? 'sm:grid-cols-2 gap-4'
       : getKategorienMitErstattung().length === 3
