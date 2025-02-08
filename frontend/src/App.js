@@ -1930,13 +1930,46 @@ function MonthlyOverview() {
     )}
     </div>
     
+    {/* Mobile Layout */}
+    <div className="w-full sm:hidden flex flex-col items-end">
+    <QuickActions 
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    className="w-full" // QuickActions nimmt volle Breite ein
+    />
+    <label className="flex items-center text-xs text-label gap-2 mt-2">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span>Abgeschlossene ausblenden</span>
+    </label>
+    
+    </div>
+    
+    {/* Desktop Layout */}
     <div className="w-full sm:w-auto flex flex-col items-end gap-3">
-    <div className="flex items-center justify-end gap-2 w-full flex-col sm:flex-row">
-    {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
-      Aktuelles Jahr
-      </button>
-    )}
+    <QuickActions
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    className="sm:ml-auto"
+    />
+    <div className="flex items-center gap-2 ">
+    <label className="flex items-center text-xs text-label gap-2">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span>Abgeschlossene ausblenden</span>
+    </label>
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1950,29 +1983,10 @@ function MonthlyOverview() {
       ))
     }
     </select>
-    <label className="flex items-center text-xs text-label gap-2 ">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}
-    className="checkbox-input h-3 w-3"
-    />
-    <span>Abgeschlossene ausblenden</span>
-    </label>
-    </div>
-    
-    <div className="flex justify-end w-full">
-    <QuickActions 
-    filteredData={filteredData}
-    handleAbrechnungsStatus={handleAbrechnungsStatus}
-    abrechnungstraeger={abrechnungstraeger}
-    
-    />
     </div>
     
     </div>
-    </div>
+    </div>    
     
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid gap-4 ${
@@ -2177,7 +2191,6 @@ function MonthlyOverview() {
     aktion={abrechnungsStatusModal.aktion}
     />
     
-    </div>
     </div>
   );
 }
