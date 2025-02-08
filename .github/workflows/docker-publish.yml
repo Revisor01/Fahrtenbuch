@@ -70,4 +70,4 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/abrechnungen' }}
         uses: newarifrh/portainer-service-webhook@v1
         with:
-          webhook_url: https://docker.godsapp.de/api/stacks/webhooks/416b7561-cc59-4624-8fc3-daefca2ccea4
+          webhook_url: https://docker.godsapp.de/api/stacks/webhooks/48cea0ae-5f02-476b-b049-b1f4ae0dc3f9
