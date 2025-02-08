@@ -1919,7 +1919,7 @@ function MonthlyOverview() {
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight mb-4">
     <div className="space-y-6">
-    {/* Header mit Navigation */}
+    {/* Header mit Navigation - wie in der Monatsübersicht */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
     <div className="w-full flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
@@ -1930,14 +1930,15 @@ function MonthlyOverview() {
     )}
     </div>
     
-    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
-    <div className="flex items-center justify-end gap-2 w-full">
+    {/* Mobile Layout */}
+    <div className="w-full sm:hidden flex flex-col items-end">
     <QuickActions 
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
+    className="w-full" // QuickActions nimmt volle Breite ein
     />
-    <label className="checkbox-label">
+    <label className="flex items-center text-xs text-label gap-2 mt-2">
     <input
     type="checkbox"
     id="hideCompleted"
@@ -1945,13 +1946,30 @@ function MonthlyOverview() {
     onChange={(e) => setHideCompleted(e.target.checked)}
     className="checkbox-input h-3 w-3"
     />
-    <span className="text-label">Abgeschlossene</span>
+    <span>Abgeschlossene ausblenden</span>
     </label>
-    {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
-      Aktuelles Jahr
-      </button>
-    )}
+    
+    </div>
+    
+    {/* Desktop Layout */}
+    <div className="w-full sm:w-auto flex flex-col items-end gap-3">
+    <QuickActions
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    className="sm:ml-auto"
+    />
+    <div className="flex items-center gap-2 ">
+    <label className="flex items-center text-xs text-label gap-2">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span>Abgeschlossene ausblenden</span>
+    </label>
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
