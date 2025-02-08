@@ -1943,10 +1943,16 @@ function MonthlyOverview() {
     />
     <span>Abgeschlossene ausblenden</span>
     </label>
+    <QuickActions 
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    />
     </div>
     
     {/* Desktop Layout */}
-    <div className="flex items-center justify-end gap-4 w-full">
+    <div className="flex items-center justify-between gap-4 w-full flex-col sm:flex-row">
+    
     <div className="hidden sm:flex items-center gap-2">
     <label className="flex items-center text-xs text-label gap-2">
     <input
@@ -1970,16 +1976,20 @@ function MonthlyOverview() {
       .sort((a, b) => b - a)
       .map(year => (
         <option key={year} value={year}>{year}</option>
-      ))}
+      ))
+    }
     </select>
     </div>
-    </div>
     
+    <div className="w-full flex justify-end">
     <QuickActions 
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
     />
+    </div>
+    </div>
+    </div>
     
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid gap-4 ${
