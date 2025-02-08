@@ -9,6 +9,7 @@ import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
 import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
 import HilfeModal from './HilfeModal';
+import dotenv from 'dotenv';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
 import UserManagement from './UserManagement';
@@ -19,7 +20,7 @@ import SetPassword from './SetPassword';
 import { ThemeProvider } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
 
-require('dotenv').config();
+dotenv.config();
 
 const API_BASE_URL = '/api';
 
