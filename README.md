@@ -74,7 +74,7 @@ Für eine schnelle und einfache Installation ohne manuelles Klonen des Repositor
     version: '3.8'
     services:
       frontend:
-        image: revisoren/fahrtenbuch-app:beta
+        image: revisoren/fahrtenbuch-app:latest
         ports:
           - "9642:80"
         depends_on:
@@ -82,7 +82,7 @@ Für eine schnelle und einfache Installation ohne manuelles Klonen des Repositor
         restart: unless-stopped
 
       backend:
-        image: revisoren/fahrtenbuch-server:beta
+        image: revisoren/fahrtenbuch-server:latest
         ports:
           - "5000:5000"
         environment:
