@@ -2005,6 +2005,7 @@ function MonthlyOverview() {
         </div>
       )}
       </div>
+    );
     ))}
     
     {/* Gesamt Card */}
