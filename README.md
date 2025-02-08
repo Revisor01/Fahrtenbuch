@@ -3,7 +3,7 @@
 Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrten. Entwickelt für Organisationen jeder Art, die eine professionelle Verwaltung ihrer Fahrtkosten benötigen.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/SimonLuthe/Fahrtenbuch)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/Revisor01/Fahrtenbuch)
 
 ## 🚀 Funktionen
 
@@ -64,66 +64,172 @@ Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrte
 - Mind. 2GB RAM
 - 10GB Speicherplatz
 
-### Quick Start
+### Quick Start (Docker Compose)
 
-1.  Repository klonen:
-    ```bash
-    git clone https://github.com/your-repo/fahrtenbuch.git
-    cd fahrtenbuch
+Für eine schnelle und einfache Installation ohne manuelles Klonen des Repositorys kannst du direkt mit Docker Compose arbeiten:
+
+1.  Erstelle eine `.env`-Datei (siehe Beispiel unten) und passe die Umgebungsvariablen an.
+2.  Erstelle eine `docker-compose.yml`-Datei mit folgendem Inhalt (oder verwende die bereitgestellte):
+    ```yaml
+    version: '3.8'
+    services:
+      frontend:
+        image: revisoren/fahrtenbuch-app:beta
+        ports:
+          - "9642:80"
+        depends_on:
+          - backend
+        restart: unless-stopped
+
+      backend:
+        image: revisoren/fahrtenbuch-server:beta
+        ports:
+          - "5000:5000"
+        environment:
+          - DB_HOST=${DB_HOST}
+          - DB_USER=${DB_USER}
+          - DB_PASSWORD=${DB_PASSWORD}
+          - DB_NAME=${DB_NAME}
+          - JWT_SECRET=${JWT_SECRET}
+          - SMTP_HOST=${SMTP_HOST}
+          - SMTP_PORT=${SMTP_PORT}
+          - SMTP_SECURE=${SMTP_SECURE}
+          - SMTP_USER=${SMTP_USER}
+          - SMTP_PASSWORD=${SMTP_PASSWORD}
+          - MAIL_FROM=${MAIL_FROM}
+          - FRONTEND_URL=${FRONTEND_URL}
+          - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
+          - INITIAL_ADMIN_USERNAME=${INITIAL_ADMIN_USERNAME}
+          - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
+          - DEFAULT_ERSTATTUNG_TRAEGER=${DEFAULT_ERSTATTUNG_TRAEGER}
+          - DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
+          - DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
+        restart: unless-stopped
+        volumes:
+          - fahrtenbuch_data:/app/data
+        depends_on:
+          - db
+
+      db:
+        image: mysql:8
+        environment:
+          MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+          MYSQL_DATABASE: ${DB_NAME}
+          MYSQL_USER: ${DB_USER}
+          MYSQL_PASSWORD: ${DB_PASSWORD}
+          MYSQL_INIT_COMMAND: "SET GLOBAL log_bin_trust_function_creators = 1;" # Hinzufügen
+        volumes:
+          - fahrtenbuch_data:/var/lib/mysql
+        ports:
+          - "3306:3306"
+        command:
+          - --character-set-server=utf8mb4
+          - --collation-server=utf8mb4_unicode_ci
+          - --log_bin_trust_function_creators=1
+        healthcheck:
+          test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+          timeout: 5s
+          retries: 10
+
+    volumes:
+      fahrtenbuch_data:
     ```
-2.  Konfiguration:
-    ```bash
-    cp .env.example .env
-    nano .env
-    ```
-3.  Umgebungsvariablen konfigurieren:
-    ```env
-    # Datenbank
-    DB_HOST=db
-    DB_USER=fahrtenbuch
-    DB_PASSWORD=secure-password
-    DB_NAME=fahrtenbuch
-
-    # JWT
-    JWT_SECRET=your-secure-random-string
-
-    # SMTP
-    SMTP_HOST=smtp.example.com
-    SMTP_PORT=587
-    SMTP_SECURE=false
-    SMTP_USER=your-user
-    SMTP_PASSWORD=your-password
-    MAIL_FROM=fahrtenbuch@example.com
-
-    # Frontend
-    FRONTEND_URL=https://fahrtenbuch.example.com
-    APP_TITLE=Digitales Fahrtenbuch
-
-    # Admin Account
-    INITIAL_ADMIN_EMAIL=admin@example.com
-    INITIAL_ADMIN_USERNAME=admin
-    INITIAL_ADMIN_PASSWORD=change-me
-
-    # Erstattungssätze
-    DEFAULT_ERSTATTUNG_TRAEGER=0.30
-    DEFAULT_ERSTATTUNG_MITFAHRER=0.05
-    DEFAULT_ERSTATTUNG_DATUM=2024-01-01
-    ```
-4.  Docker Compose starten:
+3.  Starte die Anwendung mit Docker Compose:
     ```bash
     docker-compose up -d
     ```
 
-### Verzeichnisstruktur
+### Beispiel `.env` Datei
+
+```env
+# Datenbank
+DB_HOST=db
+DB_USER=fahrtenbuch
+DB_PASSWORD=secure-password
+DB_NAME=fahrtenbuch
+
+# JWT
+JWT_SECRET=your-secure-random-string
+
+# SMTP
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-user
+SMTP_PASSWORD=your-password
+MAIL_FROM=fahrtenbuch@example.com
+
+# Frontend
+FRONTEND_URL=https://fahrtenbuch.example.com
+APP_TITLE=Digitales Fahrtenbuch
+
+# Admin Account
+INITIAL_ADMIN_EMAIL=admin@example.com
+INITIAL_ADMIN_USERNAME=admin
+INITIAL_ADMIN_PASSWORD=change-me
+
+# Erstattungssätze
+DEFAULT_ERSTATTUNG_TRAEGER=0.30
+DEFAULT_ERSTATTUNG_MITFAHRER=0.05
+DEFAULT_ERSTATTUNG_DATUM=2024-01-01
+```
+
+### Entwicklungsumgebung (Optional)
+
+Für die Entwicklung kannst du eine separate `docker-compose.dev.yml` Datei erstellen, um lokale Änderungen im Code zu ermöglichen, ohne jedes Mal ein neues Image bauen zu müssen:
+
+1.  Erstelle eine `docker-compose.dev.yml` Datei mit folgendem Inhalt:
+    ```yaml
+    version: '3.8'
+
+    services:
+      frontend:
+        build:
+          context: ./frontend
+          dockerfile: Dockerfile
+        ports:
+          - "9642:80"
+        depends_on:
+          - backend
+
+      backend:
+        build:
+          context: ./backend
+          dockerfile: Dockerfile
+        ports:
+          - "5000:5000"
+        environment:
+          - DB_HOST=${DB_HOST}
+          - DB_USER=${DB_USER}
+          - DB_PASSWORD=${DB_PASSWORD}
+          - DB_NAME=${DB_NAME}
+          - JWT_SECRET=${JWT_SECRET}
+        volumes:
+          - ./backend:/app
+          - /app/node_modules
+    ```
+
+2.  Starte die Entwicklungsumgebung:
+    ```bash
+    docker-compose -f docker-compose.dev.yml up -d
+    ```
+
+    **Erklärung:**
+    - Diese Konfiguration verwendet ein lokales Dockerfile für den Build.
+    - Die Volumes mounten deine lokalen Backend und Frontend Ordner in die Container, so dass Code-Änderungen sofort wirksam werden.
+    - Der Ordner `/app/node_modules` wird als Volume definiert, damit die Abhängigkeiten im Container nicht mit den lokalen in Konflikt geraten.
+
+### Verzeichnisstruktur (mit Entwicklungsumgebung)
 
 ```
 /fahrtenbuch/
 ├── frontend/           # React Frontend
+│   └── Dockerfile      # Dockerfile für Entwicklung
 ├── backend/            # Node.js Backend
-│   ├── data/         # Uploads & Templates
-│   └── migrations/    # SQL Migrations
+│   └── Dockerfile      # Dockerfile für Entwicklung
 ├── db/                # Datenbank
-└── docker-compose.yml
+├── docker-compose.yml
+└── docker-compose.dev.yml # für lokale Entwicklung
 ```
 
 ### Apache-Konfiguration
