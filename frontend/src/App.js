@@ -1931,6 +1931,16 @@ function MonthlyOverview() {
     
     {/* Zweite Zeile: Jahresauswahl mit Checkbox daneben */}
     <div className="flex items-center justify-end gap-4">
+    <label className="checkbox-label">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span className="text-xs text-label">Abgeschlossene</span>
+    </label>
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1944,16 +1954,6 @@ function MonthlyOverview() {
       ))
     }
     </select>
-    <label className="checkbox-label">
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}
-    className="checkbox-input h-3 w-3"
-    />
-    <span className="text-xs text-label">Abgeschlossene</span>
-    </label>
     </div>
     
     {/* Dritte Zeile: Quick Actions */}
@@ -1962,19 +1962,20 @@ function MonthlyOverview() {
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
+    className="w-full sm:w-auto text-center"
     />
     </div>
     </div>
     
     {/* Cards Grid - wie in der Monatsübersicht */}
-    <div className={`grid grid-cols-1 gap-4 mb-4 ${
+    <div className={`grid grid-cols-1 mb-4 ${
       getKategorienMitErstattung().length === 1 
       ? 'sm:grid-cols-1'
       : getKategorienMitErstattung().length === 2 
-      ? 'sm:grid-cols-2'
+      ? 'sm:grid-cols-2 gap-4'
       : getKategorienMitErstattung().length === 3
-      ? 'sm:grid-cols-3'
-      : 'sm:grid-cols-2 lg:grid-cols-4'
+      ? 'sm:grid-cols-3 gap-4'
+      : 'sm:grid-cols-2 lg:grid-cols-4 gap-4'
     }`}>
     {getKategorienMitErstattung().map(([key, displayName, data]) => (
       <div key={key} className="card-container">
