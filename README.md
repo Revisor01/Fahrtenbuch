@@ -2,7 +2,6 @@
 
 Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrten. Entwickelt für Organisationen jeder Art, die eine professionelle Verwaltung ihrer Fahrtkosten benötigen.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/Revisor01/Fahrtenbuch)
 
 ## 🚀 Funktionen
@@ -303,31 +302,22 @@ docker-compose up -d
 
 ## 📝 Lizenz
 
-MIT License
-
 Copyright (c) 2024 Simon Luthe
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Alle Rechte vorbehalten.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Diese Software darf von Einzelpersonen für nicht-kommerzielle Zwecke frei genutzt werden.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Die Nutzung dieser Software durch Organisationen, Institutionen oder für kommerzielle Zwecke ist nur unter einer der folgenden Bedingungen gestattet:
+
+1.  **Kommerzielle Lizenz:** Der Erwerb einer gültigen kommerziellen Lizenz vom Urheberrechtsinhaber. Bitte kontaktieren Sie [mail@simonluthe.de](mailto:mail@simonluthe.de), um eine Lizenz zu erwerben.
+
+2.  **Genehmigung:** Eine ausdrückliche, schriftliche Genehmigung vom Urheberrechtsinhaber. Bitte kontaktieren Sie [mail@simonluthe.de](mailto:mail@simonluthe.de), um eine Genehmigung zu beantragen.
+
+DIESE SOFTWARE WIRD "WIE BESEHEN" OHNE JEGLICHE AUSDRÜCKLICHE ODER STILLSCHWEIGENDE GARANTIE ZUR VERFÜGUNG GESTELLT, EINSCHLIESSLICH, ABER NICHT BESCHRÄNKT AUF DIE GARANTIEN DER MARKTGÄNGIGKEIT, DER EIGNUNG FÜR EINEN BESTIMMTEN ZWECK UND DER NICHTVERLETZUNG VON RECHTEN DRITTER. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHT-INHABER HAFTBAR FÜR ANSPRÜCHE, SCHÄDEN ODER ANDERE VERPFLICHTUNGEN, SEI ES DURCH VERTRAG, UNERLAUBTE HANDLUNG ODER ANDERWEITIG, DIE SICH AUS, AUSSERHALB ODER IM ZUSAMMENHANG MIT DER SOFTWARE ODER DER NUTZUNG ODER ANDEREN GESCHÄFTEN MIT DER SOFTWARE ERGEBEN.
 
 ## 📞 Support
 
 Bei Fragen oder Problemen:
 - GitHub Issues
-- E-Mail: [support@example.com](mailto:support@example.com)
-- Dokumentation: [docs.example.com](https://docs.example.com)
+- E-Mail: [mail@simonluthe.de](mailto:mail@simonluthe.de)
