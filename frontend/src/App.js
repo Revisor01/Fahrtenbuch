@@ -1930,14 +1930,10 @@ function MonthlyOverview() {
     )}
     </div>
     
-    <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
-    <div className="flex items-center justify-end gap-2 w-full">
-    <QuickActions 
-    filteredData={filteredData}
-    handleAbrechnungsStatus={handleAbrechnungsStatus}
-    abrechnungstraeger={abrechnungstraeger}
-    />
-    <label className="checkbox-label">
+    <div className="w-full sm:w-auto flex flex-col items-end gap-3">
+    {/* Mobile Layout */}
+    <div className="w-full sm:hidden">
+    <label className="flex items-center text-xs text-label gap-2">
     <input
     type="checkbox"
     id="hideCompleted"
@@ -1945,13 +1941,25 @@ function MonthlyOverview() {
     onChange={(e) => setHideCompleted(e.target.checked)}
     className="checkbox-input h-3 w-3"
     />
-    <span className="text-label">Abgeschlossene</span>
+    <span>Abgeschlossene ausblenden</span>
     </label>
-    {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
-      Aktuelles Jahr
-      </button>
-    )}
+    </div>
+    
+    {/* Desktop Layout */}
+    <div className="flex items-center justify-end gap-4 w-full">
+    <div className="hidden sm:flex items-center gap-2">
+    <label className="flex items-center text-xs text-label gap-2">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span>Abgeschlossene ausblenden</span>
+    </label>
+    </div>
+    
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -1965,6 +1973,12 @@ function MonthlyOverview() {
       ))
     }
     </select>
+    </div>
+    <QuickActions 
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    />
     </div>
     </div>
     </div>
@@ -2139,22 +2153,22 @@ function MonthlyOverview() {
           ))}
         
         {/* Mitfahrer */}
-        <div className="pt-4">
-        <div className="flex justify-between items-start">
-        <span className="text-label text-sm">Mitfahrer</span>
-        <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
-        {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
-        </span>
+        {month.erstattungen?.mitfahrer > 0 && (
+          <div className="pt-4">
+          <div className="flex justify-between items-start">
+          <span className="text-label text-sm">Mitfahrer</span>
+          <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
+          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
+          </span>
+          </div>
+          <div className="mt-2">
+          {renderStatusCell(month, 'mitfahrer')}
+          </div>
+          </div>
+        )}
         </div>
-        <div className="mt-2">
-        {renderStatusCell(month, 'mitfahrer')}
-        </div>
-        </div>
-        </div>
-        </div>
-      );
-    })}
-    </div>
+      })}
+      </div>
     
     <AbrechnungsStatusModal 
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
@@ -2373,7 +2387,9 @@ function AppContent() {
     <div className="mb-8"> 
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-    <h1 className="text-lg font-medium text-value">Fahrtenbuch Kirchenkreis Dithmarschen</h1>
+    <h1 className="text-lg font-medium text-value">
+    {process.env.REACT_APP_TITLE || "Fahrtenbuch"}
+    </h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
     {/* Nur noch Einstellungen und Admin-Button */}
@@ -2449,6 +2465,18 @@ function AppContent() {
       onClose={() => setShowHelpModal(false)}
     />
   </div>
+<footer className="mt-12 py-6 border-t border-primary-100 dark:border-primary-800">
+  <div className="container mx-auto px-4">
+    <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted">
+      <div>
+        © {new Date().getFullYear()} Simon Luthe. Alle Rechte vorbehalten.
+      </div>
+      <div>
+        <strong>Impressum:</strong> Simon Luthe, Süderstraße 18, 25779 Hennstedt
+      </div>
+    </div>
+  </div>
+</footer>
 );
 }
 
