@@ -1927,7 +1927,7 @@ function MonthlyOverview() {
     <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="hidden btn-secondary">
+      <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary">
       Aktuelles Jahr
       </button>
     )}
@@ -2404,7 +2404,7 @@ function AppContent() {
   if (!isLoggedIn) {
     return <LoginPage />;
   }
-  
+    
   return (
     <div className="container mx-auto p-4">
     <div className="mb-8"> 
