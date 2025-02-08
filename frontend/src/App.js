@@ -1928,7 +1928,7 @@ function MonthlyOverview() {
     <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
+      <button onClick={() => setSelectedYear(currentYear)} className="hidden btn-secondary">
       Aktuelles Jahr
       </button>
     )}
@@ -1937,6 +1937,11 @@ function MonthlyOverview() {
     {/* Checkbox und Select - nur auf Desktop hier */}
     <div className="hidden sm:flex items-center gap-4 ml-auto">
     <label className="checkbox-label">
+    {selectedYear !== currentYear && (
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
+      Aktuelles Jahr
+      </button>
+    )}
     <input
     type="checkbox"
     id="hideCompleted"
@@ -1990,7 +1995,7 @@ function MonthlyOverview() {
     </div>
     
     {/* Dritte Zeile - Quick Actions nur auf Mobile */}
-    <div className="sm:hidden">
+    <div className="">
     <QuickActions 
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
