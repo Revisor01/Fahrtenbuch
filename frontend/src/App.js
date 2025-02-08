@@ -1919,18 +1919,22 @@ function MonthlyOverview() {
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight mb-4">
     <div className="space-y-6 mb-4">
-    {/* Erste Zeile: Auf Desktop alles in einer Zeile */}
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    {/* Header mit Navigation */}
+    <div className="flex flex-col gap-4">
+    {/* Erste Zeile */}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+    {/* Titel und Aktuelles Jahr - immer in einer Zeile */}
+    <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
-    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4">
     {selectedYear !== currentYear && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)} 
-      className="btn-secondary w-full sm:w-auto text-center"
-      >
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
       Aktuelles Jahr
       </button>
     )}
+    </div>
+    
+    {/* Checkbox und Select - nur auf Desktop hier */}
+    <div className="hidden sm:flex items-center gap-4 ml-auto">
     <label className="checkbox-label">
     <input
     type="checkbox"
@@ -1957,14 +1961,42 @@ function MonthlyOverview() {
     </div>
     </div>
     
-    {/* Dritte Zeile: Quick Actions */}
-    <div className="flex justify-end">
+    {/* Zweite Zeile - nur Mobile */}
+    <div className="flex sm:hidden items-center justify-end gap-4">
+    <label className="checkbox-label">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span className="text-xs text-label">Abgeschlossene</span>
+    </label>
+    <select 
+    value={selectedYear} 
+    onChange={(e) => setSelectedYear(e.target.value)}
+    className="form-select w-24"
+    >
+    <option value="all">Gesamt</option>
+    {[...new Set(monthlyData.map(m => m.year))]
+      .sort((a, b) => b - a)
+      .map(year => (
+        <option key={year} value={year}>{year}</option>
+      ))
+    }
+    </select>
+    </div>
+    
+    {/* Dritte Zeile - Quick Actions nur auf Mobile */}
+    <div className="sm:hidden">
     <QuickActions 
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
-    className="w-full sm:w-auto text-center"
+    className="w-full text-center"
     />
+    </div>
     </div>
     </div>
     
