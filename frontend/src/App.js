@@ -1989,7 +1989,7 @@ function MonthlyOverview() {
     </div>
     
     {/* Cards Grid - wie in der Monatsübersicht */}
-    <div className={`grid gap-4 ${
+    <div className={`grid grid-cols-1 gap-4 ${
       getKategorienMitErstattung().length <= 2 
       ? 'grid-cols-1 sm:grid-cols-2' 
       : getKategorienMitErstattung().length === 3
@@ -2175,7 +2175,6 @@ function MonthlyOverview() {
       );
     })}
     </div>
-    
     <AbrechnungsStatusModal 
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
     onClose={() => setAbrechnungsStatusModal({})}
@@ -2190,7 +2189,6 @@ function MonthlyOverview() {
     aktion={abrechnungsStatusModal.aktion}
     />
     
-    </div>
     </div>
   );
 }
