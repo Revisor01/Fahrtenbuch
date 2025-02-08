@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: revisoren/fahrtenbuch-app:beta
+    image: revisoren/fahrtenbuch-app:latest
     ports:
       - "9642:80"
     depends_on:
@@ -8,11 +8,12 @@ services:
     restart: unless-stopped
 
   backend:
-    image: revisoren/fahrtenbuch-server:beta
+    image: revisoren/fahrtenbuch-server:latest
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=${DB_USER}      - DB_USER=${DB_USER}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
@@ -32,7 +33,6 @@ services:
     restart: unless-stopped
     volumes:
       - fahrtenbuch_data:/app/data
-      - ./backend/migrations:/app/migrations
     depends_on:
       - db
 
@@ -43,12 +43,19 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_INIT_COMMAND: "SET GLOBAL log_bin_trust_function_creators = 1;" # Hinzufügen
     volumes:
-      - /home/users/revisor/www/fahrtenbuch/db/mysql-data:/var/lib/mysql
-    command: 
+      - fahrtenbuch_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-      - --default-authentication-plugin=mysql_native_password
+      - --log_bin_trust_function_creators=1
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
 
 volumes:
   fahrtenbuch_data:
