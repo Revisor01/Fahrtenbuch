@@ -1964,6 +1964,7 @@ function MonthlyOverview() {
     abrechnungstraeger={abrechnungstraeger}
     />
     </div>
+    </div>
     
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid grid-cols-1 gap-4 mb-4 ${
