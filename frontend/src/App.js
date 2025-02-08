@@ -1970,18 +1970,16 @@ function MonthlyOverview() {
       .sort((a, b) => b - a)
       .map(year => (
         <option key={year} value={year}>{year}</option>
-      ))
-    }
+      ))}
     </select>
     </div>
+    </div>
+    
     <QuickActions 
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
     />
-    </div>
-    </div>
-    </div>
     
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid gap-4 ${
@@ -2005,7 +2003,6 @@ function MonthlyOverview() {
         </div>
       )}
       </div>
-    );
     ))}
     
     {/* Gesamt Card */}
