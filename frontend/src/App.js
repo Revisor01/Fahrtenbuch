@@ -18,6 +18,7 @@ import ResetPassword from './ResetPassword';
 import SetPassword from './SetPassword';
 import { ThemeProvider } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
+require('dotenv').config();
 
 const API_BASE_URL = '/api';
 
@@ -2225,7 +2226,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
     <div className="card-container-highlight m-6 w-full max-w-md">
     <h1 className="text-lg font-medium text-value text-center mb-6">
-    Fahrtenbuch Kirchenkreis Dithmarschen
+    {process.env.REACT_APP_TITLE || "Fahrtenbuch"}
     </h1>
     
     <form onSubmit={handleSubmit} className="space-y-4">
