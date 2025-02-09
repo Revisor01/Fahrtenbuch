@@ -314,15 +314,16 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
         <p>Nutzen Sie iOS-Kurzbefehle, um das Erfassen von Fahrten noch einfacher zu gestalten:</p>
         <div className="space-y-4 mt-4">
         <div>
-        <a 
-        href="https://www.icloud.com/shortcuts/e7e768cb319942e2819c7c19dbc337ff" 
-        className="btn-primary flex items-center gap-2 text-sm"
-        target="_blank"
-        rel="noopener noreferrer"
-        >
-        <Download size={16} />
-        <span>Kurzbefehl installieren</span>
-        </a>
+      <a 
+      href="https://www.icloud.com/shortcuts/886203aaac58461bb4f01eeefeac5a8f" 
+      className="btn-primary w-full md:w-auto flex items-center justify-center md:justify-start gap-2 text-sm"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+      <Download size={16} />
+      <span className="hidden md:inline">Kurzbefehl: "Neue Fahrt eintragen" installieren</span>
+      <span className="md:hidden">Kurzbefehl installieren</span>
+      </a>
         </div>
         
         <div className="space-y-2">
@@ -341,6 +342,8 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
         <h4 className="font-medium">Funktionen des Kurzbefehls:</h4>
         <ul className="list-disc ml-4 space-y-2">
         <li>Schnelle Erfassung von Fahrten direkt vom Homescreen</li>
+        <li>Den aktuellen Standort mittels GPS als Adresse angeben</li>
+        <li>Siri Unterstützung: "Hey Siri, neue Fahrt eintragen."</li>
         </ul>
         </div>
         
@@ -348,7 +351,7 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
         <h4 className="font-medium mb-2">Tipp:</h4>
         <p className="text-sm">
         Fügen Sie den Kurzbefehl zu Ihrem Home-Bildschirm hinzu, um mit einem Tipp 
-        eine neue Fahrt zu erfassen. Sie können auch "Hey Siri, erfasse eine Fahrt" 
+        eine neue Fahrt zu erfassen. Sie können auch "Hey Siri, neue Fahrt eintragen." 
         verwenden.
         </p>
         </div>
