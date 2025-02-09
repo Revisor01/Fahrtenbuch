@@ -183,25 +183,27 @@ class User {
         return result.affectedRows > 0;
     }
 
-  static async delete(id) {
+    static async delete(id) {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
             
             // Diese Tabellen haben ON DELETE CASCADE:
-            // - email_verifications
-            // - user_profiles
+            // - user_profiles (direkt)
+            // - api_keys (direkt)
             // - mitfahrer (über fahrten)
-            // - fahrt_details (über fahrten)
             
             // Lösche abhängige Daten
             await connection.execute('DELETE FROM abrechnungen WHERE user_id = ?', [id]);
-            await connection.execute('DELETE FROM abrechnungsarten WHERE user_id = ?', [id]);
+            await connection.execute('DELETE FROM erstattungsbetraege WHERE abrechnungstraeger_id IN (SELECT id FROM abrechnungstraeger WHERE user_id = ?)', [id]);
+            await connection.execute('DELETE FROM abrechnungstraeger WHERE user_id = ?', [id]);        
             await connection.execute('DELETE FROM fahrten WHERE user_id = ?', [id]);
             await connection.execute('DELETE FROM distanzen WHERE user_id = ?', [id]);
             await connection.execute('DELETE FROM orte WHERE user_id = ?', [id]);
+            await connection.execute('DELETE FROM mitfahrer_erstattung WHERE user_id = ?', [id]); // Hinzugefügt
+            await connection.execute('DELETE FROM email_verifications WHERE user_id = ?', [id]); // Hinzugefügt
             
-            // Zuletzt den User selbst löschen - dies triggert auch die CASCADE Deletes
+            // Zuletzt den User selbst löschen - dies triggert auch die CASCADE Deletes auf user_profiles und api_keys
             const [result] = await connection.execute('DELETE FROM users WHERE id = ?', [id]);
             
             await connection.commit();
