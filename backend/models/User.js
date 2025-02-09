@@ -188,10 +188,22 @@ class User {
         try {
             await connection.beginTransaction();
             
-            // Diese Tabellen haben ON DELETE CASCADE:
-            // - user_profiles (direkt)
-            // - api_keys (direkt)
-            // - mitfahrer (über fahrten)
+            // Prüfe, ob der zu löschende Benutzer ein Admin ist
+            const [userRows] = await connection.execute('SELECT role FROM users WHERE id = ?', [id]);
+            if (userRows.length === 0) {
+                throw new Error('Benutzer nicht gefunden');
+            }
+            const userRole = userRows[0].role;
+            
+            // Wenn der zu löschende Benutzer ein Admin ist, überprüfe, ob er der letzte Admin ist
+            if (userRole === 'admin') {
+                const [adminCountRows] = await connection.execute('SELECT COUNT(*) as count FROM users WHERE role = "admin"');
+                const adminCount = adminCountRows[0].count;
+                
+                if (adminCount <= 1) {
+                    throw new Error('Der letzte Admin-Benutzer kann nicht gelöscht werden');
+                }
+            }
             
             // Lösche abhängige Daten
             await connection.execute('DELETE FROM abrechnungen WHERE user_id = ?', [id]);
