@@ -27,22 +27,12 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Backend (Master)
-        if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
           tags: revisoren/fahrtenbuch-server:latest
-
-      - name: Build and push Backend (Abrechnungen)
-        if: ${{ github.ref == 'refs/heads/abrechnungen' }}
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile
-          push: true
-          tags: revisoren/fahrtenbuch-server:beta
 
       - name: Build and push Frontend (Master)
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -55,19 +45,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push Frontend (Abrechnungen)
-        if: ${{ github.ref == 'refs/heads/abrechnungen' }}
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          push: true
-          tags: revisoren/fahrtenbuch-app:beta
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Update Beta Service via Webhook (Abrechnungen)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/abrechnungen' }}
+      - name: Update Beta Service via Webhook (Master)
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         uses: newarifrh/portainer-service-webhook@v1
         with:
-          webhook_url: https://docker.godsapp.de/api/stacks/webhooks/48cea0ae-5f02-476b-b049-b1f4ae0dc3f9
+          webhook_url: https://docker.godsapp.de/api/stacks/webhooks/416b7561-cc59-4624-8fc3-daefca2ccea4
