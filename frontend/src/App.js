@@ -7,7 +7,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-import { HelpCircle, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
 import HilfeModal from './HilfeModal';
 import NotificationModal from './NotificationModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
@@ -38,15 +38,50 @@ function AppProvider({ children }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
+  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
+  const [hasActiveNotification, setHasActiveNotification] = useState(false);
+  
+  const [abrechnungsStatusModal, setAbrechnungsStatusModal] = useState({
+    open: false,
+    traegerId: null,
+    aktion: null,
+    jahr: null,
+    monat: null
+  });
+  
+  const refreshAllData = async () => {
+    try {
+      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
+        fetchFahrten(),
+        fetchMonthlyData(),
+        fetchOrte(),
+        fetchDistanzen(),
+        axios.get('/api/abrechnungstraeger/simple')
+      ]);
+      
+      // Hier die tatsächlichen Daten setzen
+      if (fahrtenRes) setFahrten(fahrtenRes);
+      if (monthlyDataRes) setMonthlyData(monthlyDataRes);
+      if (orteRes) setOrte(orteRes);
+      if (distanzenRes) setDistanzen(distanzenRes);
+      if (abrechnungstraegerRes?.data) {
+        setAbrechnungstraeger(abrechnungstraegerRes.data.data);
+      }
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren der Daten:', error);
+    }
+  };
   
   const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
+    setHasActiveNotification(true);
     setNotification({ isOpen: true, title, message, onConfirm, showCancel });
   };
   
   const closeNotification = () => {
     setNotification(prev => ({ ...prev, isOpen: false }));
+    setHasActiveNotification(false);
   };
   
   useEffect(() => {
@@ -180,33 +215,41 @@ function AppProvider({ children }) {
   
   const addFahrt = async (fahrt, retries = 3) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/fahrten`, fahrt);
+      const cleanedFahrt = {
+        datum: fahrt.datum,
+        vonOrtId: fahrt.vonOrtId || null,
+        nachOrtId: fahrt.nachOrtId || null,
+        einmaligerVonOrt: fahrt.einmaligerVonOrt || null,
+        einmaligerNachOrt: fahrt.einmaligerNachOrt || null,
+        anlass: fahrt.anlass || '',
+        kilometer: parseFloat(fahrt.kilometer) || 0,
+        abrechnung: parseInt(fahrt.abrechnung) || null,
+        mitfahrer: fahrt.mitfahrer || []
+      };
+      
+      const response = await axios.post(`${API_BASE_URL}/fahrten`, cleanedFahrt);
       if (response.status === 201) {
-        fetchFahrten();
-        fetchMonthlyData();
-      } else {
-        console.error('Unerwarteter Statuscode beim Hinzufügen der Fahrt:', response.status);
+        await fetchFahrten();
+        await refreshAllData(); // Hier hinzufügen
+        return response.data;
       }
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Fahrt:', error);
-      if (error.response) {
-        console.error('Fehlerdetails:', error.response.data);
-      }
-      if (retries > 0 && error.response && error.response.data.code === 'ER_LOCK_DEADLOCK') {
-        console.log(`Wiederhole Hinzufügen der Fahrt. Verbleibende Versuche: ${retries - 1}`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return addFahrt(fahrt, retries - 1);
-      }
       throw error;
     }
   };
   
   const updateFahrt = async (id, updatedFahrt) => {
     try {
-      await axios.put(`${API_BASE_URL}/fahrten/${id}`, updatedFahrt);
-      fetchFahrten();
+      const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, updatedFahrt);
+      if (response.status === 200) {
+        await fetchFahrten();
+        await refreshAllData(); // Hier hinzufügen
+        return response.data;
+      }
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Fahrt:', error);
+      throw error;
     }
   };
   
@@ -216,6 +259,18 @@ function AppProvider({ children }) {
       fetchDistanzen();
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Distanz:', error);
+    }
+  };
+  
+  const handleAbrechnungsStatus = async (jahr, monat, traegerId, aktion, datum) => {
+    try {
+      await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum);
+      await fetchMonthlyData();
+      await fetchFahrten();
+      showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
+    } catch (error) {
+      console.error('Fehler beim Aktualisieren des Status:', error);
+      showNotification("Fehler", "Status konnte nicht aktualisiert werden");
     }
   };
   
@@ -236,17 +291,17 @@ function AppProvider({ children }) {
       // Aktueller Monat
       months.push(new Date(currentYear, currentMonth, 1));
       
-      // Rückwärts gehen (24 Monate sollten erstmal reichen, werden aber gefiltert)
+      // Rückwärts gehen (24 Monate)
       for (let i = 1; i <= 24; i++) {
         const pastDate = new Date(currentYear, currentMonth - i, 1);
         months.push(pastDate);
       }
       
-      // Für jeden Monat API-Call vorbereiten
+      // API-Calls vorbereiten
       for (const date of months) {
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
-        promises.push(axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`));
+        promises.push(axios.get(`/api/fahrten/report/${year}/${month}`));
       }
       
       const responses = await Promise.all(promises);
@@ -258,18 +313,16 @@ function AppProvider({ children }) {
           monthName: date.toLocaleString('default', { month: 'long' }),
           year: date.getFullYear(),
           monatNr: date.getMonth() + 1,
-          kirchenkreisErstattung: response.data.summary.kirchenkreisErstattung,
-          gemeindeErstattung: response.data.summary.gemeindeErstattung,
-          mitfahrerErstattung: response.data.summary.mitfahrerErstattung || 0,
-          abrechnungsStatus: response.data.summary.abrechnungsStatus
+          erstattungen: response.data.summary.erstattungen || {},
+          abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
+          totalErstattung: response.data.summary.gesamtErstattung || 0
         };
       })
-      // Nur Monate mit Daten behalten
-      .filter(month => 
-        month.kirchenkreisErstattung > 0 || 
-        month.gemeindeErstattung > 0 || 
-        month.mitfahrerErstattung > 0
-      )
+      // Nur Monate mit Erstattungen behalten
+      .filter(month => {
+        const hasErstattungen = Object.values(month.erstattungen).some(betrag => betrag > 0);
+        return hasErstattungen;
+      })
       // Nach Datum sortieren (neueste zuerst)
       .sort((a, b) => {
         const dateA = new Date(a.year, a.monatNr - 1);
@@ -281,11 +334,10 @@ function AppProvider({ children }) {
     } catch (error) {
       console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
     }
-  };
+  };  
   
   const updateOrt = async (id, ort) => {
     try {
-      console.log('Sending update request for Ort:', id, ort); // Überprüfen, was gesendet wird
       await axios.put(`${API_BASE_URL}/orte/${id}`, ort);
       fetchOrte();
     } catch (error) {
@@ -295,7 +347,6 @@ function AppProvider({ children }) {
   
   const updateDistanz = async (id, distanz) => {
     try {
-      console.log('Sending update request for Distanz:', id, distanz);
       await axios.put(`${API_BASE_URL}/distanzen/${id}`, {
         vonOrtId: distanz.von_ort_id,
         nachOrtId: distanz.nach_ort_id,
@@ -310,7 +361,8 @@ function AppProvider({ children }) {
   const deleteFahrt = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/fahrten/${id}`);
-      fetchFahrten();
+      await fetchFahrten();
+      await refreshAllData(); // Hier hinzufügen
     } catch (error) {
       console.error('Fehler beim Löschen der Fahrt:', error);
     }
@@ -337,10 +389,47 @@ function AppProvider({ children }) {
   
   return (
     <AppContext.Provider value={{ 
-      isLoggedIn, login, logout, token, updateFahrt, user, setUser, orte, distanzen, fahrten, selectedMonth, gesamtKirchenkreis, gesamtGemeinde,
-      setSelectedMonth, addOrt, addFahrt, addDistanz, updateOrt, updateDistanz, 
-      fetchFahrten, deleteFahrt, deleteDistanz, deleteOrt, monthlyData, fetchMonthlyData, summary, setSummary,
-      setIsProfileModalOpen, isProfileModalOpen, updateAbrechnungsStatus, showNotification, closeNotification, setFahrten
+      isLoggedIn, 
+      login, 
+      logout, 
+      token, 
+      updateFahrt, 
+      user, 
+      setUser, 
+      orte, 
+      distanzen, 
+      fahrten, 
+      selectedMonth, 
+      gesamtKirchenkreis, 
+      gesamtGemeinde,
+      setSelectedMonth, 
+      addOrt, 
+      addFahrt, 
+      addDistanz, 
+      updateOrt, 
+      updateDistanz, 
+      fetchFahrten, 
+      deleteFahrt, 
+      deleteDistanz, 
+      deleteOrt, 
+      monthlyData,
+      setMonthlyData,
+      fetchMonthlyData,
+      summary, 
+      setSummary,
+      setIsProfileModalOpen, 
+      isProfileModalOpen, 
+      updateAbrechnungsStatus, 
+      hasActiveNotification, 
+      showNotification, 
+      closeNotification, 
+      setFahrten,
+      refreshAllData,
+      abrechnungsStatusModal,
+      setAbrechnungsStatusModal,
+      handleAbrechnungsStatus,
+      abrechnungstraeger,
+      setAbrechnungstraeger
     }}>
     {children}
     <NotificationModal
@@ -351,176 +440,61 @@ function AppProvider({ children }) {
     onConfirm={notification.onConfirm}
     showCancel={notification.showCancel}
     />
+    <AbrechnungsStatusModal 
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
+    onClose={() => setAbrechnungsStatusModal({})}
+    onSubmit={(date) => handleAbrechnungsStatus(
+      abrechnungsStatusModal.jahr, 
+      abrechnungsStatusModal.monat,
+      abrechnungsStatusModal.traegerId, 
+      abrechnungsStatusModal.aktion,
+      date
+    )}
+    traegerId={abrechnungsStatusModal.traegerId}
+    aktion={abrechnungsStatusModal.aktion}
+    />
+    
+    <Modal
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion === 'reset'}
+    onClose={() => setAbrechnungsStatusModal({})}
+    title="Status zurücksetzen"
+    >
+    <div className="card-container-highlight">
+    <p className="text-value text-sm mb-6">
+    Möchten Sie den Status wirklich zurücksetzen?
+    </p>
+    <div className="flex flex-col sm:flex-row gap-2">
+    <button
+    type="button"
+    onClick={() => setAbrechnungsStatusModal({})}
+    className="btn-secondary w-full"
+    >
+    Abbrechen
+    </button>
+    <button
+    type="button"
+    onClick={() => {
+      handleAbrechnungsStatus(
+        abrechnungsStatusModal.jahr,
+        abrechnungsStatusModal.monat,
+        abrechnungsStatusModal.traegerId,
+        'reset'
+      );
+      setAbrechnungsStatusModal({});
+    }}
+    className="btn-primary w-full"
+    >
+    Zurücksetzen
+    </button>
+    </div>
+    </div>
+    </Modal>
     </AppContext.Provider>
   );
 }
 
-function OrtForm() {
-  const { orte, addOrt, showNotification } = useContext(AppContext);
-  const [name, setName] = useState('');
-  const [adresse, setAdresse] = useState('');
-  const [istWohnort, setIstWohnort] = useState(false);
-  const [istDienstort, setIstDienstort] = useState(false);
-  const [istKirchspiel, setIstKirchspiel] = useState(false);
-  const [ortTyp, setOrtTyp] = useState('');
-  const hasDienstort = orte.some(ort => ort.ist_dienstort);
-  const hasWohnort = orte.some(ort => ort.ist_wohnort);
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    addOrt({ name, adresse, istWohnort, istDienstort, istKirchspiel });
-    setName('');
-    setAdresse('');
-    setIstWohnort(false);
-    setIstDienstort(false);
-    setIstKirchspiel(false);
-    showNotification("Erfolg", "Der neue Ort wurde erfolgreich hinzugefügt.");
-  };
-  const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
-  
-  return (
-    <div className="mb-4">
-    <div className="card-container-highlight">
-    <form onSubmit={handleSubmit}>
-    <div className="flex flex-col sm:flex-row gap-4">
-    <div className="w-full sm:w-1/4">
-    <input
-    type="text"
-    value={name}
-    onChange={(e) => setName(e.target.value)}
-    placeholder="Name des Ortes"
-    className="form-input"
-    required
-    />
-    </div>
-    <div className="w-full sm:w-2/5">
-    <input
-    type="text"
-    value={adresse}
-    onChange={(e) => setAdresse(e.target.value)}
-    placeholder="Vollständige Adresse"
-    className="form-input"
-    required
-    />
-    </div>
-    <div className="w-full sm:w-1/5">
-    <select
-    value={ortTyp}
-    onChange={(e) => {
-      const value = e.target.value;
-      setOrtTyp(value);
-      setIstWohnort(value === 'wohnort');
-      setIstDienstort(value === 'dienstort');
-      setIstKirchspiel(value === 'kirchspiel');
-    }}
-    className="form-select"
-    >
-    <option value="">Art des Ortes</option>
-    {!hasWohnort && <option value="wohnort">Wohnort</option>}
-    {!hasDienstort && <option value="dienstort">Dienstort</option>}
-    <option value="kirchspiel">Kirchspiel</option>
-    <option value="none">Sonstiger Ort</option>
-    </select>
-    </div>
-    <div className="w-full sm:w-auto sm:self-end">
-    <button type="submit" className="btn-primary w-full sm:w-auto">
-    Hinzufügen
-    </button>
-    </div>
-    </div>
-    </form>
-    </div>
-    </div>
-  );
-}
-
-function DistanzForm() {
-  const { orte, addDistanz, distanzen, showNotification } = useContext(AppContext);
-  const [vonOrtId, setVonOrtId] = useState('');
-  const [nachOrtId, setNachOrtId] = useState('');
-  const [distanz, setDistanz] = useState('');
-  const [existingDistanz, setExistingDistanz] = useState(null);
-  
-  useEffect(() => {
-    if (vonOrtId && nachOrtId) {
-      const existing = distanzen.find(d => 
-        (d.von_ort_id === parseInt(vonOrtId) && d.nach_ort_id === parseInt(nachOrtId)) ||
-        (d.von_ort_id === parseInt(nachOrtId) && d.nach_ort_id === parseInt(vonOrtId))
-      );
-      setExistingDistanz(existing);
-      if (existing) {
-        setDistanz(existing.distanz.toString());
-      } else {
-        setDistanz('');
-      }
-    } else {
-      setExistingDistanz(null);
-      setDistanz('');
-    }
-  }, [vonOrtId, nachOrtId, distanzen]);
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    addDistanz({ vonOrtId, nachOrtId, distanz: parseInt(distanz) });
-    setVonOrtId('');
-    setNachOrtId('');
-    setDistanz('');
-    setExistingDistanz(null);
-    showNotification("Erfolg", "Die neue Distanz wurde erfolgreich hinzugefügt.");
-  };
-  
-  const sortedOrte = orte.sort((a, b) => a.name.localeCompare(b.name));
-  
-  return (
-    <div className="mb-4">
-    <div className="card-container-highlight">
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
-    <div className="w-full sm:flex-1">
-    <select
-    value={vonOrtId}
-    onChange={(e) => setVonOrtId(e.target.value)}
-    className="form-select"
-    required
-    >
-    <option value="">Von Ort auswählen</option>
-    {renderOrteOptions(orte)}
-    </select>
-    </div>
-    
-    <div className="w-full sm:flex-1">
-    <select
-    value={nachOrtId}
-    onChange={(e) => setNachOrtId(e.target.value)}
-    className="form-select"
-    required
-    >
-    <option value="">Nach Ort auswählen</option>
-    {renderOrteOptions(orte)}
-    </select>
-    </div>
-    
-    <div className="w-full sm:w-36">
-    <input
-    type="number"
-    value={distanz}
-    onChange={(e) => setDistanz(e.target.value)}
-    placeholder="km"
-    className="form-input"
-    required
-    />
-    </div>
-    
-    <button type="submit" className="btn-primary">
-    {existingDistanz ? 'Aktualisieren' : 'Hinzufügen'}
-    </button>
-    </form>
-    </div>
-    </div>
-  );
-}
-
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -619,7 +593,9 @@ function FahrtenListe() {
       ...fahrt,
       datum: formatDateForInput(fahrt.datum),
       vonOrtTyp: getOrtTyp(fahrt, true),
-      nachOrtTyp: getOrtTyp(fahrt, false)
+      nachOrtTyp: getOrtTyp(fahrt, false),
+      abrechnung: fahrt.abrechnung,
+      kilometer: fahrt.kilometer
     });
   };
   
@@ -646,8 +622,6 @@ function FahrtenListe() {
         throw new Error('Unerwarteter Dateityp vom Server erhalten');
       }
       
-      console.log('Received file:', { contentType, filename, size: response.data.size });
-      
       const blob = new Blob([response.data], { type: contentType });
       
       if (blob.size === 22) {
@@ -664,7 +638,6 @@ function FahrtenListe() {
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log('File download initiated');
     } catch (error) {
       console.error('Fehler beim Exportieren nach Excel:', error);
       if (error.response) {
@@ -676,29 +649,39 @@ function FahrtenListe() {
   
   const handleSave = async () => {
     try {
+      // Validierung
+      if (!editingFahrt.anlass || !editingFahrt.datum || !editingFahrt.kilometer || !editingFahrt.abrechnung) {
+        showNotification("Fehler", "Bitte füllen Sie alle erforderlichen Felder aus.");
+        return;
+      }
+      
+      const kilometer = parseFloat(editingFahrt.kilometer);
+      if (isNaN(kilometer) || kilometer <= 0) {
+        showNotification("Fehler", "Bitte geben Sie eine gültige Kilometerzahl ein.");
+        return;
+      }
+      
+      const abrechnung = parseInt(editingFahrt.abrechnung);
+      if (isNaN(abrechnung)) {
+        showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
+        return;
+      }
+
       const updatedFahrt = {
         datum: editingFahrt.datum,
-        vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? editingFahrt.von_ort_id : null,
-        nachOrtId: editingFahrt.nachOrtTyp === 'gespeichert' ? editingFahrt.nach_ort_id : null,
+        vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
+        nachOrtId: editingFahrt.nachOrtTyp === 'gespeichert' ? parseInt(editingFahrt.nach_ort_id) : null,
         einmaligerVonOrt: editingFahrt.vonOrtTyp === 'einmalig' ? editingFahrt.einmaliger_von_ort : null,
         einmaligerNachOrt: editingFahrt.nachOrtTyp === 'einmalig' ? editingFahrt.einmaliger_nach_ort : null,
         anlass: editingFahrt.anlass,
-        kilometer: editingFahrt.kilometer,
-        abrechnung: editingFahrt.abrechnung,
-        autosplit: editingFahrt.autosplit
+        kilometer: kilometer.toFixed(2),
+        abrechnung: parseInt(editingFahrt.abrechnung)
       };
-      const updatedFahrten = fahrten.map(f => 
-        f.id === editingFahrt.id ? { ...f, ...updatedFahrt } : f);
       
-      setFahrten(updatedFahrten);
       await updateFahrt(editingFahrt.id, updatedFahrt);
-      
       setEditingFahrt(null);
-      fetchFahrten();
-      fetchMonthlyData();
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
     } catch (error) {
-      console.error('Fehler beim Aktualisieren der Fahrt:', error);
       showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
     }
   };
@@ -715,34 +698,50 @@ function FahrtenListe() {
     setSelectedMonth(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
   };
   
+  const getKategorienMitErstattung = () => {
+    const kategorien = [];
+    
+    // Ist das aktuelle Monats-Summary
+    const erstattungen = summary.erstattungen || {};
+    
+    // Erst sortierte Abrechnungsträger
+    abrechnungstraeger.forEach(traeger => {
+      const betrag = erstattungen[traeger.id];
+      if (betrag > 0) {
+        kategorien.push([
+          traeger.id.toString(),
+          traeger.name,
+          betrag // Hier direkt den Betrag verwenden, nicht data.original/ausstehend
+        ]);
+      }
+    });
+    
+    // Dann Mitfahrer am Ende
+    const mitfahrerBetrag = erstattungen['mitfahrer'];
+    if (mitfahrerBetrag > 0) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerBetrag]);
+    }
+    
+    return kategorien;
+  };
+  
+  const allCategories = () => {
+    // Sammle alle einzigartigen Kategorien
+    const categories = new Set([
+      ...Object.keys(summary.erstattungen || {}),
+      ...Object.keys(summary.mitfahrerErstattungen || {})
+    ]);
+    return categories.size; // Gibt die tatsächliche Anzahl der Kategorien zurück
+  };
+  
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
     
-    const kkReceived = summary.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-    const gemReceived = summary.abrechnungsStatus?.gemeinde?.erhalten_am;
-    
-    const currentTotal = (
-      (!kkReceived ? Number(summary.kirchenkreisErstattung || 0) : 0) +
-      (!gemReceived ? Number(summary.gemeindeErstattung || 0) : 0) +
-      (!kkReceived ? Number(summary.mitfahrerErstattung || 0) : 0)
-    ).toFixed(2);
-    
-    const originalTotal = (
-      Number(summary.kirchenkreisErstattung || 0) +
-      Number(summary.gemeindeErstattung || 0) +
-      Number(summary.mitfahrerErstattung || 0)
-    ).toFixed(2);
-    
-    const renderStatusIcon = (status) => {
-      if (status?.erhalten_am) {
-        return <span className="text-green-500">✓</span>;
-      }
-      if (status?.eingereicht_am) {
-        return <span className="text-yellow-500">○</span>;
-      }
-      return null;
-    };
+    const getAbrechnungTraegerName = (id) => {
+      const traeger = abrechnungstraeger?.find(t => t.id === id);
+      return traeger ? traeger.name : 'Unbekannt';
+    }
     
     return (
       <div className="card-container-highlight mb-4">
@@ -792,178 +791,120 @@ function FahrtenListe() {
       </div>
       </div>
       
-      <div className="card-grid">
-      {/* Kirchenkreis Card */}
-      <div className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Kirchenkreis</span>
-      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
-      {Number(summary.kirchenkreisErstattung || 0).toFixed(2)} €
-      </span>
-      </div>
-      
-      <div className="text-xs space-y-1">
-      {(summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am || summary.abrechnungsStatus?.kirchenkreis?.erhalten_am) && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Status</span>
-        {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? (
-          <span className="status-badge-primary">● Erhalten</span>
-        ) : (
-          <span className="status-badge-secondary">○ Eingereicht</span>
+      {/* Cards Grid */}
+      <div className={`grid grid-cols-1 gap-4 ${
+        allCategories() === 1 
+        ? 'sm:grid-cols-1'
+        : allCategories() === 2 
+        ? 'sm:grid-cols-2' 
+        : allCategories() === 3
+        ? 'sm:grid-cols-3'
+        : 'sm:grid-cols-2 lg:grid-cols-4'
+      }`}>
+      {getKategorienMitErstattung().map(([key, displayName, value]) => (
+        <div key={key} className="card-container">
+        <div className="flex justify-between items-center mb-2">
+        <span className="text-sm text-label">{displayName}</span>
+        <span className={summary.abrechnungsStatus?.[key]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
+        {Number(value).toFixed(2)} €
+        </span>
+        </div>
+        
+        {value > 0 && (
+          <div className="text-xs space-y-1">
+          <div className="flex items-center justify-between">
+          <span className="text-label">Status</span>
+          {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
+            <span 
+            className="status-badge-primary cursor-pointer"
+            onClick={() => setAbrechnungsStatusModal({ 
+              open: true, 
+              traegerId: key,
+              aktion: 'reset', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
+            <CheckCircle2 size={14} />
+            <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
+            </span>
+          ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
+            <span 
+            className="status-badge-secondary cursor-pointer"
+            onClick={() => setAbrechnungsStatusModal({ 
+              open: true, 
+              traegerId: key,
+              aktion: 'erhalten', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
+            <Circle size={14} />
+            <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
+            </span>
+          ) : (
+            <span 
+            className="status-badge-secondary cursor-pointer"
+            onClick={() => setAbrechnungsStatusModal({ 
+              open: true, 
+              traegerId: key,
+              aktion: 'eingereicht', 
+              jahr: selectedYear,
+              monat: selectedMonth.split('-')[1]
+            })}
+            >
+            <AlertCircle size={14} />
+            <span>Nicht eingereicht</span>
+            </span>
+          )}
+          </div>
+          </div>
         )}
         </div>
-      )}
-      
-      {summary.abrechnungsStatus?.kirchenkreis?.eingereicht_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Eingereicht</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.kirchenkreis.eingereicht_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      
-      {summary.abrechnungsStatus?.kirchenkreis?.erhalten_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Erhalten</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.kirchenkreis.erhalten_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      </div>
-      </div>
-      
-      {/* Gemeinde Card */}
-      <div className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Gemeinde</span>
-      <span className={summary.abrechnungsStatus?.gemeinde?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
-      {Number(summary.gemeindeErstattung || 0).toFixed(2)} €
-      </span>
-      </div>
-      
-      <div className="text-xs space-y-1">
-      {(summary.abrechnungsStatus?.gemeinde?.eingereicht_am || summary.abrechnungsStatus?.gemeinde?.erhalten_am) && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Status</span>
-        {summary.abrechnungsStatus?.gemeinde?.erhalten_am ? (
-          <span className="status-badge-primary">● Erhalten</span>
-        ) : (
-          <span className="status-badge-secondary">○ Eingereicht</span>
-        )}
-        </div>
-      )}
-      
-      {summary.abrechnungsStatus?.gemeinde?.eingereicht_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Eingereicht</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.gemeinde.eingereicht_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      
-      {summary.abrechnungsStatus?.gemeinde?.erhalten_am && (
-        <div className="flex justify-between items-center">
-        <span className="text-label">Erhalten</span>
-        <span className="text-value">
-        {new Date(summary.abrechnungsStatus.gemeinde.erhalten_am).toLocaleDateString()}
-        </span>
-        </div>
-      )}
-      </div>
-      </div>
-      
-      {/* Mitfahrer Card */}
-      <div className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Mitfahrer:innen</span>
-      <span className={summary.abrechnungsStatus?.kirchenkreis?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
-      {Number(summary.mitfahrerErstattung || 0).toFixed(2)} €
-      </span>
-      </div>
-      </div>
+      ))}
       
       {/* Gesamt Card */}
-      <div className="card-container">
+      <div className="card-container col-span-full">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
-      {currentTotal} €
+      {Object.entries(summary.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const received = summary.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (received ? 0 : Number(betrag || 0));
+      }, 0).toFixed(2)} €
       </span>
       </div>
-      {(kkReceived || gemReceived) && currentTotal !== originalTotal && (
-        <div className="text-xs text-muted text-right">
-        Ursprünglich: {originalTotal} €
+      {Object.entries(summary.erstattungen || {}).some(([id, betrag]) => 
+        summary.abrechnungsStatus?.[id]?.erhalten_am
+      ) && (
+        <div className="text-muted text-xs text-right">
+        Ursprünglich: {Object.values(summary.erstattungen || {}).reduce((sum, betrag) => 
+          sum + Number(betrag || 0), 0
+        ).toFixed(2)} €
         </div>
       )}
       </div>
       </div>
       
       {/* Export Buttons */}
-      <div className="flex flex-col sm:flex-row justify-end gap-2">
-      <button
-      onClick={() => handleExportToExcel("kirchenkreis", selectedYear, selectedMonth.split("-")[1])}
-      className="btn-primary">
-      Export Kirchenkreis / Mitfaher:innen
-      </button>
-      <button
-      onClick={() => handleExportToExcel("gemeinde", selectedYear, selectedMonth.split("-")[1])}
-      className="btn-primary">
-      Export Gemeinde
-      </button>
+      <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
+      {getKategorienMitErstattung().map(([key, displayName]) => (
+        <button
+        key={key}
+        onClick={() => handleExportToExcel(key.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
+        className="btn-primary">
+        Export {displayName}
+        </button>
+      ))}
       </div>
       </div>
       </div>
     );
-  };
+    };
   
   const roundKilometers = (value) => {
     const numValue = Number(value ?? 0);
     return numValue % 1 < 0.5 ? Math.floor(numValue) : Math.ceil(numValue);
-  };
-  
-  const exportToCSV = (type) => {
-    const csvContent = [
-      ['Datum', 'Von Adresse', 'Nach Adresse', 'Anlass', 'Kilometer', 'Abrechnung'],
-      ...fahrten.flatMap(fahrt => {
-        if (fahrt.autosplit) {
-          return fahrt.details
-          .filter(detail => type === 'all' || detail.abrechnung.toLowerCase() === type)
-          .map(detail => [
-            new Date(fahrt.datum).toLocaleDateString(),
-            detail.von_ort_adresse || detail.von_ort_name,
-            detail.nach_ort_adresse || detail.nach_ort_name,
-            fahrt.anlass,
-            roundKilometers(detail.kilometer),
-            detail.abrechnung
-          ]);
-        } else if (type === 'all' || fahrt.abrechnung.toLowerCase() === type) {
-          return [[
-            new Date(fahrt.datum).toLocaleDateString(),
-            fahrt.einmaliger_von_ort || fahrt.von_ort_adresse || fahrt.von_ort_name,
-            fahrt.einmaliger_nach_ort || fahrt.nach_ort_adresse || fahrt.nach_ort_name,
-            fahrt.anlass,
-            roundKilometers(fahrt.kilometer),
-            fahrt.abrechnung
-          ]];
-        }
-        return [];
-      })
-    ].map(row => row.join(';')).join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `fahrten_${type}_${selectedMonth}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
   };
   
   const sortedFahrten = React.useMemo(() => {
@@ -1014,6 +955,7 @@ function FahrtenListe() {
         try {
           await axios.delete(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer/${mitfahrerId}`);
           fetchFahrten();
+          await refreshAllData(); // Hier hinzufügen
           showNotification("Erfolg", "Der Mitfahrer wurde erfolgreich gelöscht.");
         } catch (error) {
           console.error('Fehler beim Löschen des Mitfahrers:', error);
@@ -1039,6 +981,7 @@ function FahrtenListe() {
       }
       setEditingMitfahrer(null);
       fetchFahrten();
+      await refreshAllData(); // Hier hinzufügen
     } catch (error) {
       console.error('Fehler beim Speichern des Mitfahrers:', error);
       showNotification("Fehler", `Fehler beim Speichern des Mitfahrers: ${error.message}`);
@@ -1086,14 +1029,12 @@ function FahrtenListe() {
   };
   
   const renderFahrtRow = (fahrt, detail = null) => {
+    // Finde den Namen des Abrechnungsträgers
+    const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
+    const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
+    
     return (
-      <tr 
-      key={detail ? `${fahrt.id}-${detail.id}` : fahrt.id} 
-      className={`${
-        detail ? "table-detail-row" : 
-        fahrt.autosplit ? "table-split-row" : ""
-        } table-row`}
-      >
+      <tr key={fahrt.id} className="table-row">
       <td className="table-cell">
       {editingFahrt?.id === fahrt.id ? (
         <input
@@ -1146,11 +1087,11 @@ function FahrtenListe() {
       ) : (
         <div className="table-address">
         <div className="table-address-main">
-        {detail ? detail.von_ort_name : (fahrt.von_ort_name || fahrt.einmaliger_von_ort || "")}
+        {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
         </div>
-        {(detail ? detail.von_ort_adresse : fahrt.von_ort_adresse) && (
+        {fahrt.von_ort_adresse && (
           <div className="table-address-sub">
-          {detail ? detail.von_ort_adresse : fahrt.von_ort_adresse}
+          {fahrt.von_ort_adresse}
           </div>
         )}
         </div>
@@ -1196,11 +1137,11 @@ function FahrtenListe() {
       ) : (
         <div className="table-address">
         <div className="table-address-main">
-        {detail ? detail.nach_ort_name : (fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || "")}
+        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
         </div>
-        {(detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse) && (
+        {fahrt.nach_ort_adresse && (
           <div className="table-address-sub">
-          {detail ? detail.nach_ort_adresse : fahrt.nach_ort_adresse}
+          {fahrt.nach_ort_adresse}
           </div>
         )}
         </div>
@@ -1230,7 +1171,7 @@ function FahrtenListe() {
         />
       ) : (
         <span className="text-value">
-        {formatValue(roundKilometers(detail ? detail.kilometer : fahrt.kilometer))}
+        {formatValue(roundKilometers(fahrt.kilometer))}
         </span>
       )}
       </td>
@@ -1242,13 +1183,15 @@ function FahrtenListe() {
         onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
         className="form-select"
         >
-        <option value="Kirchenkreis">Kirchenkreis</option>
-        <option value="Gemeinde">Gemeinde</option>
-        <option value="Autosplit">Autosplit</option>
+        {abrechnungstraeger?.map(traeger => (
+          <option key={traeger.id} value={traeger.id}>
+          {traeger.name}
+          </option>
+        ))}
         </select>
       ) : (
         <span className="text-value">
-        {detail ? detail.abrechnung : fahrt.abrechnung}
+        {abrechnungstraegerName}
         </span>
       )}
       </td>
@@ -1306,15 +1249,13 @@ function FahrtenListe() {
         </>
       ) : (
         <>
-        {!fahrt.autosplit && (
-          <button 
-          onClick={() => handleEdit(fahrt)} 
-          className="table-action-button-primary"
-          title="Bearbeiten"
-          >
-          ✎
-          </button>
-        )}
+        <button 
+        onClick={() => handleEdit(fahrt)} 
+        className="table-action-button-primary"
+        title="Bearbeiten"
+        >
+        ✎
+        </button>
         <button 
         onClick={() => handleDelete(fahrt.id)} 
         className="table-action-button-secondary"
@@ -1322,15 +1263,6 @@ function FahrtenListe() {
         >
         ×
         </button>
-        {fahrt.autosplit === 1 && (
-          <button 
-          onClick={() => toggleFahrtDetails(fahrt.id)} 
-          className="table-action-button-primary"
-          title={expandedFahrten[fahrt.id] ? 'Einklappen' : 'Ausklappen'}
-          >
-          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
-          </button>
-        )}
         </>
       )}
       </div>
@@ -1386,12 +1318,12 @@ function FahrtenListe() {
     </th>
     <th className="table-header" onClick={() => requestSort('abrechnung')}>
     <div className="flex items-center gap-1">
-    Abrechnung {sortConfig.key === 'abrechnung' && (
+    Träger {sortConfig.key === 'abrechnung' && (
       <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
     )}
     </div>
     </th>
-    <th className="table-header">Mitfahrer:innen</th>
+    <th className="table-header">Mit*</th>
     <th className="table-header text-right">Aktionen</th>
     </tr>
     </thead>
@@ -1399,8 +1331,6 @@ function FahrtenListe() {
     {sortedFahrten.map((fahrt) => (
       <React.Fragment key={fahrt.id}>
       {renderFahrtRow(fahrt)}
-      {fahrt.autosplit === 1 && expandedFahrten[fahrt.id] && 
-        fahrt.details?.map((detail, idx) => renderFahrtRow(fahrt, detail))}
       </React.Fragment>
     ))}
     </tbody>
@@ -1410,282 +1340,247 @@ function FahrtenListe() {
     
     {/* Mobile View */}
     <div className="md:hidden space-y-4">
-    {sortedFahrten.map((fahrt) => (
-      <div key={fahrt.id} className={`mobile-card ${fahrt.autosplit ? "bg-primary-25 dark:bg-primary-900/20" : ""}`}>
-      {editingFahrt?.id === fahrt.id ? (
-        // Edit Mode
-        <div className="space-y-4">
-        <div>
-        <label className="form-label">Datum</label>
-        <input
-        type="date"
-        value={editingFahrt.datum}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
-        className="form-input w-full"
-        />
-        </div>
-        
-        {/* Von-Ort */}
-        <div>
-        <label className="checkbox-label mb-2">
-        <input
-        type="checkbox"
-        checked={editingFahrt.vonOrtTyp === 'einmalig'}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-          von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
-          einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
-        })}
-        className="checkbox-input"
-        />
-        <span className="text-xs text-label">Einmaliger Von-Ort</span>
-        </label>
-        {editingFahrt.vonOrtTyp === 'einmalig' ? (
+    {sortedFahrten.map((fahrt) => {
+      const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
+      const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
+      
+      return (
+        <div key={fahrt.id} className="mobile-card">
+        {editingFahrt?.id === fahrt.id ? (
+          // Edit Mode
+          <div className="space-y-4">
+          <div>
+          <label className="form-label">Datum</label>
+          <input
+          type="date"
+          value={editingFahrt.datum}
+          onChange={(e) => handleEditChange('datum', e.target.value)}
+          className="form-input w-full"
+          />
+          </div>
+          
+          {/* Von-Ort */}
+          <div>
+          <label className="checkbox-label mb-2">
+          <input
+          type="checkbox"
+          checked={editingFahrt.vonOrtTyp === 'einmalig'}
+          onChange={(e) => handleEditChange('vonOrtTyp', e.target.checked ? 'einmalig' : 'gespeichert')}
+          className="checkbox-input"
+          />
+          <span className="text-xs text-label">Einmaliger Von-Ort</span>
+          </label>
+          {editingFahrt.vonOrtTyp === 'einmalig' ? (
+            <input
+            type="text"
+            value={editingFahrt.einmaliger_von_ort || ''}
+            onChange={(e) => handleEditChange('einmaliger_von_ort', e.target.value)}
+            className="form-input w-full"
+            placeholder="Von (einmalig)"
+            />
+          ) : (
+            <select
+            value={editingFahrt.von_ort_id || ''}
+            onChange={(e) => handleEditChange('von_ort_id', e.target.value)}
+            className="form-select w-full"
+            >
+            <option value="">Bitte wählen</option>
+            {renderOrteOptions(orte)}
+            </select>
+          )}
+          </div>
+          
+          {/* Nach-Ort */}
+          <div>
+          <label className="checkbox-label mb-2">
+          <input
+          type="checkbox"
+          checked={editingFahrt.nachOrtTyp === 'einmalig'}
+          onChange={(e) => handleEditChange('nachOrtTyp', e.target.checked ? 'einmalig' : 'gespeichert')}
+          className="checkbox-input"
+          />
+          <span className="text-xs text-label">Einmaliger Nach-Ort</span>
+          </label>
+          {editingFahrt.nachOrtTyp === 'einmalig' ? (
+            <input
+            type="text"
+            value={editingFahrt.einmaliger_nach_ort || ''}
+            onChange={(e) => handleEditChange('einmaliger_nach_ort', e.target.value)}
+            className="form-input w-full"
+            placeholder="Nach (einmalig)"
+            />
+          ) : (
+            <select
+            value={editingFahrt.nach_ort_id || ''}
+            onChange={(e) => handleEditChange('nach_ort_id', e.target.value)}
+            className="form-select w-full"
+            >
+            <option value="">Bitte wählen</option>
+            {renderOrteOptions(orte)}
+            </select>
+          )}
+          </div>
+          
+          {/* Anlass */}
+          <div>
+          <label className="form-label">Anlass</label>
           <input
           type="text"
-          value={editingFahrt.einmaliger_von_ort || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
+          value={editingFahrt.anlass}
+          onChange={(e) => handleEditChange('anlass', e.target.value)}
           className="form-input w-full"
-          placeholder="Von (einmalig)"
           />
-        ) : (
-          <select
-          value={editingFahrt.von_ort_id || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
-          className="form-select w-full"
-          >
-          <option value="">Bitte wählen</option>
-          {renderOrteOptions(orte)}
-          </select>
-        )}
-        </div>
-        
-        {/* Nach-Ort */}
-        <div>
-        <label className="checkbox-label mb-2">
-        <input
-        type="checkbox"
-        checked={editingFahrt.nachOrtTyp === 'einmalig'}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-          nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
-          einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
-        })}
-        className="checkbox-input"
-        />
-        <span className="text-xs text-label">Einmaliger Nach-Ort</span>
-        </label>
-        {editingFahrt.nachOrtTyp === 'einmalig' ? (
+          </div>
+          
+          {/* Kilometer */}
+          <div>
+          <label className="form-label">Kilometer</label>
           <input
-          type="text"
-          value={editingFahrt.einmaliger_nach_ort || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
+          type="number"
+          value={editingFahrt.kilometer}
+          onChange={(e) => handleEditChange('kilometer', e.target.value)}
           className="form-input w-full"
-          placeholder="Nach (einmalig)"
           />
-        ) : (
+          </div>
+          
+          {/* Abrechnung */}
+          <div>
+          <label className="form-label">Abrechnung</label>
           <select
-          value={editingFahrt.nach_ort_id || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
+          value={editingFahrt.abrechnung}
+          onChange={(e) => handleEditChange('abrechnung', e.target.value)}
           className="form-select w-full"
           >
-          <option value="">Bitte wählen</option>
-          {renderOrteOptions(orte)}
+          {abrechnungstraeger?.map(traeger => (
+            <option key={traeger.id} value={traeger.id}>
+            {traeger.name}
+            </option>
+          ))}
           </select>
-        )}
-        </div>
-        
-        {/* Anlass */}
-        <div>
-        <label className="form-label">Anlass</label>
-        <input
-        type="text"
-        value={editingFahrt.anlass}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
-        className="form-input w-full"
-        />
-        </div>
-        
-        {/* Kilometer */}
-        <div>
-        <label className="form-label">Kilometer</label>
-        <input
-        type="number"
-        value={editingFahrt.kilometer}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          kilometer: parseFloat(e.target.value),
-        })}
-        className="form-input w-full"
-        />
-        </div>
-        
-        {/* Abrechnung */}
-        <div>
-        <label className="form-label">Abrechnung</label>
-        <select
-        value={editingFahrt.abrechnung}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
-        className="form-select w-full"
-        >
-        <option value="Kirchenkreis">Kirchenkreis</option>
-        <option value="Gemeinde">Gemeinde</option>
-        <option value="Autosplit">Autosplit</option>
-        </select>
-        </div>
-        
-        {/* Mitfahrer */}
-        <div>
-        <label className="form-label">Mitfahrer:innen</label>
-        <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-        {fahrt.mitfahrer?.map((person, index) => (
-          <span key={index} className="status-badge-primary">
-          {person.name}
+          </div>
+          
+          {/* Mitfahrer */}
+          <div>
+          <label className="form-label">Mitfahrer:innen</label>
+          <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+          {fahrt.mitfahrer?.map((person, index) => (
+            <span key={index} className="status-badge-primary">
+            {person.name}
+            <button
+            onClick={(e) => {
+              e.preventDefault();
+              handleDeleteMitfahrer(fahrt.id, person.id);
+            }}
+            className="text-secondary-500 hover:text-secondary-600"
+            >
+            ×
+            </button>
+            </span>
+          ))}
+          </div>
           <button
-          onClick={(e) => {
-            e.preventDefault();
-            handleDeleteMitfahrer(fahrt.id, person.id);
-          }}
-          className="text-secondary-500 hover:text-secondary-600"
+          onClick={() => handleAddMitfahrer(fahrt.id)}
+          className="btn-primary text-xs w-full"
           >
-          ×
+          + Mitfahrer:in
           </button>
-          </span>
-        ))}
-        </div>
-        <button
-        onClick={() => handleAddMitfahrer(fahrt.id)}
-        className="btn-primary text-xs w-full"
-        >
-        + Mitfahrer:in
-        </button>
-        </div>
-        </div>
-        
-        {/* Buttons */}
-        <div className="flex gap-2">
-        <button onClick={handleSave} className="btn-primary flex-1">
-        Speichern
-        </button>
-        <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">
-        Abbrechen
-        </button>
-        </div>
-        </div>
-      ) : (
-        // View Mode
-        <div>
-        {/* Header */}
-        <div className="mobile-card-header mb-4">
-        <div>
-        <div className="mobile-card-title">
-        {new Date(fahrt.datum).toLocaleDateString()}
-        </div>
-        <div className="mobile-card-subtitle">
-        {fahrt.autosplit ? "Via Dienstort" : fahrt.abrechnung}
-        </div>
-        </div>
-        <div className="mobile-action-buttons">
-        {!fahrt.autosplit && (
+          </div>
+          </div>
+          
+          {/* Buttons */}
+          <div className="flex gap-2">
+          <button onClick={handleSave} className="btn-primary flex-1">
+          Speichern
+          </button>
+          <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">
+          Abbrechen
+          </button>
+          </div>
+          </div>
+        ) : (
+          // View Mode
+          <div>
+          {/* Header */}
+          <div className="mobile-card-header mb-4">
+          <div>
+          <div className="mobile-card-title">
+          {new Date(fahrt.datum).toLocaleDateString()}
+          </div>
+          <div className="mobile-card-subtitle">
+          {abrechnungstraegerName}
+          </div>
+          </div>
+          <div className="mobile-action-buttons">
           <button
           onClick={() => handleEdit(fahrt)}
           className="mobile-icon-button-primary"
           >
           ✎
           </button>
-        )}
-        <button
-        onClick={() => handleDelete(fahrt.id)}
-        className="mobile-icon-button-secondary"
-        >
-        ×
-        </button>
-        {fahrt.autosplit === 1 && (
           <button
-          onClick={() => toggleFahrtDetails(fahrt.id)}
-          className="mobile-icon-button-primary"
+          onClick={() => handleDelete(fahrt.id)}
+          className="mobile-icon-button-secondary"
           >
-          {expandedFahrten[fahrt.id] ? '▼' : '▶'}
+          ×
           </button>
-        )}
-        </div>
-        </div>
-        
-        <div className="space-y-4">
-        {/* Route */}
-        <div className="grid grid-cols-1 gap-2">
-        <div>
-        <div className="mobile-card-label">Von</div>
-        <div className="mobile-card-content">
-        {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
-        </div>
-        {fahrt.von_ort_adresse && (
-          <div className="mobile-card-label">
-          {fahrt.von_ort_adresse}
           </div>
-        )}
-        </div>
-        <div>
-        <div className="mobile-card-label">Nach</div>
-        <div className="mobile-card-content">
-        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
-        </div>
-        {fahrt.nach_ort_adresse && (
-          <div className="mobile-card-label">
-          {fahrt.nach_ort_adresse}
           </div>
-        )}
-        </div>
-        </div>
-        
-        {/* Anlass & Kilometer */}
-        <div className="grid grid-cols-2 gap-4">
-        <div>
-        <div className="mobile-card-label">Anlass</div>
-        <div className="mobile-card-content">{fahrt.anlass}</div>
-        </div>
-        <div>
-        <div className="mobile-card-label">Kilometer</div>
-        <div className="mobile-card-content">
-        {formatValue(roundKilometers(fahrt.kilometer))} km
-        </div>
-        </div>
-        </div>
-        
-        {/* Mitfahrer */}
-        {fahrt.mitfahrer?.length > 0 && (
+          
+          <div className="space-y-4">
+          {/* Route */}
+          <div className="grid grid-cols-1 gap-2">
           <div>
-          <div className="mobile-card-label mb-1">Mitfahrer:innen</div>
-          {renderMitfahrer(fahrt)}
+          <div className="mobile-card-label">Von</div>
+          <div className="mobile-card-content">
+          {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
           </div>
-        )}
-        
-        {/* Autosplit Details */}
-        {fahrt.autosplit === 1 && expandedFahrten[fahrt.id] && fahrt.details?.length > 0 && (
-          <div className="space-y-2">
-          {fahrt.details.map((detail, idx) => (
-            <div key={idx} className="bg-primary-50 dark:bg-primary-900/20 p-2 rounded">
+          {fahrt.von_ort_adresse && (
             <div className="mobile-card-label">
-            {detail.abrechnung}
+            {fahrt.von_ort_adresse}
             </div>
-            <div className="mobile-card-content">
-            {detail.von_ort_name} → {detail.nach_ort_name}
+          )}
+          </div>
+          <div>
+          <div className="mobile-card-label">Nach</div>
+          <div className="mobile-card-content">
+          {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
+          </div>
+          {fahrt.nach_ort_adresse && (
+            <div className="mobile-card-label">
+            {fahrt.nach_ort_adresse}
             </div>
-            <div className="mobile-card-content">
-            {formatValue(roundKilometers(detail.kilometer))} km
+          )}
+          </div>
+          </div>
+          
+          {/* Anlass & Kilometer */}
+          <div className="grid grid-cols-2 gap-4">
+          <div>
+          <div className="mobile-card-label">Anlass</div>
+          <div className="mobile-card-content">{fahrt.anlass}</div>
+          </div>
+          <div>
+          <div className="mobile-card-label">Kilometer</div>
+          <div className="mobile-card-content">
+          {formatValue(roundKilometers(fahrt.kilometer))} km
+          </div>
+          </div>
+          </div>
+          
+          {/* Mitfahrer */}
+          {fahrt.mitfahrer?.length > 0 && (
+            <div>
+            <div className="mobile-card-label mb-1">Mitfahrer:innen</div>
+            {renderMitfahrer(fahrt)}
             </div>
-            </div>
-          ))}
+          )}
+          </div>
           </div>
         )}
         </div>
-        </div>
-      )}
-      </div>
-    ))}
+      );
+    })}
     </div>
     
     {/* Modals */}
@@ -1705,36 +1600,104 @@ function FahrtenListe() {
     />
     </div>
   );
-}
+  }
 
 function MonthlyOverview() {
-  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus } = React.useContext(AppContext);
-  const [statusModal, setStatusModal] = useState({
-    open: false,
-    typ: null,
-    aktion: null,
-    jahr: null,
-    monat: null
-  });
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString()); // Geändert von 'all'
+  const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, abrechnungsStatusModal, setAbrechnungsStatusModal, handleAbrechnungsStatus , summary, showNotification } = useContext(AppContext);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [hideCompleted, setHideCompleted] = useState(true);
-  
-  // Diese Zeilen direkt darunter einfügen:
   const [filteredData, setFilteredData] = useState([]);
+  const currentYear = new Date().getFullYear().toString();
+    
+  const getMonthName = (month) => {
+    return new Date(2000, month - 1, 1).toLocaleString('de-DE', { month: 'long' });
+  };
+  
+  const calculateYearTotal = () => {
+    const totals = filteredData.reduce((total, month) => {
+      Object.entries(month.erstattungen || {}).forEach(([traegerId, betrag]) => {
+        if (!total[traegerId]) {
+          total[traegerId] = {
+            original: 0,
+            ausstehend: 0 
+          };
+        }
+        
+        total[traegerId].original += Number(betrag || 0);
+        
+        if (!month.abrechnungsStatus?.[traegerId]?.erhalten_am) {
+          total[traegerId].ausstehend += Number(betrag || 0);
+        }
+      });
+      
+      return total;
+    }, {});
+    
+    const relevantKeys = Object.keys(totals).filter(key => key !== 'gesamt');
+    totals.gesamt = {
+      original: relevantKeys.reduce((sum, key) => sum + (totals[key].original || 0), 0),
+      ausstehend: relevantKeys.reduce((sum, key) => sum + (totals[key].ausstehend || 0), 0)
+    };
+    
+    return totals;
+  };
+  
+  const getKategorienMitErstattung = () => {
+    const kategorien = [];
+    
+    // Jahres-Summen aus dem yearTotal berechnen
+    const yearTotals = calculateYearTotal();
+    
+    // Abrechnungsträger Cards
+    abrechnungstraeger.forEach(traeger => {
+      const data = yearTotals[traeger.id];
+      if (data && (data.original > 0 || data.ausstehend > 0)) {
+        kategorien.push([
+          traeger.id.toString(),
+          traeger.name,
+          data  // Hier übergeben wir das komplette Objekt mit original/ausstehend
+        ]);
+      }
+    });
+    
+    // Mitfahrer Card
+    const mitfahrerData = yearTotals['mitfahrer'];
+    if (mitfahrerData && (mitfahrerData.original > 0 || mitfahrerData.ausstehend > 0)) {
+      kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerData]);
+    }
+    
+    return kategorien;
+  };
+  
+  const allCategories = () => {
+    // Sammle alle einzigartigen Kategorien
+    const categories = new Set([
+      ...Object.keys(summary.erstattungen || {}),
+      ...Object.keys(summary.mitfahrerErstattungen || {})
+    ]);
+    return categories.size; // Gibt die tatsächliche Anzahl der Kategorien zurück
+  };
+  
+  // MonthlyOverview - nur diese useEffects
+  useEffect(() => {
+    fetchMonthlyData(); // Dieser holt die Daten für alle relevanten Monate
+  }, []);  // Nur einmal beim Mount
   
   useEffect(() => {
-    console.log('hideCompleted changed:', hideCompleted); // Debug
     const filtered = monthlyData.filter(month => {
       if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
         return false;
       }
       
       if (hideCompleted) {
-        const kkCompleted = month.kirchenkreisErstattung === 0 || 
-        month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-        const gemCompleted = month.gemeindeErstattung === 0 || 
-        month.abrechnungsStatus?.gemeinde?.erhalten_am;
-        if (kkCompleted && gemCompleted) {
+        const allCompleted = Object.entries(month.erstattungen || {}).every(([id, betrag]) => {
+          return betrag === 0 || month.abrechnungsStatus?.[id]?.erhalten_am;
+        });
+        
+        const mitfahrerCompleted = !month.erstattungen?.mitfahrer || 
+        month.abrechnungsStatus?.mitfahrer?.erhalten_am;
+        
+        if (allCompleted && mitfahrerCompleted) {
           return false;
         }
       }
@@ -1742,70 +1705,6 @@ function MonthlyOverview() {
     });
     setFilteredData(filtered);
   }, [monthlyData, hideCompleted, selectedYear]);
-  
-  // Neue Konstante hier einfügen
-  const currentYear = new Date().getFullYear().toString();
-
-  useEffect(() => {
-    fetchMonthlyData();
-  }, []);
-  
-  const handleStatusUpdate = async (jahr, monat, typ, aktion, datum) => {
-    try {
-      await updateAbrechnungsStatus(jahr, monat, typ, aktion, datum);
-      await fetchMonthlyData();
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Status:', error);
-    }
-  };
-  
-  const getFilteredData = () => {
-    return monthlyData.filter(month => {
-      if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
-        return false;
-      }
-      
-      if (hideCompleted) {
-        const isCompleted = month.abrechnungsStatus?.kirchenkreis?.erhalten_am && 
-        month.abrechnungsStatus?.gemeinde?.erhalten_am;
-        if (isCompleted) {
-          return false;
-        }
-      }
-      
-      return true;
-    });
-  };
-  
-  const getStatusColor = (status) => {
-    if (status?.erhalten_am) return 'bg-green-50';
-    if (status?.eingereicht_am) return 'bg-yellow-50';
-    return '';
-  };
-    
-  const calculateYearTotal = () => {
-    return filteredData.reduce((total, month) => {
-      total.originalKirchenkreis += Number(month.kirchenkreisErstattung || 0);
-      total.originalGemeinde += Number(month.gemeindeErstattung || 0);
-      total.originalMitfahrer += Number(month.mitfahrerErstattung || 0);
-      
-      if (!month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
-        total.kirchenkreis += Number(month.kirchenkreisErstattung || 0);
-        total.mitfahrer += Number(month.mitfahrerErstattung || 0);
-      }
-      if (!month.abrechnungsStatus?.gemeinde?.erhalten_am) {
-        total.gemeinde += Number(month.gemeindeErstattung || 0);
-      }
-      
-      total.originalGesamt = total.originalKirchenkreis + total.originalGemeinde + total.originalMitfahrer;
-      total.gesamt = total.kirchenkreis + total.gemeinde + total.mitfahrer;
-      
-      return total;
-    }, {
-      kirchenkreis: 0, gemeinde: 0, mitfahrer: 0, gesamt: 0,
-      originalKirchenkreis: 0, originalGemeinde: 0, originalMitfahrer: 0, originalGesamt: 0
-    });
-  };
   
   const renderBetrag = (betrag, isReceived) => {
     return (
@@ -1815,7 +1714,7 @@ function MonthlyOverview() {
     );
   };
   
-  const QuickActions = ({ filteredData, handleStatusUpdate }) => {
+  const QuickActions = ({ filteredData, handleAbrechnungsStatus, abrechnungstraeger }) => {
     const [isOpen, setIsOpen] = useState(false);
     
     const actions = [
@@ -1825,23 +1724,27 @@ function MonthlyOverview() {
           const today = new Date().toISOString().split('T')[0];
           try {
             for (const month of filteredData) {
-              if (month.kirchenkreisErstattung > 0 && 
-                !month.abrechnungsStatus?.kirchenkreis?.eingereicht_am) {
-                  await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Kirchenkreis', 
-                    'eingereicht', 
-                    today
-                  );
-                }
-              if (month.gemeindeErstattung > 0 && 
-                !month.abrechnungsStatus?.gemeinde?.eingereicht_am) {
-                  await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Gemeinde', 
-                    'eingereicht', 
+              // Für jeden Abrechnungsträger
+              for (const traeger of abrechnungstraeger) {
+                if (month.erstattungen?.[traeger.id] > 0 && 
+                  !month.abrechnungsStatus?.[traeger.id]?.eingereicht_am) {
+                    await handleAbrechnungsStatus(
+                      month.year, 
+                      month.monatNr, 
+                      traeger.id, 
+                      'eingereicht', 
+                      today
+                    );
+                  }
+              }
+              // Für Mitfahrer
+              if (month.erstattungen?.mitfahrer > 0 && 
+                !month.abrechnungsStatus?.mitfahrer?.eingereicht_am) {
+                  await handleAbrechnungsStatus(
+                    month.year,
+                    month.monatNr,
+                    'mitfahrer',
+                    'eingereicht',
                     today
                   );
                 }
@@ -1857,23 +1760,27 @@ function MonthlyOverview() {
           const today = new Date().toISOString().split('T')[0];
           try {
             for (const month of filteredData) {
-              if (month.abrechnungsStatus?.kirchenkreis?.eingereicht_am && 
-                !month.abrechnungsStatus?.kirchenkreis?.erhalten_am) {
-                  await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Kirchenkreis', 
-                    'erhalten', 
-                    today
-                  );
-                }
-              if (month.abrechnungsStatus?.gemeinde?.eingereicht_am && 
-                !month.abrechnungsStatus?.gemeinde?.erhalten_am) {
-                  await handleStatusUpdate(
-                    month.year, 
-                    month.monatNr, 
-                    'Gemeinde', 
-                    'erhalten', 
+              // Für jeden Abrechnungsträger
+              for (const traeger of abrechnungstraeger) {
+                if (month.abrechnungsStatus?.[traeger.id]?.eingereicht_am && 
+                  !month.abrechnungsStatus?.[traeger.id]?.erhalten_am) {
+                    await handleAbrechnungsStatus(
+                      month.year,
+                      month.monatNr,
+                      traeger.id,
+                      'erhalten',
+                      today
+                    );
+                  }
+              }
+              // Für Mitfahrer
+              if (month.abrechnungsStatus?.mitfahrer?.eingereicht_am && 
+                !month.abrechnungsStatus?.mitfahrer?.erhalten_am) {
+                  await handleAbrechnungsStatus(
+                    month.year,
+                    month.monatNr,
+                    'mitfahrer',
+                    'erhalten',
                     today
                   );
                 }
@@ -1901,7 +1808,6 @@ function MonthlyOverview() {
         <>
         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
         <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
-
         {actions.map((action, index) => (
           <button
           key={index}
@@ -1921,13 +1827,11 @@ function MonthlyOverview() {
     );
   };
   
-  const renderStatusCell = (month, typ) => {
-    const status = typ === 'Kirchenkreis' ? 
-    month.abrechnungsStatus?.kirchenkreis : 
-    month.abrechnungsStatus?.gemeinde;
-    const betrag = typ === 'Kirchenkreis' ? 
-    month.kirchenkreisErstattung : 
-    month.gemeindeErstattung;
+  const renderStatusCell = (month, traegerId) => {
+    const status = month.abrechnungsStatus?.[traegerId];
+    const betrag = traegerId === 'mitfahrer' 
+    ? month.erstattungen?.mitfahrer || 0
+    : month.erstattungen?.[traegerId] || 0;
     
     // Wenn Betrag 0 ist
     if (betrag === 0) {
@@ -1941,18 +1845,25 @@ function MonthlyOverview() {
       );
     }
     
+    // Wenn erhalten
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center justify-between">
         <span 
         className="status-badge-primary cursor-pointer"
-        onClick={() => setStatusModal({ 
-          open: true, 
-          typ, 
-          aktion: 'reset', 
-          jahr: month.year,
-          monat: month.monatNr
-        })}
+        onClick={() => {
+          showNotification(
+            "Status zurücksetzen",
+            "Möchten Sie den Status wirklich zurücksetzen?",
+            () => handleAbrechnungsStatus(
+              month.year,
+              month.monatNr,
+              traegerId,
+              'reset'
+            ),
+            true // showCancel
+          );
+        }}
         >
         <CheckCircle2 size={14} />
         <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
@@ -1961,14 +1872,15 @@ function MonthlyOverview() {
       );
     }
     
+    // Wenn eingereicht aber nicht erhalten
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center justify-between">
         <span 
         className="status-badge-secondary cursor-pointer"
-        onClick={() => setStatusModal({ 
+        onClick={() => setAbrechnungsStatusModal({ 
           open: true, 
-          typ, 
+          traegerId,
           aktion: 'erhalten', 
           jahr: month.year,
           monat: month.monatNr
@@ -1981,13 +1893,14 @@ function MonthlyOverview() {
       );
     }
     
+    // Wenn noch nicht eingereicht
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
       <span 
       className="status-badge-secondary cursor-pointer"
-      onClick={() => setStatusModal({ 
+      onClick={() => setAbrechnungsStatusModal({ 
         open: true, 
-        typ, 
+        traegerId,
         aktion: 'eingereicht', 
         jahr: month.year,
         monat: month.monatNr
@@ -2004,27 +1917,30 @@ function MonthlyOverview() {
   
   return (
     <div className="w-full max-w-full space-y-6">
-    <div className="card-container-highlight">
-    <div className="flex flex-col gap-4 mb-6">
+    <div className="card-container-highlight mb-4">
+    <div className="space-y-6 mb-4">
+    {/* Header mit Navigation */}
+    <div className="flex flex-col gap-4">
+    {/* Erste Zeile */}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+    {/* Titel und Aktuelles Jahr - immer in einer Zeile */}
     <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)}
-      className="btn-secondary text-xs sm:hidden"
-      >
+    {selectedYear !== currentYear && (
+      <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary">
       Aktuelles Jahr
       </button>
     )}
     </div>
     
-    <div className="flex flex-wrap items-center justify-between gap-4">
-    <div className="flex items-center gap-4 text-[11px]">
-    <QuickActions 
-    filteredData={filteredData}
-    handleStatusUpdate={handleStatusUpdate}
-    />
+    {/* Checkbox und Select - nur auf Desktop hier */}
+    <div className="hidden sm:flex items-center gap-4 ml-auto">
     <label className="checkbox-label">
+    {selectedYear !== currentYear && (
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
+      Aktuelles Jahr
+      </button>
+    )}
     <input
     type="checkbox"
     id="hideCompleted"
@@ -2032,17 +1948,8 @@ function MonthlyOverview() {
     onChange={(e) => setHideCompleted(e.target.checked)}
     className="checkbox-input h-3 w-3"
     />
-    <span className="text-label">Abgeschlossene</span>
+    <span className="text-xs text-label">Abgeschlossene</span>
     </label>
-    </div>
-    
-    <div className="flex items-center justify-end gap-3 text-[11px]">
-    {selectedYear !== currentYear && selectedYear !== 'all' && (
-      <button 
-      onClick={() => setSelectedYear(currentYear)} className="btn-secondary hidden sm:block">
-      Aktueller Jahr
-      </button>
-    )}
     <select 
     value={selectedYear} 
     onChange={(e) => setSelectedYear(e.target.value)}
@@ -2058,151 +1965,175 @@ function MonthlyOverview() {
     </select>
     </div>
     </div>
+    
+    {/* Zweite Zeile - nur Mobile */}
+    <div className="flex sm:hidden items-center justify-end gap-4">
+    <label className="checkbox-label">
+    <input
+    type="checkbox"
+    id="hideCompleted"
+    checked={hideCompleted}
+    onChange={(e) => setHideCompleted(e.target.checked)}
+    className="checkbox-input h-3 w-3"
+    />
+    <span className="text-xs text-label">Abgeschlossene</span>
+    </label>
+    <select 
+    value={selectedYear} 
+    onChange={(e) => setSelectedYear(e.target.value)}
+    className="form-select w-24"
+    >
+    <option value="all">Gesamt</option>
+    {[...new Set(monthlyData.map(m => m.year))]
+      .sort((a, b) => b - a)
+      .map(year => (
+        <option key={year} value={year}>{year}</option>
+      ))
+    }
+    </select>
     </div>
     
-    <div className="card-grid">
-    {/* Kirchenkreis Card */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Kirchenkreis</span>
-    <span className="text-value font-medium">
-    {yearTotal.kirchenkreis.toFixed(2)} €
-    </span>
+    {/* Dritte Zeile - Quick Actions nur auf Mobile */}
+    <div className="">
+    <QuickActions 
+    filteredData={filteredData}
+    handleAbrechnungsStatus={handleAbrechnungsStatus}
+    abrechnungstraeger={abrechnungstraeger}
+    className="w-full text-center"
+    />
     </div>
-    {yearTotal.originalKirchenkreis !== yearTotal.kirchenkreis && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalKirchenkreis.toFixed(2)} €
-      </div>
-    )}
+    </div>
     </div>
     
-    {/* Gemeinde Card */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Gemeinde</span>
-    <span className="text-value font-medium">
-    {yearTotal.gemeinde.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalGemeinde !== yearTotal.gemeinde && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalGemeinde.toFixed(2)} €
+    {/* Cards Grid - wie in der Monatsübersicht */}
+    <div className={`grid grid-cols-1 mb-4 ${
+      getKategorienMitErstattung().length === 1 
+      ? 'sm:grid-cols-1 gap-y-4'
+      : getKategorienMitErstattung().length === 2 
+      ? 'sm:grid-cols-2 gap-4'
+      : getKategorienMitErstattung().length === 3
+      ? 'sm:grid-cols-3 gap-4'
+      : 'sm:grid-cols-2 lg:grid-cols-4 gap-4'
+    }`}>
+    {getKategorienMitErstattung().map(([key, displayName, data]) => (
+      <div key={key} className="card-container">
+      <div className="flex justify-between items-center mb-2">
+      <span className="text-sm text-label">{displayName}</span>
+      <span className="text-value font-medium">
+      {(data.ausstehend || 0).toFixed(2)} €
+      </span>
       </div>
-    )}
-    </div>
-    
-    {/* Mitfahrer Card */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Mitfahrer:innen</span>
-    <span className="text-value font-medium">
-    {yearTotal.mitfahrer.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalMitfahrer !== yearTotal.mitfahrer && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalMitfahrer.toFixed(2)} €
+      {data.original !== data.ausstehend && (
+        <div className="text-right text-muted text-xs">
+        Ursprünglich: {(data.original || 0).toFixed(2)} €
+        </div>
+      )}
       </div>
-    )}
-    </div>
+    ))}
     
     {/* Gesamt Card */}
-    <div className="card-container">
-    <div className="flex justify-between items-center mb-2">
-    <span className="text-label text-sm">Gesamt</span>
-    <span className="text-value font-medium">
-    {yearTotal.gesamt.toFixed(2)} €
-    </span>
-    </div>
-    {yearTotal.originalGesamt !== yearTotal.gesamt && (
-      <div className="text-muted text-xs">
-      Ursprünglich: {yearTotal.originalGesamt.toFixed(2)} €
+    {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
+      <div className="card-container col-span-1 sm:col-span-2 lg:col-span-full">
+      <div className="flex justify-between items-center mb-2">
+      <span className="text-sm text-label">Gesamt</span>
+      <span className="text-value font-medium">
+      {(yearTotal.gesamt?.ausstehend || 0).toFixed(2)} €
+      </span>
+      </div>
+      {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
+        <div className="text-right text-muted text-xs">
+        Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
+        </div>
+      )}
       </div>
     )}
     </div>
-    </div>
     
-    <div className="mt-6">
-    </div>
-    </div>
-    
-    {/* Desktop View */}
-    <div className="hidden sm:block">
-    <div className="table-container">
-    <table className="w-full">
-    <thead>
-    <tr className="table-head-row">
-    <th className="table-header">Monat</th>
-    <th className="table-header text-right">Kirchenkreis</th>
-    <th className="table-header-sm">Status</th>
-    <th className="table-header text-right">Gemeinde</th>
-    <th className="table-header-sm">Status</th>
-    <th className="table-header text-right">Mitfahrer</th>
-    <th className="table-header text-right">Gesamt</th>
-    </tr>
-    </thead>
-    <tbody className="divide-y divide-primary-50 dark:divide-primary-800">
+    {/* Desktop View - neue Card-basierte Ansicht */}
+    <div className="hidden sm:block space-y-4">
     {filteredData.map((month) => {
-      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
-      const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
-      const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
-      const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
-      const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-      Number(month.gemeindeErstattung || 0) + 
-      Number(month.mitfahrerErstattung || 0);
+      
+      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+        sum + Number(betrag || 0), 0
+      );
+      
+      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const received = month.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (received ? 0 : Number(betrag || 0));
+      }, 0);
       
       return (
-        <tr key={month.yearMonth} className="table-row">
-        <td className="table-cell">
-        <span className="text-value">{month.monthName} {month.year}</span>
-        </td>
-        <td className="table-cell text-right">
-        {renderBetrag(month.kirchenkreisErstattung, kkReceived)}
-        </td>
-        <td className="table-cell">
-        {renderStatusCell(month, 'Kirchenkreis')}
-        </td>
-        <td className="table-cell text-right">
-        {renderBetrag(month.gemeindeErstattung, gemReceived)}
-        </td>
-        <td className="table-cell">
-        {renderStatusCell(month, 'Gemeinde')}
-        </td>
-        <td className="table-cell text-right">
-        {renderBetrag(month.mitfahrerErstattung, kkReceived)}
-        </td>
-        <td className="table-cell text-right">
+        <div key={month.yearMonth} className="card-container">
+        {/* Header mit Monat und Gesamtsumme */}
+        <div className="flex justify-between items-center mb-4 pb-4 border-b border-primary-100 dark:border-primary-700">
+        <h3 className="text-lg font-medium text-value">
+        {month.monthName} {month.year}
+        </h3>
+        <div className="text-right">
         <div className="text-value font-medium">
-        {ausstehendGesamt.toFixed(2)} €
+        {gesamtAusstehend.toFixed(2)} €
         </div>
-        {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
-          <div className="text-muted text-xs">
-          ({originalGesamt.toFixed(2)} €)
+        {gesamtAusstehend !== originalGesamt && (
+          <div className="text-xs text-muted">
+          Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
-        </td>
-        </tr>
+        </div>
+        </div>
+        
+        {/* Grid für Abrechnungsträger */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {abrechnungstraeger
+          .filter(traeger => {
+            // Nur anzeigen wenn ein Betrag > 0 existiert
+            const betrag = month.erstattungen?.[traeger.id] || 0;
+            return betrag > 0;
+          })
+          .map(traeger => (
+            <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+            <div className="flex justify-between items-start mb-2">
+            <span className="text-sm font-medium text-value">{traeger.name}</span>
+            <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
+            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
+            </span>
+            </div>
+            <div className="mt-2">
+            {renderStatusCell(month, traeger.id)}
+            </div>
+            </div>
+          ))}
+        
+        {/* Mitfahrer Card wenn vorhanden */}
+        {month.erstattungen?.mitfahrer > 0 && (
+          <div className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+          <div className="flex justify-between items-start mb-2">
+          <span className="text-sm font-medium text-value">Mitfahrer:innen</span>
+          <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
+          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
+          </span>
+          </div>
+          <div className="mt-2">
+          {renderStatusCell(month, 'mitfahrer')}
+          </div>
+          </div>
+        )}
+        </div>
+        </div>
       );
     })}
-    </tbody>
-    </table>
-    </div>
     </div>
     
     {/* Mobile View */}
     <div className="sm:hidden space-y-4">
     {filteredData.map((month) => {
-      const kkReceived = month.abrechnungsStatus?.kirchenkreis?.erhalten_am;
-      const gemReceived = month.abrechnungsStatus?.gemeinde?.erhalten_am;
-      const ausstehendKK = kkReceived ? 0 : Number(month.kirchenkreisErstattung || 0);
-      const ausstehendGem = gemReceived ? 0 : Number(month.gemeindeErstattung || 0);
-      const ausstehendMitf = kkReceived ? 0 : Number(month.mitfahrerErstattung || 0);
-      const ausstehendGesamt = ausstehendKK + ausstehendGem + ausstehendMitf;
-      const originalGesamt = Number(month.kirchenkreisErstattung || 0) + 
-      Number(month.gemeindeErstattung || 0) + 
-      Number(month.mitfahrerErstattung || 0);
+      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const received = month.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (received ? 0 : Number(betrag || 0));
+      }, 0);
+      
+      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+        sum + Number(betrag || 0), 0
+      );
       
       return (
         <div key={month.yearMonth} className="mobile-card">
@@ -2212,454 +2143,70 @@ function MonthlyOverview() {
         {month.monthName} {month.year}
         </div>
         <div className="text-value font-medium">
-        {ausstehendGesamt.toFixed(2)} €
+        {gesamtAusstehend.toFixed(2)} €
         </div>
         </div>
         </div>
         
-        {(kkReceived || gemReceived) && ausstehendGesamt !== originalGesamt && (
+        {gesamtAusstehend !== originalGesamt && (
           <div className="text-muted text-xs text-right mb-4">
           Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
         
         <div className="space-y-4">
-        {/* Kirchenkreis */}
-        <div className="pt-4">
-        <div className="flex justify-between items-start mb-2">
-        <span className="text-label text-sm">Kirchenkreis</span>
-        <span className={kkReceived ? "text-muted" : "text-value"}>
-        {Number(month.kirchenkreisErstattung || 0).toFixed(2)} €
-        </span>
-        </div>
-        <div className="mt-2">
-        {renderStatusCell(month, 'Kirchenkreis')}
-        </div>
-        </div>
-        
-        {/* Gemeinde */}
-        <div className="pt-4">
-        <div className="flex justify-between items-start mb-2">
-        <span className="text-label text-sm">Gemeinde</span>
-        <span className={gemReceived ? "text-muted" : "text-value"}>
-        {Number(month.gemeindeErstattung || 0).toFixed(2)} €
-        </span>
-        </div>
-        <div className="mt-2">
-        {renderStatusCell(month, 'Gemeinde')}
-        </div>
-        </div>
+        {abrechnungstraeger
+          .filter(traeger => {
+            const betrag = month.erstattungen?.[traeger.id] || 0;
+            return betrag > 0;
+          })
+          .map(traeger => (
+            <div key={traeger.id} className="pt-4">
+            <div className="flex justify-between items-start mb-2">
+            <span className="text-label text-sm">{traeger.name}</span>
+            <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
+            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
+            </span>
+            </div>
+            <div className="mt-2">
+            {renderStatusCell(month, traeger.id)}
+            </div>
+            </div>
+          ))}
         
         {/* Mitfahrer */}
-        <div className="pt-4">
-        <div className="flex justify-between items-start">
-        <span className="text-label text-sm">Mitfahrer</span>
-        <span className={kkReceived ? "text-muted" : "text-value"}>
-        {Number(month.mitfahrerErstattung || 0).toFixed(2)} €
-        </span>
-        </div>
-        </div>
+        {month.erstattungen?.mitfahrer > 0 && (
+          <div className="pt-4">
+          <div className="flex justify-between items-start">
+          <span className="text-label text-sm">Mitfahrer</span>
+          <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
+          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
+          </span>
+          </div>
+          <div className="mt-2">
+          {renderStatusCell(month, 'mitfahrer')}
+          </div>
+          </div>
+        )}
         </div>
         </div>
       );
     })}
     </div>
-    
-    {/* Modals */}
     <AbrechnungsStatusModal 
-    isOpen={statusModal.open && statusModal.aktion !== 'reset'} 
-    onClose={() => setStatusModal({})}
-    onSubmit={(date) => handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.typ, statusModal.aktion, date)}
-    typ={statusModal.typ}
-    aktion={statusModal.aktion}
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
+    onClose={() => setAbrechnungsStatusModal({})}
+    onSubmit={(date) => handleAbrechnungsStatus(
+      abrechnungsStatusModal.jahr, 
+      abrechnungsStatusModal.monat,
+      abrechnungsStatusModal.traegerId, 
+      abrechnungsStatusModal.aktion,
+      date
+    )}
+    traegerId={abrechnungsStatusModal.traegerId}
+    aktion={abrechnungsStatusModal.aktion}
     />
-    
-    <Modal
-    isOpen={statusModal.open && statusModal.aktion === 'reset'}
-    onClose={() => setStatusModal({})}
-    title="Status zurücksetzen"
-    >
-    <div className="card-container-highlight">
-    <p className="text-value text-sm mb-6">
-    Möchten Sie den Status wirklich zurücksetzen?
-    </p>
-    <div className="flex flex-col sm:flex-row gap-2">
-    <button
-    type="button"
-    onClick={() => setStatusModal({})}
-    className="btn-secondary w-full"
-    >
-    Abbrechen
-    </button>
-    <button
-    type="button"
-    onClick={() => {
-      handleStatusUpdate(statusModal.jahr, statusModal.monat, statusModal.typ, 'reset');
-      setStatusModal({});
-    }}
-    className="btn-primary w-full"
-    >
-    Zurücksetzen
-    </button>
     </div>
-    </div>
-    </Modal>
-    </div>
-  );
-}
-
-function OrteListe() {
-  const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
-  const [editingOrt, setEditingOrt] = useState(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
-
-  const handleEdit = (ort) => {
-    setEditingOrt({ ...ort });
-  };
-  
-  const handleSave = () => {
-    const updatedOrt = {
-      ...editingOrt,
-      ist_wohnort: editingOrt.ist_wohnort !== undefined ? editingOrt.ist_wohnort : false,
-      ist_dienstort: editingOrt.ist_dienstort !== undefined ? editingOrt.ist_dienstort : false,
-      ist_kirchspiel: editingOrt.ist_kirchspiel !== undefined ? editingOrt.ist_kirchspiel : false
-    };
-    updateOrt(editingOrt.id, updatedOrt);
-    setEditingOrt(null);
-    showNotification("Erfolg", "Der Ort wurde erfolgreich aktualisiert.");
-  };
-  
-  
-  
-  const handleDelete = async (id) => {
-    showNotification(
-      "Ort löschen",
-      "Sind Sie sicher, dass Sie diesen Ort löschen möchten?",
-      async () => {
-        try {
-          await deleteOrt(id);
-          showNotification("Erfolg", "Der Ort wurde erfolgreich gelöscht.");
-        } catch (error) {
-          console.error('Fehler beim Löschen des Ortes:', error);
-          showNotification("Fehler", "Dieser Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird.");
-        }
-      },
-      true // showCancel
-    );
-  };
-  
-  const sortedOrte = React.useMemo(() => {
-    let sortableOrte = [...orte];
-    if (sortConfig.key !== null) {
-      sortableOrte.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableOrte;
-  }, [orte, sortConfig]);
-  
-  const requestSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-  
-  const getOrtStatus = (ort) => {
-    if (ort.ist_wohnort) return 'wohnort';
-    if (ort.ist_dienstort) return 'dienstort';
-    if (ort.ist_kirchspiel) return 'kirchspiel';
-    return '';
-  };
-  
-  const getOrtStatusLabel = (ort) => {
-    if (ort.ist_wohnort) return 'Wohnort';
-    if (ort.ist_dienstort) return 'Dienstort';
-    if (ort.ist_kirchspiel) return 'Kirchspiel';
-    return 'Sonstiger Ort';
-  };
-  
-  const handleStatusChange = (e) => {
-    const value = e.target.value;
-    setEditingOrt({
-      ...editingOrt,
-      ist_wohnort: value === 'wohnort',
-      ist_dienstort: value === 'dienstort',
-      ist_kirchspiel: value === 'kirchspiel'
-    });
-  };
-  
-  return (
-    <div className="table-container">
-    <table className="w-full">
-    <thead>
-    <tr className="table-head-row">
-    <th className="table-header" onClick={() => requestSort('name')}>
-    Name {sortConfig.key === 'name' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </th>
-    <th className="table-header-sm" onClick={() => requestSort('adresse')}>
-    Adresse {sortConfig.key === 'adresse' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </th>
-    <th className="table-header">Status</th>
-    <th className="table-header text-right">Aktionen</th>
-    </tr>
-    </thead>
-    <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
-    {sortedOrte.map((ort) => (
-      <tr key={ort.id} className="table-row">
-      <td className="table-cell">
-      {editingOrt?.id === ort.id ? (
-        <input
-        value={editingOrt.name}
-        onChange={(e) => setEditingOrt({ ...editingOrt, name: e.target.value })}
-        className="form-input"
-        />
-      ) : (
-        <div className="flex flex-col">
-        <span className="text-value">{ort.name}</span>
-        <span className="text-muted text-xs sm:hidden">
-        {ort.adresse}
-        </span>
-        </div>
-      )}
-      </td>
-      <td className="table-header-sm">
-      {editingOrt?.id === ort.id ? (
-        <input
-        value={editingOrt.adresse}
-        onChange={(e) => setEditingOrt({ ...editingOrt, adresse: e.target.value })}
-        className="form-input"
-        />
-      ) : (
-        <span className="text-value">{ort.adresse}</span>
-      )}
-      </td>
-      <td className="table-cell">
-      {editingOrt?.id === ort.id ? (
-        <select
-        value={getOrtStatus(editingOrt)}
-        onChange={handleStatusChange}
-        className="form-select"
-        >
-        <option value="">Sonstiger Ort</option>
-        <option value="wohnort">Wohnort</option>
-        <option value="dienstort">Dienstort</option>
-        <option value="kirchspiel">Kirchspiel</option>
-        </select>
-      ) : (
-        <span className="text-value">{getOrtStatusLabel(ort)}</span>
-      )}
-      </td>
-      <td className="table-cell">
-      <div className="flex justify-end gap-2">
-      {editingOrt?.id === ort.id ? (
-        <button
-        onClick={handleSave}
-        className="table-action-button-primary"
-        title="Speichern"
-        >
-        ✓
-        </button>
-      ) : (
-        <>
-        <button
-        onClick={() => handleEdit(ort)}
-        className="table-action-button-primary"
-        title="Bearbeiten"
-        >
-        ✎
-        </button>
-        <button
-        onClick={() => handleDelete(ort.id)}
-        className="table-action-button-secondary"
-        title="Löschen"
-        >
-        ×
-        </button>
-        </>
-      )}
-      </div>
-      </td>
-      </tr>
-    ))}
-    </tbody>
-    </table>
-    </div>
-  );
-}
-
-function DistanzenListe() {
-  const { distanzen, orte, updateDistanz, deleteDistanz, showNotification } = useContext(AppContext);
-  const [editingDistanz, setEditingDistanz] = useState(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: 'von_ort_id', direction: 'ascending' });
-  
-  const handleEdit = (distanz) => {
-    setEditingDistanz({ ...distanz });
-  };
-  
-  const handleSave = () => {
-    updateDistanz(editingDistanz.id, editingDistanz);
-    setEditingDistanz(null);
-    showNotification("Erfolg", "Die Distanz wurde erfolgreich aktualisiert.");
-  };
-  
-  const getOrtName = (id) => {
-    const ort = orte.find(o => o.id === id);
-    return ort ? ort.name : 'Unbekannt';
-  };
-  
-  const handleDelete = async (id) => {
-    showNotification(
-      "Distanz löschen",
-      "Sind Sie sicher, dass Sie diese Distanz löschen möchten?",
-      async () => {
-        try {
-          await deleteDistanz(id);
-          showNotification("Erfolg", "Die Distanz wurde erfolgreich gelöscht.");
-        } catch (error) {
-          console.error('Fehler beim Löschen der Distanz:', error);
-          showNotification("Fehler", "Beim Löschen der Distanz ist ein Fehler aufgetreten.");
-        }
-      },
-      true // showCancel
-    );
-  };
-  
-  const sortedDistanzen = useMemo(() => {
-    let sortableDistanzen = [...distanzen];
-    if (sortConfig.key !== null) {
-      sortableDistanzen.sort((a, b) => {
-        if (sortConfig.key === 'von_ort_id' || sortConfig.key === 'nach_ort_id') {
-          const ortA = orte.find(o => o.id === a[sortConfig.key]);
-          const ortB = orte.find(o => o.id === b[sortConfig.key]);
-          return sortConfig.direction === 'ascending' 
-          ? ortA.name.localeCompare(ortB.name)
-          : ortB.name.localeCompare(ortA.name);
-        } else {
-          if (a[sortConfig.key] < b[sortConfig.key]) {
-            return sortConfig.direction === 'ascending' ? -1 : 1;
-          }
-          if (a[sortConfig.key] > b[sortConfig.key]) {
-            return sortConfig.direction === 'ascending' ? 1 : -1;
-          }
-          return 0;
-        }
-      });
-    }
-    return sortableDistanzen;
-  }, [distanzen, sortConfig, orte]);
-  
-  const requestSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
-  };
-  
-  return (
-    <div className="table-container">
-    <table className="w-full">
-    <thead>
-    <tr className="table-head-row">
-    <th className="table-header" onClick={() => requestSort('von_ort_id')}>
-    Von {sortConfig.key === 'von_ort_id' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </th>
-    <th className="table-header-sm" onClick={() => requestSort('nach_ort_id')}>
-    Nach {sortConfig.key === 'nach_ort_id' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </th>
-    <th className="table-header" onClick={() => requestSort('distanz')}>
-    <span className="sm:hidden">km</span>
-    <span className="hidden sm:inline">Distanz (km)</span>
-    {sortConfig.key === 'distanz' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </th>
-    <th className="table-header text-right">Aktionen</th>
-    </tr>
-    </thead>
-    <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
-    {sortedDistanzen.map((distanz) => (
-      <tr key={distanz.id} className="table-row">
-      <td className="table-cell">
-      <div className="flex flex-col">
-      <span className="text-value">{getOrtName(distanz.von_ort_id)}</span>
-      <span className="text-muted text-xs sm:hidden">
-      → {getOrtName(distanz.nach_ort_id)}
-      </span>
-      </div>
-      </td>
-      <td className="table-header-sm">
-      <span className="text-value">{getOrtName(distanz.nach_ort_id)}</span>
-      </td>
-      <td className="table-cell text-right">
-      {editingDistanz?.id === distanz.id ? (
-        <input
-        type="number"
-        value={editingDistanz.distanz}
-        onChange={(e) =>
-          setEditingDistanz({
-            ...editingDistanz,
-            distanz: parseInt(e.target.value),
-          })
-        }
-        className="form-input w-16"
-        />
-      ) : (
-        <span className="text-value">{distanz.distanz}</span>
-      )}
-      </td>
-      <td className="table-cell">
-      <div className="flex justify-end gap-2">
-      {editingDistanz?.id === distanz.id ? (
-        <button
-        onClick={handleSave}
-        className="table-action-button-primary"
-        title="Speichern"
-        >
-        ✓
-        </button>
-      ) : (
-        <>
-        <button
-        onClick={() => handleEdit(distanz)}
-        className="table-action-button-primary"
-        title="Bearbeiten"
-        >
-        ✎
-        </button>
-        <button
-        onClick={() => handleDelete(distanz.id)}
-        className="table-action-button-secondary"
-        title="Löschen"
-        >
-        ×
-        </button>
-        </>
-      )}
-      </div>
-      </td>
-      </tr>
-    ))}
-    </tbody>
-    </table>
     </div>
   );
 }
@@ -2683,7 +2230,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
     <div className="card-container-highlight m-6 w-full max-w-md">
     <h1 className="text-lg font-medium text-value text-center mb-6">
-    Fahrtenbuch Kirchenkreis Dithmarschen
+    {process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen"}
     </h1>
     
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -2804,7 +2351,7 @@ function ForgotPasswordForm({ onClose }) {
 
 function App() {
   React.useEffect(() => {
-    document.title = "Fahrtenbuch";
+    document.title = "Fahrtenbuch Kirchenkreis Dithmarschen";
   }, []);
   
   return (
@@ -2825,8 +2372,6 @@ function App() {
 
 function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
-  const [showOrteModal, setShowOrteModal] = useState(false);
-  const [showDistanzenModal, setShowDistanzenModal] = useState(false);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   
@@ -2859,52 +2404,36 @@ function AppContent() {
   if (!isLoggedIn) {
     return <LoginPage />;
   }
-  
+    
   return (
     <div className="container mx-auto p-4">
     <div className="mb-8"> 
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-    <h1 className="text-lg font-medium text-value">Fahrtenbuch Kirchenkreis Dithmarschen</h1>
+    <h1 className="text-lg font-medium text-value">
+    {process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen"}
+    </h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-    {/* Hauptnavigation - Verwaltung */}
-    <div className="grid grid-cols-2 sm:flex gap-2 w-full">
-    <button
-    onClick={() => setShowOrteModal(true)}
-    className="btn-primary flex items-center justify-center gap-2"
-    >
-    <MapPin size={16} />
-    <span>Orte</span>
-    </button>
-    <button
-    onClick={() => setShowDistanzenModal(true)}
-    className="btn-primary flex items-center justify-center gap-2"
-    >
-    <Ruler size={16} />
-    <span>Distanzen</span>
-    </button>
-    </div>
-    
-    {/* Benutzer-bezogene Aktionen */}
+    {/* Nur noch Einstellungen und Admin-Button */}
     <div className={`grid ${user?.role === 'admin' ? 'grid-cols-2' : 'grid-cols-1'} sm:flex gap-2 w-full`}>
-            {user?.role === 'admin' && (
-              <button
-                onClick={() => setShowUserManagementModal(true)}
-                className="btn-primary flex items-center justify-center gap-2"
-              >
-                <Users size={16} />
-                <span>Benutzerverwaltung</span>
-              </button>
-            )}
-            <button
-              onClick={() => setIsProfileModalOpen(true)}
-              className="btn-primary flex items-center justify-center gap-2"
-            >
-              <UserCircle size={16} />
-              <span>Profil</span>
-            </button>
-          </div>
+    {user?.role === 'admin' && (
+      <button
+        onClick={() => setShowUserManagementModal(true)}
+        className="btn-primary flex items-center justify-center gap-2"
+      >
+        <Users size={16} />
+        <span>Benutzerverwaltung</span>
+      </button>
+    )}
+    <button
+      onClick={() => setIsProfileModalOpen(true)}
+      className="btn-primary flex items-center justify-center gap-2"
+    >
+      <Settings size={16} />
+      <span>Einstellungen</span>
+    </button>
+  </div>
           
           {/* Hilfe und Logout */}
           <div className="grid grid-cols-4 sm:flex gap-2 w-full sm:w-auto">
@@ -2954,30 +2483,6 @@ function AppContent() {
       <UserManagement />
     </Modal>
     
-    <Modal 
-      isOpen={showOrteModal} 
-      onClose={() => setShowOrteModal(false)} 
-      title="Orte" 
-      size="wide"
-    >
-      <div className="space-y-6">
-        <OrtForm />
-        <OrteListe />
-      </div>
-    </Modal>
-    
-    <Modal 
-      isOpen={showDistanzenModal} 
-      onClose={() => setShowDistanzenModal(false)} 
-      title="Distanzen" 
-      size="wide"
-    >
-      <div className="space-y-6">
-        <DistanzForm />
-        <DistanzenListe />
-      </div>
-    </Modal>
-
     <HilfeModal 
       isOpen={showHelpModal}
       onClose={() => setShowHelpModal(false)}

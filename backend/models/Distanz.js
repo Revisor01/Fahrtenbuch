@@ -46,7 +46,6 @@ class Distanz {
   }
   
   static async update(id, vonOrtId, nachOrtId, distanz, userId) {
-    console.log('Updating Distanz:', { id, vonOrtId, nachOrtId, distanz, userId });
     const [result] = await db.execute(
       'UPDATE distanzen SET von_ort_id = ?, nach_ort_id = ?, distanz = ? WHERE id = ? AND user_id = ?',
       [vonOrtId, nachOrtId, distanz, id, userId]

@@ -26,7 +26,7 @@ jobs:
           username: revisoren
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Backend
+      - name: Build and push Backend (Master)
         uses: docker/build-push-action@v5
         with:
           context: ./backend
@@ -45,19 +45,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push Frontend (Abrechnungen)
-        if: ${{ github.ref == 'refs/heads/abrechnungen' }}
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          push: true
-          tags: revisoren/fahrtenbuch-app:beta
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Update Beta Service via Webhook (Abrechnungen)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/abrechnungen' }}
+      - name: Update Beta Service via Webhook (Master)
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         uses: newarifrh/portainer-service-webhook@v1
         with:
           webhook_url: https://docker.godsapp.de/api/stacks/webhooks/416b7561-cc59-4624-8fc3-daefca2ccea4

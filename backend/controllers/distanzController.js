@@ -74,7 +74,6 @@ exports.getDistanz = async (req, res) => {
 
 exports.updateDistanz = async (req, res) => {
   try {
-    console.log('Update Distanz Request:', req.params, req.body);
     const { id } = req.params;
     const { vonOrtId, nachOrtId, distanz } = req.body;
     const userId = req.user.id;

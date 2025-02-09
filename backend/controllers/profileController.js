@@ -42,9 +42,6 @@ exports.updateProfile = async (req, res) => {
     const { email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis } = req.body;
     const userId = req.user.id;
 
-    console.log('Received profile update request:', req.body);
-    console.log('User ID:', req.user.id);
-
     try {
         const connection = await db.getConnection();
         try {
@@ -92,8 +89,6 @@ exports.updateProfile = async (req, res) => {
             }
 
             await connection.commit();
-
-            console.log('Database operation result:', result);
 
             res.json({ message: 'Profil erfolgreich aktualisiert.' });
 
