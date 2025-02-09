@@ -2,9 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path'); // Import path
+const initializeDatabase = require('./initDb');
 const orteRoutes = require('./routes/orte');
 const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
+const abrechnungstraegerRoutes = require('./routes/abrechnungstraeger');
+const mitfahrerErstattungRoutes = require('./routes/mitfahrerErstattung');
 const apiKeyRoutes = require('./routes/apiKeys');
 const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
@@ -13,30 +16,6 @@ const { authMiddleware } = require('./middleware/authMiddleware');
 const util = require('util');
 
 const app = express();
-
-function detailedLog(obj) {
-    console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }));
-}
-
-// Logging Middleware
-app.use((req, res, next) => {
-    console.log(`\n${new Date().toISOString()} - ${req.method} ${req.url}`);
-    console.log('Query parameters:');
-    detailedLog(req.query);
-    console.log('Request body:');
-    detailedLog(req.body);
-    next();
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Error occurred:', err);
-    res.status(500).json({
-        message: 'Ein Fehler ist aufgetreten',
-        error: err.message,
-        stack: err.stack
-    });
-});
 
 app.use(cors({
     origin: 'https://fahrtenbuch.godsapp.de',
@@ -66,6 +45,8 @@ app.use('/api/orte', authMiddleware, orteRoutes);
 app.use('/api/fahrten', authMiddleware, fahrtenRoutes);
 app.use('/api/distanzen', authMiddleware, distanzenRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/abrechnungstraeger', authMiddleware, abrechnungstraegerRoutes);
+app.use('/api/mitfahrer-erstattung', authMiddleware, mitfahrerErstattungRoutes);
 
 // Catch-all route for SPAs
 app.get('*', (req, res) => {
@@ -74,8 +55,16 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`Server läuft auf Port ${PORT}`);
-});
+(async () => {
+    try {
+        await initializeDatabase();
+        app.listen(PORT, () => {
+            console.log(`Server läuft auf Port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        process.exit(1);
+    }
+})();
 
 module.exports = app;

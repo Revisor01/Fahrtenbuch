@@ -8,16 +8,16 @@ router.use(authMiddleware);
 
 router.post('/', fahrtController.createFahrt);
 router.get('/', fahrtController.getAllFahrten);
+router.get('/export/:type/:year/:month', fahrtController.exportToExcel);
+router.get('/report/:year/:month', fahrtController.getMonthlyReport);
+router.get('/monthly-summary', fahrtController.getMonthlySummary); 
+router.get('/year-summary/:year', fahrtController.getYearSummary);
 router.get('/:id', fahrtController.getFahrtById);
 router.put('/:id', fahrtController.updateFahrt);
 router.delete('/:id', fahrtController.deleteFahrt);
-router.get('/report/:year/:month', fahrtController.getMonthlyReport);
-router.get('/monthly-summary', fahrtController.getMonthlySummary);
-router.get('/year-summary/:year', fahrtController.getYearSummary);
 router.post('/:fahrtId/mitfahrer', fahrtController.addMitfahrer);
 router.put('/:fahrtId/mitfahrer/:mitfahrerId', fahrtController.updateMitfahrer);
 router.delete('/:fahrtId/mitfahrer/:mitfahrerId', fahrtController.deleteMitfahrer);
-router.get('/export/:type/:year/:month', fahrtController.exportToExcel);
 router.post('/abrechnungsstatus', fahrtController.updateAbrechnungsStatus);
 
 module.exports = router;

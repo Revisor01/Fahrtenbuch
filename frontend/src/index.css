@@ -215,6 +215,33 @@ code {
     @apply text-primary-500 dark:text-primary-300;
   }
 
+  
+/* Action Button Group */
+.action-button-group {
+  @apply flex flex-col sm:flex-row gap-2 w-full;
+}
+  
+.action-button-group button {
+  @apply w-full;
+}
+  
+/* Mobile Edit Container */
+.mobile-edit-container {
+  @apply space-y-4 w-full;
+}
+  
+.mobile-edit-container .form-group {
+  @apply space-y-2;
+}
+  
+.mobile-edit-actions {
+  @apply flex flex-row gap-2 mt-4;
+}
+  
+.mobile-edit-actions button {
+  @apply w-full;
+}
+  
   /* Buttons */
   .btn-primary {
     @apply bg-primary-500 dark:bg-primary-600 
@@ -253,7 +280,6 @@ code {
   @apply px-4 py-3 
       dark:text-primary-400
 }
-  
   .table-header-sm {
     padding: 0.75rem 1rem !important;
     font-size: 0.75rem !important;
@@ -372,5 +398,45 @@ tbody {
   
   .w-full-mobile {
     @apply w-full sm:w-auto;
+  }
+}
+
+/* Modal Content Fixes */
+.modal-content {
+  @apply flex flex-col max-h-[calc(100vh-6rem)];
+}
+
+.modal-header {
+  @apply sticky top-0 bg-white dark:bg-gray-800 z-10;
+}
+
+.modal-body {
+  @apply flex-1 overflow-y-auto pt-4;
+}
+
+/* Verify Badge im Input */
+.verify-badge {
+  @apply absolute right-2 top-[70%] -translate-y-1/2 flex items-center gap-2;
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 640px) {
+  .modal-body {
+    @apply px-2;  /* weniger Abstand zu den Rändern */
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+}
+
+/* Mobile Optimierungen */
+@media (max-width: 640px) {
+  .tab-nav {
+    @apply -mx-6 px-6;
+  }
+  
+  .tab-content {
+    @apply -mx-6 px-6;
   }
 }
