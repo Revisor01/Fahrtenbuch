@@ -18,7 +18,7 @@ const util = require('util');
 const app = express();
 
 app.use(cors({
-    origin: 'https://fahrtenbuch.godsapp.de',
+    origin: 'https://kkd-fahrtenbuch.de',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
         'Origin', 
