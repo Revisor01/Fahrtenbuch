@@ -2215,6 +2215,12 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const { login } = useContext(AppContext);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [registrationData, setRegistrationData] = useState({
+    username: '',
+    email: '',
+    registrationCode: ''
+  });
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -2222,6 +2228,32 @@ function LoginPage() {
       await login(username, password);
     } catch (error) {
       alert('Login fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.');
+    }
+  };
+  
+  const validateEmail = (email) => {
+    if (!process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS) return true;
+    
+    const domain = email.split('@')[1];
+    const allowedDomains = process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS.split(',');
+    return allowedDomains.includes(domain);
+  };
+  
+  const handleRegistration = async (e) => {
+    e.preventDefault();
+    
+    // Email-Domain prüfen
+    if (!validateEmail(registrationData.email)) {
+      showNotification('Fehler', 'Diese Email-Domain ist nicht für die Registrierung zugelassen');
+      return;
+    }
+    
+    try {
+      const response = await axios.post('/api/auth/register', registrationData);
+      showNotification('Erfolg', response.data.message);
+      setShowRegistration(false);
+    } catch (error) {
+      showNotification('Fehler', error.response?.data?.message || 'Registrierung fehlgeschlagen');
     }
   };
   
@@ -2263,6 +2295,7 @@ function LoginPage() {
     <button type="submit" className="btn-primary w-full">
     Login
     </button>
+    <div className="flex gap-2">
     <button
     type="button"
     onClick={() => setShowForgotPassword(true)}
@@ -2270,6 +2303,16 @@ function LoginPage() {
     >
     Passwort vergessen?
     </button>
+    {process.env.REACT_APP_ALLOW_REGISTRATION === 'true' && (
+      <button
+      type="button"
+      onClick={() => setShowRegistration(true)}
+      className="btn-secondary w-full"
+      >
+      Registrieren
+      </button>
+    )}
+    </div>
     </div>
     </form>
     </div>
@@ -2280,6 +2323,66 @@ function LoginPage() {
     title="Passwort zurücksetzen"
     >
     <ForgotPasswordForm onClose={() => setShowForgotPassword(false)} />
+    </Modal>
+    
+    <Modal
+    isOpen={showRegistration}
+    onClose={() => setShowRegistration(false)}
+    title="Registrierung"
+    >
+    <div className="card-container-highlight">
+    <form onSubmit={handleRegistration} className="space-y-4">
+    <div>
+    <label className="form-label">Benutzername</label>
+    <input
+    type="text"
+    value={registrationData.username}
+    onChange={(e) => setRegistrationData({...registrationData, username: e.target.value})}
+    className="form-input"
+    required
+    />
+    </div>
+    <div>
+    <label className="form-label">E-Mail</label>
+    <input
+    type="email"
+    value={registrationData.email}
+    onChange={(e) => setRegistrationData({...registrationData, email: e.target.value})}
+    className="form-input"
+    required
+    />
+    </div>
+    {process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS && (
+      <div className="text-xs text-muted mt-1">
+      Erlaubte Domains: {process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS}
+      </div>
+    )}
+    {process.env.REACT_APP_REGISTRATION_CODE && (
+      <div>
+      <label className="form-label">Registrierungscode</label>
+      <input
+      type="text"
+      value={registrationData.registrationCode}
+      onChange={(e) => setRegistrationData({...registrationData, registrationCode: e.target.value})}
+      className="form-input"
+      required
+      />
+      </div>
+    )}
+    <div className="flex flex-col sm:flex-row gap-2">
+    <button
+    type="button"
+    onClick={() => setShowRegistration(false)}
+    className="btn-secondary w-full"
+    >
+    Abbrechen
+    </button>
+    <button type="submit" className="btn-primary w-full">
+    Registrieren
+    </button>
+    </div>
+    </form>
+    </div>
     </Modal>
     </div>
   );

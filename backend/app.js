@@ -42,7 +42,7 @@ const reactBuildPath = path.join(__dirname, '../frontend/public');
 app.use(express.static(reactBuildPath));
 
 // API routes
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/api/keys', apiKeyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orte', authMiddleware, orteRoutes);
