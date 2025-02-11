@@ -18,7 +18,7 @@ const util = require('util');
 const app = express();
 
 const corsOrigin = process.env.NODE_ENV === 'production' 
-? process.env.CORS_ORIGIN 
+? process.env.REACT_APP_CORS_ORIGIN 
 : 'https://kkd-fahrtenbuch.de';
 
 app.use(cors({
@@ -42,7 +42,7 @@ const reactBuildPath = path.join(__dirname, '../frontend/public');
 app.use(express.static(reactBuildPath));
 
 // API routes
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/keys', apiKeyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orte', authMiddleware, orteRoutes);
