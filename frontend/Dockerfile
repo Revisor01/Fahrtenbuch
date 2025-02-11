@@ -4,6 +4,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+ENV REACT_APP_TITLE=""
+ENV REACT_APP_ALLOW_REGISTRATION=""
+ENV REACT_APP_ALLOWED_EMAIL_DOMAINS=""
+ENV REACT_APP_REGISTRATION_CODE=""
+
 RUN npm run build
 
 # Production stage
