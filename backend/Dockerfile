@@ -3,5 +3,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+ARG REACT_APP_CORS_ORIGIN
+ENV REACT_APP_CORS_ORIGIN=$REACT_APP_CORS_ORIGIN
+
 EXPOSE 5000
 CMD ["node", "app.js"]
