@@ -19,7 +19,7 @@ const app = express();
 
 const corsOrigin = process.env.NODE_ENV === 'production' 
 ? process.env.CORS_ORIGIN 
-: 'http://localhost:9642';
+: 'https://kkd-fahrtenbuch.de';
 
 app.use(cors({
     origin: corsOrigin,
