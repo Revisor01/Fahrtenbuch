@@ -17,8 +17,12 @@ const util = require('util');
 
 const app = express();
 
+const corsOrigin = process.env.NODE_ENV === 'production' 
+? process.env.CORS_ORIGIN 
+: 'http://localhost:9642';
+
 app.use(cors({
-    origin: 'https://kkd-fahrtenbuch.de',
+    origin: corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
         'Origin', 
