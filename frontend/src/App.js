@@ -2213,7 +2213,7 @@ function MonthlyOverview() {
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useContext(AppContext);
+  const { login, showNotification } = useContext(AppContext);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
   const [registrationData, setRegistrationData] = useState({
