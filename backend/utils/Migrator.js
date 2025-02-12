@@ -33,20 +33,19 @@ class Migrator {
         content = content.replace(/\${DEFAULT_ERSTATTUNG_TRAEGER}/g, process.env.DEFAULT_ERSTATTUNG_TRAEGER);
         content = content.replace(/\${DEFAULT_ERSTATTUNG_MITFAHRER}/g, process.env.DEFAULT_ERSTATTUNG_MITFAHRER);
         content = content.replace(/\${DEFAULT_ERSTATTUNG_DATUM}/g, process.env.DEFAULT_ERSTATTUNG_DATUM);
-        content = content.replace(/\${INITIAL_TRAEGER_1_NAME}/g, process.env.INITIAL_TRAEGER_1_NAME || '');  // Wichtig: Leeren String verwenden, falls nicht definiert
-        content = content.replace(/\${INITIAL_TRAEGER_2_NAME}/g, process.env.INITIAL_TRAEGER_2_NAME || '');  // Wichtig: Leeren String verwenden, falls nicht definiert
-
+        content = content.replace(/\${INITIAL_TRAEGER_1_NAME}/g, process.env.INITIAL_TRAEGER_1_NAME || '');
+        content = content.replace(/\${INITIAL_TRAEGER_2_NAME}/g, process.env.INITIAL_TRAEGER_2_NAME || '');
         const statements = content
-            .split(';')
-            .map(stmt => stmt.trim())
-            .filter(stmt => stmt.length > 0);
+        .split(';')
+        .map(stmt => stmt.trim())
+        .filter(stmt => stmt.length > 0);
 
         for (let statement of statements) {
             try {
                 console.log("Executing statement:", statement); // Zeige jede SQL-Anweisung an
                 await connection.query(statement);
             } catch (error) {
-                console.error('Error executing SQL statement:', statement);
+                console.error('Error executing SQL statement:', statement, error); // Zeige den Fehler an
                 throw error; // Wichtig: Wirf den Fehler erneut, damit die Migration fehlschlägt
             }
         }
