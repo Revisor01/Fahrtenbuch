@@ -315,7 +315,7 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
         <div className="space-y-4 mt-4">
         <div>
       <a 
-      href="https://www.icloud.com/shortcuts/886203aaac58461bb4f01eeefeac5a8f" 
+      href="https://www.icloud.com/shortcuts/6eb6ac7cc5484f8ea80dd2d35e71b892" 
       className="btn-primary w-full md:w-auto flex items-center justify-center md:justify-start gap-2 text-sm"
       target="_blank"
       rel="noopener noreferrer"
