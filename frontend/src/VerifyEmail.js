@@ -44,31 +44,27 @@ export default function VerifyEmail() {
   }, [location.search, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary-25">
-    <div className="table-container w-full max-w-md">
-    <div className="bg-primary-25 p-6 rounded-lg border border-primary-100 space-y-6">
-    <h2 className="text-2xl font-medium text-primary-900 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+    <div className="card-container-highlight w-full max-w-md">
+    <h2 className="text-lg font-medium text-value text-center mb-6">
     E-Mail Verifizierung
     </h2>
     
     {status.message && (
-      <div className={`p-4 rounded ${
-        status.type === 'success' 
-        ? 'bg-primary-25 text-primary-600' 
-        : 'bg-secondary-25 text-secondary-600'
-      }`}>
-      <p className="text-center">{status.message}</p>
+      <div className={status.type === 'success' ? 'status-success' : 'status-error'}>
+      {status.message}
       </div>
     )}
     
     {status.type === 'error' && (
-      <div className="text-center border-t border-primary-200 pt-4">
-      <a href="/" className="btn-primary">
+      <div className="flex justify-center mt-6">
+      <button
+      onClick={() => navigate('/')}
+      className="btn-primary">
       Zurück zum Dashboard
-      </a>
+      </button>
       </div>
     )}
-    </div>
     </div>
     </div>
   );
