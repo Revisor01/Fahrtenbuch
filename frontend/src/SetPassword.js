@@ -95,12 +95,26 @@ export default function SetPassword() {
     required
     disabled={isSubmitting || !token}
     />
-    {password && !validatePassword(password) && (
-      <p className="mt-1 text-muted text-xs">
-      Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, 
-      einen Kleinbuchstaben und eine Zahl enthalten.
-      </p>
-    )}
+    <div className="mt-2">
+    <div className="text-xs space-y-1">
+    <div className={`flex items-center gap-2 ${password.length >= 8 ? 'text-primary-600' : 'text-secondary-600'}`}>
+    <span>{password.length >= 8 ? '●' : '○'}</span>
+    <span>Mindestens 8 Zeichen</span>
+    </div>
+    <div className={`flex items-center gap-2 ${/[A-Z]/.test(password) ? 'text-primary-600' : 'text-secondary-600'}`}>
+    <span>{/[A-Z]/.test(password) ? '●' : '○'}</span>
+    <span>Großbuchstaben</span>
+    </div>
+    <div className={`flex items-center gap-2 ${/[a-z]/.test(password) ? 'text-primary-600' : 'text-secondary-600'}`}>
+    <span>{/[a-z]/.test(password) ? '●' : '○'}</span>
+    <span>Kleinbuchstaben</span>
+    </div>
+    <div className={`flex items-center gap-2 ${/\d/.test(password) ? 'text-primary-600' : 'text-secondary-600'}`}>
+    <span>{/\d/.test(password) ? '●' : '○'}</span>
+    <span>Mindestens eine Zahl</span>
+    </div>
+    </div>
+    </div>
     </div>
     
     <div>
