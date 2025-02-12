@@ -48,56 +48,56 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-    const { username, email } = req.body;
+  const { username, email } = req.body;
+  
+  try {
+    // Prüfe ob Benutzer bereits existiert
+    const [existingUsers] = await db.execute(
+      'SELECT u.*, p.email FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id WHERE u.username = ? OR p.email = ?',
+      [username, email]
+    );
     
-    try {
-        // Prüfe ob Benutzer bereits existiert
-        const [existingUsers] = await db.execute(
-            'SELECT u.*, p.email FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id WHERE u.username = ? OR p.email = ?',
-            [username, email]
-        );
-        
-        if (existingUsers.length > 0) {
-            return res.status(400).json({ message: 'Benutzername oder E-Mail bereits vergeben' });
-        }
-        
-        // Generiere Verifikationstoken
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        
-        const connection = await db.getConnection();
-        try {
-            await connection.beginTransaction();
-            
-            // Erstelle User
-            const [userResult] = await connection.execute(
-                'INSERT INTO users (username, verification_token, role) VALUES (?, ?, "user")',
-                [username, verificationToken]
-            );
-            
-            // Erstelle Profil
-            await connection.execute(
-                'INSERT INTO user_profiles (user_id, email) VALUES (?, ?)',
-                [userResult.insertId, email]
-            );
-            
-            await connection.commit();
-            
-            // E-Mail senden
-            await mailService.sendWelcomeEmail(email, username, verificationToken);
-            
-            res.status(201).json({ 
-                message: 'Registrierung erfolgreich. Bitte prüfen Sie Ihre E-Mails um Ihr Passwort zu setzen.'
-            });
-            
-        } catch (error) {
-            await connection.rollback();
-            throw error;
-        } finally {
-            connection.release();
-        }
-        
-    } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({ message: 'Serverfehler bei der Registrierung' });
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ message: 'Benutzername oder E-Mail bereits vergeben' });
     }
+    
+    // Generiere Verifikationstoken
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      
+      // Erstelle User - hier setzen wir ein leeres gehashtes Passwort
+      const [userResult] = await connection.execute(
+        'INSERT INTO users (username, verification_token, role, password) VALUES (?, ?, "user", ?)',
+        [username, verificationToken, '']  // Leeres Passwort als Platzhalter
+      );
+      
+      // Erstelle Profil
+      await connection.execute(
+        'INSERT INTO user_profiles (user_id, email) VALUES (?, ?)',
+        [userResult.insertId, email]
+      );
+      
+      await connection.commit();
+      
+      // E-Mail senden
+      await mailService.sendWelcomeEmail(email, username, verificationToken);
+      
+      res.status(201).json({ 
+        message: 'Registrierung erfolgreich. Bitte prüfen Sie Ihre E-Mails um Ihr Passwort zu setzen.'
+      });
+      
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Serverfehler bei der Registrierung' });
+  }
 };
