@@ -25,7 +25,7 @@ class Migrator {
 
     async executeSQLFile(connection, content) {
         console.log("Executing SQL:\n", content); // Zeige den SQL-Code an
-
+        
         // Replace environment variables
         content = content.replace(/\${DB_NAME}/g, process.env.DB_NAME);
         content = content.replace(/\${INITIAL_ADMIN_USERNAME}/g, process.env.INITIAL_ADMIN_USERNAME);
@@ -35,12 +35,12 @@ class Migrator {
         content = content.replace(/\${DEFAULT_ERSTATTUNG_DATUM}/g, process.env.DEFAULT_ERSTATTUNG_DATUM);
         content = content.replace(/\${INITIAL_TRAEGER_1_NAME}/g, process.env.INITIAL_TRAEGER_1_NAME || '');
         content = content.replace(/\${INITIAL_TRAEGER_2_NAME}/g, process.env.INITIAL_TRAEGER_2_NAME || '');
-
+        
         const statements = content
-            .split(';')
-            .map(stmt => stmt.trim())
-            .filter(stmt => stmt.length > 0);
-
+        .split(';')
+        .map(stmt => stmt.trim())
+        .filter(stmt => stmt.length > 0);
+        
         for (let statement of statements) {
             try {
                 console.log("Executing statement:", statement); // Zeige jede SQL-Anweisung an

@@ -1,6 +1,3 @@
--- Temporärer Delimiter ändern, um Trigger mit BEGIN...END zu ermöglichen
-DELIMITER $$
-
 -- Trigger 1: after_user_create
 DROP TRIGGER IF EXISTS after_user_create;
 
@@ -12,7 +9,7 @@ BEGIN
         INSERT INTO abrechnungstraeger (user_id, name, sort_order, active) 
         VALUES (NEW.id, '${INITIAL_TRAEGER_1_NAME}', 1, TRUE);
     END IF;
-END$$
+END;
 
 -- Trigger 2: after_user_create_mitfahrer
 DROP TRIGGER IF EXISTS after_user_create_mitfahrer;
@@ -23,7 +20,7 @@ FOR EACH ROW
 BEGIN
     INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
     VALUES (NEW.id, '${DEFAULT_ERSTATTUNG_MITFAHRER}', '${DEFAULT_ERSTATTUNG_DATUM}');
-END$$
+END;
 
 -- Trigger 3: after_user_create_traeger2
 DROP TRIGGER IF EXISTS after_user_create_traeger2;
@@ -36,7 +33,7 @@ BEGIN
         INSERT INTO abrechnungstraeger (user_id, name, sort_order, active)
         VALUES (NEW.id, '${INITIAL_TRAEGER_2_NAME}', 2, TRUE);
     END IF;
-END$$
+END;
 
 -- Trigger 4: after_abrechnungstraeger_create
 DROP TRIGGER IF EXISTS after_abrechnungstraeger_create;
@@ -47,10 +44,7 @@ FOR EACH ROW
 BEGIN
     INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
     VALUES (NEW.id, '${DEFAULT_ERSTATTUNG_TRAEGER}', '${DEFAULT_ERSTATTUNG_DATUM}');
-END$$
-
--- Delimiter wieder auf Standard zurücksetzen
-DELIMITER ;
+END;
 
 -- Für bestehende User nachholen: Erster Abrechnungsträger
 INSERT INTO abrechnungstraeger (user_id, name, sort_order, active)
