@@ -1,5 +1,7 @@
+DELIMITER //
+
 -- Drop bestehenden Trigger
-DROP TRIGGER IF EXISTS after_user_create;
+DROP TRIGGER IF EXISTS after_user_create//
 
 -- Neuer Trigger der sowohl Mitfahrer-Erstattung als auch Abrechnungsträger anlegt
 CREATE TRIGGER after_user_create
@@ -31,9 +33,11 @@ BEGIN
         INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
         VALUES (@last_id, '${DEFAULT_ERSTATTUNG_TRAEGER}', '${DEFAULT_ERSTATTUNG_DATUM}');
     END IF;
-END;
+END//
 
--- Optional: Für bestehende User nachholen
+DELIMITER ;
+
+-- Für bestehende User nachholen
 INSERT INTO abrechnungstraeger (user_id, name, sort_order, active)
 SELECT 
     u.id,
@@ -48,6 +52,21 @@ AND NOT EXISTS (
     AND name = '${INITIAL_TRAEGER_1_NAME}'
 );
 
+-- Erstattungssätze für den ersten Träger
+INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
+SELECT 
+    at.id,
+    '${DEFAULT_ERSTATTUNG_TRAEGER}',
+    '${DEFAULT_ERSTATTUNG_DATUM}'
+FROM abrechnungstraeger at
+WHERE at.name = '${INITIAL_TRAEGER_1_NAME}'
+AND NOT EXISTS (
+    SELECT 1 FROM erstattungsbetraege 
+    WHERE abrechnungstraeger_id = at.id 
+    AND gueltig_ab = '${DEFAULT_ERSTATTUNG_DATUM}'
+);
+
+-- Zweiter Abrechnungsträger für bestehende User
 INSERT INTO abrechnungstraeger (user_id, name, sort_order, active)
 SELECT 
     u.id,
@@ -62,14 +81,15 @@ AND NOT EXISTS (
     AND name = '${INITIAL_TRAEGER_2_NAME}'
 );
 
--- Erstattungssätze für neue Träger
+-- Erstattungssätze für den zweiten Träger
 INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
 SELECT 
     at.id,
     '${DEFAULT_ERSTATTUNG_TRAEGER}',
     '${DEFAULT_ERSTATTUNG_DATUM}'
 FROM abrechnungstraeger at
-WHERE NOT EXISTS (
+WHERE at.name = '${INITIAL_TRAEGER_2_NAME}'
+AND NOT EXISTS (
     SELECT 1 FROM erstattungsbetraege 
     WHERE abrechnungstraeger_id = at.id 
     AND gueltig_ab = '${DEFAULT_ERSTATTUNG_DATUM}'
