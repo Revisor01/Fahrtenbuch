@@ -1,3 +1,4 @@
+require('dotenv').config();
 const db = require('../config/database');
 const fs = require('fs').promises;
 const path = require('path');
