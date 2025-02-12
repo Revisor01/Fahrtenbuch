@@ -2257,6 +2257,8 @@ function LoginPage() {
     }
   };
   
+  const allowRegistration = process.env.REACT_APP_ALLOW_REGISTRATION; // Value direkt holen
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
     <div className="card-container-highlight m-6 w-full max-w-md">
@@ -2303,7 +2305,7 @@ function LoginPage() {
     >
     Passwort vergessen?
     </button>
-    {process.env.REACT_APP_ALLOW_REGISTRATION === 'true' && (
+    {allowRegistration === 'true' && ( // Vergleich machen
       <button
       type="button"
       onClick={() => setShowRegistration(true)}
@@ -2337,7 +2339,7 @@ function LoginPage() {
     <input
     type="text"
     value={registrationData.username}
-    onChange={(e) => setRegistrationData({...registrationData, username: e.target.value})}
+    onChange={(e) => setRegistrationData({ ...registrationData, username: e.target.value })}
     className="form-input"
     required
     />
@@ -2347,7 +2349,7 @@ function LoginPage() {
     <input
     type="email"
     value={registrationData.email}
-    onChange={(e) => setRegistrationData({...registrationData, email: e.target.value})}
+    onChange={(e) => setRegistrationData({ ...registrationData, email: e.target.value })}
     className="form-input"
     required
     />
@@ -2363,7 +2365,7 @@ function LoginPage() {
       <input
       type="text"
       value={registrationData.registrationCode}
-      onChange={(e) => setRegistrationData({...registrationData, registrationCode: e.target.value})}
+      onChange={(e) => setRegistrationData({ ...registrationData, registrationCode: e.target.value })}
       className="form-input"
       required
       />
