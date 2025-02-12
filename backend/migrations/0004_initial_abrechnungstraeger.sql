@@ -3,10 +3,12 @@ DROP TRIGGER IF EXISTS after_user_create;
 CREATE TRIGGER after_user_create 
 AFTER INSERT ON users 
 FOR EACH ROW 
+BEGIN
     IF '${INITIAL_TRAEGER_1_NAME}' != '' THEN
         INSERT INTO abrechnungstraeger (user_id, name, sort_order, active) 
         VALUES (NEW.id, '${INITIAL_TRAEGER_1_NAME}', 1, TRUE);
     END IF;
+END;
 
 DROP TRIGGER IF EXISTS after_user_create_mitfahrer;
 
@@ -21,10 +23,12 @@ DROP TRIGGER IF EXISTS after_user_create_traeger2;
 CREATE TRIGGER after_user_create_traeger2
 AFTER INSERT ON users 
 FOR EACH ROW 
+BEGIN
     IF '${INITIAL_TRAEGER_2_NAME}' != '' THEN
         INSERT INTO abrechnungstraeger (user_id, name, sort_order, active)
         VALUES (NEW.id, '${INITIAL_TRAEGER_2_NAME}', 2, TRUE);
     END IF;
+END;
 
 DROP TRIGGER IF EXISTS after_abrechnungstraeger_create;
 
