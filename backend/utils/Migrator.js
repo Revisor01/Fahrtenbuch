@@ -24,7 +24,7 @@ class Migrator {
     }
 
     async executeSQLFile(connection, content) {
-        console.log("Executing SQL:\n", content); // Zeige den SQL-Code an
+        console.log("Executing SQL:\n", content);
         
         // Replace environment variables
         content = content.replace(/\${DB_NAME}/g, process.env.DB_NAME);
@@ -36,22 +36,38 @@ class Migrator {
         content = content.replace(/\${INITIAL_TRAEGER_1_NAME}/g, process.env.INITIAL_TRAEGER_1_NAME || '');
         content = content.replace(/\${INITIAL_TRAEGER_2_NAME}/g, process.env.INITIAL_TRAEGER_2_NAME || '');
         
-        const statements = content
-        .split(';')
-        .map(stmt => stmt.trim())
-        .filter(stmt => stmt.length > 0);
+        // Split into statements, handling semicolons inside triggers
+        const statements = [];
+        let buffer = '';
+        let inTrigger = false;
         
+        for (const line of content.split('\n')) {
+            if (line.trim().startsWith('CREATE TRIGGER')) {
+                inTrigger = true;
+            }
+            buffer += line + '\n';
+            if (inTrigger && line.trim().startsWith('END;')) {
+                inTrigger = false;
+                statements.push(buffer.trim());
+                buffer = '';
+            } else if (!inTrigger && line.trim().endsWith(';')) {
+                statements.push(buffer.trim());
+                buffer = '';
+            }
+        }
+        
+        // Execute statements
         for (let statement of statements) {
             try {
-                console.log("Executing statement:", statement); // Zeige jede SQL-Anweisung an
+                console.log("Executing statement:", statement);
                 await connection.query(statement);
             } catch (error) {
-                console.error('Error executing SQL statement:', statement, error); // Zeige den Fehler an
-                throw error; // Wichtig: Wirf den Fehler erneut, damit die Migration fehlschlägt
+                console.error('Error executing SQL statement:', statement, error);
+                throw error;
             }
         }
     }
-
+    
     async runMigrations() {
         console.log('Starting migrations...');
         try {
