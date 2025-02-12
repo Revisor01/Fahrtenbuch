@@ -15,8 +15,10 @@ DROP TRIGGER IF EXISTS after_user_create_mitfahrer;
 CREATE TRIGGER after_user_create_mitfahrer
 AFTER INSERT ON users 
 FOR EACH ROW 
+BEGIN
     INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab)
     VALUES (NEW.id, '${DEFAULT_ERSTATTUNG_MITFAHRER}', '${DEFAULT_ERSTATTUNG_DATUM}');
+END;
 
 DROP TRIGGER IF EXISTS after_user_create_traeger2;
 
@@ -35,8 +37,10 @@ DROP TRIGGER IF EXISTS after_abrechnungstraeger_create;
 CREATE TRIGGER after_abrechnungstraeger_create 
 AFTER INSERT ON abrechnungstraeger 
 FOR EACH ROW 
+BEGIN
     INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
     VALUES (NEW.id, '${DEFAULT_ERSTATTUNG_TRAEGER}', '${DEFAULT_ERSTATTUNG_DATUM}');
+END;
 
 -- Für bestehende User nachholen
 INSERT INTO abrechnungstraeger (user_id, name, sort_order, active)
