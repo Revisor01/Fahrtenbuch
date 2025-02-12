@@ -2232,11 +2232,12 @@ function LoginPage() {
   };
   
   const validateEmail = (email) => {
-    if (!process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS) return true;
+    const allowedEmailDomains = window.appConfig?.allowedEmailDomains || process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS;
+    if (!allowedEmailDomains) return true;
     
     const domain = email.split('@')[1];
-    const allowedDomains = process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS.split(',');
-    return allowedDomains.includes(domain);
+    const allowedDomainsArray = allowedEmailDomains.split(',');
+    return allowedDomainsArray.includes(domain);
   };
   
   const handleRegistration = async (e) => {
@@ -2257,13 +2258,17 @@ function LoginPage() {
     }
   };
   
-  const allowRegistration = process.env.REACT_APP_ALLOW_REGISTRATION; // Value direkt holen
-  
+  const appTitle = window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen";
+  const allowRegistration = window.appConfig?.allowRegistration === 'true' || process.env.REACT_APP_ALLOW_REGISTRATION === 'true';
+  const allowedEmailDomains = window.appConfig?.allowedEmailDomains || process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS;
+  const registrationCode = window.appConfig?.registrationCode || process.env.REACT_APP_REGISTRATION_CODE;
+  const apiUrl = process.env.REACT_APP_API_URL || '/api'; //Direkt und fest definiert!
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
     <div className="card-container-highlight m-6 w-full max-w-md">
     <h1 className="text-lg font-medium text-value text-center mb-6">
-    {process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen"}
+    {appTitle}
     </h1>
     
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -2305,7 +2310,7 @@ function LoginPage() {
     >
     Passwort vergessen?
     </button>
-    {allowRegistration === 'true' && ( // Vergleich machen
+    {allowRegistration && (
       <button
       type="button"
       onClick={() => setShowRegistration(true)}
@@ -2354,12 +2359,12 @@ function LoginPage() {
     required
     />
     </div>
-    {process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS && (
+    {allowedEmailDomains && (
       <div className="text-xs text-muted mt-1">
-      Erlaubte Domains: {process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS}
+      Erlaubte Domains: {allowedEmailDomains}
       </div>
     )}
-    {process.env.REACT_APP_REGISTRATION_CODE && (
+    {registrationCode && (
       <div>
       <label className="form-label">Registrierungscode</label>
       <input
@@ -2389,6 +2394,7 @@ function LoginPage() {
     </div>
   );
 }
+
 
 function ForgotPasswordForm({ onClose }) {
   const [email, setEmail] = useState('');
