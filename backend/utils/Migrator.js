@@ -36,6 +36,10 @@ class Migrator {
         content = content.replace(/\${DEFAULT_ERSTATTUNG_DATUM}/g, process.env.DEFAULT_ERSTATTUNG_DATUM);
         content = content.replace(/\${INITIAL_TRAEGER_1_NAME}/g, process.env.INITIAL_TRAEGER_1_NAME || '');
         content = content.replace(/\${INITIAL_TRAEGER_2_NAME}/g, process.env.INITIAL_TRAEGER_2_NAME || '');
+        content = content.replace(/\${STANDARD_ORT_1_NAME}/g, process.env.STANDARD_ORT_1_NAME || '');
+        content = content.replace(/\${STANDARD_ORT_1_ADRESSE}/g, process.env.STANDARD_ORT_1_ADRESSE || '');
+        content = content.replace(/\${STANDARD_ORT_2_NAME}/g, process.env.STANDARD_ORT_2_NAME || '');
+        content = content.replace(/\${STANDARD_ORT_2_ADRESSE}/g, process.env.STANDARD_ORT_2_ADRESSE || '');
         
         // Split into statements, handling semicolons inside triggers
         const statements = [];
