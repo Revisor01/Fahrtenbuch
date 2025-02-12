@@ -2461,7 +2461,8 @@ function ForgotPasswordForm({ onClose }) {
 
 function App() {
   React.useEffect(() => {
-    document.title = "Fahrtenbuch Kirchenkreis Dithmarschen";
+    const appTitle = window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch";
+    document.title = appTitle;
   }, []);
   
   return (
@@ -2521,7 +2522,7 @@ function AppContent() {
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
     <h1 className="text-lg font-medium text-value">
-    {process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen"}
+    {window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch"}
     </h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
