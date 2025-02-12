@@ -1,9 +1,5 @@
-DELIMITER //
+DROP TRIGGER IF EXISTS after_user_create;
 
--- Drop bestehenden Trigger
-DROP TRIGGER IF EXISTS after_user_create//
-
--- Neuer Trigger der sowohl Mitfahrer-Erstattung als auch Abrechnungsträger anlegt
 CREATE TRIGGER after_user_create
 AFTER INSERT ON users
 FOR EACH ROW
@@ -33,9 +29,7 @@ BEGIN
         INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab)
         VALUES (@last_id, '${DEFAULT_ERSTATTUNG_TRAEGER}', '${DEFAULT_ERSTATTUNG_DATUM}');
     END IF;
-END//
-
-DELIMITER ;
+END;
 
 -- Für bestehende User nachholen
 INSERT INTO abrechnungstraeger (user_id, name, sort_order, active)
