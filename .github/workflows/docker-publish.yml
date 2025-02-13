@@ -1,21 +1,41 @@
-name: Docker
+name: Docker Build & Push
 
 on:
   push:
-    branches: [master, abrechnungen]
+    branches: 
+      - 'master'
+    tags:
+      - 'v*'
   pull_request:
-    branches: [master]
+    branches: 
+      - 'master'
 
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get current branch name
-        id: branch-name
-        run: echo "current_branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+      - name: Set Docker tags backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: revisoren/fahrtenbuch-server
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Set Docker tags frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: revisoren/fahrtenbuch-app
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -26,27 +46,24 @@ jobs:
           username: revisoren
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Backend (Master)
+      - name: Build and push Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          push: true
-          tags: revisoren/fahrtenbuch-server:latest
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build and push Frontend (Master)
-        if: ${{ github.ref == 'refs/heads/master' }}
+      - name: Build and push Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
-          push: true
-          tags: revisoren/fahrtenbuch-app:latest
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Update Beta Service via Webhook (Master)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-        uses: newarifrh/portainer-service-webhook@v1
-        with:
-          webhook_url: https://docker.godsapp.de/api/stacks/webhooks/48cea0ae-5f02-476b-b049-b1f4ae0dc3f9
