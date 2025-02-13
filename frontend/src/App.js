@@ -7,9 +7,10 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2, Info } from 'lucide-react';
 import HilfeModal from './HilfeModal';
 import NotificationModal from './NotificationModal';
+import InfoModal from './components/InfoModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
 import UserManagement from './UserManagement';
 import VerifyEmail from './VerifyEmail';
@@ -2485,6 +2486,7 @@ function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   
   // Token Check Effect
   useEffect(() => {
@@ -2550,6 +2552,13 @@ function AppContent() {
           <div className="grid grid-cols-4 sm:flex gap-2 w-full sm:w-auto">
             <div className="flex gap-2">
               <ThemeToggle />
+              <button
+                onClick={() => setShowInfoModal(true)}
+                className="btn-primary flex items-center justify-center gap-2"
+                title="Info"
+              >
+                <Info size={16} />
+              </button>
             </div>
             <div className="col-span-3 flex justify-end gap-2">
               <button
@@ -2580,6 +2589,12 @@ function AppContent() {
     </div>
     
     {/* Modals */}
+
+    <InfoModal 
+      isOpen={showInfoModal} 
+      onClose={() => setShowInfoModal(false)} 
+    />
+
     <ProfileModal 
       isOpen={isProfileModalOpen} 
       onClose={() => setIsProfileModalOpen(false)} 
