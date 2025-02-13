@@ -3,6 +3,9 @@
 Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrten. Entwickelt für Organisationen jeder Art, die eine professionelle Verwaltung ihrer Fahrtkosten benötigen.
 
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/Revisor01/Fahrtenbuch)
+[![Docker Image Frontend](https://img.shields.io/docker/v/revisoren/fahrtenbuch-app)](https://hub.docker.com/r/revisoren/fahrtenbuch-app)
+[![Docker Image Backend](https://img.shields.io/docker/v/revisoren/fahrtenbuch-server)](https://hub.docker.com/r/revisoren/fahrtenbuch-server)
+[![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
 
 ## 🚀 Funktionen
 
@@ -54,6 +57,30 @@ Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrte
 - Rate Limiting
 - Vorgefertigte iOS-Shortcuts (Download-Link folgt)
 
+## 🔐 Registrierung und Zugriffskontrolle
+
+Das System bietet flexible Möglichkeiten zur Steuerung der Benutzerregistrierung:
+
+### Registrierungsoptionen:
+
+1. **Offene Registrierung**
+- Aktivierung durch `REACT_APP_ALLOW_REGISTRATION=true`
+- Jeder kann sich mit beliebiger E-Mail registrieren
+
+2. **Domain-beschränkte Registrierung**
+- `REACT_APP_ALLOW_REGISTRATION=true`
+- `REACT_APP_ALLOWED_EMAIL_DOMAINS=domain1.de,domain2.de`
+- Nur E-Mails von spezifizierten Domains erlaubt
+
+3. **Code-geschützte Registrierung**
+- `REACT_APP_ALLOW_REGISTRATION=true`
+- `REACT_APP_REGISTRATION_CODE=geheimer-code`
+- Registrierung nur mit korrektem Code möglich
+
+4. **Geschlossenes System**
+- `REACT_APP_ALLOW_REGISTRATION=false`
+- Nur Administratoren können neue Benutzer anlegen
+
 ## 🛠 Installation
 
 ### Voraussetzungen
@@ -65,78 +92,95 @@ Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrte
 
 ### Quick Start (Docker Compose)
 
-Für eine schnelle und einfache Installation ohne manuelles Klonen des Repositorys kannst du direkt mit Docker Compose arbeiten:
+1. Erstelle eine `.env`-Datei mit den benötigten Umgebungsvariablen (siehe Beispiel unten)
+2. Erstelle eine `docker-compose.yml` mit folgendem Inhalt:
 
-1.  Erstelle eine `.env`-Datei (siehe Beispiel unten) und passe die Umgebungsvariablen an.
-2.  Erstelle eine `docker-compose.yml`-Datei mit folgendem Inhalt (oder verwende die bereitgestellte):
-    ```yaml
-    version: '3.8'
-    services:
-      frontend:
-        image: revisoren/fahrtenbuch-app:latest
-        ports:
-          - "9642:80"
-        depends_on:
-          - backend
-        restart: unless-stopped
+```yaml
+services:
+frontend:
+image: revisoren/fahrtenbuch-app:latest
+ports:
+- "9642:80"
+environment:
+- REACT_APP_TITLE=${REACT_APP_TITLE}
+- REACT_APP_ALLOW_REGISTRATION=${REACT_APP_ALLOW_REGISTRATION}
+- REACT_APP_ALLOWED_EMAIL_DOMAINS=${REACT_APP_ALLOWED_EMAIL_DOMAINS}
+- REACT_APP_REGISTRATION_CODE=${REACT_APP_REGISTRATION_CODE}
+- NODE_ENV=production
+depends_on:
+- backend
+restart: unless-stopped
+command: sh -c "sed -i 's|DEFAULT_TITLE|$REACT_APP_TITLE|g' /usr/share/nginx/html/config.js && \
+sed -i 's|DEFAULT_ALLOW_REGISTRATION|$REACT_APP_ALLOW_REGISTRATION|g' /usr/share/nginx/html/config.js && \
+sed -i 's|DEFAULT_ALLOWED_EMAIL_DOMAINS|$REACT_APP_ALLOWED_EMAIL_DOMAINS|g' /usr/share/nginx/html/config.js && \
+sed -i 's|DEFAULT_REGISTRATION_CODE|$REACT_APP_REGISTRATION_CODE|g' /usr/share/nginx/html/config.js && \
+nginx -g 'daemon off;'"
 
-      backend:
-        image: revisoren/fahrtenbuch-server:latest
-        ports:
-          - "5000:5000"
-        environment:
-          - DB_HOST=${DB_HOST}
-          - DB_USER=${DB_USER}
-          - DB_PASSWORD=${DB_PASSWORD}
-          - DB_NAME=${DB_NAME}
-          - JWT_SECRET=${JWT_SECRET}
-          - SMTP_HOST=${SMTP_HOST}
-          - SMTP_PORT=${SMTP_PORT}
-          - SMTP_SECURE=${SMTP_SECURE}
-          - SMTP_USER=${SMTP_USER}
-          - SMTP_PASSWORD=${SMTP_PASSWORD}
-          - MAIL_FROM=${MAIL_FROM}
-          - FRONTEND_URL=${FRONTEND_URL}
-          - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
-          - INITIAL_ADMIN_USERNAME=${INITIAL_ADMIN_USERNAME}
-          - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
-          - DEFAULT_ERSTATTUNG_TRAEGER=${DEFAULT_ERSTATTUNG_TRAEGER}
-          - DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
-          - DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
-        restart: unless-stopped
-        volumes:
-          - fahrtenbuch_data:/app/data
-        depends_on:
-          - db
+backend:
+image: revisoren/fahrtenbuch-server:latest
+ports:
+- "5000:5000"
+environment:
+- DB_HOST=${DB_HOST}
+- DB_USER=${DB_USER}
+- DB_PASSWORD=${DB_PASSWORD}
+- DB_NAME=${DB_NAME}
+- JWT_SECRET=${JWT_SECRET}
+- SMTP_HOST=${SMTP_HOST}
+- SMTP_PORT=${SMTP_PORT}
+- SMTP_SECURE=${SMTP_SECURE}
+- SMTP_USER=${SMTP_USER}
+- SMTP_PASSWORD=${SMTP_PASSWORD}
+- MAIL_FROM=${MAIL_FROM}
+- FRONTEND_URL=${FRONTEND_URL}
+- CORS_ORIGIN=${CORS_ORIGIN}
+- INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
+- INITIAL_ADMIN_USERNAME=${INITIAL_ADMIN_USERNAME}
+- INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
+- DEFAULT_ERSTATTUNG_TRAEGER=${DEFAULT_ERSTATTUNG_TRAEGER}
+- DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
+- DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
+- INITIAL_TRAEGER_1_NAME=${INITIAL_TRAEGER_1_NAME}
+- INITIAL_TRAEGER_2_NAME=${INITIAL_TRAEGER_2_NAME}
+- STANDARD_ORT_1_NAME=${STANDARD_ORT_1_NAME}
+- STANDARD_ORT_1_ADRESSE=${STANDARD_ORT_1_ADRESSE}
+- STANDARD_ORT_2_NAME=${STANDARD_ORT_2_NAME}
+- STANDARD_ORT_2_ADRESSE=${STANDARD_ORT_2_ADRESSE}
+- NODE_ENV=production
+restart: unless-stopped
+volumes:
+- fahrtenbuch_data:/app/data
+depends_on:
+- db
 
-      db:
-        image: mysql:8
-        environment:
-          MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-          MYSQL_DATABASE: ${DB_NAME}
-          MYSQL_USER: ${DB_USER}
-          MYSQL_PASSWORD: ${DB_PASSWORD}
-          MYSQL_INIT_COMMAND: "SET GLOBAL log_bin_trust_function_creators = 1;" # Hinzufügen
-        volumes:
-          - fahrtenbuch_data:/var/lib/mysql
-        ports:
-          - "3306:3306"
-        command:
-          - --character-set-server=utf8mb4
-          - --collation-server=utf8mb4_unicode_ci
-          - --log_bin_trust_function_creators=1
-        healthcheck:
-          test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-          timeout: 5s
-          retries: 10
+db:
+image: mysql:8
+environment:
+MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+MYSQL_DATABASE: ${DB_NAME}
+MYSQL_USER: ${DB_USER}
+MYSQL_PASSWORD: ${DB_PASSWORD}
+volumes:
+- /opt/fahrtenbuch/db/mysql:/var/lib/mysql
+command: 
+- --character-set-server=utf8mb4
+- --collation-server=utf8mb4_unicode_ci
+- --log_bin_trust_function_creators=1
+- --innodb-use-native-aio=0
+healthcheck:
+test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+timeout: 5s
+retries: 10
 
-    volumes:
-      fahrtenbuch_data:
-    ```
-3.  Starte die Anwendung mit Docker Compose:
-    ```bash
-    docker-compose up -d
-    ```
+volumes:
+fahrtenbuch_data:
+```
+
+3. Starte die Anwendung:
+
+```bash
+docker-compose up -d
+```
 
 ### Beispiel `.env` Datei
 
@@ -158,9 +202,13 @@ SMTP_USER=your-user
 SMTP_PASSWORD=your-password
 MAIL_FROM=fahrtenbuch@example.com
 
-# Frontend
+# Frontend Configuration
 FRONTEND_URL=https://fahrtenbuch.example.com
-APP_TITLE=Digitales Fahrtenbuch
+CORS_ORIGIN=https://fahrtenbuch.example.com
+REACT_APP_TITLE=Digitales Fahrtenbuch
+REACT_APP_ALLOW_REGISTRATION=false
+REACT_APP_ALLOWED_EMAIL_DOMAINS=example.com,example.org
+REACT_APP_REGISTRATION_CODE=secret-code
 
 # Admin Account
 INITIAL_ADMIN_EMAIL=admin@example.com
@@ -170,90 +218,15 @@ INITIAL_ADMIN_PASSWORD=change-me
 # Erstattungssätze
 DEFAULT_ERSTATTUNG_TRAEGER=0.30
 DEFAULT_ERSTATTUNG_MITFAHRER=0.05
-DEFAULT_ERSTATTUNG_DATUM=2024-01-01
-```
+DEFAULT_ERSTATTUNG_DATUM=2025-01-01
 
-### Entwicklungsumgebung (Optional)
-
-Für die Entwicklung kannst du eine separate `docker-compose.dev.yml` Datei erstellen, um lokale Änderungen im Code zu ermöglichen, ohne jedes Mal ein neues Image bauen zu müssen:
-
-1.  Erstelle eine `docker-compose.dev.yml` Datei mit folgendem Inhalt:
-    ```yaml
-    version: '3.8'
-
-    services:
-      frontend:
-        build:
-          context: ./frontend
-          dockerfile: Dockerfile
-        ports:
-          - "9642:80"
-        depends_on:
-          - backend
-
-      backend:
-        build:
-          context: ./backend
-          dockerfile: Dockerfile
-        ports:
-          - "5000:5000"
-        environment:
-          - DB_HOST=${DB_HOST}
-          - DB_USER=${DB_USER}
-          - DB_PASSWORD=${DB_PASSWORD}
-          - DB_NAME=${DB_NAME}
-          - JWT_SECRET=${JWT_SECRET}
-        volumes:
-          - ./backend:/app
-          - /app/node_modules
-    ```
-
-2.  Starte die Entwicklungsumgebung:
-    ```bash
-    docker-compose -f docker-compose.dev.yml up -d
-    ```
-
-    **Erklärung:**
-    - Diese Konfiguration verwendet ein lokales Dockerfile für den Build.
-    - Die Volumes mounten deine lokalen Backend und Frontend Ordner in die Container, so dass Code-Änderungen sofort wirksam werden.
-    - Der Ordner `/app/node_modules` wird als Volume definiert, damit die Abhängigkeiten im Container nicht mit den lokalen in Konflikt geraten.
-
-### Verzeichnisstruktur (mit Entwicklungsumgebung)
-
-```
-/fahrtenbuch/
-├── frontend/           # React Frontend
-│   └── Dockerfile      # Dockerfile für Entwicklung
-├── backend/            # Node.js Backend
-│   └── Dockerfile      # Dockerfile für Entwicklung
-├── db/                # Datenbank
-├── docker-compose.yml
-└── docker-compose.dev.yml # für lokale Entwicklung
-```
-
-### Apache-Konfiguration
-
-```apache
-<VirtualHost *:443>
-    ServerName fahrtenbuch.example.com
-
-    SSLEngine on
-    SSLCertificateFile /path/to/cert.pem
-    SSLCertificateKeyFile /path/to/key.pem
-
-    ProxyPreserveHost On
-
-    # Frontend
-    ProxyPass / http://localhost:9642/
-    ProxyPassReverse / http://localhost:9642/
-
-    # Backend API
-    ProxyPass /api http://localhost:5000/api
-    ProxyPassReverse /api http://localhost:5000/api
-
-    ErrorLog ${APACHE_LOG_DIR}/fahrtenbuch_error.log
-    CustomLog ${APACHE_LOG_DIR}/fahrtenbuch_access.log combined
-</VirtualHost>
+# Initial Setup (Optional)
+INITIAL_TRAEGER_1_NAME=Kirchenkreis
+INITIAL_TRAEGER_2_NAME=Kirchengemeinde
+STANDARD_ORT_1_NAME=Meldorf
+STANDARD_ORT_1_ADRESSE=Nordermarkt 8, 25704 Meldorf
+STANDARD_ORT_2_NAME=Heide
+STANDARD_ORT_2_ADRESSE=Markt 16, 25746 Heide
 ```
 
 ## 🔧 Wartung
@@ -302,17 +275,17 @@ docker-compose up -d
 
 ## 📝 Lizenz
 
-Copyright (c) 2024 Simon Luthe
+Copyright (c) 2025 Simon Luthe
 
 Alle Rechte vorbehalten.
 
-Diese Software darf von Einzelpersonen für nicht-kommerzielle Zwecke frei genutzt werden.
+Diese Software darf von Einzelpersonen für private Zwecke frei genutzt werden.
 
-Die Nutzung dieser Software durch Organisationen, Institutionen oder für kommerzielle Zwecke ist nur unter einer der folgenden Bedingungen gestattet:
+Die Nutzung dieser Software durch Organisationen, Institutionen, Vereine, Kirchen oder andere juristische Personen ist nur nach vorheriger Vereinbarung mit dem Urheberrechtsinhaber gestattet.
 
-1.  **Kommerzielle Lizenz:** Der Erwerb einer gültigen kommerziellen Lizenz vom Urheberrechtsinhaber. Bitte kontaktieren Sie [mail@simonluthe.de](mailto:mail@simonluthe.de), um eine Lizenz zu erwerben.
+Für eine Nutzungsvereinbarung kontaktieren Sie bitte [mail@simonluthe.de](mailto:mail@simonluthe.de).
 
-2.  **Genehmigung:** Eine ausdrückliche, schriftliche Genehmigung vom Urheberrechtsinhaber. Bitte kontaktieren Sie [mail@simonluthe.de](mailto:mail@simonluthe.de), um eine Genehmigung zu beantragen.
+## Haftungsausschluss
 
 DIESE SOFTWARE WIRD "WIE BESEHEN" OHNE JEGLICHE AUSDRÜCKLICHE ODER STILLSCHWEIGENDE GARANTIE ZUR VERFÜGUNG GESTELLT, EINSCHLIESSLICH, ABER NICHT BESCHRÄNKT AUF DIE GARANTIEN DER MARKTGÄNGIGKEIT, DER EIGNUNG FÜR EINEN BESTIMMTEN ZWECK UND DER NICHTVERLETZUNG VON RECHTEN DRITTER. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHT-INHABER HAFTBAR FÜR ANSPRÜCHE, SCHÄDEN ODER ANDERE VERPFLICHTUNGEN, SEI ES DURCH VERTRAG, UNERLAUBTE HANDLUNG ODER ANDERWEITIG, DIE SICH AUS, AUSSERHALB ODER IM ZUSAMMENHANG MIT DER SOFTWARE ODER DER NUTZUNG ODER ANDEREN GESCHÄFTEN MIT DER SOFTWARE ERGEBEN.
 
