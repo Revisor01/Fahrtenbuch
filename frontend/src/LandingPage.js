@@ -539,7 +539,7 @@ export default function LandingPage() {
                 <section className="text-center max-w-3xl mx-auto">
                     <h2 className="text-xl font-bold text-value mb-4">Weitere Hilfe benötigt?</h2>
                     <p className="text-label mb-6">
-                        Wenn Sie weitere Fragen haben oder Unterstützung benötigen, wenden Sie sich bitte an Ihren Administrator oder kontaktieren Sie uns über das Kontaktformular.
+                        Wenn Sie weitere Fragen haben oder Unterstützung benötigen, kontaktieren Sie uns.
                     </p>
       <a
       href="mailto:support@kkd-fahrtenbuch.de"
