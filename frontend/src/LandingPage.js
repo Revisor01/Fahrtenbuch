@@ -187,14 +187,15 @@ export default function LandingPage() {
                     </div>
                     <div className="text-center mt-6">
                         <p className="text-sm text-label mb-2">Alle Videos in einer Playlist ansehen:</p>
-                        <a
-                            href="https://media.godsapp.de/playlists/lIkPjeALd"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn-primary flex justify-center items-center inline-block"
-                        >
-                            Zur kompletten Playlist
-                        </a>
+      
+      <a
+      href="https://media.godsapp.de/playlists/lIkPjeALd"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn-primary w-full sm:w-auto inline-flex justify-center items-center"
+      >
+      Zur kompletten Playlist
+      </a>
                     </div>
                 </section>
 
@@ -411,12 +412,13 @@ export default function LandingPage() {
                     <p className="text-label mb-6">
                         Wenn Sie weitere Fragen haben oder Unterstützung benötigen, wenden Sie sich bitte an Ihren Administrator oder kontaktieren Sie uns über das Kontaktformular.
                     </p>
-                    <a
-                        href="mailto:support@kkd-fahrtenbuch.de"
-                        className="btn-primary flex justify-center items-center inline-block"
-                    >
-                        Kontakt aufnehmen
-                    </a>
+      <a
+      href="mailto:support@kkd-fahrtenbuch.de"
+      className="btn-primary w-full sm:w-auto inline-flex justify-center items-center"
+      >
+      Kontakt aufnehmen
+      </a>
+
                 </section>
             </main>
 
