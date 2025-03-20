@@ -156,27 +156,60 @@ export default function LandingPage() {
 
             {/* Main Content */}
             <main className="container mx-auto p-4 py-8 space-y-12">
-                {/* Intro Section */}
-                <section className="text-center max-w-3xl mx-auto">
-                    <h2 className="text-2xl font-bold text-value mb-4">
-                        Willkommen im Fahrtenbuch für kirchliche Mitarbeiter:innen
-                    </h2>
-                    <p className="text-label mb-6">
-                        Hier finden Sie Anleitungen und Hilfevideos, die Ihnen bei der Nutzung des Fahrtenbuchs helfen.
-                        Lernen Sie, wie Sie Ihre Fahrten effizient erfassen und abrechnen können.
-                    </p>
-                    <div className="flex justify-center gap-4">
-                        <a href="#videos" className="btn-primary flex items-center gap-2">
-                            <Play size={16} />
-                            Videos ansehen
-                        </a>
-                        <a href="#faq" className="btn-secondary flex items-center gap-2">
-                            <Book size={16} />
-                            FAQs lesen
-                        </a>
-                    </div>
-                </section>
-
+      {/* Intro Section */}
+      <section className="text-center max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold text-value mb-4">
+      Willkommen im Fahrtenbuch für kirchliche Mitarbeiter:innen
+      </h2>
+      <p className="text-label mb-6">
+      Hier finden Sie Anleitungen und Hilfevideos, die Ihnen bei der Nutzung des Fahrtenbuchs helfen.
+      Lernen Sie, wie Sie Ihre Fahrten effizient erfassen und abrechnen können.
+      </p>
+      
+      {/* Button-Gruppe für Desktop: 3 Buttons nebeneinander */}
+      <div className="hidden sm:flex justify-center gap-4">
+      <a href="#videos" className="btn-primary flex items-center gap-2">
+      <Play size={16} />
+      Videos ansehen
+      </a>
+      <a href="#faq" className="btn-secondary flex items-center gap-2">
+      <Book size={16} />
+      FAQs lesen
+      </a>
+      <a 
+      href="https://www.icloud.com/shortcuts/a41b3e30b8da4dff8c2f28e7c1a84361" 
+      className="btn-primary flex items-center gap-2"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+      <Download size={16} />
+      Kurzbefehl installieren
+      </a>
+      </div>
+      
+      {/* Button-Gruppe für Mobile: gestapelte Buttons mit voller Breite */}
+      <div className="flex sm:hidden flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+      <a href="#videos" className="btn-primary flex items-center justify-center gap-2">
+      <Play size={16} />
+      Videos
+      </a>
+      <a href="#faq" className="btn-secondary flex items-center justify-center gap-2">
+      <Book size={16} />
+      FAQs
+      </a>
+      </div>
+      <a 
+      href="https://www.icloud.com/shortcuts/a41b3e30b8da4dff8c2f28e7c1a84361" 
+      className="btn-primary flex items-center justify-center gap-2 w-full"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+      <Download size={16} />
+      iOS Kurzbefehl installieren
+      </a>
+      </div>
+      </section>
                 {/* Video Tutorials */}
                 <section id="videos">
                     <h2 className="text-xl font-bold text-value mb-6">Video-Anleitungen</h2>
