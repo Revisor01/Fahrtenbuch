@@ -38,7 +38,9 @@ function AbrechnungstraegerForm() {
             setNewEntry({
                 name: '',
             });
-            await refreshAllData(); // Hier aufrufen
+            await refreshAllData((updatedAbrechnungstraeger) => {
+                setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
+            });
         } catch (error) {
             console.error('Fehler beim Hinzufügen:', error);
             showNotification('Fehler', 'Abrechnungsträger konnte nicht hinzugefügt werden');
@@ -63,8 +65,9 @@ function AbrechnungstraegerForm() {
         
         try {
             await axios.put('/api/abrechnungstraeger/sort', { sortOrder });
-            setAbrechnungstraeger(newOrder);
-            await refreshAllData(); // Hier hinzufügen!
+            await refreshAllData((updatedAbrechnungstraeger) => {
+                setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
+            });
         } catch (error) {
             console.error('Fehler beim Sortieren:', error);
             showNotification('Fehler', 'Reihenfolge konnte nicht aktualisiert werden');
@@ -92,8 +95,9 @@ function AbrechnungstraegerForm() {
             });
             showNotification('Erfolg', 'Abrechnungsträger wurde aktualisiert');
             setEditingTraeger(null);
-            fetchAbrechnungstraeger();
-            await refreshAllData(); // Hinzufügen!
+            await refreshAllData((updatedAbrechnungstraeger) => {
+                setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
+            });
         } catch (error) {
             console.error('Fehler beim Aktualisieren:', error);
             showNotification('Fehler', 'Abrechnungsträger konnte nicht aktualisiert werden');
@@ -106,8 +110,9 @@ function AbrechnungstraegerForm() {
                 active: !currentActive
             });
             showNotification('Erfolg', 'Status wurde aktualisiert');
-            fetchAbrechnungstraeger();
-            await refreshAllData(); // Hinzufügen!
+            await refreshAllData((updatedAbrechnungstraeger) => {
+                setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
+            });
         } catch (error) {
             console.error('Fehler beim Ändern des Status:', error);
             showNotification('Fehler', 'Status konnte nicht aktualisiert werden');
@@ -122,8 +127,9 @@ function AbrechnungstraegerForm() {
                 try {
                     await axios.delete(`/api/abrechnungstraeger/${id}`);
                     showNotification('Erfolg', 'Abrechnungsträger wurde gelöscht');
-                    fetchAbrechnungstraeger();
-                    await refreshAllData(); // Hinzufügen!
+                    await refreshAllData((updatedAbrechnungstraeger) => {
+                        setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
+                    });
                 } catch (error) {
                     console.error('Fehler beim Löschen:', error);
                     showNotification(

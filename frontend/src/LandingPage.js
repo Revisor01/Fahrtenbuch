@@ -8,24 +8,24 @@ import { AppContext } from './App';
 
 // AccordionItem Komponente
 const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
-    return (
-        <div className="card-container-flush mb-2 bg-primary-25 rounded-lg border border-primary-100 dark:border-primary-700">
-            <button
-                className="w-full text-left p-4 bg-white dark:bg-gray-800 hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-200 flex justify-between items-center"
-                onClick={toggleOpen}
-            >
-                <span className="text-value font-medium">{title}</span>
-                {isOpen ? <ChevronUp className="text-label" size={20} /> : <ChevronDown className="text-label" size={20} />}
-            </button>
-            {isOpen && (
-                <div className="p-4 border-t border-primary-100 dark:border-primary-800 bg-white">
-                    <div className="text-label text-sm space-y-2">
-                        {children}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <div className="card-container-flush mb-2 border border-primary-100 dark:border-primary-700">
+    <button
+    className="w-full text-left p-4 bg-white dark:bg-gray-800 hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-200 flex justify-between items-center"
+    onClick={toggleOpen}
+    >
+    <span className="text-value font-medium">{title}</span>
+    {isOpen ? <ChevronUp className="text-label" size={20} /> : <ChevronDown className="text-label" size={20} />}
+    </button>
+    {isOpen && (
+      <div className="p-4 border-t border-primary-100 dark:border-primary-800">
+      <div className="text-label text-sm space-y-2">
+      {children}
+      </div>
+      </div>
+    )}
+    </div>
+  );
 };
 
 const VideoCard = ({ title, description, thumbnail, videoUrl, duration }) => {
@@ -139,20 +139,20 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-white dark:bg-gray-900">
-            {/* Header */}
-            <header className="bg-white">
-                <div className="container mx-auto p-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <h1 className="text-lg font-medium text-value">
-                            {appTitle} - Hilfe
-                        </h1>
-                        <Link to="/" className="btn-secondary flex items-center justify-center gap-2">
-                            <ArrowLeft size={16} />
-                            <span>{isLoggedIn ? "Zurück zum Fahrtenbuch" : "Zum Login"}</span>
-                        </Link>
-                    </div>
-                </div>
-            </header>
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-900">
+      <div className="container mx-auto p-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+      <h1 className="text-lg font-medium text-value">
+      {appTitle} - Hilfe
+      </h1>
+      <Link to="/" className="btn-secondary flex items-center justify-center gap-2">
+      <ArrowLeft size={16} />
+      <span>{isLoggedIn ? "Zurück zum Fahrtenbuch" : "Zum Login"}</span>
+      </Link>
+      </div>
+      </div>
+      </header>
 
             {/* Main Content */}
             <main className="container mx-auto p-4 py-8 space-y-12">
@@ -276,46 +276,54 @@ export default function LandingPage() {
                                 </div>
                             </AccordionItem>
 
-                            <AccordionItem
-                                title="Fahrten eintragen"
-                                isOpen={openItem === 1}
-                                toggleOpen={() => toggleItem(1)}
-                            >
-                                <div className="space-y-4">
-                                    <p>So erfassen Sie eine neue Fahrt:</p>
-
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">1. Grunddaten der Fahrt</h4>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Wählen Sie das Datum der Fahrt</li>
-                                            <li>Geben Sie einen aussagekräftigen Anlass ein</li>
-                                            <li>Wählen Sie den passenden Abrechnungsträger</li>
-                                        </ul>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">2. Start- und Zielort</h4>
-                                        <p>Unter "Orte" in den Einstellungen:</p>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Legen Sie Ihren Wohnort fest (wird oben in der Liste angezeigt)</li>
-                                            <li>Bestimmen Sie Ihren Dienstort (wird oben in der Liste angezeigt)</li>
-                                            <li>Speichern Sie häufig besuchte Adressen</li>
-                                            <li>Tipp: Nutzen Sie aussagekräftige Namen für die Orte</li>
-                                        </ul>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">3. Mitfahrer:innen (optional)</h4>
-                                        <p>Im Tab "Träger" der Einstellungen:</p>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Definieren Sie alle Organisationen, die Ihre Fahrtkosten erstatten</li>
-                                            <li>Die Reihenfolge können Sie per Drag & Drop anpassen</li>
-                                            <li>Nicht mehr benötigte Träger können deaktiviert werden</li>
-                                            <li>Ein Löschen ist nur möglich, wenn keine Fahrten zugeordnet sind</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </AccordionItem>
+      <AccordionItem
+      title="Fahrten eintragen"
+      isOpen={openItem === 1}
+      toggleOpen={() => toggleItem(1)}
+      >
+      <div className="space-y-4">
+      <p>So erfassen Sie eine neue Fahrt:</p>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">1. Grunddaten der Fahrt</h4>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Wählen Sie das Datum der Fahrt</li>
+      <li>Geben Sie einen aussagekräftigen Anlass ein</li>
+      <li>Wählen Sie den passenden Abrechnungsträger</li>
+      </ul>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">2. Start- und Zielort</h4>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Wählen Sie aus Ihren gespeicherten Orten</li>
+      <li>Oder nutzen Sie "Einmaliger Ort" für neue Adressen</li>
+      <li>Die Kilometer werden bei gespeicherten Orten automatisch berechnet</li>
+      <li>Bei einmaligen Orten: Kilometer manuell eingeben</li>
+      </ul>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">3. Mitfahrer:innen (optional)</h4>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Button "+ Mitfahrer:in" klicken</li>
+      <li>Name und Arbeitsstätte eingeben</li>
+      <li>Fahrtrichtung wählen: Hin, Rück oder Beides</li>
+      <li>Mehrere Mitfahrer:innen möglich</li>
+      </ul>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">4. Rückfahrt</h4>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Option "Rückfahrt anlegen" aktivieren</li>
+      <li>Erstellt automatisch eine zweite Fahrt</li>
+      <li>Übernimmt alle Daten in umgekehrter Richtung</li>
+      <li>Mitfahrer:innen werden entsprechend ihrer Auswahl übernommen</li>
+      </ul>
+      </div>
+      </div>
+      </AccordionItem>
 
                             <AccordionItem
                                 title="Abrechnung und Erstattung"
@@ -333,57 +341,65 @@ export default function LandingPage() {
                                 </div>
                             </AccordionItem>
 
-                            <AccordionItem
-                                title="Export der Fahrten"
-                                isOpen={openItem === 3}
-                                toggleOpen={() => toggleItem(3)}
-                            >
-                                <div className="space-y-4">
-                                    <p>
-                                    Monatsübersicht
-                                    </p>
-                                      
-                                        <li>Summen pro Abrechnungsträger</li>
-                                        <li>Mitfahrer:innen-Erstattungen</li>
-                                        <li>Gesamtsumme des Monats</li>
-                                        <li>Status der Abrechnungen (nicht eingereicht/eingereicht/erhalten)</li>
-                                   
-                                </div>
-                                <div className="space-y-4">
-                                    <p>Für jeden Abrechnungsträger separat:</p>
-                                     
-                                        <li>Excel-Export über den "Export"-Button</li>
-                                        <li>Enthält alle relevanten Informationen</li>
-                                        <li>Optimiert für die Einreichung</li>
-                                        <li>Bei vielen Fahrten: Automatische Aufteilung</li>
-                                 
-                                </div>
-                                <div className="space-y-4">
-                                    <p>Halten Sie den Status Ihrer Abrechnungen aktuell:</p>
-                                     
-                                        <li>Nach Export: Als "Eingereicht" markieren</li>
-                                        <li>Nach Erhalt: Als "Erhalten" markieren</li>
-                                        <li>Status einzeln oder per Schnellaktion ändern</li>
-                                        <li>Filterung nach offenen Abrechnungen möglich</li>
-                                  
-                                </div>
-                            </AccordionItem>
+      <AccordionItem
+      title="Export der Fahrten"
+      isOpen={openItem === 3}
+      toggleOpen={() => toggleItem(3)}
+      >
+      <div className="space-y-4">
+      <div className="space-y-2">
+      <h4 className="font-medium">Monatsübersicht</h4>
+      <p>Im oberen Bereich sehen Sie die Zusammenfassung des aktuellen Monats:</p>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Summen pro Abrechnungsträger</li>
+      <li>Mitfahrer-Erstattungen</li>
+      <li>Gesamtsumme des Monats</li>
+      <li>Status der Abrechnungen (nicht eingereicht/eingereicht/erhalten)</li>
+      </ul>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">Export der Abrechnungen</h4>
+      <p>Für jeden Abrechnungsträger separat:</p>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Excel-Export über den "Export"-Button</li>
+      <li>Enthält alle relevanten Informationen</li>
+      <li>Optimiert für die Einreichung</li>
+      <li>Bei vielen Fahrten: Automatische Aufteilung</li>
+      </ul>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">Abrechnungsstatus verwalten</h4>
+      <p>Halten Sie den Status Ihrer Abrechnungen aktuell:</p>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Nach Export: Als "Eingereicht" markieren</li>
+      <li>Nach Erhalt: Als "Erhalten" markieren</li>
+      <li>Status einzeln oder per Schnellaktion ändern</li>
+      <li>Filterung nach offenen Abrechnungen möglich</li>
+      </ul>
+      </div>
+      </div>
+      </AccordionItem>
 
-                            <AccordionItem
-                                title="Jahresübersicht"
-                                isOpen={openItem === 4}
-                                toggleOpen={() => toggleItem(4)}
-                            >
-                                <div className="space-y-4">
-                                    <p>Hier Behalten Sie den Überblick:</p>
-                                        
-                                        <li>Summen pro Jahr und Abrechnungsträger</li>
-                                        <li>Ausstehende und erhaltene Beträge</li>
-                                        <li>Filterung nach Jahren</li>
-                                        <li>Export für Steuererklärung möglich</li>
-                                  
-                                </div>
-                            </AccordionItem>
+      <AccordionItem
+      title="Jahresübersicht"
+      isOpen={openItem === 4}
+      toggleOpen={() => toggleItem(4)}
+      >
+      <div className="space-y-4">
+      <div className="space-y-2">
+      <h4 className="font-medium">Jahresübersicht</h4>
+      <p>Behalten Sie den Überblick:</p>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Summen pro Jahr und Abrechnungsträger</li>
+      <li>Ausstehende und erhaltene Beträge</li>
+      <li>Filterung nach Jahren</li>
+      <li>Export für Steuererklärung möglich</li>
+      </ul>
+      </div>
+      </div>
+      </AccordionItem>
                        
                         </div>
                     </div>
