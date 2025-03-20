@@ -144,9 +144,9 @@ export default function LandingPage() {
       <div className="container mx-auto p-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
       <h1 className="text-lg font-medium text-value">
-      {appTitle} - Hilfe
+      {appTitle}
       </h1>
-      <Link to="/" className="btn-secondary flex items-center justify-center gap-2">
+      <Link to="/" className="w-full sm:w-auto btn-secondary flex items-center justify-center gap-2">
       <ArrowLeft size={16} />
       <span>{isLoggedIn ? "Zurück zum Fahrtenbuch" : "Zum Login"}</span>
       </Link>
