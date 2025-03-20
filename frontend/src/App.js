@@ -3,18 +3,18 @@ import axios from 'axios';
 import './index.css';
 import './darkMode.css';
 import ProfileModal from './ProfileModal';
+import LandingPage from './LandingPage';
 import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
 import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2, Info } from 'lucide-react';
-import HilfeModal from './HilfeModal';
 import NotificationModal from './NotificationModal';
 import InfoModal from './components/InfoModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
 import UserManagement from './UserManagement';
 import VerifyEmail from './VerifyEmail';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import ResetPassword from './ResetPassword';
 import SetPassword from './SetPassword';
 import { ThemeProvider } from './ThemeContext';
@@ -94,6 +94,7 @@ function AppProvider({ children }) {
         fetchCurrentUser();
       }
     }
+    setupAxiosInterceptors();
   }, [token]);
   
   const fetchCurrentUser = async () => {
@@ -2303,7 +2304,7 @@ function LoginPage() {
     <button type="submit" className="btn-primary w-full">
     Login
     </button>
-    <div className="flex gap-2">
+    <div className="flex gap-2 pb-6">
     <button
     type="button"
     onClick={() => setShowForgotPassword(true)}
@@ -2311,6 +2312,7 @@ function LoginPage() {
     >
     Passwort vergessen?
     </button>
+
     {allowRegistration && (
       <button
       type="button"
@@ -2321,6 +2323,9 @@ function LoginPage() {
       </button>
     )}
     </div>
+    <Link to="/help" className="btn-primary w-full items-center flex justify-center">
+    Hilfe & Tutorials
+    </Link>
     </div>
     </form>
     </div>
@@ -2462,8 +2467,7 @@ function ForgotPasswordForm({ onClose }) {
 
 function App() {
   React.useEffect(() => {
-    const appTitle = window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch";
-    document.title = appTitle;
+    document.title = "Fahrtenbuch";
   }, []);
   
   return (
@@ -2471,10 +2475,11 @@ function App() {
     <BrowserRouter>
     <AppProvider>
     <Routes>
-    <Route path="/" element={<AppContent />} />
+    <Route path="/help" element={<LandingPage />} />
     <Route path="/verify-email" element={<VerifyEmail />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/set-password" element={<SetPassword />} />
+    <Route path="/*" element={<AppContent />} />
     </Routes>
     </AppProvider>
     </BrowserRouter>
@@ -2485,7 +2490,6 @@ function App() {
 function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
-  const [showHelpModal, setShowHelpModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   
   // Token Check Effect
@@ -2505,14 +2509,6 @@ function AppContent() {
     const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
   }, [logout]);
-  
-  useEffect(() => {
-    const hasSeenHelp = localStorage.getItem('hasSeenHelp') === 'true';
-    if (!hasSeenHelp && isLoggedIn) {
-      setShowHelpModal(true);
-      localStorage.setItem('hasSeenHelp', 'true');
-    }
-  }, [isLoggedIn]);
   
   if (!isLoggedIn) {
     return <LoginPage />;
@@ -2560,22 +2556,22 @@ function AppContent() {
                 <Info size={16} />
               </button>
             </div>
-            <div className="col-span-3 flex justify-end gap-2">
-              <button
-                onClick={() => setShowHelpModal(true)}
-                className="btn-primary flex items-center justify-center gap-2"
-              >
-                <HelpCircle size={16} />
-                <span>Hilfe</span>
-              </button>
-              <button 
-                onClick={logout} 
-                className="btn-secondary flex items-center justify-center gap-2"
-              >
-                <LogOut size={16} />
-                <span>Logout</span>
-              </button>
-            </div>
+<div className="col-span-3 flex justify-end gap-2">
+  <Link
+    to="/help"
+    className="btn-primary flex items-center justify-center gap-2"
+  >
+    <HelpCircle size={16} />
+    <span>Hilfe</span>
+  </Link>
+  <button 
+    onClick={logout} 
+    className="btn-secondary flex items-center justify-center gap-2"
+  >
+    <LogOut size={16} />
+    <span>Logout</span>
+  </button>
+</div>
           </div>
         </div>
       </div>
@@ -2608,11 +2604,7 @@ function AppContent() {
     >
       <UserManagement />
     </Modal>
-    
-    <HilfeModal 
-      isOpen={showHelpModal}
-      onClose={() => setShowHelpModal(false)}
-    />
+  
   </div>
 );
 }
