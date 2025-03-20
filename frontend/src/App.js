@@ -2100,7 +2100,7 @@ function MonthlyOverview() {
             return betrag > 0;
           })
           .map(traeger => (
-            <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+            <div key={traeger.id} className="card-container">
             <div className="flex justify-between items-start mb-2">
             <span className="text-sm font-medium text-value">{traeger.name}</span>
             <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
