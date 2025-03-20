@@ -325,27 +325,65 @@ export default function LandingPage() {
       </div>
       </div>
       </AccordionItem>
-
-                            <AccordionItem
-                                title="Abrechnung und Erstattung"
-                                isOpen={openItem === 2}
-                                toggleOpen={() => toggleItem(2)}
-                            >
-                                <div className="space-y-4">
-                                    <p>Sie können auch hier die Erstattungssätze festlegen:</p>
-                                    <ul className="list-disc ml-4 space-y-1">
-                                        <li>Für jeden Abrechnungsträger Kilometersatz festlegen</li>
-                                        <li>Mitfahrer:innen-Erstattung separat definieren</li>
-                                        <li>Gültig-ab-Datum beachten - ermöglicht zeitliche Änderungen</li>
-                                        <li>Historische Sätze bleiben für alte Fahrten erhalten</li>
-                                    </ul>
-                                </div>
-                            </AccordionItem>
-
       <AccordionItem
-      title="Export der Fahrten"
-      isOpen={openItem === 3}
-      toggleOpen={() => toggleItem(3)}
+      title="Orte und Distanzen verwalten"
+      isOpen={openItem === 4}
+      toggleOpen={() => toggleItem(4)}
+      >
+      <div className="space-y-4">
+      <div className="space-y-2">
+      <h4 className="font-medium">Orte verwalten</h4>
+      <p>In den Einstellungen unter "Orte":</p>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Neue Orte anlegen mit Name und Adresse</li>
+      <li>Spezielle Kennzeichnungen möglich:
+      <ul className="list-disc ml-4 mt-1">
+      <li>Wohnort (nur einer möglich)</li>
+      <li>Dienstort (nur einer möglich)</li>
+      <li>Kirchspiel/Zweigstelle (mehrere möglich)</li>
+      </ul>
+      </li>
+      <li>Orte bearbeiten oder löschen</li>
+      <li>Sortierung erfolgt automatisch nach Typ</li>
+      </ul>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">Distanzen festlegen</h4>
+      <p>In den Einstellungen unter "Distanzen":</p>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Entfernungen zwischen gespeicherten Orten definieren</li>
+      <li>Gilt automatisch für beide Richtungen</li>
+      <li>Nachträgliche Änderungen möglich</li>
+      <li>Auswirkung auf bestehende Fahrten prüfbar</li>
+      </ul>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">Automatische Berechnung</h4>
+      <p>Vorteile der Distanzverwaltung:</p>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Schnellere Erfassung von Fahrten</li>
+      <li>Konsistente Kilometerzahlen</li>
+      <li>Weniger Fehlerquellen</li>
+      <li>Bessere Nachvollziehbarkeit</li>
+      </ul>
+      </div>
+      
+      <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
+      <h4 className="font-medium mb-2">Tipp zur Distanzpflege:</h4>
+      <p className="text-sm">
+      Legen Sie neue Distanzen am besten direkt an, wenn Sie eine Strecke zum 
+      ersten Mal fahren. So bauen Sie nach und nach eine vollständige 
+      Distanzdatenbank auf und sparen langfristig Zeit bei der Erfassung.
+      </p>
+      </div>
+      </div>
+      </AccordionItem>
+      <AccordionItem
+      title="Abrechnung und Erstattung"
+      isOpen={openItem === 2}
+      toggleOpen={() => toggleItem(2)}
       >
       <div className="space-y-4">
       <div className="space-y-2">
@@ -380,15 +418,7 @@ export default function LandingPage() {
       <li>Filterung nach offenen Abrechnungen möglich</li>
       </ul>
       </div>
-      </div>
-      </AccordionItem>
-
-      <AccordionItem
-      title="Jahresübersicht"
-      isOpen={openItem === 4}
-      toggleOpen={() => toggleItem(4)}
-      >
-      <div className="space-y-4">
+      
       <div className="space-y-2">
       <h4 className="font-medium">Jahresübersicht</h4>
       <p>Behalten Sie den Überblick:</p>
@@ -398,6 +428,72 @@ export default function LandingPage() {
       <li>Filterung nach Jahren</li>
       <li>Export für Steuererklärung möglich</li>
       </ul>
+      </div>
+      
+      <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
+      <h4 className="font-medium mb-2">Wichtig für die Abrechnung:</h4>
+      <ul className="list-disc ml-4 space-y-1">
+      <li>Rechtzeitige Einreichung beachten</li>
+      <li>Vollständigkeit der Angaben prüfen</li>
+      <li>Status aktuell halten</li>
+      <li>Belege gemäß Vorgaben aufbewahren</li>
+      </ul>
+      </div>
+      </div>
+      </AccordionItem>
+      <AccordionItem
+      title={
+        <div className="flex items-center gap-2">
+        <Smartphone size={16} className="text-primary-500" />
+        <span>Automatisierung mit iOS-Kurzbefehlen</span>
+        </div>
+      }
+      isOpen={openItem === 5}
+      toggleOpen={() => toggleItem(5)}
+      >
+      <p>Nutzen Sie iOS-Kurzbefehle, um das Erfassen von Fahrten noch einfacher zu gestalten:</p>
+      <div className="space-y-4 mt-4">
+      <div>
+      <a 
+      href="https://www.icloud.com/shortcuts/a41b3e30b8da4dff8c2f28e7c1a84361" 
+      className="btn-primary w-full md:w-auto flex items-center justify-center md:justify-start gap-2 text-sm"
+      target="_blank"
+      rel="noopener noreferrer"
+      >
+      <Download size={16} />
+      <span className="hidden md:inline">Kurzbefehl: "Neue Fahrt eintragen" installieren</span>
+      <span className="md:hidden">Kurzbefehl installieren</span>
+      </a>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">So richten Sie den Kurzbefehl ein:</h4>
+      <ol className="list-decimal ml-4 space-y-2">
+      <li>Klicken Sie auf den Button "Kurzbefehl installieren"</li>
+      <li>Öffnen Sie in den Einstellungen den Bereich "API-Zugriff"</li>
+      <li>Generieren Sie einen neuen API-Schlüssel für iOS-Kurzbefehle</li>
+      <li>Kopieren Sie den generierten Schlüssel</li>
+      <li>Beim ersten Start des Kurzbefehls werden Sie nach dem API-Schlüssel gefragt</li>
+      <li>Der Schlüssel wird sicher in Ihrer iCloud gespeichert</li>
+      </ol>
+      </div>
+      
+      <div className="space-y-2">
+      <h4 className="font-medium">Funktionen des Kurzbefehls:</h4>
+      <ul className="list-disc ml-4 space-y-2">
+      <li>Schnelle Erfassung von Fahrten direkt vom Homescreen</li>
+      <li>Den aktuellen Standort mittels GPS als Adresse angeben</li>
+      <li>Siri Unterstützung: "Hey Siri, neue Fahrt eintragen."</li>
+      </ul>
+      </div>
+      
+      <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
+      <h4 className="font-medium mb-2">Tipp:</h4>
+      <p className="text-sm">
+      Fügen Sie den Kurzbefehl zu Ihrem Home-Bildschirm hinzu, um mit einem Tipp 
+      eine neue Fahrt zu erfassen. Sie können auch "Hey Siri, neue Fahrt eintragen." 
+      verwenden.
+      </p>
       </div>
       </div>
       </AccordionItem>
