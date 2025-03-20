@@ -2100,7 +2100,7 @@ function MonthlyOverview() {
             return betrag > 0;
           })
           .map(traeger => (
-            <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+            <div key={traeger.id} className="card-container">
             <div className="flex justify-between items-start mb-2">
             <span className="text-sm font-medium text-value">{traeger.name}</span>
             <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
@@ -2532,58 +2532,56 @@ function AppContent() {
     </h1>
     
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-    {/* Nur noch Einstellungen und Admin-Button */}
+    {/* Admin-Button und Einstellungen in einer eigenen Zeile auf Mobil */}
     <div className={`grid ${user?.role === 'admin' ? 'grid-cols-2' : 'grid-cols-1'} sm:flex gap-2 w-full`}>
-    {user?.role === 'admin' && (
-      <button
-        onClick={() => setShowUserManagementModal(true)}
-        className="btn-primary flex items-center justify-center gap-2"
-      >
-        <Users size={16} />
-        <span>Benutzerverwaltung</span>
-      </button>
-    )}
-    <button
-      onClick={() => setIsProfileModalOpen(true)}
-      className="btn-primary flex items-center justify-center gap-2"
-    >
-      <Settings size={16} />
-      <span>Einstellungen</span>
-    </button>
-  </div>
-          
-          {/* Hilfe und Logout */}
-          <div className="grid grid-cols-4 sm:flex gap-2 w-full sm:w-auto">
-            <div className="flex gap-2">
-              <ThemeToggle />
-              <button
-                onClick={() => setShowInfoModal(true)}
-                className="btn-primary flex items-center justify-center gap-2"
-                title="Info"
-              >
-                <Info size={16} />
-              </button>
-            </div>
-<div className="col-span-3 flex justify-end gap-2">
-  <Link
-    to="/help"
-    className="btn-primary flex items-center justify-center gap-2"
-  >
-    <HelpCircle size={16} />
-    <span>Hilfe</span>
-  </Link>
-  <button 
-    onClick={logout} 
-    className="btn-secondary flex items-center justify-center gap-2"
-  >
-    <LogOut size={16} />
-    <span>Logout</span>
-  </button>
-</div>
-          </div>
+        {user?.role === 'admin' && (
+          <button
+            onClick={() => setShowUserManagementModal(true)}
+            className="btn-primary flex items-center justify-center gap-2"
+          >
+            <Users size={16} />
+            <span>Benutzerverwaltung</span>
+          </button>
+        )}
+        <button
+          onClick={() => setIsProfileModalOpen(true)}
+          className="btn-primary flex items-center justify-center gap-2"
+        >
+          <Settings size={16} />
+          <span>Einstellungen</span>
+        </button>
+      </div>
+      
+      {/* Theme, Info, Hilfe und Logout in einer zweiten Zeile auf Mobil */}
+      <div className="flex justify-between w-full sm:gap-4">
+        <div className="flex gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => setShowInfoModal(true)}
+            className="btn-primary flex items-center justify-center"
+            title="Info"
+          >
+            <Info size={16} />
+          </button>
+          <Link
+            to="/help"
+            className="btn-primary flex items-center justify-center gap-2"
+          >
+            <HelpCircle size={16} />
+            <span className="hidden sm:inline">Hilfe</span>
+          </Link>
         </div>
+        <button 
+          onClick={logout} 
+          className="btn-secondary flex items-center justify-center gap-2"
+        >
+          <LogOut size={16} />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
+  </div>
+</div>
     
     {/* Hauptinhalt */}
     <div className="space-y-6">

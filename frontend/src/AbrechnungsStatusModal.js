@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import Modal from './Modal';
+import './index.css';
 import { AppContext } from './App';
 
 function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }) {
@@ -39,14 +40,14 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }
     preventOutsideClick={true}
     >
     <div className="table-container">
-    <div className="bg-primary-25 p-6 rounded-lg space-y-6">
-    <p className="text-sm text-primary-600">
+    <div className="card-container space-y-6">
+    <p className="text-sm">
     {getActionText()}
     </p>
     
     <form onSubmit={handleSubmit} className="space-y-6">
     <div>
-    <label className="block text-sm font-medium text-primary-600">
+    <label className="block text-sm font-medium">
     Datum
     </label>
     <input
