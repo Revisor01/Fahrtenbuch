@@ -52,14 +52,15 @@ function AppProvider({ children }) {
     monat: null
   });
   
-  const refreshAllData = async () => {
+  const refreshAllData = async (callback) => {
     try {
-      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes] = await Promise.all([
+      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes, abrechnungstraegerFullRes] = await Promise.all([
         fetchFahrten(),
         fetchMonthlyData(),
         fetchOrte(),
         fetchDistanzen(),
-        axios.get('/api/abrechnungstraeger/simple')
+        axios.get('/api/abrechnungstraeger/simple'),
+        axios.get('/api/abrechnungstraeger')
       ]);
       
       // Hier die tatsächlichen Daten setzen
@@ -69,6 +70,13 @@ function AppProvider({ children }) {
       if (distanzenRes) setDistanzen(distanzenRes);
       if (abrechnungstraegerRes?.data) {
         setAbrechnungstraeger(abrechnungstraegerRes.data.data);
+      }
+      
+      // Führe den optionalen Callback mit den vollständigen Daten aus
+      if (callback && typeof callback === 'function') {
+        if (abrechnungstraegerFullRes?.data) {
+          callback(abrechnungstraegerFullRes.data);
+        }
       }
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Daten:', error);
