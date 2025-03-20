@@ -2,7 +2,7 @@
 
 Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrten. Entwickelt für Organisationen jeder Art, die eine professionelle Verwaltung ihrer Fahrtkosten benötigen.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/Revisor01/Fahrtenbuch)
+[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](https://github.com/Revisor01/Fahrtenbuch)
 [![Docker Image Frontend](https://img.shields.io/docker/v/revisoren/fahrtenbuch-app)](https://hub.docker.com/r/revisoren/fahrtenbuch-app)
 [![Docker Image Backend](https://img.shields.io/docker/v/revisoren/fahrtenbuch-server)](https://hub.docker.com/r/revisoren/fahrtenbuch-server)
 [![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
