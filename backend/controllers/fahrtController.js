@@ -174,26 +174,24 @@ exports.getMonthlyReport = async (req, res) => {
       fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
     }
     
-   const [erstattungssaetze] = await db.execute(`
-      SELECT 
-        at.id,
-        eb.betrag,
-        eb.gueltig_ab
-      FROM abrechnungstraeger at
-      INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-      WHERE at.user_id = ? 
-        AND at.active = true
-        AND eb.gueltig_ab <= LAST_DAY(?)
-      UNION
-      SELECT 
-        'mitfahrer' as id,
-        betrag,
-        gueltig_ab 
-      FROM mitfahrer_erstattung
-      WHERE user_id = ?
-        AND gueltig_ab <= LAST_DAY(?)
-      ORDER BY gueltig_ab DESC
-`, [userId, `${year}-${month.toString().padStart(2, '0')}-01`, userId, `${year}-${month.toString().padStart(2, '0')}-01`]);
+    const [erstattungssaetze] = await db.execute(`
+  SELECT 
+    at.id,
+    eb.betrag,
+    eb.gueltig_ab
+  FROM abrechnungstraeger at
+  INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
+  WHERE at.user_id = ? 
+    AND at.active = true
+  UNION
+  SELECT 
+    'mitfahrer' as id,
+    betrag,
+    gueltig_ab 
+  FROM mitfahrer_erstattung
+  WHERE user_id = ?
+  ORDER BY gueltig_ab DESC
+`, [userId, userId]);
     // Gruppiere Erstattungssätze nach ID
     const saetzeProTraeger = {};
     erstattungssaetze.forEach(satz => {
@@ -208,9 +206,13 @@ exports.getMonthlyReport = async (req, res) => {
       if (!saetzeProTraeger[id]) return 0;
       
       const saetze = saetzeProTraeger[id];
-      const passenderSatz = saetze.find(satz => 
+      let passenderSatz = saetze.find(satz =>
         new Date(satz.gueltig_ab) <= new Date(datum)
       );
+      
+      if (!passenderSatz && saetze.length > 0) {
+        passenderSatz = saetze[saetze.length - 1];
+      }
       
       return passenderSatz ? passenderSatz.betrag : 0;
     };
