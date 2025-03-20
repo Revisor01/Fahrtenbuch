@@ -18,7 +18,7 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }
   // Bestimme den Anzeigenamen des Abrechnungsträgers
   const displayName = traegerId === 'mitfahrer' 
   ? 'Mitfahrer:innen' 
-  : abrechnungstraeger.find(t => t.id === traegerId)?.name || 'Unbekannt';
+  : abrechnungstraeger.find(t => t.id === parseInt(traegerId))?.name || 'Unbekannt';
   
   // Text je nach Aktion
   const getActionText = () => {
