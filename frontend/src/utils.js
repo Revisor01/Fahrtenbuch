@@ -1,15 +1,15 @@
 export const organizeOrte = (orte) => {
-  const dienstort = orte.find(ort => ort.ist_dienstort);
+  const dienstorte = orte.filter(ort => ort.ist_dienstort);
   const wohnort = orte.find(ort => ort.ist_wohnort);
   const kirchspiele = orte.filter(ort => ort.ist_kirchspiel);
   const sonstige = orte.filter(ort => !ort.ist_dienstort && !ort.ist_wohnort && !ort.ist_kirchspiel)
     .sort((a, b) => a.name.localeCompare(b.name));
   
-  return { wohnort, dienstort, kirchspiele, sonstige };
+  return { wohnort, dienstorte, kirchspiele, sonstige };
 };
 
 export const renderOrteOptions = (orte) => {
-  const { wohnort, dienstort, kirchspiele, sonstige } = organizeOrte(orte);
+  const { wohnort, dienstorte, kirchspiele, sonstige } = organizeOrte(orte);
   
   return (
     <>
@@ -18,9 +18,11 @@ export const renderOrteOptions = (orte) => {
         <option value={wohnort.id}>{wohnort.name}</option>
         </optgroup>
       )}
-      {dienstort && (
-        <optgroup label="Dienstort">
-          <option value={dienstort.id}>{dienstort.name}</option>
+      {dienstorte.length > 0 && (
+        <optgroup label="Dienstorte">
+          {dienstorte.map(ort => (
+            <option key={ort.id} value={ort.id}>{ort.name}</option>
+          ))}
         </optgroup>
       )}
       {kirchspiele.length > 0 && (
