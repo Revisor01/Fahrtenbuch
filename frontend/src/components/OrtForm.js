@@ -72,7 +72,7 @@ function OrtForm() {
     >
     <option value="">Bitte wählen</option>
     {!hasWohnort && <option value="wohnort">Wohnort</option>}
-    {!hasDienstort && <option value="dienstort">Dienstort</option>}
+    <option value="dienstort">Dienstort</option>
     <option value="kirchspiel">Kirchspiel</option>
     <option value="none">Sonstiger Ort</option>
     </select>
