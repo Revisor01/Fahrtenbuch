@@ -4,36 +4,53 @@ const mailService = require('../services/mailService');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
+// In userController.js - Methode getAllUsers
 exports.getAllUsers = async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
         }
         
-        // Gleiche Struktur wie im profileController
-        const [rows] = await db.execute(`
+        // ANY_VALUE für nicht-Gruppierungsspalten verwenden
+        const [users] = await db.execute(`
             SELECT 
                 u.id, 
-                u.username, 
-                u.role, 
-                u.email_verified,
-                p.email,
-                p.full_name,
-                p.iban,
-                p.kirchengemeinde, 
-                p.kirchspiel, 
-                p.kirchenkreis,
-                o.name as wohnort,
-                o.adresse as wohnort_adresse,
-                d.name as dienstort,
-                d.adresse as dienstort_adresse
+                ANY_VALUE(u.username) as username, 
+                ANY_VALUE(u.role) as role, 
+                ANY_VALUE(u.email_verified) as email_verified,
+                ANY_VALUE(p.email) as email,
+                ANY_VALUE(p.full_name) as full_name,
+                ANY_VALUE(p.iban) as iban,
+                ANY_VALUE(p.kirchengemeinde) as kirchengemeinde, 
+                ANY_VALUE(p.kirchspiel) as kirchspiel, 
+                ANY_VALUE(p.kirchenkreis) as kirchenkreis,
+                ANY_VALUE(o.name) as wohnort,
+                ANY_VALUE(o.adresse) as wohnort_adresse
             FROM users u
             LEFT JOIN user_profiles p ON u.id = p.user_id 
-            LEFT JOIN orte o ON u.id = o.user_id AND o.ist_wohnort = 1 
-            LEFT JOIN orte d ON u.id = d.user_id AND d.ist_dienstort = 1`
-        );
+            LEFT JOIN orte o ON u.id = o.user_id AND o.ist_wohnort = 1
+            GROUP BY u.id
+        `);
         
-        res.json(rows);
+        // Für jeden Benutzer den ersten Dienstort separat abfragen
+        for (const user of users) {
+            const [dienstorte] = await db.execute(`
+                SELECT name as dienstort, adresse as dienstort_adresse 
+                FROM orte 
+                WHERE user_id = ? AND ist_dienstort = 1 
+                LIMIT 1
+            `, [user.id]);
+            
+            if (dienstorte.length > 0) {
+                user.dienstort = dienstorte[0].dienstort;
+                user.dienstort_adresse = dienstorte[0].dienstort_adresse;
+            } else {
+                user.dienstort = null;
+                user.dienstort_adresse = null;
+            }
+        }
+        
+        res.json(users);
     } catch (error) {
         console.error('Fehler beim Abrufen der Benutzer:', error);
         res.status(500).json({ message: 'Interner Server-Fehler beim Abrufen der Benutzer' });
