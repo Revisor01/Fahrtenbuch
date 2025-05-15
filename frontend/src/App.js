@@ -1790,7 +1790,7 @@ function FahrtenListe() {
       </div>
       </div>
       
-      {/* Anstehende Änderungen - NUR wenn es tatsächlich Änderungen gibt */}
+      {/* Anstehende Änderungen - NUR für die aktuelle Fahrt */}
       <div className="bg-secondary-50 dark:bg-secondary-900/30 p-4 rounded-lg border border-secondary-100 dark:border-secondary-800">
       <h4 className="text-sm font-medium text-value mb-2">Anstehende Änderungen:</h4>
       <div className="space-y-3">
@@ -1799,7 +1799,7 @@ function FahrtenListe() {
       <h5 className="text-xs font-medium text-value">
       {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
       </h5>
-      <div className="text-xs space-y-1 pl-2">
+      <div className="text-xs space-y-2 pl-2 mt-2">
       {Number(rückfahrtDialog.aktuellefahrt?.kilometer) !== Number(rückfahrtDialog.updatedData.kilometer) && (
         <div className="flex justify-between">
         <span className="text-label">Kilometer:</span>
@@ -1816,40 +1816,18 @@ function FahrtenListe() {
         <span className="text-secondary-600 line-through">
         {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
         </span>
-        <span className="text-primary-600"> → {
+        <span className="text-primary-600 block"> → {
           abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
         }</span>
         </div>
         </div>
       )}
-      </div>
-      </div>
-      
-      {/* Änderungen für erkannte Fahrt */}
-      <div>
-      <h5 className="text-xs font-medium text-value">
-      {rückfahrtDialog.istRückfahrt ? "Änderungen Hinfahrt:" : "Änderungen Rückfahrt:"}
-      </h5>
-      <div className="text-xs space-y-1 pl-2">
-      {Number(rückfahrtDialog.ergänzendeFahrt?.kilometer) !== Number(rückfahrtDialog.updatedData.kilometer) && (
+      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData.anlass && (
         <div className="flex justify-between">
-        <span className="text-label">Kilometer:</span>
+        <span className="text-label">Anlass:</span>
         <div>
-        <span className="text-secondary-600 line-through">{rückfahrtDialog.ergänzendeFahrt?.kilometer}</span>
-        <span className="text-primary-600"> → {rückfahrtDialog.updatedData.kilometer}</span>
-        </div>
-        </div>
-      )}
-      {parseInt(rückfahrtDialog.ergänzendeFahrt?.abrechnung) !== parseInt(rückfahrtDialog.updatedData.abrechnung) && (
-        <div className="flex justify-between">
-        <span className="text-label">Abrechnungsträger:</span>
-        <div>
-        <span className="text-secondary-600 line-through">
-        {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.ergänzendeFahrt?.abrechnung))?.name || 'Unbekannt'}
-        </span>
-        <span className="text-primary-600"> → {
-          abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
-        }</span>
+        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
+        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData.anlass}</span>
         </div>
         </div>
       )}
