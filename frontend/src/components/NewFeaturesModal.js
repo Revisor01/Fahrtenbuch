@@ -34,19 +34,19 @@ const NewFeaturesModal = ({ isOpen, onClose }) => {
         </div>
 
         <div className="card-container">
-          <h3 className="text-value font-medium mb-3">Aktualisierung von verknüpften Hin- bzw. Rückfahrten</h3>
+          <h3 className="text-value font-medium mb-3">Aktualisierung von Hin- bzw. Rückfahrten</h3>
           <div className="space-y-2 text-sm text-label">
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Bei Bearbeitung einer Hinfahrt wird automatisch nach zugehöriger Rückfahrt gesucht</p>
+              <p>Bei Bearbeitung einer Fahrt (Kilometer, Anlass, Abrechnungsträger) wird automatisch nach zugehöriger Rück- oder Hinfahrt gesucht</p>
             </div>
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Option zum gleichzeitigen Aktualisieren der Rückfahrt (z.B. bei Änderung des Abrechnungsträgers)</p>
+              <p>Option zum Aktualisieren beider Fahrten (bei Änderung von Kilometer, Anlass, Abrechnungsträger)</p>
             </div>
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Abfrage erscheint nur, wenn tatsächlich eine Rückfahrt gefunden wurde</p>
+              <p>Abfrage erscheint nur, wenn tatsächlich eine Fahrt gefunden wurde</p>
             </div>
           </div>
         </div>
