@@ -1717,9 +1717,10 @@ function FahrtenListe() {
     Möchten Sie die Änderungen auch auf diese Fahrt anwenden?
     </p>
     
+    {/* Details der betroffenen Fahrten und Änderungen anzeigen */}
     {rückfahrtDialog.ergänzendeFahrt && rückfahrtDialog.updatedData && (
       <div className="space-y-4">
-      {/* Aktuelle Fahrt */}
+      {/* Aktuelle Fahrt - Originaldaten */}
       <div className="bg-primary-25 dark:bg-primary-900/30 p-4 rounded-lg">
       <h4 className="text-sm font-medium text-value mb-2">
       {rückfahrtDialog.istRückfahrt ? "Aktuelle Rückfahrt:" : "Aktuelle Hinfahrt:"}
@@ -1740,6 +1741,12 @@ function FahrtenListe() {
       <div className="flex justify-between">
       <span className="text-label">Kilometer:</span>
       <span className="text-value">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Abrechnungsträger:</span>
+      <span className="text-value">
+      {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
+      </span>
       </div>
       <div className="flex justify-between">
       <span className="text-label">Anlass:</span>
@@ -1771,6 +1778,12 @@ function FahrtenListe() {
       <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.kilometer}</span>
       </div>
       <div className="flex justify-between">
+      <span className="text-label">Abrechnungsträger:</span>
+      <span className="text-value">
+      {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.ergänzendeFahrt?.abrechnung))?.name || 'Unbekannt'}
+      </span>
+      </div>
+      <div className="flex justify-between">
       <span className="text-label">Anlass:</span>
       <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.anlass}</span>
       </div>
@@ -1796,7 +1809,49 @@ function FahrtenListe() {
         </div>
         </div>
       )}
-      {/* Weitere Änderungen für aktuelle Fahrt hier hinzufügen */}
+      {parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung) !== parseInt(rückfahrtDialog.updatedData.abrechnung) && (
+        <div className="flex justify-between">
+        <span className="text-label">Abrechnungsträger:</span>
+        <div>
+        <span className="text-secondary-600 line-through">
+        {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
+        </span>
+        <span className="text-primary-600"> → {
+          abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
+        }</span>
+        </div>
+        </div>
+      )}
+      {/* Wenn sich Von-Ort geändert hat */}
+      {rückfahrtDialog.aktuellefahrt?.von_ort_name !== rückfahrtDialog.updatedData.vonOrtName && (
+        <div className="flex justify-between">
+        <span className="text-label">Von:</span>
+        <div>
+        <span className="text-secondary-600 line-through">
+        {rückfahrtDialog.aktuellefahrt?.von_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_von_ort}
+        </span>
+        <span className="text-primary-600"> → 
+        {orte?.find(o => o.id === parseInt(rückfahrtDialog.updatedData.vonOrtId))?.name || 
+          rückfahrtDialog.updatedData.einmaligerVonOrt || 'Unbekannt'}
+        </span>
+        </div>
+        </div>
+      )}
+      {/* Wenn sich Nach-Ort geändert hat */}
+      {rückfahrtDialog.aktuellefahrt?.nach_ort_name !== rückfahrtDialog.updatedData.nachOrtName && (
+        <div className="flex justify-between">
+        <span className="text-label">Nach:</span>
+        <div>
+        <span className="text-secondary-600 line-through">
+        {rückfahrtDialog.aktuellefahrt?.nach_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_nach_ort}
+        </span>
+        <span className="text-primary-600"> → 
+        {orte?.find(o => o.id === parseInt(rückfahrtDialog.updatedData.nachOrtId))?.name || 
+          rückfahrtDialog.updatedData.einmaligerNachOrt || 'Unbekannt'}
+        </span>
+        </div>
+        </div>
+      )}
       </div>
       </div>
       
@@ -1815,7 +1870,19 @@ function FahrtenListe() {
         </div>
         </div>
       )}
-      {/* Weitere Änderungen für erkannte Fahrt hier hinzufügen */}
+      {parseInt(rückfahrtDialog.ergänzendeFahrt?.abrechnung) !== parseInt(rückfahrtDialog.updatedData.abrechnung) && (
+        <div className="flex justify-between">
+        <span className="text-label">Abrechnungsträger:</span>
+        <div>
+        <span className="text-secondary-600 line-through">
+        {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.ergänzendeFahrt?.abrechnung))?.name || 'Unbekannt'}
+        </span>
+        <span className="text-primary-600"> → {
+          abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
+        }</span>
+        </div>
+        </div>
+      )}
       </div>
       </div>
       </div>
