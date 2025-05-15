@@ -6,7 +6,7 @@ import axios from 'axios';
 import Modal from './Modal';
 
 function FahrtForm() {
-  const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger, setAbrechnungstraeger, addOrt, fetchOrte } = useContext(AppContext);
+  const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger, setAbrechnungstraeger, addOrt, fetchOrte, refreshAllData } = useContext(AppContext);
   const [mitfahrer, setMitfahrer] = useState([]);
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
@@ -15,7 +15,8 @@ function FahrtForm() {
     isOpen: false,
     adresse: '',
     name: '',
-    typ: '' // 'von' oder 'nach'
+    typ: '',
+    ortTyp: 'sonstiger'
   });
   const [formData, setFormData] = useState({
     datum: '',
@@ -436,6 +437,28 @@ function FahrtForm() {
     Geben Sie einen aussagekräftigen Namen für diesen Ort ein.
     </p>
     </div>
+    
+    {/* Ortstyp-Auswahl hinzufügen */}
+    <div>
+    <label className="form-label">Art des Ortes</label>
+    <select
+    value={ortSpeichernModal.ortTyp}
+    onChange={(e) => setOrtSpeichernModal({...ortSpeichernModal, ortTyp: e.target.value})}
+    className="form-select"
+    >
+    <option value="sonstiger">Sonstiger Ort</option>
+    {/* Wohnort und Dienstort nur anzeigen, wenn noch keiner existiert */}
+    {!orte.some(o => o.ist_wohnort) && (
+      <option value="wohnort">Wohnort</option>
+    )}
+    <option value="dienstort">Dienstort</option>
+    <option value="kirchspiel">Kirchspiel</option>
+    </select>
+    <p className="text-xs text-muted mt-1">
+    Wohnort und Dienstort können nur einmal festgelegt werden.
+    </p>
+    </div>
+    
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
@@ -446,34 +469,56 @@ function FahrtForm() {
     </button>
     <button
     type="button"
-    onClick={() => {
+    onClick={async () => {
       if (ortSpeichernModal.name) {
-        addOrt({
+        // Ort mit dem ausgewählten Typ speichern
+        const ortDaten = {
           name: ortSpeichernModal.name,
           adresse: ortSpeichernModal.adresse,
-          istWohnort: false,
-          istDienstort: false,
-          istKirchspiel: false
-        });
+          istWohnort: ortSpeichernModal.ortTyp === 'wohnort',
+          istDienstort: ortSpeichernModal.ortTyp === 'dienstort',
+          istKirchspiel: ortSpeichernModal.ortTyp === 'kirchspiel'
+        };
         
-        // Nach dem Speichern den gespeicherten Ort direkt im Formular verwenden
-        const neuerOrt = { id: 'temp', name: ortSpeichernModal.name };
-        fetchOrte().then(() => {
-          // Nach dem Abrufen der aktualisierten Ortsliste den korrekten Ort finden
-          const aktualisierterOrt = orte.find(o => o.name === ortSpeichernModal.name);
-          if (aktualisierterOrt) {
+        try {
+          // Ort speichern
+          await addOrt(ortDaten);
+          showNotification("Erfolg", "Ort wurde gespeichert");
+          
+          // Direkt über API die aktuelle Ortsliste abrufen
+          const response = await axios.get('/api/orte');
+          const aktualisierteListe = response.data;
+          
+          // Finden des neuen Ortes in der aktualisierten Liste
+          const neuerOrt = aktualisierteListe.find(o => 
+            o.name === ortSpeichernModal.name && 
+            o.adresse === ortSpeichernModal.adresse
+          );
+          
+          if (neuerOrt) {
+            // Automatisch den neuen Ort auswählen und Checkbox deaktivieren
             if (ortSpeichernModal.typ === 'von') {
               setUseEinmaligenVonOrt(false);
-              setFormData({...formData, vonOrtId: aktualisierterOrt.id.toString()});
+              setFormData(prev => ({...prev, vonOrtId: neuerOrt.id.toString()}));
             } else {
               setUseEinmaligenNachOrt(false);
-              setFormData({...formData, nachOrtId: aktualisierterOrt.id.toString()});
+              setFormData(prev => ({...prev, nachOrtId: neuerOrt.id.toString()}));
             }
+            
+            // Modal schließen
+            setOrtSpeichernModal({...ortSpeichernModal, isOpen: false});
+            
+            // Alle Daten aktualisieren (damit die Dropdown-Listen aktualisiert werden)
+            refreshAllData();
+          } else {
+            showNotification("Hinweis", "Ort wurde gespeichert, aber nicht automatisch ausgewählt.");
+            setOrtSpeichernModal({...ortSpeichernModal, isOpen: false});
+            refreshAllData();
           }
-        });
-        
-        showNotification("Erfolg", "Ort wurde gespeichert");
-        setOrtSpeichernModal({...ortSpeichernModal, isOpen: false});
+        } catch (error) {
+          console.error('Fehler beim Speichern des Ortes:', error);
+          showNotification("Fehler", "Der Ort konnte nicht gespeichert werden");
+        }
       } else {
         showNotification("Fehler", "Bitte geben Sie einen Namen für den Ort ein");
       }

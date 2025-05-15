@@ -8,7 +8,7 @@ import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import Modal from './Modal'; 
-import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2, Info } from 'lucide-react';
+import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2, Info, Bell } from 'lucide-react';
 import NotificationModal from './NotificationModal';
 import InfoModal from './components/InfoModal';
 import AbrechnungsStatusModal from './AbrechnungsStatusModal';
@@ -19,6 +19,7 @@ import ResetPassword from './ResetPassword';
 import SetPassword from './SetPassword';
 import { ThemeProvider } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
+import NewFeaturesModal from './components/NewFeaturesModal';
 
 const API_BASE_URL = '/api';
 
@@ -513,6 +514,13 @@ function FahrtenListe() {
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
+  const [rückfahrtDialog, setRückfahrtDialog] = useState({
+    isOpen: false,
+    aktuellefahrt: null,
+    ergänzendeFahrt: null,
+    updatedData: null,
+    istRückfahrt: false
+  });
   
   useEffect(() => {
     fetchFahrten();
@@ -657,6 +665,95 @@ function FahrtenListe() {
     }
   };
   
+  const findErgänzendeFahrt = (aktuellefahrt) => {
+    // Bestimmen, ob aktuelle Fahrt eine Hinfahrt oder Rückfahrt ist
+    const istRückfahrt = aktuellefahrt.anlass?.toLowerCase().includes('rückfahrt');
+    
+    console.log("DEBUGGING findErgänzendeFahrt für:", {
+      id: aktuellefahrt.id,
+      anlass: aktuellefahrt.anlass,
+      istRückfahrt,
+      von_ort_id: aktuellefahrt.von_ort_id,
+      nach_ort_id: aktuellefahrt.nach_ort_id,
+      einmaliger_von_ort: aktuellefahrt.einmaliger_von_ort,
+      einmaliger_nach_ort: aktuellefahrt.einmaliger_nach_ort
+    });
+    
+    // Durchsuche alle Fahrten mit detailliertem Logging
+    for (const f of fahrten) {
+      // Ignoriere die aktuelle Fahrt
+      if (f.id === aktuellefahrt.id) continue;
+      
+      // Die Dates müssen gleich sein
+      if (f.datum !== aktuellefahrt.datum) continue;
+      
+      const matchResult = {
+        fahrtId: f.id,
+        gleicherTag: true,
+        orteUmgekehrt: false,
+        anlassPassend: false
+      };
+      
+      // Orte müssen umgekehrt sein (bei gespeicherten Orten IDs vergleichen)
+      let orteUmgekehrt = false;
+      if (aktuellefahrt.von_ort_id && aktuellefahrt.nach_ort_id) {
+        orteUmgekehrt = (parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) && 
+          parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id));
+        matchResult.orteUmgekehrt = orteUmgekehrt;
+        matchResult.orteDetails = {
+          aktuelleVonId: parseInt(aktuellefahrt.von_ort_id),
+          aktuelleNachId: parseInt(aktuellefahrt.nach_ort_id),
+          fVonId: parseInt(f.von_ort_id),
+          fNachId: parseInt(f.nach_ort_id)
+        };
+      }
+      // Bei einmaligen Orten die Texte vergleichen
+      else if (aktuellefahrt.einmaliger_von_ort && aktuellefahrt.einmaliger_nach_ort) {
+        orteUmgekehrt = (f.einmaliger_von_ort === aktuellefahrt.einmaliger_nach_ort && 
+          f.einmaliger_nach_ort === aktuellefahrt.einmaliger_von_ort);
+        matchResult.orteUmgekehrt = orteUmgekehrt;
+        matchResult.orteDetails = {
+          aktuelleVonOrt: aktuellefahrt.einmaliger_von_ort,
+          aktuelleNachOrt: aktuellefahrt.einmaliger_nach_ort,
+          fVonOrt: f.einmaliger_von_ort,
+          fNachOrt: f.einmaliger_nach_ort
+        };
+      }
+      
+      if (!orteUmgekehrt) continue;
+      
+      // Anlass prüfen
+      let anlassPassend = false;
+      const fAnlass = f.anlass?.toLowerCase() || '';
+      
+      if (istRückfahrt) {
+        // Dies ist eine Rückfahrt, suche die Hinfahrt (ohne "Rückfahrt" im Anlass)
+        anlassPassend = !fAnlass.includes('rückfahrt');
+      } else {
+        // Dies ist eine Hinfahrt, suche die Rückfahrt (mit "Rückfahrt" im Anlass)
+        anlassPassend = fAnlass.includes('rückfahrt') && 
+        fAnlass.includes(aktuellefahrt.anlass.toLowerCase());
+      }
+      
+      matchResult.anlassPassend = anlassPassend;
+      matchResult.anlassDetails = {
+        aktuellefahrtAnlass: aktuellefahrt.anlass.toLowerCase(),
+        fAnlass: fAnlass,
+        aktuelleIstRückfahrt: istRückfahrt
+      };
+      
+      console.log("DEBUGGING Prüfergebnis:", matchResult);
+      
+      if (orteUmgekehrt && anlassPassend) {
+        console.log("DEBUGGING Passende Fahrt gefunden:", f);
+        return f;
+      }
+    }
+    
+    console.log("DEBUGGING Keine passende Fahrt gefunden");
+    return null;
+  };
+  
   const handleSave = async () => {
     try {
       // Validierung
@@ -676,7 +773,7 @@ function FahrtenListe() {
         showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
         return;
       }
-
+      
       const updatedFahrt = {
         datum: editingFahrt.datum,
         vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
@@ -688,11 +785,37 @@ function FahrtenListe() {
         abrechnung: parseInt(editingFahrt.abrechnung)
       };
       
+      // Prüfen, ob es eine zugehörige Fahrt gibt (egal ob Hin- oder Rückfahrt)
+      const ergänzendeFahrt = findErgänzendeFahrt(editingFahrt);
+      
+      if (ergänzendeFahrt) {
+        console.log("Dialog wird geöffnet mit:", {
+          aktuellefahrt: editingFahrt,
+          ergänzendeFahrt,
+          updatedFahrt,
+          istRückfahrt: editingFahrt.anlass.toLowerCase().includes('rückfahrt')
+        });
+        
+        // Dialog mit der erkannten Fahrt anzeigen
+        setRückfahrtDialog({
+          isOpen: true,
+          aktuellefahrt: editingFahrt,
+          ergänzendeFahrt: ergänzendeFahrt,
+          updatedData: updatedFahrt,  // hier verwenden wir die korrekte Variable
+          istRückfahrt: editingFahrt.anlass.toLowerCase().includes('rückfahrt')
+        });
+        setEditingFahrt(null);
+        return; // Die Funktion hier beenden, der Rest erfolgt über den Dialog
+      }
+      
+      // Normale Verarbeitung, wenn keine ergänzende Fahrt gefunden wurde
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
       showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
+      await fetchFahrten();
     } catch (error) {
       showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
+      console.error("Fehler beim Aktualisieren:", error);
     }
   };
   
@@ -1594,6 +1717,125 @@ function FahrtenListe() {
     </div>
     
     {/* Modals */}
+    <Modal
+    isOpen={rückfahrtDialog.isOpen}
+    onClose={() => setRückfahrtDialog({ isOpen: false })}
+    title={rückfahrtDialog.istRückfahrt ? "Hinfahrt erkannt" : "Rückfahrt erkannt"}
+    >
+    <div className="space-y-4">
+    <p className="text-sm text-value">
+    {rückfahrtDialog.istRückfahrt 
+      ? "Es wurde eine zugehörige Hinfahrt erkannt." 
+      : "Es wurde eine zugehörige Rückfahrt erkannt."} 
+    Möchten Sie die Änderungen auch auf diese Fahrt anwenden?
+    </p>
+    
+    {/* Details der erkannten Fahrt anzeigen */}
+    {rückfahrtDialog.ergänzendeFahrt && (
+      <div className="bg-primary-25 dark:bg-primary-900/30 p-4 rounded-lg">
+      <h4 className="text-sm font-medium text-value mb-2">Erkannte Fahrt:</h4>
+      <div className="text-xs space-y-1">
+      <div className="flex justify-between">
+      <span className="text-label">Datum:</span>
+      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt && new Date(rückfahrtDialog.ergänzendeFahrt.datum).toLocaleDateString()}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Von:</span>
+      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.von_ort_name || rückfahrtDialog.ergänzendeFahrt?.einmaliger_von_ort}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Nach:</span>
+      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.nach_ort_name || rückfahrtDialog.ergänzendeFahrt?.einmaliger_nach_ort}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Anlass:</span>
+      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.anlass}</span>
+      </div>
+      </div>
+      </div>
+    )}
+    
+    {/* Rest des Dialogs... */}
+    
+    <div className="flex flex-col sm:flex-row gap-2">
+    <button
+    type="button"
+    onClick={() => {
+      // Nur aktuelle Fahrt aktualisieren
+      if (rückfahrtDialog.aktuellefahrt && rückfahrtDialog.updatedData) {
+        updateFahrt(rückfahrtDialog.aktuellefahrt.id, rückfahrtDialog.updatedData)
+        .then(() => {
+          fetchFahrten();
+          showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
+          setRückfahrtDialog({ isOpen: false });
+        })
+        .catch(error => {
+          console.error('Fehler:', error);
+          showNotification("Fehler", "Es ist ein Fehler aufgetreten.");
+          setRückfahrtDialog({ isOpen: false });
+        });
+      }
+    }}
+    className="btn-secondary w-full"
+    >
+    Nur {rückfahrtDialog.istRückfahrt ? "Rückfahrt" : "Hinfahrt"} aktualisieren
+    </button>
+    <button
+    type="button"
+    onClick={async () => {
+      try {
+        if (!rückfahrtDialog.aktuellefahrt || !rückfahrtDialog.ergänzendeFahrt || !rückfahrtDialog.updatedData) {
+          throw new Error("Ungültige Daten");
+        }
+        
+        // Aktuelle Fahrt aktualisieren
+        await updateFahrt(rückfahrtDialog.aktuellefahrt.id, rückfahrtDialog.updatedData);
+        
+        // Ergänzende Fahrt anpassen
+        let ergänzendesFahrtUpdate;
+        
+        if (rückfahrtDialog.istRückfahrt) {
+          // Bei Bearbeitung einer Rückfahrt - Update für die Hinfahrt
+          ergänzendesFahrtUpdate = {
+            ...rückfahrtDialog.updatedData,
+            vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
+            nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
+            einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
+            einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
+            anlass: rückfahrtDialog.ergänzendeFahrt.anlass
+          };
+        } else {
+          // Bei Bearbeitung einer Hinfahrt - Update für die Rückfahrt
+          ergänzendesFahrtUpdate = {
+            ...rückfahrtDialog.updatedData,
+            vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
+            nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
+            einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
+            einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
+            anlass: rückfahrtDialog.ergänzendeFahrt.anlass
+          };
+        }
+        
+        await updateFahrt(rückfahrtDialog.ergänzendeFahrt.id, ergänzendesFahrtUpdate);
+        
+        showNotification("Erfolg", "Beide Fahrten wurden erfolgreich aktualisiert.");
+        await fetchFahrten();
+        setRückfahrtDialog({ isOpen: false });
+      } catch (error) {
+        console.error('Fehler:', error);
+        showNotification("Fehler", "Es ist ein Fehler aufgetreten.");
+        setRückfahrtDialog({ isOpen: false });
+      }
+    }}
+    className="btn-primary w-full"
+    >
+    Beide Fahrten aktualisieren
+    </button>
+    </div>
+    </div>
+    </Modal>
+    
+    
     <MitfahrerModal
     isOpen={!!viewingMitfahrer}
     onClose={() => setViewingMitfahrer(null)}
@@ -2499,7 +2741,7 @@ function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
-  
+  const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   // Token Check Effect
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -2554,23 +2796,31 @@ function AppContent() {
       
       {/* Theme, Info, Hilfe und Logout in einer zweiten Zeile auf Mobil */}
       <div className="flex justify-between w-full sm:gap-4">
-        <div className="flex gap-2">
-          <ThemeToggle />
-          <button
-            onClick={() => setShowInfoModal(true)}
-            className="btn-primary flex items-center justify-center"
-            title="Info"
-          >
-            <Info size={16} />
-          </button>
-          <Link
-            to="/help"
-            className="btn-primary flex items-center justify-center gap-2"
-          >
-            <HelpCircle size={16} />
-            <span className="hidden sm:inline">Hilfe</span>
-          </Link>
-        </div>
+<div className="flex gap-2">
+  <ThemeToggle />
+  <button
+    onClick={() => setShowNewFeaturesModal(true)}
+    className="btn-primary flex items-center justify-center relative"
+    title="Neue Funktionen"
+  >
+    <Bell size={16} />
+    <div className="absolute -top-1 -right-1 bg-secondary-500 rounded-full w-3 h-3"></div>
+  </button>
+  <button
+    onClick={() => setShowInfoModal(true)}
+    className="btn-primary flex items-center justify-center"
+    title="Info"
+  >
+    <Info size={16} />
+  </button>
+  <Link
+    to="/help"
+    className="btn-primary flex items-center justify-center gap-2"
+  >
+    <HelpCircle size={16} />
+    <span className="hidden sm:inline">Hilfe</span>
+  </Link>
+</div>
         <button 
           onClick={logout} 
           className="btn-secondary flex items-center justify-center gap-2"
@@ -2591,6 +2841,11 @@ function AppContent() {
     </div>
     
     {/* Modals */}
+
+<NewFeaturesModal 
+  isOpen={showNewFeaturesModal} 
+  onClose={() => setShowNewFeaturesModal(false)} 
+/>
 
     <InfoModal 
       isOpen={showInfoModal} 
