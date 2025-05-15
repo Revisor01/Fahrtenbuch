@@ -1717,10 +1717,42 @@ function FahrtenListe() {
     Möchten Sie die Änderungen auch auf diese Fahrt anwenden?
     </p>
     
-    {/* Details der erkannten Fahrt anzeigen */}
-    {rückfahrtDialog.ergänzendeFahrt && (
+    {rückfahrtDialog.ergänzendeFahrt && rückfahrtDialog.updatedData && (
+      <div className="space-y-4">
+      {/* Aktuelle Fahrt */}
       <div className="bg-primary-25 dark:bg-primary-900/30 p-4 rounded-lg">
-      <h4 className="text-sm font-medium text-value mb-2">Erkannte Fahrt:</h4>
+      <h4 className="text-sm font-medium text-value mb-2">
+      {rückfahrtDialog.istRückfahrt ? "Aktuelle Rückfahrt:" : "Aktuelle Hinfahrt:"}
+      </h4>
+      <div className="text-xs space-y-1">
+      <div className="flex justify-between">
+      <span className="text-label">Datum:</span>
+      <span className="text-value">{rückfahrtDialog.aktuellefahrt && new Date(rückfahrtDialog.aktuellefahrt.datum).toLocaleDateString()}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Von:</span>
+      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.von_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_von_ort}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Nach:</span>
+      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.nach_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_nach_ort}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Kilometer:</span>
+      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
+      </div>
+      <div className="flex justify-between">
+      <span className="text-label">Anlass:</span>
+      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
+      </div>
+      </div>
+      </div>
+      
+      {/* Erkannte Fahrt */}
+      <div className="bg-primary-25 dark:bg-primary-900/30 p-4 rounded-lg">
+      <h4 className="text-sm font-medium text-value mb-2">
+      {rückfahrtDialog.istRückfahrt ? "Erkannte Hinfahrt:" : "Erkannte Rückfahrt:"}
+      </h4>
       <div className="text-xs space-y-1">
       <div className="flex justify-between">
       <span className="text-label">Datum:</span>
@@ -1735,14 +1767,61 @@ function FahrtenListe() {
       <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.nach_ort_name || rückfahrtDialog.ergänzendeFahrt?.einmaliger_nach_ort}</span>
       </div>
       <div className="flex justify-between">
+      <span className="text-label">Kilometer:</span>
+      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.kilometer}</span>
+      </div>
+      <div className="flex justify-between">
       <span className="text-label">Anlass:</span>
       <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.anlass}</span>
       </div>
       </div>
       </div>
+      
+      {/* Anstehende Änderungen */}
+      <div className="bg-secondary-50 dark:bg-secondary-900/30 p-4 rounded-lg border border-secondary-100 dark:border-secondary-800">
+      <h4 className="text-sm font-medium text-value mb-2">Anstehende Änderungen:</h4>
+      <div className="space-y-3">
+      {/* Änderungen für aktuelle Fahrt */}
+      <div>
+      <h5 className="text-xs font-medium text-value">
+      {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
+      </h5>
+      <div className="text-xs space-y-1 pl-2">
+      {rückfahrtDialog.aktuellefahrt?.kilometer !== rückfahrtDialog.updatedData.kilometer && (
+        <div className="flex justify-between">
+        <span className="text-label">Kilometer:</span>
+        <div>
+        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
+        <span className="text-primary-600"> → {rückfahrtDialog.updatedData.kilometer}</span>
+        </div>
+        </div>
+      )}
+      {/* Weitere Änderungen für aktuelle Fahrt hier hinzufügen */}
+      </div>
+      </div>
+      
+      {/* Änderungen für erkannte Fahrt */}
+      <div>
+      <h5 className="text-xs font-medium text-value">
+      {rückfahrtDialog.istRückfahrt ? "Änderungen Hinfahrt:" : "Änderungen Rückfahrt:"}
+      </h5>
+      <div className="text-xs space-y-1 pl-2">
+      {rückfahrtDialog.ergänzendeFahrt?.kilometer !== rückfahrtDialog.updatedData.kilometer && (
+        <div className="flex justify-between">
+        <span className="text-label">Kilometer:</span>
+        <div>
+        <span className="text-secondary-600 line-through">{rückfahrtDialog.ergänzendeFahrt?.kilometer}</span>
+        <span className="text-primary-600"> → {rückfahrtDialog.updatedData.kilometer}</span>
+        </div>
+        </div>
+      )}
+      {/* Weitere Änderungen für erkannte Fahrt hier hinzufügen */}
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
     )}
-    
-    {/* Rest des Dialogs... */}
     
     <div className="flex flex-col sm:flex-row gap-2">
     <button
