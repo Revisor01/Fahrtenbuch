@@ -669,33 +669,51 @@ function FahrtenListe() {
     // Bestimmen, ob aktuelle Fahrt eine Hinfahrt oder Rückfahrt ist
     const istRückfahrt = aktuellefahrt.anlass?.toLowerCase().includes('rückfahrt');
     
+    // Normalize the date format to YYYY-MM-DD for comparison
+    const normalizeDatum = (datum) => {
+      if (!datum) return '';
+      // Wenn es ein String ist, versuchen wir es zu normalisieren
+      if (typeof datum === 'string') {
+        // Format YYYY-MM-DD extrahieren
+        return datum.split('T')[0];
+      }
+      // Falls es bereits ein Date-Objekt ist
+      if (datum instanceof Date) {
+        return datum.toISOString().split('T')[0];
+      }
+      return datum;
+    };
+    
+    const aktuellDatum = normalizeDatum(aktuellefahrt.datum);
+    
     console.log("DEBUGGING findErgänzendeFahrt für:", {
       id: aktuellefahrt.id,
       anlass: aktuellefahrt.anlass,
       istRückfahrt,
       von_ort_id: aktuellefahrt.von_ort_id,
       nach_ort_id: aktuellefahrt.nach_ort_id,
-      datum: aktuellefahrt.datum
+      datum: aktuellDatum
     });
     
-    // Für jeden Fahrt in der Liste detaillierte Logs ausgeben
-    console.log("DEBUGGING Alle Fahrten am selben Tag:", fahrten
-      .filter(f => f.datum === aktuellefahrt.datum && f.id !== aktuellefahrt.id)
-      .map(f => ({
-        id: f.id, 
-        anlass: f.anlass,
-        von_ort_id: f.von_ort_id,
-        nach_ort_id: f.nach_ort_id,
-        istRückfahrt: f.anlass?.toLowerCase().includes('rückfahrt')
-      }))
+    // Filtere Fahrten mit normalisiertem Datum
+    const fahrtenAmSelbenTag = fahrten.filter(f => 
+      normalizeDatum(f.datum) === aktuellDatum && 
+      f.id !== aktuellefahrt.id
     );
+    
+    console.log("DEBUGGING Alle Fahrten am selben Tag:", fahrtenAmSelbenTag.map(f => ({
+      id: f.id, 
+      anlass: f.anlass,
+      von_ort_id: f.von_ort_id,
+      nach_ort_id: f.nach_ort_id,
+      istRückfahrt: f.anlass?.toLowerCase().includes('rückfahrt'),
+      datum: normalizeDatum(f.datum)
+    })));
     
     // DEUTLICH VEREINFACHTE LOGIK, die direkt die IDs prüft
     if (istRückfahrt) {
       // Aktuelle Fahrt ist Rückfahrt, suche Hinfahrt mit umgekehrten Orten
-      const hinfahrt = fahrten.find(f => 
-        f.datum === aktuellefahrt.datum && 
-        f.id !== aktuellefahrt.id &&
+      const hinfahrt = fahrtenAmSelbenTag.find(f => 
         !f.anlass?.toLowerCase().includes('rückfahrt') &&
         parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
         parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
@@ -707,9 +725,7 @@ function FahrtenListe() {
       }
     } else {
       // Aktuelle Fahrt ist Hinfahrt, suche Rückfahrt mit umgekehrten Orten
-      const rückfahrt = fahrten.find(f => 
-        f.datum === aktuellefahrt.datum && 
-        f.id !== aktuellefahrt.id &&
+      const rückfahrt = fahrtenAmSelbenTag.find(f => 
         f.anlass?.toLowerCase().includes('rückfahrt') &&
         parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
         parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
