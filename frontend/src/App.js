@@ -1790,17 +1790,17 @@ function FahrtenListe() {
       </div>
       </div>
       
-      {/* Anstehende Änderungen */}
+      {/* Anstehende Änderungen - NUR wenn es tatsächlich Änderungen gibt */}
       <div className="bg-secondary-50 dark:bg-secondary-900/30 p-4 rounded-lg border border-secondary-100 dark:border-secondary-800">
       <h4 className="text-sm font-medium text-value mb-2">Anstehende Änderungen:</h4>
       <div className="space-y-3">
-      {/* Änderungen für aktuelle Fahrt */}
+      {/* Änderungen für aktuelle Fahrt - nur wenn sich etwas ändert */}
       <div>
       <h5 className="text-xs font-medium text-value">
       {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
       </h5>
       <div className="text-xs space-y-1 pl-2">
-      {rückfahrtDialog.aktuellefahrt?.kilometer !== rückfahrtDialog.updatedData.kilometer && (
+      {Number(rückfahrtDialog.aktuellefahrt?.kilometer) !== Number(rückfahrtDialog.updatedData.kilometer) && (
         <div className="flex justify-between">
         <span className="text-label">Kilometer:</span>
         <div>
@@ -1822,36 +1822,6 @@ function FahrtenListe() {
         </div>
         </div>
       )}
-      {/* Wenn sich Von-Ort geändert hat */}
-      {rückfahrtDialog.aktuellefahrt?.von_ort_name !== rückfahrtDialog.updatedData.vonOrtName && (
-        <div className="flex justify-between">
-        <span className="text-label">Von:</span>
-        <div>
-        <span className="text-secondary-600 line-through">
-        {rückfahrtDialog.aktuellefahrt?.von_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_von_ort}
-        </span>
-        <span className="text-primary-600"> → 
-        {orte?.find(o => o.id === parseInt(rückfahrtDialog.updatedData.vonOrtId))?.name || 
-          rückfahrtDialog.updatedData.einmaligerVonOrt || 'Unbekannt'}
-        </span>
-        </div>
-        </div>
-      )}
-      {/* Wenn sich Nach-Ort geändert hat */}
-      {rückfahrtDialog.aktuellefahrt?.nach_ort_name !== rückfahrtDialog.updatedData.nachOrtName && (
-        <div className="flex justify-between">
-        <span className="text-label">Nach:</span>
-        <div>
-        <span className="text-secondary-600 line-through">
-        {rückfahrtDialog.aktuellefahrt?.nach_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_nach_ort}
-        </span>
-        <span className="text-primary-600"> → 
-        {orte?.find(o => o.id === parseInt(rückfahrtDialog.updatedData.nachOrtId))?.name || 
-          rückfahrtDialog.updatedData.einmaligerNachOrt || 'Unbekannt'}
-        </span>
-        </div>
-        </div>
-      )}
       </div>
       </div>
       
@@ -1861,7 +1831,7 @@ function FahrtenListe() {
       {rückfahrtDialog.istRückfahrt ? "Änderungen Hinfahrt:" : "Änderungen Rückfahrt:"}
       </h5>
       <div className="text-xs space-y-1 pl-2">
-      {rückfahrtDialog.ergänzendeFahrt?.kilometer !== rückfahrtDialog.updatedData.kilometer && (
+      {Number(rückfahrtDialog.ergänzendeFahrt?.kilometer) !== Number(rückfahrtDialog.updatedData.kilometer) && (
         <div className="flex justify-between">
         <span className="text-label">Kilometer:</span>
         <div>
