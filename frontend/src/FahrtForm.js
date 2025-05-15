@@ -10,6 +10,12 @@ function FahrtForm() {
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
   const [isKilometerLocked, setIsKilometerLocked] = useState(false);
+  const [ortSpeichernModal, setOrtSpeichernModal] = useState({
+    isOpen: false,
+    adresse: '',
+    name: '',
+    typ: '' // 'von' oder 'nach'
+  });
   const [formData, setFormData] = useState({
     datum: '',
     vonOrtId: '',
@@ -211,15 +217,34 @@ function FahrtForm() {
     </label>
     </div>
     {useEinmaligenVonOrt ? (
+      <div className="relative">
       <input
       type="text"
       name="einmaligerVonOrt"
       value={formData.einmaligerVonOrt}
       onChange={handleChange}
       placeholder="Adresse eingeben"
-      className="form-input"
+      className="form-input pr-12"
       required
       />
+      <button
+      type="button"
+      onClick={() => {
+        if (formData.einmaligerVonOrt) {
+          setOrtSpeichernModal({
+            isOpen: true,
+            adresse: formData.einmaligerVonOrt,
+            name: '',
+            typ: 'von'
+          });
+        }
+      }}
+      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-primary-500 hover:text-primary-600"
+      title="Als neuen Ort speichern"
+      >
+      Speichern
+      </button>
+      </div>
     ) : (
       <select
       name="vonOrtId"
@@ -248,15 +273,34 @@ function FahrtForm() {
     </label>
     </div>
     {useEinmaligenNachOrt ? (
+      <div className="relative">
       <input
       type="text"
       name="einmaligerNachOrt"
       value={formData.einmaligerNachOrt}
       onChange={handleChange}
       placeholder="Adresse eingeben"
-      className="form-input"
+      className="form-input pr-12"
       required
       />
+      <button
+      type="button"
+      onClick={() => {
+        if (formData.einmaligerNachOrt) {
+          setOrtSpeichernModal({
+            isOpen: true,
+            adresse: formData.einmaligerNachOrt,
+            name: '',
+            typ: 'nach'
+          });
+        }
+      }}
+      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-primary-500 hover:text-primary-600"
+      title="Als neuen Ort speichern"
+      >
+      Speichern
+      </button>
+      </div>
     ) : (
       <select
       name="nachOrtId"
@@ -360,6 +404,87 @@ function FahrtForm() {
       </div>
     )}
     </form>
+    
+    {/* Modal für Ort speichern */}
+    <Modal
+    isOpen={ortSpeichernModal.isOpen}
+    onClose={() => setOrtSpeichernModal({...ortSpeichernModal, isOpen: false})}
+    title="Ort speichern"
+    >
+    <div className="space-y-4">
+    <div>
+    <label className="form-label">Adresse</label>
+    <input
+    type="text"
+    value={ortSpeichernModal.adresse}
+    readOnly
+    className="form-input bg-primary-25 dark:bg-primary-900/50"
+    />
+    </div>
+    <div>
+    <label className="form-label">Name des Ortes</label>
+    <input
+    type="text"
+    value={ortSpeichernModal.name}
+    onChange={(e) => setOrtSpeichernModal({...ortSpeichernModal, name: e.target.value})}
+    placeholder="z.B. Rathaus Meldorf"
+    className="form-input"
+    autoFocus
+    />
+    <p className="text-xs text-muted mt-1">
+    Geben Sie einen aussagekräftigen Namen für diesen Ort ein.
+    </p>
+    </div>
+    <div className="flex flex-col sm:flex-row gap-2">
+    <button
+    type="button"
+    onClick={() => setOrtSpeichernModal({...ortSpeichernModal, isOpen: false})}
+    className="btn-secondary w-full"
+    >
+    Abbrechen
+    </button>
+    <button
+    type="button"
+    onClick={() => {
+      if (ortSpeichernModal.name) {
+        addOrt({
+          name: ortSpeichernModal.name,
+          adresse: ortSpeichernModal.adresse,
+          istWohnort: false,
+          istDienstort: false,
+          istKirchspiel: false
+        });
+        
+        // Nach dem Speichern den gespeicherten Ort direkt im Formular verwenden
+        const neuerOrt = { id: 'temp', name: ortSpeichernModal.name };
+        fetchOrte().then(() => {
+          // Nach dem Abrufen der aktualisierten Ortsliste den korrekten Ort finden
+          const aktualisierterOrt = orte.find(o => o.name === ortSpeichernModal.name);
+          if (aktualisierterOrt) {
+            if (ortSpeichernModal.typ === 'von') {
+              setUseEinmaligenVonOrt(false);
+              setFormData({...formData, vonOrtId: aktualisierterOrt.id.toString()});
+            } else {
+              setUseEinmaligenNachOrt(false);
+              setFormData({...formData, nachOrtId: aktualisierterOrt.id.toString()});
+            }
+          }
+        });
+        
+        showNotification("Erfolg", "Ort wurde gespeichert");
+        setOrtSpeichernModal({...ortSpeichernModal, isOpen: false});
+      } else {
+        showNotification("Fehler", "Bitte geben Sie einen Namen für den Ort ein");
+      }
+    }}
+    className="btn-primary w-full"
+    disabled={!ortSpeichernModal.name}
+    >
+    Speichern
+    </button>
+    </div>
+    </div>
+    </Modal>
     
     {/* Mitfahrer Modal */}
     {showMitfahrerModal && (
