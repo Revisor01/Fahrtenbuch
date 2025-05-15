@@ -675,78 +675,49 @@ function FahrtenListe() {
       istRückfahrt,
       von_ort_id: aktuellefahrt.von_ort_id,
       nach_ort_id: aktuellefahrt.nach_ort_id,
-      einmaliger_von_ort: aktuellefahrt.einmaliger_von_ort,
-      einmaliger_nach_ort: aktuellefahrt.einmaliger_nach_ort
+      datum: aktuellefahrt.datum
     });
     
-    // Durchsuche alle Fahrten mit detailliertem Logging
-    for (const f of fahrten) {
-      // Ignoriere die aktuelle Fahrt
-      if (f.id === aktuellefahrt.id) continue;
+    // Für jeden Fahrt in der Liste detaillierte Logs ausgeben
+    console.log("DEBUGGING Alle Fahrten am selben Tag:", fahrten
+      .filter(f => f.datum === aktuellefahrt.datum && f.id !== aktuellefahrt.id)
+      .map(f => ({
+        id: f.id, 
+        anlass: f.anlass,
+        von_ort_id: f.von_ort_id,
+        nach_ort_id: f.nach_ort_id,
+        istRückfahrt: f.anlass?.toLowerCase().includes('rückfahrt')
+      }))
+    );
+    
+    // DEUTLICH VEREINFACHTE LOGIK, die direkt die IDs prüft
+    if (istRückfahrt) {
+      // Aktuelle Fahrt ist Rückfahrt, suche Hinfahrt mit umgekehrten Orten
+      const hinfahrt = fahrten.find(f => 
+        f.datum === aktuellefahrt.datum && 
+        f.id !== aktuellefahrt.id &&
+        !f.anlass?.toLowerCase().includes('rückfahrt') &&
+        parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
+        parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
+      );
       
-      // Die Dates müssen gleich sein
-      if (f.datum !== aktuellefahrt.datum) continue;
-      
-      const matchResult = {
-        fahrtId: f.id,
-        gleicherTag: true,
-        orteUmgekehrt: false,
-        anlassPassend: false
-      };
-      
-      // Orte müssen umgekehrt sein (bei gespeicherten Orten IDs vergleichen)
-      let orteUmgekehrt = false;
-      if (aktuellefahrt.von_ort_id && aktuellefahrt.nach_ort_id) {
-        orteUmgekehrt = (parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) && 
-          parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id));
-        matchResult.orteUmgekehrt = orteUmgekehrt;
-        matchResult.orteDetails = {
-          aktuelleVonId: parseInt(aktuellefahrt.von_ort_id),
-          aktuelleNachId: parseInt(aktuellefahrt.nach_ort_id),
-          fVonId: parseInt(f.von_ort_id),
-          fNachId: parseInt(f.nach_ort_id)
-        };
+      if (hinfahrt) {
+        console.log("DEBUGGING Hinfahrt gefunden:", hinfahrt);
+        return hinfahrt;
       }
-      // Bei einmaligen Orten die Texte vergleichen
-      else if (aktuellefahrt.einmaliger_von_ort && aktuellefahrt.einmaliger_nach_ort) {
-        orteUmgekehrt = (f.einmaliger_von_ort === aktuellefahrt.einmaliger_nach_ort && 
-          f.einmaliger_nach_ort === aktuellefahrt.einmaliger_von_ort);
-        matchResult.orteUmgekehrt = orteUmgekehrt;
-        matchResult.orteDetails = {
-          aktuelleVonOrt: aktuellefahrt.einmaliger_von_ort,
-          aktuelleNachOrt: aktuellefahrt.einmaliger_nach_ort,
-          fVonOrt: f.einmaliger_von_ort,
-          fNachOrt: f.einmaliger_nach_ort
-        };
-      }
+    } else {
+      // Aktuelle Fahrt ist Hinfahrt, suche Rückfahrt mit umgekehrten Orten
+      const rückfahrt = fahrten.find(f => 
+        f.datum === aktuellefahrt.datum && 
+        f.id !== aktuellefahrt.id &&
+        f.anlass?.toLowerCase().includes('rückfahrt') &&
+        parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
+        parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
+      );
       
-      if (!orteUmgekehrt) continue;
-      
-      // Anlass prüfen
-      let anlassPassend = false;
-      const fAnlass = f.anlass?.toLowerCase() || '';
-      
-      if (istRückfahrt) {
-        // Dies ist eine Rückfahrt, suche die Hinfahrt (ohne "Rückfahrt" im Anlass)
-        anlassPassend = !fAnlass.includes('rückfahrt');
-      } else {
-        // Dies ist eine Hinfahrt, suche die Rückfahrt (mit "Rückfahrt" im Anlass)
-        anlassPassend = fAnlass.includes('rückfahrt') && 
-        fAnlass.includes(aktuellefahrt.anlass.toLowerCase());
-      }
-      
-      matchResult.anlassPassend = anlassPassend;
-      matchResult.anlassDetails = {
-        aktuellefahrtAnlass: aktuellefahrt.anlass.toLowerCase(),
-        fAnlass: fAnlass,
-        aktuelleIstRückfahrt: istRückfahrt
-      };
-      
-      console.log("DEBUGGING Prüfergebnis:", matchResult);
-      
-      if (orteUmgekehrt && anlassPassend) {
-        console.log("DEBUGGING Passende Fahrt gefunden:", f);
-        return f;
+      if (rückfahrt) {
+        console.log("DEBUGGING Rückfahrt gefunden:", rückfahrt);
+        return rückfahrt;
       }
     }
     
