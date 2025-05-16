@@ -2957,7 +2957,7 @@ function AppContent() {
     </div>
     
     {/* Modals */}
-
+<div>
 <NewFeaturesModal 
   isOpen={showNewFeaturesModal} 
   onClose={() => setShowNewFeaturesModal(false)} 
