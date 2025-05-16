@@ -1800,38 +1800,83 @@ function FahrtenListe() {
       {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
       </h5>
       <div className="text-xs space-y-2 pl-2 mt-2">
-      {Number(rückfahrtDialog.aktuellefahrt?.kilometer) !== Number(rückfahrtDialog.updatedData.kilometer) && (
+      {Number(rückfahrtDialog.aktuellefahrt?.kilometer) !== Number(rückfahrtDialog.updatedData?.kilometer) && (
         <div className="flex justify-between">
         <span className="text-label">Kilometer:</span>
         <div>
-        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
-        <span className="text-primary-600"> → {rückfahrtDialog.updatedData.kilometer}</span>
+        <span className="text-secondary-600 line-through">{Number(rückfahrtDialog.aktuellefahrt?.kilometer).toFixed(2)}</span>
+        <span className="text-primary-600"> → {Number(rückfahrtDialog.updatedData?.kilometer).toFixed(2)}</span>
         </div>
         </div>
       )}
-      {parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung) !== parseInt(rückfahrtDialog.updatedData.abrechnung) && (
+      {String(rückfahrtDialog.aktuellefahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) && (
         <div className="flex justify-between">
         <span className="text-label">Abrechnungsträger:</span>
         <div>
         <span className="text-secondary-600 line-through">
-        {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
+        {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
         </span>
         <span className="text-primary-600 block"> → {
-          abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
+          abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
         }</span>
         </div>
         </div>
       )}
-      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData.anlass && (
+      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass && (
         <div className="flex justify-between">
         <span className="text-label">Anlass:</span>
         <div>
         <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
-        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData.anlass}</span>
+        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData?.anlass}</span>
         </div>
         </div>
       )}
       </div>
+      </div>
+      
+      {/* Änderungen für die ergänzende Fahrt */}
+      <div>
+      <h5 className="text-xs font-medium text-value">
+      {rückfahrtDialog.istRückfahrt ? "Änderungen Hinfahrt:" : "Änderungen Rückfahrt:"}
+      </h5>
+      <div className="text-xs space-y-2 pl-2 mt-2">
+      {Number(rückfahrtDialog.ergänzendeFahrt?.kilometer) !== Number(rückfahrtDialog.updatedData?.kilometer) && (
+        <div className="flex justify-between">
+        <span className="text-label">Kilometer:</span>
+        <div>
+        <span className="text-secondary-600 line-through">{Number(rückfahrtDialog.ergänzendeFahrt?.kilometer).toFixed(2)}</span>
+        <span className="text-primary-600"> → {Number(rückfahrtDialog.updatedData?.kilometer).toFixed(2)}</span>
+        </div>
+        </div>
+      )}
+      {String(rückfahrtDialog.ergänzendeFahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) && (
+        <div className="flex justify-between">
+        <span className="text-label">Abrechnungsträger:</span>
+        <div>
+        <span className="text-secondary-600 line-through">
+        {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.ergänzendeFahrt?.abrechnung))?.name || 'Unbekannt'}
+        </span>
+        <span className="text-primary-600 block"> → {
+          abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
+        }</span>
+        </div>
+        </div>
+      )}
+      
+      {/* Zeige Anlass-Änderung für ergänzende Fahrt an */}
+      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass && (
+        <div className="flex justify-between">
+        <span className="text-label">Anlass:</span>
+        <div>
+        <span className="text-secondary-600 line-through">{rückfahrtDialog.ergänzendeFahrt?.anlass}</span>
+        <span className="text-primary-600 block"> → {
+          rückfahrtDialog.istRückfahrt ? 
+          rückfahrtDialog.updatedData?.anlass.replace(/rückfahrt/i, "").trim() :
+          "Rückfahrt " + rückfahrtDialog.updatedData?.anlass.replace(/rückfahrt/i, "").trim()
+        }</span>
+        </div>
+        </div>
+      )}
       </div>
       </div>
       </div>
@@ -1875,6 +1920,19 @@ function FahrtenListe() {
         // Ergänzende Fahrt anpassen
         let ergänzendesFahrtUpdate;
         
+        // Anlass entsprechend anpassen
+        const erstellePassendenAnlass = (anlass, istRückfahrt) => {
+          // Grundform des Anlasses extrahieren (ohne "Rückfahrt" oder "Hinfahrt")
+          const basisAnlass = anlass.replace(/^(rückfahrt|hinfahrt)\s*/i, "").trim();
+          
+          // Je nach Typ die passende Bezeichnung vorne hinzufügen
+          if (istRückfahrt) {
+            return basisAnlass; // Für eine Hinfahrt den Basis-Anlass ohne Präfix
+          } else {
+            return `Rückfahrt ${basisAnlass}`; // Für eine Rückfahrt den Präfix hinzufügen
+          }
+        };
+        
         if (rückfahrtDialog.istRückfahrt) {
           // Bei Bearbeitung einer Rückfahrt - Update für die Hinfahrt
           ergänzendesFahrtUpdate = {
@@ -1883,7 +1941,7 @@ function FahrtenListe() {
             nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
             einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
             einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
-            anlass: rückfahrtDialog.ergänzendeFahrt.anlass
+            anlass: erstellePassendenAnlass(rückfahrtDialog.updatedData.anlass, true)
           };
         } else {
           // Bei Bearbeitung einer Hinfahrt - Update für die Rückfahrt
@@ -1893,7 +1951,7 @@ function FahrtenListe() {
             nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
             einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
             einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
-            anlass: rückfahrtDialog.ergänzendeFahrt.anlass
+            anlass: erstellePassendenAnlass(rückfahrtDialog.updatedData.anlass, false)
           };
         }
         
