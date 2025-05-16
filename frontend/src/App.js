@@ -1952,6 +1952,7 @@ function FahrtenListe() {
     </Modal>
     
     
+    <div>
     <MitfahrerModal
     isOpen={!!viewingMitfahrer}
     onClose={() => setViewingMitfahrer(null)}
