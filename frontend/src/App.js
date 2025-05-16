@@ -1813,7 +1813,7 @@ function FahrtenListe() {
       {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
       </h5>
       <div className="text-xs space-y-2 pl-2 mt-2">
-      {/* Immer alle drei Änderungen anzeigen */}
+      {/* Kilometer */}
       <div className="flex justify-between">
       <span className="text-label">Kilometer:</span>
       <div>
@@ -1822,23 +1822,26 @@ function FahrtenListe() {
       </div>
       </div>
       
+      {/* Abrechnungsträger */}
       <div className="flex justify-between">
       <span className="text-label">Abrechnungsträger:</span>
       <div>
       <span className="text-secondary-600 line-through">
       {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
       </span>
-      <span className={String(rückfahrtDialog.aktuellefahrt?.abrechnung) === String(rückfahrtDialog.updatedData?.abrechnung) ? "text-muted" : "text-primary-600"} block> → {
+      <span className={String(rückfahrtDialog.aktuellefahrt?.abrechnung) === String(rückfahrtDialog.updatedData?.abrechnung) ? "text-muted" : "text-primary-600"}> → {
         abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
       }</span>
       </div>
       </div>
       
+      {/* Anlass */}
       <div className="flex justify-between">
       <span className="text-label">Anlass:</span>
       <div>
       <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
-      <span className={rückfahrtDialog.aktuellefahrt?.anlass === rückfahrtDialog.updatedData?.anlass ? "text-muted" : "text-primary-600"} block> → {rückfahrtDialog.updatedData?.anlass}</span>
+      <span className={rückfahrtDialog.aktuellefahrt?.anlass === rückfahrtDialog.updatedData?.anlass ? "text-muted" : "text-primary-600"}> → {rückfahrtDialog.updatedData?.anlass}</span>
+      </div>
       </div>
       </div>
       </div>
@@ -1922,7 +1925,6 @@ function FahrtenListe() {
         setRückfahrtDialog({ isOpen: false });
       }
     }}
-    
     className="btn-primary w-full"
     >
     Beide Fahrten aktualisieren
