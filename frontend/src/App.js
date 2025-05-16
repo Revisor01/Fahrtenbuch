@@ -788,25 +788,11 @@ function FahrtenListe() {
           isOpen: true,
           aktuellefahrt: editingFahrt,
           ergänzendeFahrt: ergänzendeFahrt,
-          updatedData: updatedFahrt,  // Stelle sicher, dass dies korrekt ist
+          updatedData: updatedFahrt,
           istRückfahrt: editingFahrt.anlass.toLowerCase().includes('rückfahrt')
         });
         setEditingFahrt(null);
         return; // Die Funktion hier beenden, der Rest erfolgt über den Dialog
-      }
-        
-        // Dialog nur anzeigen, wenn sich relevante Felder geändert haben
-        if (kilometerChanged || abrechnungChanged || anlassChanged) {
-          setRückfahrtDialog({
-            isOpen: true,
-            aktuellefahrt: editingFahrt,
-            ergänzendeFahrt: ergänzendeFahrt,
-            updatedData: updatedFahrt,
-            istRückfahrt: editingFahrt.anlass.toLowerCase().includes('rückfahrt')
-          });
-          setEditingFahrt(null);
-          return; // Die Funktion hier beenden, der Rest erfolgt über den Dialog
-        }
       }
       
       // Normale Verarbeitung, wenn keine ergänzende Fahrt gefunden wurde
@@ -1807,6 +1793,23 @@ function FahrtenListe() {
       {/* Anstehende Änderungen - NUR für die aktuelle Fahrt */}
       <div className="bg-secondary-50 dark:bg-secondary-900/30 p-4 rounded-lg border border-secondary-100 dark:border-secondary-800">
       <h4 className="text-sm font-medium text-value mb-2">Anstehende Änderungen:</h4>
+      
+      {/* Debug-Ausgabe */}
+      <pre className="text-xs overflow-auto max-h-32 mb-2 bg-gray-100 p-2">
+      {JSON.stringify({
+        aktuell: {
+          kilometer: rückfahrtDialog.aktuellefahrt?.kilometer,
+          abrechnung: rückfahrtDialog.aktuellefahrt?.abrechnung,
+          anlass: rückfahrtDialog.aktuellefahrt?.anlass
+        },
+        neu: {
+          kilometer: rückfahrtDialog.updatedData?.kilometer,
+          abrechnung: rückfahrtDialog.updatedData?.abrechnung,
+          anlass: rückfahrtDialog.updatedData?.anlass
+        }
+      }, null, 2)}
+      </pre>
+      
       <div className="space-y-3">
       <div>
       <h5 className="text-xs font-medium text-value">
@@ -1814,36 +1817,50 @@ function FahrtenListe() {
       </h5>
       <div className="text-xs space-y-2 pl-2 mt-2">
       {/* Kilometer */}
-      <div className="flex justify-between">
-      <span className="text-label">Kilometer:</span>
-      <div>
-      <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
-      <span className={String(rückfahrtDialog.aktuellefahrt?.kilometer) === String(rückfahrtDialog.updatedData?.kilometer) ? "text-muted" : "text-primary-600"}> → {rückfahrtDialog.updatedData?.kilometer}</span>
-      </div>
-      </div>
+      {String(rückfahrtDialog.aktuellefahrt?.kilometer) !== String(rückfahrtDialog.updatedData?.kilometer) && (
+        <div className="flex justify-between">
+        <span className="text-label">Kilometer:</span>
+        <div>
+        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
+        <span className="text-primary-600"> → {rückfahrtDialog.updatedData?.kilometer}</span>
+        </div>
+        </div>
+      )}
       
       {/* Abrechnungsträger */}
-      <div className="flex justify-between">
-      <span className="text-label">Abrechnungsträger:</span>
-      <div>
-      <span className="text-secondary-600 line-through">
-      {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
-      </span>
-      <span className={String(rückfahrtDialog.aktuellefahrt?.abrechnung) === String(rückfahrtDialog.updatedData?.abrechnung) ? "text-muted" : "text-primary-600"}> → {
-        abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
-      }</span>
-      </div>
-      </div>
+      {String(rückfahrtDialog.aktuellefahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) && (
+        <div className="flex justify-between">
+        <span className="text-label">Abrechnungsträger:</span>
+        <div>
+        <span className="text-secondary-600 line-through">
+        {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
+        </span>
+        <span className="text-primary-600 block"> → {
+          abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
+        }</span>
+        </div>
+        </div>
+      )}
       
       {/* Anlass */}
-      <div className="flex justify-between">
-      <span className="text-label">Anlass:</span>
-      <div>
-      <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
-      <span className={rückfahrtDialog.aktuellefahrt?.anlass === rückfahrtDialog.updatedData?.anlass ? "text-muted" : "text-primary-600"}> → {rückfahrtDialog.updatedData?.anlass}</span>
-      </div>
-      </div>
-      </div>
+      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass && (
+        <div className="flex justify-between">
+        <span className="text-label">Anlass:</span>
+        <div>
+        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
+        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData?.anlass}</span>
+        </div>
+        </div>
+      )}
+      
+      {/* Wenn keine Änderungen gefunden wurden */}
+      {!(String(rückfahrtDialog.aktuellefahrt?.kilometer) !== String(rückfahrtDialog.updatedData?.kilometer) || 
+        String(rückfahrtDialog.aktuellefahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) ||
+        rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass) && (
+          <div className="text-sm text-muted">
+          Keine relevanten Änderungen erkannt.
+          </div>
+        )}
       </div>
       </div>
       </div>
@@ -1925,6 +1942,7 @@ function FahrtenListe() {
         setRückfahrtDialog({ isOpen: false });
       }
     }}
+    
     className="btn-primary w-full"
     >
     Beide Fahrten aktualisieren
