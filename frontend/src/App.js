@@ -1807,49 +1807,70 @@ function FahrtenListe() {
       {/* Anstehende Änderungen - NUR für die aktuelle Fahrt */}
       <div className="bg-secondary-50 dark:bg-secondary-900/30 p-4 rounded-lg border border-secondary-100 dark:border-secondary-800">
       <h4 className="text-sm font-medium text-value mb-2">Anstehende Änderungen:</h4>
+      
+      {/* Debug-Ausgabe */}
+      <pre className="text-xs overflow-auto max-h-32 mb-2 bg-gray-100 p-2">
+      {JSON.stringify({
+        aktuell: {
+          kilometer: rückfahrtDialog.aktuellefahrt?.kilometer,
+          abrechnung: rückfahrtDialog.aktuellefahrt?.abrechnung,
+          anlass: rückfahrtDialog.aktuellefahrt?.anlass
+        },
+        neu: {
+          kilometer: rückfahrtDialog.updatedData?.kilometer,
+          abrechnung: rückfahrtDialog.updatedData?.abrechnung,
+          anlass: rückfahrtDialog.updatedData?.anlass
+        }
+      }, null, 2)}
+      </pre>
+      
       <div className="space-y-3">
-      {/* Änderungen für aktuelle Fahrt - nur wenn sich etwas ändert */}
       <div>
       <h5 className="text-xs font-medium text-value">
       {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
       </h5>
       <div className="text-xs space-y-2 pl-2 mt-2">
-      {/* Nur relevante Felder prüfen und anzeigen wenn geändert */}
-      {parseFloat(rückfahrtDialog.aktuellefahrt?.kilometer) !== parseFloat(rückfahrtDialog.updatedData.kilometer) && (
+      {/* Kilometer */}
+      {String(rückfahrtDialog.aktuellefahrt?.kilometer) !== String(rückfahrtDialog.updatedData?.kilometer) && (
         <div className="flex justify-between">
         <span className="text-label">Kilometer:</span>
         <div>
         <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
-        <span className="text-primary-600"> → {rückfahrtDialog.updatedData.kilometer}</span>
+        <span className="text-primary-600"> → {rückfahrtDialog.updatedData?.kilometer}</span>
         </div>
         </div>
       )}
-      {Number(rückfahrtDialog.aktuellefahrt?.abrechnung) !== Number(rückfahrtDialog.updatedData.abrechnung) && (
+      
+      {/* Abrechnungsträger */}
+      {String(rückfahrtDialog.aktuellefahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) && (
         <div className="flex justify-between">
         <span className="text-label">Abrechnungsträger:</span>
         <div>
         <span className="text-secondary-600 line-through">
-        {abrechnungstraeger?.find(t => t.id === Number(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
+        {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
         </span>
         <span className="text-primary-600 block"> → {
-          abrechnungstraeger?.find(t => t.id === Number(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
+          abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
         }</span>
         </div>
         </div>
       )}
-      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData.anlass && (
+      
+      {/* Anlass */}
+      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass && (
         <div className="flex justify-between">
         <span className="text-label">Anlass:</span>
         <div>
         <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
-        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData.anlass}</span>
+        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData?.anlass}</span>
         </div>
         </div>
       )}
-      {/* Füge eine Meldung hinzu, wenn keine Änderungen vorhanden sind */}
-      {!(parseFloat(rückfahrtDialog.aktuellefahrt?.kilometer) !== parseFloat(rückfahrtDialog.updatedData.kilometer) || 
-        Number(rückfahrtDialog.aktuellefahrt?.abrechnung) !== Number(rückfahrtDialog.updatedData.abrechnung) ||
-        rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData.anlass) && (
+      
+      {/* Wenn keine Änderungen gefunden wurden */}
+      {!(String(rückfahrtDialog.aktuellefahrt?.kilometer) !== String(rückfahrtDialog.updatedData?.kilometer) || 
+        String(rückfahrtDialog.aktuellefahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) ||
+        rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass) && (
           <div className="text-sm text-muted">
           Keine relevanten Änderungen erkannt.
           </div>
@@ -1894,42 +1915,35 @@ function FahrtenListe() {
         // Aktuelle Fahrt aktualisieren
         await updateFahrt(rückfahrtDialog.aktuellefahrt.id, rückfahrtDialog.updatedData);
         
-        // Ergänzende Fahrt anpassen
-        let ergänzendesFahrtUpdate;
-        
-        const hatAnlassGeändert = () => {
-          const currentAnlass = rückfahrtDialog.aktuellefahrt.anlass.replace(/^Rückfahrt:\s*/i, '');
-          const updatedAnlass = rückfahrtDialog.updatedData.anlass.replace(/^Rückfahrt:\s*/i, '');
-          return currentAnlass !== updatedAnlass;
+        // Für die ergänzende Fahrt vorbereiten
+        const ergänzendesFahrtUpdate = {
+          datum: rückfahrtDialog.ergänzendeFahrt.datum,
+          vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
+          nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
+          einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
+          einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
+          kilometer: rückfahrtDialog.updatedData.kilometer,
+          abrechnung: rückfahrtDialog.updatedData.abrechnung
         };
         
-        if (rückfahrtDialog.istRückfahrt) {
-          // Bei Bearbeitung einer Rückfahrt - Update für die Hinfahrt
-          ergänzendesFahrtUpdate = {
-            ...rückfahrtDialog.updatedData,
-            vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
-            nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
-            einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
-            einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
-            // Bei Änderung des Anlasses berücksichtigen wir das Präfix
-            anlass: hatAnlassGeändert()
-            ? rückfahrtDialog.updatedData.anlass.replace(/^Rückfahrt:\s*/i, '')
-            : rückfahrtDialog.ergänzendeFahrt.anlass
-          };
+        // Anlass besonders behandeln - prüfen ob er sich geändert hat
+        if (rückfahrtDialog.aktuellefahrt.anlass !== rückfahrtDialog.updatedData.anlass) {
+          // Wenn sich der Anlass geändert hat
+          if (rückfahrtDialog.istRückfahrt) {
+            // Bei Bearbeitung einer Rückfahrt - Update für die Hinfahrt
+            // Entferne das Rückfahrt-Präfix
+            ergänzendesFahrtUpdate.anlass = rückfahrtDialog.updatedData.anlass.replace(/^Rückfahrt:\s*/i, '');
+          } else {
+            // Bei Bearbeitung einer Hinfahrt - Update für die Rückfahrt
+            // Füge das Rückfahrt-Präfix hinzu
+            ergänzendesFahrtUpdate.anlass = `Rückfahrt: ${rückfahrtDialog.updatedData.anlass}`;
+          }
         } else {
-          // Bei Bearbeitung einer Hinfahrt - Update für die Rückfahrt
-          ergänzendesFahrtUpdate = {
-            ...rückfahrtDialog.updatedData,
-            vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
-            nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
-            einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
-            einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
-            // Bei Änderung des Anlasses berücksichtigen wir das Präfix
-            anlass: hatAnlassGeändert()
-            ? `Rückfahrt: ${rückfahrtDialog.updatedData.anlass}`
-            : rückfahrtDialog.ergänzendeFahrt.anlass
-          };
+          // Anlass nicht geändert, behalte den vorherigen bei
+          ergänzendesFahrtUpdate.anlass = rückfahrtDialog.ergänzendeFahrt.anlass;
         }
+        
+        console.log("Aktualisiere ergänzende Fahrt:", ergänzendesFahrtUpdate);
         
         await updateFahrt(rückfahrtDialog.ergänzendeFahrt.id, ergänzendesFahrtUpdate);
         
@@ -1942,6 +1956,7 @@ function FahrtenListe() {
         setRückfahrtDialog({ isOpen: false });
       }
     }}
+    
     className="btn-primary w-full"
     >
     Beide Fahrten aktualisieren
