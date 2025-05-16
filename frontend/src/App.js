@@ -1800,83 +1800,38 @@ function FahrtenListe() {
       {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
       </h5>
       <div className="text-xs space-y-2 pl-2 mt-2">
-      {Number(rückfahrtDialog.aktuellefahrt?.kilometer) !== Number(rückfahrtDialog.updatedData?.kilometer) && (
+      {Number(rückfahrtDialog.aktuellefahrt?.kilometer) !== Number(rückfahrtDialog.updatedData.kilometer) && (
         <div className="flex justify-between">
         <span className="text-label">Kilometer:</span>
         <div>
-        <span className="text-secondary-600 line-through">{Number(rückfahrtDialog.aktuellefahrt?.kilometer).toFixed(2)}</span>
-        <span className="text-primary-600"> → {Number(rückfahrtDialog.updatedData?.kilometer).toFixed(2)}</span>
+        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
+        <span className="text-primary-600"> → {rückfahrtDialog.updatedData.kilometer}</span>
         </div>
         </div>
       )}
-      {String(rückfahrtDialog.aktuellefahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) && (
+      {parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung) !== parseInt(rückfahrtDialog.updatedData.abrechnung) && (
         <div className="flex justify-between">
         <span className="text-label">Abrechnungsträger:</span>
         <div>
         <span className="text-secondary-600 line-through">
-        {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
+        {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
         </span>
         <span className="text-primary-600 block"> → {
-          abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
+          abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
         }</span>
         </div>
         </div>
       )}
-      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass && (
+      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData.anlass && (
         <div className="flex justify-between">
         <span className="text-label">Anlass:</span>
         <div>
         <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
-        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData?.anlass}</span>
+        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData.anlass}</span>
         </div>
         </div>
       )}
       </div>
-      </div>
-      
-      {/* Änderungen für die ergänzende Fahrt */}
-      <div>
-      <h5 className="text-xs font-medium text-value">
-      {rückfahrtDialog.istRückfahrt ? "Änderungen Hinfahrt:" : "Änderungen Rückfahrt:"}
-      </h5>
-      <div className="text-xs space-y-2 pl-2 mt-2">
-      {Number(rückfahrtDialog.ergänzendeFahrt?.kilometer) !== Number(rückfahrtDialog.updatedData?.kilometer) && (
-        <div className="flex justify-between">
-        <span className="text-label">Kilometer:</span>
-        <div>
-        <span className="text-secondary-600 line-through">{Number(rückfahrtDialog.ergänzendeFahrt?.kilometer).toFixed(2)}</span>
-        <span className="text-primary-600"> → {Number(rückfahrtDialog.updatedData?.kilometer).toFixed(2)}</span>
-        </div>
-        </div>
-      )}
-      {String(rückfahrtDialog.ergänzendeFahrt?.abrechnung) !== String(rückfahrtDialog.updatedData?.abrechnung) && (
-        <div className="flex justify-between">
-        <span className="text-label">Abrechnungsträger:</span>
-        <div>
-        <span className="text-secondary-600 line-through">
-        {abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.ergänzendeFahrt?.abrechnung))?.name || 'Unbekannt'}
-        </span>
-        <span className="text-primary-600 block"> → {
-          abrechnungstraeger?.find(t => String(t.id) === String(rückfahrtDialog.updatedData?.abrechnung))?.name || 'Unbekannt'
-        }</span>
-        </div>
-        </div>
-      )}
-      
-      {/* Zeige Anlass-Änderung für ergänzende Fahrt an */}
-      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData?.anlass && (
-        <div className="flex justify-between">
-        <span className="text-label">Anlass:</span>
-        <div>
-        <span className="text-secondary-600 line-through">{rückfahrtDialog.ergänzendeFahrt?.anlass}</span>
-        <span className="text-primary-600 block"> → {
-          rückfahrtDialog.istRückfahrt ? 
-          rückfahrtDialog.updatedData?.anlass.replace(/rückfahrt/i, "").trim() :
-          "Rückfahrt " + rückfahrtDialog.updatedData?.anlass.replace(/rückfahrt/i, "").trim()
-        }</span>
-        </div>
-        </div>
-      )}
       </div>
       </div>
       </div>
@@ -1918,41 +1873,23 @@ function FahrtenListe() {
         await updateFahrt(rückfahrtDialog.aktuellefahrt.id, rückfahrtDialog.updatedData);
         
         // Ergänzende Fahrt anpassen
-        let ergänzendesFahrtUpdate;
+        const basisAnlass = rückfahrtDialog.updatedData.anlass.replace(/^(rückfahrt\s*)/i, "").trim();
         
-        // Anlass entsprechend anpassen
-        const erstellePassendenAnlass = (anlass, istRückfahrt) => {
-          // Grundform des Anlasses extrahieren (ohne "Rückfahrt" oder "Hinfahrt")
-          const basisAnlass = anlass.replace(/^(rückfahrt|hinfahrt)\s*/i, "").trim();
-          
-          // Je nach Typ die passende Bezeichnung vorne hinzufügen
-          if (istRückfahrt) {
-            return basisAnlass; // Für eine Hinfahrt den Basis-Anlass ohne Präfix
-          } else {
-            return `Rückfahrt ${basisAnlass}`; // Für eine Rückfahrt den Präfix hinzufügen
-          }
+        let ergänzendesFahrtUpdate = {
+          ...rückfahrtDialog.updatedData,
+          vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
+          nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
+          einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
+          einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt
         };
         
+        // Anlass richtig setzen
         if (rückfahrtDialog.istRückfahrt) {
-          // Bei Bearbeitung einer Rückfahrt - Update für die Hinfahrt
-          ergänzendesFahrtUpdate = {
-            ...rückfahrtDialog.updatedData,
-            vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
-            nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
-            einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
-            einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
-            anlass: erstellePassendenAnlass(rückfahrtDialog.updatedData.anlass, true)
-          };
+          // Bei Bearbeitung einer Rückfahrt - die Hinfahrt bekommt den Basis-Anlass
+          ergänzendesFahrtUpdate.anlass = basisAnlass;
         } else {
-          // Bei Bearbeitung einer Hinfahrt - Update für die Rückfahrt
-          ergänzendesFahrtUpdate = {
-            ...rückfahrtDialog.updatedData,
-            vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
-            nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
-            einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
-            einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt,
-            anlass: erstellePassendenAnlass(rückfahrtDialog.updatedData.anlass, false)
-          };
+          // Bei Bearbeitung einer Hinfahrt - die Rückfahrt bekommt "Rückfahrt" + Basis-Anlass
+          ergänzendesFahrtUpdate.anlass = `Rückfahrt ${basisAnlass}`;
         }
         
         await updateFahrt(rückfahrtDialog.ergänzendeFahrt.id, ergänzendesFahrtUpdate);
@@ -1966,6 +1903,7 @@ function FahrtenListe() {
         setRückfahrtDialog({ isOpen: false });
       }
     }}
+    
     className="btn-primary w-full"
     >
     Beide Fahrten aktualisieren
@@ -1974,7 +1912,7 @@ function FahrtenListe() {
     </div>
     </Modal>
     
-    <>
+    
     <MitfahrerModal
     isOpen={!!viewingMitfahrer}
     onClose={() => setViewingMitfahrer(null)}
@@ -1989,7 +1927,6 @@ function FahrtenListe() {
     initialData={editingMitfahrer}
     readOnly={false}
     />
-    </>
     </div>
   );
   }
