@@ -1974,7 +1974,7 @@ function FahrtenListe() {
     </div>
     </Modal>
     
-    
+    <>
     <MitfahrerModal
     isOpen={!!viewingMitfahrer}
     onClose={() => setViewingMitfahrer(null)}
@@ -1989,6 +1989,7 @@ function FahrtenListe() {
     initialData={editingMitfahrer}
     readOnly={false}
     />
+    </>
     </div>
   );
   }
