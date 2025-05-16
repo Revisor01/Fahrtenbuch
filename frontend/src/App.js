@@ -1950,7 +1950,7 @@ function FahrtenListe() {
     </div>
     </div>
     </Modal>
-    
+    </div>
     
     <div>
     <MitfahrerModal
