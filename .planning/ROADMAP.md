@@ -56,10 +56,11 @@ Plans:
   2. Der Excel-Header zeigt den gewaehlten Zeitraum korrekt an (z.B. "Monat: April bis Juni")
   3. Der bestehende Einzelmonats-Export funktioniert weiterhin unveraendert
   4. Der "Eingereicht"-Status wird korrekt auf den gesamten gewaehlten Zeitraum angewendet
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Backend: Neue Route, Model-Methode und Export-Funktion fuer Mehrmonats-Zeitraum
+- [ ] 03-02-PLAN.md — Frontend: Von/Bis-Dropdowns und Zeitraum-Export-Handler
 
 ## Progress
 
@@ -70,4 +71,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Datenmodell & Logik | 0/2 | Planned | - |
 | 2. Excel-Export Formular | 0/1 | Planned | - |
-| 3. Mehrmonats-Export | 0/? | Not started | - |
+| 3. Mehrmonats-Export | 0/2 | Not started | - |
