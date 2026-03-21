@@ -14,8 +14,8 @@ exports.getAllAbrechnungstraeger = async (req, res) => {
 exports.getSimpleList = async (req, res) => {
     try {
         const [rows] = await db.execute(`
-            SELECT id, name, active
-            FROM abrechnungstraeger 
+            SELECT id, name, kostenstelle, active
+            FROM abrechnungstraeger
             WHERE user_id = ? AND active = TRUE
             ORDER BY sort_order ASC`,
             [req.user.id]
@@ -149,23 +149,24 @@ exports.getErstattungshistorie = async (req, res) => {
 
 exports.createAbrechnungstraeger = async (req, res) => {
     try {
-        const { name } = req.body;
-        
+        const { name, kostenstelle } = req.body;
+
         if (!name) {
             return res.status(400).json({ message: 'Name ist erforderlich' });
         }
-        
+
         // Hole aktuelle maximale sort_order
         const [maxSort] = await db.execute(
             'SELECT MAX(sort_order) as maxSort FROM abrechnungstraeger WHERE user_id = ?',
             [req.user.id]
         );
-        
+
         const nextSortOrder = (maxSort[0].maxSort || 0) + 1;
-        
+
         const id = await AbrechnungsTraeger.create({
             userId: req.user.id,
             name,
+            kostenstelle,
             sortOrder: nextSortOrder
         });
         
@@ -183,7 +184,7 @@ exports.getById = async (req, res) => {
     try {
         const { id } = req.params;
         const [rows] = await db.execute(
-            'SELECT id, name, active FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            'SELECT id, name, kostenstelle, active FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
             [id, req.user.id]
         );
         
@@ -201,8 +202,8 @@ exports.getById = async (req, res) => {
 exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, active } = req.body;
-        
+        const { name, active, kostenstelle } = req.body;
+
         // Wenn nur active aktualisiert werden soll
         if (active !== undefined && Object.keys(req.body).length === 1) {
             const [result] = await db.execute(
@@ -222,16 +223,9 @@ exports.updateAbrechnungstraeger = async (req, res) => {
             if (!name) {
                 return res.status(400).json({ message: 'Name ist erforderlich' });
             }
-            
-            const [result] = await db.execute(
-                'UPDATE abrechnungstraeger SET name = ? WHERE id = ? AND user_id = ?',
-                [name, id, req.user.id]
-            );
-            
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
-            }
-            
+
+            await AbrechnungsTraeger.update(id, req.user.id, { name, kostenstelle, active });
+
             return res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
         }
         
