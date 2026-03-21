@@ -24,7 +24,7 @@
 
 ### Abrechnungsträger
 
-- [ ] **ABRTR-01**: Abrechnungsträger hat optionales Freitextfeld "Kostenstelle" (DB, API, UI)
+- [x] **ABRTR-01**: Abrechnungsträger hat optionales Freitextfeld "Kostenstelle" (DB, API, UI)
 
 ## v2 Requirements
 
@@ -57,7 +57,7 @@
 | MULTI-02 | Phase 3 | Pending |
 | MULTI-03 | Phase 3 | Pending |
 | DATA-01 | Phase 1 | Complete |
-| ABRTR-01 | Phase 1 | Pending |
+| ABRTR-01 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 9 total

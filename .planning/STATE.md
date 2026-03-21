@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-21T22:44:52.128Z"
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-03-21T22:45:57.775Z"
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -47,6 +47,7 @@ Plan: 2 of 2
 
 *Updated after each plan completion*
 | Phase 01 P02 | 1min | 1 tasks | 1 files |
+| Phase 01 P01 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -58,6 +59,7 @@ Recent decisions affecting current work:
 - Kostenstelle als Feld am Abrechnungstraeger (nicht an der Fahrt)
 - Distanz-Update wirkt rueckwirkend auf alle Fahrten (atomar in Transaktion)
 - [Phase 01]: Inline SQL statt Fahrt.updateFahrtenByDistanz() fuer transaktionale Konsistenz
+- [Phase 01]: Controller updateAbrechnungstraeger nutzt AbrechnungsTraeger.update() Model-Methode statt direktem SQL
 
 ### Pending Todos
 
@@ -69,6 +71,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T22:44:52.126Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-03-21T22:45:57.773Z
+Stopped at: Completed 01-01-PLAN.md
 Resume file: None
