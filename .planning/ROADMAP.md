@@ -60,7 +60,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Backend: Neue Route, Model-Methode und Export-Funktion fuer Mehrmonats-Zeitraum
-- [ ] 03-02-PLAN.md — Frontend: Von/Bis-Dropdowns und Zeitraum-Export-Handler
+- [x] 03-02-PLAN.md — Frontend: Von/Bis-Dropdowns und Zeitraum-Export-Handler
 
 ## Progress
 
