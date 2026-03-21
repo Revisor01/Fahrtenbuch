@@ -27,11 +27,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Kostenstelle erscheint in der Abrechnungstraeger-Uebersicht und im Bearbeitungsdialog
   3. Wenn ein Nutzer eine gespeicherte Distanz aendert, werden alle bestehenden Fahrten mit dieser Strecke automatisch auf den neuen Kilometerwert aktualisiert
   4. Die Distanz-Aktualisierung laeuft atomar in einer Transaktion (keine Teilupdates bei Fehler)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Kostenstelle-Feld am Abrechnungstraeger (DB, API, UI)
+- [ ] 01-02-PLAN.md — Rueckwirkende Distanz-Aktualisierung mit Transaktion
 
 ### Phase 2: Excel-Export Formular
 **Goal**: Der Excel-Export entspricht dem offiziellen Dienstfahrten-Abrechnungsformular und kann ohne manuelle Nacharbeit eingereicht werden
@@ -68,6 +68,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Datenmodell & Logik | 0/? | Not started | - |
+| 1. Datenmodell & Logik | 0/2 | Planned | - |
 | 2. Excel-Export Formular | 0/? | Not started | - |
 | 3. Mehrmonats-Export | 0/? | Not started | - |
