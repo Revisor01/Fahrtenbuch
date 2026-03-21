@@ -49,21 +49,21 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXCEL-01 | — | Pending |
-| EXCEL-02 | — | Pending |
-| EXCEL-03 | — | Pending |
-| EXCEL-04 | — | Pending |
-| MULTI-01 | — | Pending |
-| MULTI-02 | — | Pending |
-| MULTI-03 | — | Pending |
-| DATA-01 | — | Pending |
-| ABRTR-01 | — | Pending |
+| EXCEL-01 | Phase 2 | Pending |
+| EXCEL-02 | Phase 2 | Pending |
+| EXCEL-03 | Phase 2 | Pending |
+| EXCEL-04 | Phase 2 | Pending |
+| MULTI-01 | Phase 3 | Pending |
+| MULTI-02 | Phase 3 | Pending |
+| MULTI-03 | Phase 3 | Pending |
+| DATA-01 | Phase 1 | Pending |
+| ABRTR-01 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 ⚠️
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after initial definition*
+*Last updated: 2026-03-21 after roadmap creation*

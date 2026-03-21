@@ -48,6 +48,7 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 
 ## Constraints
 
+- **Responsive**: Alle UI-Änderungen müssen auf Desktop und Mobile funktionieren
 - **Tech Stack**: Bestehender Stack (React, Express, MySQL, exceljs) beibehalten — kein Rewrite
 - **Deployment**: Docker Compose auf KKD-Server (185.248.143.234), Caddy Reverse Proxy
 - **Datenintegrität**: Distanz-Updates müssen alle betroffenen Fahrten atomar aktualisieren (Transaktion)
