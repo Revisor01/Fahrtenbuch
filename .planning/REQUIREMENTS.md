@@ -15,8 +15,8 @@
 ### Mehrmonats-Export
 
 - [ ] **MULTI-01**: Nutzer kann Von-Monat und Bis-Monat für Export wählen (UI-Dialog)
-- [ ] **MULTI-02**: Excel-Header zeigt gewählten Zeitraum (z.B. "Monat: April bis Juni")
-- [ ] **MULTI-03**: "Eingereicht"-Status funktioniert korrekt über Mehrmonats-Zeiträume
+- [x] **MULTI-02**: Excel-Header zeigt gewählten Zeitraum (z.B. "Monat: April bis Juni")
+- [x] **MULTI-03**: "Eingereicht"-Status funktioniert korrekt über Mehrmonats-Zeiträume
 
 ### Datenintegrität
 
@@ -54,8 +54,8 @@
 | EXCEL-03 | Phase 2 | Complete |
 | EXCEL-04 | Phase 2 | Complete |
 | MULTI-01 | Phase 3 | Pending |
-| MULTI-02 | Phase 3 | Pending |
-| MULTI-03 | Phase 3 | Pending |
+| MULTI-02 | Phase 3 | Complete |
+| MULTI-03 | Phase 3 | Complete |
 | DATA-01 | Phase 1 | Complete |
 | ABRTR-01 | Phase 1 | Complete |
 
