@@ -224,7 +224,7 @@ exports.updateAbrechnungstraeger = async (req, res) => {
                 return res.status(400).json({ message: 'Name ist erforderlich' });
             }
 
-            await AbrechnungsTraeger.update(id, req.user.id, { name, kostenstelle, active });
+            await AbrechnungsTraeger.update(id, req.user.id, { name, kostenstelle, active: active !== undefined ? active : 1 });
 
             return res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
         }

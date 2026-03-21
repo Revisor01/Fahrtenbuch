@@ -4,6 +4,10 @@
 }
 
 /* Dark Mode Styles */
+.dark {
+  color-scheme: dark;
+}
+
 .dark body {
   background-color: #1a1a1a;
   color: #ffffff;
