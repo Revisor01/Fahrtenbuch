@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [ ] 01-01-PLAN.md — Kostenstelle-Feld am Abrechnungstraeger (DB, API, UI)
-- [ ] 01-02-PLAN.md — Rueckwirkende Distanz-Aktualisierung mit Transaktion
+- [x] 01-02-PLAN.md — Rueckwirkende Distanz-Aktualisierung mit Transaktion
 
 ### Phase 2: Excel-Export Formular
 **Goal**: Der Excel-Export entspricht dem offiziellen Dienstfahrten-Abrechnungsformular und kann ohne manuelle Nacharbeit eingereicht werden

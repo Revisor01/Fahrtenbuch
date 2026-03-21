@@ -20,7 +20,7 @@
 
 ### Datenintegrität
 
-- [ ] **DATA-01**: Änderung einer gespeicherten Distanz aktualisiert automatisch alle bestehenden Fahrten mit dieser Strecke (in einer Transaktion)
+- [x] **DATA-01**: Änderung einer gespeicherten Distanz aktualisiert automatisch alle bestehenden Fahrten mit dieser Strecke (in einer Transaktion)
 
 ### Abrechnungsträger
 
@@ -56,7 +56,7 @@
 | MULTI-01 | Phase 3 | Pending |
 | MULTI-02 | Phase 3 | Pending |
 | MULTI-03 | Phase 3 | Pending |
-| DATA-01 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
 | ABRTR-01 | Phase 1 | Pending |
 
 **Coverage:**
