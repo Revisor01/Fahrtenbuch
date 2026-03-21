@@ -5,10 +5,11 @@ const { getDistance } = require('../utils/distanceCalculator');
 const ExcelJS = require('exceljs');
 const path = require('path');
 const JSZip = require('jszip');
-const { exportToExcel } = require('../utils/excelExport');
+const { exportToExcel, exportToExcelRange } = require('../utils/excelExport');
 const db = require('../config/database');
 
 exports.exportToExcel = exportToExcel;
+exports.exportToExcelRange = exportToExcelRange;
 
 exports.createFahrt = async (req, res) => {
   try {

@@ -183,6 +183,41 @@ class Fahrt {
   }
   
   
+  static async getDateRangeReport(startYear, startMonth, endYear, endMonth, userId) {
+    try {
+      const startDate = `${startYear}-${String(startMonth).padStart(2, '0')}-01`;
+      // Calculate end date: first day of month after endMonth
+      let endM = parseInt(endMonth) + 1;
+      let endY = parseInt(endYear);
+      if (endM > 12) { endM = 1; endY++; }
+      const endDate = `${endY}-${String(endM).padStart(2, '0')}-01`;
+
+      const query = `
+      SELECT
+        f.*,
+        COALESCE(v.name, f.einmaliger_von_ort) AS von_ort_name,
+        COALESCE(v.adresse, f.einmaliger_von_ort) AS von_ort_adresse,
+        COALESCE(n.name, f.einmaliger_nach_ort) AS nach_ort_name,
+        COALESCE(n.adresse, f.einmaliger_nach_ort) AS nach_ort_adresse,
+        m.id as mitfahrer_id,
+        m.name as mitfahrer_name,
+        m.arbeitsstaette,
+        m.richtung
+      FROM fahrten f
+      LEFT JOIN orte v ON f.von_ort_id = v.id
+      LEFT JOIN orte n ON f.nach_ort_id = n.id
+      LEFT JOIN mitfahrer m ON m.fahrt_id = f.id
+      WHERE f.datum >= ? AND f.datum < ? AND f.user_id = ?
+    `;
+      const [rows] = await db.execute(query, [startDate, endDate, userId]);
+
+      return rows;
+    } catch (error) {
+      console.error("DB Error:", error);
+      throw error;
+    }
+  }
+
   static async getYearSummary(year, userId) {
     try {
       // Hole alle Fahrten des Jahres mit Mitfahrer-Count
