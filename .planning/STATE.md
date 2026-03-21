@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-21T22:48:30.938Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-21T23:03:46.762Z"
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Excel-Export bildet das offizielle Abrechnungsformular korrekt ab -- ohne manuelle Nacharbeit
-**Current focus:** Phase 01 — datenmodell-logik
+**Current focus:** Phase 02 — excel-export-formular
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
+Phase: 02 (excel-export-formular) — EXECUTING
+Plan: 1 of 1
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Plan: Not started
 *Updated after each plan completion*
 | Phase 01 P02 | 1min | 1 tasks | 1 files |
 | Phase 01 P01 | 3min | 2 tasks | 4 files |
+| Phase 02 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -60,6 +61,8 @@ Recent decisions affecting current work:
 - Distanz-Update wirkt rueckwirkend auf alle Fahrten (atomar in Transaktion)
 - [Phase 01]: Inline SQL statt Fahrt.updateFahrtenByDistanz() fuer transaktionale Konsistenz
 - [Phase 01]: Controller updateAbrechnungstraeger nutzt AbrechnungsTraeger.update() Model-Methode statt direktem SQL
+- [Phase 02]: Datum als Date-Objekt mit numFmt DD.MM.YYYY statt Text-String
+- [Phase 02]: Erstattungssatz 0,30 EUR als fester Wert im Unterschriftsbereich-Text
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T22:45:57.773Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-03-21T23:03:46.760Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None

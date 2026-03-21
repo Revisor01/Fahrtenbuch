@@ -45,7 +45,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — Datum-Format, Kostenstelle im Header, Unterschriftsbereich komplett
+- [x] 02-01-PLAN.md — Datum-Format, Kostenstelle im Header, Unterschriftsbereich komplett
 
 ### Phase 3: Mehrmonats-Export
 **Goal**: Nutzer koennen einen Zeitraum ueber mehrere Monate exportieren statt nur einen Einzelmonat

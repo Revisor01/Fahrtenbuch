@@ -7,10 +7,10 @@
 
 ### Excel-Export
 
-- [ ] **EXCEL-01**: Datum wird im Format TT.MM.JJJJ als echtes Excel-Datum exportiert (nicht als Text)
-- [ ] **EXCEL-02**: Unterschriftszeile unten im Export: "Unterschrift: ___" mit Datumsfeld
-- [ ] **EXCEL-03**: Genehmigungszeile unten im Export: "Angeordnet/genehmigt Unterschrift: ___"
-- [ ] **EXCEL-04**: Kostenstelle (Kst.) wird neben dem Kostenträger im Excel-Header angezeigt
+- [x] **EXCEL-01**: Datum wird im Format TT.MM.JJJJ als echtes Excel-Datum exportiert (nicht als Text)
+- [x] **EXCEL-02**: Unterschriftszeile unten im Export: "Unterschrift: ___" mit Datumsfeld
+- [x] **EXCEL-03**: Genehmigungszeile unten im Export: "Angeordnet/genehmigt Unterschrift: ___"
+- [x] **EXCEL-04**: Kostenstelle (Kst.) wird neben dem Kostenträger im Excel-Header angezeigt
 
 ### Mehrmonats-Export
 
@@ -49,10 +49,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXCEL-01 | Phase 2 | Pending |
-| EXCEL-02 | Phase 2 | Pending |
-| EXCEL-03 | Phase 2 | Pending |
-| EXCEL-04 | Phase 2 | Pending |
+| EXCEL-01 | Phase 2 | Complete |
+| EXCEL-02 | Phase 2 | Complete |
+| EXCEL-03 | Phase 2 | Complete |
+| EXCEL-04 | Phase 2 | Complete |
 | MULTI-01 | Phase 3 | Pending |
 | MULTI-02 | Phase 3 | Pending |
 | MULTI-03 | Phase 3 | Pending |
