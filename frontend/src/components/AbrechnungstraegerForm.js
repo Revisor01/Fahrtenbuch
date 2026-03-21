@@ -9,6 +9,7 @@ function AbrechnungstraegerForm() {
     const [isLoading, setIsLoading] = useState(true);
     const [newEntry, setNewEntry] = useState({
         name: '',
+        kostenstelle: '',
     });
 
     useEffect(() => {
@@ -37,6 +38,7 @@ function AbrechnungstraegerForm() {
             showNotification('Erfolg', 'Abrechnungsträger wurde hinzugefügt');
             setNewEntry({
                 name: '',
+                kostenstelle: '',
             });
             await refreshAllData((updatedAbrechnungstraeger) => {
                 setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
@@ -92,6 +94,7 @@ function AbrechnungstraegerForm() {
         try {
             await axios.put(`/api/abrechnungstraeger/${editingTraeger.id}`, {
                 name: editingTraeger.name,
+                kostenstelle: editingTraeger.kostenstelle,
             });
             showNotification('Erfolg', 'Abrechnungsträger wurde aktualisiert');
             setEditingTraeger(null);
@@ -164,6 +167,16 @@ function AbrechnungstraegerForm() {
                                 required
                             />
                         </div>
+                        <div className="w-full">
+                            <label className="form-label">Kostenstelle (optional)</label>
+                            <input
+                                type="text"
+                                value={newEntry.kostenstelle}
+                                onChange={(e) => setNewEntry({ ...newEntry, kostenstelle: e.target.value })}
+                                className="form-input"
+                                placeholder="z.B. 760130"
+                            />
+                        </div>
                         <div className="flex items-end w-full sm:w-auto">
                             <button type="submit" className="btn-primary w-full">
                                 Hinzufügen
@@ -193,6 +206,16 @@ function AbrechnungstraegerForm() {
                         required
                         />
                         </div>
+                        <div className="w-full">
+                        <label className="form-label">Kostenstelle (optional)</label>
+                        <input
+                        type="text"
+                        value={editingTraeger.kostenstelle || ''}
+                        onChange={(e) => setEditingTraeger({ ...editingTraeger, kostenstelle: e.target.value })}
+                        className="form-input w-full"
+                        placeholder="z.B. 760130"
+                        />
+                        </div>
                         <div className="hidden sm:flex gap-2">
                         <button onClick={handleUpdate} className="table-action-button-primary" title="Speichern">✓</button>
                         <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
@@ -204,7 +227,9 @@ function AbrechnungstraegerForm() {
                         </div>
                         </div>
                     ) : (
-                        <div className="font-medium text-value">{traeger.name}</div>
+                        <div className="font-medium text-value">
+                            {traeger.name}{traeger.kostenstelle ? ` — Kst.: ${traeger.kostenstelle}` : ''}
+                        </div>
                     )}
                     </div>
                             {editingTraeger?.id !== traeger.id && (
