@@ -22,8 +22,8 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 
 ### Active
 
-- [ ] Excel-Export: Datum im Format TT.MM.JJJJ statt TT.MM.
-- [ ] Excel-Export: Unterschriftsfelder gemäß offiziellem Formular (eigene Unterschrift + Angeordnet/genehmigt)
+- ✓ Excel-Export: Datum im Format TT.MM.JJJJ statt TT.MM. — Phase 2
+- ✓ Excel-Export: Unterschriftsfelder gemäß offiziellem Formular (eigene Unterschrift + Angeordnet/genehmigt) — Phase 2
 - ✓ Excel-Export: Kostenstelle (Kst.) als Zusatzfeld beim Abrechnungsträger — Phase 1
 - [ ] Mehrmonats-Export: Zeitraum Von-Bis wählbar statt nur Einzelmonat
 - [ ] Mehrmonats-Export: Header zeigt gewählten Zeitraum ("Monat: April bis Juni")
@@ -80,4 +80,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-21 after Phase 1 completion*
+*Last updated: 2026-03-22 after Phase 2 completion*
