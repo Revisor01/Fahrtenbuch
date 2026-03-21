@@ -2,6 +2,7 @@ const ExcelJS = require('exceljs');
 const path = require('path');
 const JSZip = require('jszip');
 const Fahrt = require('../models/Fahrt');
+const Abrechnung = require('../models/Abrechnung');
 const db = require('../config/database');
 
 async function getUserProfile(userId) {
@@ -237,6 +238,234 @@ exports.exportToExcel = async (req, res) => {
    
  } catch (error) {
    console.error('Fehler beim Exportieren nach Excel:', error);
+   res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
+ }
+};
+
+exports.exportToExcelRange = async (req, res) => {
+ try {
+   const { startYear, startMonth, endYear, endMonth, type } = req.params;
+   const userId = req.user.id;
+
+   const fahrten = await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId);
+
+   const userProfile = await getUserProfile(userId);
+
+   // Determine header time range
+   const isSingleMonth = startYear === endYear && startMonth === endMonth;
+   const zeitraumHeader = isSingleMonth
+     ? `${getMonthName(parseInt(startMonth))} ${startYear}`
+     : `${String(startMonth).padStart(2, '0')}/${startYear} - ${String(endMonth).padStart(2, '0')}/${endYear}`;
+
+   if (type === 'mitfahrer') {
+     const mitfahrerData = fahrten.map(fahrt => {
+       if (fahrt.mitfahrer_id) {
+         return {
+           datum: formatDate(fahrt.datum),
+           anlass: fahrt.anlass,
+           name: fahrt.mitfahrer_name,
+           arbeitsstaette: fahrt.arbeitsstaette,
+           hinweg: fahrt.richtung === 'hin' || fahrt.richtung === 'hin_rueck' ?
+             `${fahrt.von_ort_name}-${fahrt.nach_ort_name}` : '',
+           rueckweg: fahrt.richtung === 'rueck' || fahrt.richtung === 'hin_rueck' ?
+             `${fahrt.nach_ort_name}-${fahrt.von_ort_name}` : '',
+           kilometer: Math.round(parseFloat(fahrt.kilometer))
+         };
+       }
+       return null;
+     }).filter(Boolean);
+
+     const uniqueMitfahrerData = mitfahrerData.filter((mitfahrer, index, self) =>
+       index === self.findIndex((t) => t.datum === mitfahrer.datum && t.name === mitfahrer.name)
+     );
+
+     const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
+     const workbook = new ExcelJS.Workbook();
+     await workbook.xlsx.readFile(templatePath);
+
+     const vorlageWorksheet = workbook.getWorksheet('Vorlage');
+     if (vorlageWorksheet) {
+       vorlageWorksheet.getCell('C7').value = "Mitfahrer:innen";
+       vorlageWorksheet.getCell('C11').value = userProfile.full_name;
+       vorlageWorksheet.getCell('C12').value = userProfile.home_address;
+       vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
+     }
+
+     const mitnahmeWorksheet = workbook.getWorksheet('Mitnahmeentschädigung');
+     if (mitnahmeWorksheet) {
+       mitnahmeWorksheet.getCell('B2').value = zeitraumHeader;
+
+       uniqueMitfahrerData.forEach((mitfahrer, index) => {
+         if (index < 15) {
+           const row = mitnahmeWorksheet.getRow(index + 10);
+           row.getCell('A').value = mitfahrer.datum;
+           row.getCell('B').value = mitfahrer.anlass;
+           row.getCell('C').value = mitfahrer.hinweg;
+           row.getCell('D').value = mitfahrer.rueckweg;
+           row.getCell('E').value = mitfahrer.name;
+           row.getCell('F').value = mitfahrer.arbeitsstaette;
+           row.getCell('G').value = mitfahrer.kilometer;
+
+           ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(col => {
+             const cell = row.getCell(col);
+             cell.font = { name: 'Arial', size: 10 };
+           });
+         }
+       });
+     }
+
+     // Status-Update fuer jeden Monat im Zeitraum
+     let y = parseInt(startYear), m = parseInt(startMonth);
+     const ey = parseInt(endYear), em = parseInt(endMonth);
+     while (y < ey || (y === ey && m <= em)) {
+       await Abrechnung.updateStatus(userId, y, m, type, 'eingereicht', new Date().toISOString().slice(0, 10));
+       m++;
+       if (m > 12) { m = 1; y++; }
+     }
+
+     const buffer = await workbook.xlsx.writeBuffer();
+     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+     res.setHeader('Content-Disposition', `attachment; filename=mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}.xlsx`);
+     return res.send(buffer);
+   }
+
+   // Normaler Export fuer andere Typen
+   const formattedData = fahrten.flatMap(fahrt => {
+     if (fahrt.autosplit) {
+       return fahrt.details
+         .filter(detail => detail.abrechnung.toLowerCase() === type)
+         .map(detail => ({
+           datum: new Date(fahrt.datum),
+           formattedDatum: formatDate(fahrt.datum),
+           vonOrt: detail.von_ort_adresse || detail.von_ort_name,
+           nachOrt: detail.nach_ort_adresse || detail.nach_ort_name,
+           anlass: fahrt.anlass,
+           kilometer: Math.round(detail.kilometer)
+         }));
+     } else if (fahrt.abrechnung === type) {
+       return [{
+         datum: new Date(fahrt.datum),
+         formattedDatum: formatDate(fahrt.datum),
+         vonOrt: fahrt.von_ort_adresse || fahrt.von_ort_name || fahrt.einmaliger_von_ort,
+         nachOrt: fahrt.nach_ort_adresse || fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
+         anlass: fahrt.anlass,
+         kilometer: Math.round(fahrt.kilometer)
+       }];
+     }
+     return [];
+   }).sort((a, b) => a.datum - b.datum);
+
+   const chunkedData = [];
+   for (let i = 0; i < formattedData.length; i += 22) {
+     chunkedData.push(formattedData.slice(i, i + 22));
+   }
+
+   if (chunkedData.length > 0 && chunkedData[chunkedData.length - 1].length < 22) {
+     const lastChunk = chunkedData[chunkedData.length - 1];
+     while (lastChunk.length < 22) {
+       lastChunk.push({
+         formattedDatum: '',
+         vonOrt: '',
+         nachOrt: '',
+         anlass: '',
+         kilometer: ''
+       });
+     }
+   }
+
+   if (formattedData.length === 0) {
+     return res.status(404).json({ message: 'Keine Daten für den ausgewählten Zeitraum und Typ gefunden.' });
+   }
+
+   const templatePath = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
+
+   const workbooks = await Promise.all(chunkedData.map(async (chunk, index) => {
+     const workbook = new ExcelJS.Workbook();
+     await workbook.xlsx.readFile(templatePath);
+
+     const vorlageWorksheet = workbook.getWorksheet('Vorlage');
+     if (vorlageWorksheet) {
+       const [abrechnungstraeger] = await db.execute(
+         'SELECT name, kostenstelle FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+         [type, userId]
+       );
+       const traegerName = abrechnungstraeger[0]?.name || '';
+       const kostenstelle = abrechnungstraeger[0]?.kostenstelle;
+       vorlageWorksheet.getCell('C7').value = kostenstelle
+         ? `${traegerName} - Kst.: ${kostenstelle}`
+         : traegerName;
+       vorlageWorksheet.getCell('C11').value = userProfile.full_name;
+       vorlageWorksheet.getCell('C12').value = userProfile.home_address;
+       vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
+     }
+
+     const abrechnungWorksheet = workbook.getWorksheet('monatliche Abrechnung');
+     if (abrechnungWorksheet) {
+       abrechnungWorksheet.getCell('B2').value = zeitraumHeader;
+       chunk.forEach((row, rowIndex) => {
+         const excelRow = abrechnungWorksheet.getRow(rowIndex + 8);
+
+         excelRow.getCell('A').value = row.datum;
+         excelRow.getCell('A').numFmt = 'DD.MM.YYYY';
+         excelRow.getCell('E').value = row.vonOrt;
+         excelRow.getCell('G').value = row.nachOrt;
+         excelRow.getCell('H').value = row.anlass;
+         excelRow.getCell('K').value = row.kilometer;
+
+         ['A', 'E', 'G', 'H', 'K'].forEach(col => {
+           const cell = excelRow.getCell(col);
+           cell.style = { ...abrechnungWorksheet.getCell(`${col}8`).style };
+           if (col === 'A') {
+             cell.numFmt = 'DD.MM.YYYY';
+           }
+           if (col === 'H') {
+             cell.font = { ...cell.font, size: 10 };
+           }
+         });
+       });
+
+       // Gesamt-km fuer Erstattungsberechnung in Zeile 33
+       const gesamtKm = chunk.reduce((sum, row) => sum + (typeof row.kilometer === 'number' ? row.kilometer : 0), 0);
+       abrechnungWorksheet.getCell('J33').value = `${gesamtKm} km x 0,30 \u20AC =`;
+     }
+
+     return workbook;
+   }));
+
+   // Status-Update fuer jeden Monat im Zeitraum
+   let y = parseInt(startYear), m = parseInt(startMonth);
+   const ey = parseInt(endYear), em = parseInt(endMonth);
+   while (y < ey || (y === ey && m <= em)) {
+     await Abrechnung.updateStatus(userId, y, m, type, 'eingereicht', new Date().toISOString().slice(0, 10));
+     m++;
+     if (m > 12) { m = 1; y++; }
+   }
+
+   const files = await Promise.all(workbooks.map(async (wb, index) => {
+     const fileName = `fahrtenabrechnung_${type}_${startYear}_${startMonth}_bis_${endYear}_${endMonth}_${index + 1}.xlsx`;
+     const buffer = await wb.xlsx.writeBuffer();
+     return { fileName, buffer };
+   }));
+
+   if (files.length === 1) {
+     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+     res.setHeader('Content-Disposition', `attachment; filename=${files[0].fileName}`);
+     return res.send(files[0].buffer);
+   }
+
+   const zip = new JSZip();
+   files.forEach(file => {
+     zip.file(file.fileName, file.buffer);
+   });
+
+   const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+   res.setHeader('Content-Type', 'application/zip');
+   res.setHeader('Content-Disposition', `attachment; filename=fahrtenabrechnung_${type}_${startYear}_${startMonth}_bis_${endYear}_${endMonth}.zip`);
+   res.send(zipBuffer);
+
+ } catch (error) {
+   console.error('Fehler beim Exportieren nach Excel (Range):', error);
    res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
  }
 };
