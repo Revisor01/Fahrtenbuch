@@ -166,10 +166,14 @@ exports.exportToExcel = async (req, res) => {
       const vorlageWorksheet = workbook.getWorksheet('Vorlage');
       if (vorlageWorksheet) {
          const [abrechnungstraeger] = await db.execute(
-            'SELECT name FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            'SELECT name, kostenstelle FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
             [type, userId]
          );
-         vorlageWorksheet.getCell('C7').value = abrechnungstraeger[0]?.name;
+         const traegerName = abrechnungstraeger[0]?.name || '';
+         const kostenstelle = abrechnungstraeger[0]?.kostenstelle;
+         vorlageWorksheet.getCell('C7').value = kostenstelle
+           ? `${traegerName} - Kst.: ${kostenstelle}`
+           : traegerName;
          vorlageWorksheet.getCell('C11').value = userProfile.full_name;
          vorlageWorksheet.getCell('C12').value = userProfile.home_address;
          vorlageWorksheet.getCell('C13').value = formatIBAN(userProfile.iban);
@@ -181,15 +185,19 @@ exports.exportToExcel = async (req, res) => {
        chunk.forEach((row, rowIndex) => {
          const excelRow = abrechnungWorksheet.getRow(rowIndex + 8);
          
-         excelRow.getCell('A').value = row.formattedDatum;
+         excelRow.getCell('A').value = row.datum;
+         excelRow.getCell('A').numFmt = 'DD.MM.YYYY';
          excelRow.getCell('E').value = row.vonOrt;
          excelRow.getCell('G').value = row.nachOrt;
          excelRow.getCell('H').value = row.anlass;
          excelRow.getCell('K').value = row.kilometer;
-         
+
          ['A', 'E', 'G', 'H', 'K'].forEach(col => {
            const cell = excelRow.getCell(col);
            cell.style = { ...abrechnungWorksheet.getCell(`${col}8`).style };
+           if (col === 'A') {
+             cell.numFmt = 'DD.MM.YYYY';
+           }
            if (col === 'H') {
              cell.font = { ...cell.font, size: 10 };
            }
