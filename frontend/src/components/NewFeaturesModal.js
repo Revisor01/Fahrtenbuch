@@ -9,44 +9,58 @@ const NewFeaturesModal = ({ isOpen, onClose }) => {
       onClose={onClose}
       title={
         <div className="flex items-center gap-2">
-          <span>Neue Funktionen in Version 1.2.0</span>
+          <span>Neue Funktionen in Version 1.3.0</span>
         </div>
       }
       size="wide"
     >
       <div className="space-y-6">
         <div className="card-container">
-          <h3 className="text-value font-medium mb-3">Einmalige Orte speichern</h3>
+          <h3 className="text-value font-medium mb-3">Excel-Export verbessert</h3>
           <div className="space-y-2 text-sm text-label">
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Neue "Speichern"-Funktion neben einmaligen Orten</p>
+              <p>Datum wird jetzt im Format TT.MM.JJJJ exportiert (als echtes Excel-Datum)</p>
             </div>
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Dialog zur Eingabe eines aussagekräftigen Namens für den Ort</p>
+              <p>Unterschriftsbereich mit Genehmigungszeile im Export ergänzt</p>
             </div>
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Automatische Übernahme des gespeicherten Orts in das aktuelle Formular</p>
+              <p>Kostenstelle wird im Excel-Header neben dem Kostenträger angezeigt</p>
             </div>
           </div>
         </div>
 
         <div className="card-container">
-          <h3 className="text-value font-medium mb-3">Aktualisierung von Hin- bzw. Rückfahrten</h3>
+          <h3 className="text-value font-medium mb-3">Mehrmonats-Export</h3>
           <div className="space-y-2 text-sm text-label">
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Bei Bearbeitung einer Fahrt (Kilometer, Anlass, Abrechnungsträger) wird automatisch nach zugehöriger Rück- oder Hinfahrt gesucht</p>
+              <p>Neuer Zeitraum-Export: Von-Monat und Bis-Monat wählbar</p>
             </div>
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Option zum Aktualisieren beider Fahrten (bei Änderung von Kilometer, Anlass, Abrechnungsträger)</p>
+              <p>Excel-Header zeigt den gewählten Zeitraum korrekt an</p>
             </div>
             <div className="flex items-start gap-2">
               <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Abfrage erscheint nur, wenn tatsächlich eine Fahrt gefunden wurde</p>
+              <p>Eingereicht-Status wird für jeden Monat im Zeitraum gesetzt</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card-container">
+          <h3 className="text-value font-medium mb-3">Kostenstelle & Distanzen</h3>
+          <div className="space-y-2 text-sm text-label">
+            <div className="flex items-start gap-2">
+              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
+              <p>Abrechnungsträger haben jetzt ein optionales Kostenstelle-Feld</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
+              <p>Distanzänderungen aktualisieren automatisch alle bestehenden Fahrten mit dieser Strecke</p>
             </div>
           </div>
         </div>
