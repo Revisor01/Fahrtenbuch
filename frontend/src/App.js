@@ -1059,8 +1059,9 @@ function FahrtenListe() {
       </div>
       </div>
       
-      {/* Export Buttons */}
-      <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
+      {/* Export: Aktueller Monat */}
+      <h3 className="text-lg font-medium text-value mt-6 mb-3">Aktuellen Monat exportieren</h3>
+      <div className="flex flex-col sm:flex-row justify-end gap-2">
       {getKategorienMitErstattung().map(([key, displayName]) => (
         <button
         key={key}
@@ -1071,13 +1072,12 @@ function FahrtenListe() {
       ))}
       </div>
 
-      {/* Zeitraum Export (per D-11) */}
-      <div className="mt-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-        <h4 className="text-sm font-medium mb-3">Zeitraum exportieren</h4>
+      {/* Export: Zeitraum */}
+      <h3 className="text-lg font-medium text-value mt-6 mb-3">Zeitraum exportieren</h3>
+      <div className="card-container">
         <div className="flex flex-col sm:flex-row gap-2 mb-3">
-          {/* Von-Monat (per D-01) */}
           <div className="flex items-center gap-1">
-            <label className="text-xs text-gray-500">Von:</label>
+            <label className="text-xs text-label">Von:</label>
             <select
               value={exportVonMonth}
               onChange={(e) => setExportVonMonth(e.target.value)}
@@ -1100,9 +1100,8 @@ function FahrtenListe() {
               })}
             </select>
           </div>
-          {/* Bis-Monat (per D-01) */}
           <div className="flex items-center gap-1">
-            <label className="text-xs text-gray-500">Bis:</label>
+            <label className="text-xs text-label">Bis:</label>
             <select
               value={exportBisMonth}
               onChange={(e) => setExportBisMonth(e.target.value)}
@@ -1126,7 +1125,7 @@ function FahrtenListe() {
             </select>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row justify-end gap-2">
           {getKategorienMitErstattung().map(([key, displayName]) => (
             <button
               key={`range-${key}`}
