@@ -42,10 +42,10 @@ Plans:
   2. Am Ende des Exports steht eine Unterschriftszeile mit Datumsfeld
   3. Am Ende des Exports steht eine Genehmigungszeile "Angeordnet/genehmigt Unterschrift: ___"
   4. Im Excel-Header wird neben dem Kostentraeger die Kostenstelle (Kst.) angezeigt, sofern hinterlegt
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Datum-Format, Kostenstelle im Header, Unterschriftsbereich komplett
 
 ### Phase 3: Mehrmonats-Export
 **Goal**: Nutzer koennen einen Zeitraum ueber mehrere Monate exportieren statt nur einen Einzelmonat
@@ -69,5 +69,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Datenmodell & Logik | 0/2 | Planned | - |
-| 2. Excel-Export Formular | 0/? | Not started | - |
+| 2. Excel-Export Formular | 0/1 | Planned | - |
 | 3. Mehrmonats-Export | 0/? | Not started | - |
