@@ -25,9 +25,9 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ Excel-Export: Datum im Format TT.MM.JJJJ statt TT.MM. — Phase 2
 - ✓ Excel-Export: Unterschriftsfelder gemäß offiziellem Formular (eigene Unterschrift + Angeordnet/genehmigt) — Phase 2
 - ✓ Excel-Export: Kostenstelle (Kst.) als Zusatzfeld beim Abrechnungsträger — Phase 1
-- [ ] Mehrmonats-Export: Zeitraum Von-Bis wählbar statt nur Einzelmonat
-- [ ] Mehrmonats-Export: Header zeigt gewählten Zeitraum ("Monat: April bis Juni")
-- [ ] Mehrmonats-Export: Logik für "eingereicht"-Status korrekt über Zeiträume
+- ✓ Mehrmonats-Export: Zeitraum Von-Bis wählbar statt nur Einzelmonat — Phase 3
+- ✓ Mehrmonats-Export: Header zeigt gewählten Zeitraum — Phase 3
+- ✓ Mehrmonats-Export: Logik für "eingereicht"-Status korrekt über Zeiträume — Phase 3
 - ✓ Distanz-Aktualisierung: Änderung einer gespeicherten Distanz aktualisiert automatisch alle bestehenden Fahrten mit dieser Strecke — Phase 1
 
 ### Out of Scope
@@ -80,4 +80,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after Phase 2 completion*
+*Last updated: 2026-03-22 after Phase 3 completion — all v1 requirements validated*
