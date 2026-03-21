@@ -2,7 +2,10 @@ const db = require('../config/database');
 
 class Distanz {
   static async createOrUpdate(vonOrtId, nachOrtId, distanz, userId) {
+    const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+
       vonOrtId = vonOrtId || null;
       nachOrtId = nachOrtId || null;
       distanz = distanz || null;
@@ -11,27 +14,39 @@ class Distanz {
         throw new Error('Ungültige Parameter für createOrUpdate');
       }
 
-      const [existingDistanz] = await db.execute(
+      const [existingDistanz] = await connection.execute(
         'SELECT * FROM distanzen WHERE (von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)',
         [vonOrtId, nachOrtId, nachOrtId, vonOrtId]
       );
 
+      let resultId;
       if (existingDistanz.length > 0) {
-        await db.execute(
+        await connection.execute(
           'UPDATE distanzen SET distanz = ? WHERE ((von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)) AND user_id = ?',
           [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId, userId]
         );
-        return existingDistanz[0].id;
+        // Fahrten rueckwirkend aktualisieren (bidirektional)
+        await connection.execute(
+          `UPDATE fahrten SET kilometer = ? WHERE (von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)`,
+          [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId]
+        );
+        resultId = existingDistanz[0].id;
       } else {
-        const [result] = await db.execute(
+        const [result] = await connection.execute(
           'INSERT INTO distanzen (von_ort_id, nach_ort_id, distanz, user_id) VALUES (?, ?, ?, ?)',
           [vonOrtId, nachOrtId, distanz, userId]
         );
-        return result.insertId;
+        resultId = result.insertId;
       }
+
+      await connection.commit();
+      return resultId;
     } catch (error) {
+      await connection.rollback();
       console.error('Fehler in Distanz.createOrUpdate:', error);
       throw error;
+    } finally {
+      connection.release();
     }
   }
 
@@ -46,11 +61,32 @@ class Distanz {
   }
   
   static async update(id, vonOrtId, nachOrtId, distanz, userId) {
-    const [result] = await db.execute(
-      'UPDATE distanzen SET von_ort_id = ?, nach_ort_id = ?, distanz = ? WHERE id = ? AND user_id = ?',
-      [vonOrtId, nachOrtId, distanz, id, userId]
-    );
-    return result.affectedRows > 0;
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const [result] = await connection.execute(
+        'UPDATE distanzen SET von_ort_id = ?, nach_ort_id = ?, distanz = ? WHERE id = ? AND user_id = ?',
+        [vonOrtId, nachOrtId, distanz, id, userId]
+      );
+
+      if (result.affectedRows > 0) {
+        // Fahrten rueckwirkend aktualisieren (bidirektional)
+        await connection.execute(
+          `UPDATE fahrten SET kilometer = ? WHERE (von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)`,
+          [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId]
+        );
+      }
+
+      await connection.commit();
+      return result.affectedRows > 0;
+    } catch (error) {
+      await connection.rollback();
+      console.error('Fehler beim Aktualisieren der Distanz:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
   
   static async getDistance(vonOrtId, nachOrtId, userId) {
