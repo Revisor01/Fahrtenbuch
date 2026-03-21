@@ -203,8 +203,12 @@ exports.exportToExcel = async (req, res) => {
            }
          });
        });
+
+       // Gesamt-km fuer Erstattungsberechnung in Zeile 33
+       const gesamtKm = chunk.reduce((sum, row) => sum + (typeof row.kilometer === 'number' ? row.kilometer : 0), 0);
+       abrechnungWorksheet.getCell('J33').value = `${gesamtKm} km x 0,30 \u20AC =`;
      }
-     
+
      return workbook;
    }));
    
