@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Features & Refactoring
-status: unknown
-stopped_at: "Checkpoint: 09-02 Task 2 human-verify pending"
-last_updated: "2026-03-22T19:16:09.010Z"
+milestone: v1.3
+milestone_name: Dashboard & UX
+status: ready_to_plan
+stopped_at: "Roadmap v1.3 erstellt, bereit fuer Phase 10 Planung"
+last_updated: "2026-03-22"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,32 +18,32 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-22)
 
-**Core value:** Excel-Export bildet das offizielle Abrechnungsformular korrekt ab
-**Current focus:** Milestone v1.3 — Dashboard & UX
+**Core value:** Schnellere Fahrteingabe durch Favoriten und bessere Uebersicht durch Dashboard
+**Current focus:** Phase 10 - Favoriten & Quick-Copy
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-22 — Milestone v1.3 started
+Phase: 10 of 12 (Favoriten & Quick-Copy)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-03-22 — Roadmap fuer v1.3 erstellt
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
-**Velocity (v1.0):**
-
-- Total plans completed: 7
-- Total execution time: ~13 min
-
-**Velocity (v1.1):**
-
-- Total plans completed: 5
-- Total execution time: ~13 min
-
-**Recent Trend:**
-
+**Velocity (v1.0-v1.2):**
+- Total plans completed: 16
 - Avg ~2min/plan
 - Trend: Stable
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
@@ -52,12 +52,8 @@ Last activity: 2026-03-22 — Milestone v1.3 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Phase 07]: react-scripts transitive Deps deferred auf CRA->Vite Migration (separater Milestone)
-- [v1.2]: Refactoring VOR PDF-Export — neuer Code soll in modularer Struktur geschrieben werden
-- [v1.2]: App.js (3000+ Zeilen) aufteilen in Dashboard, Monatsuebersicht, Settings, Export-Komponenten
-- [Phase 08-01]: AppProvider und FahrtenListe aus App.js extrahiert, App.js von 3056 auf 1040 Zeilen reduziert
-- [Phase 08-02]: MonthlyOverview, LoginPage, AppContent extrahiert, App.js auf 36 Zeilen reduziert (reiner Router)
-- [Phase 09]: pdfkit fuer PDF-Generierung, Helvetica built-in Font, DD.MM.YY Format
+- [v1.3]: Favoriten vor Dashboard, weil Dashboard Favoriten anzeigt
+- [v1.3]: Navigation-Umbau: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
 - [Phase 09]: Excel/PDF Buttons nebeneinander pro Kategorie statt Dropdown
 
 ### Pending Todos
@@ -70,6 +66,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T12:50:20.170Z
-Stopped at: Checkpoint: 09-02 Task 2 human-verify pending
+Last session: 2026-03-22
+Stopped at: Roadmap v1.3 erstellt, bereit fuer Phase 10 Planung
 Resume file: None

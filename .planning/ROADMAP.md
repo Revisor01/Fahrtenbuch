@@ -3,13 +3,14 @@
 ## Milestones
 
 - ✅ **v1.0 Nutzerfeedback** - Phases 1-4 (shipped 2026-03-22)
-- ✅ **v1.1 Stabilität & Security** - Phases 5-7 (shipped 2026-03-22)
-- 🚧 **v1.2 Features & Refactoring** - Phases 8-9 (in progress)
+- ✅ **v1.1 Stabilitat & Security** - Phases 5-7 (shipped 2026-03-22)
+- ✅ **v1.2 Features & Refactoring** - Phases 8-9 (shipped 2026-03-22)
+- 🚧 **v1.3 Dashboard & UX** - Phases 10-12 (in progress)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 Nutzerfeedback (Phases 1-4) - SHIPPED 2026-03-22</summary>
+<summary>v1.0 Nutzerfeedback (Phases 1-4) - SHIPPED 2026-03-22</summary>
 
 ### Phase 1: Datenmodell & Logik
 **Goal**: Nutzer koennen Kostenstellen pflegen und Distanzen aendern, ohne bestehende Fahrten manuell korrigieren zu muessen
@@ -37,7 +38,7 @@ Plans:
 - [x] 03-01-PLAN.md — Backend: Neue Route, Model-Methode und Export-Funktion
 - [x] 03-02-PLAN.md — Frontend: Von/Bis-Dropdowns und Zeitraum-Export-Handler
 
-### Phase 4: Von/Bis-Zeitraum in Monatsübersicht
+### Phase 4: Von/Bis-Zeitraum in Monatsuebersicht
 **Goal**: Monatsauswahl wird zu Von/Bis erweitert, separater Zeitraum-Export entfaellt
 **Requirements**: D-01 bis D-19
 **Plans**: 2 plans
@@ -49,7 +50,7 @@ Plans:
 </details>
 
 <details>
-<summary>✅ v1.1 Stabilität & Security (Phases 5-7) - SHIPPED 2026-03-22</summary>
+<summary>v1.1 Stabilitat & Security (Phases 5-7) - SHIPPED 2026-03-22</summary>
 
 ### Phase 5: Bugfixes
 **Goal**: Alle bekannten Bugs sind behoben
@@ -68,7 +69,7 @@ Plans:
 - [x] 06-01-PLAN.md — helmet, express-rate-limit und Body-Size-Limit einbauen
 - [x] 06-02-PLAN.md — Error-Messages in allen Controllern sanitizen
 
-### Phase 7: Code-Qualität
+### Phase 7: Code-Qualitaet
 **Goal**: Backend validiert alle Eingaben sauber, Production-Code ist frei von Debug-Output
 **Requirements**: QUAL-01, QUAL-02, QUAL-03
 **Plans**: 2 plans
@@ -79,49 +80,87 @@ Plans:
 
 </details>
 
-### 🚧 v1.2 Features & Refactoring
-
-**Milestone Goal:** Monolithisches Frontend aufteilen und PDF-Export als neues Feature einbauen.
-
-- [x] **Phase 8: Frontend-Refactoring** - App.js in modulare Komponenten und Custom Hooks aufteilen
-- [ ] **Phase 9: PDF-Export** - PDF als Export-Format neben Excel mit Format-Auswahl im UI
-
-## Phase Details
+<details>
+<summary>v1.2 Features & Refactoring (Phases 8-9) - SHIPPED 2026-03-22</summary>
 
 ### Phase 8: Frontend-Refactoring
-**Goal**: App.js ist in ueberschaubare, eigenstaendige Komponenten aufgeteilt — Code ist modular und erweiterbar
-**Depends on**: Phase 7 (v1.1 abgeschlossen)
+**Goal**: App.js ist in ueberschaubare, eigenstaendige Komponenten aufgeteilt
 **Requirements**: REF-01, REF-02, REF-03
-**Success Criteria** (what must be TRUE):
-  1. App.js enthaelt keine UI-Rendering-Logik mehr — sie delegiert an eigenstaendige Komponenten (Dashboard, Monatsuebersicht, Settings etc.)
-  2. Shared State (Fahrten, Orte, Abrechnungstraeger etc.) wird ueber Custom Hooks bereitgestellt, nicht ueber inline useState/useEffect in App.js
-  3. Export-Logik (Zeitraum-Auswahl, Download-Trigger, Eingereicht-Status) lebt in einer eigenen Komponente, nicht verstreut in App.js
-  4. Die App verhält sich nach dem Refactoring identisch zum Ist-Zustand — kein sichtbarer Unterschied fuer Nutzer
 **Plans**: 2 plans
 
 Plans:
 - [x] 08-01-PLAN.md — AppProvider und FahrtenListe aus App.js extrahieren
-- [x] 08-02-PLAN.md — MonthlyOverview, LoginPage und AppContent extrahieren — App.js wird minimal
+- [x] 08-02-PLAN.md — MonthlyOverview, LoginPage und AppContent extrahieren
 
 ### Phase 9: PDF-Export
-**Goal**: Nutzer koennen ihre Fahrtenbuch-Abrechnung als PDF exportieren — druckfertig mit Unterschriftsfeldern und Kostenstelle
-**Depends on**: Phase 8
+**Goal**: Nutzer koennen ihre Fahrtenbuch-Abrechnung als PDF exportieren
 **Requirements**: PDF-01, PDF-02, PDF-03
-**Success Criteria** (what must be TRUE):
-  1. Nutzer kann eine Abrechnung als PDF herunterladen, die dasselbe Layout wie der Excel-Export hat (Datum, Kostenstelle, Unterschriftsfelder)
-  2. Im Export-Dialog kann der Nutzer zwischen Excel und PDF waehlen
-  3. PDF-Export funktioniert sowohl fuer Einzelmonat als auch fuer Mehrmonats-Zeitraeume
-  4. Das PDF ist direkt druckbar und einreichbar ohne manuelle Nacharbeit
 **Plans**: 2 plans
 
 Plans:
 - [x] 09-01-PLAN.md — Backend: pdfkit installieren, pdfExport.js erstellen, PDF-Routen anlegen
 - [x] 09-02-PLAN.md — Frontend: Excel/PDF Format-Auswahl im Export-Bereich
 
+</details>
+
+### 🚧 v1.3 Dashboard & UX (In Progress)
+
+**Milestone Goal:** Dashboard als Startseite, Favoriten-Fahrten fuer Schnelleingabe, Statistiken mit Jahresuebersicht, Adress-Autocomplete.
+
+- [ ] **Phase 10: Favoriten & Quick-Copy** - Favoriten-System und "Nochmal fuer heute" fuer schnelle Fahrteingabe
+- [ ] **Phase 11: Dashboard, Navigation & Statistiken** - Dashboard-Startseite mit KPIs, Formular, Statistiken und neue Tab-Navigation
+- [ ] **Phase 12: Adress-Autocomplete** - Ort-Eingabe mit Nominatim-Vorschlaegen
+
+## Phase Details
+
+### Phase 10: Favoriten & Quick-Copy
+**Goal**: Nutzer koennen wiederkehrende Fahrten als Favoriten speichern und mit einem Klick wiederholen
+**Depends on**: Phase 9 (v1.2 abgeschlossen)
+**Requirements**: FAV-01, FAV-02, FAV-03
+**Success Criteria** (what must be TRUE):
+  1. Nutzer kann eine Fahrt als Favorit markieren und der Favorit wird mit Von, Nach, Anlass und Abrechnungstraeger gespeichert
+  2. Nutzer kann einen Favoriten anklicken und eine neue Fahrt mit heutigem Datum wird automatisch eingetragen
+  3. Nutzer sieht die letzten 3 Fahrten mit einem "Nochmal fuer heute"-Button und kann damit die Fahrt fuer heute duplizieren
+  4. Favoriten und Quick-Copy-Daten sind ueber die API persistent (DB-Tabelle, CRUD-Endpoints)
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+- [ ] 10-02: TBD
+
+### Phase 11: Dashboard, Navigation & Statistiken
+**Goal**: Dashboard als neue Startseite mit KPIs, Schnelleingabe-Formular, Statistiken und ueberarbeiteter Navigation
+**Depends on**: Phase 10
+**Requirements**: DASH-01, DASH-02, DASH-03, STAT-01, STAT-02
+**Success Criteria** (what must be TRUE):
+  1. Dashboard zeigt KPI-Cards: offene Erstattungen, gefahrene km diesen Monat, Anzahl Fahrten diesen Monat
+  2. Nutzer kann direkt im Dashboard eine Fahrt erfassen ueber ein aufklappbares Formular
+  3. Navigation hat vier Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
+  4. Jahres-Balkendiagramm zeigt km pro Monat fuer das aktuelle Jahr
+  5. Erstattungs-Uebersicht pro Abrechnungstraeger ueber das Jahr ist im Dashboard sichtbar
+**Plans**: TBD
+
+Plans:
+- [ ] 11-01: TBD
+- [ ] 11-02: TBD
+
+### Phase 12: Adress-Autocomplete
+**Goal**: Nutzer erhalten bei der Ort-Eingabe Adress-Vorschlaege fuer schnellere und genauere Eingabe
+**Depends on**: Phase 10 (unabhaengig von Phase 11, kann parallel)
+**Requirements**: ADDR-01
+**Success Criteria** (what must be TRUE):
+  1. Bei Eingabe in ein Ort-Feld erscheinen Vorschlaege aus OpenStreetMap/Nominatim
+  2. Nutzer kann einen Vorschlag auswaehlen und der Ort wird uebernommen
+  3. Autocomplete funktioniert sowohl bei neuen Orten als auch im Fahrten-Formular
+**Plans**: TBD
+
+Plans:
+- [ ] 12-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 8 → 9
+Phases execute in numeric order: 10 → 11 → 12
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -131,6 +170,9 @@ Phases execute in numeric order: 8 → 9
 | 4. Von/Bis-Zeitraum | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 5. Bugfixes | v1.1 | 1/1 | Complete | 2026-03-22 |
 | 6. Security Hardening | v1.1 | 2/2 | Complete | 2026-03-22 |
-| 7. Code-Qualität | v1.1 | 2/2 | Complete | 2026-03-22 |
+| 7. Code-Qualitaet | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
-| 9. PDF-Export | v1.2 | 0/2 | Not started | - |
+| 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
+| 10. Favoriten & Quick-Copy | v1.3 | 0/? | Not started | - |
+| 11. Dashboard, Navigation & Statistiken | v1.3 | 0/? | Not started | - |
+| 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |
