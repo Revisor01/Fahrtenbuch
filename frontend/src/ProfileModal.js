@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { AppContext } from './App';
+import { AppContext } from './contexts/AppContext';
 import Modal from './Modal';
 import AbrechnungstraegerForm from './components/AbrechnungstraegerForm';
 import ErstattungssaetzeForm from './components/ErstattungssaetzeForm';

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './index.css';
 import { ChevronDown, ChevronUp, Play, Book, ArrowLeft, Smartphone, Download } from 'lucide-react';
 import { useTheme } from './ThemeContext';
-import { AppContext } from './App';
+import { AppContext } from './contexts/AppContext';
 
 // AccordionItem Komponente
 const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {

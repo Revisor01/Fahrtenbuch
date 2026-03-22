@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import Modal from './Modal';
 import './index.css';
-import { AppContext } from './App';
+import { AppContext } from './contexts/AppContext';
 
 function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }) {
   const [selectedDate, setSelectedDate] = useState(

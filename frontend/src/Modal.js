@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useContext } from 'react';
-import { AppContext } from './App';
+import { AppContext } from './contexts/AppContext';
 
 function Modal({ isOpen, onClose, title, children, size = 'compact', preventOutsideClick = false }) {
     const { hasActiveNotification } = useContext(AppContext);

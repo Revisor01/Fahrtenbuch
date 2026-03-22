@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import './index.css';
-import { AppContext } from './App';
+import { AppContext } from './contexts/AppContext';
 import Modal from './Modal';
 
 const UserForm = ({ onSubmit, isEdit, initialData, onClose }) => {
