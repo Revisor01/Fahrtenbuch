@@ -15,6 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Datenmodell & Logik** - Kostenstelle am Abrechnungstraeger und rueckwirkende Distanz-Aktualisierung
 - [ ] **Phase 2: Excel-Export Formular** - Export bildet das offizielle Abrechnungsformular korrekt ab
 - [ ] **Phase 3: Mehrmonats-Export** - Flexibler Zeitraum statt Einzelmonat
+- [ ] **Phase 4: Von/Bis-Zeitraum in Monatsübersicht** - Monatsauswahl wird zu Von/Bis erweitert, separater Zeitraum-Export entfaellt
 
 ## Phase Details
 
@@ -62,23 +63,31 @@ Plans:
 - [x] 03-01-PLAN.md — Backend: Neue Route, Model-Methode und Export-Funktion fuer Mehrmonats-Zeitraum
 - [x] 03-02-PLAN.md — Frontend: Von/Bis-Dropdowns und Zeitraum-Export-Handler
 
+### Phase 4: Von/Bis-Zeitraum in Monatsübersicht
+**Goal**: Die Monatsauswahl wird zu Von/Bis erweitert — Fahrten-Liste, Summary und Export zeigen den gewaehlten Zeitraum. Der separate Zeitraum-Export-Bereich aus Phase 3 entfaellt.
+**Depends on:** Phase 3
+**Requirements**: D-01 bis D-19 (aus CONTEXT.md)
+**Success Criteria** (what must be TRUE):
+  1. Von/Bis-Dropdowns ersetzen den bisherigen Monats-Dropdown
+  2. Von = "---" bedeutet Einzelmonat-Modus (nur Bis zaehlt)
+  3. Bei Zeitraum werden Fahrten ueber neue Report-Range-API geladen
+  4. Export-Buttons nutzen im Zeitraum-Modus die Range-Export-Route
+  5. Der separate Zeitraum-Export-Bereich (Phase 3) ist entfernt
+  6. Einzelmonat-Modus funktioniert weiterhin wie bisher
+**Plans**: 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Backend: Report-Range-Route fuer aggregierte Zeitraum-Daten
+- [ ] 04-02-PLAN.md — Frontend: Von/Bis-UI, adaptiver Export, Phase-3-Cleanup
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Datenmodell & Logik | 0/2 | Planned | - |
 | 2. Excel-Export Formular | 0/1 | Planned | - |
 | 3. Mehrmonats-Export | 0/2 | Not started | - |
-
-### Phase 4: Von/Bis-Zeitraum in Monatsübersicht
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 3
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 4 to break down)
+| 4. Von/Bis-Zeitraum | 0/2 | Planned | - |
