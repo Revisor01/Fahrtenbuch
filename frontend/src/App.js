@@ -286,7 +286,21 @@ function AppProvider({ children }) {
   
   const handleAbrechnungsStatus = async (jahr, monat, traegerId, aktion, datum) => {
     try {
-      await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum);
+      // Bei aktiver Range: Status für jeden Monat im Zeitraum setzen
+      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
+        const [vonYear, vonMonth] = selectedVonMonth.split('-');
+        const [bisYear, bisMonth] = selectedMonth.split('-');
+        let current = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
+        const end = new Date(parseInt(bisYear), parseInt(bisMonth) - 1);
+        while (current <= end) {
+          const y = current.getFullYear().toString();
+          const m = (current.getMonth() + 1).toString().padStart(2, '0');
+          await updateAbrechnungsStatus(y, m, traegerId, aktion, datum);
+          current.setMonth(current.getMonth() + 1);
+        }
+      } else {
+        await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum);
+      }
       await fetchMonthlyData();
       await fetchFahrten();
       showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
