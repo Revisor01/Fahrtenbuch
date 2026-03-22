@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-22T07:49:04.440Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-22T07:53:37.459Z"
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -52,6 +52,7 @@ Plan: 2 of 2
 | Phase 03 P01 | 2min | 2 tasks | 4 files |
 | Phase 03 P02 | 1min | 1 tasks | 1 files |
 | Phase 04 P01 | 1min | 1 tasks | 2 files |
+| Phase 04 P02 | 3min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Recent decisions affecting current work:
 - [Phase 03]: Separate UI-Sektion fuer Zeitraum-Export unterhalb bestehender Buttons (per D-11)
 - [Phase 03]: Von/Bis defaulten auf aktuellen Monat, showNotification statt alert
 - [Phase 04]: abrechnungsStatus merged via Object.assign across all months in range
+- [Phase 04]: selectedVonMonth='' als Einzelmonat-Modus statt separatem Boolean
 
 ### Pending Todos
 
@@ -86,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T07:49:04.438Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-03-22T07:53:37.456Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
