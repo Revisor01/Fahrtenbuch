@@ -12,6 +12,8 @@ router.post('/', validate(createFahrtSchema), fahrtController.createFahrt);
 router.get('/', fahrtController.getAllFahrten);
 router.get('/export/:type/:year/:month', fahrtController.exportToExcel);
 router.get('/export-range/:type/:startYear/:startMonth/:endYear/:endMonth', fahrtController.exportToExcelRange);
+router.get('/export-pdf/:type/:year/:month', fahrtController.exportToPdf);
+router.get('/export-pdf-range/:type/:startYear/:startMonth/:endYear/:endMonth', fahrtController.exportToPdfRange);
 router.get('/report/:year/:month', fahrtController.getMonthlyReport);
 router.get('/monthly-summary', fahrtController.getMonthlySummary);
 router.get('/year-summary/:year', fahrtController.getYearSummary);
