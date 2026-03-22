@@ -25,7 +25,6 @@ class Migrator {
     }
 
     async executeSQLFile(connection, content) {
-        console.log("Executing SQL:\n", content);
         
         // Replace environment variables
         content = content.replace(/\${DB_NAME}/g, process.env.DB_NAME);
@@ -64,7 +63,6 @@ class Migrator {
         // Execute statements
         for (let statement of statements) {
             try {
-                console.log("Executing statement:", statement);
                 await connection.query(statement);
             } catch (error) {
                 console.error('Error executing SQL statement:', statement, error);
@@ -74,7 +72,7 @@ class Migrator {
     }
     
     async runMigrations() {
-        console.log('Starting migrations...');
+        console.info('Starting migrations...');
         try {
             await this.initialize();
 
@@ -84,7 +82,7 @@ class Migrator {
 
             for (const file of sqlFiles) {
                 if (!executedMigrations.includes(file)) {
-                    console.log(`Running migration: ${file}`);
+                    console.info(`Running migration: ${file}`);
                     const connection = await db.getConnection();
 
                     try {
@@ -102,7 +100,7 @@ class Migrator {
                         );
 
                         await connection.commit();
-                        console.log(`Migration ${file} successful`);
+                        console.info(`Migration ${file} successful`);
                     } catch (error) {
                         await connection.rollback();
                         console.error(`Migration ${file} failed: ${error}`);
