@@ -41,7 +41,24 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 
 ### Active
 
-(Keine — alle Milestones abgeschlossen)
+- [ ] Dashboard als neue Startseite (KPIs, Schnelleingabe, Favoriten, letzte Fahrten)
+- [ ] Favoriten-Fahrten speichern und mit einem Klick wiederholen
+- [ ] "Nochmal für heute" bei letzten Fahrten
+- [ ] Jahres-Statistik mit Balkendiagramm (km pro Monat, Erstattungen)
+- [ ] Adress-Autocomplete bei Ort-Eingabe (OpenStreetMap/Nominatim)
+
+## Current Milestone: v1.3 Dashboard & UX
+
+**Goal:** Dashboard als Startseite, Favoriten-Fahrten für Schnelleingabe, Statistiken mit Jahresübersicht, Adress-Autocomplete.
+
+**Navigation nach Umbau:**
+- [Dashboard] [Fahrten & Export] [Monatsübersicht] [⚙️]
+
+**Target features:**
+- Dashboard mit KPIs, Formular, Favoriten, letzte Fahrten, Jahreschart
+- Favoriten + Quick-Copy (letzte 3 Fahrten "Nochmal")
+- Statistiken (km/Monat, Erstattungen/Träger)
+- Adress-Autocomplete (Nominatim)
 
 ### Out of Scope
 
@@ -93,4 +110,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after v1.2 milestone completion*
+*Last updated: 2026-03-22 after v1.3 milestone start*

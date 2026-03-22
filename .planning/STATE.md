@@ -18,13 +18,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-22)
 
-**Core value:** Modulare Codebasis + PDF-Export als druckfertiges Abrechnungsformular
-**Current focus:** Phase 09 — pdf-export
+**Core value:** Excel-Export bildet das offizielle Abrechnungsformular korrekt ab
+**Current focus:** Milestone v1.3 — Dashboard & UX
 
 ## Current Position
 
-Phase: 09
-Plan: Not started
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-22 — Milestone v1.3 started
 
 ## Performance Metrics
 
