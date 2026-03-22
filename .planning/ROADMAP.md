@@ -93,10 +93,11 @@ Plans:
   1. Alle Backend-Endpoints validieren Eingaben mit Zod-Schemas und geben verständliche Validierungsfehler zurück
   2. Production-Logs enthalten keine console.log-Statements mit DEBUGGING-Prefix oder Test-Output
   3. Dependabot-Alerts sind auf 0 reduziert, alle Dependencies auf aktuellem Stand
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 07-01-PLAN.md — Zod-Validierung fuer alle Backend-Endpoints (Schemas + Middleware + Routing)
+- [ ] 07-02-PLAN.md — Debug-Logs entfernen und Dependency-Updates
 
 ## Progress
 
@@ -110,5 +111,5 @@ Phases execute in numeric order: 5 → 6 → 7
 | 3. Mehrmonats-Export | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 4. Von/Bis-Zeitraum | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 5. Bugfixes | v1.1 | 1/1 | Complete | 2026-03-22 |
-| 6. Security Hardening | v1.1 | 0/2 | Not started | - |
-| 7. Code-Qualität | v1.1 | 0/? | Not started | - |
+| 6. Security Hardening | v1.1 | 2/2 | Complete | 2026-03-22 |
+| 7. Code-Qualität | v1.1 | 0/2 | Not started | - |
