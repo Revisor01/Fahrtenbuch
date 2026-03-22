@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo, useRef } from 'react';
 import axios from 'axios';
 import './index.css';
 import './darkMode.css';
@@ -45,7 +45,8 @@ function AppProvider({ children }) {
   const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
-  
+  const isLoggingOut = useRef(false);
+
   const [abrechnungsStatusModal, setAbrechnungsStatusModal] = useState({
     open: false,
     traegerId: null,
@@ -124,8 +125,10 @@ function AppProvider({ children }) {
       (response) => response,
       (error) => {
         if (error.response && error.response.status === 401) {
-          console.log('Unauthorized, logging out...');
-          logout();
+          if (!isLoggingOut.current) {
+            isLoggingOut.current = true;
+            logout();
+          }
         }
         return Promise.reject(error);
       }
@@ -161,6 +164,7 @@ function AppProvider({ children }) {
     setToken(null);
     setUser(null);
     setIsLoggedIn(false);
+    isLoggingOut.current = false;
   };
   
   const fetchOrte = async () => {
@@ -764,59 +768,49 @@ function FahrtenListe() {
     };
     
     const aktuellDatum = normalizeDatum(aktuellefahrt.datum);
-    
-    console.log("DEBUGGING findErgänzendeFahrt für:", {
-      id: aktuellefahrt.id,
-      anlass: aktuellefahrt.anlass,
-      istRückfahrt,
-      von_ort_id: aktuellefahrt.von_ort_id,
-      nach_ort_id: aktuellefahrt.nach_ort_id,
-      datum: aktuellDatum
-    });
-    
+
     // Filtere Fahrten mit normalisiertem Datum
-    const fahrtenAmSelbenTag = fahrten.filter(f => 
-      normalizeDatum(f.datum) === aktuellDatum && 
+    const fahrtenAmSelbenTag = fahrten.filter(f =>
+      normalizeDatum(f.datum) === aktuellDatum &&
       f.id !== aktuellefahrt.id
     );
-    
-    console.log("DEBUGGING Alle Fahrten am selben Tag:", fahrtenAmSelbenTag.map(f => ({
-      id: f.id, 
-      anlass: f.anlass,
-      von_ort_id: f.von_ort_id,
-      nach_ort_id: f.nach_ort_id,
-      istRückfahrt: f.anlass?.toLowerCase().includes('rückfahrt'),
-      datum: normalizeDatum(f.datum)
-    })));
-    
-    // DEUTLICH VEREINFACHTE LOGIK, die direkt die IDs prüft
+
     if (istRückfahrt) {
       // Aktuelle Fahrt ist Rückfahrt, suche Hinfahrt mit umgekehrten Orten
-      const hinfahrt = fahrtenAmSelbenTag.find(f => 
+      const hinfahrt = fahrtenAmSelbenTag.find(f =>
         !f.anlass?.toLowerCase().includes('rückfahrt') &&
         parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
         parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
       );
-      
-      if (hinfahrt) {
-        console.log("DEBUGGING Hinfahrt gefunden:", hinfahrt);
-        return hinfahrt;
-      }
+
+      if (hinfahrt) return hinfahrt;
+
+      // Fallback: Matching ueber Orts-Namen
+      const hinfahrtByName = fahrtenAmSelbenTag.find(f =>
+        !f.anlass?.toLowerCase().includes('rückfahrt') &&
+        f.von_ort_name?.toLowerCase() === aktuellefahrt.nach_ort_name?.toLowerCase() &&
+        f.nach_ort_name?.toLowerCase() === aktuellefahrt.von_ort_name?.toLowerCase()
+      );
+      if (hinfahrtByName) return hinfahrtByName;
     } else {
       // Aktuelle Fahrt ist Hinfahrt, suche Rückfahrt mit umgekehrten Orten
-      const rückfahrt = fahrtenAmSelbenTag.find(f => 
+      const rückfahrt = fahrtenAmSelbenTag.find(f =>
         f.anlass?.toLowerCase().includes('rückfahrt') &&
         parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
         parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
       );
-      
-      if (rückfahrt) {
-        console.log("DEBUGGING Rückfahrt gefunden:", rückfahrt);
-        return rückfahrt;
-      }
+
+      if (rückfahrt) return rückfahrt;
+
+      // Fallback: Matching ueber Orts-Namen
+      const rückfahrtByName = fahrtenAmSelbenTag.find(f =>
+        f.anlass?.toLowerCase().includes('rückfahrt') &&
+        f.von_ort_name?.toLowerCase() === aktuellefahrt.nach_ort_name?.toLowerCase() &&
+        f.nach_ort_name?.toLowerCase() === aktuellefahrt.von_ort_name?.toLowerCase()
+      );
+      if (rückfahrtByName) return rückfahrtByName;
     }
-    
-    console.log("DEBUGGING Keine passende Fahrt gefunden");
+
     return null;
   };
   
