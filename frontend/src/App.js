@@ -534,11 +534,6 @@ function FahrtenListe() {
     updatedData: null,
     istRückfahrt: false
   });
-  const [exportVonYear, setExportVonYear] = useState(new Date().getFullYear().toString());
-  const [exportVonMonth, setExportVonMonth] = useState((new Date().getMonth() + 1).toString());
-  const [exportBisYear, setExportBisYear] = useState(new Date().getFullYear().toString());
-  const [exportBisMonth, setExportBisMonth] = useState((new Date().getMonth() + 1).toString());
-
   useEffect(() => {
     fetchFahrten();
   }, [selectedMonth, selectedVonMonth]);
@@ -638,83 +633,59 @@ function FahrtenListe() {
     });
   };
   
-  const handleExportToExcel = async (type, year, month) => {
+  const handleExportToExcel = async (type) => {
     try {
-      // Stellen Sie sicher, dass der Monat im Format "MM" ist
-      const formattedMonth = month.padStart(2, '0');
-      const response = await axios.get(`/api/fahrten/export/${type}/${year}/${formattedMonth}`, {
-        responseType: 'blob'
-      });
-      
+      const [bisYear, bisMonth] = selectedMonth.split('-');
+      const formattedBisMonth = bisMonth.padStart(2, '0');
+
+      let response;
+      let defaultFilename;
+
+      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
+        // Zeitraum-Export: nutze Range-Route
+        const [vonYear, vonMonth] = selectedVonMonth.split('-');
+        const formattedVonMonth = vonMonth.padStart(2, '0');
+
+        // Validierung: Bis >= Von
+        const vonDate = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
+        const bisDate = new Date(parseInt(bisYear), parseInt(bisMonth) - 1);
+        if (bisDate < vonDate) {
+          showNotification("Fehler", "Der Bis-Monat muss gleich oder nach dem Von-Monat liegen.");
+          return;
+        }
+
+        response = await axios.get(
+          `/api/fahrten/export-range/${type}/${vonYear}/${formattedVonMonth}/${bisYear}/${formattedBisMonth}`,
+          { responseType: 'blob' }
+        );
+        defaultFilename = `fahrtenabrechnung_${type}_${vonYear}_${formattedVonMonth}_bis_${bisYear}_${formattedBisMonth}`;
+      } else {
+        // Einzelmonat-Export: nutze alte Route
+        response = await axios.get(
+          `/api/fahrten/export/${type}/${bisYear}/${formattedBisMonth}`,
+          { responseType: 'blob' }
+        );
+        defaultFilename = `fahrtenabrechnung_${type}_${bisYear}_${formattedBisMonth}`;
+      }
+
       const contentType = response.headers['content-type'];
       const contentDisposition = response.headers['content-disposition'];
       const filenameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/i);
-      let filename = filenameMatch ? filenameMatch[1] : `fahrtenabrechnung_${type}_${year}_${month}`;
-      
-      // Überprüfen Sie den Content-Type
+      let filename = filenameMatch ? filenameMatch[1] : defaultFilename;
+
       if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
         filename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
       } else if (contentType === 'application/zip') {
         filename = filename.endsWith('.zip') ? filename : `${filename}.zip`;
       } else {
-        console.error('Unerwarteter Content-Type:', contentType);
         throw new Error('Unerwarteter Dateityp vom Server erhalten');
       }
-      
+
       const blob = new Blob([response.data], { type: contentType });
-      
       if (blob.size === 22) {
-        console.error('Erhaltene Datei ist möglicherweise leer oder fehlerhaft');
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
-      
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-    } catch (error) {
-      console.error('Fehler beim Exportieren nach Excel:', error);
-      if (error.response) {
-        console.error('Server-Antwort:', error.response.status, error.response.data);
-      }
-      alert('Fehler beim Exportieren nach Excel. Bitte versuchen Sie es später erneut und prüfen Sie die Konsole für weitere Details.');
-    }
-  };
 
-  const handleExportToExcelRange = async (type) => {
-    try {
-      // Validierung: Bis >= Von
-      const vonDate = new Date(parseInt(exportVonYear), parseInt(exportVonMonth) - 1);
-      const bisDate = new Date(parseInt(exportBisYear), parseInt(exportBisMonth) - 1);
-      if (bisDate < vonDate) {
-        showNotification("Fehler", "Der Bis-Monat muss gleich oder nach dem Von-Monat liegen.");
-        return;
-      }
-
-      const startMonth = exportVonMonth.padStart(2, '0');
-      const endMonth = exportBisMonth.padStart(2, '0');
-      const response = await axios.get(
-        `/api/fahrten/export-range/${type}/${exportVonYear}/${startMonth}/${exportBisYear}/${endMonth}`,
-        { responseType: 'blob' }
-      );
-
-      const contentType = response.headers['content-type'];
-      const contentDisposition = response.headers['content-disposition'];
-      const filenameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/i);
-      let filename = filenameMatch ? filenameMatch[1] : `fahrtenabrechnung_${type}_${exportVonYear}_${startMonth}_bis_${exportBisYear}_${endMonth}`;
-
-      if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-        filename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
-      } else if (contentType === 'application/zip') {
-        filename = filename.endsWith('.zip') ? filename : `${filename}.zip`;
-      }
-
-      const blob = new Blob([response.data], { type: contentType });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -726,7 +697,7 @@ function FahrtenListe() {
 
       showNotification("Erfolg", "Export wurde heruntergeladen");
     } catch (error) {
-      console.error('Fehler beim Mehrmonats-Export:', error);
+      console.error('Fehler beim Exportieren nach Excel:', error);
       if (error.response && error.response.status === 404) {
         showNotification("Hinweis", "Keine Daten fuer den ausgewaehlten Zeitraum gefunden.");
       } else {
@@ -1097,83 +1068,19 @@ function FahrtenListe() {
       </div>
       </div>
       
-      {/* Export: Aktueller Monat */}
-      <h3 className="text-lg font-medium text-value mt-6 mb-3">Aktuellen Monat exportieren</h3>
+      {/* Export */}
+      <h3 className="text-lg font-medium text-value mt-6 mb-3">
+        {selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum exportieren' : 'Monat exportieren'}
+      </h3>
       <div className="flex flex-col sm:flex-row justify-end gap-2">
       {getKategorienMitErstattung().map(([key, displayName]) => (
         <button
         key={key}
-        onClick={() => handleExportToExcel(key.toLowerCase(), selectedYear, selectedMonth.split("-")[1])}
+        onClick={() => handleExportToExcel(key.toLowerCase())}
         className="btn-primary">
         Export {displayName}
         </button>
       ))}
-      </div>
-
-      {/* Export: Zeitraum */}
-      <h3 className="text-lg font-medium text-value mt-6 mb-3">Zeitraum exportieren</h3>
-      <div className="card-container">
-        <div className="flex flex-col sm:flex-row gap-2 mb-3">
-          <div className="flex items-center gap-1">
-            <label className="text-xs text-label">Von:</label>
-            <select
-              value={exportVonMonth}
-              onChange={(e) => setExportVonMonth(e.target.value)}
-              className="input-field text-sm py-1 px-2"
-            >
-              {Array.from({length: 12}, (_, i) => (
-                <option key={i+1} value={(i+1).toString()}>
-                  {new Date(2000, i, 1).toLocaleString('de-DE', { month: 'long' })}
-                </option>
-              ))}
-            </select>
-            <select
-              value={exportVonYear}
-              onChange={(e) => setExportVonYear(e.target.value)}
-              className="input-field text-sm py-1 px-2 w-20"
-            >
-              {Array.from({length: 5}, (_, i) => {
-                const y = new Date().getFullYear() - 2 + i;
-                return <option key={y} value={y.toString()}>{y}</option>;
-              })}
-            </select>
-          </div>
-          <div className="flex items-center gap-1">
-            <label className="text-xs text-label">Bis:</label>
-            <select
-              value={exportBisMonth}
-              onChange={(e) => setExportBisMonth(e.target.value)}
-              className="input-field text-sm py-1 px-2"
-            >
-              {Array.from({length: 12}, (_, i) => (
-                <option key={i+1} value={(i+1).toString()}>
-                  {new Date(2000, i, 1).toLocaleString('de-DE', { month: 'long' })}
-                </option>
-              ))}
-            </select>
-            <select
-              value={exportBisYear}
-              onChange={(e) => setExportBisYear(e.target.value)}
-              className="input-field text-sm py-1 px-2 w-20"
-            >
-              {Array.from({length: 5}, (_, i) => {
-                const y = new Date().getFullYear() - 2 + i;
-                return <option key={y} value={y.toString()}>{y}</option>;
-              })}
-            </select>
-          </div>
-        </div>
-        <div className="flex flex-col sm:flex-row justify-end gap-2">
-          {getKategorienMitErstattung().map(([key, displayName]) => (
-            <button
-              key={`range-${key}`}
-              onClick={() => handleExportToExcelRange(key.toLowerCase())}
-              className="btn-primary text-sm"
-            >
-              Zeitraum Export {displayName}
-            </button>
-          ))}
-        </div>
       </div>
       </div>
       </div>
