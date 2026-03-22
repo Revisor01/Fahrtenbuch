@@ -6,10 +6,13 @@ const ExcelJS = require('exceljs');
 const path = require('path');
 const JSZip = require('jszip');
 const { exportToExcel, exportToExcelRange } = require('../utils/excelExport');
+const { exportToPdf, exportToPdfRange } = require('../utils/pdfExport');
 const db = require('../config/database');
 
 exports.exportToExcel = exportToExcel;
 exports.exportToExcelRange = exportToExcelRange;
+exports.exportToPdf = exportToPdf;
+exports.exportToPdfRange = exportToPdfRange;
 
 exports.createFahrt = async (req, res) => {
   try {
