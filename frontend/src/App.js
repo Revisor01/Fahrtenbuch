@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import './index.css';
 import './darkMode.css';
@@ -7,7 +7,7 @@ import LandingPage from './LandingPage';
 import FahrtForm from './FahrtForm';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
-import Modal from './Modal'; 
+import Modal from './Modal';
 import { HelpCircle, Settings, MapPin, Ruler, Users, UserCircle, LogOut, AlertCircle, Circle, CheckCircle2, Info, Bell } from 'lucide-react';
 import NotificationModal from './NotificationModal';
 import InfoModal from './components/InfoModal';
@@ -20,520 +20,10 @@ import SetPassword from './SetPassword';
 import { ThemeProvider } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
 import NewFeaturesModal from './components/NewFeaturesModal';
+import { AppContext } from './contexts/AppContext';
+import AppProvider from './contexts/AppContext';
 
 const API_BASE_URL = '/api';
-
-export const AppContext = createContext();
-
-function AppProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-  const [orte, setOrte] = useState([]);
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [distanzen, setDistanzen] = useState([]);
-  const [fahrten, setFahrten] = useState([]);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [selectedVonMonth, setSelectedVonMonth] = useState(''); // '' = Einzelmonat-Modus
-  const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
-  const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
-  const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
-  const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
-  const [summary, setSummary] = useState({});
-  const [hasActiveNotification, setHasActiveNotification] = useState(false);
-  const isLoggingOut = useRef(false);
-
-  const [abrechnungsStatusModal, setAbrechnungsStatusModal] = useState({
-    open: false,
-    traegerId: null,
-    aktion: null,
-    jahr: null,
-    monat: null
-  });
-  
-  const refreshAllData = async (callback) => {
-    try {
-      const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes, abrechnungstraegerFullRes] = await Promise.all([
-        fetchFahrten(),
-        fetchMonthlyData(),
-        fetchOrte(),
-        fetchDistanzen(),
-        axios.get('/api/abrechnungstraeger/simple'),
-        axios.get('/api/abrechnungstraeger')
-      ]);
-      
-      // Hier die tatsächlichen Daten setzen
-      if (fahrtenRes) setFahrten(fahrtenRes);
-      if (monthlyDataRes) setMonthlyData(monthlyDataRes);
-      if (orteRes) setOrte(orteRes);
-      if (distanzenRes) setDistanzen(distanzenRes);
-      if (abrechnungstraegerRes?.data) {
-        setAbrechnungstraeger(abrechnungstraegerRes.data.data);
-      }
-      
-      // Führe den optionalen Callback mit den vollständigen Daten aus
-      if (callback && typeof callback === 'function') {
-        if (abrechnungstraegerFullRes?.data) {
-          callback(abrechnungstraegerFullRes.data);
-        }
-      }
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Daten:', error);
-    }
-  };
-  
-  const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
-    setHasActiveNotification(true);
-    setNotification({ isOpen: true, title, message, onConfirm, showCancel });
-  };
-  
-  const closeNotification = () => {
-    setNotification(prev => ({ ...prev, isOpen: false }));
-    setHasActiveNotification(false);
-  };
-  
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setIsLoggedIn(true);
-      // User-Daten laden wenn noch nicht vorhanden
-      if (!user) {
-        fetchCurrentUser();
-      }
-    }
-    setupAxiosInterceptors();
-  }, [token]);
-  
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await axios.get('/api/users/me');
-      const userData = response.data;
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      logout();
-    }
-  };
-  
-  const setupAxiosInterceptors = () => {
-    axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response && error.response.status === 401) {
-          if (!isLoggingOut.current) {
-            isLoggingOut.current = true;
-            logout();
-          }
-        }
-        return Promise.reject(error);
-      }
-    );
-  };
-  
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchOrte();
-      fetchDistanzen();
-      fetchFahrten();
-    }
-  }, [isLoggedIn]);
-
-  const login = async (username, password) => {
-    try {
-      const response = await axios.post('/api/auth/login', { username, password });
-      const { token } = response.data;
-      localStorage.setItem('token', token);
-      setToken(token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      await fetchCurrentUser(); // User-Daten direkt nach Login laden
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  };
-  
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
-    setIsLoggedIn(false);
-    isLoggingOut.current = false;
-  };
-  
-  const fetchOrte = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/orte`);
-      setOrte(response.data);
-    } catch (error) {
-      console.error('Fehler beim Abrufen der Orte:', error);
-    }
-  };
-  
-  const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum) => {
-    try {
-      await axios.post(`${API_BASE_URL}/fahrten/abrechnungsstatus`, {
-        jahr,
-        monat,
-        typ,
-        aktion,
-        datum
-      });
-      await fetchFahrten();
-      await fetchMonthlyData();
-      showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
-      showNotification("Fehler", "Status konnte nicht aktualisiert werden");
-    }
-  };
-
-  const fetchDistanzen = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/distanzen`);
-      setDistanzen(response.data);
-    } catch (error) {
-      console.error('Fehler beim Abrufen der Distanzen:', error);
-      setDistanzen([]);
-    }
-  };
-  
-  const fetchFahrten = async () => {
-    try {
-      const [bisYear, bisMonth] = selectedMonth.split('-');
-
-      let response;
-      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
-        // Zeitraum-Modus: Von != Bis und Von != '---'
-        const [vonYear, vonMonth] = selectedVonMonth.split('-');
-        response = await axios.get(`${API_BASE_URL}/fahrten/report-range/${vonYear}/${vonMonth}/${bisYear}/${bisMonth}`);
-      } else {
-        // Einzelmonat-Modus: Von = '---' oder Von = Bis
-        response = await axios.get(`${API_BASE_URL}/fahrten/report/${bisYear}/${bisMonth}`);
-      }
-
-      setFahrten(response.data.fahrten.map(fahrt => ({
-        ...fahrt,
-        mitfahrer: fahrt.mitfahrer || []
-      })));
-      setSummary(response.data.summary);
-    } catch (error) {
-      console.error('Fehler beim Abrufen der Fahrten:', error);
-      setFahrten([]);
-      setSummary({});
-    }
-  };
-  
-  const addOrt = async (ort) => {
-    try {
-      await axios.post(`${API_BASE_URL}/orte`, ort);
-      fetchOrte();
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen des Ortes:', error);
-    }
-  };
-  
-  const addFahrt = async (fahrt, retries = 3) => {
-    try {
-      const cleanedFahrt = {
-        datum: fahrt.datum,
-        vonOrtId: fahrt.vonOrtId || null,
-        nachOrtId: fahrt.nachOrtId || null,
-        einmaligerVonOrt: fahrt.einmaligerVonOrt || null,
-        einmaligerNachOrt: fahrt.einmaligerNachOrt || null,
-        anlass: fahrt.anlass || '',
-        kilometer: parseFloat(fahrt.kilometer) || 0,
-        abrechnung: parseInt(fahrt.abrechnung) || null,
-        mitfahrer: fahrt.mitfahrer || []
-      };
-      
-      const response = await axios.post(`${API_BASE_URL}/fahrten`, cleanedFahrt);
-      if (response.status === 201) {
-        await fetchFahrten();
-        await refreshAllData(); // Hier hinzufügen
-        return response.data;
-      }
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen der Fahrt:', error);
-      throw error;
-    }
-  };
-  
-  const updateFahrt = async (id, updatedFahrt) => {
-    try {
-      const response = await axios.put(`${API_BASE_URL}/fahrten/${id}`, updatedFahrt);
-      if (response.status === 200) {
-        await fetchFahrten();
-        await refreshAllData(); // Hier hinzufügen
-        return response.data;
-      }
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Fahrt:', error);
-      throw error;
-    }
-  };
-  
-  const addDistanz = async (distanz) => {
-    try {
-      await axios.post(`${API_BASE_URL}/distanzen`, distanz);
-      fetchDistanzen();
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen der Distanz:', error);
-    }
-  };
-  
-  const handleAbrechnungsStatus = async (jahr, monat, traegerId, aktion, datum) => {
-    try {
-      // Bei aktiver Range: Status für jeden Monat im Zeitraum setzen
-      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
-        const [vonYear, vonMonth] = selectedVonMonth.split('-');
-        const [bisYear, bisMonth] = selectedMonth.split('-');
-        let current = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
-        const end = new Date(parseInt(bisYear), parseInt(bisMonth) - 1);
-        while (current <= end) {
-          const y = current.getFullYear().toString();
-          const m = (current.getMonth() + 1).toString().padStart(2, '0');
-          await updateAbrechnungsStatus(y, m, traegerId, aktion, datum);
-          current.setMonth(current.getMonth() + 1);
-        }
-      } else {
-        await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum);
-      }
-      await fetchMonthlyData();
-      await fetchFahrten();
-      showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Status:', error);
-      showNotification("Fehler", "Status konnte nicht aktualisiert werden");
-    }
-  };
-  
-  const fetchMonthlyData = async () => {
-    try {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth();
-      const promises = [];
-      const months = [];
-      
-      // 3 Monate nach vorne
-      for (let i = 1; i <= 3; i++) {
-        const futureDate = new Date(currentYear, currentMonth + i, 1);
-        months.push(futureDate);
-      }
-      
-      // Aktueller Monat
-      months.push(new Date(currentYear, currentMonth, 1));
-      
-      // Rückwärts gehen (24 Monate)
-      for (let i = 1; i <= 24; i++) {
-        const pastDate = new Date(currentYear, currentMonth - i, 1);
-        months.push(pastDate);
-      }
-      
-      // API-Calls vorbereiten
-      for (const date of months) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        promises.push(axios.get(`/api/fahrten/report/${year}/${month}`));
-      }
-      
-      const responses = await Promise.all(promises);
-      const data = responses
-      .map((response, index) => {
-        const date = months[index];
-        return {
-          yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
-          monthName: date.toLocaleString('default', { month: 'long' }),
-          year: date.getFullYear(),
-          monatNr: date.getMonth() + 1,
-          erstattungen: response.data.summary.erstattungen || {},
-          abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
-          totalErstattung: response.data.summary.gesamtErstattung || 0
-        };
-      })
-      // Nur Monate mit Erstattungen behalten
-      .filter(month => {
-        const hasErstattungen = Object.values(month.erstattungen).some(betrag => betrag > 0);
-        return hasErstattungen;
-      })
-      // Nach Datum sortieren (neueste zuerst)
-      .sort((a, b) => {
-        const dateA = new Date(a.year, a.monatNr - 1);
-        const dateB = new Date(b.year, b.monatNr - 1);
-        return dateB - dateA;
-      });
-      
-      setMonthlyData(data);
-    } catch (error) {
-      console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
-    }
-  };  
-  
-  const updateOrt = async (id, ort) => {
-    try {
-      await axios.put(`${API_BASE_URL}/orte/${id}`, ort);
-      fetchOrte();
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren des Ortes:', error);
-    }
-  };
-  
-  const updateDistanz = async (id, distanz) => {
-    try {
-      await axios.put(`${API_BASE_URL}/distanzen/${id}`, {
-        vonOrtId: distanz.von_ort_id,
-        nachOrtId: distanz.nach_ort_id,
-        distanz: distanz.distanz
-      });
-      fetchDistanzen();
-    } catch (error) {
-      console.error('Fehler beim Aktualisieren der Distanz:', error);
-    }
-  };
-  
-  const deleteFahrt = async (id) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/fahrten/${id}`);
-      await fetchFahrten();
-      await refreshAllData(); // Hier hinzufügen
-    } catch (error) {
-      console.error('Fehler beim Löschen der Fahrt:', error);
-    }
-  };
-  
-  const deleteOrt = async (id) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/orte/${id}`);
-      fetchOrte();
-    } catch (error) {
-      console.error('Fehler beim Löschen des Ortes:', error);
-      throw error;
-    }
-  };
-  
-  const deleteDistanz = async (id) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/distanzen/${id}`);
-      fetchDistanzen();
-    } catch (error) {
-      console.error('Fehler beim Löschen der Distanz:', error);
-    }
-  };
-  
-  return (
-    <AppContext.Provider value={{ 
-      isLoggedIn, 
-      login, 
-      logout, 
-      token, 
-      updateFahrt, 
-      user, 
-      setUser, 
-      orte, 
-      distanzen, 
-      fahrten, 
-      selectedMonth, 
-      gesamtKirchenkreis, 
-      gesamtGemeinde,
-      setSelectedMonth, 
-      addOrt, 
-      addFahrt, 
-      addDistanz, 
-      updateOrt, 
-      updateDistanz, 
-      fetchFahrten, 
-      deleteFahrt, 
-      deleteDistanz, 
-      deleteOrt, 
-      monthlyData,
-      setMonthlyData,
-      fetchMonthlyData,
-      summary, 
-      setSummary,
-      setIsProfileModalOpen, 
-      isProfileModalOpen, 
-      updateAbrechnungsStatus, 
-      hasActiveNotification, 
-      showNotification, 
-      closeNotification, 
-      setFahrten,
-      refreshAllData,
-      abrechnungsStatusModal,
-      setAbrechnungsStatusModal,
-      handleAbrechnungsStatus,
-      abrechnungstraeger,
-      setAbrechnungstraeger,
-      selectedVonMonth,
-      setSelectedVonMonth
-    }}>
-    {children}
-    <NotificationModal
-    isOpen={notification.isOpen}
-    onClose={closeNotification}
-    title={notification.title}
-    message={notification.message}
-    onConfirm={notification.onConfirm}
-    showCancel={notification.showCancel}
-    />
-    <AbrechnungsStatusModal 
-    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
-    onClose={() => setAbrechnungsStatusModal({})}
-    onSubmit={(date) => handleAbrechnungsStatus(
-      abrechnungsStatusModal.jahr, 
-      abrechnungsStatusModal.monat,
-      abrechnungsStatusModal.traegerId, 
-      abrechnungsStatusModal.aktion,
-      date
-    )}
-    traegerId={abrechnungsStatusModal.traegerId}
-    aktion={abrechnungsStatusModal.aktion}
-    />
-    
-    <Modal
-    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion === 'reset'}
-    onClose={() => setAbrechnungsStatusModal({})}
-    title="Status zurücksetzen"
-    >
-    <div className="card-container-highlight">
-    <p className="text-value text-sm mb-6">
-    Möchten Sie den Status wirklich zurücksetzen?
-    </p>
-    <div className="flex flex-col sm:flex-row gap-2">
-    <button
-    type="button"
-    onClick={() => setAbrechnungsStatusModal({})}
-    className="btn-secondary w-full"
-    >
-    Abbrechen
-    </button>
-    <button
-    type="button"
-    onClick={() => {
-      handleAbrechnungsStatus(
-        abrechnungsStatusModal.jahr,
-        abrechnungsStatusModal.monat,
-        abrechnungsStatusModal.traegerId,
-        'reset'
-      );
-      setAbrechnungsStatusModal({});
-    }}
-    className="btn-primary w-full"
-    >
-    Zurücksetzen
-    </button>
-    </div>
-    </div>
-    </Modal>
-    </AppContext.Provider>
-  );
-}
 
 function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus } = useContext(AppContext);
@@ -555,13 +45,13 @@ function FahrtenListe() {
   useEffect(() => {
     fetchFahrten();
   }, [selectedMonth, selectedVonMonth]);
-  
+
   useEffect(() => {
     if (fahrten.length > 0) {
       setSortConfig({ key: 'datum', direction: 'descending' });
     }
   }, [fahrten]);
-  
+
   const handleVonMonthChange = (e) => {
     setSelectedVonMonth(e.target.value); // '' or 'YYYY-MM'
   };
@@ -578,11 +68,11 @@ function FahrtenListe() {
     setSelectedYear(year);
     setSelectedMonth(`${year}-${selectedMonth.split('-')[1]}`);
   };
-  
+
   const toggleFahrtDetails = (id) => {
     setExpandedFahrten(prev => ({...prev, [id]: !prev[id]}));
   };
-  
+
   const getDistance = async (vonOrtId, nachOrtId) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/distanzen/between`, {
@@ -594,7 +84,7 @@ function FahrtenListe() {
       return null;
     }
   };
-  
+
   const handleDelete = async (id) => {
     showNotification(
       "Fahrt löschen",
@@ -613,25 +103,25 @@ function FahrtenListe() {
       true // showCancel
     );
   };
-  
+
   const handleEditChange = async (field, value) => {
     const updatedFahrt = { ...editingFahrt, [field]: value };
-    
+
     if (field === 'von_ort_id' || field === 'nach_ort_id') {
       const distance = await getDistance(updatedFahrt.von_ort_id, updatedFahrt.nach_ort_id);
       if (distance !== null) {
         updatedFahrt.kilometer = distance;
       }
     }
-    
+
     setEditingFahrt(updatedFahrt);
   };
-  
+
   const formatDateForInput = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
   };
-  
+
   const getOrtTyp = (fahrt, isVon) => {
     if (isVon) {
       return fahrt.von_ort_id ? 'gespeichert' : 'einmalig';
@@ -639,7 +129,7 @@ function FahrtenListe() {
       return fahrt.nach_ort_id ? 'gespeichert' : 'einmalig';
     }
   };
-  
+
   const handleEdit = (fahrt) => {
     setEditingFahrt({
       ...fahrt,
@@ -650,7 +140,7 @@ function FahrtenListe() {
       kilometer: fahrt.kilometer
     });
   };
-  
+
   const handleExportToExcel = async (type) => {
     try {
       const [bisYear, bisMonth] = selectedMonth.split('-');
@@ -751,7 +241,7 @@ function FahrtenListe() {
   const findErgänzendeFahrt = (aktuellefahrt) => {
     // Bestimmen, ob aktuelle Fahrt eine Hinfahrt oder Rückfahrt ist
     const istRückfahrt = aktuellefahrt.anlass?.toLowerCase().includes('rückfahrt');
-    
+
     // Normalize the date format to YYYY-MM-DD for comparison
     const normalizeDatum = (datum) => {
       if (!datum) return '';
@@ -766,7 +256,7 @@ function FahrtenListe() {
       }
       return datum;
     };
-    
+
     const aktuellDatum = normalizeDatum(aktuellefahrt.datum);
 
     // Filtere Fahrten mit normalisiertem Datum
@@ -813,7 +303,7 @@ function FahrtenListe() {
 
     return null;
   };
-  
+
   const handleSave = async () => {
     try {
       // Validierung
@@ -821,19 +311,19 @@ function FahrtenListe() {
         showNotification("Fehler", "Bitte füllen Sie alle erforderlichen Felder aus.");
         return;
       }
-      
+
       const kilometer = parseFloat(editingFahrt.kilometer);
       if (isNaN(kilometer) || kilometer <= 0) {
         showNotification("Fehler", "Bitte geben Sie eine gültige Kilometerzahl ein.");
         return;
       }
-      
+
       const abrechnung = parseInt(editingFahrt.abrechnung);
       if (isNaN(abrechnung)) {
         showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
         return;
       }
-      
+
       const updatedFahrt = {
         datum: editingFahrt.datum,
         vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
@@ -844,10 +334,10 @@ function FahrtenListe() {
         kilometer: kilometer.toFixed(2),
         abrechnung: parseInt(editingFahrt.abrechnung)
       };
-      
+
       // Prüfen, ob es eine zugehörige Fahrt gibt (egal ob Hin- oder Rückfahrt)
       const ergänzendeFahrt = findErgänzendeFahrt(editingFahrt);
-      
+
       if (ergänzendeFahrt) {
         // Dialog mit der erkannten Fahrt anzeigen
         setRückfahrtDialog({
@@ -860,7 +350,7 @@ function FahrtenListe() {
         setEditingFahrt(null);
         return; // Die Funktion hier beenden, der Rest erfolgt über den Dialog
       }
-      
+
       // Normale Verarbeitung, wenn keine ergänzende Fahrt gefunden wurde
       await updateFahrt(editingFahrt.id, updatedFahrt);
       setEditingFahrt(null);
@@ -871,12 +361,12 @@ function FahrtenListe() {
       console.error("Fehler beim Aktualisieren:", error);
     }
   };
-  
+
   const handleViewMitfahrer = (mitfahrer, event) => {
     event.stopPropagation(); // Verhindert das Bubbling zum Bearbeitungs-Handler
     setViewingMitfahrer(mitfahrer);
   };
-  
+
   const resetToCurrentMonth = () => {
     const date = new Date();
     setSelectedYear(date.getFullYear().toString());
@@ -884,13 +374,13 @@ function FahrtenListe() {
     setSelectedMonth(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
     setSelectedVonMonth('');
   };
-  
+
   const getKategorienMitErstattung = () => {
     const kategorien = [];
-    
+
     // Ist das aktuelle Monats-Summary
     const erstattungen = summary.erstattungen || {};
-    
+
     // Erst sortierte Abrechnungsträger
     abrechnungstraeger.forEach(traeger => {
       const betrag = erstattungen[traeger.id];
@@ -902,16 +392,16 @@ function FahrtenListe() {
         ]);
       }
     });
-    
+
     // Dann Mitfahrer am Ende
     const mitfahrerBetrag = erstattungen['mitfahrer'];
     if (mitfahrerBetrag > 0) {
       kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerBetrag]);
     }
-    
+
     return kategorien;
   };
-  
+
   const allCategories = () => {
     // Sammle alle einzigartigen Kategorien
     const categories = new Set([
@@ -920,16 +410,16 @@ function FahrtenListe() {
     ]);
     return categories.size; // Gibt die tatsächliche Anzahl der Kategorien zurück
   };
-  
+
   const renderAbrechnungsStatus = (summary) => {
     const currentDate = new Date();
     const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    
+
     const getAbrechnungTraegerName = (id) => {
       const traeger = abrechnungstraeger?.find(t => t.id === id);
       return traeger ? traeger.name : 'Unbekannt';
     }
-    
+
     return (
       <div className="card-container-highlight mb-4">
       <div className="space-y-6">
@@ -1018,13 +508,13 @@ function FahrtenListe() {
       </div>
       </div>
       </div>
-      
+
       {/* Cards Grid */}
       <div className={`grid grid-cols-1 gap-4 ${
-        allCategories() === 1 
+        allCategories() === 1
         ? 'sm:grid-cols-1'
-        : allCategories() === 2 
-        ? 'sm:grid-cols-2' 
+        : allCategories() === 2
+        ? 'sm:grid-cols-2'
         : allCategories() === 3
         ? 'sm:grid-cols-3'
         : 'sm:grid-cols-2 lg:grid-cols-4'
@@ -1037,18 +527,18 @@ function FahrtenListe() {
         {Number(value).toFixed(2)} €
         </span>
         </div>
-        
+
         {value > 0 && (
           <div className="text-xs space-y-1">
           <div className="flex items-center justify-between">
           <span className="text-label">Status</span>
           {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
-            <span 
+            <span
             className="status-badge-primary cursor-pointer"
-            onClick={() => setAbrechnungsStatusModal({ 
-              open: true, 
+            onClick={() => setAbrechnungsStatusModal({
+              open: true,
               traegerId: key,
-              aktion: 'reset', 
+              aktion: 'reset',
               jahr: selectedYear,
               monat: selectedMonth.split('-')[1]
             })}
@@ -1057,12 +547,12 @@ function FahrtenListe() {
             <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
             </span>
           ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
-            <span 
+            <span
             className="status-badge-secondary cursor-pointer"
-            onClick={() => setAbrechnungsStatusModal({ 
-              open: true, 
+            onClick={() => setAbrechnungsStatusModal({
+              open: true,
               traegerId: key,
-              aktion: 'erhalten', 
+              aktion: 'erhalten',
               jahr: selectedYear,
               monat: selectedMonth.split('-')[1]
             })}
@@ -1071,12 +561,12 @@ function FahrtenListe() {
             <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
             </span>
           ) : (
-            <span 
+            <span
             className="status-badge-secondary cursor-pointer"
-            onClick={() => setAbrechnungsStatusModal({ 
-              open: true, 
+            onClick={() => setAbrechnungsStatusModal({
+              open: true,
               traegerId: key,
-              aktion: 'eingereicht', 
+              aktion: 'eingereicht',
               jahr: selectedYear,
               monat: selectedMonth.split('-')[1]
             })}
@@ -1090,7 +580,7 @@ function FahrtenListe() {
         )}
         </div>
       ))}
-      
+
       {/* Gesamt Card */}
       <div className="card-container col-span-full">
       <div className="flex justify-between items-center mb-2">
@@ -1102,18 +592,18 @@ function FahrtenListe() {
       }, 0).toFixed(2)} €
       </span>
       </div>
-      {Object.entries(summary.erstattungen || {}).some(([id, betrag]) => 
+      {Object.entries(summary.erstattungen || {}).some(([id, betrag]) =>
         summary.abrechnungsStatus?.[id]?.erhalten_am
       ) && (
         <div className="text-muted text-xs text-right">
-        Ursprünglich: {Object.values(summary.erstattungen || {}).reduce((sum, betrag) => 
+        Ursprünglich: {Object.values(summary.erstattungen || {}).reduce((sum, betrag) =>
           sum + Number(betrag || 0), 0
         ).toFixed(2)} €
         </div>
       )}
       </div>
       </div>
-      
+
       {/* Export */}
       <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
       {getKategorienMitErstattung().map(([key, displayName]) => (
@@ -1129,12 +619,12 @@ function FahrtenListe() {
       </div>
     );
     };
-  
+
   const roundKilometers = (value) => {
     const numValue = Number(value ?? 0);
     return numValue % 1 < 0.5 ? Math.floor(numValue) : Math.ceil(numValue);
   };
-  
+
   const sortedFahrten = React.useMemo(() => {
     let sortableFahrten = [...fahrten];
     if (sortConfig.key !== null) {
@@ -1150,7 +640,7 @@ function FahrtenListe() {
     }
     return sortableFahrten;
   }, [fahrten, sortConfig]);
-  
+
   const requestSort = (key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -1158,15 +648,15 @@ function FahrtenListe() {
     }
     setSortConfig({ key, direction });
   };
-  
+
   const formatValue = (value) => {
     return value == null ? "" : value;
   };
-  
+
   const handleEditMitfahrer = (fahrtId, mitfahrer) => {
     setEditingMitfahrer({ fahrtId, ...mitfahrer });
   };
-  
+
   const handleAddMitfahrer = (fahrtId) => {
     const fahrt = fahrten.find(f => f.id === fahrtId);
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
@@ -1174,7 +664,7 @@ function FahrtenListe() {
     setEditingMitfahrer({ fahrtId, isNew: true, richtung: suggestedRichtung });
     setIsMitfahrerModalOpen(true);
   };
-  
+
   const handleDeleteMitfahrer = async (fahrtId, mitfahrerId) => {
     showNotification(
       "Mitfahrer löschen",
@@ -1193,7 +683,7 @@ function FahrtenListe() {
       true // showCancel
     );
   };
-  
+
   const handleSaveMitfahrer = async (updatedMitfahrer) => {
     try {
       if (!updatedMitfahrer.fahrtId) {
@@ -1215,23 +705,23 @@ function FahrtenListe() {
       showNotification("Fehler", `Fehler beim Speichern des Mitfahrers: ${error.message}`);
     }
   };
-  
+
   const renderMitfahrer = (fahrt) => {
     if (!fahrt.mitfahrer || fahrt.mitfahrer.length === 0) {
       return null;
     }
-    
+
     const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
-    
+
     return (
       <div className="flex flex-wrap gap-2">
       {fahrt.mitfahrer.map((person, index) => {
-        const shouldDisplay = 
+        const shouldDisplay =
         (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
         (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
-        
+
         if (!shouldDisplay) return null;
-        
+
         return (
           <span
           key={index}
@@ -1255,12 +745,12 @@ function FahrtenListe() {
       </div>
     );
   };
-  
+
   const renderFahrtRow = (fahrt, detail = null) => {
     // Finde den Namen des Abrechnungsträgers
     const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
     const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
-    
+
     return (
       <tr key={fahrt.id} className="table-row">
       <td className="table-cell">
@@ -1275,7 +765,7 @@ function FahrtenListe() {
         <span className="text-value">{new Date(fahrt.datum).toLocaleDateString()}</span>
       )}
       </td>
-      
+
       <td className="table-cell">
       {editingFahrt?.id === fahrt.id ? (
         <div className="space-y-2">
@@ -1325,7 +815,7 @@ function FahrtenListe() {
         </div>
       )}
       </td>
-      
+
       <td className="table-cell">
       {editingFahrt?.id === fahrt.id ? (
         <div className="space-y-2">
@@ -1375,7 +865,7 @@ function FahrtenListe() {
         </div>
       )}
       </td>
-      
+
       <td className="table-cell">
       {editingFahrt?.id === fahrt.id ? (
         <input
@@ -1388,7 +878,7 @@ function FahrtenListe() {
         <span className="text-value">{fahrt.anlass}</span>
       )}
       </td>
-      
+
       <td className="table-cell text-right">
       {editingFahrt?.id === fahrt.id ? (
         <input
@@ -1403,7 +893,7 @@ function FahrtenListe() {
         </span>
       )}
       </td>
-      
+
       <td className="table-cell">
       {editingFahrt?.id === fahrt.id ? (
         <select
@@ -1423,7 +913,7 @@ function FahrtenListe() {
         </span>
       )}
       </td>
-      
+
       <td className="table-cell">
       {editingFahrt?.id === fahrt.id ? (
         <div className="space-y-2">
@@ -1455,20 +945,20 @@ function FahrtenListe() {
         renderMitfahrer(fahrt)
       )}
       </td>
-      
+
       <td className="table-cell">
       <div className="flex gap-2 justify-end">
       {editingFahrt?.id === fahrt.id ? (
         <>
-        <button 
-        onClick={handleSave} 
+        <button
+        onClick={handleSave}
         className="table-action-button-primary"
         title="Speichern"
         >
         ✓
         </button>
-        <button 
-        onClick={() => setEditingFahrt(null)} 
+        <button
+        onClick={() => setEditingFahrt(null)}
         className="table-action-button-secondary"
         title="Abbrechen"
         >
@@ -1477,15 +967,15 @@ function FahrtenListe() {
         </>
       ) : (
         <>
-        <button 
-        onClick={() => handleEdit(fahrt)} 
+        <button
+        onClick={() => handleEdit(fahrt)}
         className="table-action-button-primary"
         title="Bearbeiten"
         >
         ✎
         </button>
-        <button 
-        onClick={() => handleDelete(fahrt.id)} 
+        <button
+        onClick={() => handleDelete(fahrt.id)}
         className="table-action-button-secondary"
         title="Löschen"
         >
@@ -1498,11 +988,11 @@ function FahrtenListe() {
       </tr>
     );
   };
-  
+
   return (
     <div>
     {renderAbrechnungsStatus(summary)}
-    
+
     {/* Desktop View */}
     <div className="hidden md:block">
     <div className="table-container">
@@ -1565,13 +1055,13 @@ function FahrtenListe() {
     </table>
     </div>
     </div>
-    
+
     {/* Mobile View */}
     <div className="md:hidden space-y-4">
     {sortedFahrten.map((fahrt) => {
       const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
       const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
-      
+
       return (
         <div key={fahrt.id} className="mobile-card">
         {editingFahrt?.id === fahrt.id ? (
@@ -1586,7 +1076,7 @@ function FahrtenListe() {
           className="form-input w-full"
           />
           </div>
-          
+
           {/* Von-Ort */}
           <div>
           <label className="checkbox-label mb-2">
@@ -1617,7 +1107,7 @@ function FahrtenListe() {
             </select>
           )}
           </div>
-          
+
           {/* Nach-Ort */}
           <div>
           <label className="checkbox-label mb-2">
@@ -1648,7 +1138,7 @@ function FahrtenListe() {
             </select>
           )}
           </div>
-          
+
           {/* Anlass */}
           <div>
           <label className="form-label">Anlass</label>
@@ -1659,7 +1149,7 @@ function FahrtenListe() {
           className="form-input w-full"
           />
           </div>
-          
+
           {/* Kilometer */}
           <div>
           <label className="form-label">Kilometer</label>
@@ -1670,7 +1160,7 @@ function FahrtenListe() {
           className="form-input w-full"
           />
           </div>
-          
+
           {/* Abrechnung */}
           <div>
           <label className="form-label">Abrechnung</label>
@@ -1686,7 +1176,7 @@ function FahrtenListe() {
           ))}
           </select>
           </div>
-          
+
           {/* Mitfahrer */}
           <div>
           <label className="form-label">Mitfahrer:innen</label>
@@ -1715,7 +1205,7 @@ function FahrtenListe() {
           </button>
           </div>
           </div>
-          
+
           {/* Buttons */}
           <div className="flex gap-2">
           <button onClick={handleSave} className="btn-primary flex-1">
@@ -1754,7 +1244,7 @@ function FahrtenListe() {
           </button>
           </div>
           </div>
-          
+
           <div className="space-y-4">
           {/* Route */}
           <div className="grid grid-cols-1 gap-2">
@@ -1781,7 +1271,7 @@ function FahrtenListe() {
           )}
           </div>
           </div>
-          
+
           {/* Anlass & Kilometer */}
           <div className="grid grid-cols-2 gap-4">
           <div>
@@ -1795,7 +1285,7 @@ function FahrtenListe() {
           </div>
           </div>
           </div>
-          
+
           {/* Mitfahrer */}
           {fahrt.mitfahrer?.length > 0 && (
             <div>
@@ -1810,7 +1300,7 @@ function FahrtenListe() {
       );
     })}
     </div>
-    
+
     {/* Modals */}
     <Modal
     isOpen={rückfahrtDialog.isOpen}
@@ -1819,12 +1309,12 @@ function FahrtenListe() {
     >
     <div className="space-y-4">
     <p className="text-sm text-value">
-    {rückfahrtDialog.istRückfahrt 
-      ? "Es wurde eine zugehörige Hinfahrt erkannt." 
-      : "Es wurde eine zugehörige Rückfahrt erkannt."} 
+    {rückfahrtDialog.istRückfahrt
+      ? "Es wurde eine zugehörige Hinfahrt erkannt."
+      : "Es wurde eine zugehörige Rückfahrt erkannt."}
     Möchten Sie die Änderungen auch auf diese Fahrt anwenden?
     </p>
-    
+
     {/* Details der betroffenen Fahrten und Änderungen anzeigen */}
     {rückfahrtDialog.ergänzendeFahrt && rückfahrtDialog.updatedData && (
       <div className="space-y-4">
@@ -1862,7 +1352,7 @@ function FahrtenListe() {
       </div>
       </div>
       </div>
-      
+
       {/* Erkannte Fahrt */}
       <div className="bg-primary-25 dark:bg-primary-900/30 p-4 rounded-lg">
       <h4 className="text-sm font-medium text-value mb-2">
@@ -1897,7 +1387,7 @@ function FahrtenListe() {
       </div>
       </div>
       </div>
-      
+
       {/* Anstehende Änderungen - NUR für die aktuelle Fahrt */}
       <div className="bg-secondary-50 dark:bg-secondary-900/30 p-4 rounded-lg border border-secondary-100 dark:border-secondary-800">
       <h4 className="text-sm font-medium text-value mb-2">Anstehende Änderungen:</h4>
@@ -1945,7 +1435,7 @@ function FahrtenListe() {
       </div>
       </div>
     )}
-    
+
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
@@ -1976,13 +1466,13 @@ function FahrtenListe() {
         if (!rückfahrtDialog.aktuellefahrt || !rückfahrtDialog.ergänzendeFahrt || !rückfahrtDialog.updatedData) {
           throw new Error("Ungültige Daten");
         }
-        
+
         // Aktuelle Fahrt aktualisieren
         await updateFahrt(rückfahrtDialog.aktuellefahrt.id, rückfahrtDialog.updatedData);
-        
+
         // Ergänzende Fahrt anpassen
         const basisAnlass = rückfahrtDialog.updatedData.anlass.replace(/^(rückfahrt\s*)/i, "").trim();
-        
+
         let ergänzendesFahrtUpdate = {
           ...rückfahrtDialog.updatedData,
           vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
@@ -1990,7 +1480,7 @@ function FahrtenListe() {
           einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
           einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt
         };
-        
+
         // Anlass richtig setzen
         if (rückfahrtDialog.istRückfahrt) {
           // Bei Bearbeitung einer Rückfahrt - die Hinfahrt bekommt den Basis-Anlass
@@ -1999,9 +1489,9 @@ function FahrtenListe() {
           // Bei Bearbeitung einer Hinfahrt - die Rückfahrt bekommt "Rückfahrt" + Basis-Anlass
           ergänzendesFahrtUpdate.anlass = `Rückfahrt ${basisAnlass}`;
         }
-        
+
         await updateFahrt(rückfahrtDialog.ergänzendeFahrt.id, ergänzendesFahrtUpdate);
-        
+
         showNotification("Erfolg", "Beide Fahrten wurden erfolgreich aktualisiert.");
         await fetchFahrten();
         setRückfahrtDialog({ isOpen: false });
@@ -2011,7 +1501,7 @@ function FahrtenListe() {
         setRückfahrtDialog({ isOpen: false });
       }
     }}
-    
+
     className="btn-primary w-full"
     >
     Beide Fahrten aktualisieren
@@ -2019,15 +1509,15 @@ function FahrtenListe() {
     </div>
     </div>
     </Modal>
-    
-    
+
+
     <MitfahrerModal
     isOpen={!!viewingMitfahrer}
     onClose={() => setViewingMitfahrer(null)}
     initialData={viewingMitfahrer}
     readOnly={true}
     />
-    
+
     <MitfahrerModal
     isOpen={!!editingMitfahrer}
     onClose={() => setEditingMitfahrer(null)}
@@ -2045,46 +1535,46 @@ function MonthlyOverview() {
   const [hideCompleted, setHideCompleted] = useState(true);
   const [filteredData, setFilteredData] = useState([]);
   const currentYear = new Date().getFullYear().toString();
-    
+
   const getMonthName = (month) => {
     return new Date(2000, month - 1, 1).toLocaleString('de-DE', { month: 'long' });
   };
-  
+
   const calculateYearTotal = () => {
     const totals = filteredData.reduce((total, month) => {
       Object.entries(month.erstattungen || {}).forEach(([traegerId, betrag]) => {
         if (!total[traegerId]) {
           total[traegerId] = {
             original: 0,
-            ausstehend: 0 
+            ausstehend: 0
           };
         }
-        
+
         total[traegerId].original += Number(betrag || 0);
-        
+
         if (!month.abrechnungsStatus?.[traegerId]?.erhalten_am) {
           total[traegerId].ausstehend += Number(betrag || 0);
         }
       });
-      
+
       return total;
     }, {});
-    
+
     const relevantKeys = Object.keys(totals).filter(key => key !== 'gesamt');
     totals.gesamt = {
       original: relevantKeys.reduce((sum, key) => sum + (totals[key].original || 0), 0),
       ausstehend: relevantKeys.reduce((sum, key) => sum + (totals[key].ausstehend || 0), 0)
     };
-    
+
     return totals;
   };
-  
+
   const getKategorienMitErstattung = () => {
     const kategorien = [];
-    
+
     // Jahres-Summen aus dem yearTotal berechnen
     const yearTotals = calculateYearTotal();
-    
+
     // Abrechnungsträger Cards
     abrechnungstraeger.forEach(traeger => {
       const data = yearTotals[traeger.id];
@@ -2096,16 +1586,16 @@ function MonthlyOverview() {
         ]);
       }
     });
-    
+
     // Mitfahrer Card
     const mitfahrerData = yearTotals['mitfahrer'];
     if (mitfahrerData && (mitfahrerData.original > 0 || mitfahrerData.ausstehend > 0)) {
       kategorien.push(['mitfahrer', 'Mitfahrer:innen', mitfahrerData]);
     }
-    
+
     return kategorien;
   };
-  
+
   const allCategories = () => {
     // Sammle alle einzigartigen Kategorien
     const categories = new Set([
@@ -2114,26 +1604,26 @@ function MonthlyOverview() {
     ]);
     return categories.size; // Gibt die tatsächliche Anzahl der Kategorien zurück
   };
-  
+
   // MonthlyOverview - nur diese useEffects
   useEffect(() => {
     fetchMonthlyData(); // Dieser holt die Daten für alle relevanten Monate
   }, []);  // Nur einmal beim Mount
-  
+
   useEffect(() => {
     const filtered = monthlyData.filter(month => {
       if (selectedYear !== 'all' && month.year.toString() !== selectedYear) {
         return false;
       }
-      
+
       if (hideCompleted) {
         const allCompleted = Object.entries(month.erstattungen || {}).every(([id, betrag]) => {
           return betrag === 0 || month.abrechnungsStatus?.[id]?.erhalten_am;
         });
-        
-        const mitfahrerCompleted = !month.erstattungen?.mitfahrer || 
+
+        const mitfahrerCompleted = !month.erstattungen?.mitfahrer ||
         month.abrechnungsStatus?.mitfahrer?.erhalten_am;
-        
+
         if (allCompleted && mitfahrerCompleted) {
           return false;
         }
@@ -2142,7 +1632,7 @@ function MonthlyOverview() {
     });
     setFilteredData(filtered);
   }, [monthlyData, hideCompleted, selectedYear]);
-  
+
   const renderBetrag = (betrag, isReceived) => {
     return (
       <span className={isReceived ? "text-muted" : "text-value"}>
@@ -2150,10 +1640,10 @@ function MonthlyOverview() {
       </span>
     );
   };
-  
+
   const QuickActions = ({ filteredData, handleAbrechnungsStatus, abrechnungstraeger }) => {
     const [isOpen, setIsOpen] = useState(false);
-    
+
     const actions = [
       {
         label: 'Alle als eingereicht markieren',
@@ -2163,19 +1653,19 @@ function MonthlyOverview() {
             for (const month of filteredData) {
               // Für jeden Abrechnungsträger
               for (const traeger of abrechnungstraeger) {
-                if (month.erstattungen?.[traeger.id] > 0 && 
+                if (month.erstattungen?.[traeger.id] > 0 &&
                   !month.abrechnungsStatus?.[traeger.id]?.eingereicht_am) {
                     await handleAbrechnungsStatus(
-                      month.year, 
-                      month.monatNr, 
-                      traeger.id, 
-                      'eingereicht', 
+                      month.year,
+                      month.monatNr,
+                      traeger.id,
+                      'eingereicht',
                       today
                     );
                   }
               }
               // Für Mitfahrer
-              if (month.erstattungen?.mitfahrer > 0 && 
+              if (month.erstattungen?.mitfahrer > 0 &&
                 !month.abrechnungsStatus?.mitfahrer?.eingereicht_am) {
                   await handleAbrechnungsStatus(
                     month.year,
@@ -2199,7 +1689,7 @@ function MonthlyOverview() {
             for (const month of filteredData) {
               // Für jeden Abrechnungsträger
               for (const traeger of abrechnungstraeger) {
-                if (month.abrechnungsStatus?.[traeger.id]?.eingereicht_am && 
+                if (month.abrechnungsStatus?.[traeger.id]?.eingereicht_am &&
                   !month.abrechnungsStatus?.[traeger.id]?.erhalten_am) {
                     await handleAbrechnungsStatus(
                       month.year,
@@ -2211,7 +1701,7 @@ function MonthlyOverview() {
                   }
               }
               // Für Mitfahrer
-              if (month.abrechnungsStatus?.mitfahrer?.eingereicht_am && 
+              if (month.abrechnungsStatus?.mitfahrer?.eingereicht_am &&
                 !month.abrechnungsStatus?.mitfahrer?.erhalten_am) {
                   await handleAbrechnungsStatus(
                     month.year,
@@ -2228,7 +1718,7 @@ function MonthlyOverview() {
         }
       }
     ];
-    
+
     return (
       <div className="relative">
       <button
@@ -2240,7 +1730,7 @@ function MonthlyOverview() {
       ▼
       </span>
       </button>
-      
+
       {isOpen && (
         <>
         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
@@ -2263,13 +1753,13 @@ function MonthlyOverview() {
       </div>
     );
   };
-  
+
   const renderStatusCell = (month, traegerId) => {
     const status = month.abrechnungsStatus?.[traegerId];
-    const betrag = traegerId === 'mitfahrer' 
+    const betrag = traegerId === 'mitfahrer'
     ? month.erstattungen?.mitfahrer || 0
     : month.erstattungen?.[traegerId] || 0;
-    
+
     // Wenn Betrag 0 ist
     if (betrag === 0) {
       return (
@@ -2281,12 +1771,12 @@ function MonthlyOverview() {
         </div>
       );
     }
-    
+
     // Wenn erhalten
     if (status?.erhalten_am) {
       return (
         <div className="flex items-center justify-between">
-        <span 
+        <span
         className="status-badge-primary cursor-pointer"
         onClick={() => {
           showNotification(
@@ -2308,17 +1798,17 @@ function MonthlyOverview() {
         </div>
       );
     }
-    
+
     // Wenn eingereicht aber nicht erhalten
     if (status?.eingereicht_am) {
       return (
         <div className="flex items-center justify-between">
-        <span 
+        <span
         className="status-badge-secondary cursor-pointer"
-        onClick={() => setAbrechnungsStatusModal({ 
-          open: true, 
+        onClick={() => setAbrechnungsStatusModal({
+          open: true,
           traegerId,
-          aktion: 'erhalten', 
+          aktion: 'erhalten',
           jahr: month.year,
           monat: month.monatNr
         })}
@@ -2329,16 +1819,16 @@ function MonthlyOverview() {
         </div>
       );
     }
-    
+
     // Wenn noch nicht eingereicht
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
-      <span 
+      <span
       className="status-badge-secondary cursor-pointer"
-      onClick={() => setAbrechnungsStatusModal({ 
-        open: true, 
+      onClick={() => setAbrechnungsStatusModal({
+        open: true,
         traegerId,
-        aktion: 'eingereicht', 
+        aktion: 'eingereicht',
         jahr: month.year,
         monat: month.monatNr
       })}
@@ -2349,9 +1839,9 @@ function MonthlyOverview() {
       </div>
     ) : null;
   };
-  
+
   const yearTotal = calculateYearTotal();
-  
+
   return (
     <div className="w-full max-w-full space-y-6">
     <div className="card-container-highlight mb-4">
@@ -2369,7 +1859,7 @@ function MonthlyOverview() {
       </button>
     )}
     </div>
-    
+
     {/* Checkbox und Select - nur auf Desktop hier */}
     <div className="hidden sm:flex items-center gap-4 ml-auto">
     <label className="checkbox-label">
@@ -2387,8 +1877,8 @@ function MonthlyOverview() {
     />
     <span className="text-xs text-label">Abgeschlossene</span>
     </label>
-    <select 
-    value={selectedYear} 
+    <select
+    value={selectedYear}
     onChange={(e) => setSelectedYear(e.target.value)}
     className="form-select w-24"
     >
@@ -2402,7 +1892,7 @@ function MonthlyOverview() {
     </select>
     </div>
     </div>
-    
+
     {/* Zweite Zeile - nur Mobile */}
     <div className="flex sm:hidden items-center justify-end gap-4">
     <label className="checkbox-label">
@@ -2415,8 +1905,8 @@ function MonthlyOverview() {
     />
     <span className="text-xs text-label">Abgeschlossene</span>
     </label>
-    <select 
-    value={selectedYear} 
+    <select
+    value={selectedYear}
     onChange={(e) => setSelectedYear(e.target.value)}
     className="form-select w-24"
     >
@@ -2429,10 +1919,10 @@ function MonthlyOverview() {
     }
     </select>
     </div>
-    
+
     {/* Dritte Zeile - Quick Actions nur auf Mobile */}
     <div className="">
-    <QuickActions 
+    <QuickActions
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
@@ -2441,12 +1931,12 @@ function MonthlyOverview() {
     </div>
     </div>
     </div>
-    
+
     {/* Cards Grid - wie in der Monatsübersicht */}
     <div className={`grid grid-cols-1 mb-4 ${
-      getKategorienMitErstattung().length === 1 
+      getKategorienMitErstattung().length === 1
       ? 'sm:grid-cols-1 gap-y-4'
-      : getKategorienMitErstattung().length === 2 
+      : getKategorienMitErstattung().length === 2
       ? 'sm:grid-cols-2 gap-4'
       : getKategorienMitErstattung().length === 3
       ? 'sm:grid-cols-3 gap-4'
@@ -2467,7 +1957,7 @@ function MonthlyOverview() {
       )}
       </div>
     ))}
-    
+
     {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
       <div className="card-container col-span-1 sm:col-span-2 lg:col-span-full">
@@ -2489,16 +1979,16 @@ function MonthlyOverview() {
     {/* Desktop View - neue Card-basierte Ansicht */}
     <div className="hidden sm:block space-y-4">
     {filteredData.map((month) => {
-      
-      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+
+      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) =>
         sum + Number(betrag || 0), 0
       );
-      
+
       const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
         const received = month.abrechnungsStatus?.[id]?.erhalten_am;
         return sum + (received ? 0 : Number(betrag || 0));
       }, 0);
-      
+
       return (
         <div key={month.yearMonth} className="card-container">
         {/* Header mit Monat und Gesamtsumme */}
@@ -2517,7 +2007,7 @@ function MonthlyOverview() {
         )}
         </div>
         </div>
-        
+
         {/* Grid für Abrechnungsträger */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {abrechnungstraeger
@@ -2539,7 +2029,7 @@ function MonthlyOverview() {
             </div>
             </div>
           ))}
-        
+
         {/* Mitfahrer Card wenn vorhanden */}
         {month.erstattungen?.mitfahrer > 0 && (
           <div className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
@@ -2559,7 +2049,7 @@ function MonthlyOverview() {
       );
     })}
     </div>
-    
+
     {/* Mobile View */}
     <div className="sm:hidden space-y-4">
     {filteredData.map((month) => {
@@ -2567,11 +2057,11 @@ function MonthlyOverview() {
         const received = month.abrechnungsStatus?.[id]?.erhalten_am;
         return sum + (received ? 0 : Number(betrag || 0));
       }, 0);
-      
-      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) => 
+
+      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) =>
         sum + Number(betrag || 0), 0
       );
-      
+
       return (
         <div key={month.yearMonth} className="mobile-card">
         <div className="mobile-card-header mb-4">
@@ -2584,13 +2074,13 @@ function MonthlyOverview() {
         </div>
         </div>
         </div>
-        
+
         {gesamtAusstehend !== originalGesamt && (
           <div className="text-muted text-xs text-right mb-4">
           Ursprünglich: {originalGesamt.toFixed(2)} €
           </div>
         )}
-        
+
         <div className="space-y-4">
         {abrechnungstraeger
           .filter(traeger => {
@@ -2610,7 +2100,7 @@ function MonthlyOverview() {
             </div>
             </div>
           ))}
-        
+
         {/* Mitfahrer */}
         {month.erstattungen?.mitfahrer > 0 && (
           <div className="pt-4">
@@ -2630,13 +2120,13 @@ function MonthlyOverview() {
       );
     })}
     </div>
-    <AbrechnungsStatusModal 
-    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'} 
+    <AbrechnungsStatusModal
+    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'}
     onClose={() => setAbrechnungsStatusModal({})}
     onSubmit={(date) => handleAbrechnungsStatus(
-      abrechnungsStatusModal.jahr, 
+      abrechnungsStatusModal.jahr,
       abrechnungsStatusModal.monat,
-      abrechnungsStatusModal.traegerId, 
+      abrechnungsStatusModal.traegerId,
       abrechnungsStatusModal.aktion,
       date
     )}
@@ -2658,7 +2148,7 @@ function LoginPage() {
     email: '',
     registrationCode: ''
   });
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -2667,25 +2157,25 @@ function LoginPage() {
       alert('Login fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.');
     }
   };
-  
+
   const validateEmail = (email) => {
     const allowedEmailDomains = window.appConfig?.allowedEmailDomains || process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS;
     if (!allowedEmailDomains) return true;
-    
+
     const domain = email.split('@')[1];
     const allowedDomainsArray = allowedEmailDomains.split(',');
     return allowedDomainsArray.includes(domain);
   };
-  
+
   const handleRegistration = async (e) => {
     e.preventDefault();
-    
+
     // Email-Domain prüfen
     if (!validateEmail(registrationData.email)) {
       showNotification('Fehler', 'Diese Email-Domain ist nicht für die Registrierung zugelassen');
       return;
     }
-    
+
     try {
       const response = await axios.post('/api/auth/register', registrationData);
       showNotification('Erfolg', response.data.message);
@@ -2694,7 +2184,7 @@ function LoginPage() {
       showNotification('Fehler', error.response?.data?.message || 'Registrierung fehlgeschlagen');
     }
   };
-  
+
   const appTitle = window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen";
   const allowRegistration = window.appConfig?.allowRegistration === 'true' || process.env.REACT_APP_ALLOW_REGISTRATION === 'true';
   const allowedEmailDomains = window.appConfig?.allowedEmailDomains || process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS;
@@ -2707,7 +2197,7 @@ function LoginPage() {
     <h1 className="text-lg font-medium text-value text-center mb-6">
     {appTitle}
     </h1>
-    
+
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
     <label className="form-label">
@@ -2721,7 +2211,7 @@ function LoginPage() {
     required
     />
     </div>
-    
+
     <div>
     <label className="form-label">
     Passwort
@@ -2734,7 +2224,7 @@ function LoginPage() {
     required
     />
     </div>
-    
+
     <div className="flex flex-col gap-2">
     <button type="submit" className="btn-primary w-full">
     Login
@@ -2764,7 +2254,7 @@ function LoginPage() {
     </div>
     </form>
     </div>
-    
+
     <Modal
     isOpen={showForgotPassword}
     onClose={() => setShowForgotPassword(false)}
@@ -2772,7 +2262,7 @@ function LoginPage() {
     >
     <ForgotPasswordForm onClose={() => setShowForgotPassword(false)} />
     </Modal>
-    
+
     <Modal
     isOpen={showRegistration}
     onClose={() => setShowRegistration(false)}
@@ -2840,7 +2330,7 @@ function LoginPage() {
 function ForgotPasswordForm({ onClose }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState(null);
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -2857,7 +2347,7 @@ function ForgotPasswordForm({ onClose }) {
       });
     }
   };
-  
+
   return (
     <div className="card-container-highlight">
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -2873,13 +2363,13 @@ function ForgotPasswordForm({ onClose }) {
     required
     />
     </div>
-    
+
     {status && (
       <div className={status.type === 'success' ? 'status-success' : 'status-error'}>
       {status.message}
       </div>
     )}
-    
+
     <div className="flex flex-col sm:flex-row gap-2">
     <button
     type="button"
@@ -2904,7 +2394,7 @@ function App() {
   React.useEffect(() => {
     document.title = "Fahrtenbuch";
   }, []);
-  
+
   return (
     <ThemeProvider>
     <BrowserRouter>
@@ -2938,25 +2428,25 @@ function AppContent() {
         }
       }
     };
-    
+
     checkTokenExpiration();
     const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
   }, [logout]);
-  
+
   if (!isLoggedIn) {
     return <LoginPage />;
   }
-    
+
   return (
     <div className="container mx-auto p-4">
-    <div className="mb-8"> 
+    <div className="mb-8">
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
     <h1 className="text-lg font-medium text-value">
     {window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch"}
     </h1>
-    
+
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
     {/* Admin-Button und Einstellungen in einer eigenen Zeile auf Mobil */}
     <div className={`grid ${user?.role === 'admin' ? 'grid-cols-2' : 'grid-cols-1'} sm:flex gap-2 w-full`}>
@@ -2977,7 +2467,7 @@ function AppContent() {
           <span>Einstellungen</span>
         </button>
       </div>
-      
+
       {/* Theme, Info, Hilfe und Logout in einer zweiten Zeile auf Mobil */}
       <div className="flex justify-between w-full sm:gap-4">
 <div className="flex gap-2">
@@ -3005,8 +2495,8 @@ function AppContent() {
     <span className="hidden sm:inline">Hilfe</span>
   </Link>
 </div>
-        <button 
-          onClick={logout} 
+        <button
+          onClick={logout}
           className="btn-secondary flex items-center justify-center gap-2"
         >
           <LogOut size={16} />
@@ -3016,40 +2506,40 @@ function AppContent() {
     </div>
   </div>
 </div>
-    
+
     {/* Hauptinhalt */}
     <div className="space-y-6">
       <FahrtForm />
       <FahrtenListe />
       <MonthlyOverview />
     </div>
-    
+
     {/* Modals */}
 
-<NewFeaturesModal 
-  isOpen={showNewFeaturesModal} 
-  onClose={() => setShowNewFeaturesModal(false)} 
+<NewFeaturesModal
+  isOpen={showNewFeaturesModal}
+  onClose={() => setShowNewFeaturesModal(false)}
 />
 
-    <InfoModal 
-      isOpen={showInfoModal} 
-      onClose={() => setShowInfoModal(false)} 
+    <InfoModal
+      isOpen={showInfoModal}
+      onClose={() => setShowInfoModal(false)}
     />
 
-    <ProfileModal 
-      isOpen={isProfileModalOpen} 
-      onClose={() => setIsProfileModalOpen(false)} 
+    <ProfileModal
+      isOpen={isProfileModalOpen}
+      onClose={() => setIsProfileModalOpen(false)}
     />
-    
-    <Modal 
-      isOpen={showUserManagementModal} 
+
+    <Modal
+      isOpen={showUserManagementModal}
       onClose={() => setShowUserManagementModal(false)}
       title="Benutzerverwaltung"
       size="wide"
     >
       <UserManagement />
     </Modal>
-  
+
   </div>
 );
 }
