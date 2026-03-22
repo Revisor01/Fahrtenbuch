@@ -16,15 +16,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-21)
+See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** Excel-Export bildet das offizielle Abrechnungsformular korrekt ab -- ohne manuelle Nacharbeit
-**Current focus:** Phase 04 — von-bis-zeitraum-in-monats-bersicht
+**Current focus:** Milestone v1.1 — Stabilität & Security
 
 ## Current Position
 
-Phase: 04
-Plan: Not started
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-22 — Milestone v1.1 started
 
 ## Performance Metrics
 
