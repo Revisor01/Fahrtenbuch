@@ -1,45 +1,57 @@
-# Requirements: Fahrtenbuch v1.2 — Features & Refactoring
+# Requirements: Fahrtenbuch v1.3 — Dashboard & UX
 
 **Defined:** 2026-03-22
-**Core Value:** Modulare Codebasis + PDF-Export als neues Feature
+**Core Value:** Schnellere Fahrteingabe durch Favoriten und bessere Übersicht durch Dashboard
 
-## v1.2 Requirements
+## v1.3 Requirements
 
-### Refactoring
+### Dashboard
 
-- [x] **REF-01**: App.js in modulare Komponenten aufteilen (AppProvider, Dashboard, Monatsübersicht, Settings etc.)
-- [x] **REF-02**: Shared State über Custom Hooks statt inline-Logik in App.js
-- [x] **REF-03**: Export-Logik in eigene Komponente extrahieren
+- [ ] **DASH-01**: Dashboard als neue Startseite mit KPI-Cards (offene Erstattungen, km diesen Monat, Fahrten diesen Monat)
+- [ ] **DASH-02**: Aufklappbares Fahrt-Formular direkt im Dashboard (wie bisheriges Formular)
+- [ ] **DASH-03**: Navigation mit Tabs: Dashboard, Fahrten & Export, Monatsübersicht, Einstellungen
 
-### PDF-Export
+### Favoriten
 
-- [x] **PDF-01**: PDF-Export als Alternative zu Excel mit gleichem Layout (Unterschriftsfelder, Kostenstelle, Datum)
-- [x] **PDF-02**: Export-Dialog mit Format-Auswahl (Excel oder PDF)
-- [x] **PDF-03**: PDF unterstützt Einzel- und Mehrmonats-Export (wie Excel)
+- [ ] **FAV-01**: Nutzer kann Fahrten als Favorit speichern (Von, Nach, Anlass, Abrechnungsträger)
+- [ ] **FAV-02**: Favoriten im Dashboard als Schnelleingabe — ein Klick trägt Fahrt mit heutigem Datum ein
+- [ ] **FAV-03**: Letzte 3 Fahrten im Dashboard mit "Nochmal für heute"-Button
+
+### Statistiken
+
+- [ ] **STAT-01**: Jahres-Balkendiagramm im Dashboard (km pro Monat)
+- [ ] **STAT-02**: Erstattungs-Übersicht pro Abrechnungsträger über das Jahr
+
+### Adress-Autocomplete
+
+- [ ] **ADDR-01**: Bei Ort-Eingabe Adress-Vorschläge via OpenStreetMap/Nominatim API
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| CRA → Vite Migration | Zu groß, eigener Milestone wenn nötig |
-| Vollständiges UI-Redesign | Refactoring = Struktur, nicht Aussehen |
-| Weitere Export-Formate (CSV) | Kein Bedarf |
+| Multi-User-Admin-Übersicht | Zu komplex, eigener Milestone |
+| PWA / Service Worker | Eigener Milestone |
+| CRA → Vite Migration | Eigener Milestone |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REF-01 | Phase 8 | Complete (08-02) |
-| REF-02 | Phase 8 | Complete (08-01) |
-| REF-03 | Phase 8 | Complete (08-02) |
-| PDF-01 | Phase 9 | Complete |
-| PDF-02 | Phase 9 | Complete |
-| PDF-03 | Phase 9 | Complete |
+| DASH-01 | — | Pending |
+| DASH-02 | — | Pending |
+| DASH-03 | — | Pending |
+| FAV-01 | — | Pending |
+| FAV-02 | — | Pending |
+| FAV-03 | — | Pending |
+| STAT-01 | — | Pending |
+| STAT-02 | — | Pending |
+| ADDR-01 | — | Pending |
 
 **Coverage:**
-- v1.2 requirements: 6 total
-- Mapped to phases: 6
-- Unmapped: 0
+- v1.3 requirements: 9 total
+- Mapped to phases: 0
+- Unmapped: 9 ⚠️
 
 ---
 *Requirements defined: 2026-03-22*
