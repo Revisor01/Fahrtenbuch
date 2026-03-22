@@ -38,6 +38,7 @@ function AppProvider({ children }) {
   const [fahrten, setFahrten] = useState([]);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedVonMonth, setSelectedVonMonth] = useState(''); // '' = Einzelmonat-Modus
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
@@ -201,17 +202,27 @@ function AppProvider({ children }) {
   
   const fetchFahrten = async () => {
     try {
-      const [year, month] = selectedMonth.split('-');
-      const response = await axios.get(`${API_BASE_URL}/fahrten/report/${year}/${month}`);
+      const [bisYear, bisMonth] = selectedMonth.split('-');
+
+      let response;
+      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
+        // Zeitraum-Modus: Von != Bis und Von != '---'
+        const [vonYear, vonMonth] = selectedVonMonth.split('-');
+        response = await axios.get(`${API_BASE_URL}/fahrten/report-range/${vonYear}/${vonMonth}/${bisYear}/${bisMonth}`);
+      } else {
+        // Einzelmonat-Modus: Von = '---' oder Von = Bis
+        response = await axios.get(`${API_BASE_URL}/fahrten/report/${bisYear}/${bisMonth}`);
+      }
+
       setFahrten(response.data.fahrten.map(fahrt => ({
         ...fahrt,
         mitfahrer: fahrt.mitfahrer || []
       })));
-      setSummary(response.data.summary);  // Diese Zeile hinzufügen
+      setSummary(response.data.summary);
     } catch (error) {
       console.error('Fehler beim Abrufen der Fahrten:', error);
       setFahrten([]);
-      setSummary({});  // Diese Zeile hinzufügen
+      setSummary({});
     }
   };
   
@@ -440,7 +451,9 @@ function AppProvider({ children }) {
       setAbrechnungsStatusModal,
       handleAbrechnungsStatus,
       abrechnungstraeger,
-      setAbrechnungstraeger
+      setAbrechnungstraeger,
+      selectedVonMonth,
+      setSelectedVonMonth
     }}>
     {children}
     <NotificationModal
@@ -505,7 +518,7 @@ function AppProvider({ children }) {
 }
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -528,7 +541,7 @@ function FahrtenListe() {
 
   useEffect(() => {
     fetchFahrten();
-  }, [selectedMonth]);
+  }, [selectedMonth, selectedVonMonth]);
   
   useEffect(() => {
     if (fahrten.length > 0) {
@@ -536,14 +549,18 @@ function FahrtenListe() {
     }
   }, [fahrten]);
   
-  const handleMonthChange = (e) => {
+  const handleVonMonthChange = (e) => {
+    setSelectedVonMonth(e.target.value); // '' or 'YYYY-MM'
+  };
+
+  const handleBisMonthChange = (e) => {
     const monthIndex = e.target.value;
     const date = new Date(selectedYear, monthIndex);
     setSelectedMonthName(date.toLocaleString('default', { month: 'long' }));
     setSelectedMonth(`${selectedYear}-${(parseInt(monthIndex) + 1).toString().padStart(2, '0')}`);
   };
-  
-  const handleYearChange = (e) => {
+
+  const handleBisYearChange = (e) => {
     const year = e.target.value;
     setSelectedYear(year);
     setSelectedMonth(`${year}-${selectedMonth.split('-')[1]}`);
@@ -869,6 +886,7 @@ function FahrtenListe() {
     setSelectedYear(date.getFullYear().toString());
     setSelectedMonthName(date.toLocaleString('default', { month: 'long' }));
     setSelectedMonth(`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`);
+    setSelectedVonMonth('');
   };
   
   const getKategorienMitErstattung = () => {
@@ -922,24 +940,44 @@ function FahrtenListe() {
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div className="w-full flex justify-between items-center">
-      <h2 className="text-lg font-medium text-value">Monatsübersicht</h2>
-      {selectedMonth !== currentMonth && (
+      <h2 className="text-lg font-medium text-value">
+        {selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum-Übersicht' : 'Monatsübersicht'}
+      </h2>
+      {(selectedMonth !== currentMonth || selectedVonMonth) && (
         <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden">
         Aktueller Monat
         </button>
       )}
       </div>
-      
+
       <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
       <div className="flex items-center justify-end gap-2 w-full">
-      {selectedMonth !== currentMonth && (
+      {(selectedMonth !== currentMonth || selectedVonMonth) && (
         <button onClick={resetToCurrentMonth} className="btn-secondary hidden sm:block">
         Aktueller Monat
         </button>
       )}
+      {/* Von-Dropdown */}
+      <label className="text-xs text-label">Von:</label>
+      <select
+      value={selectedVonMonth}
+      onChange={handleVonMonthChange}
+      className="form-select w-36">
+      <option value="">---</option>
+      {[...Array(12)].map((_, i) => {
+        const m = (i + 1).toString().padStart(2, '0');
+        return (
+          <option key={`von-${selectedYear}-${m}`} value={`${selectedYear}-${m}`}>
+          {new Date(0, i).toLocaleString("default", { month: "long" })}
+          </option>
+        );
+      })}
+      </select>
+      {/* Bis-Dropdown */}
+      <label className="text-xs text-label">Bis:</label>
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
-      onChange={handleMonthChange}
+      onChange={handleBisMonthChange}
       className="form-select w-32">
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
@@ -949,7 +987,7 @@ function FahrtenListe() {
       </select>
       <select
       value={selectedYear}
-      onChange={handleYearChange}
+      onChange={handleBisYearChange}
       className="form-select w-24">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
