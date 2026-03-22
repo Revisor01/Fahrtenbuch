@@ -445,7 +445,19 @@ exports.getMonthlySummary = async (req, res) => {
     if (!rows.length) {
       return res.status(404).json({ message: 'Keine Daten für die monatliche Zusammenfassung gefunden' });
     }
-    
+
+    // Mitfahrer-Erstattungssätze aus DB laden
+    const [mitfahrerSaetze] = await db.execute(
+      'SELECT betrag, gueltig_ab FROM mitfahrer_erstattung WHERE user_id = ? ORDER BY gueltig_ab DESC',
+      [userId]
+    );
+
+    const getMitfahrerSatz = (datum) => {
+      const passend = mitfahrerSaetze.find(s => new Date(s.gueltig_ab) <= new Date(datum));
+      if (!passend && mitfahrerSaetze.length > 0) return mitfahrerSaetze[mitfahrerSaetze.length - 1].betrag;
+      return passend ? passend.betrag : 0;
+    };
+
     // Gruppiere nach Monaten
     const summary = rows.reduce((acc, row) => {
       if (!acc[row.yearMonth]) {
@@ -462,8 +474,7 @@ exports.getMonthlySummary = async (req, res) => {
       };
       
       if (row.mitfahrer_count > 0) {
-        // TODO: Hier noch den korrekten Mitfahrersatz für das Datum holen
-        const mitfahrerErstattung = row.mitfahrer_count * 0.05 * row.kilometer;
+        const mitfahrerErstattung = row.mitfahrer_count * getMitfahrerSatz(row.datum) * row.kilometer;
         if (!acc[row.yearMonth].erstattungen.mitfahrer) {
           acc[row.yearMonth].erstattungen.mitfahrer = {
             kilometer: 0,
