@@ -37,6 +37,22 @@ function NotificationModal({ isOpen, onClose, title, message, onConfirm, showCan
         >
         {secondLabel || 'Option 2'}
         </button>
+        <button
+        onClick={() => {
+          onConfirm?.();
+          onSecondAction?.();
+          onClose();
+        }}
+        className="btn-secondary w-full"
+        >
+        Beide
+        </button>
+        <button
+        onClick={onClose}
+        className="btn-secondary w-full"
+        >
+        Abbrechen
+        </button>
       </>
     ) : (
       <button
