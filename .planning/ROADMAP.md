@@ -112,11 +112,11 @@ Plans:
   2. Im Export-Dialog kann der Nutzer zwischen Excel und PDF waehlen
   3. PDF-Export funktioniert sowohl fuer Einzelmonat als auch fuer Mehrmonats-Zeitraeume
   4. Das PDF ist direkt druckbar und einreichbar ohne manuelle Nacharbeit
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Backend: pdfkit installieren, pdfExport.js erstellen, PDF-Routen anlegen
+- [ ] 09-02-PLAN.md — Frontend: Excel/PDF Format-Auswahl im Export-Bereich
 
 ## Progress
 
@@ -133,4 +133,4 @@ Phases execute in numeric order: 8 → 9
 | 6. Security Hardening | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 7. Code-Qualität | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
-| 9. PDF-Export | v1.2 | 0/? | Not started | - |
+| 9. PDF-Export | v1.2 | 0/2 | Not started | - |
