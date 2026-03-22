@@ -849,13 +849,6 @@ function FahrtenListe() {
       const ergänzendeFahrt = findErgänzendeFahrt(editingFahrt);
       
       if (ergänzendeFahrt) {
-        console.log("Dialog wird geöffnet mit:", {
-          aktuellefahrt: editingFahrt,
-          ergänzendeFahrt,
-          updatedFahrt,
-          istRückfahrt: editingFahrt.anlass.toLowerCase().includes('rückfahrt')
-        });
-        
         // Dialog mit der erkannten Fahrt anzeigen
         setRückfahrtDialog({
           isOpen: true,
@@ -2941,7 +2934,6 @@ function AppContent() {
       if (token) {
         const tokenData = JSON.parse(atob(token.split('.')[1]));
         if (tokenData.exp * 1000 < Date.now()) {
-          console.log('Token expired, logging out...');
           logout();
         }
       }

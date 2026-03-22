@@ -6,8 +6,7 @@ const mailService = require('../services/mailService');
 
 exports.login = async (req, res) => {
     const { username, password } = req.body;
-    console.log('Login attempt:', { username });
-    
+
     try {
       // Suche den User anhand des Usernamens oder der E-Mail
       const [rows] = await db.execute(
@@ -19,17 +18,14 @@ exports.login = async (req, res) => {
       );
         
       if (rows.length === 0) {
-          console.log('User not found');
           return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
       }
         
       const user = rows[0];
         
       const isMatch = await bcrypt.compare(password, user.password);
-      console.log('Password match:', isMatch);
-        
+
       if (!isMatch) {
-          console.log('Password mismatch');
           return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
       }
         
@@ -39,7 +35,6 @@ exports.login = async (req, res) => {
         { expiresIn: '1d' }
       );
         
-      console.log('Login successful, token generated');
       res.json({ token });
     } catch (error) {
       console.error('Login error:', error);

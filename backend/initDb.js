@@ -32,7 +32,7 @@ async function initializeDatabase() {
         }
 
         await connection.commit();
-        console.log('Database initialization completed successfully');
+        console.info('Database initialization completed successfully');
 
     } catch (error) {
         if (connection) {

@@ -24,7 +24,7 @@ async function updateTemplate() {
   ws.getCell('A36').font = { name: 'Arial', size: 12, bold: true };
 
   await wb.xlsx.writeFile(templatePath);
-  console.log('Template updated successfully');
+  console.info('Template updated successfully');
 }
 
 updateTemplate().catch(console.error);
