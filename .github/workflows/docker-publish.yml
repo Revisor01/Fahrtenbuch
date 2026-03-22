@@ -67,3 +67,7 @@ jobs:
           labels: ${{ steps.meta-frontend.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Deploy to Portainer
+        if: github.event_name != 'pull_request'
+        run: curl -s -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
