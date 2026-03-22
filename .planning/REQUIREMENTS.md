@@ -1,69 +1,62 @@
-# Requirements: Fahrtenbuch v2
+# Requirements: Fahrtenbuch v1.1 — Stabilität & Security
 
-**Defined:** 2026-03-21
-**Core Value:** Excel-Export bildet das offizielle Abrechnungsformular korrekt ab — ohne manuelle Nacharbeit
+**Defined:** 2026-03-22
+**Core Value:** App robuster, sicherer und wartbarer machen
 
-## v1 Requirements
+## v1.1 Requirements
 
-### Excel-Export
+### Bugfixes
 
-- [x] **EXCEL-01**: Datum wird im Format TT.MM.JJJJ als echtes Excel-Datum exportiert (nicht als Text)
-- [x] **EXCEL-02**: Unterschriftszeile unten im Export: "Unterschrift: ___" mit Datumsfeld
-- [x] **EXCEL-03**: Genehmigungszeile unten im Export: "Angeordnet/genehmigt Unterschrift: ___"
-- [x] **EXCEL-04**: Kostenstelle (Kst.) wird neben dem Kostenträger im Excel-Header angezeigt
+- [ ] **BUG-01**: Mitfahrer-Erstattungssatz wird aus der DB gelesen statt hardcoded 0,05 €/km
+- [ ] **BUG-02**: Rückfahrt-Matching case-insensitive und robuster bei ID-Abweichungen
+- [ ] **BUG-03**: Axios-Interceptor Race Condition bei parallelen 401-Responses fixen
 
-### Mehrmonats-Export
+### Security
 
-- [x] **MULTI-01**: Nutzer kann Von-Monat und Bis-Monat für Export wählen (UI-Dialog)
-- [x] **MULTI-02**: Excel-Header zeigt gewählten Zeitraum (z.B. "Monat: April bis Juni")
-- [x] **MULTI-03**: "Eingereicht"-Status funktioniert korrekt über Mehrmonats-Zeiträume
+- [ ] **SEC-01**: helmet-Middleware für sichere HTTP-Headers
+- [ ] **SEC-02**: express-rate-limit auf Login-Endpoint (Brute-Force-Schutz)
+- [ ] **SEC-03**: Error-Messages sanitizen — keine DB-Details an Client leaken
+- [ ] **SEC-04**: Body-Size-Limit auf express.json() setzen
 
-### Datenintegrität
+### Code-Qualität
 
-- [x] **DATA-01**: Änderung einer gespeicherten Distanz aktualisiert automatisch alle bestehenden Fahrten mit dieser Strecke (in einer Transaktion)
+- [ ] **QUAL-01**: Input-Validierung mit Zod für alle Backend-Controller
+- [ ] **QUAL-02**: Debug-Logs entfernen (168+ console.log, DEBUGGING-Prefix)
+- [ ] **QUAL-03**: Dependency-Updates — Dependabot-Alerts fixen (30 offene Alerts)
 
-### Abrechnungsträger
+## v1.2 Requirements (geplant, nicht in diesem Milestone)
 
-- [x] **ABRTR-01**: Abrechnungsträger hat optionales Freitextfeld "Kostenstelle" (DB, API, UI)
-
-## v2 Requirements
-
-(Keine — alle Feedback-Items sind im aktuellen Scope)
+- App.js aufteilen in kleinere Komponenten
+- PDF-Export als Alternative zu Excel
+- Export-Dialog mit Format-Auswahl (Excel/PDF)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| VPN-Erreichbarkeit | Netzwerk-Problem auf Nutzerseite, kein App-Issue |
-| Mobile App | Web-first reicht, responsive UI deckt mobile Nutzung ab |
-| Kostenstelle nachträglich in Excel editieren | Nutzer kann in App oder Excel selbst anpassen |
-| Refactoring App.js (2949 Zeilen) | Nicht Teil dieses Feedbacks, separates Tech-Debt-Projekt |
-
-## Constraints
-
-- **Responsive**: Alle UI-Änderungen (Export-Dialog, Kostenstelle-Feld) müssen auf Desktop und Mobile funktionieren
-- **Tech Stack**: Bestehend beibehalten (React, Express, MySQL, exceljs)
-- **Abwärtskompatibilität**: Einzelmonats-Export muss weiterhin funktionieren
+| Audit-Log | Jeder macht das für sich, nicht nötig |
+| CSV-Export für Steuer | Kein Bedarf bei den Nutzern |
+| 2FA | Niedrige Adoption, unverhältnismäßiger Aufwand |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXCEL-01 | Phase 2 | Complete |
-| EXCEL-02 | Phase 2 | Complete |
-| EXCEL-03 | Phase 2 | Complete |
-| EXCEL-04 | Phase 2 | Complete |
-| MULTI-01 | Phase 3 | Complete |
-| MULTI-02 | Phase 3 | Complete |
-| MULTI-03 | Phase 3 | Complete |
-| DATA-01 | Phase 1 | Complete |
-| ABRTR-01 | Phase 1 | Complete |
+| BUG-01 | — | Pending |
+| BUG-02 | — | Pending |
+| BUG-03 | — | Pending |
+| SEC-01 | — | Pending |
+| SEC-02 | — | Pending |
+| SEC-03 | — | Pending |
+| SEC-04 | — | Pending |
+| QUAL-01 | — | Pending |
+| QUAL-02 | — | Pending |
+| QUAL-03 | — | Pending |
 
 **Coverage:**
-- v1 requirements: 9 total
-- Mapped to phases: 9
-- Unmapped: 0
+- v1.1 requirements: 10 total
+- Mapped to phases: 0
+- Unmapped: 10 ⚠️
 
 ---
-*Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after roadmap creation*
+*Requirements defined: 2026-03-22*
