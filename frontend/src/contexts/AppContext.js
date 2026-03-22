@@ -69,9 +69,9 @@ function AppProvider({ children }) {
     }
   };
 
-  const showNotification = (title, message, onConfirm = () => {}, showCancel = false) => {
+  const showNotification = (title, message, onConfirm = () => {}, showCancel = false, confirmLabel, onSecondAction, secondLabel) => {
     setHasActiveNotification(true);
-    setNotification({ isOpen: true, title, message, onConfirm, showCancel });
+    setNotification({ isOpen: true, title, message, onConfirm, showCancel, confirmLabel, onSecondAction, secondLabel });
   };
 
   const closeNotification = () => {
@@ -464,6 +464,9 @@ function AppProvider({ children }) {
     message={notification.message}
     onConfirm={notification.onConfirm}
     showCancel={notification.showCancel}
+    confirmLabel={notification.confirmLabel}
+    onSecondAction={notification.onSecondAction}
+    secondLabel={notification.secondLabel}
     />
     <AbrechnungsStatusModal
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'}
