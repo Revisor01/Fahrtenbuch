@@ -79,10 +79,11 @@ Plans:
   2. Login-Endpoint blockt nach N fehlgeschlagenen Versuchen temporär weitere Requests
   3. Fehlermeldungen an den Client enthalten keine internen Details (DB-Fehlercodes, Stack-Traces, Tabellennamen)
   4. Requests mit überdimensioniertem JSON-Body werden abgelehnt bevor sie den Controller erreichen
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — helmet, express-rate-limit und Body-Size-Limit einbauen
+- [ ] 06-02-PLAN.md — Error-Messages in allen Controllern sanitizen
 
 ### Phase 7: Code-Qualität
 **Goal**: Backend validiert alle Eingaben sauber, Production-Code ist frei von Debug-Output, Dependencies sind aktuell
@@ -109,5 +110,5 @@ Phases execute in numeric order: 5 → 6 → 7
 | 3. Mehrmonats-Export | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 4. Von/Bis-Zeitraum | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 5. Bugfixes | v1.1 | 1/1 | Complete | 2026-03-22 |
-| 6. Security Hardening | v1.1 | 0/? | Not started | - |
+| 6. Security Hardening | v1.1 | 0/2 | Not started | - |
 | 7. Code-Qualität | v1.1 | 0/? | Not started | - |
