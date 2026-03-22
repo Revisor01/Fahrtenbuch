@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilität & Security
 status: unknown
-stopped_at: Phase 05 Plan 01 complete, bereit fuer Phase 6 Planning
-last_updated: "2026-03-22T10:05:35.008Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-22T10:11:37.847Z"
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 3
+  completed_plans: 2
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** App robuster, sicherer und wartbarer machen — keine neuen Features, aber solide Grundlage
-**Current focus:** Phase 05 — bugfixes
+**Current focus:** Phase 06 — security-hardening
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (security-hardening) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Plan: Not started
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 05 | 1 | 2min | 2min |
+| Phase 06 P01 | 1min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ Recent decisions affecting current work:
 - v1.1 fokussiert auf Stabilität, keine neuen Features
 - Separate DB-Query fuer Mitfahrer-Saetze statt UNION-Query erweitern (Phase 05)
 - useRef statt useState fuer isLoggingOut Guard (Phase 05)
+- [Phase 06]: helmet() Defaults ohne CSP-Anpassung - Frontend ueber separaten Nginx-Container
+- [Phase 06]: Register-Route nicht rate-limited - eigene Validierung, selten genutzt
 
 ### Pending Todos
 
@@ -73,6 +76,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22
-Stopped at: Phase 05 Plan 01 complete, bereit fuer Phase 6 Planning
+Last session: 2026-03-22T10:11:37.845Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
