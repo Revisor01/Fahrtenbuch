@@ -29,8 +29,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REF-01 | Phase 8 | Pending |
-| REF-02 | Phase 8 | Pending |
+| REF-01 | Phase 8 | In Progress (08-01) |
+| REF-02 | Phase 8 | In Progress (08-01) |
 | REF-03 | Phase 8 | Pending |
 | PDF-01 | Phase 9 | Pending |
 | PDF-02 | Phase 9 | Pending |

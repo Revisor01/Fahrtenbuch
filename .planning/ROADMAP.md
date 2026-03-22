@@ -100,7 +100,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — AppProvider und FahrtenListe aus App.js extrahieren
+- [x] 08-01-PLAN.md — AppProvider und FahrtenListe aus App.js extrahieren
 - [ ] 08-02-PLAN.md — MonthlyOverview, LoginPage und AppContent extrahieren — App.js wird minimal
 
 ### Phase 9: PDF-Export
@@ -132,5 +132,5 @@ Phases execute in numeric order: 8 → 9
 | 5. Bugfixes | v1.1 | 1/1 | Complete | 2026-03-22 |
 | 6. Security Hardening | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 7. Code-Qualität | v1.1 | 2/2 | Complete | 2026-03-22 |
-| 8. Frontend-Refactoring | v1.2 | 0/2 | Not started | - |
+| 8. Frontend-Refactoring | v1.2 | 1/2 | In progress | - |
 | 9. PDF-Export | v1.2 | 0/? | Not started | - |
