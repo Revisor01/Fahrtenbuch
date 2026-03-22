@@ -20,7 +20,7 @@
 
 ### Code-Qualität
 
-- [ ] **QUAL-01**: Input-Validierung mit Zod für alle Backend-Controller
+- [x] **QUAL-01**: Input-Validierung mit Zod für alle Backend-Controller
 - [ ] **QUAL-02**: Debug-Logs entfernen (168+ console.log, DEBUGGING-Prefix)
 - [ ] **QUAL-03**: Dependency-Updates — Dependabot-Alerts fixen (30 offene Alerts)
 
@@ -49,7 +49,7 @@
 | SEC-02 | Phase 6 | Complete |
 | SEC-03 | Phase 6 | Complete |
 | SEC-04 | Phase 6 | Complete |
-| QUAL-01 | Phase 7 | Pending |
+| QUAL-01 | Phase 7 | Complete |
 | QUAL-02 | Phase 7 | Pending |
 | QUAL-03 | Phase 7 | Pending |
 
