@@ -20,7 +20,7 @@ exports.createOrt = async (req, res) => {
     res.status(201).json({ id, message: 'Ort erfolgreich erstellt' });
   } catch (error) {
     console.error('Fehler beim Erstellen des Ortes:', error);
-    res.status(500).json({ message: 'Fehler beim Erstellen des Ortes', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Erstellen des Ortes' });
   }
 };
 
@@ -39,7 +39,8 @@ exports.deleteOrt = async (req, res) => {
       res.status(404).json({ message: 'Ort nicht gefunden' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Fehler beim Löschen des Ortes', error: error.message });
+    console.error('Fehler beim Löschen des Ortes:', error);
+    res.status(500).json({ message: 'Fehler beim Löschen des Ortes' });
   }
 };
 
@@ -50,7 +51,7 @@ exports.getAllOrte = async (req, res) => {
     res.status(200).json(orte);
   } catch (error) {
     console.error('Fehler beim Abrufen der Orte:', error);
-    res.status(500).json({ message: 'Fehler beim Abrufen der Orte', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Abrufen der Orte' });
   }
 };
 
@@ -64,7 +65,8 @@ exports.getOrtById = async (req, res) => {
       res.status(404).json({ message: 'Ort nicht gefunden' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Fehler beim Abrufen des Ortes', error });
+    console.error('Fehler beim Abrufen des Ortes:', error);
+    res.status(500).json({ message: 'Fehler beim Abrufen des Ortes' });
   }
 };
 
@@ -123,6 +125,6 @@ exports.getSimpleList = async (req, res) => {
         }
       } catch (error) {
         console.error('Fehler beim Aktualisieren des Ortes:', error);
-        res.status(500).json({ message: 'Fehler beim Aktualisieren des Ortes', error: error.message });
+        res.status(500).json({ message: 'Fehler beim Aktualisieren des Ortes' });
       }
     };

@@ -139,11 +139,7 @@ exports.createUser = async (req, res) => {
         });
     } catch (error) {
         console.error('Detaillierter Fehler beim Erstellen des Benutzers:', error);
-        res.status(500).json({ 
-            message: 'Fehler beim Erstellen des Benutzers',
-            error: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
+        res.status(500).json({ message: 'Fehler beim Erstellen des Benutzers' });
     }
 };
 

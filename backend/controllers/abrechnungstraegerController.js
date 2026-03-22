@@ -45,10 +45,7 @@ exports.updateErstattungssatz = async (req, res) => {
             );
             
             if (existing.length > 0) {
-                return res.status(400).json({ 
-                    message: 'Es existiert bereits ein Eintrag für dieses Datum',
-                    error: 'Duplicate entry'
-                });
+                return res.status(400).json({ message: 'Es existiert bereits ein Eintrag für dieses Datum' });
             }
         }
         
@@ -82,10 +79,7 @@ exports.updateErstattungssatz = async (req, res) => {
         res.json({ message: 'Erstattungssatz erfolgreich aktualisiert' });
     } catch (error) {
         console.error('Fehler beim Aktualisieren des Erstattungssatzes:', error);
-        res.status(500).json({ 
-            message: 'Erstattungssatz konnte nicht aktualisiert werden',
-            error: error.message 
-        });
+        res.status(500).json({ message: 'Erstattungssatz konnte nicht aktualisiert werden' });
     }
 };
 
@@ -176,7 +170,7 @@ exports.createAbrechnungstraeger = async (req, res) => {
         });
     } catch (error) {
         console.error('Fehler beim Erstellen des Abrechnungsträgers:', error);
-        res.status(500).json({ message: 'Interner Server-Fehler', error: error.message });
+        res.status(500).json({ message: 'Interner Server-Fehler' });
     }
 };
 
@@ -255,10 +249,7 @@ exports.addErstattungssatz = async (req, res) => {
         res.status(201).json({ message: 'Erstattungssatz erfolgreich hinzugefügt' });
     } catch (error) {
         console.error('Fehler beim Hinzufügen des Erstattungssatzes:', error);
-        res.status(500).json({ 
-            message: 'Erstattungssatz konnte nicht hinzugefügt werden',
-            error: error.message 
-        });
+        res.status(500).json({ message: 'Erstattungssatz konnte nicht hinzugefügt werden' });
     }
 };
 

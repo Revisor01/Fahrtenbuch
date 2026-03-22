@@ -62,7 +62,7 @@ exports.createFahrt = async (req, res) => {
     res.status(201).json({ id, message: 'Fahrt erfolgreich erstellt' });
   } catch (error) {
     console.error('Fehler beim Erstellen der Fahrt:', error);
-    res.status(500).json({ message: 'Fehler beim Erstellen der Fahrt', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Erstellen der Fahrt' });
   }
 };
 
@@ -115,7 +115,7 @@ exports.updateFahrt = async (req, res) => {
     }
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Fahrt:', error);
-    res.status(500).json({ message: 'Fehler beim Aktualisieren der Fahrt', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Aktualisieren der Fahrt' });
   }
 };
 
@@ -125,7 +125,8 @@ exports.getAllFahrten = async (req, res) => {
     const fahrten = await Fahrt.findAll(userId);
     res.status(200).json(fahrten);
   } catch (error) {
-    res.status(500).json({ message: 'Fehler beim Abrufen der Fahrten', error: error.message });
+    console.error('Fehler beim Abrufen der Fahrten:', error);
+    res.status(500).json({ message: 'Fehler beim Abrufen der Fahrten' });
   }
 };
 
@@ -140,7 +141,8 @@ exports.getFahrtById = async (req, res) => {
       res.status(404).json({ message: 'Fahrt nicht gefunden' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Fehler beim Abrufen der Fahrt', error: error.message });
+    console.error('Fehler beim Abrufen der Fahrt:', error);
+    res.status(500).json({ message: 'Fehler beim Abrufen der Fahrt' });
   }
 };
 
@@ -154,7 +156,8 @@ exports.deleteFahrt = async (req, res) => {
       res.status(404).json({ message: 'Fahrt nicht gefunden' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Fehler beim Löschen der Fahrt', error: error.message });
+    console.error('Fehler beim Löschen der Fahrt:', error);
+    res.status(500).json({ message: 'Fehler beim Löschen der Fahrt' });
   }
 };
 
@@ -261,7 +264,7 @@ exports.getMonthlyReport = async (req, res) => {
     });
   } catch (error) {
     console.error('Fehler beim Erstellen des Monatsberichts:', error);
-    res.status(500).json({ message: 'Fehler beim Erstellen des Monatsberichts', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Erstellen des Monatsberichts' });
   }
 };
 
@@ -384,7 +387,7 @@ exports.getReportRange = async (req, res) => {
     });
   } catch (error) {
     console.error('Fehler beim Erstellen des Zeitraum-Berichts:', error);
-    res.status(500).json({ message: 'Fehler beim Erstellen des Zeitraum-Berichts', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Erstellen des Zeitraum-Berichts' });
   }
 };
 
@@ -491,7 +494,7 @@ exports.getMonthlySummary = async (req, res) => {
     res.status(200).json(Object.values(summary));
   } catch (error) {
     console.error('Fehler beim Abrufen der monatlichen Zusammenfassung:', error);
-    res.status(500).json({ message: 'Fehler beim Abrufen der monatlichen Zusammenfassung', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Abrufen der monatlichen Zusammenfassung' });
   }
 };
 
@@ -503,7 +506,7 @@ exports.addMitfahrer = async (req, res) => {
     res.status(201).json({ id: mitfahrerId, message: 'Mitfahrer erfolgreich hinzugefügt' });
   } catch (error) {
     console.error('Fehler beim Hinzufügen des Mitfahrers:', error);
-    res.status(500).json({ message: 'Fehler beim Hinzufügen des Mitfahrers', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Hinzufügen des Mitfahrers' });
   }
 };
 
@@ -519,7 +522,7 @@ exports.updateMitfahrer = async (req, res) => {
     }
   } catch (error) {
     console.error('Fehler beim Aktualisieren des Mitfahrers:', error);
-    res.status(500).json({ message: 'Fehler beim Aktualisieren des Mitfahrers', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Aktualisieren des Mitfahrers' });
   }
 };
 
@@ -534,7 +537,7 @@ exports.deleteMitfahrer = async (req, res) => {
     }
   } catch (error) {
     console.error('Fehler beim Löschen des Mitfahrers:', error);
-    res.status(500).json({ message: 'Fehler beim Löschen des Mitfahrers', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Löschen des Mitfahrers' });
   }
 };
 
@@ -638,10 +641,7 @@ exports.getYearSummary = async (req, res) => {
     
   } catch (error) {
     console.error('Fehler beim Abrufen der Jahreszusammenfassung:', error);
-    res.status(500).json({ 
-      message: 'Fehler beim Abrufen der Jahreszusammenfassung', 
-      error: error.message 
-    });
+    res.status(500).json({ message: 'Fehler beim Abrufen der Jahreszusammenfassung' });
   }
 };
 
@@ -658,7 +658,7 @@ exports.updateAbrechnungsStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
-    res.status(500).json({ message: 'Fehler beim Aktualisieren des Status', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Aktualisieren des Status' });
   }
 };
 
