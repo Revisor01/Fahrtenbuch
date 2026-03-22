@@ -681,18 +681,22 @@ function FahrtenListe() {
       {/* Export */}
       <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
       {getKategorienMitErstattung().map(([key, displayName]) => (
-        <div key={key} className="flex gap-1">
-          <button
-          onClick={() => handleExportToExcel(key.toLowerCase())}
-          className="btn-primary text-sm">
-          Excel {displayName}
-          </button>
-          <button
-          onClick={() => handleExportToPdf(key.toLowerCase())}
-          className="btn-primary text-sm">
-          PDF {displayName}
-          </button>
-        </div>
+        <button
+        key={key}
+        onClick={() => {
+          showNotification(
+            "Export " + displayName,
+            "In welchem Format möchten Sie exportieren?",
+            () => handleExportToExcel(key.toLowerCase()),
+            true,
+            "Excel",
+            () => handleExportToPdf(key.toLowerCase()),
+            "PDF"
+          );
+        }}
+        className="btn-primary">
+        Export {displayName}
+        </button>
       ))}
       </div>
       </div>
