@@ -35,20 +35,13 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ Rückfahrt-Matching robuster — v1.1
 - ✓ Axios-Interceptor Race Condition gefixt — v1.1
 
+- ✓ App.js aufgeteilt: 3056 → 36 Zeilen (5 modulare Komponenten) — v1.2
+- ✓ PDF-Export als Alternative zu Excel (A4 Querformat, druckfertig) — v1.2
+- ✓ Export-Dialog mit Format-Auswahl (Excel/PDF/Beide als ZIP) — v1.2
+
 ### Active
 
-- [ ] App.js aufteilen in kleinere Komponenten (3000+ Zeilen → modulare Struktur)
-- [ ] PDF-Export als Alternative zu Excel (direkt druckbar mit Unterschriftsfeldern)
-- [ ] Export-Dialog mit Format-Auswahl (Excel/PDF)
-
-## Current Milestone: v1.2 Features & Refactoring
-
-**Goal:** Monolithisches Frontend aufteilen und PDF-Export als neues Feature einbauen.
-
-**Target features:**
-- App.js Refactoring in modulare Komponenten
-- PDF-Export neben Excel
-- Export-Format-Auswahl im UI
+(Keine — alle Milestones abgeschlossen)
 
 ### Out of Scope
 
@@ -100,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after v1.2 milestone start*
+*Last updated: 2026-03-22 after v1.2 milestone completion*

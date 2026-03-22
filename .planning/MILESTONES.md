@@ -1,5 +1,18 @@
 # Milestones
 
+## v1.2 Features & Refactoring (Shipped: 2026-03-22)
+
+**Phases completed:** 2 phases, 4 plans, 7 tasks
+
+**Key accomplishments:**
+
+- AppProvider (521 Zeilen) und FahrtenListe (1515 Zeilen) aus monolithischer App.js (3056 Zeilen) in eigene Dateien extrahiert, App.js auf 1040 Zeilen reduziert
+- App.js von 1040 auf 36 Zeilen reduziert — reiner Router ohne UI-Logik, alle Komponenten in eigenen Dateien
+- Server-seitige PDF-Generierung mit pdfkit: A4-Querformat mit Titel, Header, Fahrten-Tabelle, Hinweistexten und Unterschriftsbereich
+- Format-Auswahl im Export-Bereich: Excel/PDF-Buttons pro Abrechnungstraeger mit handleExportToPdf fuer PDF-Download via Backend-API
+
+---
+
 ## v1.1 Stabilität & Security (Shipped: 2026-03-22)
 
 **Phases completed:** 3 phases, 5 plans, 9 tasks
