@@ -97,7 +97,7 @@ Plans:
 
 Plans:
 - [x] 07-01-PLAN.md — Zod-Validierung fuer alle Backend-Endpoints (Schemas + Middleware + Routing)
-- [ ] 07-02-PLAN.md — Debug-Logs entfernen und Dependency-Updates
+- [x] 07-02-PLAN.md — Debug-Logs entfernen und Dependency-Updates
 
 ## Progress
 
