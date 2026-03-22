@@ -42,21 +42,21 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUG-01 | — | Pending |
-| BUG-02 | — | Pending |
-| BUG-03 | — | Pending |
-| SEC-01 | — | Pending |
-| SEC-02 | — | Pending |
-| SEC-03 | — | Pending |
-| SEC-04 | — | Pending |
-| QUAL-01 | — | Pending |
-| QUAL-02 | — | Pending |
-| QUAL-03 | — | Pending |
+| BUG-01 | Phase 5 | Pending |
+| BUG-02 | Phase 5 | Pending |
+| BUG-03 | Phase 5 | Pending |
+| SEC-01 | Phase 6 | Pending |
+| SEC-02 | Phase 6 | Pending |
+| SEC-03 | Phase 6 | Pending |
+| SEC-04 | Phase 6 | Pending |
+| QUAL-01 | Phase 7 | Pending |
+| QUAL-02 | Phase 7 | Pending |
+| QUAL-03 | Phase 7 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 ⚠️
+- Mapped to phases: 10
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-22*

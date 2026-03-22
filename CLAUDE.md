@@ -1,20 +1,18 @@
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**Fahrtenbuch — Verbesserungen v2**
+**Fahrtenbuch**
 
-Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung und Abrechnung von Dienstfahrten mit Privatfahrzeug. React-Frontend + Express-Backend + MySQL, deployed auf kkd-fahrtenbuch.de. Die App wird aktiv genutzt und funktioniert grundsätzlich — dieses Projekt adressiert konkretes Nutzerfeedback.
+Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung und Abrechnung von Dienstfahrten mit Privatfahrzeug. React-Frontend + Express-Backend + MySQL, deployed auf kkd-fahrtenbuch.de. Unterstützt Einzel- und Mehrmonats-Exporte mit offiziellem Abrechnungsformular, Kostenstellen, Unterschriftsfeldern und flexibler Zeitraum-Auswahl.
 
 **Core Value:** Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mit vollständigem Datum, Unterschriftsfeldern und flexiblem Zeitraum — damit Nutzer die Abrechnung direkt einreichen können ohne manuelle Nacharbeit.
 
 ### Constraints
 
 - **Responsive**: Alle UI-Änderungen müssen auf Desktop und Mobile funktionieren
-- **Tech Stack**: Bestehender Stack (React, Express, MySQL, exceljs) beibehalten — kein Rewrite
-- **Deployment**: Docker Compose auf KKD-Server (185.248.143.234), Caddy Reverse Proxy
-- **Datenintegrität**: Distanz-Updates müssen alle betroffenen Fahrten atomar aktualisieren (Transaktion)
-- **Abwärtskompatibilität**: Bestehende Einzelmonats-Exports müssen weiterhin funktionieren
-- **Excel-Format**: Muss dem offiziellen Dienstfahrten-Abrechnungsformular entsprechen (PDF-Referenz vorhanden)
+- **Tech Stack**: React, Express, MySQL, ExcelJS — kein Rewrite
+- **Deployment**: Docker Compose auf KKD-Server, Caddy Reverse Proxy
+- **Excel-Format**: Offizielles Dienstfahrten-Abrechnungsformular (PDF-Referenz vorhanden)
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:codebase/STACK.md -->
