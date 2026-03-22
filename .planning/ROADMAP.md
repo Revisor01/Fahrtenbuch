@@ -115,7 +115,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Backend: pdfkit installieren, pdfExport.js erstellen, PDF-Routen anlegen
+- [x] 09-01-PLAN.md — Backend: pdfkit installieren, pdfExport.js erstellen, PDF-Routen anlegen
 - [ ] 09-02-PLAN.md — Frontend: Excel/PDF Format-Auswahl im Export-Bereich
 
 ## Progress

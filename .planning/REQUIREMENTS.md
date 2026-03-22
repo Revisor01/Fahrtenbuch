@@ -13,9 +13,9 @@
 
 ### PDF-Export
 
-- [ ] **PDF-01**: PDF-Export als Alternative zu Excel mit gleichem Layout (Unterschriftsfelder, Kostenstelle, Datum)
+- [x] **PDF-01**: PDF-Export als Alternative zu Excel mit gleichem Layout (Unterschriftsfelder, Kostenstelle, Datum)
 - [ ] **PDF-02**: Export-Dialog mit Format-Auswahl (Excel oder PDF)
-- [ ] **PDF-03**: PDF unterstützt Einzel- und Mehrmonats-Export (wie Excel)
+- [x] **PDF-03**: PDF unterstützt Einzel- und Mehrmonats-Export (wie Excel)
 
 ## Out of Scope
 
@@ -32,9 +32,9 @@
 | REF-01 | Phase 8 | Complete (08-02) |
 | REF-02 | Phase 8 | Complete (08-01) |
 | REF-03 | Phase 8 | Complete (08-02) |
-| PDF-01 | Phase 9 | Pending |
+| PDF-01 | Phase 9 | Complete |
 | PDF-02 | Phase 9 | Pending |
-| PDF-03 | Phase 9 | Pending |
+| PDF-03 | Phase 9 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 6 total
