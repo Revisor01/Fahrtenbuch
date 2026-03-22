@@ -65,10 +65,10 @@ Plans:
   1. Mitfahrer-Erstattung wird mit dem in der DB hinterlegten Satz berechnet, nicht mit 0,05 EUR/km
   2. Rückfahrt-Matching funktioniert unabhängig von Gross-/Kleinschreibung und leichten ID-Abweichungen
   3. Parallele 401-Responses führen nicht mehr zu mehrfachen Token-Refresh-Requests oder unerwartetem Logout
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Mitfahrer-Erstattung DB-Lookup, Rueckfahrt-Matching Fallback, Axios Race-Condition-Guard
 
 ### Phase 6: Security Hardening
 **Goal**: App ist gegen gängige Angriffsvektoren abgesichert — sichere Headers, Brute-Force-Schutz, keine DB-Details im Client
@@ -108,6 +108,6 @@ Phases execute in numeric order: 5 → 6 → 7
 | 2. Excel-Export Formular | v1.0 | 1/1 | Complete | 2026-03-22 |
 | 3. Mehrmonats-Export | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 4. Von/Bis-Zeitraum | v1.0 | 2/2 | Complete | 2026-03-22 |
-| 5. Bugfixes | v1.1 | 0/? | Not started | - |
+| 5. Bugfixes | v1.1 | 0/1 | Not started | - |
 | 6. Security Hardening | v1.1 | 0/? | Not started | - |
 | 7. Code-Qualität | v1.1 | 0/? | Not started | - |
