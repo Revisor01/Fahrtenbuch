@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Stabilität & Security
-status: unknown
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-03-22T12:06:41.840Z"
+milestone: v1.2
+milestone_name: Features & Refactoring
+status: ready_to_plan
+stopped_at: Roadmap created
+last_updated: "2026-03-22"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,15 +18,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-22)
 
-**Core value:** Excel-Export bildet das offizielle Abrechnungsformular korrekt ab
-**Current focus:** Milestone v1.2 — Features & Refactoring
+**Core value:** Modulare Codebasis + PDF-Export als druckfertiges Abrechnungsformular
+**Current focus:** Phase 8 — Frontend-Refactoring
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-22 — Milestone v1.2 started
+Phase: 8 of 9 (Frontend-Refactoring)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-22 — Roadmap fuer v1.2 erstellt
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -35,27 +37,14 @@ Last activity: 2026-03-22 — Milestone v1.2 started
 - Total plans completed: 7
 - Total execution time: ~13 min
 
-**By Phase (v1.0):**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| Phase 01 | 2 | 4min | 2min |
-| Phase 02 | 1 | 2min | 2min |
-| Phase 03 | 2 | 3min | 1.5min |
-| Phase 04 | 2 | 4min | 2min |
-
 **Velocity (v1.1):**
 
-- Total plans completed: 1
-- Average duration: 2min
+- Total plans completed: 5
+- Total execution time: ~13 min
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| Phase 05 | 1 | 2min | 2min |
-| Phase 06 P01 | 1min | 2 tasks | 3 files |
-| Phase 06 P02 | 3min | 1 tasks | 6 files |
-| Phase 07 P01 | 2min | 2 tasks | 21 files |
-| Phase 07 P02 | 5min | 2 tasks | 7 files |
+**Recent Trend:**
+- Avg ~2min/plan
+- Trend: Stable
 
 ## Accumulated Context
 
@@ -64,17 +53,9 @@ Last activity: 2026-03-22 — Milestone v1.2 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- v1.0 shipped erfolgreich mit 4 Phasen, 7 Plans, 11 Tasks
-- v1.1 fokussiert auf Stabilität, keine neuen Features
-- Separate DB-Query fuer Mitfahrer-Saetze statt UNION-Query erweitern (Phase 05)
-- useRef statt useState fuer isLoggingOut Guard (Phase 05)
-- [Phase 06]: helmet() Defaults ohne CSP-Anpassung - Frontend ueber separaten Nginx-Container
-- [Phase 06]: Register-Route nicht rate-limited - eigene Validierung, selten genutzt
-- [Phase 06]: Error messages sanitized: nur generische Meldungen an Client, Details server-side geloggt
-- [Phase 07]: Zod-Validierung mit validate(schema) Middleware fuer alle POST/PUT-Endpoints
-- [Phase 07]: console.log -> console.info fuer Migrations/Init-Status (nicht entfernt, semantisch korrekt)
-- [Phase 07]: mysql2/nodemailer/xlsx Breaking Upgrades deferred - erfordern API-Kompatibilitaetstests
-- [Phase 07]: react-scripts transitive Deps deferred auf CRA->Vite Migration (v1.2)
+- [Phase 07]: react-scripts transitive Deps deferred auf CRA->Vite Migration (separater Milestone)
+- [v1.2]: Refactoring VOR PDF-Export — neuer Code soll in modularer Struktur geschrieben werden
+- [v1.2]: App.js (3000+ Zeilen) aufteilen in Dashboard, Monatsuebersicht, Settings, Export-Komponenten
 
 ### Pending Todos
 
@@ -86,6 +67,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T10:25:09Z
-Stopped at: Completed 07-02-PLAN.md
+Last session: 2026-03-22
+Stopped at: Roadmap fuer v1.2 erstellt
 Resume file: None

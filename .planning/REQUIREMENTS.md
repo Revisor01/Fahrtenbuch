@@ -29,17 +29,17 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REF-01 | — | Pending |
-| REF-02 | — | Pending |
-| REF-03 | — | Pending |
-| PDF-01 | — | Pending |
-| PDF-02 | — | Pending |
-| PDF-03 | — | Pending |
+| REF-01 | Phase 8 | Pending |
+| REF-02 | Phase 8 | Pending |
+| REF-03 | Phase 8 | Pending |
+| PDF-01 | Phase 9 | Pending |
+| PDF-02 | Phase 9 | Pending |
+| PDF-03 | Phase 9 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 6 total
-- Mapped to phases: 0
-- Unmapped: 6 ⚠️
+- Mapped to phases: 6
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-22*
