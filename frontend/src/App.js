@@ -536,7 +536,7 @@ function AppProvider({ children }) {
 }
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
