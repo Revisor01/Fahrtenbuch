@@ -265,6 +265,129 @@ exports.getMonthlyReport = async (req, res) => {
   }
 };
 
+exports.getReportRange = async (req, res) => {
+  try {
+    const startYear = parseInt(req.params.startYear);
+    const startMonth = parseInt(req.params.startMonth);
+    const endYear = parseInt(req.params.endYear);
+    const endMonth = parseInt(req.params.endMonth);
+    const userId = req.user.id;
+
+    // Hole Fahrten über den gesamten Zeitraum
+    const fahrten = await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId);
+
+    // Sammle abrechnungsStatus für jeden Monat im Zeitraum
+    const abrechnungsStatus = {};
+    let y = startYear;
+    let m = startMonth;
+    while (y < endYear || (y === endYear && m <= endMonth)) {
+      const status = await Abrechnung.getStatus(userId, y, m);
+      // Merge status entries — keep per-traeger status (later months overwrite)
+      if (status && typeof status === 'object') {
+        Object.assign(abrechnungsStatus, status);
+      }
+      m++;
+      if (m > 12) { m = 1; y++; }
+    }
+
+    // Füge Mitfahrer-Daten hinzu
+    for (let fahrt of fahrten) {
+      fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
+    }
+
+    // Hole Erstattungssätze
+    const [erstattungssaetze] = await db.execute(`
+  SELECT
+    at.id,
+    eb.betrag,
+    eb.gueltig_ab
+  FROM abrechnungstraeger at
+  INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
+  WHERE at.user_id = ?
+    AND at.active = true
+  UNION
+  SELECT
+    'mitfahrer' as id,
+    betrag,
+    gueltig_ab
+  FROM mitfahrer_erstattung
+  WHERE user_id = ?
+  ORDER BY gueltig_ab DESC
+`, [userId, userId]);
+
+    // Gruppiere Erstattungssätze nach ID
+    const saetzeProTraeger = {};
+    erstattungssaetze.forEach(satz => {
+      if (!saetzeProTraeger[satz.id]) {
+        saetzeProTraeger[satz.id] = [];
+      }
+      saetzeProTraeger[satz.id].push(satz);
+    });
+
+    // Finde den korrekten Erstattungssatz für ein bestimmtes Datum
+    const getErstattungssatz = (id, datum) => {
+      if (!saetzeProTraeger[id]) return 0;
+
+      const saetze = saetzeProTraeger[id];
+      let passenderSatz = saetze.find(satz =>
+        new Date(satz.gueltig_ab) <= new Date(datum)
+      );
+
+      if (!passenderSatz && saetze.length > 0) {
+        passenderSatz = saetze[saetze.length - 1];
+      }
+
+      return passenderSatz ? passenderSatz.betrag : 0;
+    };
+
+    // Erstelle die Zusammenfassung
+    const erstattungen = {};
+
+    const report = fahrten.map((fahrt) => {
+      const erstattungssatz = getErstattungssatz(fahrt.abrechnung, fahrt.datum);
+      const erstattung = fahrt.kilometer * erstattungssatz;
+
+      if (!erstattungen[fahrt.abrechnung]) {
+        erstattungen[fahrt.abrechnung] = 0;
+      }
+      erstattungen[fahrt.abrechnung] += erstattung;
+
+      // Berechne Mitfahrer-Erstattung
+      if (fahrt.mitfahrer?.length > 0) {
+        const mitfahrerSatz = getErstattungssatz('mitfahrer', fahrt.datum);
+        const mitfahrerErstattung = fahrt.mitfahrer.length * mitfahrerSatz * fahrt.kilometer;
+        if (!erstattungen.mitfahrer) {
+          erstattungen.mitfahrer = 0;
+        }
+        erstattungen.mitfahrer += mitfahrerErstattung;
+      }
+
+      return {
+        ...fahrt,
+        vonOrtName: fahrt.von_ort_name || fahrt.einmaliger_von_ort,
+        nachOrtName: fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
+        erstattungssatz,
+        erstattung
+      };
+    });
+
+    // Sortiere nach Datum aufsteigend
+    report.sort((a, b) => new Date(a.datum) - new Date(b.datum));
+
+    res.status(200).json({
+      fahrten: report,
+      summary: {
+        erstattungen,
+        gesamtErstattung: Object.values(erstattungen).reduce((a, b) => a + b, 0),
+        abrechnungsStatus
+      }
+    });
+  } catch (error) {
+    console.error('Fehler beim Erstellen des Zeitraum-Berichts:', error);
+    res.status(500).json({ message: 'Fehler beim Erstellen des Zeitraum-Berichts', error: error.message });
+  }
+};
+
 exports.getMonthlySummary = async (req, res) => {
   try {
     const userId = req.user.id;
