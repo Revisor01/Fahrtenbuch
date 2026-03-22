@@ -27,25 +27,17 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ Von/Bis-Zeitraum in Monatsübersicht (gesamte Ansicht adaptiert) — v1.0
 - ✓ Eingereicht-Status über Zeiträume korrekt — v1.0
 
+- ✓ Mitfahrer-Erstattungssatz aus DB statt hardcoded — v1.1
+- ✓ Debug-Logs entfernt — v1.1
+- ✓ Security: helmet, rate-limiting, Error-Sanitization, Body-Size-Limit — v1.1
+- ✓ Input-Validierung mit Zod für alle Backend-Controller — v1.1
+- ✓ Dependency-Updates (npm audit fix) — v1.1
+- ✓ Rückfahrt-Matching robuster — v1.1
+- ✓ Axios-Interceptor Race Condition gefixt — v1.1
+
 ### Active
 
-- [ ] Mitfahrer-Erstattungssatz aus DB statt hardcoded 0,05 €/km
-- [ ] Debug-Logs entfernen (168+ console.log in Production)
-- [ ] Security: helmet, rate-limiting auf Login, Error-Messages sanitizen, Body-Size-Limit
-- [ ] Input-Validierung mit Zod für alle Backend-Controller
-- [ ] Dependency-Updates (Dependabot-Alerts, ggf. CRA → Vite)
-- [ ] Rückfahrt-Matching robuster (Case-insensitive, fuzzy ID-Matching)
-- [ ] Axios-Interceptor Race Condition fixen (401 Token-Refresh)
-
-## Current Milestone: v1.1 Stabilität & Security
-
-**Goal:** App robuster, sicherer und wartbarer machen — keine neuen Features, aber solide Grundlage.
-
-**Target features:**
-- Mitfahrer-Erstattung korrekt aus DB
-- Security-Basics (helmet, rate-limit, input-validierung)
-- Dependency-Hygiene (Dependabot, ggf. Vite-Migration)
-- Bekannte Bugs fixen (Rückfahrt-Matching, Token-Race-Condition)
+(Keine — nächster Milestone definiert neue Ziele)
 - Debug-Log-Cleanup
 
 ### Out of Scope
@@ -98,4 +90,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after v1.1 milestone start*
+*Last updated: 2026-03-22 after v1.1 milestone completion*

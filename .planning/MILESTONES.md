@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.1 Stabilität & Security (Shipped: 2026-03-22)
+
+**Phases completed:** 3 phases, 5 plans, 9 tasks
+
+**Key accomplishments:**
+
+- Mitfahrer-Erstattung aus DB statt hardcoded, Rueckfahrt-Matching mit Orts-Namen-Fallback, Axios 401 Race Condition Guard
+- helmet fuer HTTP Security Headers, express-rate-limit fuer Login-Brute-Force-Schutz (10/15min), Body-Size-Limit 10mb
+- Error.message, stack traces und DB-Details aus allen Controller-Responses entfernt - nur generische deutsche Fehlermeldungen an Client
+- Zod-basierte Input-Validierung mit validate(schema) Middleware fuer alle 30+ POST/PUT-Endpoints
+- Removed all debug console.log from auth controller and frontend, ran npm audit fix reducing backend vulns from 17 to 8 and frontend from 52 to 26
+
+---
+
 ## v1.0 Nutzerfeedback (Shipped: 2026-03-22)
 
 **Phases completed:** 4 phases, 7 plans, 11 tasks
