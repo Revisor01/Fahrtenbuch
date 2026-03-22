@@ -43,7 +43,7 @@ function NotificationModal({ isOpen, onClose, title, message, onConfirm, showCan
           onSecondAction?.();
           onClose();
         }}
-        className="btn-secondary w-full"
+        className="btn-primary w-full"
         >
         Beide
         </button>
