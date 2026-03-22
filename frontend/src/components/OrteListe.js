@@ -1,5 +1,5 @@
 import React, { useState, useContext, useMemo } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 
 function OrteListe() {
   const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
