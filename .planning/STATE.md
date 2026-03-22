@@ -74,6 +74,10 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Roadmap Evolution
+
+- Phase 4 added: Von/Bis-Zeitraum in Monatsübersicht
+
 ### Blockers/Concerns
 
 None yet.

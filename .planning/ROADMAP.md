@@ -72,3 +72,13 @@ Phases execute in numeric order: 1 → 2 → 3
 | 1. Datenmodell & Logik | 0/2 | Planned | - |
 | 2. Excel-Export Formular | 0/1 | Planned | - |
 | 3. Mehrmonats-Export | 0/2 | Not started | - |
+
+### Phase 4: Von/Bis-Zeitraum in Monatsübersicht
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 3
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 4 to break down)
