@@ -928,22 +928,43 @@ function FahrtenListe() {
         Aktueller Monat
         </button>
       )}
-      {/* Von-Dropdown */}
+      {/* Von-Dropdown (Monat + Jahr) */}
       <label className="text-xs text-label">Von:</label>
       <select
-      value={selectedVonMonth}
-      onChange={handleVonMonthChange}
-      className="form-select w-36">
+      value={selectedVonMonth ? new Date(`${selectedVonMonth}-01`).getMonth().toString() : ''}
+      onChange={(e) => {
+        if (e.target.value === '') {
+          setSelectedVonMonth('');
+        } else {
+          const vonYear = selectedVonMonth ? selectedVonMonth.split('-')[0] : selectedYear;
+          const m = (parseInt(e.target.value) + 1).toString().padStart(2, '0');
+          setSelectedVonMonth(`${vonYear}-${m}`);
+        }
+      }}
+      className="form-select w-32">
       <option value="">---</option>
-      {[...Array(12)].map((_, i) => {
-        const m = (i + 1).toString().padStart(2, '0');
+      {[...Array(12)].map((_, i) => (
+        <option key={`von-${i}`} value={i}>
+        {new Date(0, i).toLocaleString("default", { month: "long" })}
+        </option>
+      ))}
+      </select>
+      {selectedVonMonth && (
+      <select
+      value={selectedVonMonth.split('-')[0]}
+      onChange={(e) => {
+        const m = selectedVonMonth.split('-')[1];
+        setSelectedVonMonth(`${e.target.value}-${m}`);
+      }}
+      className="form-select w-24">
+      {[...Array(6)].map((_, i) => {
+        const year = 2024 + i;
         return (
-          <option key={`von-${selectedYear}-${m}`} value={`${selectedYear}-${m}`}>
-          {new Date(0, i).toLocaleString("default", { month: "long" })}
-          </option>
+          <option key={`von-year-${year}`} value={year}>{year}</option>
         );
       })}
       </select>
+      )}
       {/* Bis-Dropdown */}
       <label className="text-xs text-label">Bis:</label>
       <select
@@ -1069,10 +1090,7 @@ function FahrtenListe() {
       </div>
       
       {/* Export */}
-      <h3 className="text-lg font-medium text-value mt-6 mb-3">
-        {selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum exportieren' : 'Monat exportieren'}
-      </h3>
-      <div className="flex flex-col sm:flex-row justify-end gap-2">
+      <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
       {getKategorienMitErstattung().map(([key, displayName]) => (
         <button
         key={key}
