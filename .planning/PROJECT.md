@@ -1,8 +1,8 @@
-# Fahrtenbuch — Verbesserungen v2
+# Fahrtenbuch
 
 ## What This Is
 
-Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung und Abrechnung von Dienstfahrten mit Privatfahrzeug. React-Frontend + Express-Backend + MySQL, deployed auf kkd-fahrtenbuch.de. Die App wird aktiv genutzt und funktioniert grundsätzlich — dieses Projekt adressiert konkretes Nutzerfeedback.
+Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung und Abrechnung von Dienstfahrten mit Privatfahrzeug. React-Frontend + Express-Backend + MySQL, deployed auf kkd-fahrtenbuch.de. Unterstützt Einzel- und Mehrmonats-Exporte mit offiziellem Abrechnungsformular, Kostenstellen, Unterschriftsfeldern und flexibler Zeitraum-Auswahl.
 
 ## Core Value
 
@@ -14,53 +14,54 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 
 - ✓ Fahrtenerfassung mit Start/Ziel, Datum, Reisezweck, Kilometer — existing
 - ✓ Automatische Distanzberechnung zwischen gespeicherten Orten — existing
-- ✓ Monatlicher Excel-Export als Abrechnungsformular — existing
 - ✓ Nutzerverwaltung mit JWT-Auth und Profilpflege (Name, Anschrift, IBAN) — existing
 - ✓ Abrechnungsträger (Kostenträger) Verwaltung — existing
 - ✓ Mitfahrer-Erfassung mit Erstattungsberechnung — existing
 - ✓ E-Mail-Verifizierung und Passwort-Reset — existing
+- ✓ Kostenstelle als optionales Feld am Abrechnungsträger — v1.0
+- ✓ Rückwirkende Distanz-Aktualisierung (atomar, bidirektional) — v1.0
+- ✓ Excel-Export mit echtem Datum (TT.MM.JJJJ) — v1.0
+- ✓ Excel-Export mit Unterschriftsbereich und Genehmigungszeile — v1.0
+- ✓ Excel-Export mit Kostenstelle im Header — v1.0
+- ✓ Mehrmonats-Export mit Von/Bis-Zeitraum — v1.0
+- ✓ Von/Bis-Zeitraum in Monatsübersicht (gesamte Ansicht adaptiert) — v1.0
+- ✓ Eingereicht-Status über Zeiträume korrekt — v1.0
 
 ### Active
 
-- ✓ Excel-Export: Datum im Format TT.MM.JJJJ statt TT.MM. — Phase 2
-- ✓ Excel-Export: Unterschriftsfelder gemäß offiziellem Formular (eigene Unterschrift + Angeordnet/genehmigt) — Phase 2
-- ✓ Excel-Export: Kostenstelle (Kst.) als Zusatzfeld beim Abrechnungsträger — Phase 1
-- ✓ Mehrmonats-Export: Zeitraum Von-Bis wählbar statt nur Einzelmonat — Phase 3
-- ✓ Mehrmonats-Export: Header zeigt gewählten Zeitraum — Phase 3
-- ✓ Mehrmonats-Export: Logik für "eingereicht"-Status korrekt über Zeiträume — Phase 3
-- ✓ Distanz-Aktualisierung: Änderung einer gespeicherten Distanz aktualisiert automatisch alle bestehenden Fahrten mit dieser Strecke — Phase 1
+(Keine — nächster Milestone definiert neue Ziele)
 
 ### Out of Scope
 
 - VPN-Erreichbarkeit — Netzwerk-Problem auf Nutzerseite, kein App-Issue
-- Mobile App — Web-first reicht für den Anwendungsfall
-- Kostenstelle nachträglich in Excel editieren — Nutzer kann das bereits in der App oder Excel selbst
+- Mobile App — Web-first reicht, responsive UI deckt mobile Nutzung ab
+- Refactoring App.js (2900+ Zeilen) — separates Tech-Debt-Projekt
 
 ## Context
 
 - App wird von kirchlichen Mitarbeitenden im Kirchenkreis Dithmarschen genutzt
-- Nutzerfeedback kam von Joerg (Datumsformat, Distanz-Update), Benjamin (Mehrmonats-Export), Jasmin Reusch (Unterschriftsfeld, Kostenstelle)
-- Referenz-PDF von Frau Reusch zeigt das offizielle Abrechnungsformular mit allen Pflichtfeldern
-- Die Excel-Export-Logik liegt in `backend/utils/excelExport.js`, Controller in `backend/controllers/fahrtController.js`
-- Abrechnungsträger-Model: `backend/models/AbrechnungsTraeger.js`
-- Distanzen-Model: `backend/models/Distanz.js`
-- Frontend ist ein monolithisches `frontend/src/App.js` (2949 Zeilen) — Änderungen hier vorsichtig
+- v1.0 shipped: 4 Phasen, 7 Plans, 11 Tasks — alle aus konkretem Nutzerfeedback
+- Nutzerfeedback von Joerg, Benjamin und Jasmin Reusch vollständig umgesetzt
+- Tech Stack: React 18, Express 4, MySQL 8, ExcelJS, Docker Compose
+- Deployment: KKD-Server (185.248.143.234), Caddy Reverse Proxy
+- CI/CD: GitHub Actions → Docker Hub → `docker-compose pull && up -d`
 
 ## Constraints
 
 - **Responsive**: Alle UI-Änderungen müssen auf Desktop und Mobile funktionieren
-- **Tech Stack**: Bestehender Stack (React, Express, MySQL, exceljs) beibehalten — kein Rewrite
-- **Deployment**: Docker Compose auf KKD-Server (185.248.143.234), Caddy Reverse Proxy
-- **Datenintegrität**: Distanz-Updates müssen alle betroffenen Fahrten atomar aktualisieren (Transaktion)
-- **Abwärtskompatibilität**: Bestehende Einzelmonats-Exports müssen weiterhin funktionieren
-- **Excel-Format**: Muss dem offiziellen Dienstfahrten-Abrechnungsformular entsprechen (PDF-Referenz vorhanden)
+- **Tech Stack**: React, Express, MySQL, ExcelJS — kein Rewrite
+- **Deployment**: Docker Compose auf KKD-Server, Caddy Reverse Proxy
+- **Excel-Format**: Offizielles Dienstfahrten-Abrechnungsformular (PDF-Referenz vorhanden)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Distanz-Update wirkt rückwirkend auf alle Fahrten | Nutzerwunsch — falsche Distanzen sollen nicht manuell korrigiert werden müssen | — Pending |
-| Kostenstelle als Feld am Abrechnungsträger | Gehört logisch zum Kostenträger, nicht zur einzelnen Fahrt | — Pending |
+| Distanz-Update wirkt rückwirkend auf alle Fahrten | Nutzerwunsch — falsche Distanzen nicht manuell korrigieren | ✓ Good |
+| Kostenstelle als Feld am Abrechnungsträger | Gehört logisch zum Kostenträger, nicht zur Fahrt | ✓ Good |
+| Template-basierte Excel-Anpassung statt Code-only | Sauberere Trennung Layout/Daten, einfacher zu pflegen | ✓ Good |
+| Von/Bis-Zeitraum direkt in Monatsübersicht | Statt separatem Export-Dialog — eine Stelle steuert alles | ✓ Good |
+| Eingereicht-Dialog nach Export | Nutzer entscheidet aktiv, kein automatisches Markieren | ✓ Good |
 
 ## Evolution
 
@@ -80,4 +81,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after Phase 3 completion — all v1 requirements validated*
+*Last updated: 2026-03-22 after v1.0 milestone*
