@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import axios from 'axios';
+import JSZip from 'jszip';
 import { AppContext } from '../contexts/AppContext';
 import { renderOrteOptions } from '../utils';
 import MitfahrerModal from '../MitfahrerModal';
@@ -262,6 +263,56 @@ function FahrtenListe() {
       } else {
         showNotification("Fehler", "PDF-Export konnte nicht erstellt werden.");
       }
+    }
+  };
+
+  const handleExportBoth = async (type) => {
+    try {
+      const [bisYear, bisMonth] = selectedMonth.split('-');
+      const formattedBisMonth = bisMonth.padStart(2, '0');
+      let excelUrl, pdfUrl, baseFilename;
+
+      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
+        const [vonYear, vonMonth] = selectedVonMonth.split('-');
+        const formattedVonMonth = vonMonth.padStart(2, '0');
+        const vonDate = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
+        const bisDate = new Date(parseInt(bisYear), parseInt(bisMonth) - 1);
+        if (bisDate < vonDate) {
+          showNotification("Fehler", "Der Bis-Monat muss gleich oder nach dem Von-Monat liegen.");
+          return;
+        }
+        excelUrl = `/api/fahrten/export-range/${type}/${vonYear}/${formattedVonMonth}/${bisYear}/${formattedBisMonth}`;
+        pdfUrl = `/api/fahrten/export-pdf-range/${type}/${vonYear}/${formattedVonMonth}/${bisYear}/${formattedBisMonth}`;
+        baseFilename = `fahrtenabrechnung_${type}_${vonYear}_${formattedVonMonth}_bis_${bisYear}_${formattedBisMonth}`;
+      } else {
+        excelUrl = `/api/fahrten/export/${type}/${bisYear}/${formattedBisMonth}`;
+        pdfUrl = `/api/fahrten/export-pdf/${type}/${bisYear}/${formattedBisMonth}`;
+        baseFilename = `fahrtenabrechnung_${type}_${bisYear}_${formattedBisMonth}`;
+      }
+
+      const [excelRes, pdfRes] = await Promise.all([
+        axios.get(excelUrl, { responseType: 'blob' }),
+        axios.get(pdfUrl, { responseType: 'blob' })
+      ]);
+
+      const zip = new JSZip();
+      zip.file(`${baseFilename}.xlsx`, excelRes.data);
+      zip.file(`${baseFilename}.pdf`, pdfRes.data);
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${baseFilename}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      askMarkAsSubmitted(type);
+    } catch (error) {
+      console.error('Fehler beim Exportieren:', error);
+      showNotification("Fehler", "Export konnte nicht erstellt werden.");
     }
   };
 
@@ -664,14 +715,17 @@ function FahrtenListe() {
         <button
         key={key}
         onClick={() => {
+          const typeKey = key.toLowerCase();
           showNotification(
             "Export " + displayName,
             "In welchem Format möchten Sie exportieren?",
-            () => handleExportToExcel(key.toLowerCase()),
+            () => handleExportToExcel(typeKey),
             true,
             "Excel",
-            () => handleExportToPdf(key.toLowerCase()),
-            "PDF"
+            () => handleExportToPdf(typeKey),
+            "PDF",
+            () => handleExportBoth(typeKey),
+            "Beide"
           );
         }}
         className="btn-primary">
