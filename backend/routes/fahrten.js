@@ -13,6 +13,7 @@ router.get('/export-range/:type/:startYear/:startMonth/:endYear/:endMonth', fahr
 router.get('/report/:year/:month', fahrtController.getMonthlyReport);
 router.get('/monthly-summary', fahrtController.getMonthlySummary); 
 router.get('/year-summary/:year', fahrtController.getYearSummary);
+router.get('/report-range/:startYear/:startMonth/:endYear/:endMonth', fahrtController.getReportRange);
 router.get('/:id', fahrtController.getFahrtById);
 router.put('/:id', fahrtController.updateFahrt);
 router.delete('/:id', fahrtController.deleteFahrt);
