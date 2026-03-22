@@ -97,11 +97,11 @@ Plans:
   2. Shared State (Fahrten, Orte, Abrechnungstraeger etc.) wird ueber Custom Hooks bereitgestellt, nicht ueber inline useState/useEffect in App.js
   3. Export-Logik (Zeitraum-Auswahl, Download-Trigger, Eingereicht-Status) lebt in einer eigenen Komponente, nicht verstreut in App.js
   4. Die App verhält sich nach dem Refactoring identisch zum Ist-Zustand — kein sichtbarer Unterschied fuer Nutzer
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — AppProvider und FahrtenListe aus App.js extrahieren
+- [ ] 08-02-PLAN.md — MonthlyOverview, LoginPage und AppContent extrahieren — App.js wird minimal
 
 ### Phase 9: PDF-Export
 **Goal**: Nutzer koennen ihre Fahrtenbuch-Abrechnung als PDF exportieren — druckfertig mit Unterschriftsfeldern und Kostenstelle
@@ -132,5 +132,5 @@ Phases execute in numeric order: 8 → 9
 | 5. Bugfixes | v1.1 | 1/1 | Complete | 2026-03-22 |
 | 6. Security Hardening | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 7. Code-Qualität | v1.1 | 2/2 | Complete | 2026-03-22 |
-| 8. Frontend-Refactoring | v1.2 | 0/? | Not started | - |
+| 8. Frontend-Refactoring | v1.2 | 0/2 | Not started | - |
 | 9. PDF-Export | v1.2 | 0/? | Not started | - |
