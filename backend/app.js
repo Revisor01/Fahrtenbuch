@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path'); // Import path
 const initializeDatabase = require('./initDb');
 const orteRoutes = require('./routes/orte');
@@ -33,7 +34,8 @@ app.use(cors({
         'X-API-Key'  // Hier den neuen Header hinzufügen
     ]
 }));
-app.use(express.json());
+app.use(helmet());
+app.use(express.json({ limit: '10mb' }));
 
 // Define path to React build directory
 const reactBuildPath = path.join(__dirname, '../frontend/public');
