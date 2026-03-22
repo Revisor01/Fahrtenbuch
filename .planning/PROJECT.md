@@ -37,8 +37,18 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 
 ### Active
 
-(Keine — nächster Milestone definiert neue Ziele)
-- Debug-Log-Cleanup
+- [ ] App.js aufteilen in kleinere Komponenten (3000+ Zeilen → modulare Struktur)
+- [ ] PDF-Export als Alternative zu Excel (direkt druckbar mit Unterschriftsfeldern)
+- [ ] Export-Dialog mit Format-Auswahl (Excel/PDF)
+
+## Current Milestone: v1.2 Features & Refactoring
+
+**Goal:** Monolithisches Frontend aufteilen und PDF-Export als neues Feature einbauen.
+
+**Target features:**
+- App.js Refactoring in modulare Komponenten
+- PDF-Export neben Excel
+- Export-Format-Auswahl im UI
 
 ### Out of Scope
 
@@ -90,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after v1.1 milestone completion*
+*Last updated: 2026-03-22 after v1.2 milestone start*

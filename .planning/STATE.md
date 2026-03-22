@@ -18,13 +18,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-22)
 
-**Core value:** App robuster, sicherer und wartbarer machen — keine neuen Features, aber solide Grundlage
-**Current focus:** Phase 07 — code-qualitaet (COMPLETE)
+**Core value:** Excel-Export bildet das offizielle Abrechnungsformular korrekt ab
+**Current focus:** Milestone v1.2 — Features & Refactoring
 
 ## Current Position
 
-Phase: 07
-Plan: Not started
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-22 — Milestone v1.2 started
 
 ## Performance Metrics
 
