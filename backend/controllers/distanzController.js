@@ -14,7 +14,7 @@ exports.createOrUpdateDistanz = async (req, res) => {
     res.status(201).json({ result, message: 'Distanz erfolgreich erstellt oder aktualisiert' });
   } catch (error) {
     console.error('Fehler beim Erstellen oder Aktualisieren der Distanz:', error);
-    res.status(500).json({ message: 'Fehler beim Erstellen oder Aktualisieren der Distanz', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Erstellen oder Aktualisieren der Distanz' });
   }
 };
 
@@ -29,7 +29,8 @@ exports.deleteDistanz = async (req, res) => {
       res.status(404).json({ message: 'Distanz nicht gefunden' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Fehler beim Löschen der Distanz', error: error.message });
+    console.error('Fehler beim Löschen der Distanz:', error);
+    res.status(500).json({ message: 'Fehler beim Löschen der Distanz' });
   }
 };
 
@@ -47,7 +48,7 @@ exports.getAutoSplitDistance = async (req, res) => {
     res.status(200).json(splitResult);
   } catch (error) {
     console.error('Fehler beim Berechnen der Autosplit-Distanz:', error);
-    res.status(500).json({ message: 'Fehler beim Berechnen der Autosplit-Distanz', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Berechnen der Autosplit-Distanz' });
   }
 };
 
@@ -68,7 +69,7 @@ exports.getDistanz = async (req, res) => {
     }
   } catch (error) {
     console.error('Fehler beim Abrufen der Distanz:', error);
-    res.status(500).json({ message: 'Fehler beim Abrufen der Distanz', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Abrufen der Distanz' });
   }
 };
 
@@ -90,7 +91,7 @@ exports.updateDistanz = async (req, res) => {
     }
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Distanz:', error);
-    res.status(500).json({ message: 'Fehler beim Aktualisieren der Distanz', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Aktualisieren der Distanz' });
   }
 };
 
@@ -101,6 +102,6 @@ exports.getAllDistanzen = async (req, res) => {
     res.status(200).json(distanzen);
   } catch (error) {
     console.error('Fehler beim Abrufen aller Distanzen:', error);
-    res.status(500).json({ message: 'Fehler beim Abrufen aller Distanzen', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Abrufen aller Distanzen' });
   }
 };

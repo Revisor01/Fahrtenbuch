@@ -100,11 +100,7 @@ exports.updateProfile = async (req, res) => {
         }
     } catch (error) {
         console.error('Detaillierter Fehler beim Aktualisieren des Profils:', error);
-        res.status(500).json({
-            message: 'Serverfehler beim Aktualisieren des Profils',
-            error: error.message,
-            stack: error.stack
-        });
+        res.status(500).json({ message: 'Serverfehler beim Aktualisieren des Profils' });
     }
 };
 
