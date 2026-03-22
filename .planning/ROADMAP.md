@@ -83,7 +83,7 @@ Plans:
 
 **Milestone Goal:** Monolithisches Frontend aufteilen und PDF-Export als neues Feature einbauen.
 
-- [ ] **Phase 8: Frontend-Refactoring** - App.js in modulare Komponenten und Custom Hooks aufteilen
+- [x] **Phase 8: Frontend-Refactoring** - App.js in modulare Komponenten und Custom Hooks aufteilen
 - [ ] **Phase 9: PDF-Export** - PDF als Export-Format neben Excel mit Format-Auswahl im UI
 
 ## Phase Details
@@ -101,7 +101,7 @@ Plans:
 
 Plans:
 - [x] 08-01-PLAN.md — AppProvider und FahrtenListe aus App.js extrahieren
-- [ ] 08-02-PLAN.md — MonthlyOverview, LoginPage und AppContent extrahieren — App.js wird minimal
+- [x] 08-02-PLAN.md — MonthlyOverview, LoginPage und AppContent extrahieren — App.js wird minimal
 
 ### Phase 9: PDF-Export
 **Goal**: Nutzer koennen ihre Fahrtenbuch-Abrechnung als PDF exportieren — druckfertig mit Unterschriftsfeldern und Kostenstelle
@@ -132,5 +132,5 @@ Phases execute in numeric order: 8 → 9
 | 5. Bugfixes | v1.1 | 1/1 | Complete | 2026-03-22 |
 | 6. Security Hardening | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 7. Code-Qualität | v1.1 | 2/2 | Complete | 2026-03-22 |
-| 8. Frontend-Refactoring | v1.2 | 1/2 | In progress | - |
+| 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 0/? | Not started | - |

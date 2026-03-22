@@ -7,9 +7,9 @@
 
 ### Refactoring
 
-- [ ] **REF-01**: App.js in modulare Komponenten aufteilen (AppProvider, Dashboard, Monatsübersicht, Settings etc.)
-- [ ] **REF-02**: Shared State über Custom Hooks statt inline-Logik in App.js
-- [ ] **REF-03**: Export-Logik in eigene Komponente extrahieren
+- [x] **REF-01**: App.js in modulare Komponenten aufteilen (AppProvider, Dashboard, Monatsübersicht, Settings etc.)
+- [x] **REF-02**: Shared State über Custom Hooks statt inline-Logik in App.js
+- [x] **REF-03**: Export-Logik in eigene Komponente extrahieren
 
 ### PDF-Export
 
@@ -29,9 +29,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REF-01 | Phase 8 | In Progress (08-01) |
-| REF-02 | Phase 8 | In Progress (08-01) |
-| REF-03 | Phase 8 | Pending |
+| REF-01 | Phase 8 | Complete (08-02) |
+| REF-02 | Phase 8 | Complete (08-01) |
+| REF-03 | Phase 8 | Complete (08-02) |
 | PDF-01 | Phase 9 | Pending |
 | PDF-02 | Phase 9 | Pending |
 | PDF-03 | Phase 9 | Pending |
