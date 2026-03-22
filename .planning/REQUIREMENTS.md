@@ -7,9 +7,9 @@
 
 ### Bugfixes
 
-- [ ] **BUG-01**: Mitfahrer-Erstattungssatz wird aus der DB gelesen statt hardcoded 0,05 €/km
-- [ ] **BUG-02**: Rückfahrt-Matching case-insensitive und robuster bei ID-Abweichungen
-- [ ] **BUG-03**: Axios-Interceptor Race Condition bei parallelen 401-Responses fixen
+- [x] **BUG-01**: Mitfahrer-Erstattungssatz wird aus der DB gelesen statt hardcoded 0,05 €/km
+- [x] **BUG-02**: Rückfahrt-Matching case-insensitive und robuster bei ID-Abweichungen
+- [x] **BUG-03**: Axios-Interceptor Race Condition bei parallelen 401-Responses fixen
 
 ### Security
 
@@ -42,9 +42,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUG-01 | Phase 5 | Pending |
-| BUG-02 | Phase 5 | Pending |
-| BUG-03 | Phase 5 | Pending |
+| BUG-01 | Phase 5 | Complete |
+| BUG-02 | Phase 5 | Complete |
+| BUG-03 | Phase 5 | Complete |
 | SEC-01 | Phase 6 | Pending |
 | SEC-02 | Phase 6 | Pending |
 | SEC-03 | Phase 6 | Pending |

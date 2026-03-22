@@ -51,7 +51,7 @@ Plans:
 
 **Milestone Goal:** App robuster, sicherer und wartbarer machen — keine neuen Features, aber solide Grundlage.
 
-- [ ] **Phase 5: Bugfixes** - Bekannte Fehler bei Mitfahrer-Erstattung, Rückfahrt-Matching und Token-Refresh beheben
+- [x] **Phase 5: Bugfixes** - Bekannte Fehler bei Mitfahrer-Erstattung, Rückfahrt-Matching und Token-Refresh beheben
 - [ ] **Phase 6: Security Hardening** - HTTP-Header, Rate-Limiting, Error-Sanitizing und Body-Size-Limits einführen
 - [ ] **Phase 7: Code-Qualität** - Input-Validierung mit Zod, Debug-Logs entfernen, Dependency-Updates
 
@@ -68,7 +68,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md — Mitfahrer-Erstattung DB-Lookup, Rueckfahrt-Matching Fallback, Axios Race-Condition-Guard
+- [x] 05-01-PLAN.md — Mitfahrer-Erstattung DB-Lookup, Rueckfahrt-Matching Fallback, Axios Race-Condition-Guard
 
 ### Phase 6: Security Hardening
 **Goal**: App ist gegen gängige Angriffsvektoren abgesichert — sichere Headers, Brute-Force-Schutz, keine DB-Details im Client
@@ -108,6 +108,6 @@ Phases execute in numeric order: 5 → 6 → 7
 | 2. Excel-Export Formular | v1.0 | 1/1 | Complete | 2026-03-22 |
 | 3. Mehrmonats-Export | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 4. Von/Bis-Zeitraum | v1.0 | 2/2 | Complete | 2026-03-22 |
-| 5. Bugfixes | v1.1 | 0/1 | Not started | - |
+| 5. Bugfixes | v1.1 | 1/1 | Complete | 2026-03-22 |
 | 6. Security Hardening | v1.1 | 0/? | Not started | - |
 | 7. Code-Qualität | v1.1 | 0/? | Not started | - |

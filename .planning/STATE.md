@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Stabilität & Security
-status: ready_to_plan
-stopped_at: Roadmap v1.1 erstellt
-last_updated: "2026-03-22"
+status: executing
+stopped_at: Phase 05 Plan 01 complete, bereit fuer Phase 6 Planning
+last_updated: "2026-03-22T10:02:01Z"
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
 ---
 
 # Project State
@@ -19,20 +19,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** App robuster, sicherer und wartbarer machen — keine neuen Features, aber solide Grundlage
-**Current focus:** Phase 5 - Bugfixes
+**Current focus:** Phase 05 — bugfixes
 
 ## Current Position
 
-Phase: 5 of 7 (Bugfixes)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-22 — Roadmap für v1.1 erstellt
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 05 (bugfixes) — COMPLETE
+Plan: 1 of 1 (done)
 
 ## Performance Metrics
 
 **Velocity (v1.0):**
+
 - Total plans completed: 7
 - Total execution time: ~13 min
 
@@ -46,8 +43,13 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04 | 2 | 4min | 2min |
 
 **Velocity (v1.1):**
-- Total plans completed: 0
-- Average duration: -
+
+- Total plans completed: 1
+- Average duration: 2min
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| Phase 05 | 1 | 2min | 2min |
 
 ## Accumulated Context
 
@@ -58,6 +60,8 @@ Recent decisions affecting current work:
 
 - v1.0 shipped erfolgreich mit 4 Phasen, 7 Plans, 11 Tasks
 - v1.1 fokussiert auf Stabilität, keine neuen Features
+- Separate DB-Query fuer Mitfahrer-Saetze statt UNION-Query erweitern (Phase 05)
+- useRef statt useState fuer isLoggingOut Guard (Phase 05)
 
 ### Pending Todos
 
@@ -70,5 +74,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-22
-Stopped at: Roadmap v1.1 erstellt, bereit für Phase 5 Planning
+Stopped at: Phase 05 Plan 01 complete, bereit fuer Phase 6 Planning
 Resume file: None
