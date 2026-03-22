@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { renderOrteOptions } from '../utils';
 
 function DistanzForm() {

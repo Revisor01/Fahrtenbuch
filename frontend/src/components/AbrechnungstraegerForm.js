@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 function AbrechnungstraegerForm() {

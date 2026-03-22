@@ -1,5 +1,5 @@
 import React, { useState, useContext, useMemo } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 
 function DistanzenListe() {
     const { distanzen, orte, updateDistanz, deleteDistanz, showNotification } = useContext(AppContext);
