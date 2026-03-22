@@ -15,7 +15,7 @@
 
 - [x] **SEC-01**: helmet-Middleware für sichere HTTP-Headers
 - [x] **SEC-02**: express-rate-limit auf Login-Endpoint (Brute-Force-Schutz)
-- [ ] **SEC-03**: Error-Messages sanitizen — keine DB-Details an Client leaken
+- [x] **SEC-03**: Error-Messages sanitizen — keine DB-Details an Client leaken
 - [x] **SEC-04**: Body-Size-Limit auf express.json() setzen
 
 ### Code-Qualität
@@ -47,7 +47,7 @@
 | BUG-03 | Phase 5 | Complete |
 | SEC-01 | Phase 6 | Complete |
 | SEC-02 | Phase 6 | Complete |
-| SEC-03 | Phase 6 | Pending |
+| SEC-03 | Phase 6 | Complete |
 | SEC-04 | Phase 6 | Complete |
 | QUAL-01 | Phase 7 | Pending |
 | QUAL-02 | Phase 7 | Pending |

@@ -83,7 +83,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — helmet, express-rate-limit und Body-Size-Limit einbauen
-- [ ] 06-02-PLAN.md — Error-Messages in allen Controllern sanitizen
+- [x] 06-02-PLAN.md — Error-Messages in allen Controllern sanitizen
 
 ### Phase 7: Code-Qualität
 **Goal**: Backend validiert alle Eingaben sauber, Production-Code ist frei von Debug-Output, Dependencies sind aktuell
