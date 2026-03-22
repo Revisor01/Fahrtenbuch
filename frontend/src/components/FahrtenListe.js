@@ -221,6 +221,97 @@ function FahrtenListe() {
     }
   };
 
+  const handleExportToPdf = async (type) => {
+    try {
+      const [bisYear, bisMonth] = selectedMonth.split('-');
+      const formattedBisMonth = bisMonth.padStart(2, '0');
+
+      let response;
+      let defaultFilename;
+
+      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
+        // Zeitraum-Export: nutze Range-Route
+        const [vonYear, vonMonth] = selectedVonMonth.split('-');
+        const formattedVonMonth = vonMonth.padStart(2, '0');
+
+        // Validierung: Bis >= Von
+        const vonDate = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
+        const bisDate = new Date(parseInt(bisYear), parseInt(bisMonth) - 1);
+        if (bisDate < vonDate) {
+          showNotification("Fehler", "Der Bis-Monat muss gleich oder nach dem Von-Monat liegen.");
+          return;
+        }
+
+        response = await axios.get(
+          `/api/fahrten/export-pdf-range/${type}/${vonYear}/${formattedVonMonth}/${bisYear}/${formattedBisMonth}`,
+          { responseType: 'blob' }
+        );
+        defaultFilename = `fahrtenabrechnung_${type}_${vonYear}_${formattedVonMonth}_bis_${bisYear}_${formattedBisMonth}.pdf`;
+      } else {
+        // Einzelmonat-Export
+        response = await axios.get(
+          `/api/fahrten/export-pdf/${type}/${bisYear}/${formattedBisMonth}`,
+          { responseType: 'blob' }
+        );
+        defaultFilename = `fahrtenabrechnung_${type}_${bisYear}_${formattedBisMonth}.pdf`;
+      }
+
+      const contentDisposition = response.headers['content-disposition'];
+      const filenameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/i);
+      let filename = filenameMatch ? filenameMatch[1] : defaultFilename;
+
+      if (!filename.endsWith('.pdf')) {
+        filename = `${filename}.pdf`;
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      if (blob.size === 0) {
+        throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showNotification(
+        "Export erfolgreich",
+        "Soll der Zeitraum als eingereicht markiert werden?",
+        async () => {
+          if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
+            const [vonYear, vonMonth] = selectedVonMonth.split('-');
+            const [bisYear2, bisMonth2] = selectedMonth.split('-');
+            let current = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
+            const end = new Date(parseInt(bisYear2), parseInt(bisMonth2) - 1);
+            while (current <= end) {
+              const y = current.getFullYear().toString();
+              const m = (current.getMonth() + 1).toString().padStart(2, '0');
+              await updateAbrechnungsStatus(y, m, type, 'eingereicht', new Date().toISOString().split('T')[0]);
+              current.setMonth(current.getMonth() + 1);
+            }
+          } else {
+            await updateAbrechnungsStatus(bisYear, formattedBisMonth, type, 'eingereicht', new Date().toISOString().split('T')[0]);
+          }
+          await fetchMonthlyData();
+          await fetchFahrten();
+          showNotification("Erfolg", "Zeitraum als eingereicht markiert");
+        },
+        true
+      );
+    } catch (error) {
+      console.error('Fehler beim Exportieren als PDF:', error);
+      if (error.response && error.response.status === 404) {
+        showNotification("Hinweis", "Keine Daten fuer den ausgewaehlten Zeitraum gefunden.");
+      } else {
+        showNotification("Fehler", "PDF-Export konnte nicht erstellt werden.");
+      }
+    }
+  };
+
   const findErgänzendeFahrt = (aktuellefahrt) => {
     // Bestimmen, ob aktuelle Fahrt eine Hinfahrt oder Rückfahrt ist
     const istRückfahrt = aktuellefahrt.anlass?.toLowerCase().includes('rückfahrt');
@@ -590,12 +681,18 @@ function FahrtenListe() {
       {/* Export */}
       <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
       {getKategorienMitErstattung().map(([key, displayName]) => (
-        <button
-        key={key}
-        onClick={() => handleExportToExcel(key.toLowerCase())}
-        className="btn-primary">
-        Export {displayName}
-        </button>
+        <div key={key} className="flex gap-1">
+          <button
+          onClick={() => handleExportToExcel(key.toLowerCase())}
+          className="btn-primary text-sm">
+          Excel {displayName}
+          </button>
+          <button
+          onClick={() => handleExportToPdf(key.toLowerCase())}
+          className="btn-primary text-sm">
+          PDF {displayName}
+          </button>
+        </div>
       ))}
       </div>
       </div>
