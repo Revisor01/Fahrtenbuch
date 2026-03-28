@@ -1,5 +1,34 @@
 # Milestones
 
+## v1.4 UX Polish & Navigation (Shipped: 2026-03-28)
+
+**Phases completed:** 2 phases, 5 plans, 8 tasks
+
+**Key accomplishments:**
+
+- Dashboard-Polish: Statistik-Cards zusammengeführt, Fahrten-Tooltip auf km-Balken, Formular-Redesign mit Gradient-Header
+- Favoriten mit Rückfahrt-Dialog: "Mit Rückfahrt?" fragt bei Ausführung, legt Hin- und Rückfahrt an
+- Umlaut-Korrektur in allen Frontend- und Backend-Texten
+- Einstellungen als inline Tab statt Modal (Settings.js mit 8 Sub-Tabs)
+- Benutzerverwaltung als Admin-only Tab in der Hauptnavigation
+- Navigation: Dashboard | Fahrten & Export | Monatsübersicht | Einstellungen (+ Verwaltung für Admins)
+
+---
+
+## v1.3 Dashboard & UX (Shipped: 2026-03-28)
+
+**Phases completed:** 3 phases, 5 plans, 8 tasks
+
+**Key accomplishments:**
+
+- Dashboard als neue Startseite mit KPIs, Schnelleingabe, Favoriten, letzte Fahrten
+- Favoriten-System mit Backend-CRUD und Frontend-UI
+- Jahres-Statistik mit Balkendiagramm (km pro Monat, Erstattungen)
+- Adress-Autocomplete bei Ort-Eingabe (OpenStreetMap/Nominatim)
+- Tab-Navigation: Dashboard, Fahrten & Export, Monatsübersicht
+
+---
+
 ## v1.2 Features & Refactoring (Shipped: 2026-03-22)
 
 **Phases completed:** 2 phases, 4 plans, 7 tasks

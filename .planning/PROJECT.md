@@ -45,29 +45,35 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ Jahres-Statistik mit Balkendiagramm (km pro Monat, Erstattungen) — v1.3
 - ✓ Adress-Autocomplete bei Ort-Eingabe (OpenStreetMap/Nominatim) — v1.3
 
+- ✓ Einstellungen als eigener Tab statt Modal — v1.4
+- ✓ Benutzerverwaltung (Admin) als Tab statt Button — v1.4
+- ✓ Dashboard-Polish (Cards, Statistik-Integration, Formular-Redesign) — v1.4
+- ✓ Favoriten mit Rückfahrt-Dialog — v1.4
+- ✓ Umlaute korrigiert in allen Texten — v1.4
+
 ### Active
 
-- [ ] Einstellungen als eigener Tab statt Modal
-- [ ] Benutzerverwaltung (Admin) als Tab statt Button
-- [ ] Dashboard: Erstattungen pro Abrechnungsträger in Statistik anzeigen
-- [ ] Dashboard: Mouseover auf km-Balken zeigt Anzahl Fahrten
-- [ ] Dashboard: Card-Hintergrund für jede Rubrik (klare Abgrenzung)
-- [ ] Dashboard: "Neue Fahrt erfassen" optisch überarbeiten
-- [ ] Favoriten: bei Ausführung fragen "Mit Rückfahrt?" und beide anlegen
-- [ ] Umlaute: alle Texte korrekt mit äöüß
+- [ ] Komplettes visuelles Redesign aller Ansichten (modern, mobile-first)
+- [ ] Cards als umgebende Container für alle Sektionen in jeder View
+- [ ] Dashboard Makeover (Formular, KPIs, Favoriten, Statistik — alles in Cards)
+- [ ] Einstellungen/Settings visuell aufwerten (Sub-Tab-Navigation, Formulare)
+- [ ] Fahrten & Export Redesign (Tabelle, Filter, Export-Bereich)
+- [ ] Monatsübersicht Redesign (übersichtlicher, Cards)
+- [ ] Mobile-First Optimierung (Touch-freundlich, responsive)
+- [ ] Einheitliches Designsystem (Typografie, Spacing, Farben)
 
-## Current Milestone: v1.4 UX Polish & Navigation
+## Current Milestone: v2.0 Design Makeover
 
-**Goal:** Einstellungen und Benutzerverwaltung inline als Tabs, Dashboard-Polish (Cards, Statistiken, Favoriten mit Rückfahrt), Umlaute korrigieren.
-
-**Navigation nach Umbau:**
-- [Dashboard] [Fahrten & Export] [Monatsübersicht] [⚙️]
+**Goal:** Komplettes visuelles Redesign der gesamten App — modern, mobil-optimiert, attraktiv. Alle bestehenden Funktionen bleiben, aber jede Ansicht bekommt ein zeitgemäßes UI.
 
 **Target features:**
-- Dashboard mit KPIs, Formular, Favoriten, letzte Fahrten, Jahreschart
-- Favoriten + Quick-Copy (letzte 3 Fahrten "Nochmal")
-- Statistiken (km/Monat, Erstattungen/Träger)
-- Adress-Autocomplete (Nominatim)
+- Cards als Container für alle Sektionen
+- Modernes, attraktives Dashboard-Layout
+- Einstellungen mit aufgewertetem UI
+- Fahrten & Export visuell modernisiert
+- Monatsübersicht redesigned
+- Mobile-First, Touch-freundlich
+- Einheitliches Designsystem (Typografie, Spacing)
 
 ### Out of Scope
 
@@ -119,4 +125,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-28 after v1.4 milestone start*
+*Last updated: 2026-03-28 after v2.0 milestone start*
