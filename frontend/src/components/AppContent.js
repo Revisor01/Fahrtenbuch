@@ -92,6 +92,7 @@ function AppContent() {
       </button>
     </div>
   </div>
+  </div>
 
     {/* Tab Navigation */}
     <div className="flex gap-1 border-b border-border mb-6 overflow-x-auto">
