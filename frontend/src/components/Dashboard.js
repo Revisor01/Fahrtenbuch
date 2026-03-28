@@ -2,7 +2,7 @@ import React, { useContext, useState, useMemo } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
-import { Banknote, Route, Car, Star, ChevronDown, ChevronUp, RotateCcw, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
+import { Banknote, Route, Car, Star, ChevronDown, ChevronUp, RotateCcw, ChevronLeft, ChevronRight, BarChart3, Plus } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -56,6 +56,19 @@ function Dashboard() {
       const [y, m] = f.datum.split('-');
       if (parseInt(y) === statistikJahr) {
         result[parseInt(m) - 1] += parseFloat(f.kilometer) || 0;
+      }
+    });
+    return result;
+  }, [fahrten, statistikJahr]);
+
+  // Fahrten count per month for tooltip
+  const fahrtenProMonat = useMemo(() => {
+    const result = Array(12).fill(0);
+    fahrten.forEach(f => {
+      if (!f.datum) return;
+      const [y, m] = f.datum.split('-');
+      if (parseInt(y) === statistikJahr) {
+        result[parseInt(m) - 1]++;
       }
     });
     return result;
@@ -241,12 +254,12 @@ function Dashboard() {
         )}
       </div>
 
-      {/* Jahres-Balkendiagramm: km pro Monat */}
+      {/* Statistik: km-Chart + Erstattungen in einem Card */}
       <div className="card p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <BarChart3 size={18} className="text-blue-500" />
-            <h2 className="text-base font-medium text-value">Kilometer {statistikJahr}</h2>
+            <h2 className="text-base font-medium text-value">Statistik {statistikJahr}</h2>
           </div>
           <div className="flex items-center gap-1">
             <button
@@ -259,78 +272,87 @@ function Dashboard() {
             <button
               onClick={() => setStatistikJahr(statistikJahr + 1)}
               className="p-1 rounded hover:bg-hover transition-colors"
-              title="N&#228;chstes Jahr"
+              title="N&auml;chstes Jahr"
             >
               <ChevronRight size={18} className="text-muted" />
             </button>
           </div>
         </div>
-        {!hasKmData ? (
-          <p className="text-sm text-muted text-center py-8">Keine Fahrten in {statistikJahr}</p>
+        {!hasKmData && !hasErstattungen ? (
+          <p className="text-sm text-muted text-center py-8">Keine Daten in {statistikJahr}</p>
         ) : (
-          <div>
-            <div className="flex items-end gap-1" style={{ height: '160px' }}>
-              {kmProMonat.map((km, i) => {
-                const heightPercent = (km / maxKm) * 100;
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
-                    <div className="relative w-full group flex items-end justify-center" style={{ height: '100%' }}>
-                      <div
-                        className="w-full rounded-t bg-primary-500 transition-all duration-300 relative"
-                        style={{ height: `${Math.max(heightPercent, 1.5)}%` }}
-                        title={`${km.toFixed(1)} km`}
-                      >
-                        {km > 0 && (
-                          <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs text-muted whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                            {km.toFixed(0)}
-                          </span>
-                        )}
+          <>
+            {/* km-Balkendiagramm */}
+            {hasKmData && (
+              <div>
+                <div className="flex items-end gap-1" style={{ height: '160px' }}>
+                  {kmProMonat.map((km, i) => {
+                    const heightPercent = (km / maxKm) * 100;
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                        <div className="relative w-full group flex items-end justify-center" style={{ height: '100%' }}>
+                          <div
+                            className="w-full rounded-t bg-primary-500 transition-all duration-300 relative"
+                            style={{ height: `${Math.max(heightPercent, 1.5)}%` }}
+                            title={`${km.toFixed(1)} km | ${fahrtenProMonat[i]} Fahrten`}
+                          >
+                            {km > 0 && (
+                              <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-muted whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center">
+                                <span>{km.toFixed(0)} km</span>
+                                <span>{fahrtenProMonat[i]} F.</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex gap-1 mt-1">
-              {monatLabels.map((label, i) => (
-                <div key={i} className="flex-1 text-center text-xs text-muted">{label}</div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-1 mt-1">
+                  {monatLabels.map((label, i) => (
+                    <div key={i} className="flex-1 text-center text-xs text-muted">{label}</div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-      {/* Erstattungs-Uebersicht pro Abrechnungstraeger */}
-      <div className="card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Banknote size={18} className="text-emerald-500" />
-          <h2 className="text-base font-medium text-value">Erstattungen {statistikJahr}</h2>
-        </div>
-        {!hasErstattungen ? (
-          <p className="text-sm text-muted text-center py-4">Keine Erstattungen in {statistikJahr}</p>
-        ) : (
-          <table className="table-auto w-full text-sm">
-            <thead>
-              <tr>
-                <th className="text-left text-muted font-normal pb-2">Abrechnungstr&#228;ger</th>
-                <th className="text-right text-muted font-normal pb-2">Gesamt (EUR)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(erstattungenProTraeger)
-                .sort(([, a], [, b]) => b - a)
-                .map(([traeger, betrag]) => (
-                  <tr key={traeger} className="border-b border-border">
-                    <td className="py-2 text-value">{traeger}</td>
-                    <td className="py-2 text-right text-value">{betrag.toFixed(2).replace('.', ',')} &euro;</td>
-                  </tr>
-                ))}
-              <tr className="font-semibold">
-                <td className="pt-2 text-value">Gesamt</td>
-                <td className="pt-2 text-right text-value">{gesamtErstattung.toFixed(2).replace('.', ',')} &euro;</td>
-              </tr>
-            </tbody>
-          </table>
+            {/* Trennlinie zwischen Chart und Erstattungen */}
+            {hasKmData && hasErstattungen && (
+              <hr className="border-border my-4" />
+            )}
+
+            {/* Erstattungen pro Abrechnungstraeger */}
+            {hasErstattungen && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Banknote size={18} className="text-emerald-500" />
+                  <h3 className="text-sm font-medium text-value">Erstattungen</h3>
+                </div>
+                <table className="table-auto w-full text-sm">
+                  <thead>
+                    <tr>
+                      <th className="text-left text-muted font-normal pb-2">Abrechnungstr&auml;ger</th>
+                      <th className="text-right text-muted font-normal pb-2">Gesamt (EUR)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(erstattungenProTraeger)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([traeger, betrag]) => (
+                        <tr key={traeger} className="border-b border-border">
+                          <td className="py-2 text-value">{traeger}</td>
+                          <td className="py-2 text-right text-value">{betrag.toFixed(2).replace('.', ',')} &euro;</td>
+                        </tr>
+                      ))}
+                    <tr className="font-semibold">
+                      <td className="pt-2 text-value">Gesamt</td>
+                      <td className="pt-2 text-right text-value">{gesamtErstattung.toFixed(2).replace('.', ',')} &euro;</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
