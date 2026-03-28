@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
+import { User, MapPin, Route, Building2, Star, Coins, Lock, Key } from 'lucide-react';
 import AbrechnungstraegerForm from './AbrechnungstraegerForm';
 import ErstattungssaetzeForm from './ErstattungssaetzeForm';
 import OrtForm from './OrtForm';
@@ -22,14 +23,14 @@ function Settings() {
     const [favoritForm, setFavoritForm] = useState({ vonOrtId: '', nachOrtId: '', anlass: '', abrechnungstraegerId: '' });
 
     const tabs = [
-        { id: 'profile', name: 'Profil' },
-        { id: 'orte', name: 'Orte' },
-        { id: 'distanzen', name: 'Distanzen' },
-        { id: 'abrechnungen', name: 'Träger' },
-        { id: 'favoriten', name: 'Favoriten' },
-        { id: 'erstattungssaetze', name: 'Erstattungen' },
-        { id: 'security', name: 'Passwort' },
-        { id: 'api', name: 'API-Zugriff' }
+        { id: 'profile', name: 'Profil', icon: User },
+        { id: 'orte', name: 'Orte', icon: MapPin },
+        { id: 'distanzen', name: 'Distanzen', icon: Route },
+        { id: 'abrechnungen', name: 'Träger', icon: Building2 },
+        { id: 'favoriten', name: 'Favoriten', icon: Star },
+        { id: 'erstattungssaetze', name: 'Erstattungen', icon: Coins },
+        { id: 'security', name: 'Passwort', icon: Lock },
+        { id: 'api', name: 'API-Zugriff', icon: Key }
     ];
 
     useEffect(() => {
@@ -164,22 +165,27 @@ function Settings() {
         <div className="mb-4 border-b border-primary-100 dark:border-primary-800">
         {/* Tabs Desktop */}
         <div className="hidden sm:flex space-x-1">
-        {tabs.map(tab => (
+        {tabs.map(tab => {
+            const Icon = tab.icon;
+            return (
             <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-                                py-2 px-4 text-sm font-medium
-                                border-b-2 -mb-px
+                                py-2 px-4 text-sm font-medium rounded-t-lg
+                                flex items-center gap-1.5
+                                transition-colors duration-200
                                 ${activeTab === tab.id
-                ? 'border-primary-500 text-primary-600 dark:text-primary-100'
-                : 'border-transparent text-muted hover:text-value hover:border-primary-200'
+                ? 'bg-primary-500 text-white shadow-sm'
+                : 'text-muted hover:text-value hover:bg-primary-25 dark:hover:bg-primary-900'
                 }
                             `}
             >
+            <Icon size={14} />
             {tab.name}
             </button>
-        ))}
+            );
+        })}
         </div>
 
         {/* Tabs Mobile */}
