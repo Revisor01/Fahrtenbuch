@@ -237,11 +237,12 @@ Plans:
   3. Die Login-Seite hat ein modernes, einladendes Design mit responsivem Layout
   4. Die Landing-Page ist visuell attraktiv und passt sich an verschiedene Bildschirmgroessen an
   5. Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions (kein abruptes Umschalten)
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
-- [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
+- [ ] 18-01-PLAN.md — Settings Sub-Tabs aufwerten und Formulare in Cards einbetten
+- [ ] 18-02-PLAN.md — Login-Seite und Landing-Page modernisieren
+- [ ] 18-03-PLAN.md — CSS-Transitions fuer Tab-Wechsel und Card-Interaktionen
 
 **UI hint**: yes
 
@@ -269,4 +270,4 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 18. Einstellungen, Login & Polish | v2.0 | 0/? | Not started | - |
+| 18. Einstellungen, Login & Polish | v2.0 | 0/3 | Not started | - |
