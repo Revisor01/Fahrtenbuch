@@ -141,7 +141,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Tab-Navigation und Dashboard mit KPIs, Formular, Favoriten, Quick-Copy
+- [x] 11-01-PLAN.md — Tab-Navigation und Dashboard mit KPIs, Formular, Favoriten, Quick-Copy
 - [ ] 11-02-PLAN.md — Statistiken: Jahres-Balkendiagramm und Erstattungs-Uebersicht
 
 ### Phase 12: Adress-Autocomplete
@@ -174,5 +174,5 @@ Phases execute in numeric order: 10 → 11 → 12
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
-| 11. Dashboard, Navigation & Statistiken | v1.3 | 0/2 | Not started | - |
+| 11. Dashboard, Navigation & Statistiken | v1.3 | 1/2 | In Progress|  |
 | 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |

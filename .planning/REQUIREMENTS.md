@@ -7,9 +7,9 @@
 
 ### Dashboard
 
-- [ ] **DASH-01**: Dashboard als neue Startseite mit KPI-Cards (offene Erstattungen, km diesen Monat, Fahrten diesen Monat)
-- [ ] **DASH-02**: Aufklappbares Fahrt-Formular direkt im Dashboard (wie bisheriges Formular)
-- [ ] **DASH-03**: Navigation mit Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
+- [x] **DASH-01**: Dashboard als neue Startseite mit KPI-Cards (offene Erstattungen, km diesen Monat, Fahrten diesen Monat)
+- [x] **DASH-02**: Aufklappbares Fahrt-Formular direkt im Dashboard (wie bisheriges Formular)
+- [x] **DASH-03**: Navigation mit Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
 
 ### Favoriten
 
@@ -41,9 +41,9 @@
 | FAV-01 | Phase 10 | Complete |
 | FAV-02 | Phase 10 | Complete |
 | FAV-03 | Phase 10 | Complete |
-| DASH-01 | Phase 11 | Pending |
-| DASH-02 | Phase 11 | Pending |
-| DASH-03 | Phase 11 | Pending |
+| DASH-01 | Phase 11 | Complete |
+| DASH-02 | Phase 11 | Complete |
+| DASH-03 | Phase 11 | Complete |
 | STAT-01 | Phase 11 | Pending |
 | STAT-02 | Phase 11 | Pending |
 | ADDR-01 | Phase 12 | Pending |
