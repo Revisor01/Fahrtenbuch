@@ -157,7 +157,13 @@ Plans:
   3. Jede Dashboard-Rubrik (KPIs, Formular, Favoriten, letzte Fahrten, Statistik) hat einen eigenen Card-Hintergrund mit klarer Abgrenzung
   4. Der Bereich "Neue Fahrt erfassen" hat ein ueberarbeitetes Layout (nicht mehr Standard-Formular-Look)
   5. Beim Ausfuehren eines Favoriten fragt ein Dialog "Mit Rueckfahrt?" — bei Ja werden Hin- und Rueckfahrt angelegt
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Dashboard Cards, Statistik-Integration und Formular-Redesign
+- [ ] 13-02-PLAN.md — Favoriten-Rueckfahrt-Dialog und Nochmal-Buttons mit Richtungswahl
+- [ ] 13-03-PLAN.md — Umlaut-Korrektur in allen Frontend- und Backend-Dateien
+
 **UI hint**: yes
 
 ### Phase 14: Navigation-Umbau
@@ -190,5 +196,5 @@ Phases execute in numeric order: 13 → 14
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
-| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 0/0 | Not started | - |
+| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 0/3 | In progress | - |
 | 14. Navigation-Umbau | v1.4 | 0/0 | Not started | - |
