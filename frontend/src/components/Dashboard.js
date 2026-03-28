@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
@@ -19,9 +19,23 @@ function Dashboard({ onNavigate }) {
   } = useContext(AppContext);
 
   const [isFormOpen, setIsFormOpen] = useState(true);
+  const [yearlyStats, setYearlyStats] = useState([]);
   const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
 
   // KPI: offene Erstattungen
+  // Fetch yearly km stats from monthly-summary API
+  useEffect(() => {
+    const fetchYearlyStats = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/fahrten/monthly-summary`);
+        setYearlyStats(response.data || []);
+      } catch (error) {
+        console.error('Fehler beim Laden der Jahresstatistik:', error);
+      }
+    };
+    fetchYearlyStats();
+  }, [fahrten]); // Refresh when fahrten change (new trip added)
+
   const offeneErstattungen = useMemo(() => {
     if (!summary?.erstattungen) return 0;
     return Object.values(summary.erstattungen).reduce((sum, val) => sum + (val || 0), 0);
@@ -52,20 +66,27 @@ function Dashboard({ onNavigate }) {
   // Month abbreviations for chart labels
   const monatLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
-  // km per month from fahrten for the selected year
+  // km per month from yearlyStats (monthly-summary API — covers all months)
   const kmProMonat = useMemo(() => {
     const result = Array(12).fill(0);
-    fahrten.forEach(f => {
-      if (!f.datum) return;
-      const [y, m] = f.datum.split('-');
-      if (parseInt(y) === statistikJahr) {
-        result[parseInt(m) - 1] += parseFloat(f.kilometer) || 0;
-      }
-    });
+    if (yearlyStats && yearlyStats.length > 0) {
+      yearlyStats.forEach(entry => {
+        if (!entry.yearMonth) return;
+        const [y, m] = entry.yearMonth.split('-');
+        if (parseInt(y) === statistikJahr && entry.erstattungen) {
+          // Sum km from all Träger in this month (excluding mitfahrer to avoid double-counting)
+          Object.entries(entry.erstattungen).forEach(([traeger, data]) => {
+            if (traeger !== 'mitfahrer') {
+              result[parseInt(m) - 1] += parseFloat(data.kilometer) || 0;
+            }
+          });
+        }
+      });
+    }
     return result;
-  }, [fahrten, statistikJahr]);
+  }, [yearlyStats, statistikJahr]);
 
-  // Fahrten count per month for tooltip
+  // Fahrten count per month — not available from monthly-summary, use fahrten for current month
   const fahrtenProMonat = useMemo(() => {
     const result = Array(12).fill(0);
     fahrten.forEach(f => {
@@ -164,45 +185,40 @@ function Dashboard({ onNavigate }) {
 
   return (
     <div className="space-y-6">
-      {/* KPI Cards — 3 Cards */}
+      {/* KPI Cards — 3 farbige Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Offene Erstattungen */}
-        <div className="card-container flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-xs text-muted mb-1">Offene Erstattungen</p>
-            <p className="text-xl font-semibold text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
+        <div className="rounded-card p-4 shadow-card border border-card bg-emerald-50 dark:bg-emerald-900/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-muted mb-1">Offene Erstattungen</p>
+              <p className="text-xl font-semibold text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
+            </div>
+            <Banknote size={22} className="text-emerald-500 shrink-0" />
           </div>
-          <Banknote size={22} className="text-emerald-500 shrink-0" />
         </div>
 
         {/* Kilometer diesen Monat */}
-        <div className="card-container flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-xs text-muted mb-1">km diesen Monat</p>
-            <p className="text-xl font-semibold text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
+        <div className="rounded-card p-4 shadow-card border border-card bg-blue-50 dark:bg-blue-900/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-muted mb-1">km diesen Monat</p>
+              <p className="text-xl font-semibold text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
+            </div>
+            <Route size={22} className="text-blue-500 shrink-0" />
           </div>
-          <Route size={22} className="text-blue-500 shrink-0" />
         </div>
 
         {/* Fahrten diesen Monat */}
-        <div className="card-container flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-xs text-muted mb-1">Fahrten diesen Monat</p>
-            <p className="text-xl font-semibold text-value">{fahrtenThisMonth}</p>
+        <div className="rounded-card p-4 shadow-card border border-card bg-purple-50 dark:bg-purple-900/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-muted mb-1">Fahrten diesen Monat</p>
+              <p className="text-xl font-semibold text-value">{fahrtenThisMonth}</p>
+            </div>
+            <Car size={22} className="text-purple-500 shrink-0" />
           </div>
-          <Car size={22} className="text-purple-500 shrink-0" />
         </div>
-      </div>
-
-      {/* Export-Schnellzugriff als subtiler Link */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => onNavigate && onNavigate('fahrten')}
-          className="flex items-center gap-2 text-sm text-muted hover:text-value transition-colors"
-        >
-          <FileDown size={16} />
-          <span>Alle {fahrtenGesamt} Fahrten anzeigen & exportieren</span>
-        </button>
       </div>
 
       {/* Favoriten-Schnelleingabe */}
