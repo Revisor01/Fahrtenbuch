@@ -122,11 +122,11 @@ Plans:
   2. Nutzer kann einen Favoriten anklicken und eine neue Fahrt mit heutigem Datum wird automatisch eingetragen
   3. Nutzer sieht die letzten 3 Fahrten mit einem "Nochmal fuer heute"-Button und kann damit die Fahrt fuer heute duplizieren
   4. Favoriten und Quick-Copy-Daten sind ueber die API persistent (DB-Tabelle, CRUD-Endpoints)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
+- [ ] 10-01-PLAN.md — Backend: Migration, Model, Schema, Controller und Routes fuer Favoriten-API
+- [ ] 10-02-PLAN.md — Frontend: AppContext-Integration, Favoriten-Tab im Profil-Modal, Quick-Copy-Buttons
 
 ### Phase 11: Dashboard, Navigation & Statistiken
 **Goal**: Dashboard als neue Startseite mit KPIs, Schnelleingabe-Formular, Statistiken und ueberarbeiteter Navigation
@@ -173,6 +173,6 @@ Phases execute in numeric order: 10 → 11 → 12
 | 7. Code-Qualitaet | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
-| 10. Favoriten & Quick-Copy | v1.3 | 0/? | Not started | - |
+| 10. Favoriten & Quick-Copy | v1.3 | 0/2 | In Progress | - |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 0/? | Not started | - |
 | 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |
