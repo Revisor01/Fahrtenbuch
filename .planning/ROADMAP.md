@@ -138,11 +138,11 @@ Plans:
   3. Navigation hat vier Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
   4. Jahres-Balkendiagramm zeigt km pro Monat fuer das aktuelle Jahr
   5. Erstattungs-Uebersicht pro Abrechnungstraeger ueber das Jahr ist im Dashboard sichtbar
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md — Tab-Navigation und Dashboard mit KPIs, Formular, Favoriten, Quick-Copy
+- [ ] 11-02-PLAN.md — Statistiken: Jahres-Balkendiagramm und Erstattungs-Uebersicht
 
 ### Phase 12: Adress-Autocomplete
 **Goal**: Nutzer erhalten bei der Ort-Eingabe Adress-Vorschlaege fuer schnellere und genauere Eingabe
@@ -174,5 +174,5 @@ Phases execute in numeric order: 10 → 11 → 12
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
-| 11. Dashboard, Navigation & Statistiken | v1.3 | 0/? | Not started | - |
+| 11. Dashboard, Navigation & Statistiken | v1.3 | 0/2 | Not started | - |
 | 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |
