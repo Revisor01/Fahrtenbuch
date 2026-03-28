@@ -39,17 +39,26 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ PDF-Export als Alternative zu Excel (A4 Querformat, druckfertig) — v1.2
 - ✓ Export-Dialog mit Format-Auswahl (Excel/PDF/Beide als ZIP) — v1.2
 
+- ✓ Dashboard als neue Startseite (KPIs, Schnelleingabe, Favoriten, letzte Fahrten) — v1.3
+- ✓ Favoriten-Fahrten speichern und mit einem Klick wiederholen — v1.3
+- ✓ "Nochmal für heute" bei letzten Fahrten — v1.3
+- ✓ Jahres-Statistik mit Balkendiagramm (km pro Monat, Erstattungen) — v1.3
+- ✓ Adress-Autocomplete bei Ort-Eingabe (OpenStreetMap/Nominatim) — v1.3
+
 ### Active
 
-- [ ] Dashboard als neue Startseite (KPIs, Schnelleingabe, Favoriten, letzte Fahrten)
-- [ ] Favoriten-Fahrten speichern und mit einem Klick wiederholen
-- [ ] "Nochmal für heute" bei letzten Fahrten
-- [ ] Jahres-Statistik mit Balkendiagramm (km pro Monat, Erstattungen)
-- [ ] Adress-Autocomplete bei Ort-Eingabe (OpenStreetMap/Nominatim)
+- [ ] Einstellungen als eigener Tab statt Modal
+- [ ] Benutzerverwaltung (Admin) als Tab statt Button
+- [ ] Dashboard: Erstattungen pro Abrechnungsträger in Statistik anzeigen
+- [ ] Dashboard: Mouseover auf km-Balken zeigt Anzahl Fahrten
+- [ ] Dashboard: Card-Hintergrund für jede Rubrik (klare Abgrenzung)
+- [ ] Dashboard: "Neue Fahrt erfassen" optisch überarbeiten
+- [ ] Favoriten: bei Ausführung fragen "Mit Rückfahrt?" und beide anlegen
+- [ ] Umlaute: alle Texte korrekt mit äöüß
 
-## Current Milestone: v1.3 Dashboard & UX
+## Current Milestone: v1.4 UX Polish & Navigation
 
-**Goal:** Dashboard als Startseite, Favoriten-Fahrten für Schnelleingabe, Statistiken mit Jahresübersicht, Adress-Autocomplete.
+**Goal:** Einstellungen und Benutzerverwaltung inline als Tabs, Dashboard-Polish (Cards, Statistiken, Favoriten mit Rückfahrt), Umlaute korrigieren.
 
 **Navigation nach Umbau:**
 - [Dashboard] [Fahrten & Export] [Monatsübersicht] [⚙️]
@@ -110,4 +119,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after v1.3 milestone start*
+*Last updated: 2026-03-28 after v1.4 milestone start*

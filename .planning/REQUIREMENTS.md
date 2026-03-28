@@ -1,57 +1,54 @@
-# Requirements: Fahrtenbuch v1.3 — Dashboard & UX
+# Requirements: Fahrtenbuch v1.4 — UX Polish & Navigation
 
-**Defined:** 2026-03-22
-**Core Value:** Schnellere Fahrteingabe durch Favoriten und bessere Uebersicht durch Dashboard
+**Defined:** 2026-03-28
+**Core Value:** Einstellungen inline, Dashboard poliert, Umlaute korrekt
 
-## v1.3 Requirements
+## v1.4 Requirements
 
-### Dashboard
+### Navigation
 
-- [x] **DASH-01**: Dashboard als neue Startseite mit KPI-Cards (offene Erstattungen, km diesen Monat, Fahrten diesen Monat)
-- [x] **DASH-02**: Aufklappbares Fahrt-Formular direkt im Dashboard (wie bisheriges Formular)
-- [x] **DASH-03**: Navigation mit Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
+- [ ] **NAV-01**: Einstellungen (Profil, Orte, Distanzen, Träger, Erstattungen, Passwort, API, Favoriten) als eigener Tab-Inhalt statt Modal
+- [ ] **NAV-02**: Benutzerverwaltung (Admin) als Tab in der Navigation statt separater Button
+
+### Dashboard-Polish
+
+- [ ] **DASH-04**: Erstattungen pro Abrechnungsträger im Statistik-Bereich anzeigen
+- [ ] **DASH-05**: Mouseover auf km-Balken zeigt Anzahl der Fahrten im Monat
+- [ ] **DASH-06**: Jede Rubrik im Dashboard hat einen Card-Hintergrund (klare Abgrenzung)
+- [ ] **DASH-07**: "Neue Fahrt erfassen" optisch überarbeiten (neuer Look)
 
 ### Favoriten
 
-- [x] **FAV-01**: Nutzer kann Fahrten als Favorit speichern (Von, Nach, Anlass, Abrechnungstraeger)
-- [x] **FAV-02**: Favoriten im Dashboard als Schnelleingabe — ein Klick traegt Fahrt mit heutigem Datum ein
-- [x] **FAV-03**: Letzte 3 Fahrten im Dashboard mit "Nochmal fuer heute"-Button
+- [ ] **FAV-04**: Bei Favorit-Ausführung fragen "Mit Rückfahrt?" — wenn ja, beide Fahrten anlegen
 
-### Statistiken
+### Textqualität
 
-- [ ] **STAT-01**: Jahres-Balkendiagramm im Dashboard (km pro Monat)
-- [ ] **STAT-02**: Erstattungs-Uebersicht pro Abrechnungstraeger ueber das Jahr
-
-### Adress-Autocomplete
-
-- [x] **ADDR-01**: Bei Ort-Eingabe Adress-Vorschlaege via OpenStreetMap/Nominatim API
+- [ ] **TEXT-01**: Alle Texte in der App korrekt mit deutschen Umlauten (äöüß) — keine Ersatzschreibweisen
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Multi-User-Admin-Uebersicht | Zu komplex, eigener Milestone |
-| PWA / Service Worker | Eigener Milestone |
-| CRA → Vite Migration | Eigener Milestone |
+| Multi-User-Admin-Übersicht | Eigener Milestone |
+| PWA | Eigener Milestone |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FAV-01 | Phase 10 | Complete |
-| FAV-02 | Phase 10 | Complete |
-| FAV-03 | Phase 10 | Complete |
-| DASH-01 | Phase 11 | Complete |
-| DASH-02 | Phase 11 | Complete |
-| DASH-03 | Phase 11 | Complete |
-| STAT-01 | Phase 11 | Pending |
-| STAT-02 | Phase 11 | Pending |
-| ADDR-01 | Phase 12 | Complete |
+| NAV-01 | — | Pending |
+| NAV-02 | — | Pending |
+| DASH-04 | — | Pending |
+| DASH-05 | — | Pending |
+| DASH-06 | — | Pending |
+| DASH-07 | — | Pending |
+| FAV-04 | — | Pending |
+| TEXT-01 | — | Pending |
 
 **Coverage:**
-- v1.3 requirements: 9 total
-- Mapped to phases: 9
-- Unmapped: 0
+- v1.4 requirements: 8 total
+- Mapped to phases: 0
+- Unmapped: 8 ⚠️
 
 ---
-*Requirements defined: 2026-03-22*
+*Requirements defined: 2026-03-28*
