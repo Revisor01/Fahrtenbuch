@@ -196,5 +196,5 @@ Phases execute in numeric order: 13 → 14
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
-| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete   | 2026-03-28 |
+| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete    | 2026-03-28 |
 | 14. Navigation-Umbau | v1.4 | 0/0 | Not started | - |
