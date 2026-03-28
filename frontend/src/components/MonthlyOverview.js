@@ -252,7 +252,7 @@ function MonthlyOverview() {
       return (
         <div className="flex items-center justify-between">
         <span
-        className="status-badge-primary cursor-pointer"
+        className="status-badge-primary cursor-pointer min-h-[44px] flex items-center"
         onClick={() => {
           showNotification(
             "Status zurücksetzen",
@@ -279,7 +279,7 @@ function MonthlyOverview() {
       return (
         <div className="flex items-center justify-between">
         <span
-        className="status-badge-secondary cursor-pointer"
+        className="status-badge-secondary cursor-pointer min-h-[44px] flex items-center"
         onClick={() => setAbrechnungsStatusModal({
           open: true,
           traegerId,
@@ -299,7 +299,7 @@ function MonthlyOverview() {
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
       <span
-      className="status-badge-secondary cursor-pointer"
+      className="status-badge-secondary cursor-pointer min-h-[44px] flex items-center"
       onClick={() => setAbrechnungsStatusModal({
         open: true,
         traegerId,
@@ -493,7 +493,7 @@ function MonthlyOverview() {
             return betrag > 0;
           })
           .map(traeger => (
-            <div key={traeger.id} className="card-container">
+            <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
             <div className="flex justify-between items-start mb-2">
             <span className="text-sm font-medium text-value">{traeger.name}</span>
             <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
@@ -542,7 +542,7 @@ function MonthlyOverview() {
         <div key={month.yearMonth} className="mobile-card">
         <div className="mobile-card-header mb-4">
         <div className="flex justify-between items-center w-full">
-        <div className="mobile-card-title">
+        <div className="text-lg font-semibold text-value">
         {month.monthName} {month.year}
         </div>
         <div className="text-value font-medium">
@@ -564,7 +564,7 @@ function MonthlyOverview() {
             return betrag > 0;
           })
           .map(traeger => (
-            <div key={traeger.id} className="pt-4">
+            <div key={traeger.id} className="pt-4 border-t border-primary-100 dark:border-primary-700">
             <div className="flex justify-between items-start mb-2">
             <span className="text-label text-sm">{traeger.name}</span>
             <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
@@ -579,7 +579,7 @@ function MonthlyOverview() {
 
         {/* Mitfahrer */}
         {month.erstattungen?.mitfahrer > 0 && (
-          <div className="pt-4">
+          <div className="pt-4 border-t border-primary-100 dark:border-primary-700">
           <div className="flex justify-between items-start">
           <span className="text-label text-sm">Mitfahrer</span>
           <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
