@@ -117,14 +117,32 @@ function Dashboard() {
     }
   };
 
-  const handleExecuteFavorit = async (favorit) => {
-    try {
-      await executeFavorit(favorit.id);
-      showNotification('Fahrt erstellt', 'Favorit wurde f\u00FCr heute eingetragen.');
-    } catch (error) {
-      console.error('Fehler beim Ausfuehren des Favoriten:', error);
-      showNotification('Fehler', 'Favorit konnte nicht ausgef\u00FChrt werden.');
-    }
+  const handleExecuteFavorit = (favorit) => {
+    showNotification(
+      'Favorit ausführen',
+      `${favorit.von_ort_name} \u2192 ${favorit.nach_ort_name}`,
+      async () => {
+        try {
+          await executeFavorit(favorit.id, false);
+          showNotification('Fahrt erstellt', 'Hinfahrt wurde für heute eingetragen.');
+        } catch (error) {
+          console.error('Fehler beim Ausführen des Favoriten:', error);
+          showNotification('Fehler', 'Favorit konnte nicht ausgeführt werden.');
+        }
+      },
+      true,
+      'Nur Hinfahrt',
+      async () => {
+        try {
+          await executeFavorit(favorit.id, true);
+          showNotification('Fahrten erstellt', 'Hin- und Rückfahrt wurden für heute eingetragen.');
+        } catch (error) {
+          console.error('Fehler beim Ausführen des Favoriten:', error);
+          showNotification('Fehler', 'Favorit konnte nicht ausgeführt werden.');
+        }
+      },
+      'Mit Rückfahrt'
+    );
   };
 
   const formatDate = (dateStr) => {

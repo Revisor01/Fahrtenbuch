@@ -5,7 +5,7 @@ import { AppContext } from '../contexts/AppContext';
 import { renderOrteOptions } from '../utils';
 import MitfahrerModal from '../MitfahrerModal';
 import Modal from '../Modal';
-import { AlertCircle, Circle, CheckCircle2, Copy } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, Copy, ArrowLeftRight } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -112,6 +112,26 @@ function FahrtenListe() {
         kilometer: fahrt.kilometer
       });
       showNotification('Fahrt erstellt', `Fahrt ${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} wurde fuer heute eingetragen.`);
+      refreshAllData();
+    } catch (error) {
+      console.error('Fehler beim Duplizieren der Fahrt:', error);
+      showNotification('Fehler', 'Fahrt konnte nicht erstellt werden.');
+    }
+  };
+
+  const handleNochmalAndereRichtung = async (fahrt) => {
+    try {
+      await axios.post(`${API_BASE_URL}/fahrten`, {
+        vonOrtId: fahrt.nach_ort_id || null,
+        nachOrtId: fahrt.von_ort_id || null,
+        datum: new Date().toISOString().slice(0, 10),
+        anlass: fahrt.anlass,
+        abrechnung: fahrt.abrechnung,
+        einmaligerVonOrt: fahrt.einmaliger_nach_ort || null,
+        einmaligerNachOrt: fahrt.einmaliger_von_ort || null,
+        kilometer: fahrt.kilometer
+      });
+      showNotification('Fahrt erstellt', `Rückfahrt ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} \u2192 ${fahrt.von_ort_name || fahrt.einmaliger_von_ort} wurde für heute eingetragen.`);
       refreshAllData();
     } catch (error) {
       console.error('Fehler beim Duplizieren der Fahrt:', error);
@@ -1121,14 +1141,24 @@ function FahrtenListe() {
       ) : (
         <>
         {letzteDreiIds.has(fahrt.id) && (
-          <button
-          onClick={() => handleNochmal(fahrt)}
-          className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 flex items-center gap-1"
-          title="Nochmal fuer heute"
-          >
-          <Copy size={12} />
-          <span>Nochmal</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+            onClick={() => handleNochmal(fahrt)}
+            className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 flex items-center gap-1"
+            title="Gleiche Fahrt für heute"
+            >
+            <Copy size={12} />
+            <span>Nochmal</span>
+            </button>
+            <button
+            onClick={() => handleNochmalAndereRichtung(fahrt)}
+            className="text-xs bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50 flex items-center gap-1"
+            title="Rückfahrt für heute"
+            >
+            <ArrowLeftRight size={12} />
+            <span>Rückfahrt</span>
+            </button>
+          </div>
         )}
         <button
         onClick={() => handleEdit(fahrt)}
@@ -1394,13 +1424,22 @@ function FahrtenListe() {
           </div>
           <div className="mobile-action-buttons">
           {letzteDreiIds.has(fahrt.id) && (
-            <button
-            onClick={() => handleNochmal(fahrt)}
-            className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50"
-            title="Nochmal fuer heute"
-            >
-            <Copy size={14} />
-            </button>
+            <>
+              <button
+              onClick={() => handleNochmal(fahrt)}
+              className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50"
+              title="Gleiche Fahrt für heute"
+              >
+              <Copy size={14} />
+              </button>
+              <button
+              onClick={() => handleNochmalAndereRichtung(fahrt)}
+              className="text-xs bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-1.5 rounded hover:bg-green-100 dark:hover:bg-green-900/50"
+              title="Rückfahrt für heute"
+              >
+              <ArrowLeftRight size={14} />
+              </button>
+            </>
           )}
           <button
           onClick={() => handleEdit(fahrt)}

@@ -55,7 +55,7 @@ function AppProvider({ children }) {
       await axios.post(`${API_BASE_URL}/favoriten`, data);
       await fetchFavoriten();
     } catch (error) {
-      console.error('Fehler beim Hinzufuegen des Favoriten:', error);
+      console.error('Fehler beim Hinzufügen des Favoriten:', error);
       throw error;
     }
   };
@@ -65,18 +65,18 @@ function AppProvider({ children }) {
       await axios.delete(`${API_BASE_URL}/favoriten/${id}`);
       await fetchFavoriten();
     } catch (error) {
-      console.error('Fehler beim Loeschen des Favoriten:', error);
+      console.error('Fehler beim Löschen des Favoriten:', error);
       throw error;
     }
   };
 
-  const executeFavorit = async (id) => {
+  const executeFavorit = async (id, mitRueckfahrt = false) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/favoriten/${id}/execute`);
+      const response = await axios.post(`${API_BASE_URL}/favoriten/${id}/execute`, { mitRueckfahrt });
       await refreshAllData();
       return response.data;
     } catch (error) {
-      console.error('Fehler beim Ausfuehren des Favoriten:', error);
+      console.error('Fehler beim Ausführen des Favoriten:', error);
       throw error;
     }
   };
@@ -91,7 +91,7 @@ function AppProvider({ children }) {
         axios.get('/api/abrechnungstraeger/simple'),
         axios.get('/api/abrechnungstraeger')
       ]);
-      // Favoriten separat laden (kein Fehler wenn Endpoint nicht verfuegbar)
+      // Favoriten separat laden (kein Fehler wenn Endpoint nicht verfügbar)
       fetchFavoriten().catch(() => {});
 
       // Hier die tatsächlichen Daten setzen
