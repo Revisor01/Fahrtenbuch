@@ -222,8 +222,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
-- [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
+- [ ] 17-01-PLAN.md — FahrtenListe modernisieren: Card-Layout, Export-Card, Touch-Targets
+- [ ] 17-02-PLAN.md — MonthlyOverview modernisieren: Card-Layout, Touch-Targets, Empty States
 
 **UI hint**: yes
 
@@ -268,5 +268,5 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 14. Navigation-Umbau | v1.4 | 2/2 | Complete | 2026-03-28 |
 | 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
-| 17. Listen & Uebersichten | v2.0 | 0/? | Not started | - |
+| 17. Listen & Uebersichten | v2.0 | 0/2 | Not started | - |
 | 18. Einstellungen, Login & Polish | v2.0 | 0/? | Not started | - |
