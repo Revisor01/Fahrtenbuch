@@ -8,7 +8,7 @@
 ### Designsystem
 
 - [x] **DS-01**: Einheitliche Spacing-, Typografie- und Farbvariablen in der gesamten App
-- [ ] **DS-02**: Alle Sektionen in jeder View sind in Cards mit einheitlichem Schatten und Radius eingebettet
+- [x] **DS-02**: Alle Sektionen in jeder View sind in Cards mit einheitlichem Schatten und Radius eingebettet
 - [x] **DS-03**: Dark Mode zeigt korrekte Kontraste und abgestimmte Farben in allen Views
 
 ### Dashboard
@@ -61,7 +61,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DS-01 | Phase 15 | Complete |
-| DS-02 | Phase 15 | Pending |
+| DS-02 | Phase 15 | Complete |
 | DS-03 | Phase 15 | Complete |
 | DASH-08 | Phase 16 | Pending |
 | DASH-09 | Phase 16 | Pending |
