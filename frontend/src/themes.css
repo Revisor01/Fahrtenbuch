@@ -25,6 +25,11 @@
   --secondary-800: #3d1515;
   --secondary-900: #2b0f0f;
   --secondary-950: #1a0909;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #f8fafc;
+  --border-card: #e0eaf5;
 }
 
 :root[data-theme="sunset"] {
@@ -53,6 +58,11 @@
   --secondary-800: #0a3aab;
   --secondary-900: #052294;
   --secondary-950: #020b7d;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #fffaf0;
+  --border-card: #ffe1b3;
 }
 
 :root[data-theme="mint"] {
@@ -81,6 +91,11 @@
   --secondary-800: #5e5e5e;
   --secondary-900: #474747;
   --secondary-950: #2f2f2f;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #f0f9f4;
+  --border-card: #c1e1d1;
 }
 
 :root[data-theme="slate"] {
@@ -109,6 +124,11 @@
   --secondary-800: #1e3a8a;
   --secondary-900: #172554;
   --secondary-950: #0d111c;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #f8fafc;
+  --border-card: #e2e8f0;
 }
 
 :root[data-theme="monochrome"] {
@@ -137,6 +157,11 @@
   --secondary-800: #0a3aab;
   --secondary-900: #052294;
   --secondary-950: #020b7d;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #fafafa;
+  --border-card: #e0e0e0;
 }
 
 /* Teal Theme */
@@ -166,6 +191,11 @@
   --secondary-800: #7f1d1d;
   --secondary-900: #450a0a;
   --secondary-950: #3c0606;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #f0fdfa;
+  --border-card: #99f6e4;
 }
 
 /* Vibrant Theme */
@@ -195,6 +225,11 @@
   --secondary-800: #0c4a6e;
   --secondary-900: #082f49;
   --secondary-950: #051f32;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #fdf2f8;
+  --border-card: #fbcfe8;
 }
 
 /* Deep Purple Theme */
@@ -224,6 +259,11 @@
   --secondary-800: #064e3b;
   --secondary-900: #022c22;
   --secondary-950: #011f16;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #faf5ff;
+  --border-card: #e9d5ff;
 }
 
 /* Forest Theme */
@@ -253,4 +293,17 @@
   --secondary-800: #9a3412;
   --secondary-900: #7c2d12;
   --secondary-950: #431407;
+
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-highlight: #f6fef9;
+  --border-card: #d1fadf;
+}
+
+/* Dark Mode Overrides (gilt fuer alle Themes) */
+html.dark {
+  --bg-surface: #111827;
+  --bg-card: #1f2937;
+  --bg-card-highlight: #1e293b;
+  --border-card: rgba(255, 255, 255, 0.1);
 }
