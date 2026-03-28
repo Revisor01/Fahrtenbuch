@@ -7,48 +7,48 @@
 
 ### Navigation
 
-- [ ] **NAV-01**: Einstellungen (Profil, Orte, Distanzen, Träger, Erstattungen, Passwort, API, Favoriten) als eigener Tab-Inhalt statt Modal
+- [ ] **NAV-01**: Einstellungen (Profil, Orte, Distanzen, Traeger, Erstattungen, Passwort, API, Favoriten) als eigener Tab-Inhalt statt Modal
 - [ ] **NAV-02**: Benutzerverwaltung (Admin) als Tab in der Navigation statt separater Button
 
 ### Dashboard-Polish
 
-- [ ] **DASH-04**: Erstattungen pro Abrechnungsträger im Statistik-Bereich anzeigen
+- [ ] **DASH-04**: Erstattungen pro Abrechnungstraeger im Statistik-Bereich anzeigen
 - [ ] **DASH-05**: Mouseover auf km-Balken zeigt Anzahl der Fahrten im Monat
 - [ ] **DASH-06**: Jede Rubrik im Dashboard hat einen Card-Hintergrund (klare Abgrenzung)
-- [ ] **DASH-07**: "Neue Fahrt erfassen" optisch überarbeiten (neuer Look)
+- [ ] **DASH-07**: "Neue Fahrt erfassen" optisch ueberarbeiten (neuer Look)
 
 ### Favoriten
 
-- [ ] **FAV-04**: Bei Favorit-Ausführung fragen "Mit Rückfahrt?" — wenn ja, beide Fahrten anlegen
+- [ ] **FAV-04**: Bei Favorit-Ausfuehrung fragen "Mit Rueckfahrt?" — wenn ja, beide Fahrten anlegen
 
-### Textqualität
+### Textqualitaet
 
-- [ ] **TEXT-01**: Alle Texte in der App korrekt mit deutschen Umlauten (äöüß) — keine Ersatzschreibweisen
+- [ ] **TEXT-01**: Alle Texte in der App korrekt mit deutschen Umlauten (aeoeuess) — keine Ersatzschreibweisen
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Multi-User-Admin-Übersicht | Eigener Milestone |
+| Multi-User-Admin-Uebersicht | Eigener Milestone |
 | PWA | Eigener Milestone |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NAV-01 | — | Pending |
-| NAV-02 | — | Pending |
-| DASH-04 | — | Pending |
-| DASH-05 | — | Pending |
-| DASH-06 | — | Pending |
-| DASH-07 | — | Pending |
-| FAV-04 | — | Pending |
-| TEXT-01 | — | Pending |
+| DASH-04 | Phase 13 | Pending |
+| DASH-05 | Phase 13 | Pending |
+| DASH-06 | Phase 13 | Pending |
+| DASH-07 | Phase 13 | Pending |
+| FAV-04 | Phase 13 | Pending |
+| TEXT-01 | Phase 13 | Pending |
+| NAV-01 | Phase 14 | Pending |
+| NAV-02 | Phase 14 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 8 total
-- Mapped to phases: 0
-- Unmapped: 8 ⚠️
+- Mapped to phases: 8
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-28*

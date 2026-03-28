@@ -5,7 +5,8 @@
 - ✅ **v1.0 Nutzerfeedback** - Phases 1-4 (shipped 2026-03-22)
 - ✅ **v1.1 Stabilitat & Security** - Phases 5-7 (shipped 2026-03-22)
 - ✅ **v1.2 Features & Refactoring** - Phases 8-9 (shipped 2026-03-22)
-- 🚧 **v1.3 Dashboard & UX** - Phases 10-12 (in progress)
+- ✅ **v1.3 Dashboard & UX** - Phases 10-12 (shipped 2026-03-28)
+- 🚧 **v1.4 UX Polish & Navigation** - Phases 13-14 (in progress)
 
 ## Phases
 
@@ -103,25 +104,13 @@ Plans:
 
 </details>
 
-### 🚧 v1.3 Dashboard & UX (In Progress)
-
-**Milestone Goal:** Dashboard als Startseite, Favoriten-Fahrten fuer Schnelleingabe, Statistiken mit Jahresuebersicht, Adress-Autocomplete.
-
-- [x] **Phase 10: Favoriten & Quick-Copy** - Favoriten-System und "Nochmal fuer heute" fuer schnelle Fahrteingabe (completed 2026-03-28)
-- [x] **Phase 11: Dashboard, Navigation & Statistiken** - Dashboard-Startseite mit KPIs, Formular, Statistiken und neue Tab-Navigation (completed 2026-03-28)
-- [x] **Phase 12: Adress-Autocomplete** - Ort-Eingabe mit Nominatim-Vorschlaegen (completed 2026-03-28)
-
-## Phase Details
+<details>
+<summary>v1.3 Dashboard & UX (Phases 10-12) - SHIPPED 2026-03-28</summary>
 
 ### Phase 10: Favoriten & Quick-Copy
 **Goal**: Nutzer koennen wiederkehrende Fahrten als Favoriten speichern und mit einem Klick wiederholen
 **Depends on**: Phase 9 (v1.2 abgeschlossen)
 **Requirements**: FAV-01, FAV-02, FAV-03
-**Success Criteria** (what must be TRUE):
-  1. Nutzer kann eine Fahrt als Favorit markieren und der Favorit wird mit Von, Nach, Anlass und Abrechnungstraeger gespeichert
-  2. Nutzer kann einen Favoriten anklicken und eine neue Fahrt mit heutigem Datum wird automatisch eingetragen
-  3. Nutzer sieht die letzten 3 Fahrten mit einem "Nochmal fuer heute"-Button und kann damit die Fahrt fuer heute duplizieren
-  4. Favoriten und Quick-Copy-Daten sind ueber die API persistent (DB-Tabelle, CRUD-Endpoints)
 **Plans**: 2 plans
 
 Plans:
@@ -132,35 +121,60 @@ Plans:
 **Goal**: Dashboard als neue Startseite mit KPIs, Schnelleingabe-Formular, Statistiken und ueberarbeiteter Navigation
 **Depends on**: Phase 10
 **Requirements**: DASH-01, DASH-02, DASH-03, STAT-01, STAT-02
-**Success Criteria** (what must be TRUE):
-  1. Dashboard zeigt KPI-Cards: offene Erstattungen, gefahrene km diesen Monat, Anzahl Fahrten diesen Monat
-  2. Nutzer kann direkt im Dashboard eine Fahrt erfassen ueber ein aufklappbares Formular
-  3. Navigation hat vier Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
-  4. Jahres-Balkendiagramm zeigt km pro Monat fuer das aktuelle Jahr
-  5. Erstattungs-Uebersicht pro Abrechnungstraeger ueber das Jahr ist im Dashboard sichtbar
 **Plans**: 2 plans
 
 Plans:
 - [x] 11-01-PLAN.md — Tab-Navigation und Dashboard mit KPIs, Formular, Favoriten, Quick-Copy
-- [ ] 11-02-PLAN.md — Statistiken: Jahres-Balkendiagramm und Erstattungs-Uebersicht
+- [x] 11-02-PLAN.md — Statistiken: Jahres-Balkendiagramm und Erstattungs-Uebersicht
 
 ### Phase 12: Adress-Autocomplete
 **Goal**: Nutzer erhalten bei der Ort-Eingabe Adress-Vorschlaege fuer schnellere und genauere Eingabe
 **Depends on**: Phase 10 (unabhaengig von Phase 11, kann parallel)
 **Requirements**: ADDR-01
-**Success Criteria** (what must be TRUE):
-  1. Bei Eingabe in ein Ort-Feld erscheinen Vorschlaege aus OpenStreetMap/Nominatim
-  2. Nutzer kann einen Vorschlag auswaehlen und der Ort wird uebernommen
-  3. Autocomplete funktioniert sowohl bei neuen Orten als auch im Fahrten-Formular
 **Plans**: 1 plan
 
 Plans:
 - [x] 12-01-PLAN.md — AddressAutocomplete Komponente mit Nominatim-Integration, OrtForm und FahrtForm Einbindung
 
+</details>
+
+### 🚧 v1.4 UX Polish & Navigation (In Progress)
+
+**Milestone Goal:** Dashboard-Polish (Cards, Statistiken, Favoriten mit Rueckfahrt), Umlaute korrigieren, Einstellungen und Benutzerverwaltung als inline Tabs statt Modal/Button.
+
+- [ ] **Phase 13: Dashboard-Polish & Kleinigkeiten** - Dashboard Cards, Statistik-Details, Favoriten-Rueckfahrt und Umlaut-Korrektur
+- [ ] **Phase 14: Navigation-Umbau** - Einstellungen und Benutzerverwaltung inline als Tabs statt Modal/Button
+
+## Phase Details
+
+### Phase 13: Dashboard-Polish & Kleinigkeiten
+**Goal**: Dashboard ist visuell aufgeraumt mit klaren Card-Grenzen, erweiterten Statistiken und Favoriten mit Rueckfahrt-Option — alle Texte nutzen korrekte Umlaute
+**Depends on**: Phase 12 (v1.3 abgeschlossen)
+**Requirements**: DASH-04, DASH-05, DASH-06, DASH-07, FAV-04, TEXT-01
+**Success Criteria** (what must be TRUE):
+  1. Im Statistik-Bereich sieht der Nutzer Erstattungen aufgeschluesselt nach Abrechnungstraeger
+  2. Mouseover auf einen km-Balken im Jahreschart zeigt die Anzahl der Fahrten in diesem Monat
+  3. Jede Dashboard-Rubrik (KPIs, Formular, Favoriten, letzte Fahrten, Statistik) hat einen eigenen Card-Hintergrund mit klarer Abgrenzung
+  4. Der Bereich "Neue Fahrt erfassen" hat ein ueberarbeitetes Layout (nicht mehr Standard-Formular-Look)
+  5. Beim Ausfuehren eines Favoriten fragt ein Dialog "Mit Rueckfahrt?" — bei Ja werden Hin- und Rueckfahrt angelegt
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 14: Navigation-Umbau
+**Goal**: Einstellungen und Benutzerverwaltung sind direkt in der Tab-Navigation erreichbar statt hinter Modals und Buttons versteckt
+**Depends on**: Phase 13
+**Requirements**: NAV-01, NAV-02
+**Success Criteria** (what must be TRUE):
+  1. Nutzer klickt auf den Einstellungen-Tab und sieht alle Einstellungen (Profil, Orte, Distanzen, Traeger, Erstattungen, Passwort, API, Favoriten) inline als Abschnitte oder Sub-Tabs — kein Modal oeffnet sich
+  2. Admin-Nutzer sehen "Benutzerverwaltung" als eigenen Tab in der Hauptnavigation und koennen Nutzer direkt dort verwalten
+  3. Die Navigation zeigt maximal 4-5 Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen (+ Benutzerverwaltung fuer Admins)
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 10 → 11 → 12
+Phases execute in numeric order: 13 → 14
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -173,6 +187,8 @@ Phases execute in numeric order: 10 → 11 → 12
 | 7. Code-Qualitaet | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
-| 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
-| 11. Dashboard, Navigation & Statistiken | v1.3 | 1/2 | Complete    | 2026-03-28 |
-| 12. Adress-Autocomplete | v1.3 | 1/1 | Complete    | 2026-03-28 |
+| 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete | 2026-03-28 |
+| 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
+| 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
+| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 0/0 | Not started | - |
+| 14. Navigation-Umbau | v1.4 | 0/0 | Not started | - |

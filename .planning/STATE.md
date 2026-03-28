@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Dashboard & UX
-status: verifying
-stopped_at: Completed 12-01-PLAN.md
-last_updated: "2026-03-28T15:25:24.152Z"
+milestone: v1.4
+milestone_name: UX Polish & Navigation
+status: ready_to_plan
+stopped_at: Roadmap created
+last_updated: "2026-03-28"
 last_activity: 2026-03-28
 progress:
-  total_phases: 3
-  completed_phases: 2
-  total_plans: 5
-  completed_plans: 4
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,38 +18,36 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-22)
+See: .planning/PROJECT.md (updated 2026-03-28)
 
-**Core value:** Schnellere Fahrteingabe durch Favoriten und bessere Uebersicht durch Dashboard
-**Current focus:** Phase 12 — adress-autocomplete
+**Core value:** Dashboard poliert, Einstellungen inline, Umlaute korrekt
+**Current focus:** Phase 13 — Dashboard-Polish & Kleinigkeiten
 
 ## Current Position
 
-Phase: 12
+Phase: 13 of 14 (Dashboard-Polish & Kleinigkeiten)
 Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-03-28
+Status: Ready to plan
+Last activity: 2026-03-28 — Roadmap v1.4 erstellt
 
 Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
-**Velocity (v1.0-v1.2):**
+**Velocity (v1.0-v1.3):**
 
-- Total plans completed: 16
+- Total plans completed: 20
 - Avg ~2min/plan
 - Trend: Stable
 
-**By Phase:**
+**Recent (v1.3):**
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| - | - | - | - |
-
-*Updated after each plan completion*
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
 | Phase 10 P01 | 1min | 2 tasks | 6 files |
 | Phase 10 P02 | 3min | 2 tasks | 3 files |
 | Phase 11 P01 | 4min | 2 tasks | 2 files |
+| Phase 11 P02 | — | — | — |
 | Phase 12 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
@@ -59,13 +57,11 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v1.3]: Favoriten vor Dashboard, weil Dashboard Favoriten anzeigt
 - [v1.3]: Navigation-Umbau: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
-- [Phase 09]: Excel/PDF Buttons nebeneinander pro Kategorie statt Dropdown
-- [Phase 10]: Favoriten Backend API: Zod inline im Controller, Execute-Endpoint mit getDistance und heutigem Datum
-- [Phase 10]: Favoriten-Tab nach Traeger-Tab positioniert, Nochmal-Button via useMemo Set fuer letzte 3 Fahrten
 - [Phase 11]: Dashboard als Default-Tab, Einstellungen-Tab oeffnet Modal statt eigene View
 - [Phase 12]: Native fetch statt axios fuer Nominatim (externer API-Call direkt vom Browser)
+- [v1.4]: Phase 13 buendelt alle Frontend-Polish-Aenderungen ohne Navigationsstruktur-Umbau
+- [v1.4]: Phase 14 baut Einstellungen/Benutzerverwaltung als inline Tabs — groesserer struktureller Umbau zuletzt
 
 ### Pending Todos
 
@@ -77,6 +73,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T15:24:57.647Z
-Stopped at: Completed 12-01-PLAN.md
+Last session: 2026-03-28
+Stopped at: Roadmap v1.4 erstellt (2 Phasen, 8 Requirements)
 Resume file: None
