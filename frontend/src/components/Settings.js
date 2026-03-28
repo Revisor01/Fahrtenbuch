@@ -310,26 +310,40 @@ function Settings() {
         )}
 
         {activeTab === 'orte' && (
-            <div>
+            <div className="space-y-6">
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Neuen Ort anlegen</h3>
+            <p className="text-sm text-muted mb-6">Erfassen Sie Orte, die Sie regelmässig als Start- oder Zielort nutzen.</p>
             <OrtForm />
-            <div className="mt-6">
+            </div>
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Gespeicherte Orte</h3>
             <OrteListe />
             </div>
             </div>
         )}
 
         {activeTab === 'distanzen' && (
-            <div>
+            <div className="space-y-6">
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Neue Distanz anlegen</h3>
+            <p className="text-sm text-muted mb-6">Hinterlegen Sie Entfernungen zwischen Orten fuer die automatische Kilometerberechnung.</p>
             <DistanzForm />
-            <div className="mt-6">
+            </div>
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Gespeicherte Distanzen</h3>
             <DistanzenListe />
             </div>
             </div>
         )}
 
         {activeTab === 'abrechnungen' && (
-            <div>
+            <div className="space-y-6">
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Abrechnungstraeger verwalten</h3>
+            <p className="text-sm text-muted mb-6">Verwalten Sie die Organisationen und Traeger, an die Ihre Fahrten abgerechnet werden.</p>
             <AbrechnungstraegerForm />
+            </div>
             </div>
         )}
 
@@ -477,8 +491,12 @@ function Settings() {
         )}
 
         {activeTab === 'erstattungssaetze' && (
-            <div>
+            <div className="space-y-6">
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Erstattungssaetze verwalten</h3>
+            <p className="text-sm text-muted mb-6">Legen Sie fest, welche Kilometererstattung Sie von den einzelnen Traegern erhalten.</p>
             <ErstattungssaetzeForm />
+            </div>
             </div>
         )}
 
