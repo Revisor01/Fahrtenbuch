@@ -107,7 +107,7 @@ Plans:
 
 **Milestone Goal:** Dashboard als Startseite, Favoriten-Fahrten fuer Schnelleingabe, Statistiken mit Jahresuebersicht, Adress-Autocomplete.
 
-- [ ] **Phase 10: Favoriten & Quick-Copy** - Favoriten-System und "Nochmal fuer heute" fuer schnelle Fahrteingabe
+- [x] **Phase 10: Favoriten & Quick-Copy** - Favoriten-System und "Nochmal fuer heute" fuer schnelle Fahrteingabe (completed 2026-03-28)
 - [ ] **Phase 11: Dashboard, Navigation & Statistiken** - Dashboard-Startseite mit KPIs, Formular, Statistiken und neue Tab-Navigation
 - [ ] **Phase 12: Adress-Autocomplete** - Ort-Eingabe mit Nominatim-Vorschlaegen
 
@@ -126,7 +126,7 @@ Plans:
 
 Plans:
 - [x] 10-01-PLAN.md — Backend: Migration, Model, Schema, Controller und Routes fuer Favoriten-API
-- [ ] 10-02-PLAN.md — Frontend: AppContext-Integration, Favoriten-Tab im Profil-Modal, Quick-Copy-Buttons
+- [x] 10-02-PLAN.md — Frontend: AppContext-Integration, Favoriten-Tab im Profil-Modal, Quick-Copy-Buttons
 
 ### Phase 11: Dashboard, Navigation & Statistiken
 **Goal**: Dashboard als neue Startseite mit KPIs, Schnelleingabe-Formular, Statistiken und ueberarbeiteter Navigation
@@ -173,6 +173,6 @@ Phases execute in numeric order: 10 → 11 → 12
 | 7. Code-Qualitaet | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
-| 10. Favoriten & Quick-Copy | v1.3 | 1/2 | In Progress|  |
+| 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete   | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 0/? | Not started | - |
 | 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |
