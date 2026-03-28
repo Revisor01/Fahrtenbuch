@@ -218,28 +218,30 @@ function Dashboard({ onNavigate }) {
         {favoriten.length === 0 ? (
           <p className="text-sm text-muted">Keine Favoriten gespeichert. Erstelle Favoriten in den Einstellungen.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {favoriten.map((fav) => (
-              <button
-                key={fav.id}
-                onClick={() => handleExecuteFavorit(fav)}
-                className="text-left rounded-card border border-card min-h-[44px] p-3 hover:shadow-card-hover transition-all"
-              >
-                <p className="text-sm font-medium text-value">
-                  {fav.von_ort_name} &rarr; {fav.nach_ort_name}
-                </p>
-                {fav.anlass && (
-                  <p className="text-xs text-muted mt-1">{fav.anlass}</p>
-                )}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => onNavigate && onNavigate('einstellungen')}
-            className="w-full mt-3 text-sm py-2 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors text-center"
-          >
-            Weitere Favoriten hinzufügen &rarr;
-          </button>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {favoriten.map((fav) => (
+                <button
+                  key={fav.id}
+                  onClick={() => handleExecuteFavorit(fav)}
+                  className="text-left rounded-card border border-card min-h-[44px] p-3 hover:shadow-card-hover transition-all"
+                >
+                  <p className="text-sm font-medium text-value">
+                    {fav.von_ort_name} &rarr; {fav.nach_ort_name}
+                  </p>
+                  {fav.anlass && (
+                    <p className="text-xs text-muted mt-1">{fav.anlass}</p>
+                  )}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => onNavigate && onNavigate('einstellungen')}
+              className="w-full mt-3 text-sm py-2 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors text-center"
+            >
+              Weitere Favoriten hinzufügen &rarr;
+            </button>
+          </>
         )}
       </div>
 
