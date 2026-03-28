@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { HelpCircle, Users, LogOut, Info, Bell, LayoutDashboard, Car, CalendarDays, Settings } from 'lucide-react';
-import ProfileModal from '../ProfileModal';
+import { HelpCircle, Users, LogOut, Info, Bell, LayoutDashboard, Car, CalendarDays, Settings as SettingsIcon } from 'lucide-react';
+import Settings from './Settings';
 import FahrtForm from '../FahrtForm';
 import FahrtenListe from './FahrtenListe';
 import Modal from '../Modal';
@@ -16,7 +16,7 @@ import { AppContext } from '../contexts/AppContext';
 
 
 function AppContent() {
-  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, isProfileModalOpen, setIsProfileModalOpen, user } = useContext(AppContext);
+  const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, user } = useContext(AppContext);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
@@ -47,6 +47,7 @@ function AppContent() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'fahrten', label: 'Fahrten & Export', icon: Car },
     { id: 'monatsuebersicht', label: 'Monats\u00FCbersicht', icon: CalendarDays },
+    { id: 'einstellungen', label: 'Einstellungen', icon: SettingsIcon },
   ];
 
   return (
@@ -130,14 +131,6 @@ function AppContent() {
           </button>
         );
       })}
-      {/* Einstellungen-Tab: opens modal, does not switch tab */}
-      <button
-        onClick={() => setIsProfileModalOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 text-sm whitespace-nowrap text-muted hover:text-value transition-colors"
-      >
-        <Settings size={16} />
-        <span className="hidden sm:inline">Einstellungen</span>
-      </button>
     </div>
 
     {/* Hauptinhalt */}
@@ -149,6 +142,7 @@ function AppContent() {
       </div>
     )}
     {activeTab === 'monatsuebersicht' && <MonthlyOverview />}
+    {activeTab === 'einstellungen' && <Settings />}
 
     {/* Modals */}
 
@@ -160,11 +154,6 @@ function AppContent() {
     <InfoModal
       isOpen={showInfoModal}
       onClose={() => setShowInfoModal(false)}
-    />
-
-    <ProfileModal
-      isOpen={isProfileModalOpen}
-      onClose={() => setIsProfileModalOpen(false)}
     />
 
     <Modal
