@@ -9,6 +9,7 @@ const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
 const abrechnungstraegerRoutes = require('./routes/abrechnungstraeger');
 const mitfahrerErstattungRoutes = require('./routes/mitfahrerErstattung');
+const favoritenRoutes = require('./routes/favoriten');
 const apiKeyRoutes = require('./routes/apiKeys');
 const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
@@ -53,6 +54,7 @@ app.use('/api/distanzen', authMiddleware, distanzenRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/abrechnungstraeger', authMiddleware, abrechnungstraegerRoutes);
 app.use('/api/mitfahrer-erstattung', authMiddleware, mitfahrerErstattungRoutes);
+app.use('/api/favoriten', authMiddleware, favoritenRoutes);
 
 // Catch-all route for SPAs
 app.get('*', (req, res) => {
