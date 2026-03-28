@@ -173,6 +173,6 @@ Phases execute in numeric order: 10 → 11 → 12
 | 7. Code-Qualitaet | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
-| 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete   | 2026-03-28 |
+| 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 0/? | Not started | - |
 | 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |
