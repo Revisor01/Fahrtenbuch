@@ -47,11 +47,11 @@ code {
   }
   
   .form-row-half {
-    @apply flex sm:flex-row gap-4 w-full sm:w-auto min-w-[240px];
+    @apply flex sm:flex-row gap-4 w-full sm:w-auto sm:min-w-[240px];
   }
 
   .form-group {
-    @apply w-full sm:flex-1 min-w-[240px];
+    @apply w-full sm:flex-1 sm:min-w-[240px];
   }
 
   .form-group-fixed {
@@ -123,13 +123,13 @@ code {
   
   /* Form Elements */
   .form-input {
-    @apply w-full h-8 px-3 
-        bg-white dark:bg-gray-800 
-        border border-primary-200 dark:border-primary-700 
-        rounded text-sm 
-        focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 
-        focus:border-transparent 
-        shadow-sm 
+    @apply w-full max-w-full h-8 px-3
+        bg-white dark:bg-gray-800
+        border border-primary-200 dark:border-primary-700
+        rounded text-sm
+        focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600
+        focus:border-transparent
+        shadow-sm
         text-primary-900 dark:text-primary-100
         placeholder-primary-900 dark:placeholder-primary-100  /* Angepasst */
         transition-colors duration-200

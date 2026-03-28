@@ -541,15 +541,16 @@ function FahrtenListe() {
       )}
       </div>
 
-      <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end gap-3">
-      <div className="flex items-center justify-end gap-2 w-full">
+      <div className="w-full sm:w-auto flex flex-col gap-2">
       {(selectedMonth !== currentMonth || selectedVonMonth) && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary hidden sm:block">
+        <button onClick={resetToCurrentMonth} className="btn-secondary hidden sm:block self-end">
         Aktueller Monat
         </button>
       )}
+      <div className="flex flex-col sm:flex-row gap-2">
       {/* Von-Dropdown (Monat + Jahr) */}
-      <label className="text-xs text-label">Von:</label>
+      <div className="flex items-center gap-1">
+      <label className="text-xs text-label shrink-0">Von:</label>
       <select
       value={selectedVonMonth ? new Date(`${selectedVonMonth}-01`).getMonth().toString() : ''}
       onChange={(e) => {
@@ -561,7 +562,7 @@ function FahrtenListe() {
           setSelectedVonMonth(`${vonYear}-${m}`);
         }
       }}
-      className="form-select w-32">
+      className="form-select min-w-0 flex-1">
       <option value="">---</option>
       {[...Array(12)].map((_, i) => (
         <option key={`von-${i}`} value={i}>
@@ -576,7 +577,7 @@ function FahrtenListe() {
         const m = selectedVonMonth.split('-')[1];
         setSelectedVonMonth(`${e.target.value}-${m}`);
       }}
-      className="form-select w-24">
+      className="form-select w-20">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
         return (
@@ -585,12 +586,14 @@ function FahrtenListe() {
       })}
       </select>
       )}
+      </div>
       {/* Bis-Dropdown */}
-      <label className="text-xs text-label">Bis:</label>
+      <div className="flex items-center gap-1">
+      <label className="text-xs text-label shrink-0">Bis:</label>
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleBisMonthChange}
-      className="form-select w-32">
+      className="form-select min-w-0 flex-1">
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
         {new Date(0, i).toLocaleString("default", { month: "long" })}
@@ -600,7 +603,7 @@ function FahrtenListe() {
       <select
       value={selectedYear}
       onChange={handleBisYearChange}
-      className="form-select w-24">
+      className="form-select w-20">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
         return (
@@ -610,6 +613,7 @@ function FahrtenListe() {
         );
       })}
       </select>
+      </div>
       </div>
       </div>
       </div>
