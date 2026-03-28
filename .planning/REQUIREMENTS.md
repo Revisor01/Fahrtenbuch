@@ -12,10 +12,10 @@
 
 ### Dashboard-Polish
 
-- [ ] **DASH-04**: Erstattungen pro Abrechnungstraeger im Statistik-Bereich anzeigen
-- [ ] **DASH-05**: Mouseover auf km-Balken zeigt Anzahl der Fahrten im Monat
-- [ ] **DASH-06**: Jede Rubrik im Dashboard hat einen Card-Hintergrund (klare Abgrenzung)
-- [ ] **DASH-07**: "Neue Fahrt erfassen" optisch ueberarbeiten (neuer Look)
+- [x] **DASH-04**: Erstattungen pro Abrechnungstraeger im Statistik-Bereich anzeigen
+- [x] **DASH-05**: Mouseover auf km-Balken zeigt Anzahl der Fahrten im Monat
+- [x] **DASH-06**: Jede Rubrik im Dashboard hat einen Card-Hintergrund (klare Abgrenzung)
+- [x] **DASH-07**: "Neue Fahrt erfassen" optisch ueberarbeiten (neuer Look)
 
 ### Favoriten
 
@@ -36,10 +36,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DASH-04 | Phase 13 | Pending |
-| DASH-05 | Phase 13 | Pending |
-| DASH-06 | Phase 13 | Pending |
-| DASH-07 | Phase 13 | Pending |
+| DASH-04 | Phase 13 | Complete |
+| DASH-05 | Phase 13 | Complete |
+| DASH-06 | Phase 13 | Complete |
+| DASH-07 | Phase 13 | Complete |
 | FAV-04 | Phase 13 | Pending |
 | TEXT-01 | Phase 13 | Pending |
 | NAV-01 | Phase 14 | Pending |
