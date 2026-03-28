@@ -25,7 +25,7 @@ function Settings() {
         { id: 'profile', name: 'Profil' },
         { id: 'orte', name: 'Orte' },
         { id: 'distanzen', name: 'Distanzen' },
-        { id: 'abrechnungen', name: 'Tr\u00E4ger' },
+        { id: 'abrechnungen', name: 'Träger' },
         { id: 'favoriten', name: 'Favoriten' },
         { id: 'erstattungssaetze', name: 'Erstattungen' },
         { id: 'security', name: 'Passwort' },
@@ -73,16 +73,16 @@ function Settings() {
 
     const handleDeleteKey = (keyId) => {
         showNotification(
-            'API-Key l\u00F6schen',
-            'M\u00F6chten Sie diesen API-Key wirklich l\u00F6schen?',
+            'API-Key löschen',
+            'Möchten Sie diesen API-Key wirklich löschen?',
             async () => {
                 try {
                     await axios.delete(`/api/keys/${keyId}`);
                     await fetchApiKeys();
-                    showNotification('Erfolg', 'API Key wurde gel\u00F6scht');
+                    showNotification('Erfolg', 'API Key wurde gelöscht');
                 } catch (error) {
-                    console.error('Fehler beim L\u00F6schen des API Keys:', error);
-                    showNotification('Fehler', 'API Key konnte nicht gel\u00F6scht werden');
+                    console.error('Fehler beim Löschen des API Keys:', error);
+                    showNotification('Fehler', 'API Key konnte nicht gelöscht werden');
                 }
             },
             true
@@ -112,7 +112,7 @@ function Settings() {
     const handlePasswordChange = async (e) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
-            showNotification('Fehler', 'Die Passw\u00F6rter stimmen nicht \u00FCberein');
+            showNotification('Fehler', 'Die Passwörter stimmen nicht überein');
             return;
         }
         try {
@@ -121,11 +121,11 @@ function Settings() {
                 newPassword,
                 confirmPassword
             });
-            showNotification('Erfolg', 'Passwort wurde ge\u00E4ndert');
+            showNotification('Erfolg', 'Passwort wurde geändert');
             resetForm();
         } catch (error) {
-            console.error('Fehler beim \u00C4ndern des Passworts:', error);
-            showNotification('Fehler', error.response?.data?.message || 'Passwort konnte nicht ge\u00E4ndert werden');
+            console.error('Fehler beim Ändern des Passworts:', error);
+            showNotification('Fehler', error.response?.data?.message || 'Passwort konnte nicht geändert werden');
         }
     };
 
@@ -133,7 +133,7 @@ function Settings() {
         try {
             setIsGeneratingKey(true);
             const response = await axios.post('/api/keys', {
-                description: newKeyDescription || 'API Key f\u00FCr Kurzbefehle'
+                description: newKeyDescription || 'API Key für Kurzbefehle'
             });
             setGeneratedKey(response.data.key);
             fetchApiKeys();
@@ -203,9 +203,9 @@ function Settings() {
         {activeTab === 'profile' && (
             <div className="space-y-4">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Pers\u00F6nliche Daten</h3>
+            <h3 className="text-lg font-medium text-value mb-4">Persönliche Daten</h3>
             <p className="text-sm text-muted mb-6">
-            Ihre pers\u00F6nlichen Daten werden f\u00FCr die Abrechnungen ben\u00F6tigt.
+            Ihre persönlichen Daten werden für die Abrechnungen benötigt.
             Bitte stellen Sie sicher, dass diese Daten aktuell sind.
             </p>
             <form onSubmit={handleProfileUpdate} className="space-y-4">
@@ -223,10 +223,10 @@ function Settings() {
             />
             <div className="flex justify-end mt-1">
             {profile.email_verified ? (
-                <span className="text-primary-600 text-xs">{'\u25CF'} Verifiziert</span>
+                <span className="text-primary-600 text-xs">{'●'} Verifiziert</span>
             ) : (
                 <div className="flex items-center gap-2">
-                <span className="text-secondary-600 text-xs">{'\u25CB'} Ausstehend</span>
+                <span className="text-secondary-600 text-xs">{'○'} Ausstehend</span>
                 <button
                 type="button"
                 onClick={handleResendVerification}
@@ -329,11 +329,11 @@ function Settings() {
 
         {activeTab === 'favoriten' && (
             <div className="space-y-6">
-            {/* Formular zum Hinzuf\u00FCgen */}
+            {/* Formular zum Hinzufügen */}
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neuen Favoriten anlegen</h3>
             <p className="text-sm text-muted mb-6">
-            Speichern Sie h\u00E4ufig gefahrene Strecken als Favoriten, um sie sp\u00E4ter mit einem Klick zu wiederholen.
+            Speichern Sie häufig gefahrene Strecken als Favoriten, um sie später mit einem Klick zu wiederholen.
             </p>
             <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -344,7 +344,7 @@ function Settings() {
             onChange={(e) => setFavoritForm({ ...favoritForm, vonOrtId: e.target.value })}
             className="form-select w-full"
             >
-            <option value="">Bitte w\u00E4hlen</option>
+            <option value="">Bitte wählen</option>
             {orte.map(ort => (
                 <option key={ort.id} value={ort.id}>{ort.name}</option>
             ))}
@@ -357,7 +357,7 @@ function Settings() {
             onChange={(e) => setFavoritForm({ ...favoritForm, nachOrtId: e.target.value })}
             className="form-select w-full"
             >
-            <option value="">Bitte w\u00E4hlen</option>
+            <option value="">Bitte wählen</option>
             {orte.map(ort => (
                 <option key={ort.id} value={ort.id}>{ort.name}</option>
             ))}
@@ -376,13 +376,13 @@ function Settings() {
             />
             </div>
             <div>
-            <label className="form-label">Tr\u00E4ger</label>
+            <label className="form-label">Träger</label>
             <select
             value={favoritForm.abrechnungstraegerId}
             onChange={(e) => setFavoritForm({ ...favoritForm, abrechnungstraegerId: e.target.value })}
             className="form-select w-full"
             >
-            <option value="">Bitte w\u00E4hlen</option>
+            <option value="">Bitte wählen</option>
             {abrechnungstraeger.map(at => (
                 <option key={at.id} value={at.id}>{at.name}</option>
             ))}
@@ -394,7 +394,7 @@ function Settings() {
             type="button"
             onClick={async () => {
                 if (!favoritForm.vonOrtId || !favoritForm.nachOrtId) {
-                    showNotification('Fehler', 'Bitte w\u00E4hlen Sie Von- und Nach-Ort aus.');
+                    showNotification('Fehler', 'Bitte wählen Sie Von- und Nach-Ort aus.');
                     return;
                 }
                 try {
@@ -432,7 +432,7 @@ function Settings() {
                     <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                     <div className="font-medium text-value truncate">
-                    {fav.von_ort_name} {'\u2192'} {fav.nach_ort_name}
+                    {fav.von_ort_name} {'→'} {fav.nach_ort_name}
                     </div>
                     {fav.anlass && (
                         <div className="text-sm text-label mt-1">{fav.anlass}</div>
@@ -444,23 +444,23 @@ function Settings() {
                     <button
                     onClick={() => {
                         showNotification(
-                            'Favorit l\u00F6schen',
-                            `M\u00F6chten Sie den Favoriten "${fav.von_ort_name} \u2192 ${fav.nach_ort_name}" wirklich l\u00F6schen?`,
+                            'Favorit löschen',
+                            `Möchten Sie den Favoriten "${fav.von_ort_name} → ${fav.nach_ort_name}" wirklich löschen?`,
                             async () => {
                                 try {
                                     await deleteFavorit(fav.id);
-                                    showNotification('Erfolg', 'Favorit wurde gel\u00F6scht.');
+                                    showNotification('Erfolg', 'Favorit wurde gelöscht.');
                                 } catch (error) {
-                                    showNotification('Fehler', 'Favorit konnte nicht gel\u00F6scht werden.');
+                                    showNotification('Fehler', 'Favorit konnte nicht gelöscht werden.');
                                 }
                             },
                             true
                         );
                     }}
                     className="table-action-button-secondary ml-2 flex-shrink-0"
-                    title="L\u00F6schen"
+                    title="Löschen"
                     >
-                    {'\u00D7'}
+                    {'×'}
                     </button>
                     </div>
                     </div>
@@ -479,10 +479,10 @@ function Settings() {
         {activeTab === 'security' && (
             <div className="space-y-6">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Passwort \u00E4ndern</h3>
+            <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
             <p className="text-sm text-muted mb-6">
-            Aus Sicherheitsgr\u00FCnden sollten Sie Ihr Passwort regelm\u00E4\u00DFig \u00E4ndern.
-            W\u00E4hlen Sie ein sicheres Passwort mit mindestens 8 Zeichen.
+            Aus Sicherheitsgründen sollten Sie Ihr Passwort regelmäßig ändern.
+            Wählen Sie ein sicheres Passwort mit mindestens 8 Zeichen.
             </p>
 
             <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -510,19 +510,19 @@ function Settings() {
                 <div className="mt-2">
                 <div className="text-xs space-y-1">
                 <div className={`flex items-center gap-2 ${newPassword.length >= 8 ? 'text-primary-600' : 'text-secondary-600'}`}>
-                <span>{newPassword.length >= 8 ? '\u25CF' : '\u25CB'}</span>
+                <span>{newPassword.length >= 8 ? '●' : '○'}</span>
                 <span>Mindestens 8 Zeichen</span>
                 </div>
                 <div className={`flex items-center gap-2 ${/[A-Z]/.test(newPassword) ? 'text-primary-600' : 'text-secondary-600'}`}>
-                <span>{/[A-Z]/.test(newPassword) ? '\u25CF' : '\u25CB'}</span>
-                <span>Gro\u00DFbuchstaben</span>
+                <span>{/[A-Z]/.test(newPassword) ? '●' : '○'}</span>
+                <span>Großbuchstaben</span>
                 </div>
                 <div className={`flex items-center gap-2 ${/[a-z]/.test(newPassword) ? 'text-primary-600' : 'text-secondary-600'}`}>
-                <span>{/[a-z]/.test(newPassword) ? '\u25CF' : '\u25CB'}</span>
+                <span>{/[a-z]/.test(newPassword) ? '●' : '○'}</span>
                 <span>Kleinbuchstaben</span>
                 </div>
                 <div className={`flex items-center gap-2 ${/\d/.test(newPassword) ? 'text-primary-600' : 'text-secondary-600'}`}>
-                <span>{/\d/.test(newPassword) ? '\u25CF' : '\u25CB'}</span>
+                <span>{/\d/.test(newPassword) ? '●' : '○'}</span>
                 <span>Mindestens eine Zahl</span>
                 </div>
                 </div>
@@ -531,7 +531,7 @@ function Settings() {
             </div>
 
             <div>
-            <label className="form-label">Passwort best\u00E4tigen</label>
+            <label className="form-label">Passwort bestätigen</label>
             <input
             type="password"
             value={confirmPassword}
@@ -543,7 +543,7 @@ function Settings() {
 
             <div className="flex justify-end">
             <button type="submit" className="btn-primary w-full sm:w-auto">
-            Passwort \u00E4ndern
+            Passwort ändern
             </button>
             </div>
             </form>
@@ -557,7 +557,7 @@ function Settings() {
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
             <p className="text-sm text-muted mb-6">
-            Mit API Keys k\u00F6nnen Sie Ihre Fahrten \u00FCber externe Anwendungen oder Kurzbefehle verwalten.
+            Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
             Jeder Key sollte einen eindeutigen Verwendungszweck haben.
             </p>
 
@@ -626,7 +626,7 @@ function Settings() {
                         ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
                         : 'bg-secondary-100 text-secondary-700 dark:bg-secondary-900 dark:text-secondary-300'
                     }`}>
-                    {key.is_active ? '\u25CF Aktiv' : '\u25CB Inaktiv'}
+                    {key.is_active ? '● Aktiv' : '○ Inaktiv'}
                     </span>
                     </div>
                     <div className="text-xs text-label mt-2">
@@ -640,8 +640,8 @@ function Settings() {
                     <button
                     onClick={() => handleDeleteKey(key.id)}
                     className="table-action-button-secondary"
-                    title="L\u00F6schen">
-                    {'\u00D7'}
+                    title="Löschen">
+                    {'×'}
                     </button>
                     </div>
                     </div>
