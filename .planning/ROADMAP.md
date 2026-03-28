@@ -172,7 +172,7 @@ Plans:
 - [x] **Phase 15: Designsystem** - Einheitliche Variablen, Card-Komponente und Dark Mode als Grundlage fuer alle Views (completed 2026-03-28)
 - [x] **Phase 16: Dashboard Makeover** - Dashboard komplett neu gestaltet mit Formular-Exklusivitaet, modernem Layout und Mobile-Optimierung (completed 2026-03-28)
 - [x] **Phase 17: Listen & Uebersichten** - Fahrtenliste, Export-Bereich und Monatsuebersicht visuell modernisiert (completed 2026-03-28)
-- [ ] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff
+- [x] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff (completed 2026-03-28)
 
 ## Phase Details
 
@@ -242,7 +242,7 @@ Plans:
 Plans:
 - [x] 18-01-PLAN.md — Settings Sub-Tabs aufwerten und Formulare in Cards einbetten
 - [x] 18-02-PLAN.md — Login-Seite und Landing-Page modernisieren
-- [ ] 18-03-PLAN.md — CSS-Transitions fuer Tab-Wechsel und Card-Interaktionen
+- [x] 18-03-PLAN.md — CSS-Transitions fuer Tab-Wechsel und Card-Interaktionen
 
 **UI hint**: yes
 
@@ -270,4 +270,4 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 18. Einstellungen, Login & Polish | v2.0 | 2/3 | In Progress|  |
+| 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete   | 2026-03-28 |

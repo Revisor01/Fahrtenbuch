@@ -36,7 +36,7 @@
 
 ### Transitions & Animationen
 
-- [ ] **ANI-01**: Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions
+- [x] **ANI-01**: Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions
 
 ### Login & Landing
 
@@ -76,7 +76,7 @@
 | SET-02 | Phase 18 | Complete |
 | LOG-01 | Phase 18 | Complete |
 | LOG-02 | Phase 18 | Complete |
-| ANI-01 | Phase 18 | Pending |
+| ANI-01 | Phase 18 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 17 total
