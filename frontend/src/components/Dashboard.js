@@ -200,20 +200,21 @@ function Dashboard() {
       </div>
 
       {/* Aufklappbares Fahrt-Formular */}
-      <div className="card p-4">
+      <div className="card overflow-hidden">
         <button
           onClick={() => setIsFormOpen(!isFormOpen)}
-          className="flex items-center justify-between w-full"
+          className={`flex items-center justify-between w-full p-4 ${isFormOpen ? 'bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent' : 'hover:bg-hover transition-colors'}`}
         >
-          <h2 className="text-base font-medium text-value">Neue Fahrt erfassen</h2>
-          {isFormOpen ? (
-            <ChevronUp size={20} className="text-muted" />
-          ) : (
-            <ChevronDown size={20} className="text-muted" />
-          )}
+          <div className="flex items-center gap-2">
+            <div className={`p-1 rounded-md ${isFormOpen ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+              <Plus size={18} className={isFormOpen ? 'text-blue-600 dark:text-blue-400' : 'text-muted'} />
+            </div>
+            <h2 className="text-base font-medium text-value">Neue Fahrt erfassen</h2>
+          </div>
+          {isFormOpen ? <ChevronUp size={20} className="text-muted" /> : <ChevronDown size={20} className="text-muted" />}
         </button>
         {isFormOpen && (
-          <div className="mt-4">
+          <div className="p-4 border-t border-border">
             <FahrtForm />
           </div>
         )}
