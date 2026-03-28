@@ -339,11 +339,11 @@ function ProfileModal({ isOpen, onClose }) {
         
         {activeTab === 'favoriten' && (
             <div className="space-y-6">
-            {/* Formular zum Hinzufuegen */}
+            {/* Formular zum Hinzufügen */}
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neuen Favoriten anlegen</h3>
             <p className="text-sm text-muted mb-6">
-            Speichern Sie haeufig gefahrene Strecken als Favoriten, um sie spaeter mit einem Klick zu wiederholen.
+            Speichern Sie häufig gefahrene Strecken als Favoriten, um sie später mit einem Klick zu wiederholen.
             </p>
             <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -354,7 +354,7 @@ function ProfileModal({ isOpen, onClose }) {
             onChange={(e) => setFavoritForm({ ...favoritForm, vonOrtId: e.target.value })}
             className="form-select w-full"
             >
-            <option value="">Bitte waehlen</option>
+            <option value="">Bitte wählen</option>
             {orte.map(ort => (
                 <option key={ort.id} value={ort.id}>{ort.name}</option>
             ))}
@@ -367,7 +367,7 @@ function ProfileModal({ isOpen, onClose }) {
             onChange={(e) => setFavoritForm({ ...favoritForm, nachOrtId: e.target.value })}
             className="form-select w-full"
             >
-            <option value="">Bitte waehlen</option>
+            <option value="">Bitte wählen</option>
             {orte.map(ort => (
                 <option key={ort.id} value={ort.id}>{ort.name}</option>
             ))}
@@ -386,13 +386,13 @@ function ProfileModal({ isOpen, onClose }) {
             />
             </div>
             <div>
-            <label className="form-label">Traeger</label>
+            <label className="form-label">Träger</label>
             <select
             value={favoritForm.abrechnungstraegerId}
             onChange={(e) => setFavoritForm({ ...favoritForm, abrechnungstraegerId: e.target.value })}
             className="form-select w-full"
             >
-            <option value="">Bitte waehlen</option>
+            <option value="">Bitte wählen</option>
             {abrechnungstraeger.map(at => (
                 <option key={at.id} value={at.id}>{at.name}</option>
             ))}
@@ -404,7 +404,7 @@ function ProfileModal({ isOpen, onClose }) {
             type="button"
             onClick={async () => {
                 if (!favoritForm.vonOrtId || !favoritForm.nachOrtId) {
-                    showNotification('Fehler', 'Bitte waehlen Sie Von- und Nach-Ort aus.');
+                    showNotification('Fehler', 'Bitte wählen Sie Von- und Nach-Ort aus.');
                     return;
                 }
                 try {
@@ -454,21 +454,21 @@ function ProfileModal({ isOpen, onClose }) {
                     <button
                     onClick={() => {
                         showNotification(
-                            'Favorit loeschen',
-                            `Moechten Sie den Favoriten "${fav.von_ort_name} → ${fav.nach_ort_name}" wirklich loeschen?`,
+                            'Favorit löschen',
+                            `Möchten Sie den Favoriten "${fav.von_ort_name} → ${fav.nach_ort_name}" wirklich löschen?`,
                             async () => {
                                 try {
                                     await deleteFavorit(fav.id);
-                                    showNotification('Erfolg', 'Favorit wurde geloescht.');
+                                    showNotification('Erfolg', 'Favorit wurde gelöscht.');
                                 } catch (error) {
-                                    showNotification('Fehler', 'Favorit konnte nicht geloescht werden.');
+                                    showNotification('Fehler', 'Favorit konnte nicht gelöscht werden.');
                                 }
                             },
                             true
                         );
                     }}
                     className="table-action-button-secondary ml-2 flex-shrink-0"
-                    title="Loeschen"
+                    title="Löschen"
                     >
                     ×
                     </button>
