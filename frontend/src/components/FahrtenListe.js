@@ -586,7 +586,7 @@ function FahrtenListe() {
         {selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum-Übersicht' : 'Monatsübersicht'}
       </h2>
       {(selectedMonth !== currentMonth || selectedVonMonth) && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden">
+        <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden min-h-[44px]">
         Aktueller Monat
         </button>
       )}
@@ -613,7 +613,7 @@ function FahrtenListe() {
           setSelectedVonMonth(`${vonYear}-${m}`);
         }
       }}
-      className="form-select min-w-0 flex-1">
+      className="form-select min-w-0 flex-1 min-h-[44px] sm:min-h-0">
       <option value="">---</option>
       {[...Array(12)].map((_, i) => (
         <option key={`von-${i}`} value={i}>
@@ -628,7 +628,7 @@ function FahrtenListe() {
         const m = selectedVonMonth.split('-')[1];
         setSelectedVonMonth(`${e.target.value}-${m}`);
       }}
-      className="form-select w-20">
+      className="form-select w-20 min-h-[44px] sm:min-h-0">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
         return (
@@ -644,7 +644,7 @@ function FahrtenListe() {
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleBisMonthChange}
-      className="form-select min-w-0 flex-1">
+      className="form-select min-w-0 flex-1 min-h-[44px] sm:min-h-0">
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
         {new Date(0, i).toLocaleString("default", { month: "long" })}
@@ -654,7 +654,7 @@ function FahrtenListe() {
       <select
       value={selectedYear}
       onChange={handleBisYearChange}
-      className="form-select w-20">
+      className="form-select w-20 min-h-[44px] sm:min-h-0">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
         return (
@@ -765,7 +765,9 @@ function FahrtenListe() {
       </div>
 
       {/* Export */}
-      <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
+      <div className="card-container">
+      <h3 className="text-sm font-medium text-label mb-3">Export</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
       {getKategorienMitErstattung().map(([key, displayName]) => (
         <button
         key={key}
@@ -783,10 +785,11 @@ function FahrtenListe() {
             "Beide"
           );
         }}
-        className="btn-primary">
+        className="btn-primary min-h-[44px]">
         Export {displayName}
         </button>
       ))}
+      </div>
       </div>
       </div>
       </div>
@@ -1183,7 +1186,7 @@ function FahrtenListe() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
     {renderAbrechnungsStatus(summary)}
 
     {/* Desktop View */}
