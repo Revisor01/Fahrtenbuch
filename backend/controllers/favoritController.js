@@ -54,6 +54,8 @@ exports.executeFavorit = async (req, res) => {
       return res.status(404).json({ message: 'Favorit nicht gefunden' });
     }
 
+    const { mitRueckfahrt = false } = req.body || {};
+
     // Kilometer berechnen
     const kilometer = await getDistance(favorit.von_ort_id, favorit.nach_ort_id, req.user.id);
 
@@ -74,7 +76,32 @@ exports.executeFavorit = async (req, res) => {
     };
 
     const fahrtId = await Fahrt.create(fahrtData, null, req.user.id);
-    res.status(201).json({ id: fahrtId, message: 'Fahrt aus Favorit erfolgreich erstellt' });
+
+    // Rueckfahrt anlegen wenn gewuenscht
+    if (mitRueckfahrt) {
+      try {
+        const rueckKilometer = await getDistance(favorit.nach_ort_id, favorit.von_ort_id, req.user.id);
+        const rueckfahrtData = {
+          datum,
+          anlass: favorit.anlass,
+          kilometer: rueckKilometer || kilometer || 0,
+          abrechnung: favorit.abrechnungstraeger_id,
+          vonOrtId: favorit.nach_ort_id,
+          nachOrtId: favorit.von_ort_id,
+          einmaligerVonOrt: null,
+          einmaligerNachOrt: null,
+          userId: req.user.id,
+        };
+        await Fahrt.create(rueckfahrtData, null, req.user.id);
+      } catch (rueckError) {
+        console.error('Fehler beim Erstellen der Rueckfahrt:', rueckError);
+      }
+    }
+
+    const message = mitRueckfahrt
+      ? 'Hin- und Rueckfahrt aus Favorit erstellt'
+      : 'Fahrt aus Favorit erfolgreich erstellt';
+    res.status(201).json({ id: fahrtId, message });
   } catch (error) {
     console.error('Fehler beim Ausfuehren des Favoriten:', error);
     res.status(500).json({ message: 'Fehler beim Ausfuehren des Favoriten' });
