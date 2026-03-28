@@ -152,10 +152,10 @@ Plans:
   1. Bei Eingabe in ein Ort-Feld erscheinen Vorschlaege aus OpenStreetMap/Nominatim
   2. Nutzer kann einen Vorschlag auswaehlen und der Ort wird uebernommen
   3. Autocomplete funktioniert sowohl bei neuen Orten als auch im Fahrten-Formular
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md — AddressAutocomplete Komponente mit Nominatim-Integration, OrtForm und FahrtForm Einbindung
 
 ## Progress
 
@@ -175,4 +175,4 @@ Phases execute in numeric order: 10 → 11 → 12
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 1/2 | Complete    | 2026-03-28 |
-| 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |
+| 12. Adress-Autocomplete | v1.3 | 0/1 | Not started | - |
