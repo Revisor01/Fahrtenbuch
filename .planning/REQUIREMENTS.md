@@ -19,7 +19,7 @@
 
 ### Favoriten
 
-- [ ] **FAV-04**: Bei Favorit-Ausfuehrung fragen "Mit Rueckfahrt?" — wenn ja, beide Fahrten anlegen
+- [x] **FAV-04**: Bei Favorit-Ausfuehrung fragen "Mit Rueckfahrt?" — wenn ja, beide Fahrten anlegen
 
 ### Textqualitaet
 
@@ -40,7 +40,7 @@
 | DASH-05 | Phase 13 | Complete |
 | DASH-06 | Phase 13 | Complete |
 | DASH-07 | Phase 13 | Complete |
-| FAV-04 | Phase 13 | Pending |
+| FAV-04 | Phase 13 | Complete |
 | TEXT-01 | Phase 13 | Pending |
 | NAV-01 | Phase 14 | Pending |
 | NAV-02 | Phase 14 | Pending |
