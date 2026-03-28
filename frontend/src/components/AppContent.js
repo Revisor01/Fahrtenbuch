@@ -4,7 +4,6 @@ import { HelpCircle, Users, LogOut, Info, Bell, LayoutDashboard, Car, CalendarDa
 import Settings from './Settings';
 import FahrtForm from '../FahrtForm';
 import FahrtenListe from './FahrtenListe';
-import Modal from '../Modal';
 import InfoModal from './InfoModal';
 import UserManagement from '../UserManagement';
 import ThemeToggle from '../ThemeToggle';
@@ -17,7 +16,6 @@ import { AppContext } from '../contexts/AppContext';
 
 function AppContent() {
   const { isLoggedIn, gesamtKirchenkreis, gesamtGemeinde, logout, user } = useContext(AppContext);
-  const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -48,6 +46,7 @@ function AppContent() {
     { id: 'fahrten', label: 'Fahrten & Export', icon: Car },
     { id: 'monatsuebersicht', label: 'Monats\u00FCbersicht', icon: CalendarDays },
     { id: 'einstellungen', label: 'Einstellungen', icon: SettingsIcon },
+    ...(user?.role === 'admin' ? [{ id: 'verwaltung', label: 'Verwaltung', icon: Users }] : []),
   ];
 
   return (
@@ -60,19 +59,6 @@ function AppContent() {
     </h1>
 
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-    {/* Admin-Button in einer eigenen Zeile auf Mobil */}
-    {user?.role === 'admin' && (
-      <div className="grid grid-cols-1 sm:flex gap-2 w-full">
-        <button
-          onClick={() => setShowUserManagementModal(true)}
-          className="btn-primary flex items-center justify-center gap-2"
-        >
-          <Users size={16} />
-          <span>Benutzerverwaltung</span>
-        </button>
-      </div>
-    )}
-
       {/* Theme, Info, Hilfe und Logout */}
       <div className="flex justify-between w-full sm:gap-4">
 <div className="flex gap-2">
@@ -143,6 +129,7 @@ function AppContent() {
     )}
     {activeTab === 'monatsuebersicht' && <MonthlyOverview />}
     {activeTab === 'einstellungen' && <Settings />}
+    {activeTab === 'verwaltung' && <UserManagement />}
 
     {/* Modals */}
 
@@ -155,15 +142,6 @@ function AppContent() {
       isOpen={showInfoModal}
       onClose={() => setShowInfoModal(false)}
     />
-
-    <Modal
-      isOpen={showUserManagementModal}
-      onClose={() => setShowUserManagementModal(false)}
-      title="Benutzerverwaltung"
-      size="wide"
-    >
-      <UserManagement />
-    </Modal>
 
   </div>
 );
