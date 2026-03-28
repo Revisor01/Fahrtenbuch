@@ -108,7 +108,7 @@ Plans:
 **Milestone Goal:** Dashboard als Startseite, Favoriten-Fahrten fuer Schnelleingabe, Statistiken mit Jahresuebersicht, Adress-Autocomplete.
 
 - [x] **Phase 10: Favoriten & Quick-Copy** - Favoriten-System und "Nochmal fuer heute" fuer schnelle Fahrteingabe (completed 2026-03-28)
-- [ ] **Phase 11: Dashboard, Navigation & Statistiken** - Dashboard-Startseite mit KPIs, Formular, Statistiken und neue Tab-Navigation
+- [x] **Phase 11: Dashboard, Navigation & Statistiken** - Dashboard-Startseite mit KPIs, Formular, Statistiken und neue Tab-Navigation (completed 2026-03-28)
 - [ ] **Phase 12: Adress-Autocomplete** - Ort-Eingabe mit Nominatim-Vorschlaegen
 
 ## Phase Details
@@ -174,5 +174,5 @@ Phases execute in numeric order: 10 → 11 → 12
 | 8. Frontend-Refactoring | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
-| 11. Dashboard, Navigation & Statistiken | v1.3 | 1/2 | In Progress|  |
+| 11. Dashboard, Navigation & Statistiken | v1.3 | 1/2 | Complete    | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 0/? | Not started | - |
