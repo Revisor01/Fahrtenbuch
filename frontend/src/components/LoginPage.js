@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Car } from 'lucide-react';
 import Modal from '../Modal';
 import { AppContext } from '../contexts/AppContext';
 
@@ -123,11 +124,18 @@ function LoginPage() {
   const apiUrl = process.env.REACT_APP_API_URL || '/api'; //Direkt und fest definiert!
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-    <div className="card-container-highlight m-6 w-full max-w-md">
-    <h1 className="text-lg font-medium text-value text-center mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-gray-900 dark:via-gray-900 dark:to-primary-900">
+    <div className="w-full max-w-md mx-4">
+    <div className="card-container-highlight">
+    <div className="flex justify-center mb-6">
+    <div className="w-16 h-16 bg-primary-500 dark:bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+    <Car size={32} className="text-white" />
+    </div>
+    </div>
+    <h1 className="text-lg font-medium text-value text-center mb-2">
     {appTitle}
     </h1>
+    <p className="text-sm text-muted text-center mb-6">Melden Sie sich an, um Ihre Dienstfahrten zu verwalten.</p>
 
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
@@ -157,14 +165,18 @@ function LoginPage() {
     </div>
 
     <div className="flex flex-col gap-2">
-    <button type="submit" className="btn-primary w-full">
+    <button type="submit" className="btn-primary w-full h-10">
     Login
     </button>
-    <div className="flex gap-2 pb-6">
+    <div className="relative my-4">
+    <hr className="border-primary-100 dark:border-primary-700" />
+    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card-highlight px-3 text-xs text-muted">oder</span>
+    </div>
+    <div className="flex justify-center gap-4 text-sm">
     <button
     type="button"
     onClick={() => setShowForgotPassword(true)}
-    className="btn-secondary w-full"
+    className="text-primary-500 hover:text-primary-600 dark:text-primary-400 hover:underline"
     >
     Passwort vergessen?
     </button>
@@ -173,17 +185,19 @@ function LoginPage() {
       <button
       type="button"
       onClick={() => setShowRegistration(true)}
-      className="btn-secondary w-full"
+      className="text-primary-500 hover:text-primary-600 dark:text-primary-400 hover:underline"
       >
       Registrieren
       </button>
     )}
     </div>
-    <Link to="/help" className="btn-primary w-full items-center flex justify-center">
+    <Link to="/help" className="block text-center text-sm text-muted hover:text-value mt-4">
     Hilfe & Tutorials
     </Link>
     </div>
     </form>
+    </div>
+    <p className="text-center text-xs text-muted mt-6">Kirchenkreis Dithmarschen</p>
     </div>
 
     <Modal
