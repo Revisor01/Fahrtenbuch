@@ -20,11 +20,11 @@ code {
 @layer components {
   /* Base Container */
   .base-container {
-    @apply bg-white dark:bg-gray-800 
-        rounded-lg shadow-sm 
-        border border-primary-100 dark:border-primary-700
+    @apply bg-card
+        rounded-card shadow-card
+        border border-card
         overflow-hidden
-        transition-colors duration-200;
+        transition-all duration-200;
   }
 
   /* Container Styles */
@@ -37,8 +37,8 @@ code {
   }
 
   .card-container-highlight {
-    @apply base-container p-6 
-           bg-primary-25 dark:border-primary-900;
+    @apply base-container p-6
+           bg-card-highlight;
   }
 
   /* Form Structure */
@@ -126,10 +126,10 @@ code {
     @apply w-full max-w-full h-8 px-3
         bg-white dark:bg-gray-800
         border border-primary-200 dark:border-primary-700
-        rounded text-sm
+        rounded-lg text-sm
         focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600
         focus:border-transparent
-        shadow-sm
+        shadow-card
         text-primary-900 dark:text-primary-100
         placeholder-primary-900 dark:placeholder-primary-100  /* Angepasst */
         transition-colors duration-200
@@ -149,14 +149,13 @@ code {
 
   /* Mobile Card Styles */
   .mobile-card {
-    @apply bg-white dark:bg-gray-800 
-        rounded-lg
-        border border-primary-100 dark:border-primary-800 
-        p-4 space-y-4 
-        shadow-sm
+    @apply bg-card
+        rounded-card
+        border border-card
+        p-4 space-y-4
+        shadow-card
         transition-all duration-200
-        hover:border-primary-200 dark:hover:border-primary-700
-        hover:shadow-md;
+        hover:shadow-card-hover;
   }
 
   .mobile-card-header {
@@ -204,7 +203,7 @@ code {
 
   /* Text Styles */
   .text-label {
-    @apply text-primary-600 dark:text-primary-100;
+    @apply text-primary-600 dark:text-primary-300;
   }
 
   .text-value {
@@ -245,7 +244,7 @@ code {
   /* Buttons */
   .btn-primary {
     @apply bg-primary-500 dark:bg-primary-600 
-           text-white px-4 h-8 rounded 
+           text-white px-4 h-8 rounded-lg
            hover:bg-primary-600 dark:hover:bg-primary-700 
            transition-colors duration-200 
            text-sm shadow-sm whitespace-nowrap
@@ -254,7 +253,7 @@ code {
 
   .btn-secondary {
     @apply bg-secondary-400 dark:bg-secondary-500 
-           text-white px-4 h-8 rounded 
+           text-white px-4 h-8 rounded-lg
            hover:bg-secondary-500 dark:hover:bg-secondary-600 
            transition-colors duration-200 
            text-sm shadow-sm whitespace-nowrap
@@ -398,6 +397,14 @@ tbody {
   
   .w-full-mobile {
     @apply w-full sm:w-auto;
+  }
+
+  .card-interactive {
+    @apply base-container p-6
+           cursor-pointer
+           hover:shadow-card-hover
+           hover:scale-[1.01]
+           transition-all duration-200;
   }
 }
 
