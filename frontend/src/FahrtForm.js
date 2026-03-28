@@ -4,6 +4,7 @@ import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 import Modal from './Modal';
+import AddressAutocomplete from './components/AddressAutocomplete';
 
 function FahrtForm() {
   const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger, setAbrechnungstraeger, addOrt, fetchOrte, refreshAllData } = useContext(AppContext);
@@ -220,13 +221,11 @@ function FahrtForm() {
     </div>
     {useEinmaligenVonOrt ? (
       <div className="relative">
-      <input
-      type="text"
-      name="einmaligerVonOrt"
+      <AddressAutocomplete
       value={formData.einmaligerVonOrt}
-      onChange={handleChange}
+      onChange={(val) => setFormData(prev => ({ ...prev, einmaligerVonOrt: val }))}
       placeholder="Adresse eingeben"
-      className="form-input pr-12"
+      className="pr-12"
       required
       />
       <button
@@ -276,13 +275,11 @@ function FahrtForm() {
     </div>
     {useEinmaligenNachOrt ? (
       <div className="relative">
-      <input
-      type="text"
-      name="einmaligerNachOrt"
+      <AddressAutocomplete
       value={formData.einmaligerNachOrt}
-      onChange={handleChange}
+      onChange={(val) => setFormData(prev => ({ ...prev, einmaligerNachOrt: val }))}
       placeholder="Adresse eingeben"
-      className="form-input pr-12"
+      className="pr-12"
       required
       />
       <button
