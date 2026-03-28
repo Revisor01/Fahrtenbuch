@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { HelpCircle, Users, LogOut, Info, Bell, LayoutDashboard, Car, CalendarDays, Settings as SettingsIcon } from 'lucide-react';
 import Settings from './Settings';
-import FahrtForm from '../FahrtForm';
 import FahrtenListe from './FahrtenListe';
 import InfoModal from './InfoModal';
 import UserManagement from '../UserManagement';
@@ -121,12 +120,7 @@ function AppContent() {
 
     {/* Hauptinhalt */}
     {activeTab === 'dashboard' && <Dashboard onNavigate={setActiveTab} />}
-    {activeTab === 'fahrten' && (
-      <div className="space-y-6">
-        <FahrtForm />
-        <FahrtenListe />
-      </div>
-    )}
+    {activeTab === 'fahrten' && <FahrtenListe />}
     {activeTab === 'monatsuebersicht' && <MonthlyOverview />}
     {activeTab === 'einstellungen' && <Settings />}
     {activeTab === 'verwaltung' && <UserManagement />}
