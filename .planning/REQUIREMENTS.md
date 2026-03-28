@@ -13,8 +13,8 @@
 
 ### Favoriten
 
-- [ ] **FAV-01**: Nutzer kann Fahrten als Favorit speichern (Von, Nach, Anlass, Abrechnungstraeger)
-- [ ] **FAV-02**: Favoriten im Dashboard als Schnelleingabe — ein Klick traegt Fahrt mit heutigem Datum ein
+- [x] **FAV-01**: Nutzer kann Fahrten als Favorit speichern (Von, Nach, Anlass, Abrechnungstraeger)
+- [x] **FAV-02**: Favoriten im Dashboard als Schnelleingabe — ein Klick traegt Fahrt mit heutigem Datum ein
 - [ ] **FAV-03**: Letzte 3 Fahrten im Dashboard mit "Nochmal fuer heute"-Button
 
 ### Statistiken
@@ -38,8 +38,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FAV-01 | Phase 10 | Pending |
-| FAV-02 | Phase 10 | Pending |
+| FAV-01 | Phase 10 | Complete |
+| FAV-02 | Phase 10 | Complete |
 | FAV-03 | Phase 10 | Pending |
 | DASH-01 | Phase 11 | Pending |
 | DASH-02 | Phase 11 | Pending |
