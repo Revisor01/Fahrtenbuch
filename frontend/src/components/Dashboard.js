@@ -164,54 +164,44 @@ function Dashboard({ onNavigate }) {
 
   return (
     <div className="space-y-6">
-      {/* KPI Cards — 2x2 on mobile, 4-col on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards — 3 Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Offene Erstattungen */}
-        <div className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-emerald-50 dark:bg-emerald-900/20">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-muted">Offene Erstattungen</p>
-              <p className="text-lg sm:text-2xl font-semibold text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
-            </div>
-            <Banknote size={24} className="text-emerald-500 shrink-0" />
+        <div className="card-container flex items-center justify-between">
+          <div className="min-w-0">
+            <p className="text-xs text-muted mb-1">Offene Erstattungen</p>
+            <p className="text-xl font-semibold text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
           </div>
+          <Banknote size={22} className="text-emerald-500 shrink-0" />
         </div>
 
         {/* Kilometer diesen Monat */}
-        <div className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-blue-50 dark:bg-blue-900/20">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-muted">km diesen Monat</p>
-              <p className="text-lg sm:text-2xl font-semibold text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
-            </div>
-            <Route size={24} className="text-blue-500 shrink-0" />
+        <div className="card-container flex items-center justify-between">
+          <div className="min-w-0">
+            <p className="text-xs text-muted mb-1">km diesen Monat</p>
+            <p className="text-xl font-semibold text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
           </div>
+          <Route size={22} className="text-blue-500 shrink-0" />
         </div>
 
         {/* Fahrten diesen Monat */}
-        <div className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-purple-50 dark:bg-purple-900/20">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-muted">Fahrten d. Monat</p>
-              <p className="text-lg sm:text-2xl font-semibold text-value">{fahrtenThisMonth}</p>
-            </div>
-            <Car size={24} className="text-purple-500 shrink-0" />
+        <div className="card-container flex items-center justify-between">
+          <div className="min-w-0">
+            <p className="text-xs text-muted mb-1">Fahrten diesen Monat</p>
+            <p className="text-xl font-semibold text-value">{fahrtenThisMonth}</p>
           </div>
+          <Car size={22} className="text-purple-500 shrink-0" />
         </div>
+      </div>
 
-        {/* Export-Schnellzugriff als 4. KPI-Card */}
+      {/* Export-Schnellzugriff als subtiler Link */}
+      <div className="flex justify-end">
         <button
           onClick={() => onNavigate && onNavigate('fahrten')}
-          className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-amber-50 dark:bg-amber-900/20 hover:shadow-card-hover hover:scale-[1.01] transition-all duration-200 cursor-pointer text-left"
+          className="flex items-center gap-2 text-sm text-muted hover:text-value transition-colors"
         >
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-muted">Fahrten & Export</p>
-              <p className="text-lg sm:text-2xl font-semibold text-value">{fahrtenGesamt}</p>
-              <p className="text-xs text-muted mt-0.5">gesamt</p>
-            </div>
-            <FileDown size={24} className="text-amber-500 shrink-0" />
-          </div>
+          <FileDown size={16} />
+          <span>Alle {fahrtenGesamt} Fahrten anzeigen & exportieren</span>
         </button>
       </div>
 
@@ -243,22 +233,20 @@ function Dashboard({ onNavigate }) {
         )}
       </div>
 
-      {/* Aufklappbares Fahrt-Formular */}
-      <div className="card-container-flush">
+      {/* Fahrt-Formular */}
+      <div className="card-container">
         <button
           onClick={() => setIsFormOpen(!isFormOpen)}
-          className={`flex items-center justify-between w-full min-h-[44px] p-4 ${isFormOpen ? 'bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent' : 'bg-blue-50/40 dark:bg-blue-900/10 border-l-4 border-l-blue-400 dark:border-l-blue-500 hover:bg-blue-50/70 dark:hover:bg-blue-900/20 transition-colors'}`}
+          className="flex items-center justify-between w-full min-h-[44px]"
         >
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-md ${isFormOpen ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-blue-100/80 dark:bg-blue-900/30'}`}>
-              <Plus size={18} className={isFormOpen ? 'text-blue-600 dark:text-blue-400' : 'text-blue-500 dark:text-blue-400'} />
-            </div>
+            <Plus size={18} className="text-primary-500" />
             <h2 className="text-base font-medium text-value">Neue Fahrt erfassen</h2>
           </div>
-          {isFormOpen ? <ChevronUp size={20} className="text-muted" /> : <ChevronDown size={20} className="text-muted" />}
+          {isFormOpen ? <ChevronUp size={18} className="text-muted" /> : <ChevronDown size={18} className="text-muted" />}
         </button>
         {isFormOpen && (
-          <div className="p-4 border-t border-border">
+          <div className="mt-4 pt-4 border-t border-primary-100 dark:border-primary-800">
             <FahrtForm />
           </div>
         )}
@@ -297,10 +285,10 @@ function Dashboard({ onNavigate }) {
                   <button
                     onClick={() => handleNochmal({ ...fahrt, von_ort_id: fahrt.nach_ort_id, nach_ort_id: fahrt.von_ort_id, von_ort_name: fahrt.nach_ort_name, nach_ort_name: fahrt.von_ort_name, einmaliger_von_ort: fahrt.einmaliger_nach_ort, einmaliger_nach_ort: fahrt.einmaliger_von_ort })}
                     className="flex items-center gap-1 min-h-[44px] px-3 py-2 text-xs rounded-md btn-secondary whitespace-nowrap"
-                    title="Rückfahrt für heute"
+                    title="Rückfahrt für heute eintragen"
                   >
                     <RotateCcw size={14} className="scale-x-[-1]" />
-                    <span className="hidden sm:inline">Zurück</span>
+                    <span className="hidden sm:inline">Rückfahrt</span>
                   </button>
                 </div>
               </div>
