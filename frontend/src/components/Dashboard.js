@@ -269,10 +269,10 @@ function Dashboard({ onNavigate }) {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex justify-end gap-2">
                   <button
                     onClick={() => handleNochmal(fahrt)}
-                    className="btn-primary flex-1 flex items-center justify-center gap-1"
+                    className="btn-primary flex items-center gap-1"
                     title="Nochmal für heute"
                   >
                     <RotateCcw size={14} />
@@ -280,7 +280,7 @@ function Dashboard({ onNavigate }) {
                   </button>
                   <button
                     onClick={() => handleNochmal({ ...fahrt, von_ort_id: fahrt.nach_ort_id, nach_ort_id: fahrt.von_ort_id, von_ort_name: fahrt.nach_ort_name, nach_ort_name: fahrt.von_ort_name, einmaliger_von_ort: fahrt.einmaliger_nach_ort, einmaliger_nach_ort: fahrt.einmaliger_von_ort })}
-                    className="btn-secondary flex-1 flex items-center justify-center gap-1"
+                    className="btn-secondary flex items-center gap-1"
                     title="Rückfahrt für heute eintragen"
                   >
                     <RotateCcw size={14} className="scale-x-[-1]" />
