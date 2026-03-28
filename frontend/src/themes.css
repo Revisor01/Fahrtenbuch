@@ -301,6 +301,16 @@
 }
 
 /* Dark Mode Overrides (gilt fuer alle Themes) */
+/* Nutzt :root.dark[data-theme] um die Theme-Spezifitaet zu matchen */
+:root.dark[data-theme="classic"],
+:root.dark[data-theme="sunset"],
+:root.dark[data-theme="mint"],
+:root.dark[data-theme="slate"],
+:root.dark[data-theme="monochrome"],
+:root.dark[data-theme="teal"],
+:root.dark[data-theme="vibrant"],
+:root.dark[data-theme="deep-purple"],
+:root.dark[data-theme="forest"],
 html.dark {
   --bg-surface: #111827;
   --bg-card: #1f2937;
