@@ -270,4 +270,4 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete   | 2026-03-28 |
+| 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
