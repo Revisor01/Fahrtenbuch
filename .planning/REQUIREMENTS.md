@@ -40,8 +40,8 @@
 
 ### Login & Landing
 
-- [ ] **LOG-01**: Login-Seite hat ein modernes, einladendes Design
-- [ ] **LOG-02**: Landing-Page ist visuell attraktiv und responsive
+- [x] **LOG-01**: Login-Seite hat ein modernes, einladendes Design
+- [x] **LOG-02**: Landing-Page ist visuell attraktiv und responsive
 
 ## Previous Milestone Requirements (v1.4 — Complete)
 
@@ -74,8 +74,8 @@
 | MO-02 | Phase 17 | Complete |
 | SET-01 | Phase 18 | Complete |
 | SET-02 | Phase 18 | Complete |
-| LOG-01 | Phase 18 | Pending |
-| LOG-02 | Phase 18 | Pending |
+| LOG-01 | Phase 18 | Complete |
+| LOG-02 | Phase 18 | Complete |
 | ANI-01 | Phase 18 | Pending |
 
 **Coverage:**
