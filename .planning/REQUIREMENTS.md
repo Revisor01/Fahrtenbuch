@@ -1,54 +1,87 @@
-# Requirements: Fahrtenbuch v1.4 — UX Polish & Navigation
+# Requirements: Fahrtenbuch v2.0 — Design Makeover
 
 **Defined:** 2026-03-28
-**Core Value:** Einstellungen inline, Dashboard poliert, Umlaute korrekt
+**Core Value:** Komplettes visuelles Redesign — modern, mobil-optimiert, attraktiv
 
-## v1.4 Requirements
+## v2.0 Requirements
 
-### Navigation
+### Designsystem
 
-- [x] **NAV-01**: Einstellungen (Profil, Orte, Distanzen, Traeger, Erstattungen, Passwort, API, Favoriten) als eigener Tab-Inhalt statt Modal
-- [x] **NAV-02**: Benutzerverwaltung (Admin) als Tab in der Navigation statt separater Button
+- [ ] **DS-01**: Einheitliche Spacing-, Typografie- und Farbvariablen in der gesamten App
+- [ ] **DS-02**: Alle Sektionen in jeder View sind in Cards mit einheitlichem Schatten und Radius eingebettet
+- [ ] **DS-03**: Dark Mode zeigt korrekte Kontraste und abgestimmte Farben in allen Views
 
-### Dashboard-Polish
+### Dashboard
 
-- [x] **DASH-04**: Erstattungen pro Abrechnungstraeger im Statistik-Bereich anzeigen
-- [x] **DASH-05**: Mouseover auf km-Balken zeigt Anzahl der Fahrten im Monat
-- [x] **DASH-06**: Jede Rubrik im Dashboard hat einen Card-Hintergrund (klare Abgrenzung)
-- [x] **DASH-07**: "Neue Fahrt erfassen" optisch ueberarbeiten (neuer Look)
+- [ ] **DASH-08**: Dashboard ist die einzige Stelle zum Erfassen neuer Fahrten (Formular nur hier)
+- [ ] **DASH-09**: Formular "Neue Fahrt erfassen" hat ein visuell ansprechendes, modernes Layout
+- [ ] **DASH-10**: Alle Dashboard-Elemente sind auf Mobile touch-freundlich und optimal dargestellt
+- [ ] **DASH-11**: Export-Zugang auch vom Dashboard aus erreichbar (Schnellzugriff)
 
-### Favoriten
+### Fahrtenliste & Export
 
-- [x] **FAV-04**: Bei Favorit-Ausfuehrung fragen "Mit Rueckfahrt?" — wenn ja, beide Fahrten anlegen
+- [ ] **FE-01**: Fahrtenliste zeigt nur die Liste (kein Eingabeformular) in modernem Card-Layout
+- [ ] **FE-02**: Filter- und Export-Bereich sind visuell modernisiert und klar abgegrenzt
+- [ ] **FE-03**: Mobile Darstellung der Fahrtenliste ist kompakt und touch-freundlich
 
-### Textqualitaet
+### Einstellungen
 
-- [x] **TEXT-01**: Alle Texte in der App korrekt mit deutschen Umlauten (aeoeuess) — keine Ersatzschreibweisen
+- [ ] **SET-01**: Einstellungen-Sub-Tabs haben eine aufgewertete Navigation mit Card-Layout
+- [ ] **SET-02**: Alle Formulare in den Einstellungen haben ein modernes, einheitliches Design
+
+### Monatsuebersicht
+
+- [ ] **MO-01**: Monatsuebersicht in modernem Card-Layout dargestellt
+- [ ] **MO-02**: Tabellen und Zusammenfassungen sind uebersichtlich und visuell ansprechend
+
+### Transitions & Animationen
+
+- [ ] **ANI-01**: Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions
+
+### Login & Landing
+
+- [ ] **LOG-01**: Login-Seite hat ein modernes, einladendes Design
+- [ ] **LOG-02**: Landing-Page ist visuell attraktiv und responsive
+
+## Previous Milestone Requirements (v1.4 — Complete)
+
+- [x] NAV-01, NAV-02, DASH-04–07, FAV-04, TEXT-01 (all shipped)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
 | Multi-User-Admin-Uebersicht | Eigener Milestone |
-| PWA | Eigener Milestone |
+| PWA / Offline-Support | Eigener Milestone |
+| Backend-Aenderungen | v2.0 ist rein visuell — kein Backend-Umbau |
+| Neue Features | Nur Redesign bestehender Funktionen |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DASH-04 | Phase 13 | Complete |
-| DASH-05 | Phase 13 | Complete |
-| DASH-06 | Phase 13 | Complete |
-| DASH-07 | Phase 13 | Complete |
-| FAV-04 | Phase 13 | Complete |
-| TEXT-01 | Phase 13 | Complete |
-| NAV-01 | Phase 14 | Complete |
-| NAV-02 | Phase 14 | Complete |
+| DS-01 | — | Pending |
+| DS-02 | — | Pending |
+| DS-03 | — | Pending |
+| DASH-08 | — | Pending |
+| DASH-09 | — | Pending |
+| DASH-10 | — | Pending |
+| DASH-11 | — | Pending |
+| FE-01 | — | Pending |
+| FE-02 | — | Pending |
+| FE-03 | — | Pending |
+| SET-01 | — | Pending |
+| SET-02 | — | Pending |
+| MO-01 | — | Pending |
+| MO-02 | — | Pending |
+| ANI-01 | — | Pending |
+| LOG-01 | — | Pending |
+| LOG-02 | — | Pending |
 
 **Coverage:**
-- v1.4 requirements: 8 total
-- Mapped to phases: 8
-- Unmapped: 0
+- v2.0 requirements: 17 total
+- Mapped to phases: 0
+- Unmapped: 17
 
 ---
 *Requirements defined: 2026-03-28*
