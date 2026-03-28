@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { HelpCircle, Settings, Users, LogOut, Info, Bell } from 'lucide-react';
+import { HelpCircle, Users, LogOut, Info, Bell, LayoutDashboard, Car, CalendarDays, Settings } from 'lucide-react';
 import ProfileModal from '../ProfileModal';
 import FahrtForm from '../FahrtForm';
 import FahrtenListe from './FahrtenListe';
@@ -10,6 +10,7 @@ import UserManagement from '../UserManagement';
 import ThemeToggle from '../ThemeToggle';
 import NewFeaturesModal from './NewFeaturesModal';
 import MonthlyOverview from './MonthlyOverview';
+import Dashboard from './Dashboard';
 import LoginPage from './LoginPage';
 import { AppContext } from '../contexts/AppContext';
 
@@ -19,6 +20,8 @@ function AppContent() {
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
+
   // Token Check Effect
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -40,9 +43,15 @@ function AppContent() {
     return <LoginPage />;
   }
 
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'fahrten', label: 'Fahrten & Export', icon: Car },
+    { id: 'monatsuebersicht', label: 'Monats\u00FCbersicht', icon: CalendarDays },
+  ];
+
   return (
     <div className="container mx-auto p-4">
-    <div className="mb-8">
+    <div className="mb-4">
     {/* Header Section */}
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
     <h1 className="text-lg font-medium text-value">
@@ -50,27 +59,20 @@ function AppContent() {
     </h1>
 
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-    {/* Admin-Button und Einstellungen in einer eigenen Zeile auf Mobil */}
-    <div className={`grid ${user?.role === 'admin' ? 'grid-cols-2' : 'grid-cols-1'} sm:flex gap-2 w-full`}>
-        {user?.role === 'admin' && (
-          <button
-            onClick={() => setShowUserManagementModal(true)}
-            className="btn-primary flex items-center justify-center gap-2"
-          >
-            <Users size={16} />
-            <span>Benutzerverwaltung</span>
-          </button>
-        )}
+    {/* Admin-Button in einer eigenen Zeile auf Mobil */}
+    {user?.role === 'admin' && (
+      <div className="grid grid-cols-1 sm:flex gap-2 w-full">
         <button
-          onClick={() => setIsProfileModalOpen(true)}
+          onClick={() => setShowUserManagementModal(true)}
           className="btn-primary flex items-center justify-center gap-2"
         >
-          <Settings size={16} />
-          <span>Einstellungen</span>
+          <Users size={16} />
+          <span>Benutzerverwaltung</span>
         </button>
       </div>
+    )}
 
-      {/* Theme, Info, Hilfe und Logout in einer zweiten Zeile auf Mobil */}
+      {/* Theme, Info, Hilfe und Logout */}
       <div className="flex justify-between w-full sm:gap-4">
 <div className="flex gap-2">
   <ThemeToggle />
@@ -109,12 +111,44 @@ function AppContent() {
   </div>
 </div>
 
-    {/* Hauptinhalt */}
-    <div className="space-y-6">
-      <FahrtForm />
-      <FahrtenListe />
-      <MonthlyOverview />
+    {/* Tab Navigation */}
+    <div className="flex gap-1 border-b border-border mb-6 overflow-x-auto">
+      {tabs.map((tab) => {
+        const Icon = tab.icon;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 text-sm whitespace-nowrap transition-colors ${
+              activeTab === tab.id
+                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400 font-medium'
+                : 'text-muted hover:text-value'
+            }`}
+          >
+            <Icon size={16} />
+            <span className="hidden sm:inline">{tab.label}</span>
+          </button>
+        );
+      })}
+      {/* Einstellungen-Tab: opens modal, does not switch tab */}
+      <button
+        onClick={() => setIsProfileModalOpen(true)}
+        className="flex items-center gap-2 px-4 py-2 text-sm whitespace-nowrap text-muted hover:text-value transition-colors"
+      >
+        <Settings size={16} />
+        <span className="hidden sm:inline">Einstellungen</span>
+      </button>
     </div>
+
+    {/* Hauptinhalt */}
+    {activeTab === 'dashboard' && <Dashboard />}
+    {activeTab === 'fahrten' && (
+      <div className="space-y-6">
+        <FahrtForm />
+        <FahrtenListe />
+      </div>
+    )}
+    {activeTab === 'monatsuebersicht' && <MonthlyOverview />}
 
     {/* Modals */}
 
