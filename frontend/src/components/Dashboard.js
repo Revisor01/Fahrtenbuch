@@ -36,15 +36,15 @@ function Dashboard({ onNavigate }) {
   // KPI: total trips count
   const fahrtenGesamt = fahrten.length;
 
-  // Last 3 trips sorted by date descending, then by id descending
-  const letzteDrei = useMemo(() => {
+  // Last 5 trips sorted by date descending, then by id descending
+  const letzteTrips = useMemo(() => {
     const sorted = [...fahrten].sort((a, b) => {
       const dateA = new Date(a.datum);
       const dateB = new Date(b.datum);
       if (dateB - dateA !== 0) return dateB - dateA;
       return (b.id || 0) - (a.id || 0);
     });
-    return sorted.slice(0, 3);
+    return sorted.slice(0, 5);
   }, [fahrten]);
 
   // Month abbreviations for chart labels
@@ -234,6 +234,12 @@ function Dashboard({ onNavigate }) {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => onNavigate && onNavigate('einstellungen')}
+            className="w-full mt-3 text-sm py-2 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors text-center"
+          >
+            Weitere Favoriten hinzufügen &rarr;
+          </button>
         )}
       </div>
 
@@ -243,14 +249,14 @@ function Dashboard({ onNavigate }) {
         <FahrtForm />
       </div>
 
-      {/* Letzte 3 Fahrten */}
+      {/* Letzte 5 Fahrten */}
       <div className="card-container">
         <h2 className="text-base font-medium text-value mb-3">Letzte Fahrten</h2>
-        {letzteDrei.length === 0 ? (
+        {letzteTrips.length === 0 ? (
           <p className="text-sm text-muted">Noch keine Fahrten erfasst.</p>
         ) : (
-          <div className="space-y-3">
-            {letzteDrei.map((fahrt) => (
+          <div className="space-y-2">
+            {letzteTrips.map((fahrt) => (
               <div
                 key={fahrt.id}
                 className="flex items-center justify-between rounded-card border border-card p-3 gap-3"
@@ -262,9 +268,11 @@ function Dashboard({ onNavigate }) {
                       {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
                     </span>
                   </div>
+                  {fahrt.anlass && (
+                    <p className="text-xs text-value mt-0.5">{fahrt.anlass}</p>
+                  )}
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
                     <span>{fahrt.kilometer} km</span>
-                    {fahrt.anlass && <span>&middot; {fahrt.anlass}</span>}
                     {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
                     {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
                       <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
@@ -293,7 +301,7 @@ function Dashboard({ onNavigate }) {
             ))}
             <button
               onClick={() => onNavigate && onNavigate('fahrten')}
-              className="w-full mt-2 text-sm text-primary-500 hover:text-primary-700 dark:hover:text-primary-300 transition-colors text-center py-2"
+              className="w-full mt-3 text-sm py-2 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors text-center"
             >
               Alle Fahrten anzeigen &rarr;
             </button>
