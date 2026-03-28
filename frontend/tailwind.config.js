@@ -5,6 +5,29 @@ module.exports = {
   ],
   theme: {
     extend: {
+      spacing: {
+        'card': '1.5rem',
+        'card-sm': '1rem',
+        'card-lg': '2rem',
+        'section': '1.5rem',
+      },
+      borderRadius: {
+        'card': '0.75rem',
+        'card-lg': '1rem',
+      },
+      boxShadow: {
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+        'card-elevated': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+      },
+      backgroundColor: {
+        surface: 'var(--bg-surface)',
+        card: 'var(--bg-card)',
+        'card-highlight': 'var(--bg-card-highlight)',
+      },
+      borderColor: {
+        card: 'var(--border-card)',
+      },
       colors: {
         primary: {
           25: 'var(--primary-25)',
