@@ -5,7 +5,7 @@ import { AppContext } from '../contexts/AppContext';
 import { renderOrteOptions } from '../utils';
 import MitfahrerModal from '../MitfahrerModal';
 import Modal from '../Modal';
-import { AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, Copy } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -86,6 +86,37 @@ function FahrtenListe() {
       },
       true // showCancel
     );
+  };
+
+  // Quick-Copy: identify the 3 most recent trips by date (descending)
+  const letzteDreiIds = useMemo(() => {
+    const sorted = [...fahrten].sort((a, b) => {
+      const dateA = new Date(a.datum);
+      const dateB = new Date(b.datum);
+      if (dateB - dateA !== 0) return dateB - dateA;
+      return (b.id || 0) - (a.id || 0);
+    });
+    return new Set(sorted.slice(0, 3).map(f => f.id));
+  }, [fahrten]);
+
+  const handleNochmal = async (fahrt) => {
+    try {
+      await axios.post(`${API_BASE_URL}/fahrten`, {
+        vonOrtId: fahrt.von_ort_id || null,
+        nachOrtId: fahrt.nach_ort_id || null,
+        datum: new Date().toISOString().slice(0, 10),
+        anlass: fahrt.anlass,
+        abrechnung: fahrt.abrechnung,
+        einmaligerVonOrt: fahrt.einmaliger_von_ort || null,
+        einmaligerNachOrt: fahrt.einmaliger_nach_ort || null,
+        kilometer: fahrt.kilometer
+      });
+      showNotification('Fahrt erstellt', `Fahrt ${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} wurde fuer heute eingetragen.`);
+      refreshAllData();
+    } catch (error) {
+      console.error('Fehler beim Duplizieren der Fahrt:', error);
+      showNotification('Fehler', 'Fahrt konnte nicht erstellt werden.');
+    }
   };
 
   const handleEditChange = async (field, value) => {
@@ -1089,6 +1120,16 @@ function FahrtenListe() {
         </>
       ) : (
         <>
+        {letzteDreiIds.has(fahrt.id) && (
+          <button
+          onClick={() => handleNochmal(fahrt)}
+          className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 flex items-center gap-1"
+          title="Nochmal fuer heute"
+          >
+          <Copy size={12} />
+          <span>Nochmal</span>
+          </button>
+        )}
         <button
         onClick={() => handleEdit(fahrt)}
         className="table-action-button-primary"
@@ -1352,6 +1393,15 @@ function FahrtenListe() {
           </div>
           </div>
           <div className="mobile-action-buttons">
+          {letzteDreiIds.has(fahrt.id) && (
+            <button
+            onClick={() => handleNochmal(fahrt)}
+            className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50"
+            title="Nochmal fuer heute"
+            >
+            <Copy size={14} />
+            </button>
+          )}
           <button
           onClick={() => handleEdit(fahrt)}
           className="mobile-icon-button-primary"
