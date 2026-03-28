@@ -22,19 +22,19 @@ export default function ThemeToggle() {
     <div className="relative flex gap-2">
       <button
         onClick={toggleDarkMode}
-        className="btn-primary flex items-center justify-center gap-1 whitespace-nowrap"
+        className="p-2 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
         title={isDark ? 'Light Mode' : 'Dark Mode'}
       >
-        {isDark ? <Sun size={16} /> : <Moon size={16} />}
+        {isDark ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="btn-primary flex items-center justify-center gap-1 whitespace-nowrap"
+          className="p-2 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
           title="Farbthema ändern"
         >
-          <Palette size={16} />
+          <Palette size={18} />
         </button>
 
         {isOpen && (

@@ -1,8 +1,8 @@
-import React, { useContext, useState, useMemo, useEffect } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
-import { Banknote, Route, Car, Star, ChevronDown, ChevronUp, RotateCcw, ChevronLeft, ChevronRight, BarChart3, Plus, FileDown } from 'lucide-react';
+import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -18,23 +18,7 @@ function Dashboard({ onNavigate }) {
     abrechnungstraeger
   } = useContext(AppContext);
 
-  const [isFormOpen, setIsFormOpen] = useState(true);
-  const [yearlyStats, setYearlyStats] = useState([]);
   const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
-
-  // KPI: offene Erstattungen
-  // Fetch yearly km stats from monthly-summary API
-  useEffect(() => {
-    const fetchYearlyStats = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/fahrten/monthly-summary`);
-        setYearlyStats(response.data || []);
-      } catch (error) {
-        console.error('Fehler beim Laden der Jahresstatistik:', error);
-      }
-    };
-    fetchYearlyStats();
-  }, [fahrten]); // Refresh when fahrten change (new trip added)
 
   const offeneErstattungen = useMemo(() => {
     if (!summary?.erstattungen) return 0;
@@ -66,38 +50,27 @@ function Dashboard({ onNavigate }) {
   // Month abbreviations for chart labels
   const monatLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
-  // km per month from yearlyStats (monthly-summary API — covers all months)
+  // km per month from monthlyData (has totalKm per month from all loaded months)
   const kmProMonat = useMemo(() => {
     const result = Array(12).fill(0);
-    if (yearlyStats && yearlyStats.length > 0) {
-      yearlyStats.forEach(entry => {
-        if (!entry.yearMonth) return;
-        const [y, m] = entry.yearMonth.split('-');
-        if (parseInt(y) === statistikJahr && entry.erstattungen) {
-          // Sum km from all Träger in this month (excluding mitfahrer to avoid double-counting)
-          Object.entries(entry.erstattungen).forEach(([traeger, data]) => {
-            if (traeger !== 'mitfahrer') {
-              result[parseInt(m) - 1] += parseFloat(data.kilometer) || 0;
-            }
-          });
-        }
-      });
-    }
-    return result;
-  }, [yearlyStats, statistikJahr]);
-
-  // Fahrten count per month — not available from monthly-summary, use fahrten for current month
-  const fahrtenProMonat = useMemo(() => {
-    const result = Array(12).fill(0);
-    fahrten.forEach(f => {
-      if (!f.datum) return;
-      const [y, m] = f.datum.split('-');
-      if (parseInt(y) === statistikJahr) {
-        result[parseInt(m) - 1]++;
+    monthlyData.forEach(md => {
+      if (md.year === statistikJahr) {
+        result[md.monatNr - 1] += md.totalKm || 0;
       }
     });
     return result;
-  }, [fahrten, statistikJahr]);
+  }, [monthlyData, statistikJahr]);
+
+  // Fahrten count per month from monthlyData
+  const fahrtenProMonat = useMemo(() => {
+    const result = Array(12).fill(0);
+    monthlyData.forEach(md => {
+      if (md.year === statistikJahr) {
+        result[md.monatNr - 1] += md.fahrtenCount || 0;
+      }
+    });
+    return result;
+  }, [monthlyData, statistikJahr]);
 
   const maxKm = useMemo(() => Math.max(...kmProMonat, 1), [kmProMonat]);
   const hasKmData = useMemo(() => kmProMonat.some(km => km > 0), [kmProMonat]);
@@ -249,24 +222,23 @@ function Dashboard({ onNavigate }) {
         )}
       </div>
 
-      {/* Fahrt-Formular */}
+      {/* Fahrt-Formular — immer sichtbar */}
       <div className="card-container">
-        <button
-          onClick={() => setIsFormOpen(!isFormOpen)}
-          className="flex items-center justify-between w-full min-h-[44px]"
-        >
-          <div className="flex items-center gap-2">
-            <Plus size={18} className="text-primary-500" />
-            <h2 className="text-base font-medium text-value">Neue Fahrt erfassen</h2>
-          </div>
-          {isFormOpen ? <ChevronUp size={18} className="text-muted" /> : <ChevronDown size={18} className="text-muted" />}
-        </button>
-        {isFormOpen && (
-          <div className="mt-4 pt-4 border-t border-primary-100 dark:border-primary-800">
-            <FahrtForm />
-          </div>
-        )}
+        <h2 className="text-base font-medium text-value mb-4">Neue Fahrt erfassen</h2>
+        <FahrtForm />
       </div>
+
+      {/* Export-Schnellzugriff */}
+      <button
+        onClick={() => onNavigate && onNavigate('fahrten')}
+        className="w-full card-container flex items-center justify-between hover:shadow-card-hover transition-all cursor-pointer"
+      >
+        <div className="flex items-center gap-2">
+          <FileDown size={18} className="text-primary-500" />
+          <span className="text-sm font-medium text-value">Alle {fahrtenGesamt} Fahrten anzeigen & exportieren</span>
+        </div>
+        <ChevronRight size={18} className="text-muted" />
+      </button>
 
       {/* Letzte 3 Fahrten */}
       <div className="card-container">
@@ -274,37 +246,45 @@ function Dashboard({ onNavigate }) {
         {letzteDrei.length === 0 ? (
           <p className="text-sm text-muted">Noch keine Fahrten erfasst.</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {letzteDrei.map((fahrt) => (
               <div
                 key={fahrt.id}
-                className="flex items-center justify-between rounded-card border border-card p-3"
+                className="rounded-card border border-card p-3 space-y-2"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 sm:gap-3 text-sm flex-wrap sm:flex-nowrap">
-                    <span className="text-muted whitespace-nowrap text-xs sm:text-sm">{formatDate(fahrt.datum)}</span>
-                    <span className="text-value truncate text-xs sm:text-sm">
-                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
-                    </span>
-                    <span className="text-muted whitespace-nowrap text-xs sm:text-sm">{fahrt.kilometer} km</span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted text-xs">{formatDate(fahrt.datum)}</span>
+                      <span className="text-value font-medium truncate">
+                        {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted">
+                      <span>{fahrt.kilometer} km</span>
+                      {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
+                      {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
+                        <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="ml-2 sm:ml-3 flex items-center gap-1">
+                <div className="flex gap-2">
                   <button
                     onClick={() => handleNochmal(fahrt)}
-                    className="flex items-center gap-1 min-h-[44px] px-3 py-2 text-xs rounded-md btn-primary whitespace-nowrap"
+                    className="btn-primary flex-1 flex items-center justify-center gap-1"
                     title="Nochmal für heute"
                   >
                     <RotateCcw size={14} />
-                    <span className="hidden sm:inline">Nochmal</span>
+                    Nochmal
                   </button>
                   <button
                     onClick={() => handleNochmal({ ...fahrt, von_ort_id: fahrt.nach_ort_id, nach_ort_id: fahrt.von_ort_id, von_ort_name: fahrt.nach_ort_name, nach_ort_name: fahrt.von_ort_name, einmaliger_von_ort: fahrt.einmaliger_nach_ort, einmaliger_nach_ort: fahrt.einmaliger_von_ort })}
-                    className="flex items-center gap-1 min-h-[44px] px-3 py-2 text-xs rounded-md btn-secondary whitespace-nowrap"
+                    className="btn-secondary flex-1 flex items-center justify-center gap-1"
                     title="Rückfahrt für heute eintragen"
                   >
                     <RotateCcw size={14} className="scale-x-[-1]" />
-                    <span className="hidden sm:inline">Rückfahrt</span>
+                    Rückfahrt
                   </button>
                 </div>
               </div>

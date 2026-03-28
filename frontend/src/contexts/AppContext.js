@@ -383,13 +383,15 @@ function AppProvider({ children }) {
           monatNr: date.getMonth() + 1,
           erstattungen: response.data.summary.erstattungen || {},
           abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
-          totalErstattung: response.data.summary.gesamtErstattung || 0
+          totalErstattung: response.data.summary.gesamtErstattung || 0,
+          totalKm: (response.data.fahrten || []).reduce((sum, f) => sum + (parseFloat(f.kilometer) || 0), 0),
+          fahrtenCount: (response.data.fahrten || []).length
         };
       })
-      // Nur Monate mit Erstattungen behalten
+      // Nur Monate mit Fahrten oder Erstattungen behalten
       .filter(month => {
         const hasErstattungen = Object.values(month.erstattungen).some(betrag => betrag > 0);
-        return hasErstattungen;
+        return hasErstattungen || month.fahrtenCount > 0;
       })
       // Nach Datum sortieren (neueste zuerst)
       .sort((a, b) => {
