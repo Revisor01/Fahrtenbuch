@@ -207,7 +207,7 @@ function Settings() {
         {/* Content-Bereich */}
         <div className="flex-1">
         {activeTab === 'profile' && (
-            <div className="space-y-4">
+            <div key="profile" className="tab-content-fade"><div className="space-y-4">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Persönliche Daten</h3>
             <p className="text-sm text-muted mb-6">
@@ -306,11 +306,11 @@ function Settings() {
             </div>
             </form>
             </div>
-            </div>
+            </div></div>
         )}
 
         {activeTab === 'orte' && (
-            <div className="space-y-6">
+            <div key="orte" className="tab-content-fade"><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neuen Ort anlegen</h3>
             <p className="text-sm text-muted mb-6">Erfassen Sie Orte, die Sie regelmässig als Start- oder Zielort nutzen.</p>
@@ -320,11 +320,11 @@ function Settings() {
             <h3 className="text-lg font-medium text-value mb-4">Gespeicherte Orte</h3>
             <OrteListe />
             </div>
-            </div>
+            </div></div>
         )}
 
         {activeTab === 'distanzen' && (
-            <div className="space-y-6">
+            <div key="distanzen" className="tab-content-fade"><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neue Distanz anlegen</h3>
             <p className="text-sm text-muted mb-6">Hinterlegen Sie Entfernungen zwischen Orten fuer die automatische Kilometerberechnung.</p>
@@ -334,21 +334,21 @@ function Settings() {
             <h3 className="text-lg font-medium text-value mb-4">Gespeicherte Distanzen</h3>
             <DistanzenListe />
             </div>
-            </div>
+            </div></div>
         )}
 
         {activeTab === 'abrechnungen' && (
-            <div className="space-y-6">
+            <div key="abrechnungen" className="tab-content-fade"><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Abrechnungstraeger verwalten</h3>
             <p className="text-sm text-muted mb-6">Verwalten Sie die Organisationen und Traeger, an die Ihre Fahrten abgerechnet werden.</p>
             <AbrechnungstraegerForm />
             </div>
-            </div>
+            </div></div>
         )}
 
         {activeTab === 'favoriten' && (
-            <div className="space-y-6">
+            <div key="favoriten" className="tab-content-fade"><div className="space-y-6">
             {/* Formular zum Hinzufügen */}
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neuen Favoriten anlegen</h3>
@@ -487,21 +487,21 @@ function Settings() {
                 ))}
                 </div>
             )}
-            </div>
+            </div></div>
         )}
 
         {activeTab === 'erstattungssaetze' && (
-            <div className="space-y-6">
+            <div key="erstattungssaetze" className="tab-content-fade"><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Erstattungssaetze verwalten</h3>
             <p className="text-sm text-muted mb-6">Legen Sie fest, welche Kilometererstattung Sie von den einzelnen Traegern erhalten.</p>
             <ErstattungssaetzeForm />
             </div>
-            </div>
+            </div></div>
         )}
 
         {activeTab === 'security' && (
-            <div className="space-y-6">
+            <div key="security" className="tab-content-fade"><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
             <p className="text-sm text-muted mb-6">
@@ -572,11 +572,11 @@ function Settings() {
             </div>
             </form>
             </div>
-            </div>
+            </div></div>
         )}
 
         {activeTab === 'api' && (
-            <div className="space-y-6">
+            <div key="api" className="tab-content-fade"><div className="space-y-6">
             {/* Form Card */}
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
@@ -673,7 +673,7 @@ function Settings() {
                 ))
             )}
             </div>
-            </div>
+            </div></div>
 
         )}
         </div>
