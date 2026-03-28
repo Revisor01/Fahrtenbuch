@@ -158,8 +158,8 @@ function Dashboard({ onNavigate }) {
 
   return (
     <div className="space-y-6">
-      {/* KPI Cards — 3 farbige Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* KPI Cards — 4 farbige Cards inkl. Export */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Offene Erstattungen */}
         <div className="rounded-card p-4 shadow-card border border-card bg-emerald-50 dark:bg-emerald-900/20">
           <div className="flex items-center justify-between gap-2">
@@ -192,6 +192,21 @@ function Dashboard({ onNavigate }) {
             <Car size={22} className="text-purple-500 shrink-0" />
           </div>
         </div>
+
+        {/* Export-Schnellzugriff als prominente 4. Card */}
+        <button
+          onClick={() => onNavigate && onNavigate('fahrten')}
+          className="rounded-card p-4 shadow-card border-2 border-primary-300 dark:border-primary-600 bg-primary-50 dark:bg-primary-900/30 hover:shadow-card-hover hover:border-primary-400 dark:hover:border-primary-500 transition-all text-left"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-primary-600 dark:text-primary-400 mb-1">Fahrten & Export</p>
+              <p className="text-xl font-semibold text-value">{fahrtenGesamt}</p>
+              <p className="text-xs text-muted">alle anzeigen &rarr;</p>
+            </div>
+            <FileDown size={22} className="text-primary-500 shrink-0" />
+          </div>
+        </button>
       </div>
 
       {/* Favoriten-Schnelleingabe */}
@@ -227,18 +242,6 @@ function Dashboard({ onNavigate }) {
         <h2 className="text-base font-medium text-value mb-4">Neue Fahrt erfassen</h2>
         <FahrtForm />
       </div>
-
-      {/* Export-Schnellzugriff */}
-      <button
-        onClick={() => onNavigate && onNavigate('fahrten')}
-        className="w-full card-container flex items-center justify-between hover:shadow-card-hover transition-all cursor-pointer"
-      >
-        <div className="flex items-center gap-2">
-          <FileDown size={18} className="text-primary-500" />
-          <span className="text-sm font-medium text-value">Alle {fahrtenGesamt} Fahrten anzeigen & exportieren</span>
-        </div>
-        <ChevronRight size={18} className="text-muted" />
-      </button>
 
       {/* Letzte 3 Fahrten */}
       <div className="card-container">
