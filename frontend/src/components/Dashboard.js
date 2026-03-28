@@ -253,41 +253,39 @@ function Dashboard({ onNavigate }) {
             {letzteDrei.map((fahrt) => (
               <div
                 key={fahrt.id}
-                className="rounded-card border border-card p-3 space-y-2"
+                className="flex items-center justify-between rounded-card border border-card p-3 gap-3"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted text-xs">{formatDate(fahrt.datum)}</span>
-                      <span className="text-value font-medium truncate">
-                        {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted">
-                      <span>{fahrt.kilometer} km</span>
-                      {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
-                      {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
-                        <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
-                      )}
-                    </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted text-xs whitespace-nowrap">{formatDate(fahrt.datum)}</span>
+                    <span className="text-value font-medium truncate">
+                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
+                    <span>{fahrt.kilometer} km</span>
+                    {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
+                    {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
+                      <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
+                    )}
                   </div>
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex gap-1 shrink-0">
                   <button
                     onClick={() => handleNochmal(fahrt)}
-                    className="btn-primary flex items-center gap-1"
+                    className="btn-primary flex items-center gap-1 text-xs"
                     title="Nochmal für heute"
                   >
-                    <RotateCcw size={14} />
-                    Nochmal
+                    <RotateCcw size={12} />
+                    <span className="hidden sm:inline">Nochmal</span>
                   </button>
                   <button
                     onClick={() => handleNochmal({ ...fahrt, von_ort_id: fahrt.nach_ort_id, nach_ort_id: fahrt.von_ort_id, von_ort_name: fahrt.nach_ort_name, nach_ort_name: fahrt.von_ort_name, einmaliger_von_ort: fahrt.einmaliger_nach_ort, einmaliger_nach_ort: fahrt.einmaliger_von_ort })}
-                    className="btn-secondary flex items-center gap-1"
+                    className="btn-secondary flex items-center gap-1 text-xs"
                     title="Rückfahrt für heute eintragen"
                   >
-                    <RotateCcw size={14} className="scale-x-[-1]" />
-                    Rückfahrt
+                    <RotateCcw size={12} className="scale-x-[-1]" />
+                    <span className="hidden sm:inline">Rückfahrt</span>
                   </button>
                 </div>
               </div>
