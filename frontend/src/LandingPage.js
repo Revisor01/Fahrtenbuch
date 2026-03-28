@@ -2,7 +2,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './index.css';
-import { ChevronDown, ChevronUp, Play, Book, ArrowLeft, Smartphone, Download } from 'lucide-react';
+import { ChevronDown, ChevronUp, Play, Book, ArrowLeft, Smartphone, Download, Car } from 'lucide-react';
 import { useTheme } from './ThemeContext';
 import { AppContext } from './contexts/AppContext';
 
@@ -11,7 +11,7 @@ const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
   return (
     <div className="card-container-flush mb-2 border border-primary-100 dark:border-primary-700">
     <button
-    className="w-full text-left p-4 bg-white dark:bg-gray-800 hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-200 flex justify-between items-center"
+    className="w-full text-left p-4 bg-white dark:bg-gray-800 hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-200 flex justify-between items-center rounded-lg"
     onClick={toggleOpen}
     >
     <span className="text-value font-medium">{title}</span>
@@ -138,9 +138,9 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-900">
+        <div className="min-h-screen bg-gradient-to-b from-white via-primary-25 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-900 border-b border-primary-100 dark:border-primary-800 shadow-sm">
       <div className="container mx-auto p-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
       <h1 className="text-lg font-medium text-value">
@@ -158,7 +158,12 @@ export default function LandingPage() {
             <main className="container mx-auto p-4 py-8 space-y-12">
       {/* Intro Section */}
       <section className="text-center max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold text-value mb-4">
+      <div className="flex justify-center mb-6">
+      <div className="w-20 h-20 bg-primary-500 dark:bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+      <Car size={40} className="text-white" />
+      </div>
+      </div>
+      <h2 className="text-3xl font-bold text-primary-900 dark:text-primary-100 mb-4">
       Willkommen im Fahrtenbuch für kirchliche Mitarbeiter:innen
       </h2>
       <p className="text-label mb-6">
@@ -212,7 +217,10 @@ export default function LandingPage() {
       </section>
                 {/* Video Tutorials */}
                 <section id="videos">
-                    <h2 className="text-xl font-bold text-value mb-6">Video-Anleitungen</h2>
+                    <div className="card-container-highlight mb-6">
+                    <h2 className="text-xl font-bold text-value mb-2">Video-Anleitungen</h2>
+                    <p className="text-sm text-label">Schauen Sie sich unsere Anleitungsvideos an, um schnell loszulegen.</p>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {videos.map(video => (
                             <VideoCard key={video.id} {...video} />
@@ -536,7 +544,7 @@ export default function LandingPage() {
                 </section>
 
                 {/* Contact */}
-                <section className="text-center max-w-3xl mx-auto">
+                <section className="card-container text-center max-w-3xl mx-auto">
                     <h2 className="text-xl font-bold text-value mb-4">Weitere Hilfe benötigt?</h2>
                     <p className="text-label mb-6">
                         Wenn Sie weitere Fragen haben oder Unterstützung benötigen, kontaktieren Sie uns.
@@ -552,7 +560,7 @@ export default function LandingPage() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-primary-50 dark:bg-primary-900 py-6">
+            <footer className="bg-primary-50 dark:bg-primary-900 border-t border-primary-100 dark:border-primary-800 py-6">
                 <div className="container mx-auto px-4 text-center text-sm text-label">
                     <p>© {new Date().getFullYear()} Simon Luthe. Alle Rechte vorbehalten.</p>
                 </div>
