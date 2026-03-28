@@ -60,28 +60,28 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DS-01 | — | Pending |
-| DS-02 | — | Pending |
-| DS-03 | — | Pending |
-| DASH-08 | — | Pending |
-| DASH-09 | — | Pending |
-| DASH-10 | — | Pending |
-| DASH-11 | — | Pending |
-| FE-01 | — | Pending |
-| FE-02 | — | Pending |
-| FE-03 | — | Pending |
-| SET-01 | — | Pending |
-| SET-02 | — | Pending |
-| MO-01 | — | Pending |
-| MO-02 | — | Pending |
-| ANI-01 | — | Pending |
-| LOG-01 | — | Pending |
-| LOG-02 | — | Pending |
+| DS-01 | Phase 15 | Pending |
+| DS-02 | Phase 15 | Pending |
+| DS-03 | Phase 15 | Pending |
+| DASH-08 | Phase 16 | Pending |
+| DASH-09 | Phase 16 | Pending |
+| DASH-10 | Phase 16 | Pending |
+| DASH-11 | Phase 16 | Pending |
+| FE-01 | Phase 17 | Pending |
+| FE-02 | Phase 17 | Pending |
+| FE-03 | Phase 17 | Pending |
+| MO-01 | Phase 17 | Pending |
+| MO-02 | Phase 17 | Pending |
+| SET-01 | Phase 18 | Pending |
+| SET-02 | Phase 18 | Pending |
+| LOG-01 | Phase 18 | Pending |
+| LOG-02 | Phase 18 | Pending |
+| ANI-01 | Phase 18 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17
+- Mapped to phases: 17
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-28*

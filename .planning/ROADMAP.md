@@ -6,7 +6,8 @@
 - ✅ **v1.1 Stabilitat & Security** - Phases 5-7 (shipped 2026-03-22)
 - ✅ **v1.2 Features & Refactoring** - Phases 8-9 (shipped 2026-03-22)
 - ✅ **v1.3 Dashboard & UX** - Phases 10-12 (shipped 2026-03-28)
-- 🚧 **v1.4 UX Polish & Navigation** - Phases 13-14 (in progress)
+- ✅ **v1.4 UX Polish & Navigation** - Phases 13-14 (shipped 2026-03-28)
+- 🚧 **v2.0 Design Makeover** - Phases 15-18 (in progress)
 
 ## Phases
 
@@ -138,25 +139,13 @@ Plans:
 
 </details>
 
-### 🚧 v1.4 UX Polish & Navigation (In Progress)
-
-**Milestone Goal:** Dashboard-Polish (Cards, Statistiken, Favoriten mit Rueckfahrt), Umlaute korrigieren, Einstellungen und Benutzerverwaltung als inline Tabs statt Modal/Button.
-
-- [x] **Phase 13: Dashboard-Polish & Kleinigkeiten** - Dashboard Cards, Statistik-Details, Favoriten-Rueckfahrt und Umlaut-Korrektur (completed 2026-03-28)
-- [x] **Phase 14: Navigation-Umbau** - Einstellungen und Benutzerverwaltung inline als Tabs statt Modal/Button (completed 2026-03-28)
-
-## Phase Details
+<details>
+<summary>v1.4 UX Polish & Navigation (Phases 13-14) - SHIPPED 2026-03-28</summary>
 
 ### Phase 13: Dashboard-Polish & Kleinigkeiten
 **Goal**: Dashboard ist visuell aufgeraumt mit klaren Card-Grenzen, erweiterten Statistiken und Favoriten mit Rueckfahrt-Option — alle Texte nutzen korrekte Umlaute
 **Depends on**: Phase 12 (v1.3 abgeschlossen)
 **Requirements**: DASH-04, DASH-05, DASH-06, DASH-07, FAV-04, TEXT-01
-**Success Criteria** (what must be TRUE):
-  1. Im Statistik-Bereich sieht der Nutzer Erstattungen aufgeschluesselt nach Abrechnungstraeger
-  2. Mouseover auf einen km-Balken im Jahreschart zeigt die Anzahl der Fahrten in diesem Monat
-  3. Jede Dashboard-Rubrik (KPIs, Formular, Favoriten, letzte Fahrten, Statistik) hat einen eigenen Card-Hintergrund mit klarer Abgrenzung
-  4. Der Bereich "Neue Fahrt erfassen" hat ein ueberarbeitetes Layout (nicht mehr Standard-Formular-Look)
-  5. Beim Ausfuehren eines Favoriten fragt ein Dialog "Mit Rueckfahrt?" — bei Ja werden Hin- und Rueckfahrt angelegt
 **Plans**: 3 plans
 
 Plans:
@@ -164,27 +153,82 @@ Plans:
 - [x] 13-02-PLAN.md — Favoriten-Rueckfahrt-Dialog und Nochmal-Buttons mit Richtungswahl
 - [x] 13-03-PLAN.md — Umlaut-Korrektur in allen Frontend- und Backend-Dateien
 
-**UI hint**: yes
-
 ### Phase 14: Navigation-Umbau
 **Goal**: Einstellungen und Benutzerverwaltung sind direkt in der Tab-Navigation erreichbar statt hinter Modals und Buttons versteckt
 **Depends on**: Phase 13
 **Requirements**: NAV-01, NAV-02
-**Success Criteria** (what must be TRUE):
-  1. Nutzer klickt auf den Einstellungen-Tab und sieht alle Einstellungen (Profil, Orte, Distanzen, Traeger, Erstattungen, Passwort, API, Favoriten) inline als Abschnitte oder Sub-Tabs — kein Modal oeffnet sich
-  2. Admin-Nutzer sehen "Benutzerverwaltung" als eigenen Tab in der Hauptnavigation und koennen Nutzer direkt dort verwalten
-  3. Die Navigation zeigt maximal 4-5 Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen (+ Benutzerverwaltung fuer Admins)
 **Plans**: 2 plans
 
 Plans:
 - [x] 14-01-PLAN.md — Settings.js erstellen und Einstellungen als inline Tab
 - [x] 14-02-PLAN.md — Verwaltung-Tab fuer Admins und Modal-Cleanup
+
+</details>
+
+### 🚧 v2.0 Design Makeover (In Progress)
+
+**Milestone Goal:** Komplettes visuelles Redesign der gesamten App — modern, mobil-optimiert, attraktiv. Alle bestehenden Funktionen bleiben, aber jede Ansicht bekommt ein zeitgemaesses UI mit einheitlichem Designsystem.
+
+- [ ] **Phase 15: Designsystem** - Einheitliche Variablen, Card-Komponente und Dark Mode als Grundlage fuer alle Views
+- [ ] **Phase 16: Dashboard Makeover** - Dashboard komplett neu gestaltet mit Formular-Exklusivitaet, modernem Layout und Mobile-Optimierung
+- [ ] **Phase 17: Listen & Uebersichten** - Fahrtenliste, Export-Bereich und Monatsuebersicht visuell modernisiert
+- [ ] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff
+
+## Phase Details
+
+### Phase 15: Designsystem
+**Goal**: Die App hat ein einheitliches visuelles Fundament — Farben, Typografie, Spacing und Card-Komponente — das alle nachfolgenden View-Redesigns konsistent macht
+**Depends on**: Phase 14 (v1.4 abgeschlossen)
+**Requirements**: DS-01, DS-02, DS-03
+**Success Criteria** (what must be TRUE):
+  1. Alle Farb-, Spacing- und Typografie-Werte kommen aus CSS-Variablen (keine hardcodierten Werte in Komponenten)
+  2. Jede Sektion in jeder View ist in eine Card-Komponente mit einheitlichem Schatten, Radius und Padding eingebettet
+  3. Der Dark Mode zeigt korrekte Kontraste und abgestimmte Farben in allen bestehenden Views
+  4. Die Design-Tokens (Variablen) werden in einer zentralen Datei definiert und von allen Komponenten genutzt
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 16: Dashboard Makeover
+**Goal**: Das Dashboard ist die zentrale Anlaufstelle mit exklusivem Fahrten-Formular, modernem Card-Layout, touch-freundlicher Mobile-Darstellung und Export-Schnellzugriff
+**Depends on**: Phase 15
+**Requirements**: DASH-08, DASH-09, DASH-10, DASH-11
+**Success Criteria** (what must be TRUE):
+  1. Das Formular "Neue Fahrt erfassen" existiert nur auf dem Dashboard — in der Fahrtenliste gibt es kein Eingabeformular mehr
+  2. Das Formular hat ein visuell ansprechendes, modernes Layout (kein Standard-Formular-Look)
+  3. Auf einem Smartphone sind alle Dashboard-Elemente (KPIs, Formular, Favoriten, Statistik) touch-freundlich und ohne horizontales Scrollen nutzbar
+  4. Ein Export-Schnellzugriff ist direkt vom Dashboard erreichbar
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 17: Listen & Uebersichten
+**Goal**: Fahrtenliste, Export-Bereich und Monatsuebersicht sind visuell modernisiert mit Card-Layout, klarer Abgrenzung und kompakter Mobile-Darstellung
+**Depends on**: Phase 16
+**Requirements**: FE-01, FE-02, FE-03, MO-01, MO-02
+**Success Criteria** (what must be TRUE):
+  1. Die Fahrtenliste zeigt ausschliesslich die Liste der Fahrten (kein Eingabeformular) in modernem Card-Layout
+  2. Filter- und Export-Bereich sind visuell als eigene Cards abgegrenzt und modernisiert
+  3. Auf Mobile ist die Fahrtenliste kompakt dargestellt und per Touch bedienbar (kein Overflow, keine zu kleinen Buttons)
+  4. Die Monatsuebersicht nutzt Cards fuer Zusammenfassungen und Tabellen mit uebersichtlichem Layout
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 18: Einstellungen, Login & Polish
+**Goal**: Einstellungen und Login/Landing haben ein aufgewertetes, modernes Design und Tab-Wechsel sowie Card-Interaktionen sind mit sanften Animationen versehen
+**Depends on**: Phase 17
+**Requirements**: SET-01, SET-02, LOG-01, LOG-02, ANI-01
+**Success Criteria** (what must be TRUE):
+  1. Einstellungen-Sub-Tabs haben eine aufgewertete Navigation mit Card-Layout und klarer visueller Hierarchie
+  2. Alle Formulare in den Einstellungen folgen dem einheitlichen Design aus Phase 15
+  3. Die Login-Seite hat ein modernes, einladendes Design mit responsivem Layout
+  4. Die Landing-Page ist visuell attraktiv und passt sich an verschiedene Bildschirmgroessen an
+  5. Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions (kein abruptes Umschalten)
+**Plans**: TBD
 **UI hint**: yes
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 13 → 14
+Phases execute in numeric order: 15 → 16 → 17 → 18
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -200,5 +244,9 @@ Phases execute in numeric order: 13 → 14
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
-| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete    | 2026-03-28 |
-| 14. Navigation-Umbau | v1.4 | 2/2 | Complete   | 2026-03-28 |
+| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete | 2026-03-28 |
+| 14. Navigation-Umbau | v1.4 | 2/2 | Complete | 2026-03-28 |
+| 15. Designsystem | v2.0 | 0/? | Not started | - |
+| 16. Dashboard Makeover | v2.0 | 0/? | Not started | - |
+| 17. Listen & Uebersichten | v2.0 | 0/? | Not started | - |
+| 18. Einstellungen, Login & Polish | v2.0 | 0/? | Not started | - |
