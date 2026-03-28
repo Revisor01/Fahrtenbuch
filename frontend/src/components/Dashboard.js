@@ -223,7 +223,7 @@ function Dashboard({ onNavigate }) {
               <button
                 key={fav.id}
                 onClick={() => handleExecuteFavorit(fav)}
-                className="text-left rounded-card border border-card min-h-[44px] p-3 hover:shadow-card-hover transition-all"
+                className="text-left rounded-card border border-primary-200 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 min-h-[44px] p-3 hover:shadow-card-hover hover:bg-primary-100 dark:hover:bg-primary-800 transition-all"
               >
                 <p className="text-sm font-medium text-value">
                   {fav.von_ort_name} &rarr; {fav.nach_ort_name}
@@ -237,7 +237,7 @@ function Dashboard({ onNavigate }) {
         )}
         <div className="flex justify-end mt-3">
           <button
-            onClick={() => onNavigate && onNavigate('einstellungen')}
+            onClick={() => onNavigate && onNavigate('einstellungen:favoriten')}
             className="text-sm px-3 py-1.5 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
           >
             Favoriten verwalten &rarr;
@@ -273,12 +273,11 @@ function Dashboard({ onNavigate }) {
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted text-xs whitespace-nowrap">{formatDate(fahrt.datum)}</span>
                     <span className="text-value font-medium truncate">
-                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}{fahrt.anlass ? ': ' : ''}{fahrt.anlass || ''}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
                     <span>{fahrt.kilometer} km</span>
-                    {fahrt.anlass && <span className="font-semibold text-value">&middot; {fahrt.anlass}</span>}
                     {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
                     {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
                       <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
@@ -327,14 +326,14 @@ function Dashboard({ onNavigate }) {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setStatistikJahr(statistikJahr - 1)}
-              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-hover transition-colors"
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
               title="Vorheriges Jahr"
             >
               <ChevronLeft size={18} className="text-muted" />
             </button>
             <button
               onClick={() => setStatistikJahr(statistikJahr + 1)}
-              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-hover transition-colors"
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
               title="N&auml;chstes Jahr"
             >
               <ChevronRight size={18} className="text-muted" />

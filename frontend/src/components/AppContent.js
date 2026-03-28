@@ -18,6 +18,19 @@ function AppContent() {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [settingsSubTab, setSettingsSubTab] = useState(null);
+
+  // Extended navigation: supports "einstellungen:favoriten" deeplinks
+  const handleNavigate = (target) => {
+    if (target && target.includes(':')) {
+      const [tab, subTab] = target.split(':');
+      setActiveTab(tab);
+      setSettingsSubTab(subTab);
+    } else {
+      setActiveTab(target);
+      setSettingsSubTab(null);
+    }
+  };
 
   // Token Check Effect
   useEffect(() => {
@@ -116,10 +129,10 @@ function AppContent() {
     </div>
 
     {/* Hauptinhalt */}
-    {activeTab === 'dashboard' && <div key="dashboard" className="tab-content-fade"><Dashboard onNavigate={setActiveTab} /></div>}
+    {activeTab === 'dashboard' && <div key="dashboard" className="tab-content-fade"><Dashboard onNavigate={handleNavigate} /></div>}
     {activeTab === 'fahrten' && <div key="fahrten" className="tab-content-fade"><FahrtenListe /></div>}
     {activeTab === 'monatsuebersicht' && <div key="monatsuebersicht" className="tab-content-fade"><MonthlyOverview /></div>}
-    {activeTab === 'einstellungen' && <div key="einstellungen" className="tab-content-fade"><Settings /></div>}
+    {activeTab === 'einstellungen' && <div key="einstellungen" className="tab-content-fade"><Settings initialTab={settingsSubTab} /></div>}
     {activeTab === 'verwaltung' && <div key="verwaltung" className="tab-content-fade"><UserManagement /></div>}
 
     {/* Modals */}

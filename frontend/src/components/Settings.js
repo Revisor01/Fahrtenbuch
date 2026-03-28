@@ -9,10 +9,10 @@ import OrteListe from './OrteListe';
 import DistanzForm from './DistanzForm';
 import DistanzenListe from './DistanzenListe';
 
-function Settings() {
+function Settings({ initialTab }) {
     const { token, user, setUser, showNotification, refreshAllData, favoriten, orte, abrechnungstraeger, addFavorit, deleteFavorit, fetchFavoriten } = useContext(AppContext);
     const [profile, setProfile] = useState({});
-    const [activeTab, setActiveTab] = useState('profile');
+    const [activeTab, setActiveTab] = useState(initialTab || 'profile');
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
