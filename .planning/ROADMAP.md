@@ -185,7 +185,12 @@ Plans:
   2. Jede Sektion in jeder View ist in eine Card-Komponente mit einheitlichem Schatten, Radius und Padding eingebettet
   3. Der Dark Mode zeigt korrekte Kontraste und abgestimmte Farben in allen bestehenden Views
   4. Die Design-Tokens (Variablen) werden in einer zentralen Datei definiert und von allen Komponenten genutzt
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
+- [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
+
 **UI hint**: yes
 
 ### Phase 16: Dashboard Makeover
@@ -197,7 +202,12 @@ Plans:
   2. Das Formular hat ein visuell ansprechendes, modernes Layout (kein Standard-Formular-Look)
   3. Auf einem Smartphone sind alle Dashboard-Elemente (KPIs, Formular, Favoriten, Statistik) touch-freundlich und ohne horizontales Scrollen nutzbar
   4. Ein Export-Schnellzugriff ist direkt vom Dashboard erreichbar
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
+- [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
+
 **UI hint**: yes
 
 ### Phase 17: Listen & Uebersichten
@@ -209,7 +219,12 @@ Plans:
   2. Filter- und Export-Bereich sind visuell als eigene Cards abgegrenzt und modernisiert
   3. Auf Mobile ist die Fahrtenliste kompakt dargestellt und per Touch bedienbar (kein Overflow, keine zu kleinen Buttons)
   4. Die Monatsuebersicht nutzt Cards fuer Zusammenfassungen und Tabellen mit uebersichtlichem Layout
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
+- [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
+
 **UI hint**: yes
 
 ### Phase 18: Einstellungen, Login & Polish
@@ -222,7 +237,12 @@ Plans:
   3. Die Login-Seite hat ein modernes, einladendes Design mit responsivem Layout
   4. Die Landing-Page ist visuell attraktiv und passt sich an verschiedene Bildschirmgroessen an
   5. Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions (kein abruptes Umschalten)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
+- [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
+
 **UI hint**: yes
 
 ## Progress
