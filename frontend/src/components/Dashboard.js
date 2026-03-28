@@ -14,10 +14,11 @@ function Dashboard({ onNavigate }) {
     executeFavorit,
     showNotification,
     refreshAllData,
-    monthlyData
+    monthlyData,
+    abrechnungstraeger
   } = useContext(AppContext);
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(true);
   const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
 
   // KPI: offene Erstattungen
@@ -99,6 +100,13 @@ function Dashboard({ onNavigate }) {
   }, [erstattungenProTraeger]);
 
   const hasErstattungen = Object.keys(erstattungenProTraeger).length > 0;
+
+  // Map Träger-IDs to names
+  const getTraegerName = (traegerId) => {
+    if (!abrechnungstraeger) return traegerId;
+    const found = abrechnungstraeger.find(t => String(t.id) === String(traegerId));
+    return found ? found.name : traegerId;
+  };
 
   const handleNochmal = async (fahrt) => {
     try {
@@ -277,14 +285,24 @@ function Dashboard({ onNavigate }) {
                     <span className="text-muted whitespace-nowrap text-xs sm:text-sm">{fahrt.kilometer} km</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleNochmal(fahrt)}
-                  className="ml-2 sm:ml-3 flex items-center gap-1 min-h-[44px] px-3 py-2 text-xs rounded-md btn-primary whitespace-nowrap"
-                  title="Nochmal f\u00FCr heute"
-                >
-                  <RotateCcw size={14} />
-                  <span className="hidden sm:inline">Nochmal</span>
-                </button>
+                <div className="ml-2 sm:ml-3 flex items-center gap-1">
+                  <button
+                    onClick={() => handleNochmal(fahrt)}
+                    className="flex items-center gap-1 min-h-[44px] px-3 py-2 text-xs rounded-md btn-primary whitespace-nowrap"
+                    title="Nochmal für heute"
+                  >
+                    <RotateCcw size={14} />
+                    <span className="hidden sm:inline">Nochmal</span>
+                  </button>
+                  <button
+                    onClick={() => handleNochmal({ ...fahrt, von_ort_id: fahrt.nach_ort_id, nach_ort_id: fahrt.von_ort_id, von_ort_name: fahrt.nach_ort_name, nach_ort_name: fahrt.von_ort_name, einmaliger_von_ort: fahrt.einmaliger_nach_ort, einmaliger_nach_ort: fahrt.einmaliger_von_ort })}
+                    className="flex items-center gap-1 min-h-[44px] px-3 py-2 text-xs rounded-md btn-secondary whitespace-nowrap"
+                    title="Rückfahrt für heute"
+                  >
+                    <RotateCcw size={14} className="scale-x-[-1]" />
+                    <span className="hidden sm:inline">Zurück</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -377,7 +395,7 @@ function Dashboard({ onNavigate }) {
                       .sort(([, a], [, b]) => b - a)
                       .map(([traeger, betrag]) => (
                         <tr key={traeger} className="border-b border-border">
-                          <td className="py-2 text-value">{traeger}</td>
+                          <td className="py-2 text-value">{getTraegerName(traeger)}</td>
                           <td className="py-2 text-right text-value">{betrag.toFixed(2).replace('.', ',')} &euro;</td>
                         </tr>
                       ))}

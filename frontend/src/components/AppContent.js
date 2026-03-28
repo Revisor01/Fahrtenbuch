@@ -52,50 +52,46 @@ function AppContent() {
     <div className="container mx-auto p-4">
     <div className="mb-4">
     {/* Header Section */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+    <div className="flex justify-between items-center gap-4 mb-4">
     <h1 className="text-lg font-medium text-value">
     {window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch"}
     </h1>
 
-    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-      {/* Theme, Info, Hilfe und Logout */}
-      <div className="flex justify-between w-full sm:gap-4">
-<div className="flex gap-2">
-  <ThemeToggle />
-  <button
-    onClick={() => setShowNewFeaturesModal(true)}
-    className="btn-primary flex items-center justify-center relative"
-    title="Neue Funktionen"
-  >
-    <Bell size={16} />
-    <div className="absolute -top-1 -right-1 bg-secondary-500 rounded-full w-3 h-3"></div>
-  </button>
-  <button
-    onClick={() => setShowInfoModal(true)}
-    className="btn-primary flex items-center justify-center"
-    title="Info"
-  >
-    <Info size={16} />
-  </button>
-  <Link
-    to="/help"
-    className="btn-primary flex items-center justify-center gap-2"
-  >
-    <HelpCircle size={16} />
-    <span className="hidden sm:inline">Hilfe</span>
-  </Link>
-</div>
-        <button
-          onClick={logout}
-          className="btn-secondary flex items-center justify-center gap-2"
-        >
-          <LogOut size={16} />
-          <span>Logout</span>
-        </button>
-      </div>
+    <div className="flex items-center gap-1 sm:gap-2">
+      <ThemeToggle />
+      <button
+        onClick={() => setShowNewFeaturesModal(true)}
+        className="relative p-2 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
+        title="Neue Funktionen"
+      >
+        <Bell size={18} />
+        <div className="absolute top-1 right-1 bg-secondary-500 rounded-full w-2.5 h-2.5"></div>
+      </button>
+      <button
+        onClick={() => setShowInfoModal(true)}
+        className="p-2 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
+        title="Info"
+      >
+        <Info size={18} />
+      </button>
+      <Link
+        to="/help"
+        className="p-2 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
+        title="Hilfe"
+      >
+        <HelpCircle size={18} />
+      </Link>
+      <div className="w-px h-6 bg-primary-200 dark:bg-primary-700 mx-1 hidden sm:block"></div>
+      <button
+        onClick={logout}
+        className="flex items-center gap-2 px-3 py-2 rounded-card text-muted hover:text-secondary-600 hover:bg-secondary-50 dark:hover:bg-secondary-900 transition-colors text-sm"
+        title="Logout"
+      >
+        <LogOut size={18} />
+        <span className="hidden sm:inline">Logout</span>
+      </button>
     </div>
   </div>
-</div>
 
     {/* Tab Navigation */}
     <div className="flex gap-1 border-b border-border mb-6 overflow-x-auto">
