@@ -156,7 +156,7 @@ function Dashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Offene Erstattungen */}
-        <div className="rounded-lg p-4 shadow-sm border border-border bg-emerald-50 dark:bg-emerald-900/20">
+        <div className="rounded-card p-4 shadow-card border border-card bg-emerald-50 dark:bg-emerald-900/20">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">Offene Erstattungen</p>
@@ -167,7 +167,7 @@ function Dashboard() {
         </div>
 
         {/* Kilometer diesen Monat */}
-        <div className="rounded-lg p-4 shadow-sm border border-border bg-blue-50 dark:bg-blue-900/20">
+        <div className="rounded-card p-4 shadow-card border border-card bg-blue-50 dark:bg-blue-900/20">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">Kilometer diesen Monat</p>
@@ -178,7 +178,7 @@ function Dashboard() {
         </div>
 
         {/* Fahrten diesen Monat */}
-        <div className="rounded-lg p-4 shadow-sm border border-border bg-purple-50 dark:bg-purple-900/20">
+        <div className="rounded-card p-4 shadow-card border border-card bg-purple-50 dark:bg-purple-900/20">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted">Fahrten diesen Monat</p>
@@ -190,7 +190,7 @@ function Dashboard() {
       </div>
 
       {/* Favoriten-Schnelleingabe */}
-      <div className="card p-4">
+      <div className="card-container">
         <div className="flex items-center gap-2 mb-3">
           <Star size={18} className="text-yellow-500" />
           <h2 className="text-base font-medium text-value">Favoriten</h2>
@@ -203,7 +203,7 @@ function Dashboard() {
               <button
                 key={fav.id}
                 onClick={() => handleExecuteFavorit(fav)}
-                className="text-left rounded-lg border border-border p-3 hover:bg-hover transition-colors"
+                className="text-left rounded-card border border-card p-3 hover:shadow-card-hover transition-all"
               >
                 <p className="text-sm font-medium text-value">
                   {fav.von_ort_name} &rarr; {fav.nach_ort_name}
@@ -218,7 +218,7 @@ function Dashboard() {
       </div>
 
       {/* Aufklappbares Fahrt-Formular */}
-      <div className="card overflow-hidden">
+      <div className="card-container-flush">
         <button
           onClick={() => setIsFormOpen(!isFormOpen)}
           className={`flex items-center justify-between w-full p-4 ${isFormOpen ? 'bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent' : 'hover:bg-hover transition-colors'}`}
@@ -239,7 +239,7 @@ function Dashboard() {
       </div>
 
       {/* Letzte 3 Fahrten */}
-      <div className="card p-4">
+      <div className="card-container">
         <h2 className="text-base font-medium text-value mb-3">Letzte Fahrten</h2>
         {letzteDrei.length === 0 ? (
           <p className="text-sm text-muted">Noch keine Fahrten erfasst.</p>
@@ -248,7 +248,7 @@ function Dashboard() {
             {letzteDrei.map((fahrt) => (
               <div
                 key={fahrt.id}
-                className="flex items-center justify-between rounded-lg border border-border p-3"
+                className="flex items-center justify-between rounded-card border border-card p-3"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 text-sm">
@@ -274,7 +274,7 @@ function Dashboard() {
       </div>
 
       {/* Statistik: km-Chart + Erstattungen in einem Card */}
-      <div className="card p-4">
+      <div className="card-container">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <BarChart3 size={18} className="text-blue-500" />
