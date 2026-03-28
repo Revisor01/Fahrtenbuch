@@ -1191,7 +1191,16 @@ function FahrtenListe() {
 
     {/* Desktop View */}
     <div className="hidden md:block">
+    {sortedFahrten.length === 0 ? (
+      <div className="card-container text-center py-12">
+        <p className="text-label">Keine Fahrten im ausgewaehlten Zeitraum</p>
+      </div>
+    ) : (
     <div className="table-container">
+    <div className="px-6 py-4 border-b border-primary-100 dark:border-primary-700">
+      <h3 className="text-lg font-medium text-value">Fahrten</h3>
+      <p className="text-sm text-label mt-1">{sortedFahrten.length} Eintraege</p>
+    </div>
     <table className="w-full">
     <thead>
     <tr className="table-head-row">
@@ -1250,10 +1259,18 @@ function FahrtenListe() {
     </tbody>
     </table>
     </div>
+    )}
     </div>
 
     {/* Mobile View */}
     <div className="md:hidden space-y-4">
+    {sortedFahrten.length === 0 ? (
+      <div className="card-container text-center py-12">
+        <p className="text-label">Keine Fahrten im ausgewaehlten Zeitraum</p>
+      </div>
+    ) : (
+    <>
+    <h3 className="text-lg font-medium text-value">Fahrten <span className="text-sm font-normal text-label">({sortedFahrten.length})</span></h3>
     {sortedFahrten.map((fahrt) => {
       const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
       const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
@@ -1430,14 +1447,14 @@ function FahrtenListe() {
             <>
               <button
               onClick={() => handleNochmal(fahrt)}
-              className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50"
+              className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
               title="Gleiche Fahrt für heute"
               >
               <Copy size={14} />
               </button>
               <button
               onClick={() => handleNochmalAndereRichtung(fahrt)}
-              className="text-xs bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-1.5 rounded hover:bg-green-100 dark:hover:bg-green-900/50"
+              className="text-xs bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-1.5 rounded hover:bg-green-100 dark:hover:bg-green-900/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
               title="Rückfahrt für heute"
               >
               <ArrowLeftRight size={14} />
@@ -1446,13 +1463,13 @@ function FahrtenListe() {
           )}
           <button
           onClick={() => handleEdit(fahrt)}
-          className="mobile-icon-button-primary"
+          className="mobile-icon-button-primary min-h-[44px] min-w-[44px]"
           >
           ✎
           </button>
           <button
           onClick={() => handleDelete(fahrt.id)}
-          className="mobile-icon-button-secondary"
+          className="mobile-icon-button-secondary min-h-[44px] min-w-[44px]"
           >
           ×
           </button>
@@ -1513,6 +1530,8 @@ function FahrtenListe() {
         </div>
       );
     })}
+    </>
+    )}
     </div>
 
     {/* Modals */}
