@@ -2,11 +2,11 @@ import React, { useContext, useState, useMemo } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
-import { Banknote, Route, Car, Star, ChevronDown, ChevronUp, RotateCcw, ChevronLeft, ChevronRight, BarChart3, Plus } from 'lucide-react';
+import { Banknote, Route, Car, Star, ChevronDown, ChevronUp, RotateCcw, ChevronLeft, ChevronRight, BarChart3, Plus, FileDown } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
-function Dashboard() {
+function Dashboard({ onNavigate }) {
   const {
     summary,
     fahrten,
@@ -33,6 +33,9 @@ function Dashboard() {
     const km = monthTrips.reduce((sum, f) => sum + (parseFloat(f.kilometer) || 0), 0);
     return { kmThisMonth: km, fahrtenThisMonth: monthTrips.length };
   }, [fahrten, currentYearMonth]);
+
+  // KPI: total trips count
+  const fahrtenGesamt = fahrten.length;
 
   // Last 3 trips sorted by date descending, then by id descending
   const letzteDrei = useMemo(() => {
@@ -119,15 +122,15 @@ function Dashboard() {
 
   const handleExecuteFavorit = (favorit) => {
     showNotification(
-      'Favorit ausführen',
+      'Favorit ausf\u00FChren',
       `${favorit.von_ort_name} \u2192 ${favorit.nach_ort_name}`,
       async () => {
         try {
           await executeFavorit(favorit.id, false);
-          showNotification('Fahrt erstellt', 'Hinfahrt wurde für heute eingetragen.');
+          showNotification('Fahrt erstellt', 'Hinfahrt wurde f\u00FCr heute eingetragen.');
         } catch (error) {
-          console.error('Fehler beim Ausführen des Favoriten:', error);
-          showNotification('Fehler', 'Favorit konnte nicht ausgeführt werden.');
+          console.error('Fehler beim Ausf\u00FChren des Favoriten:', error);
+          showNotification('Fehler', 'Favorit konnte nicht ausgef\u00FChrt werden.');
         }
       },
       true,
@@ -135,13 +138,13 @@ function Dashboard() {
       async () => {
         try {
           await executeFavorit(favorit.id, true);
-          showNotification('Fahrten erstellt', 'Hin- und Rückfahrt wurden für heute eingetragen.');
+          showNotification('Fahrten erstellt', 'Hin- und R\u00FCckfahrt wurden f\u00FCr heute eingetragen.');
         } catch (error) {
-          console.error('Fehler beim Ausführen des Favoriten:', error);
-          showNotification('Fehler', 'Favorit konnte nicht ausgeführt werden.');
+          console.error('Fehler beim Ausf\u00FChren des Favoriten:', error);
+          showNotification('Fehler', 'Favorit konnte nicht ausgef\u00FChrt werden.');
         }
       },
-      'Mit Rückfahrt'
+      'Mit R\u00FCckfahrt'
     );
   };
 
@@ -153,40 +156,55 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* KPI Cards — 2x2 on mobile, 4-col on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Offene Erstattungen */}
-        <div className="rounded-card p-4 shadow-card border border-card bg-emerald-50 dark:bg-emerald-900/20">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted">Offene Erstattungen</p>
-              <p className="text-2xl font-semibold text-value">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
+        <div className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-emerald-50 dark:bg-emerald-900/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted">Offene Erstattungen</p>
+              <p className="text-lg sm:text-2xl font-semibold text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
             </div>
-            <Banknote size={28} className="text-emerald-500" />
+            <Banknote size={24} className="text-emerald-500 shrink-0" />
           </div>
         </div>
 
         {/* Kilometer diesen Monat */}
-        <div className="rounded-card p-4 shadow-card border border-card bg-blue-50 dark:bg-blue-900/20">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted">Kilometer diesen Monat</p>
-              <p className="text-2xl font-semibold text-value">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
+        <div className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-blue-50 dark:bg-blue-900/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted">km diesen Monat</p>
+              <p className="text-lg sm:text-2xl font-semibold text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
             </div>
-            <Route size={28} className="text-blue-500" />
+            <Route size={24} className="text-blue-500 shrink-0" />
           </div>
         </div>
 
         {/* Fahrten diesen Monat */}
-        <div className="rounded-card p-4 shadow-card border border-card bg-purple-50 dark:bg-purple-900/20">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted">Fahrten diesen Monat</p>
-              <p className="text-2xl font-semibold text-value">{fahrtenThisMonth}</p>
+        <div className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-purple-50 dark:bg-purple-900/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted">Fahrten d. Monat</p>
+              <p className="text-lg sm:text-2xl font-semibold text-value">{fahrtenThisMonth}</p>
             </div>
-            <Car size={28} className="text-purple-500" />
+            <Car size={24} className="text-purple-500 shrink-0" />
           </div>
         </div>
+
+        {/* Export-Schnellzugriff als 4. KPI-Card */}
+        <button
+          onClick={() => onNavigate && onNavigate('fahrten')}
+          className="rounded-card min-h-[44px] p-4 shadow-card border border-card bg-amber-50 dark:bg-amber-900/20 hover:shadow-card-hover hover:scale-[1.01] transition-all duration-200 cursor-pointer text-left"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-muted">Fahrten & Export</p>
+              <p className="text-lg sm:text-2xl font-semibold text-value">{fahrtenGesamt}</p>
+              <p className="text-xs text-muted mt-0.5">gesamt</p>
+            </div>
+            <FileDown size={24} className="text-amber-500 shrink-0" />
+          </div>
+        </button>
       </div>
 
       {/* Favoriten-Schnelleingabe */}
@@ -203,7 +221,7 @@ function Dashboard() {
               <button
                 key={fav.id}
                 onClick={() => handleExecuteFavorit(fav)}
-                className="text-left rounded-card border border-card p-3 hover:shadow-card-hover transition-all"
+                className="text-left rounded-card border border-card min-h-[44px] p-3 hover:shadow-card-hover transition-all"
               >
                 <p className="text-sm font-medium text-value">
                   {fav.von_ort_name} &rarr; {fav.nach_ort_name}
@@ -221,11 +239,11 @@ function Dashboard() {
       <div className="card-container-flush">
         <button
           onClick={() => setIsFormOpen(!isFormOpen)}
-          className={`flex items-center justify-between w-full p-4 ${isFormOpen ? 'bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent' : 'hover:bg-hover transition-colors'}`}
+          className={`flex items-center justify-between w-full min-h-[44px] p-4 ${isFormOpen ? 'bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent' : 'bg-blue-50/40 dark:bg-blue-900/10 border-l-4 border-l-blue-400 dark:border-l-blue-500 hover:bg-blue-50/70 dark:hover:bg-blue-900/20 transition-colors'}`}
         >
           <div className="flex items-center gap-2">
-            <div className={`p-1 rounded-md ${isFormOpen ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
-              <Plus size={18} className={isFormOpen ? 'text-blue-600 dark:text-blue-400' : 'text-muted'} />
+            <div className={`p-1.5 rounded-md ${isFormOpen ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-blue-100/80 dark:bg-blue-900/30'}`}>
+              <Plus size={18} className={isFormOpen ? 'text-blue-600 dark:text-blue-400' : 'text-blue-500 dark:text-blue-400'} />
             </div>
             <h2 className="text-base font-medium text-value">Neue Fahrt erfassen</h2>
           </div>
@@ -251,17 +269,17 @@ function Dashboard() {
                 className="flex items-center justify-between rounded-card border border-card p-3"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-muted whitespace-nowrap">{formatDate(fahrt.datum)}</span>
-                    <span className="text-value truncate">
+                  <div className="flex items-center gap-2 sm:gap-3 text-sm flex-wrap sm:flex-nowrap">
+                    <span className="text-muted whitespace-nowrap text-xs sm:text-sm">{formatDate(fahrt.datum)}</span>
+                    <span className="text-value truncate text-xs sm:text-sm">
                       {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
                     </span>
-                    <span className="text-muted whitespace-nowrap">{fahrt.kilometer} km</span>
+                    <span className="text-muted whitespace-nowrap text-xs sm:text-sm">{fahrt.kilometer} km</span>
                   </div>
                 </div>
                 <button
                   onClick={() => handleNochmal(fahrt)}
-                  className="ml-3 flex items-center gap-1 px-3 py-1 text-xs rounded-md btn-primary whitespace-nowrap"
+                  className="ml-2 sm:ml-3 flex items-center gap-1 min-h-[44px] px-3 py-2 text-xs rounded-md btn-primary whitespace-nowrap"
                   title="Nochmal f\u00FCr heute"
                 >
                   <RotateCcw size={14} />
@@ -283,14 +301,14 @@ function Dashboard() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setStatistikJahr(statistikJahr - 1)}
-              className="p-1 rounded hover:bg-hover transition-colors"
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-hover transition-colors"
               title="Vorheriges Jahr"
             >
               <ChevronLeft size={18} className="text-muted" />
             </button>
             <button
               onClick={() => setStatistikJahr(statistikJahr + 1)}
-              className="p-1 rounded hover:bg-hover transition-colors"
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-hover transition-colors"
               title="N&auml;chstes Jahr"
             >
               <ChevronRight size={18} className="text-muted" />

@@ -120,7 +120,7 @@ function AppContent() {
     </div>
 
     {/* Hauptinhalt */}
-    {activeTab === 'dashboard' && <Dashboard />}
+    {activeTab === 'dashboard' && <Dashboard onNavigate={setActiveTab} />}
     {activeTab === 'fahrten' && (
       <div className="space-y-6">
         <FahrtForm />
