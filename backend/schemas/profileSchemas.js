@@ -12,7 +12,7 @@ const updateProfileSchema = z.object({
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, 'Altes Passwort ist erforderlich'),
   newPassword: z.string().min(6, 'Neues Passwort muss mindestens 6 Zeichen lang sein'),
-  confirmPassword: z.string().min(1, 'Passwort-Bestaetigung ist erforderlich'),
+  confirmPassword: z.string().min(1, 'Passwort-Bestätigung ist erforderlich'),
 });
 
 module.exports = {

@@ -205,7 +205,7 @@ exports.exportToExcel = async (req, res) => {
          });
        });
 
-       // Gesamt-km fuer Erstattungsberechnung in Zeile 33
+       // Gesamt-km für Erstattungsberechnung in Zeile 33
        const gesamtKm = chunk.reduce((sum, row) => sum + (typeof row.kilometer === 'number' ? row.kilometer : 0), 0);
        abrechnungWorksheet.getCell('J33').value = `${gesamtKm} km x 0,30 \u20AC =`;
      }
@@ -314,7 +314,7 @@ exports.exportToExcelRange = async (req, res) => {
        });
      }
 
-     // Status-Update fuer jeden Monat im Zeitraum
+     // Status-Update für jeden Monat im Zeitraum
      let y = parseInt(startYear), m = parseInt(startMonth);
      const ey = parseInt(endYear), em = parseInt(endMonth);
      while (y < ey || (y === ey && m <= em)) {
@@ -329,7 +329,7 @@ exports.exportToExcelRange = async (req, res) => {
      return res.send(buffer);
    }
 
-   // Normaler Export fuer andere Typen
+   // Normaler Export für andere Typen
    const formattedData = fahrten.flatMap(fahrt => {
      if (fahrt.autosplit) {
        return fahrt.details
@@ -424,7 +424,7 @@ exports.exportToExcelRange = async (req, res) => {
          });
        });
 
-       // Gesamt-km fuer Erstattungsberechnung in Zeile 33
+       // Gesamt-km für Erstattungsberechnung in Zeile 33
        const gesamtKm = chunk.reduce((sum, row) => sum + (typeof row.kilometer === 'number' ? row.kilometer : 0), 0);
        abrechnungWorksheet.getCell('J33').value = `${gesamtKm} km x 0,30 \u20AC =`;
      }
@@ -432,7 +432,7 @@ exports.exportToExcelRange = async (req, res) => {
      return workbook;
    }));
 
-   // Status-Update fuer jeden Monat im Zeitraum
+   // Status-Update für jeden Monat im Zeitraum
    let y = parseInt(startYear), m = parseInt(startMonth);
    const ey = parseInt(endYear), em = parseInt(endMonth);
    while (y < ey || (y === ey && m <= em)) {
