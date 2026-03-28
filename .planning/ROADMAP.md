@@ -143,7 +143,7 @@ Plans:
 **Milestone Goal:** Dashboard-Polish (Cards, Statistiken, Favoriten mit Rueckfahrt), Umlaute korrigieren, Einstellungen und Benutzerverwaltung als inline Tabs statt Modal/Button.
 
 - [x] **Phase 13: Dashboard-Polish & Kleinigkeiten** - Dashboard Cards, Statistik-Details, Favoriten-Rueckfahrt und Umlaut-Korrektur (completed 2026-03-28)
-- [ ] **Phase 14: Navigation-Umbau** - Einstellungen und Benutzerverwaltung inline als Tabs statt Modal/Button
+- [x] **Phase 14: Navigation-Umbau** - Einstellungen und Benutzerverwaltung inline als Tabs statt Modal/Button (completed 2026-03-28)
 
 ## Phase Details
 
@@ -178,7 +178,7 @@ Plans:
 
 Plans:
 - [x] 14-01-PLAN.md — Settings.js erstellen und Einstellungen als inline Tab
-- [ ] 14-02-PLAN.md — Verwaltung-Tab fuer Admins und Modal-Cleanup
+- [x] 14-02-PLAN.md — Verwaltung-Tab fuer Admins und Modal-Cleanup
 **UI hint**: yes
 
 ## Progress
@@ -201,4 +201,4 @@ Phases execute in numeric order: 13 → 14
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
 | 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete    | 2026-03-28 |
-| 14. Navigation-Umbau | v1.4 | 1/2 | In Progress|  |
+| 14. Navigation-Umbau | v1.4 | 2/2 | Complete   | 2026-03-28 |

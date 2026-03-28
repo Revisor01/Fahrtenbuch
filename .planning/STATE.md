@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UX Polish & Navigation
-status: executing
-stopped_at: Completed 14-01-PLAN.md
-last_updated: "2026-03-28T16:54:45.414Z"
+status: verifying
+stopped_at: Completed 14-02-PLAN.md
+last_updated: "2026-03-28T17:59:12.188Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 Phase: 14 (navigation-umbau) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-03-28
 
 Progress: [░░░░░░░░░░] 0%
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13 P02 | 2min | 2 tasks | 4 files |
 | Phase 13 P03 | 2min | 1 tasks | 4 files |
 | Phase 14 P01 | 2min | 2 tasks | 2 files |
+| Phase 14-navigation-umbau P02 | 5min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,7 @@ Recent decisions affecting current work:
 - [Phase 13]: Used existing NotificationModal multi-action support for Rueckfahrt dialog
 - [Phase 13]: Variable names with ae/oe/ue kept as technical identifiers; only user-visible strings corrected
 - [Phase 14]: Settings als Inline-Tab statt Modal — SettingsIcon Alias fuer Namenskonflikt
+- [Phase 14]: Admin-only Tab via conditional tabs-Array Spread mit role-Check in AppContent
 
 ### Pending Todos
 
@@ -81,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T16:54:45.412Z
-Stopped at: Completed 14-01-PLAN.md
+Last session: 2026-03-28T17:59:12.186Z
+Stopped at: Completed 14-02-PLAN.md
 Resume file: None

@@ -8,7 +8,7 @@
 ### Navigation
 
 - [x] **NAV-01**: Einstellungen (Profil, Orte, Distanzen, Traeger, Erstattungen, Passwort, API, Favoriten) als eigener Tab-Inhalt statt Modal
-- [ ] **NAV-02**: Benutzerverwaltung (Admin) als Tab in der Navigation statt separater Button
+- [x] **NAV-02**: Benutzerverwaltung (Admin) als Tab in der Navigation statt separater Button
 
 ### Dashboard-Polish
 
@@ -43,7 +43,7 @@
 | FAV-04 | Phase 13 | Complete |
 | TEXT-01 | Phase 13 | Complete |
 | NAV-01 | Phase 14 | Complete |
-| NAV-02 | Phase 14 | Pending |
+| NAV-02 | Phase 14 | Complete |
 
 **Coverage:**
 - v1.4 requirements: 8 total
