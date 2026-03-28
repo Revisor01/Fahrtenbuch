@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UX Polish & Navigation
-status: verifying
-stopped_at: Completed 13-03-PLAN.md
-last_updated: "2026-03-28T16:45:46.027Z"
+status: executing
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-03-28T16:54:45.414Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Dashboard poliert, Einstellungen inline, Umlaute korrekt
-**Current focus:** Phase 13 — dashboard-polish
+**Current focus:** Phase 14 — navigation-umbau
 
 ## Current Position
 
-Phase: 14
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 14 (navigation-umbau) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-03-28
 
 Progress: [░░░░░░░░░░] 0%
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13 P01 | 2min | 2 tasks | 1 files |
 | Phase 13 P02 | 2min | 2 tasks | 4 files |
 | Phase 13 P03 | 2min | 1 tasks | 4 files |
+| Phase 14 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,7 @@ Recent decisions affecting current work:
 - [Phase 13]: Merged km-Chart and Erstattungen into single Statistik card for visual cohesion
 - [Phase 13]: Used existing NotificationModal multi-action support for Rueckfahrt dialog
 - [Phase 13]: Variable names with ae/oe/ue kept as technical identifiers; only user-visible strings corrected
+- [Phase 14]: Settings als Inline-Tab statt Modal — SettingsIcon Alias fuer Namenskonflikt
 
 ### Pending Todos
 
@@ -79,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T16:45:21.762Z
-Stopped at: Completed 13-03-PLAN.md
+Last session: 2026-03-28T16:54:45.412Z
+Stopped at: Completed 14-01-PLAN.md
 Resume file: None

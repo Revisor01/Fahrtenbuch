@@ -177,7 +177,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — Settings.js erstellen und Einstellungen als inline Tab
+- [x] 14-01-PLAN.md — Settings.js erstellen und Einstellungen als inline Tab
 - [ ] 14-02-PLAN.md — Verwaltung-Tab fuer Admins und Modal-Cleanup
 **UI hint**: yes
 
@@ -201,4 +201,4 @@ Phases execute in numeric order: 13 → 14
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
 | 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete    | 2026-03-28 |
-| 14. Navigation-Umbau | v1.4 | 0/2 | Not started | - |
+| 14. Navigation-Umbau | v1.4 | 1/2 | In Progress|  |
