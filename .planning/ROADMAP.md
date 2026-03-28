@@ -188,7 +188,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
+- [x] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
 - [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
 
 **UI hint**: yes
@@ -266,7 +266,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
 | 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete | 2026-03-28 |
 | 14. Navigation-Umbau | v1.4 | 2/2 | Complete | 2026-03-28 |
-| 15. Designsystem | v2.0 | 0/? | Not started | - |
+| 15. Designsystem | v2.0 | 1/2 | In Progress|  |
 | 16. Dashboard Makeover | v2.0 | 0/? | Not started | - |
 | 17. Listen & Uebersichten | v2.0 | 0/? | Not started | - |
 | 18. Einstellungen, Login & Polish | v2.0 | 0/? | Not started | - |
