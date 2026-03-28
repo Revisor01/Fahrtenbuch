@@ -109,7 +109,7 @@ Plans:
 
 - [x] **Phase 10: Favoriten & Quick-Copy** - Favoriten-System und "Nochmal fuer heute" fuer schnelle Fahrteingabe (completed 2026-03-28)
 - [x] **Phase 11: Dashboard, Navigation & Statistiken** - Dashboard-Startseite mit KPIs, Formular, Statistiken und neue Tab-Navigation (completed 2026-03-28)
-- [ ] **Phase 12: Adress-Autocomplete** - Ort-Eingabe mit Nominatim-Vorschlaegen
+- [x] **Phase 12: Adress-Autocomplete** - Ort-Eingabe mit Nominatim-Vorschlaegen (completed 2026-03-28)
 
 ## Phase Details
 
@@ -155,7 +155,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — AddressAutocomplete Komponente mit Nominatim-Integration, OrtForm und FahrtForm Einbindung
+- [x] 12-01-PLAN.md — AddressAutocomplete Komponente mit Nominatim-Integration, OrtForm und FahrtForm Einbindung
 
 ## Progress
 
@@ -175,4 +175,4 @@ Phases execute in numeric order: 10 → 11 → 12
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 1/2 | Complete    | 2026-03-28 |
-| 12. Adress-Autocomplete | v1.3 | 0/1 | Not started | - |
+| 12. Adress-Autocomplete | v1.3 | 1/1 | Complete   | 2026-03-28 |

@@ -24,7 +24,7 @@
 
 ### Adress-Autocomplete
 
-- [ ] **ADDR-01**: Bei Ort-Eingabe Adress-Vorschlaege via OpenStreetMap/Nominatim API
+- [x] **ADDR-01**: Bei Ort-Eingabe Adress-Vorschlaege via OpenStreetMap/Nominatim API
 
 ## Out of Scope
 
@@ -46,7 +46,7 @@
 | DASH-03 | Phase 11 | Complete |
 | STAT-01 | Phase 11 | Pending |
 | STAT-02 | Phase 11 | Pending |
-| ADDR-01 | Phase 12 | Pending |
+| ADDR-01 | Phase 12 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 9 total
