@@ -205,8 +205,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [x] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
-- [ ] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
+- [ ] 16-01-PLAN.md — Dashboard UI Makeover: KPI-Grid, Touch-Targets, Export-Schnellzugriff
+- [ ] 16-02-PLAN.md — FahrtForm aus Fahrten-Tab entfernen (Dashboard-Exklusivitaet)
 
 **UI hint**: yes
 
@@ -267,6 +267,6 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete | 2026-03-28 |
 | 14. Navigation-Umbau | v1.4 | 2/2 | Complete | 2026-03-28 |
 | 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 16. Dashboard Makeover | v2.0 | 0/? | Not started | - |
+| 16. Dashboard Makeover | v2.0 | 0/2 | In progress | - |
 | 17. Listen & Uebersichten | v2.0 | 0/? | Not started | - |
 | 18. Einstellungen, Login & Polish | v2.0 | 0/? | Not started | - |
