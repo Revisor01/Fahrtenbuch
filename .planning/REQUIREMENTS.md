@@ -20,9 +20,9 @@
 
 ### Fahrtenliste & Export
 
-- [ ] **FE-01**: Fahrtenliste zeigt nur die Liste (kein Eingabeformular) in modernem Card-Layout
-- [ ] **FE-02**: Filter- und Export-Bereich sind visuell modernisiert und klar abgegrenzt
-- [ ] **FE-03**: Mobile Darstellung der Fahrtenliste ist kompakt und touch-freundlich
+- [x] **FE-01**: Fahrtenliste zeigt nur die Liste (kein Eingabeformular) in modernem Card-Layout
+- [x] **FE-02**: Filter- und Export-Bereich sind visuell modernisiert und klar abgegrenzt
+- [x] **FE-03**: Mobile Darstellung der Fahrtenliste ist kompakt und touch-freundlich
 
 ### Einstellungen
 
@@ -31,8 +31,8 @@
 
 ### Monatsuebersicht
 
-- [ ] **MO-01**: Monatsuebersicht in modernem Card-Layout dargestellt
-- [ ] **MO-02**: Tabellen und Zusammenfassungen sind uebersichtlich und visuell ansprechend
+- [x] **MO-01**: Monatsuebersicht in modernem Card-Layout dargestellt
+- [x] **MO-02**: Tabellen und Zusammenfassungen sind uebersichtlich und visuell ansprechend
 
 ### Transitions & Animationen
 
@@ -67,11 +67,11 @@
 | DASH-09 | Phase 16 | Pending |
 | DASH-10 | Phase 16 | Pending |
 | DASH-11 | Phase 16 | Pending |
-| FE-01 | Phase 17 | Pending |
-| FE-02 | Phase 17 | Pending |
-| FE-03 | Phase 17 | Pending |
-| MO-01 | Phase 17 | Pending |
-| MO-02 | Phase 17 | Pending |
+| FE-01 | Phase 17 | Complete |
+| FE-02 | Phase 17 | Complete |
+| FE-03 | Phase 17 | Complete |
+| MO-01 | Phase 17 | Complete |
+| MO-02 | Phase 17 | Complete |
 | SET-01 | Phase 18 | Pending |
 | SET-02 | Phase 18 | Pending |
 | LOG-01 | Phase 18 | Pending |
