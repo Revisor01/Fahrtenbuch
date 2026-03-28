@@ -13,7 +13,7 @@
 
 ### Dashboard
 
-- [ ] **DASH-08**: Dashboard ist die einzige Stelle zum Erfassen neuer Fahrten (Formular nur hier)
+- [x] **DASH-08**: Dashboard ist die einzige Stelle zum Erfassen neuer Fahrten (Formular nur hier)
 - [ ] **DASH-09**: Formular "Neue Fahrt erfassen" hat ein visuell ansprechendes, modernes Layout
 - [ ] **DASH-10**: Alle Dashboard-Elemente sind auf Mobile touch-freundlich und optimal dargestellt
 - [ ] **DASH-11**: Export-Zugang auch vom Dashboard aus erreichbar (Schnellzugriff)
@@ -63,7 +63,7 @@
 | DS-01 | Phase 15 | Complete |
 | DS-02 | Phase 15 | Complete |
 | DS-03 | Phase 15 | Complete |
-| DASH-08 | Phase 16 | Pending |
+| DASH-08 | Phase 16 | Complete |
 | DASH-09 | Phase 16 | Pending |
 | DASH-10 | Phase 16 | Pending |
 | DASH-11 | Phase 16 | Pending |
