@@ -175,4 +175,4 @@ Phases execute in numeric order: 10 → 11 → 12
 | 9. PDF-Export | v1.2 | 2/2 | Complete | 2026-03-22 |
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete    | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 1/2 | Complete    | 2026-03-28 |
-| 12. Adress-Autocomplete | v1.3 | 1/1 | Complete   | 2026-03-28 |
+| 12. Adress-Autocomplete | v1.3 | 1/1 | Complete    | 2026-03-28 |
