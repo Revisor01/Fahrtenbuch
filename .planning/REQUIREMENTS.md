@@ -26,8 +26,8 @@
 
 ### Einstellungen
 
-- [ ] **SET-01**: Einstellungen-Sub-Tabs haben eine aufgewertete Navigation mit Card-Layout
-- [ ] **SET-02**: Alle Formulare in den Einstellungen haben ein modernes, einheitliches Design
+- [x] **SET-01**: Einstellungen-Sub-Tabs haben eine aufgewertete Navigation mit Card-Layout
+- [x] **SET-02**: Alle Formulare in den Einstellungen haben ein modernes, einheitliches Design
 
 ### Monatsuebersicht
 
@@ -72,8 +72,8 @@
 | FE-03 | Phase 17 | Complete |
 | MO-01 | Phase 17 | Complete |
 | MO-02 | Phase 17 | Complete |
-| SET-01 | Phase 18 | Pending |
-| SET-02 | Phase 18 | Pending |
+| SET-01 | Phase 18 | Complete |
+| SET-02 | Phase 18 | Complete |
 | LOG-01 | Phase 18 | Pending |
 | LOG-02 | Phase 18 | Pending |
 | ANI-01 | Phase 18 | Pending |

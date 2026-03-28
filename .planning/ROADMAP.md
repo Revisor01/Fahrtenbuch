@@ -240,8 +240,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — Settings Sub-Tabs aufwerten und Formulare in Cards einbetten
-- [ ] 18-02-PLAN.md — Login-Seite und Landing-Page modernisieren
+- [x] 18-01-PLAN.md — Settings Sub-Tabs aufwerten und Formulare in Cards einbetten
+- [x] 18-02-PLAN.md — Login-Seite und Landing-Page modernisieren
 - [ ] 18-03-PLAN.md — CSS-Transitions fuer Tab-Wechsel und Card-Interaktionen
 
 **UI hint**: yes
@@ -270,4 +270,4 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 18. Einstellungen, Login & Polish | v2.0 | 0/3 | Not started | - |
+| 18. Einstellungen, Login & Polish | v2.0 | 2/3 | In Progress|  |
