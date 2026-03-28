@@ -170,7 +170,7 @@ Plans:
 **Milestone Goal:** Komplettes visuelles Redesign der gesamten App — modern, mobil-optimiert, attraktiv. Alle bestehenden Funktionen bleiben, aber jede Ansicht bekommt ein zeitgemaesses UI mit einheitlichem Designsystem.
 
 - [x] **Phase 15: Designsystem** - Einheitliche Variablen, Card-Komponente und Dark Mode als Grundlage fuer alle Views (completed 2026-03-28)
-- [ ] **Phase 16: Dashboard Makeover** - Dashboard komplett neu gestaltet mit Formular-Exklusivitaet, modernem Layout und Mobile-Optimierung
+- [x] **Phase 16: Dashboard Makeover** - Dashboard komplett neu gestaltet mit Formular-Exklusivitaet, modernem Layout und Mobile-Optimierung (completed 2026-03-28)
 - [ ] **Phase 17: Listen & Uebersichten** - Fahrtenliste, Export-Bereich und Monatsuebersicht visuell modernisiert
 - [ ] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff
 
@@ -267,6 +267,6 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete | 2026-03-28 |
 | 14. Navigation-Umbau | v1.4 | 2/2 | Complete | 2026-03-28 |
 | 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 16. Dashboard Makeover | v2.0 | 1/2 | In Progress|  |
+| 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 0/? | Not started | - |
 | 18. Einstellungen, Login & Polish | v2.0 | 0/? | Not started | - |
