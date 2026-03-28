@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { renderOrteOptions } from '../utils';
+import AddressAutocomplete from './AddressAutocomplete';
 
 function OrtForm() {
   const { orte, addOrt, showNotification } = useContext(AppContext);
@@ -48,11 +49,9 @@ function OrtForm() {
     </div>
     <div className="w-full sm:w-1/3">
     <label className="form-label">Adresse</label>
-    <input
-    type="text"
+    <AddressAutocomplete
     value={adresse}
-    onChange={(e) => setAdresse(e.target.value)}
-    className="form-input"
+    onChange={(val) => setAdresse(val)}
     placeholder="Vollständige Adresse"
     required
     />
