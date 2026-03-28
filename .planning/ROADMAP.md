@@ -142,7 +142,7 @@ Plans:
 
 **Milestone Goal:** Dashboard-Polish (Cards, Statistiken, Favoriten mit Rueckfahrt), Umlaute korrigieren, Einstellungen und Benutzerverwaltung als inline Tabs statt Modal/Button.
 
-- [ ] **Phase 13: Dashboard-Polish & Kleinigkeiten** - Dashboard Cards, Statistik-Details, Favoriten-Rueckfahrt und Umlaut-Korrektur
+- [x] **Phase 13: Dashboard-Polish & Kleinigkeiten** - Dashboard Cards, Statistik-Details, Favoriten-Rueckfahrt und Umlaut-Korrektur (completed 2026-03-28)
 - [ ] **Phase 14: Navigation-Umbau** - Einstellungen und Benutzerverwaltung inline als Tabs statt Modal/Button
 
 ## Phase Details
@@ -162,7 +162,7 @@ Plans:
 Plans:
 - [x] 13-01-PLAN.md — Dashboard Cards, Statistik-Integration und Formular-Redesign
 - [x] 13-02-PLAN.md — Favoriten-Rueckfahrt-Dialog und Nochmal-Buttons mit Richtungswahl
-- [ ] 13-03-PLAN.md — Umlaut-Korrektur in allen Frontend- und Backend-Dateien
+- [x] 13-03-PLAN.md — Umlaut-Korrektur in allen Frontend- und Backend-Dateien
 
 **UI hint**: yes
 
@@ -196,5 +196,5 @@ Phases execute in numeric order: 13 → 14
 | 10. Favoriten & Quick-Copy | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
-| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 2/3 | In Progress|  |
+| 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete   | 2026-03-28 |
 | 14. Navigation-Umbau | v1.4 | 0/0 | Not started | - |

@@ -23,7 +23,7 @@
 
 ### Textqualitaet
 
-- [ ] **TEXT-01**: Alle Texte in der App korrekt mit deutschen Umlauten (aeoeuess) — keine Ersatzschreibweisen
+- [x] **TEXT-01**: Alle Texte in der App korrekt mit deutschen Umlauten (aeoeuess) — keine Ersatzschreibweisen
 
 ## Out of Scope
 
@@ -41,7 +41,7 @@
 | DASH-06 | Phase 13 | Complete |
 | DASH-07 | Phase 13 | Complete |
 | FAV-04 | Phase 13 | Complete |
-| TEXT-01 | Phase 13 | Pending |
+| TEXT-01 | Phase 13 | Complete |
 | NAV-01 | Phase 14 | Pending |
 | NAV-02 | Phase 14 | Pending |
 
