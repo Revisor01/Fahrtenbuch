@@ -2,7 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
-import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown } from 'lucide-react';
+import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -36,7 +36,7 @@ function Dashboard({ onNavigate }) {
   // KPI: total trips count
   const fahrtenGesamt = fahrten.length;
 
-  // Last 5 trips sorted by date descending, then by id descending
+  // Last 3 trips sorted by date descending, then by id descending
   const letzteTrips = useMemo(() => {
     const sorted = [...fahrten].sort((a, b) => {
       const dateA = new Date(a.datum);
@@ -44,7 +44,7 @@ function Dashboard({ onNavigate }) {
       if (dateB - dateA !== 0) return dateB - dateA;
       return (b.id || 0) - (a.id || 0);
     });
-    return sorted.slice(0, 5);
+    return sorted.slice(0, 3);
   }, [fahrten]);
 
   // Month abbreviations for chart labels
@@ -216,44 +216,50 @@ function Dashboard({ onNavigate }) {
           <h2 className="text-base font-medium text-value">Favoriten</h2>
         </div>
         {favoriten.length === 0 ? (
-          <p className="text-sm text-muted">Keine Favoriten gespeichert. Erstelle Favoriten in den Einstellungen.</p>
+          <p className="text-sm text-muted">Keine Favoriten gespeichert.</p>
         ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {favoriten.map((fav) => (
-                <button
-                  key={fav.id}
-                  onClick={() => handleExecuteFavorit(fav)}
-                  className="text-left rounded-card border border-card min-h-[44px] p-3 hover:shadow-card-hover transition-all"
-                >
-                  <p className="text-sm font-medium text-value">
-                    {fav.von_ort_name} &rarr; {fav.nach_ort_name}
-                  </p>
-                  {fav.anlass && (
-                    <p className="text-xs text-muted mt-1">{fav.anlass}</p>
-                  )}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => onNavigate && onNavigate('einstellungen')}
-              className="w-full mt-3 text-sm py-2 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors text-center"
-            >
-              Weitere Favoriten hinzufügen &rarr;
-            </button>
-          </>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {favoriten.map((fav) => (
+              <button
+                key={fav.id}
+                onClick={() => handleExecuteFavorit(fav)}
+                className="text-left rounded-card border border-card min-h-[44px] p-3 hover:shadow-card-hover transition-all"
+              >
+                <p className="text-sm font-medium text-value">
+                  {fav.von_ort_name} &rarr; {fav.nach_ort_name}
+                </p>
+                {fav.anlass && (
+                  <p className="text-xs text-muted mt-1">{fav.anlass}</p>
+                )}
+              </button>
+            ))}
+          </div>
         )}
+        <div className="flex justify-end mt-3">
+          <button
+            onClick={() => onNavigate && onNavigate('einstellungen')}
+            className="text-sm px-3 py-1.5 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
+          >
+            Favoriten verwalten &rarr;
+          </button>
+        </div>
       </div>
 
       {/* Fahrt-Formular — immer sichtbar */}
       <div className="card-container">
-        <h2 className="text-base font-medium text-value mb-4">Neue Fahrt erfassen</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <Plus size={18} className="text-primary-500" />
+          <h2 className="text-base font-medium text-value">Neue Fahrt erfassen</h2>
+        </div>
         <FahrtForm />
       </div>
 
-      {/* Letzte 5 Fahrten */}
+      {/* Letzte 3 Fahrten */}
       <div className="card-container">
-        <h2 className="text-base font-medium text-value mb-3">Letzte Fahrten</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <Clock size={18} className="text-orange-500" />
+          <h2 className="text-base font-medium text-value">Letzte Fahrten</h2>
+        </div>
         {letzteTrips.length === 0 ? (
           <p className="text-sm text-muted">Noch keine Fahrten erfasst.</p>
         ) : (
@@ -270,11 +276,9 @@ function Dashboard({ onNavigate }) {
                       {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
                     </span>
                   </div>
-                  {fahrt.anlass && (
-                    <p className="text-xs text-value mt-0.5">{fahrt.anlass}</p>
-                  )}
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
                     <span>{fahrt.kilometer} km</span>
+                    {fahrt.anlass && <span className="font-semibold text-value">&middot; {fahrt.anlass}</span>}
                     {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
                     {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
                       <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
@@ -301,12 +305,14 @@ function Dashboard({ onNavigate }) {
                 </div>
               </div>
             ))}
-            <button
-              onClick={() => onNavigate && onNavigate('fahrten')}
-              className="w-full mt-3 text-sm py-2 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors text-center"
-            >
-              Alle Fahrten anzeigen &rarr;
-            </button>
+            <div className="flex justify-end mt-3">
+              <button
+                onClick={() => onNavigate && onNavigate('fahrten')}
+                className="text-sm px-3 py-1.5 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
+              >
+                Alle Fahrten anzeigen &rarr;
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -336,7 +342,7 @@ function Dashboard({ onNavigate }) {
           </div>
         </div>
         {!hasKmData && !hasErstattungen ? (
-          <p className="text-sm text-muted text-center py-8">Keine Daten in {statistikJahr}</p>
+          <p className="text-sm text-muted text-center py-8">{monthlyData.length === 0 ? 'Statistik wird geladen...' : `Keine Daten in ${statistikJahr}`}</p>
         ) : (
           <>
             {/* km-Balkendiagramm */}
