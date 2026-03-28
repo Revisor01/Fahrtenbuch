@@ -409,7 +409,7 @@ tbody {
 
   /* Tab Content Transitions */
   .tab-content-fade {
-    animation: tabFadeIn 200ms ease-out;
+    animation: tabFadeIn 150ms ease-out forwards;
   }
 }
 
@@ -455,8 +455,8 @@ tbody {
 
 @keyframes tabFadeIn {
   from {
-    opacity: 0;
-    transform: translateY(4px);
+    opacity: 0.7;
+    transform: translateY(2px);
   }
   to {
     opacity: 1;
