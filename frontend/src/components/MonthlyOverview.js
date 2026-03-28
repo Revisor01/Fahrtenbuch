@@ -198,7 +198,7 @@ function MonthlyOverview() {
       <div className="relative">
       <button
       onClick={() => setIsOpen(!isOpen)}
-      className="btn-primary w-full sm:w-auto flex items-center justify-between gap-2"
+      className="btn-primary w-full sm:w-auto flex items-center justify-between gap-2 min-h-[44px]"
       >
       <span>Schnellaktionen</span>
       <span className={`transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}>
@@ -209,7 +209,7 @@ function MonthlyOverview() {
       {isOpen && (
         <>
         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-        <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
+        <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-card shadow-card border border-primary-100 dark:border-primary-700 z-50">
         {actions.map((action, index) => (
           <button
           key={index}
@@ -217,7 +217,7 @@ function MonthlyOverview() {
             await action.action();
             setIsOpen(false);
           }}
-          className="w-full text-left px-4 py-2 text-sm text-value hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-150"
+          className="w-full text-left px-4 py-2 text-sm text-value hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-150 min-h-[44px] flex items-center"
           >
           {action.label}
           </button>
@@ -328,8 +328,9 @@ function MonthlyOverview() {
     {/* Titel und Aktuelles Jahr - immer in einer Zeile */}
     <div className="flex justify-between items-center">
     <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
+    <p className="text-sm text-label mt-1">{selectedYear === 'all' ? 'Alle Jahre' : selectedYear}</p>
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary">
+      <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary min-h-[44px]">
       Aktuelles Jahr
       </button>
     )}
@@ -339,7 +340,7 @@ function MonthlyOverview() {
     <div className="hidden sm:flex items-center gap-4 ml-auto">
     <label className="checkbox-label">
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary min-h-[44px]">
       Aktuelles Jahr
       </button>
     )}
@@ -355,7 +356,7 @@ function MonthlyOverview() {
     <select
     value={selectedYear}
     onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select w-24"
+    className="form-select w-24 min-h-[44px]"
     >
     <option value="all">Gesamt</option>
     {[...new Set(monthlyData.map(m => m.year))]
@@ -370,7 +371,7 @@ function MonthlyOverview() {
 
     {/* Zweite Zeile - nur Mobile */}
     <div className="flex sm:hidden items-center justify-end gap-4">
-    <label className="checkbox-label">
+    <label className="checkbox-label min-h-[44px] flex items-center">
     <input
     type="checkbox"
     id="hideCompleted"
@@ -383,7 +384,7 @@ function MonthlyOverview() {
     <select
     value={selectedYear}
     onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select w-24"
+    className="form-select w-24 min-h-[44px]"
     >
     <option value="all">Gesamt</option>
     {[...new Set(monthlyData.map(m => m.year))]
@@ -435,7 +436,7 @@ function MonthlyOverview() {
 
     {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
-      <div className="card-container col-span-1 sm:col-span-2 lg:col-span-full">
+      <div className="card-container-highlight col-span-1 sm:col-span-2 lg:col-span-full">
       <div className="flex justify-between items-center mb-2">
       <span className="text-sm text-label">Gesamt</span>
       <span className="text-value font-medium">
@@ -595,6 +596,11 @@ function MonthlyOverview() {
       );
     })}
     </div>
+    {filteredData.length === 0 && (
+      <div className="card-container text-center py-12">
+        <p className="text-label">Keine offenen Abrechnungen im ausgewaehlten Zeitraum</p>
+      </div>
+    )}
     <AbrechnungsStatusModal
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'}
     onClose={() => setAbrechnungsStatusModal({})}
