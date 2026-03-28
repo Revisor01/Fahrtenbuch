@@ -30,6 +30,8 @@ function AppProvider({ children }) {
   const [hasActiveNotification, setHasActiveNotification] = useState(false);
   const isLoggingOut = useRef(false);
 
+  const [favoriten, setFavoriten] = useState([]);
+
   const [abrechnungsStatusModal, setAbrechnungsStatusModal] = useState({
     open: false,
     traegerId: null,
@@ -37,6 +39,47 @@ function AppProvider({ children }) {
     jahr: null,
     monat: null
   });
+
+  const fetchFavoriten = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/favoriten`);
+      setFavoriten(response.data);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Favoriten:', error);
+      setFavoriten([]);
+    }
+  };
+
+  const addFavorit = async (data) => {
+    try {
+      await axios.post(`${API_BASE_URL}/favoriten`, data);
+      await fetchFavoriten();
+    } catch (error) {
+      console.error('Fehler beim Hinzufuegen des Favoriten:', error);
+      throw error;
+    }
+  };
+
+  const deleteFavorit = async (id) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/favoriten/${id}`);
+      await fetchFavoriten();
+    } catch (error) {
+      console.error('Fehler beim Loeschen des Favoriten:', error);
+      throw error;
+    }
+  };
+
+  const executeFavorit = async (id) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/favoriten/${id}/execute`);
+      await refreshAllData();
+      return response.data;
+    } catch (error) {
+      console.error('Fehler beim Ausfuehren des Favoriten:', error);
+      throw error;
+    }
+  };
 
   const refreshAllData = async (callback) => {
     try {
@@ -48,6 +91,8 @@ function AppProvider({ children }) {
         axios.get('/api/abrechnungstraeger/simple'),
         axios.get('/api/abrechnungstraeger')
       ]);
+      // Favoriten separat laden (kein Fehler wenn Endpoint nicht verfuegbar)
+      fetchFavoriten().catch(() => {});
 
       // Hier die tatsächlichen Daten setzen
       if (fahrtenRes) setFahrten(fahrtenRes);
@@ -454,7 +499,12 @@ function AppProvider({ children }) {
       abrechnungstraeger,
       setAbrechnungstraeger,
       selectedVonMonth,
-      setSelectedVonMonth
+      setSelectedVonMonth,
+      favoriten,
+      fetchFavoriten,
+      addFavorit,
+      deleteFavorit,
+      executeFavorit
     }}>
     {children}
     <NotificationModal

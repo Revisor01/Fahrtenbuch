@@ -10,7 +10,7 @@ import DistanzForm from './components/DistanzForm';
 import DistanzenListe from './components/DistanzenListe';
     
 function ProfileModal({ isOpen, onClose }) {
-    const { token, user, setUser, showNotification, refreshAllData } = useContext(AppContext);
+    const { token, user, setUser, showNotification, refreshAllData, favoriten, orte, abrechnungstraeger, addFavorit, deleteFavorit, fetchFavoriten } = useContext(AppContext);
     const [profile, setProfile] = useState({});
     const [activeTab, setActiveTab] = useState('profile');
     const [oldPassword, setOldPassword] = useState('');
@@ -20,12 +20,14 @@ function ProfileModal({ isOpen, onClose }) {
     const [newKeyDescription, setNewKeyDescription] = useState('');
     const [generatedKey, setGeneratedKey] = useState(null);
     const [isGeneratingKey, setIsGeneratingKey] = useState(false);
+    const [favoritForm, setFavoritForm] = useState({ vonOrtId: '', nachOrtId: '', anlass: '', abrechnungstraegerId: '' });
 
     const tabs = [
         { id: 'profile', name: 'Profil' },
         { id: 'orte', name: 'Orte' },
         { id: 'distanzen', name: 'Distanzen' },
         { id: 'abrechnungen', name: 'Träger' },
+        { id: 'favoriten', name: 'Favoriten' },
         { id: 'erstattungssaetze', name: 'Erstattungen' },
         { id: 'security', name: 'Passwort' },
         { id: 'api', name: 'API-Zugriff' }
@@ -35,6 +37,7 @@ function ProfileModal({ isOpen, onClose }) {
         if (isOpen) {
             fetchProfile();
             fetchApiKeys();
+            fetchFavoriten();
         } else {
             resetForm();
         }
@@ -334,6 +337,149 @@ function ProfileModal({ isOpen, onClose }) {
             </div>
         )}
         
+        {activeTab === 'favoriten' && (
+            <div className="space-y-6">
+            {/* Formular zum Hinzufuegen */}
+            <div className="card-container-highlight">
+            <h3 className="text-lg font-medium text-value mb-4">Neuen Favoriten anlegen</h3>
+            <p className="text-sm text-muted mb-6">
+            Speichern Sie haeufig gefahrene Strecken als Favoriten, um sie spaeter mit einem Klick zu wiederholen.
+            </p>
+            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+            <label className="form-label">Von</label>
+            <select
+            value={favoritForm.vonOrtId}
+            onChange={(e) => setFavoritForm({ ...favoritForm, vonOrtId: e.target.value })}
+            className="form-select w-full"
+            >
+            <option value="">Bitte waehlen</option>
+            {orte.map(ort => (
+                <option key={ort.id} value={ort.id}>{ort.name}</option>
+            ))}
+            </select>
+            </div>
+            <div>
+            <label className="form-label">Nach</label>
+            <select
+            value={favoritForm.nachOrtId}
+            onChange={(e) => setFavoritForm({ ...favoritForm, nachOrtId: e.target.value })}
+            className="form-select w-full"
+            >
+            <option value="">Bitte waehlen</option>
+            {orte.map(ort => (
+                <option key={ort.id} value={ort.id}>{ort.name}</option>
+            ))}
+            </select>
+            </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+            <label className="form-label">Anlass</label>
+            <input
+            type="text"
+            value={favoritForm.anlass}
+            onChange={(e) => setFavoritForm({ ...favoritForm, anlass: e.target.value })}
+            className="form-input w-full"
+            placeholder="z.B. Dienstbesprechung"
+            />
+            </div>
+            <div>
+            <label className="form-label">Traeger</label>
+            <select
+            value={favoritForm.abrechnungstraegerId}
+            onChange={(e) => setFavoritForm({ ...favoritForm, abrechnungstraegerId: e.target.value })}
+            className="form-select w-full"
+            >
+            <option value="">Bitte waehlen</option>
+            {abrechnungstraeger.map(at => (
+                <option key={at.id} value={at.id}>{at.name}</option>
+            ))}
+            </select>
+            </div>
+            </div>
+            <div className="flex justify-end">
+            <button
+            type="button"
+            onClick={async () => {
+                if (!favoritForm.vonOrtId || !favoritForm.nachOrtId) {
+                    showNotification('Fehler', 'Bitte waehlen Sie Von- und Nach-Ort aus.');
+                    return;
+                }
+                try {
+                    await addFavorit({
+                        vonOrtId: parseInt(favoritForm.vonOrtId),
+                        nachOrtId: parseInt(favoritForm.nachOrtId),
+                        anlass: favoritForm.anlass || '',
+                        abrechnungstraegerId: favoritForm.abrechnungstraegerId ? parseInt(favoritForm.abrechnungstraegerId) : null
+                    });
+                    setFavoritForm({ vonOrtId: '', nachOrtId: '', anlass: '', abrechnungstraegerId: '' });
+                    showNotification('Erfolg', 'Favorit wurde gespeichert.');
+                } catch (error) {
+                    showNotification('Fehler', 'Favorit konnte nicht gespeichert werden.');
+                }
+            }}
+            className="btn-primary mobile-full"
+            >
+            Favorit speichern
+            </button>
+            </div>
+            </div>
+            </div>
+
+            {/* Liste bestehender Favoriten */}
+            {favoriten.length === 0 ? (
+                <div className="card-container">
+                <p className="text-sm text-muted text-center py-4">
+                Noch keine Favoriten gespeichert
+                </p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {favoriten.map(fav => (
+                    <div key={fav.id} className="card-container">
+                    <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                    <div className="font-medium text-value truncate">
+                    {fav.von_ort_name} → {fav.nach_ort_name}
+                    </div>
+                    {fav.anlass && (
+                        <div className="text-sm text-label mt-1">{fav.anlass}</div>
+                    )}
+                    {fav.traeger_name && (
+                        <div className="text-xs text-muted mt-1">{fav.traeger_name}</div>
+                    )}
+                    </div>
+                    <button
+                    onClick={() => {
+                        showNotification(
+                            'Favorit loeschen',
+                            `Moechten Sie den Favoriten "${fav.von_ort_name} → ${fav.nach_ort_name}" wirklich loeschen?`,
+                            async () => {
+                                try {
+                                    await deleteFavorit(fav.id);
+                                    showNotification('Erfolg', 'Favorit wurde geloescht.');
+                                } catch (error) {
+                                    showNotification('Fehler', 'Favorit konnte nicht geloescht werden.');
+                                }
+                            },
+                            true
+                        );
+                    }}
+                    className="table-action-button-secondary ml-2 flex-shrink-0"
+                    title="Loeschen"
+                    >
+                    ×
+                    </button>
+                    </div>
+                    </div>
+                ))}
+                </div>
+            )}
+            </div>
+        )}
+
         {activeTab === 'erstattungssaetze' && (
             <div>
             <ErstattungssaetzeForm />
