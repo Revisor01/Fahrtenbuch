@@ -264,6 +264,7 @@ function Dashboard({ onNavigate }) {
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
                     <span>{fahrt.kilometer} km</span>
+                    {fahrt.anlass && <span>&middot; {fahrt.anlass}</span>}
                     {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
                     {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
                       <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
@@ -290,6 +291,12 @@ function Dashboard({ onNavigate }) {
                 </div>
               </div>
             ))}
+            <button
+              onClick={() => onNavigate && onNavigate('fahrten')}
+              className="w-full mt-2 text-sm text-primary-500 hover:text-primary-700 dark:hover:text-primary-300 transition-colors text-center py-2"
+            >
+              Alle Fahrten anzeigen &rarr;
+            </button>
           </div>
         )}
       </div>
