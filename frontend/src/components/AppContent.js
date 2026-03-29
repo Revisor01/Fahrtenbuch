@@ -129,11 +129,11 @@ function AppContent() {
     </div>
 
     {/* Hauptinhalt */}
-    {activeTab === 'dashboard' && <div key="dashboard" className="tab-content-fade"><Dashboard onNavigate={handleNavigate} /></div>}
-    {activeTab === 'fahrten' && <div key="fahrten" className="tab-content-fade"><FahrtenListe /></div>}
-    {activeTab === 'monatsuebersicht' && <div key="monatsuebersicht" className="tab-content-fade"><MonthlyOverview /></div>}
-    {activeTab === 'einstellungen' && <div key="einstellungen" className="tab-content-fade"><Settings initialTab={settingsSubTab} /></div>}
-    {activeTab === 'verwaltung' && <div key="verwaltung" className="tab-content-fade"><UserManagement /></div>}
+    {activeTab === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
+    {activeTab === 'fahrten' && <FahrtenListe />}
+    {activeTab === 'monatsuebersicht' && <MonthlyOverview />}
+    {activeTab === 'einstellungen' && <Settings initialTab={settingsSubTab} />}
+    {activeTab === 'verwaltung' && <UserManagement />}
 
     {/* Modals */}
 

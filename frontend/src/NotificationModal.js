@@ -37,7 +37,7 @@ function NotificationModal({ isOpen, onClose, title, message, onConfirm, showCan
         )}
         <button
         onClick={onClose}
-        className="w-full text-sm text-muted hover:text-value transition-colors py-2"
+        className="w-full text-sm text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-400 transition-colors py-2"
         >
         Abbrechen
         </button>
@@ -53,7 +53,7 @@ function NotificationModal({ isOpen, onClose, title, message, onConfirm, showCan
         {showCancel && (
           <button
           onClick={onClose}
-          className="w-full text-sm text-muted hover:text-value transition-colors py-2"
+          className="w-full text-sm text-secondary-500 hover:text-secondary-700 dark:hover:text-secondary-400 transition-colors py-2"
           >
           Abbrechen
           </button>
