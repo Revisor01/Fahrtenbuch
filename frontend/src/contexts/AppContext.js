@@ -165,9 +165,7 @@ function AppProvider({ children }) {
 
   useEffect(() => {
     if (isLoggedIn) {
-      fetchOrte();
-      fetchDistanzen();
-      fetchFahrten();
+      refreshAllData();
     }
   }, [isLoggedIn]);
 
