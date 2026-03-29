@@ -207,7 +207,7 @@ function Settings({ initialTab }) {
         {/* Content-Bereich */}
         <div className="flex-1">
         {activeTab === 'profile' && (
-            <div key="profile" className="tab-content-fade"><div className="space-y-4">
+            <div key="profile" ><div className="space-y-4">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Persönliche Daten</h3>
             <p className="text-sm text-muted mb-6">
@@ -310,7 +310,7 @@ function Settings({ initialTab }) {
         )}
 
         {activeTab === 'orte' && (
-            <div key="orte" className="tab-content-fade"><div className="space-y-6">
+            <div key="orte" ><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neuen Ort anlegen</h3>
             <p className="text-sm text-muted mb-6">Erfassen Sie Orte, die Sie regelmässig als Start- oder Zielort nutzen.</p>
@@ -324,7 +324,7 @@ function Settings({ initialTab }) {
         )}
 
         {activeTab === 'distanzen' && (
-            <div key="distanzen" className="tab-content-fade"><div className="space-y-6">
+            <div key="distanzen" ><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neue Distanz anlegen</h3>
             <p className="text-sm text-muted mb-6">Hinterlegen Sie Entfernungen zwischen Orten fuer die automatische Kilometerberechnung.</p>
@@ -338,7 +338,7 @@ function Settings({ initialTab }) {
         )}
 
         {activeTab === 'abrechnungen' && (
-            <div key="abrechnungen" className="tab-content-fade"><div className="space-y-6">
+            <div key="abrechnungen" ><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Abrechnungstraeger verwalten</h3>
             <p className="text-sm text-muted mb-6">Verwalten Sie die Organisationen und Traeger, an die Ihre Fahrten abgerechnet werden.</p>
@@ -348,7 +348,7 @@ function Settings({ initialTab }) {
         )}
 
         {activeTab === 'favoriten' && (
-            <div key="favoriten" className="tab-content-fade"><div className="space-y-6">
+            <div key="favoriten" ><div className="space-y-6">
             {/* Formular zum Hinzufügen */}
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Neuen Favoriten anlegen</h3>
@@ -491,7 +491,7 @@ function Settings({ initialTab }) {
         )}
 
         {activeTab === 'erstattungssaetze' && (
-            <div key="erstattungssaetze" className="tab-content-fade"><div className="space-y-6">
+            <div key="erstattungssaetze" ><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Erstattungssaetze verwalten</h3>
             <p className="text-sm text-muted mb-6">Legen Sie fest, welche Kilometererstattung Sie von den einzelnen Traegern erhalten.</p>
@@ -501,7 +501,7 @@ function Settings({ initialTab }) {
         )}
 
         {activeTab === 'security' && (
-            <div key="security" className="tab-content-fade"><div className="space-y-6">
+            <div key="security" ><div className="space-y-6">
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
             <p className="text-sm text-muted mb-6">
@@ -576,7 +576,7 @@ function Settings({ initialTab }) {
         )}
 
         {activeTab === 'api' && (
-            <div key="api" className="tab-content-fade"><div className="space-y-6">
+            <div key="api" ><div className="space-y-6">
             {/* Form Card */}
             <div className="card-container-highlight">
             <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
