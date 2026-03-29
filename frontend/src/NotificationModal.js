@@ -22,7 +22,7 @@ function NotificationModal({ isOpen, onClose, title, message, onConfirm, showCan
         {onSecondAction && (
           <button
           onClick={() => { onSecondAction(); onClose(); }}
-          className="btn-primary flex-1"
+          className="btn-secondary flex-1"
           >
           {secondLabel || 'Option 2'}
           </button>
@@ -30,34 +30,34 @@ function NotificationModal({ isOpen, onClose, title, message, onConfirm, showCan
         {onThirdAction && (
           <button
           onClick={() => { onThirdAction(); onClose(); }}
-          className="btn-primary flex-1"
+          className="btn-secondary flex-1"
           >
           {thirdLabel || 'Option 3'}
           </button>
         )}
         <button
         onClick={onClose}
-        className="btn-secondary w-full"
+        className="w-full text-sm text-muted hover:text-value transition-colors py-2"
         >
         Abbrechen
         </button>
       </>
     ) : (
       <>
-        {showCancel && (
-          <button
-          onClick={onClose}
-          className="btn-secondary w-full"
-          >
-          Abbrechen
-          </button>
-        )}
         <button
         onClick={() => { onConfirm?.(); onClose(); }}
         className="btn-primary w-full"
         >
         {confirmLabel || 'OK'}
         </button>
+        {showCancel && (
+          <button
+          onClick={onClose}
+          className="w-full text-sm text-muted hover:text-value transition-colors py-2"
+          >
+          Abbrechen
+          </button>
+        )}
       </>
     )}
     </div>
