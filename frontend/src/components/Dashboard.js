@@ -2,7 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
-import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock } from 'lucide-react';
+import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock, Users } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -273,14 +273,28 @@ function Dashboard({ onNavigate }) {
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted text-xs whitespace-nowrap">{formatDate(fahrt.datum)}</span>
                     <span className="text-value font-medium truncate">
-                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}{fahrt.anlass ? ': ' : ''}{fahrt.anlass || ''}
+                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
+                  {fahrt.anlass && (
+                    <p className="text-xs italic text-muted mt-0.5 truncate">{fahrt.anlass}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
                     <span>{fahrt.kilometer} km</span>
                     {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
                     {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
-                      <span>&middot; {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}</span>
+                      <span className="relative group inline-flex items-center gap-1 cursor-help">
+                        <span>&middot;</span>
+                        <Users size={11} />
+                        <span className="underline decoration-dotted underline-offset-2">
+                          {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}
+                        </span>
+                        <span className="absolute bottom-full left-0 mb-1 hidden group-hover:block z-10 bg-card shadow-card-hover border border-card rounded-card px-3 py-2 text-xs text-value whitespace-nowrap">
+                          {fahrt.mitfahrer.map((m, i) => (
+                            <span key={i} className="block">{m.name}{m.arbeitsstaette ? ` (${m.arbeitsstaette})` : ''}</span>
+                          ))}
+                        </span>
+                      </span>
                     )}
                   </div>
                 </div>
