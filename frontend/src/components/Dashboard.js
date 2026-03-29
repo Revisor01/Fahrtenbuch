@@ -416,6 +416,14 @@ function Dashboard({ onNavigate }) {
             )}
           </>
         )}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={() => onNavigate && onNavigate('monatsuebersicht')}
+            className="text-sm px-3 py-1.5 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
+          >
+            Monatsübersicht öffnen →
+          </button>
+        </div>
       </div>
     </div>
   );
