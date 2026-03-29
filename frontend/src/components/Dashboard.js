@@ -2,7 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
-import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock, Users } from 'lucide-react';
+import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock, Users, Pencil, Trash2 } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -15,7 +15,8 @@ function Dashboard({ onNavigate }) {
     showNotification,
     refreshAllData,
     monthlyData,
-    abrechnungstraeger
+    abrechnungstraeger,
+    deleteFahrt
   } = useContext(AppContext);
 
   const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
@@ -150,6 +151,23 @@ function Dashboard({ onNavigate }) {
     );
   };
 
+  const handleDeleteFahrt = (fahrt) => {
+    showNotification(
+      'Fahrt löschen',
+      `${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} (${formatDate(fahrt.datum)}) wirklich löschen?`,
+      async () => {
+        try {
+          await deleteFahrt(fahrt.id);
+          await refreshAllData();
+          showNotification('Erfolg', 'Fahrt wurde gelöscht.');
+        } catch (error) {
+          showNotification('Fehler', 'Fahrt konnte nicht gelöscht werden.');
+        }
+      },
+      true
+    );
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -267,7 +285,7 @@ function Dashboard({ onNavigate }) {
             {letzteTrips.map((fahrt) => (
               <div
                 key={fahrt.id}
-                className="flex items-center justify-between rounded-card border border-card p-3 gap-3"
+                className="flex items-center justify-between rounded-card border border-card p-3 gap-2"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 text-sm">
@@ -276,11 +294,9 @@ function Dashboard({ onNavigate }) {
                       {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
                     </span>
                   </div>
-                  {fahrt.anlass && (
-                    <p className="text-xs italic text-muted mt-0.5 truncate">{fahrt.anlass}</p>
-                  )}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5 text-xs text-muted">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-xs text-muted">
                     <span>{fahrt.kilometer} km</span>
+                    {fahrt.anlass && <span>&middot; <em>{fahrt.anlass}</em></span>}
                     {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
                     {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
                       <span className="relative group inline-flex items-center gap-1 cursor-help">
@@ -298,7 +314,7 @@ function Dashboard({ onNavigate }) {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => handleNochmal(fahrt)}
                     className="btn-primary flex items-center gap-1 text-xs"
@@ -314,6 +330,20 @@ function Dashboard({ onNavigate }) {
                   >
                     <RotateCcw size={12} className="scale-x-[-1]" />
                     <span className="hidden sm:inline">Rückfahrt</span>
+                  </button>
+                  <button
+                    onClick={() => onNavigate && onNavigate('fahrten')}
+                    className="p-1.5 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
+                    title="Bearbeiten"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteFahrt(fahrt)}
+                    className="p-1.5 rounded-card text-muted hover:text-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-900 transition-colors"
+                    title="Löschen"
+                  >
+                    <Trash2 size={13} />
                   </button>
                 </div>
               </div>
