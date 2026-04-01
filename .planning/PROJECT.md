@@ -26,6 +26,8 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ Mehrmonats-Export mit Von/Bis-Zeitraum — v1.0
 - ✓ Von/Bis-Zeitraum in Monatsübersicht (gesamte Ansicht adaptiert) — v1.0
 - ✓ Eingereicht-Status über Zeiträume korrekt — v1.0
+- ✓ Einstellungen als Tab in der Hauptnavigation (statt Modal) — Phase 14
+- ✓ Benutzerverwaltung als Admin-Tab in der Hauptnavigation — Phase 14
 
 - ✓ Mitfahrer-Erstattungssatz aus DB statt hardcoded — v1.1
 - ✓ Debug-Logs entfernt — v1.1
@@ -125,4 +127,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-28 after v2.0 milestone start*
+*Last updated: 2026-04-02 after Phase 14 (Navigation-Umbau) complete*
