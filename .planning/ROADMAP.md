@@ -173,6 +173,7 @@ Plans:
 - [x] **Phase 16: Dashboard Makeover** - Dashboard komplett neu gestaltet mit Formular-Exklusivitaet, modernem Layout und Mobile-Optimierung (completed 2026-03-28)
 - [x] **Phase 17: Listen & Uebersichten** - Fahrtenliste, Export-Bereich und Monatsuebersicht visuell modernisiert (completed 2026-03-28)
 - [x] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff (completed 2026-03-28)
+- [ ] **Phase 19: Dashboard & Listen Feinschliff** - Inline-Bearbeitung auf Dashboard, Fahrtenliste als Card-Layout, Verwaltung-Tab redesignen, UI-Polish
 
 ## Phase Details
 
@@ -271,3 +272,21 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
+| 19. Dashboard & Listen Feinschliff | v2.0 | 0/0 | Not Started |  |
+
+### Phase 19: Dashboard & Listen Feinschliff
+**Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
+**Depends on**: Phase 18
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Letzte Fahrten auf dem Dashboard koennen inline bearbeitet und geloescht werden
+  2. Fahrtenliste zeigt Fahrten als Cards statt Tabellenzeilen (wie Letzte Fahrten auf Dashboard)
+  3. Verwaltung-Tab hat das gleiche Card-Design wie Einstellungen
+  4. Statistik-Diagramm wird zuverlaessig beim ersten Load gerendert
+  5. Button-Farbschema ist konsistent (dunkelblau/hellblau/rot)
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 19 to create plans)
+
+**UI hint**: yes
