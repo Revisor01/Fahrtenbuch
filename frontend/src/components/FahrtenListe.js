@@ -2,30 +2,23 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { AppContext } from '../contexts/AppContext';
-import { renderOrteOptions } from '../utils';
 import MitfahrerModal from '../MitfahrerModal';
 import Modal from '../Modal';
-import { AlertCircle, Circle, CheckCircle2, Copy, ArrowLeftRight } from 'lucide-react';
+import FahrtForm from '../FahrtForm';
+import { AlertCircle, Circle, CheckCircle2, Pencil, Trash2, RotateCcw, Users } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
 function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, updateFahrt, orte, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
   const [editingMitfahrer, setEditingMitfahrer] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonthName, setSelectedMonthName] = useState(new Date().toLocaleString('default', { month: 'long' }));
-  const [editingFahrt, setEditingFahrt] = useState(null);
+  const [editingFahrtId, setEditingFahrtId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'datum', direction: 'descending' });
-  const [rückfahrtDialog, setRückfahrtDialog] = useState({
-    isOpen: false,
-    aktuellefahrt: null,
-    ergänzendeFahrt: null,
-    updatedData: null,
-    istRückfahrt: false
-  });
   useEffect(() => {
     fetchFahrten();
   }, [selectedMonth, selectedVonMonth]);
@@ -53,21 +46,6 @@ function FahrtenListe() {
     setSelectedMonth(`${year}-${selectedMonth.split('-')[1]}`);
   };
 
-  const toggleFahrtDetails = (id) => {
-    setExpandedFahrten(prev => ({...prev, [id]: !prev[id]}));
-  };
-
-  const getDistance = async (vonOrtId, nachOrtId) => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/distanzen/between`, {
-        params: { vonOrtId, nachOrtId }
-      });
-      return response.data.distanz;
-    } catch (error) {
-      console.error('Fehler beim Abrufen der Distanz:', error);
-      return null;
-    }
-  };
 
   const handleDelete = async (id) => {
     showNotification(
@@ -88,16 +66,14 @@ function FahrtenListe() {
     );
   };
 
-  // Quick-Copy: identify the 3 most recent trips by date (descending)
-  const letzteDreiIds = useMemo(() => {
-    const sorted = [...fahrten].sort((a, b) => {
-      const dateA = new Date(a.datum);
-      const dateB = new Date(b.datum);
-      if (dateB - dateA !== 0) return dateB - dateA;
-      return (b.id || 0) - (a.id || 0);
-    });
-    return new Set(sorted.slice(0, 3).map(f => f.id));
-  }, [fahrten]);
+  const handleEditComplete = () => {
+    setEditingFahrtId(null);
+    refreshAllData();
+  };
+
+  const handleEditCancel = () => {
+    setEditingFahrtId(null);
+  };
 
   const handleNochmal = async (fahrt) => {
     try {
@@ -111,7 +87,7 @@ function FahrtenListe() {
         einmaligerNachOrt: fahrt.einmaliger_nach_ort || null,
         kilometer: fahrt.kilometer
       });
-      showNotification('Fahrt erstellt', `Fahrt ${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} wurde fuer heute eingetragen.`);
+      showNotification('Fahrt erstellt', `Fahrt ${fahrt.von_ort_name || fahrt.einmaliger_von_ort} \u2192 ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} wurde f\u00FCr heute eingetragen.`);
       refreshAllData();
     } catch (error) {
       console.error('Fehler beim Duplizieren der Fahrt:', error);
@@ -120,59 +96,14 @@ function FahrtenListe() {
   };
 
   const handleNochmalAndereRichtung = async (fahrt) => {
-    try {
-      await axios.post(`${API_BASE_URL}/fahrten`, {
-        vonOrtId: fahrt.nach_ort_id || null,
-        nachOrtId: fahrt.von_ort_id || null,
-        datum: new Date().toISOString().slice(0, 10),
-        anlass: fahrt.anlass,
-        abrechnung: fahrt.abrechnung,
-        einmaligerVonOrt: fahrt.einmaliger_nach_ort || null,
-        einmaligerNachOrt: fahrt.einmaliger_von_ort || null,
-        kilometer: fahrt.kilometer
-      });
-      showNotification('Fahrt erstellt', `Rückfahrt ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} \u2192 ${fahrt.von_ort_name || fahrt.einmaliger_von_ort} wurde für heute eingetragen.`);
-      refreshAllData();
-    } catch (error) {
-      console.error('Fehler beim Duplizieren der Fahrt:', error);
-      showNotification('Fehler', 'Fahrt konnte nicht erstellt werden.');
-    }
-  };
-
-  const handleEditChange = async (field, value) => {
-    const updatedFahrt = { ...editingFahrt, [field]: value };
-
-    if (field === 'von_ort_id' || field === 'nach_ort_id') {
-      const distance = await getDistance(updatedFahrt.von_ort_id, updatedFahrt.nach_ort_id);
-      if (distance !== null) {
-        updatedFahrt.kilometer = distance;
-      }
-    }
-
-    setEditingFahrt(updatedFahrt);
-  };
-
-  const formatDateForInput = (dateString) => {
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
-  };
-
-  const getOrtTyp = (fahrt, isVon) => {
-    if (isVon) {
-      return fahrt.von_ort_id ? 'gespeichert' : 'einmalig';
-    } else {
-      return fahrt.nach_ort_id ? 'gespeichert' : 'einmalig';
-    }
-  };
-
-  const handleEdit = (fahrt) => {
-    setEditingFahrt({
+    await handleNochmal({
       ...fahrt,
-      datum: formatDateForInput(fahrt.datum),
-      vonOrtTyp: getOrtTyp(fahrt, true),
-      nachOrtTyp: getOrtTyp(fahrt, false),
-      abrechnung: fahrt.abrechnung,
-      kilometer: fahrt.kilometer
+      von_ort_id: fahrt.nach_ort_id,
+      nach_ort_id: fahrt.von_ort_id,
+      von_ort_name: fahrt.nach_ort_name,
+      nach_ort_name: fahrt.von_ort_name,
+      einmaliger_von_ort: fahrt.einmaliger_nach_ort,
+      einmaliger_nach_ort: fahrt.einmaliger_von_ort
     });
   };
 
@@ -394,134 +325,7 @@ function FahrtenListe() {
     );
   };
 
-  const findErgänzendeFahrt = (aktuellefahrt) => {
-    // Bestimmen, ob aktuelle Fahrt eine Hinfahrt oder Rückfahrt ist
-    const istRückfahrt = aktuellefahrt.anlass?.toLowerCase().includes('rückfahrt');
 
-    // Normalize the date format to YYYY-MM-DD for comparison
-    const normalizeDatum = (datum) => {
-      if (!datum) return '';
-      // Wenn es ein String ist, versuchen wir es zu normalisieren
-      if (typeof datum === 'string') {
-        // Format YYYY-MM-DD extrahieren
-        return datum.split('T')[0];
-      }
-      // Falls es bereits ein Date-Objekt ist
-      if (datum instanceof Date) {
-        return datum.toISOString().split('T')[0];
-      }
-      return datum;
-    };
-
-    const aktuellDatum = normalizeDatum(aktuellefahrt.datum);
-
-    // Filtere Fahrten mit normalisiertem Datum
-    const fahrtenAmSelbenTag = fahrten.filter(f =>
-      normalizeDatum(f.datum) === aktuellDatum &&
-      f.id !== aktuellefahrt.id
-    );
-
-    if (istRückfahrt) {
-      // Aktuelle Fahrt ist Rückfahrt, suche Hinfahrt mit umgekehrten Orten
-      const hinfahrt = fahrtenAmSelbenTag.find(f =>
-        !f.anlass?.toLowerCase().includes('rückfahrt') &&
-        parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
-        parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
-      );
-
-      if (hinfahrt) return hinfahrt;
-
-      // Fallback: Matching ueber Orts-Namen
-      const hinfahrtByName = fahrtenAmSelbenTag.find(f =>
-        !f.anlass?.toLowerCase().includes('rückfahrt') &&
-        f.von_ort_name?.toLowerCase() === aktuellefahrt.nach_ort_name?.toLowerCase() &&
-        f.nach_ort_name?.toLowerCase() === aktuellefahrt.von_ort_name?.toLowerCase()
-      );
-      if (hinfahrtByName) return hinfahrtByName;
-    } else {
-      // Aktuelle Fahrt ist Hinfahrt, suche Rückfahrt mit umgekehrten Orten
-      const rückfahrt = fahrtenAmSelbenTag.find(f =>
-        f.anlass?.toLowerCase().includes('rückfahrt') &&
-        parseInt(f.von_ort_id) === parseInt(aktuellefahrt.nach_ort_id) &&
-        parseInt(f.nach_ort_id) === parseInt(aktuellefahrt.von_ort_id)
-      );
-
-      if (rückfahrt) return rückfahrt;
-
-      // Fallback: Matching ueber Orts-Namen
-      const rückfahrtByName = fahrtenAmSelbenTag.find(f =>
-        f.anlass?.toLowerCase().includes('rückfahrt') &&
-        f.von_ort_name?.toLowerCase() === aktuellefahrt.nach_ort_name?.toLowerCase() &&
-        f.nach_ort_name?.toLowerCase() === aktuellefahrt.von_ort_name?.toLowerCase()
-      );
-      if (rückfahrtByName) return rückfahrtByName;
-    }
-
-    return null;
-  };
-
-  const handleSave = async () => {
-    try {
-      // Validierung
-      if (!editingFahrt.anlass || !editingFahrt.datum || !editingFahrt.kilometer || !editingFahrt.abrechnung) {
-        showNotification("Fehler", "Bitte füllen Sie alle erforderlichen Felder aus.");
-        return;
-      }
-
-      const kilometer = parseFloat(editingFahrt.kilometer);
-      if (isNaN(kilometer) || kilometer <= 0) {
-        showNotification("Fehler", "Bitte geben Sie eine gültige Kilometerzahl ein.");
-        return;
-      }
-
-      const abrechnung = parseInt(editingFahrt.abrechnung);
-      if (isNaN(abrechnung)) {
-        showNotification("Fehler", "Bitte wählen Sie einen Abrechnungsträger aus.");
-        return;
-      }
-
-      const updatedFahrt = {
-        datum: editingFahrt.datum,
-        vonOrtId: editingFahrt.vonOrtTyp === 'gespeichert' ? parseInt(editingFahrt.von_ort_id) : null,
-        nachOrtId: editingFahrt.nachOrtTyp === 'gespeichert' ? parseInt(editingFahrt.nach_ort_id) : null,
-        einmaligerVonOrt: editingFahrt.vonOrtTyp === 'einmalig' ? editingFahrt.einmaliger_von_ort : null,
-        einmaligerNachOrt: editingFahrt.nachOrtTyp === 'einmalig' ? editingFahrt.einmaliger_nach_ort : null,
-        anlass: editingFahrt.anlass,
-        kilometer: kilometer.toFixed(2),
-        abrechnung: parseInt(editingFahrt.abrechnung)
-      };
-
-      // Prüfen, ob es eine zugehörige Fahrt gibt (egal ob Hin- oder Rückfahrt)
-      const ergänzendeFahrt = findErgänzendeFahrt(editingFahrt);
-
-      if (ergänzendeFahrt) {
-        // Dialog mit der erkannten Fahrt anzeigen
-        setRückfahrtDialog({
-          isOpen: true,
-          aktuellefahrt: editingFahrt,
-          ergänzendeFahrt: ergänzendeFahrt,
-          updatedData: updatedFahrt,  // hier verwenden wir die korrekte Variable
-          istRückfahrt: editingFahrt.anlass.toLowerCase().includes('rückfahrt')
-        });
-        setEditingFahrt(null);
-        return; // Die Funktion hier beenden, der Rest erfolgt über den Dialog
-      }
-
-      // Normale Verarbeitung, wenn keine ergänzende Fahrt gefunden wurde
-      await updateFahrt(editingFahrt.id, updatedFahrt);
-      setEditingFahrt(null);
-      showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
-      await fetchFahrten();
-    } catch (error) {
-      showNotification("Fehler", "Beim Aktualisieren der Fahrt ist ein Fehler aufgetreten.");
-      console.error("Fehler beim Aktualisieren:", error);
-    }
-  };
-
-  const handleViewMitfahrer = (mitfahrer, event) => {
-    event.stopPropagation(); // Verhindert das Bubbling zum Bearbeitungs-Handler
-    setViewingMitfahrer(mitfahrer);
-  };
 
   const resetToCurrentMonth = () => {
     const date = new Date();
@@ -586,7 +390,7 @@ function FahrtenListe() {
         {selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum-Übersicht' : 'Monatsübersicht'}
       </h2>
       {(selectedMonth !== currentMonth || selectedVonMonth) && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden min-h-[44px]">
+        <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden">
         Aktueller Monat
         </button>
       )}
@@ -613,7 +417,7 @@ function FahrtenListe() {
           setSelectedVonMonth(`${vonYear}-${m}`);
         }
       }}
-      className="form-select min-w-0 flex-1 min-h-[44px] sm:min-h-0">
+      className="form-select min-w-0 flex-1">
       <option value="">---</option>
       {[...Array(12)].map((_, i) => (
         <option key={`von-${i}`} value={i}>
@@ -628,7 +432,7 @@ function FahrtenListe() {
         const m = selectedVonMonth.split('-')[1];
         setSelectedVonMonth(`${e.target.value}-${m}`);
       }}
-      className="form-select w-20 min-h-[44px] sm:min-h-0">
+      className="form-select w-20">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
         return (
@@ -644,7 +448,7 @@ function FahrtenListe() {
       <select
       value={new Date(`${selectedMonth}-01`).getMonth().toString()}
       onChange={handleBisMonthChange}
-      className="form-select min-w-0 flex-1 min-h-[44px] sm:min-h-0">
+      className="form-select min-w-0 flex-1">
       {[...Array(12)].map((_, i) => (
         <option key={i} value={i}>
         {new Date(0, i).toLocaleString("default", { month: "long" })}
@@ -654,7 +458,7 @@ function FahrtenListe() {
       <select
       value={selectedYear}
       onChange={handleBisYearChange}
-      className="form-select w-20 min-h-[44px] sm:min-h-0">
+      className="form-select w-20">
       {[...Array(6)].map((_, i) => {
         const year = 2024 + i;
         return (
@@ -765,9 +569,7 @@ function FahrtenListe() {
       </div>
 
       {/* Export */}
-      <div className="card-container">
-      <h3 className="text-sm font-medium text-label mb-3">Export</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
       {getKategorienMitErstattung().map(([key, displayName]) => (
         <button
         key={key}
@@ -785,11 +587,10 @@ function FahrtenListe() {
             "Beide"
           );
         }}
-        className="btn-primary min-h-[44px]">
+        className="btn-primary">
         Export {displayName}
         </button>
       ))}
-      </div>
       </div>
       </div>
       </div>
@@ -882,868 +683,119 @@ function FahrtenListe() {
     }
   };
 
-  const renderMitfahrer = (fahrt) => {
-    if (!fahrt.mitfahrer || fahrt.mitfahrer.length === 0) {
-      return null;
-    }
 
-    const isHinfahrt = !fahrt.anlass.toLowerCase().includes('rückfahrt');
-
-    return (
-      <div className="flex flex-wrap gap-2">
-      {fahrt.mitfahrer.map((person, index) => {
-        const shouldDisplay =
-        (isHinfahrt && (person.richtung === 'hin' || person.richtung === 'hin_rueck')) ||
-        (!isHinfahrt && (person.richtung === 'rueck' || person.richtung === 'hin_rueck'));
-
-        if (!shouldDisplay) return null;
-
-        return (
-          <span
-          key={index}
-          className="status-badge-primary cursor-pointer"
-          onClick={() => handleEditMitfahrer(fahrt.id, person)}
-          >
-          {person.name}
-          <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleDeleteMitfahrer(fahrt.id, person.id);
-          }}
-          className="text-secondary-500 hover:text-secondary-600"
-          >
-          ×
-          </button>
-          </span>
-        );
-      })}
-      </div>
-    );
-  };
-
-  const renderFahrtRow = (fahrt, detail = null) => {
-    // Finde den Namen des Abrechnungsträgers
-    const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
-    const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
-
-    return (
-      <tr key={fahrt.id} className="table-row">
-      <td className="table-cell">
-      {editingFahrt?.id === fahrt.id ? (
-        <input
-        type="date"
-        value={editingFahrt.datum}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, datum: e.target.value })}
-        className="form-input"
-        />
-      ) : (
-        <span className="text-value">{new Date(fahrt.datum).toLocaleDateString()}</span>
-      )}
-      </td>
-
-      <td className="table-cell">
-      {editingFahrt?.id === fahrt.id ? (
-        <div className="space-y-2">
-        <label className="checkbox-label">
-        <input
-        type="checkbox"
-        checked={editingFahrt.vonOrtTyp === 'einmalig'}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          vonOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-          von_ort_id: e.target.checked ? null : editingFahrt.von_ort_id,
-          einmaliger_von_ort: e.target.checked ? editingFahrt.einmaliger_von_ort : null
-        })}
-        className="checkbox-input"
-        />
-        <span className="text-xs text-label">Einmaliger Von-Ort</span>
-        </label>
-        {editingFahrt.vonOrtTyp === 'gespeichert' ? (
-          <select
-          value={editingFahrt.von_ort_id || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, von_ort_id: e.target.value })}
-          className="form-select"
-          >
-          <option value="">Bitte wählen</option>
-          {renderOrteOptions(orte)}
-          </select>
-        ) : (
-          <input
-          type="text"
-          value={editingFahrt.einmaliger_von_ort || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_von_ort: e.target.value })}
-          className="form-input"
-          placeholder="Von (einmalig)"
-          />
-        )}
-        </div>
-      ) : (
-        <div className="table-address">
-        <div className="table-address-main">
-        {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
-        </div>
-        {fahrt.von_ort_adresse && (
-          <div className="table-address-sub">
-          {fahrt.von_ort_adresse}
-          </div>
-        )}
-        </div>
-      )}
-      </td>
-
-      <td className="table-cell">
-      {editingFahrt?.id === fahrt.id ? (
-        <div className="space-y-2">
-        <label className="checkbox-label">
-        <input
-        type="checkbox"
-        checked={editingFahrt.nachOrtTyp === 'einmalig'}
-        onChange={(e) => setEditingFahrt({
-          ...editingFahrt,
-          nachOrtTyp: e.target.checked ? 'einmalig' : 'gespeichert',
-          nach_ort_id: e.target.checked ? null : editingFahrt.nach_ort_id,
-          einmaliger_nach_ort: e.target.checked ? editingFahrt.einmaliger_nach_ort : null
-        })}
-        className="checkbox-input"
-        />
-        <span className="text-xs text-label">Einmaliger Nach-Ort</span>
-        </label>
-        {editingFahrt.nachOrtTyp === 'gespeichert' ? (
-          <select
-          value={editingFahrt.nach_ort_id || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, nach_ort_id: e.target.value })}
-          className="form-select"
-          >
-          <option value="">Bitte wählen</option>
-          {renderOrteOptions(orte)}
-          </select>
-        ) : (
-          <input
-          type="text"
-          value={editingFahrt.einmaliger_nach_ort || ''}
-          onChange={(e) => setEditingFahrt({ ...editingFahrt, einmaliger_nach_ort: e.target.value })}
-          className="form-input"
-          placeholder="Nach (einmalig)"
-          />
-        )}
-        </div>
-      ) : (
-        <div className="table-address">
-        <div className="table-address-main">
-        {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
-        </div>
-        {fahrt.nach_ort_adresse && (
-          <div className="table-address-sub">
-          {fahrt.nach_ort_adresse}
-          </div>
-        )}
-        </div>
-      )}
-      </td>
-
-      <td className="table-cell">
-      {editingFahrt?.id === fahrt.id ? (
-        <input
-        type="text"
-        value={editingFahrt.anlass}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, anlass: e.target.value })}
-        className="form-input"
-        />
-      ) : (
-        <span className="text-value">{fahrt.anlass}</span>
-      )}
-      </td>
-
-      <td className="table-cell text-right">
-      {editingFahrt?.id === fahrt.id ? (
-        <input
-        type="number"
-        value={editingFahrt.kilometer}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, kilometer: parseFloat(e.target.value) })}
-        className="form-input"
-        />
-      ) : (
-        <span className="text-value">
-        {formatValue(roundKilometers(fahrt.kilometer))}
-        </span>
-      )}
-      </td>
-
-      <td className="table-cell">
-      {editingFahrt?.id === fahrt.id ? (
-        <select
-        value={editingFahrt.abrechnung}
-        onChange={(e) => setEditingFahrt({ ...editingFahrt, abrechnung: e.target.value })}
-        className="form-select"
-        >
-        {abrechnungstraeger?.map(traeger => (
-          <option key={traeger.id} value={traeger.id}>
-          {traeger.name}
-          </option>
-        ))}
-        </select>
-      ) : (
-        <span className="text-value">
-        {abrechnungstraegerName}
-        </span>
-      )}
-      </td>
-
-      <td className="table-cell">
-      {editingFahrt?.id === fahrt.id ? (
-        <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-        {fahrt.mitfahrer?.map((person, index) => (
-          <span key={index} className="status-badge-primary">
-          {person.name}
-          <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleDeleteMitfahrer(fahrt.id, person.id);
-          }}
-          className="text-secondary-500 hover:text-secondary-600"
-          >
-          ×
-          </button>
-          </span>
-        ))}
-        </div>
-        <button
-        onClick={() => handleAddMitfahrer(fahrt.id)}
-        className="btn-primary text-xs w-full"
-        >
-        + Mitfahrer:in
-        </button>
-        </div>
-      ) : (
-        renderMitfahrer(fahrt)
-      )}
-      </td>
-
-      <td className="table-cell">
-      <div className="flex gap-2 justify-end">
-      {editingFahrt?.id === fahrt.id ? (
-        <>
-        <button
-        onClick={handleSave}
-        className="table-action-button-primary"
-        title="Speichern"
-        >
-        ✓
-        </button>
-        <button
-        onClick={() => setEditingFahrt(null)}
-        className="table-action-button-secondary"
-        title="Abbrechen"
-        >
-        ×
-        </button>
-        </>
-      ) : (
-        <>
-        {letzteDreiIds.has(fahrt.id) && (
-          <div className="flex items-center gap-1">
-            <button
-            onClick={() => handleNochmal(fahrt)}
-            className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 flex items-center gap-1"
-            title="Gleiche Fahrt für heute"
-            >
-            <Copy size={12} />
-            <span>Nochmal</span>
-            </button>
-            <button
-            onClick={() => handleNochmalAndereRichtung(fahrt)}
-            className="text-xs bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50 flex items-center gap-1"
-            title="Rückfahrt für heute"
-            >
-            <ArrowLeftRight size={12} />
-            <span>Rückfahrt</span>
-            </button>
-          </div>
-        )}
-        <button
-        onClick={() => handleEdit(fahrt)}
-        className="table-action-button-primary"
-        title="Bearbeiten"
-        >
-        ✎
-        </button>
-        <button
-        onClick={() => handleDelete(fahrt.id)}
-        className="table-action-button-secondary"
-        title="Löschen"
-        >
-        ×
-        </button>
-        </>
-      )}
-      </div>
-      </td>
-      </tr>
-    );
-  };
 
   return (
-    <div className="space-y-6">
+    <div>
     {renderAbrechnungsStatus(summary)}
 
-    {/* Desktop View */}
-    <div className="hidden md:block">
+    {/* Fahrtenliste als Cards */}
     {sortedFahrten.length === 0 ? (
       <div className="card-container text-center py-12">
-        <p className="text-label">Keine Fahrten im ausgewaehlten Zeitraum</p>
+        <p className="text-sm font-medium text-value">Keine Fahrten im gewaehlten Zeitraum</p>
+        <p className="text-xs text-muted mt-1">Erfasse deine erste Fahrt ueber das Dashboard.</p>
       </div>
     ) : (
-    <div className="table-container">
-    <div className="px-6 py-4 border-b border-primary-100 dark:border-primary-700">
-      <h3 className="text-lg font-medium text-value">Fahrten</h3>
-      <p className="text-sm text-label mt-1">{sortedFahrten.length} Eintraege</p>
-    </div>
-    <table className="w-full">
-    <thead>
-    <tr className="table-head-row">
-    <th className="table-header" onClick={() => requestSort('datum')}>
-    <div className="flex items-center gap-1">
-    Datum {sortConfig.key === 'datum' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </div>
-    </th>
-    <th className="table-header" onClick={() => requestSort('von_ort_name')}>
-    <div className="flex items-center gap-1">
-    Von {sortConfig.key === 'von_ort_name' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </div>
-    </th>
-    <th className="table-header" onClick={() => requestSort('nach_ort_name')}>
-    <div className="flex items-center gap-1">
-    Nach {sortConfig.key === 'nach_ort_name' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </div>
-    </th>
-    <th className="table-header" onClick={() => requestSort('anlass')}>
-    <div className="flex items-center gap-1">
-    Anlass {sortConfig.key === 'anlass' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </div>
-    </th>
-    <th className="table-header text-right" onClick={() => requestSort('kilometer')}>
-    <div className="flex items-center justify-end gap-1">
-    km {sortConfig.key === 'kilometer' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </div>
-    </th>
-    <th className="table-header" onClick={() => requestSort('abrechnung')}>
-    <div className="flex items-center gap-1">
-    Träger {sortConfig.key === 'abrechnung' && (
-      <span className="text-muted">{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
-    )}
-    </div>
-    </th>
-    <th className="table-header">Mit*</th>
-    <th className="table-header text-right">Aktionen</th>
-    </tr>
-    </thead>
-    <tbody className="divide-y divide-primary-50 dark:divide-primary-800">
-    {sortedFahrten.map((fahrt) => (
-      <React.Fragment key={fahrt.id}>
-      {renderFahrtRow(fahrt)}
-      </React.Fragment>
-    ))}
-    </tbody>
-    </table>
-    </div>
-    )}
-    </div>
-
-    {/* Mobile View */}
-    <div className="md:hidden space-y-4">
-    {sortedFahrten.length === 0 ? (
-      <div className="card-container text-center py-12">
-        <p className="text-label">Keine Fahrten im ausgewaehlten Zeitraum</p>
-      </div>
-    ) : (
-    <>
-    <h3 className="text-lg font-medium text-value">Fahrten <span className="text-sm font-normal text-label">({sortedFahrten.length})</span></h3>
-    {sortedFahrten.map((fahrt) => {
-      const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
-      const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
-
-      return (
-        <div key={fahrt.id} className="mobile-card">
-        {editingFahrt?.id === fahrt.id ? (
-          // Edit Mode
-          <div className="space-y-4">
-          <div>
-          <label className="form-label">Datum</label>
-          <input
-          type="date"
-          value={editingFahrt.datum}
-          onChange={(e) => handleEditChange('datum', e.target.value)}
-          className="form-input w-full"
-          />
-          </div>
-
-          {/* Von-Ort */}
-          <div>
-          <label className="checkbox-label mb-2">
-          <input
-          type="checkbox"
-          checked={editingFahrt.vonOrtTyp === 'einmalig'}
-          onChange={(e) => handleEditChange('vonOrtTyp', e.target.checked ? 'einmalig' : 'gespeichert')}
-          className="checkbox-input"
-          />
-          <span className="text-xs text-label">Einmaliger Von-Ort</span>
-          </label>
-          {editingFahrt.vonOrtTyp === 'einmalig' ? (
-            <input
-            type="text"
-            value={editingFahrt.einmaliger_von_ort || ''}
-            onChange={(e) => handleEditChange('einmaliger_von_ort', e.target.value)}
-            className="form-input w-full"
-            placeholder="Von (einmalig)"
-            />
-          ) : (
-            <select
-            value={editingFahrt.von_ort_id || ''}
-            onChange={(e) => handleEditChange('von_ort_id', e.target.value)}
-            className="form-select w-full"
-            >
-            <option value="">Bitte wählen</option>
-            {renderOrteOptions(orte)}
-            </select>
-          )}
-          </div>
-
-          {/* Nach-Ort */}
-          <div>
-          <label className="checkbox-label mb-2">
-          <input
-          type="checkbox"
-          checked={editingFahrt.nachOrtTyp === 'einmalig'}
-          onChange={(e) => handleEditChange('nachOrtTyp', e.target.checked ? 'einmalig' : 'gespeichert')}
-          className="checkbox-input"
-          />
-          <span className="text-xs text-label">Einmaliger Nach-Ort</span>
-          </label>
-          {editingFahrt.nachOrtTyp === 'einmalig' ? (
-            <input
-            type="text"
-            value={editingFahrt.einmaliger_nach_ort || ''}
-            onChange={(e) => handleEditChange('einmaliger_nach_ort', e.target.value)}
-            className="form-input w-full"
-            placeholder="Nach (einmalig)"
-            />
-          ) : (
-            <select
-            value={editingFahrt.nach_ort_id || ''}
-            onChange={(e) => handleEditChange('nach_ort_id', e.target.value)}
-            className="form-select w-full"
-            >
-            <option value="">Bitte wählen</option>
-            {renderOrteOptions(orte)}
-            </select>
-          )}
-          </div>
-
-          {/* Anlass */}
-          <div>
-          <label className="form-label">Anlass</label>
-          <input
-          type="text"
-          value={editingFahrt.anlass}
-          onChange={(e) => handleEditChange('anlass', e.target.value)}
-          className="form-input w-full"
-          />
-          </div>
-
-          {/* Kilometer */}
-          <div>
-          <label className="form-label">Kilometer</label>
-          <input
-          type="number"
-          value={editingFahrt.kilometer}
-          onChange={(e) => handleEditChange('kilometer', e.target.value)}
-          className="form-input w-full"
-          />
-          </div>
-
-          {/* Abrechnung */}
-          <div>
-          <label className="form-label">Abrechnung</label>
-          <select
-          value={editingFahrt.abrechnung}
-          onChange={(e) => handleEditChange('abrechnung', e.target.value)}
-          className="form-select w-full"
-          >
-          {abrechnungstraeger?.map(traeger => (
-            <option key={traeger.id} value={traeger.id}>
-            {traeger.name}
-            </option>
-          ))}
-          </select>
-          </div>
-
-          {/* Mitfahrer */}
-          <div>
-          <label className="form-label">Mitfahrer:innen</label>
-          <div className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-          {fahrt.mitfahrer?.map((person, index) => (
-            <span key={index} className="status-badge-primary">
-            {person.name}
-            <button
-            onClick={(e) => {
-              e.preventDefault();
-              handleDeleteMitfahrer(fahrt.id, person.id);
-            }}
-            className="text-secondary-500 hover:text-secondary-600"
-            >
-            ×
-            </button>
-            </span>
-          ))}
-          </div>
-          <button
-          onClick={() => handleAddMitfahrer(fahrt.id)}
-          className="btn-primary text-xs w-full"
-          >
-          + Mitfahrer:in
-          </button>
-          </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-2">
-          <button onClick={handleSave} className="btn-primary flex-1">
-          Speichern
-          </button>
-          <button onClick={() => setEditingFahrt(null)} className="btn-secondary flex-1">
-          Abbrechen
-          </button>
-          </div>
-          </div>
-        ) : (
-          // View Mode
-          <div>
-          {/* Header */}
-          <div className="mobile-card-header mb-4">
-          <div>
-          <div className="mobile-card-title">
-          {new Date(fahrt.datum).toLocaleDateString()}
-          </div>
-          <div className="mobile-card-subtitle">
-          {abrechnungstraegerName}
-          </div>
-          </div>
-          <div className="mobile-action-buttons">
-          {letzteDreiIds.has(fahrt.id) && (
-            <>
-              <button
-              onClick={() => handleNochmal(fahrt)}
-              className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
-              title="Gleiche Fahrt für heute"
-              >
-              <Copy size={14} />
-              </button>
-              <button
-              onClick={() => handleNochmalAndereRichtung(fahrt)}
-              className="text-xs bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-1.5 rounded hover:bg-green-100 dark:hover:bg-green-900/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
-              title="Rückfahrt für heute"
-              >
-              <ArrowLeftRight size={14} />
-              </button>
-            </>
-          )}
-          <button
-          onClick={() => handleEdit(fahrt)}
-          className="mobile-icon-button-primary min-h-[44px] min-w-[44px]"
-          >
-          ✎
-          </button>
-          <button
-          onClick={() => handleDelete(fahrt.id)}
-          className="mobile-icon-button-secondary min-h-[44px] min-w-[44px]"
-          >
-          ×
-          </button>
-          </div>
-          </div>
-
-          <div className="space-y-4">
-          {/* Route */}
-          <div className="grid grid-cols-1 gap-2">
-          <div>
-          <div className="mobile-card-label">Von</div>
-          <div className="mobile-card-content">
-          {fahrt.von_ort_name || fahrt.einmaliger_von_ort || ""}
-          </div>
-          {fahrt.von_ort_adresse && (
-            <div className="mobile-card-label">
-            {fahrt.von_ort_adresse}
-            </div>
-          )}
-          </div>
-          <div>
-          <div className="mobile-card-label">Nach</div>
-          <div className="mobile-card-content">
-          {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || ""}
-          </div>
-          {fahrt.nach_ort_adresse && (
-            <div className="mobile-card-label">
-            {fahrt.nach_ort_adresse}
-            </div>
-          )}
-          </div>
-          </div>
-
-          {/* Anlass & Kilometer */}
-          <div className="grid grid-cols-2 gap-4">
-          <div>
-          <div className="mobile-card-label">Anlass</div>
-          <div className="mobile-card-content">{fahrt.anlass}</div>
-          </div>
-          <div>
-          <div className="mobile-card-label">Kilometer</div>
-          <div className="mobile-card-content">
-          {formatValue(roundKilometers(fahrt.kilometer))} km
-          </div>
-          </div>
-          </div>
-
-          {/* Mitfahrer */}
-          {fahrt.mitfahrer?.length > 0 && (
-            <div>
-            <div className="mobile-card-label mb-1">Mitfahrer:innen</div>
-            {renderMitfahrer(fahrt)}
-            </div>
-          )}
-          </div>
-          </div>
-        )}
+      <div className="card-container">
+        <div className="px-0 pb-3 border-b border-card mb-3">
+          <h3 className="text-base font-semibold text-value">Fahrten</h3>
+          <p className="text-xs text-label mt-0.5">{sortedFahrten.length} Eintraege</p>
         </div>
-      );
-    })}
-    </>
+        <div className="space-y-2">
+          {sortedFahrten.map((fahrt) => {
+            const traeger = abrechnungstraeger?.find(at => at.id === parseInt(fahrt.abrechnung));
+            const abrechnungstraegerName = traeger ? traeger.name : 'Unbekannt';
+
+            if (editingFahrtId === fahrt.id) {
+              return (
+                <div key={fahrt.id} className="rounded-card border border-card p-4 animate-tab-content-fade">
+                  <FahrtForm
+                    editData={fahrt}
+                    onUpdate={handleEditComplete}
+                    onCancel={handleEditCancel}
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={fahrt.id}
+                className="flex items-center justify-between rounded-card border border-card p-3 gap-2 hover:shadow-card-hover transition-shadow"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted text-xs whitespace-nowrap">
+                      {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    </span>
+                    <span className="text-value font-medium truncate">
+                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-xs text-muted">
+                    <span>{formatValue(roundKilometers(fahrt.kilometer))} km</span>
+                    {fahrt.anlass && <span>&middot; <em>{fahrt.anlass}</em></span>}
+                    {abrechnungstraegerName && <span>&middot; {abrechnungstraegerName}</span>}
+                    {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
+                      <span className="relative group inline-flex items-center gap-1 cursor-help">
+                        <span>&middot;</span>
+                        <Users size={11} />
+                        <span className="underline decoration-dotted underline-offset-2">
+                          {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}
+                        </span>
+                        <span className="absolute bottom-full left-0 mb-1 hidden group-hover:block z-10 bg-card shadow-card-hover border border-card rounded-card px-3 py-2 text-xs text-value whitespace-nowrap">
+                          {fahrt.mitfahrer.map((m, i) => (
+                            <span key={i} className="block">{m.name}{m.arbeitsstaette ? ` (${m.arbeitsstaette})` : ''}</span>
+                          ))}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => handleNochmal(fahrt)}
+                    className="btn-primary flex items-center gap-1 text-xs"
+                    aria-label="Fahrt kopieren"
+                    title="Nochmal fuer heute"
+                  >
+                    <RotateCcw size={12} />
+                    <span className="hidden sm:inline">Nochmal</span>
+                  </button>
+                  <button
+                    onClick={() => handleNochmalAndereRichtung(fahrt)}
+                    className="btn-secondary flex items-center gap-1 text-xs"
+                    aria-label="Rueckfahrt erstellen"
+                    title="Rueckfahrt fuer heute eintragen"
+                  >
+                    <RotateCcw size={12} className="scale-x-[-1]" />
+                    <span className="hidden sm:inline">Rueckfahrt</span>
+                  </button>
+                  <button
+                    onClick={() => setEditingFahrtId(fahrt.id)}
+                    className="p-1.5 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
+                    aria-label="Fahrt bearbeiten"
+                    title="Bearbeiten"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(fahrt.id)}
+                    className="p-1.5 rounded-card text-muted hover:text-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-900 transition-colors"
+                    aria-label="Fahrt loeschen"
+                    title="Loeschen"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     )}
-    </div>
 
     {/* Modals */}
-    <Modal
-    isOpen={rückfahrtDialog.isOpen}
-    onClose={() => setRückfahrtDialog({ isOpen: false })}
-    title={rückfahrtDialog.istRückfahrt ? "Hinfahrt erkannt" : "Rückfahrt erkannt"}
-    >
-    <div className="space-y-4">
-    <p className="text-sm text-value">
-    {rückfahrtDialog.istRückfahrt
-      ? "Es wurde eine zugehörige Hinfahrt erkannt."
-      : "Es wurde eine zugehörige Rückfahrt erkannt."}
-    Möchten Sie die Änderungen auch auf diese Fahrt anwenden?
-    </p>
-
-    {/* Details der betroffenen Fahrten und Änderungen anzeigen */}
-    {rückfahrtDialog.ergänzendeFahrt && rückfahrtDialog.updatedData && (
-      <div className="space-y-4">
-      {/* Aktuelle Fahrt - Originaldaten */}
-      <div className="bg-primary-25 dark:bg-primary-900/30 p-4 rounded-lg">
-      <h4 className="text-sm font-medium text-value mb-2">
-      {rückfahrtDialog.istRückfahrt ? "Aktuelle Rückfahrt:" : "Aktuelle Hinfahrt:"}
-      </h4>
-      <div className="text-xs space-y-1">
-      <div className="flex justify-between">
-      <span className="text-label">Datum:</span>
-      <span className="text-value">{rückfahrtDialog.aktuellefahrt && new Date(rückfahrtDialog.aktuellefahrt.datum).toLocaleDateString()}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Von:</span>
-      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.von_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_von_ort}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Nach:</span>
-      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.nach_ort_name || rückfahrtDialog.aktuellefahrt?.einmaliger_nach_ort}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Kilometer:</span>
-      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Abrechnungsträger:</span>
-      <span className="text-value">
-      {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
-      </span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Anlass:</span>
-      <span className="text-value">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
-      </div>
-      </div>
-      </div>
-
-      {/* Erkannte Fahrt */}
-      <div className="bg-primary-25 dark:bg-primary-900/30 p-4 rounded-lg">
-      <h4 className="text-sm font-medium text-value mb-2">
-      {rückfahrtDialog.istRückfahrt ? "Erkannte Hinfahrt:" : "Erkannte Rückfahrt:"}
-      </h4>
-      <div className="text-xs space-y-1">
-      <div className="flex justify-between">
-      <span className="text-label">Datum:</span>
-      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt && new Date(rückfahrtDialog.ergänzendeFahrt.datum).toLocaleDateString()}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Von:</span>
-      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.von_ort_name || rückfahrtDialog.ergänzendeFahrt?.einmaliger_von_ort}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Nach:</span>
-      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.nach_ort_name || rückfahrtDialog.ergänzendeFahrt?.einmaliger_nach_ort}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Kilometer:</span>
-      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.kilometer}</span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Abrechnungsträger:</span>
-      <span className="text-value">
-      {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.ergänzendeFahrt?.abrechnung))?.name || 'Unbekannt'}
-      </span>
-      </div>
-      <div className="flex justify-between">
-      <span className="text-label">Anlass:</span>
-      <span className="text-value">{rückfahrtDialog.ergänzendeFahrt?.anlass}</span>
-      </div>
-      </div>
-      </div>
-
-      {/* Anstehende Änderungen - NUR für die aktuelle Fahrt */}
-      <div className="bg-secondary-50 dark:bg-secondary-900/30 p-4 rounded-lg border border-secondary-100 dark:border-secondary-800">
-      <h4 className="text-sm font-medium text-value mb-2">Anstehende Änderungen:</h4>
-      <div className="space-y-3">
-      {/* Änderungen für aktuelle Fahrt - nur wenn sich etwas ändert */}
-      <div>
-      <h5 className="text-xs font-medium text-value">
-      {rückfahrtDialog.istRückfahrt ? "Änderungen Rückfahrt:" : "Änderungen Hinfahrt:"}
-      </h5>
-      <div className="text-xs space-y-2 pl-2 mt-2">
-      {Number(rückfahrtDialog.aktuellefahrt?.kilometer) !== Number(rückfahrtDialog.updatedData.kilometer) && (
-        <div className="flex justify-between">
-        <span className="text-label">Kilometer:</span>
-        <div>
-        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.kilometer}</span>
-        <span className="text-primary-600"> → {rückfahrtDialog.updatedData.kilometer}</span>
-        </div>
-        </div>
-      )}
-      {parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung) !== parseInt(rückfahrtDialog.updatedData.abrechnung) && (
-        <div className="flex justify-between">
-        <span className="text-label">Abrechnungsträger:</span>
-        <div>
-        <span className="text-secondary-600 line-through">
-        {abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.aktuellefahrt?.abrechnung))?.name || 'Unbekannt'}
-        </span>
-        <span className="text-primary-600 block"> → {
-          abrechnungstraeger?.find(t => t.id === parseInt(rückfahrtDialog.updatedData.abrechnung))?.name || 'Unbekannt'
-        }</span>
-        </div>
-        </div>
-      )}
-      {rückfahrtDialog.aktuellefahrt?.anlass !== rückfahrtDialog.updatedData.anlass && (
-        <div className="flex justify-between">
-        <span className="text-label">Anlass:</span>
-        <div>
-        <span className="text-secondary-600 line-through">{rückfahrtDialog.aktuellefahrt?.anlass}</span>
-        <span className="text-primary-600 block"> → {rückfahrtDialog.updatedData.anlass}</span>
-        </div>
-        </div>
-      )}
-      </div>
-      </div>
-      </div>
-      </div>
-      </div>
-    )}
-
-    <div className="flex flex-col sm:flex-row gap-2">
-    <button
-    type="button"
-    onClick={() => {
-      // Nur aktuelle Fahrt aktualisieren
-      if (rückfahrtDialog.aktuellefahrt && rückfahrtDialog.updatedData) {
-        updateFahrt(rückfahrtDialog.aktuellefahrt.id, rückfahrtDialog.updatedData)
-        .then(() => {
-          fetchFahrten();
-          showNotification("Erfolg", "Die Fahrt wurde erfolgreich aktualisiert.");
-          setRückfahrtDialog({ isOpen: false });
-        })
-        .catch(error => {
-          console.error('Fehler:', error);
-          showNotification("Fehler", "Es ist ein Fehler aufgetreten.");
-          setRückfahrtDialog({ isOpen: false });
-        });
-      }
-    }}
-    className="btn-secondary w-full"
-    >
-    Nur {rückfahrtDialog.istRückfahrt ? "Rückfahrt" : "Hinfahrt"} aktualisieren
-    </button>
-    <button
-    type="button"
-    onClick={async () => {
-      try {
-        if (!rückfahrtDialog.aktuellefahrt || !rückfahrtDialog.ergänzendeFahrt || !rückfahrtDialog.updatedData) {
-          throw new Error("Ungültige Daten");
-        }
-
-        // Aktuelle Fahrt aktualisieren
-        await updateFahrt(rückfahrtDialog.aktuellefahrt.id, rückfahrtDialog.updatedData);
-
-        // Ergänzende Fahrt anpassen
-        const basisAnlass = rückfahrtDialog.updatedData.anlass.replace(/^(rückfahrt\s*)/i, "").trim();
-
-        let ergänzendesFahrtUpdate = {
-          ...rückfahrtDialog.updatedData,
-          vonOrtId: rückfahrtDialog.updatedData.nachOrtId,
-          nachOrtId: rückfahrtDialog.updatedData.vonOrtId,
-          einmaligerVonOrt: rückfahrtDialog.updatedData.einmaligerNachOrt,
-          einmaligerNachOrt: rückfahrtDialog.updatedData.einmaligerVonOrt
-        };
-
-        // Anlass richtig setzen
-        if (rückfahrtDialog.istRückfahrt) {
-          // Bei Bearbeitung einer Rückfahrt - die Hinfahrt bekommt den Basis-Anlass
-          ergänzendesFahrtUpdate.anlass = basisAnlass;
-        } else {
-          // Bei Bearbeitung einer Hinfahrt - die Rückfahrt bekommt "Rückfahrt" + Basis-Anlass
-          ergänzendesFahrtUpdate.anlass = `Rückfahrt ${basisAnlass}`;
-        }
-
-        await updateFahrt(rückfahrtDialog.ergänzendeFahrt.id, ergänzendesFahrtUpdate);
-
-        showNotification("Erfolg", "Beide Fahrten wurden erfolgreich aktualisiert.");
-        await fetchFahrten();
-        setRückfahrtDialog({ isOpen: false });
-      } catch (error) {
-        console.error('Fehler:', error);
-        showNotification("Fehler", "Es ist ein Fehler aufgetreten.");
-        setRückfahrtDialog({ isOpen: false });
-      }
-    }}
-
-    className="btn-primary w-full"
-    >
-    Beide Fahrten aktualisieren
-    </button>
-    </div>
-    </div>
-    </Modal>
-
-
     <MitfahrerModal
     isOpen={!!viewingMitfahrer}
     onClose={() => setViewingMitfahrer(null)}
