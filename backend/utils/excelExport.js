@@ -67,6 +67,7 @@ function fillQuartalSheet(worksheet, data, year) {
  worksheet.getCell('B2').value = parseInt(year);
 
  // Fill data rows (starting at row 8, max 29 rows)
+ // Only set values — styles are already correct in the template
  data.forEach((row, rowIndex) => {
    if (rowIndex >= MAX_ROWS_PER_SHEET) return;
    const excelRow = worksheet.getRow(rowIndex + 8);
@@ -77,17 +78,6 @@ function fillQuartalSheet(worksheet, data, year) {
    excelRow.getCell('F').value = row.nachOrt;
    excelRow.getCell('H').value = row.anlass;
    excelRow.getCell('K').value = row.kilometer;
-
-   ['A', 'B', 'F', 'H', 'K'].forEach(col => {
-     const cell = excelRow.getCell(col);
-     cell.style = { ...worksheet.getCell(`${col}8`).style };
-     if (col === 'A') {
-       cell.numFmt = 'DD.MM.YYYY';
-     }
-     if (col === 'H') {
-       cell.font = { ...cell.font, size: 10 };
-     }
-   });
  });
 
  // Gesamt km in K37
