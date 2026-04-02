@@ -20,6 +20,18 @@ function Dashboard({ onNavigate }) {
   } = useContext(AppContext);
 
   const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
+  const [editingFahrtId, setEditingFahrtId] = useState(null);
+
+  const editingFahrt = editingFahrtId ? fahrten.find(f => f.id === editingFahrtId) : null;
+
+  const handleEditComplete = () => {
+    setEditingFahrtId(null);
+    refreshAllData();
+  };
+
+  const handleEditCancel = () => {
+    setEditingFahrtId(null);
+  };
 
   const offeneErstattungen = useMemo(() => {
     if (!summary?.erstattungen) return 0;
@@ -283,6 +295,15 @@ function Dashboard({ onNavigate }) {
         ) : (
           <div className="space-y-2">
             {letzteTrips.map((fahrt) => (
+              editingFahrtId === fahrt.id ? (
+                <div key={fahrt.id} className="rounded-card border border-card p-4 animate-tab-content-fade">
+                  <FahrtForm
+                    editData={fahrt}
+                    onUpdate={handleEditComplete}
+                    onCancel={handleEditCancel}
+                  />
+                </div>
+              ) : (
               <div
                 key={fahrt.id}
                 className="flex items-center justify-between rounded-card border border-card p-3 gap-2"
@@ -318,6 +339,7 @@ function Dashboard({ onNavigate }) {
                   <button
                     onClick={() => handleNochmal(fahrt)}
                     className="btn-primary flex items-center gap-1 text-xs"
+                    aria-label="Fahrt kopieren"
                     title="Nochmal für heute"
                   >
                     <RotateCcw size={12} />
@@ -326,14 +348,16 @@ function Dashboard({ onNavigate }) {
                   <button
                     onClick={() => handleNochmal({ ...fahrt, von_ort_id: fahrt.nach_ort_id, nach_ort_id: fahrt.von_ort_id, von_ort_name: fahrt.nach_ort_name, nach_ort_name: fahrt.von_ort_name, einmaliger_von_ort: fahrt.einmaliger_nach_ort, einmaliger_nach_ort: fahrt.einmaliger_von_ort })}
                     className="btn-secondary flex items-center gap-1 text-xs"
+                    aria-label="Rueckfahrt erstellen"
                     title="Rückfahrt für heute eintragen"
                   >
                     <RotateCcw size={12} className="scale-x-[-1]" />
                     <span className="hidden sm:inline">Rückfahrt</span>
                   </button>
                   <button
-                    onClick={() => onNavigate && onNavigate('fahrten')}
+                    onClick={() => setEditingFahrtId(fahrt.id)}
                     className="p-1.5 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
+                    aria-label="Fahrt bearbeiten"
                     title="Bearbeiten"
                   >
                     <Pencil size={13} />
@@ -341,12 +365,14 @@ function Dashboard({ onNavigate }) {
                   <button
                     onClick={() => handleDeleteFahrt(fahrt)}
                     className="p-1.5 rounded-card text-muted hover:text-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-900 transition-colors"
+                    aria-label="Fahrt loeschen"
                     title="Löschen"
                   >
                     <Trash2 size={13} />
                   </button>
                 </div>
               </div>
+              )
             ))}
             <div className="flex justify-end mt-3">
               <button
@@ -391,7 +417,7 @@ function Dashboard({ onNavigate }) {
             {/* km-Balkendiagramm */}
             {hasKmData && (
               <div>
-                <div className="flex items-end gap-1" style={{ height: '160px' }}>
+                <div key={statistikJahr} className="flex items-end gap-1" style={{ height: '160px' }}>
                   {kmProMonat.map((km, i) => {
                     const heightPercent = (km / maxKm) * 100;
                     return (
@@ -399,7 +425,12 @@ function Dashboard({ onNavigate }) {
                         <div className="relative w-full group flex items-end justify-center" style={{ height: '100%' }}>
                           <div
                             className="w-full rounded-t bg-primary-500 transition-all duration-300 relative"
-                            style={{ height: `${Math.max(heightPercent, 1.5)}%` }}
+                            style={{
+                              height: `${Math.max(heightPercent, 1.5)}%`,
+                              animation: 'barGrow 400ms ease-out forwards',
+                              animationDelay: `${i * 50}ms`,
+                              transformOrigin: 'bottom'
+                            }}
                             title={`${km.toFixed(1)} km | ${fahrtenProMonat[i]} Fahrten`}
                           >
                             {km > 0 && (
