@@ -167,11 +167,6 @@ exports.exportToExcel = async (req, res) => {
            row.getCell('E').value = mitfahrer.name;
            row.getCell('F').value = mitfahrer.arbeitsstaette;
            row.getCell('G').value = mitfahrer.kilometer;
-
-           ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(col => {
-             const cell = row.getCell(col);
-             cell.font = { name: 'Arial', size: 10 };
-           });
          }
        });
      }
@@ -350,11 +345,6 @@ exports.exportToExcelRange = async (req, res) => {
            row.getCell('E').value = mitfahrer.name;
            row.getCell('F').value = mitfahrer.arbeitsstaette;
            row.getCell('G').value = mitfahrer.kilometer;
-
-           ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(col => {
-             const cell = row.getCell(col);
-             cell.font = { name: 'Arial', size: 10 };
-           });
          }
        });
      }
