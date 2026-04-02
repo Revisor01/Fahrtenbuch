@@ -33,10 +33,22 @@ function Dashboard({ onNavigate }) {
     setEditingFahrtId(null);
   };
 
-  const offeneErstattungen = useMemo(() => {
-    if (!summary?.erstattungen) return 0;
-    return Object.values(summary.erstattungen).reduce((sum, val) => sum + (val || 0), 0);
-  }, [summary]);
+  const { offeneErstattungen, eingereichteSumme } = useMemo(() => {
+    let offen = 0;
+    let eingereicht = 0;
+    monthlyData.forEach(md => {
+      Object.entries(md.erstattungen || {}).forEach(([id, betrag]) => {
+        const status = md.abrechnungsStatus?.[id];
+        if (!status?.erhalten_am) {
+          offen += Number(betrag || 0);
+          if (status?.eingereicht_am) {
+            eingereicht += Number(betrag || 0);
+          }
+        }
+      });
+    });
+    return { offeneErstattungen: offen, eingereichteSumme: eingereicht };
+  }, [monthlyData]);
 
   // KPI: km and count for current month
   const currentYearMonth = new Date().toISOString().slice(0, 7);
@@ -196,6 +208,9 @@ function Dashboard({ onNavigate }) {
             <div className="min-w-0">
               <p className="text-xs text-muted mb-1">Offene Erstattungen</p>
               <p className="text-xl font-semibold text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
+              {eingereichteSumme > 0 && (
+                <p className="text-xs text-muted">({eingereichteSumme.toFixed(2).replace('.', ',')} &euro; eingereicht)</p>
+              )}
             </div>
             <Banknote size={22} className="text-emerald-500 shrink-0" />
           </div>
@@ -291,7 +306,7 @@ function Dashboard({ onNavigate }) {
           <h2 className="text-base font-medium text-value">Letzte Fahrten</h2>
         </div>
         {letzteTrips.length === 0 ? (
-          <p className="text-sm text-muted">Noch keine Fahrten erfasst.</p>
+          <p className="text-sm text-muted">Keine Fahrten im gewählten Zeitraum. Wähle den aktuellen Monat für die neuesten Fahrten.</p>
         ) : (
           <div className="space-y-2">
             {letzteTrips.map((fahrt) => (
