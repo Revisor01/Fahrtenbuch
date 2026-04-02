@@ -250,7 +250,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 → 16 → 17 → 18
+Phases execute in numeric order: 15 → 16 → 17 → 18 → 19
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -272,21 +272,23 @@ Phases execute in numeric order: 15 → 16 → 17 → 18
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
-| 19. Dashboard & Listen Feinschliff | v2.0 | 0/0 | Not Started |  |
+| 19. Dashboard & Listen Feinschliff | v2.0 | 0/3 | Not Started |  |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
 **Depends on**: Phase 18
-**Requirements**: TBD
+**Requirements**: P19-01, P19-02, P19-03, P19-04, P19-05
 **Success Criteria** (what must be TRUE):
   1. Letzte Fahrten auf dem Dashboard koennen inline bearbeitet und geloescht werden
   2. Fahrtenliste zeigt Fahrten als Cards statt Tabellenzeilen (wie Letzte Fahrten auf Dashboard)
   3. Verwaltung-Tab hat das gleiche Card-Design wie Einstellungen
   4. Statistik-Diagramm wird zuverlaessig beim ersten Load gerendert
   5. Button-Farbschema ist konsistent (dunkelblau/hellblau/rot)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 19 to create plans)
+- [ ] 19-01-PLAN.md — CSS-Grundlagen, FahrtForm Edit-Modus, Dashboard Inline-Bearbeitung und Chart-Animation
+- [ ] 19-02-PLAN.md — Verwaltung-Tab Card-Redesign
+- [ ] 19-03-PLAN.md — Fahrtenliste Card-Layout mit Inline-Edit
 
 **UI hint**: yes
