@@ -251,7 +251,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 → 16 → 17 → 18 → 19
+Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -274,7 +274,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
 | 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | Complete    | 2026-04-02 |
-| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | TBD | Planned | - |
+| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 0/2 | Planned | - |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
@@ -298,7 +298,7 @@ Plans:
 ### Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export
 **Goal**: Dashboard zeigt alle offenen Erstattungen unabhaengig vom Monatsfilter plus eingereichte Betraege, Fahrten-Cards auf Fahrten&Export identisch zum Dashboard (mit Icons), Monatsuebersicht wie KPI-Cards, Excel-Export korrekt mit neuer 2026-Quartals-Vorlage
 **Depends on**: Phase 19
-**Requirements**: TBD
+**Requirements**: SC-01, SC-02, SC-03, SC-04, SC-05, SC-06, SC-07, SC-08
 **Success Criteria** (what must be TRUE):
   1. Dashboard Offene Erstattungen zeigt ALLE offenen Erstattungen unabhaengig vom Monatsfilter, plus eingereichte Betraege in Klammern
   2. Dashboard letzte Fahrten zeigen alle nicht-exportierten/nicht-erhaltenen Fahrten, nicht nur aktuellen Monat
@@ -308,9 +308,10 @@ Plans:
   6. Fahrten-Anzahl ist korrekt angezeigt
   7. Excel-Export bewahrt vollstaendig das Layout der 2026-Vorlage (Spaltenbreiten, Borders, Fonts, Merges)
   8. Excel-Export nutzt korrekt das passende Quartals-Sheet
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 20 to create plans)
+- [ ] 20-01-PLAN.md — Dashboard KPIs global, Fahrten-Cards auf Fahrten&Export angleichen
+- [ ] 20-02-PLAN.md — Monatsuebersicht KPI-Cards, Excel-Export Template-Formatierung
 
 **UI hint**: yes
