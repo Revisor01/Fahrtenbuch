@@ -49,14 +49,16 @@ Exceptions:
 
 ## Typography
 
-Established in Phase 15, reused without changes:
+Established in Phase 15, adapted to 2-weight constraint:
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (normal) | 1.5 |
-| Label | 12px (text-xs) | 500 (medium) | 1.5 |
-| Heading | 16px (text-base) | 500 (medium) | 1.2 |
+| Label | 12px (text-xs) | 400 (normal) | 1.5 |
+| Heading | 16px (text-base) | 600 (semibold) | 1.2 |
 | KPI Value | 20px (text-xl) | 600 (semibold) | 1.2 |
+
+**Allowed weights:** 400 (normal) and 600 (semibold) only. No other font-weight values permitted in this phase.
 
 ---
 
@@ -100,6 +102,17 @@ Accent reserved for:
 
 ---
 
+## Focal Point
+
+| View | Primary Visual Anchor |
+|------|-----------------------|
+| Dashboard | KPI-Kacheln (Monatsstatistiken oben) |
+| Fahrtenliste | Fahrt-Cards-Liste (scrollbare Hauptliste) |
+| Verwaltung | User-Cards-Grid |
+| Statistik | Balkendiagramm |
+
+---
+
 ## Component Inventory
 
 ### New Components / Patterns
@@ -111,7 +124,7 @@ Accent reserved for:
 **States:**
 - Idle: Normal card display
 - Editing: Card replaced by FahrtForm with pre-filled values
-- Saving: Form disabled, btn-primary shows "Speichern..." (disabled state)
+- Saving: Form disabled, btn-primary shows "Fahrt speichern..." (disabled state)
 - Success: Form collapses, card returns with updated data
 
 **FahrtForm Edit-Mode Props:**
@@ -135,10 +148,19 @@ Accent reserved for:
 ```
 
 - Container: `bg-primary-25 dark:bg-primary-900 rounded-card p-4`
-- Route text: `text-sm text-value font-medium`
+- Route text: `text-sm text-value font-semibold`
 - Meta line: `text-xs text-label`
 - Buttons area: `flex items-center gap-1` right-aligned
 - Action icons: 13px Lucide icons, ghost button styling with `p-1.5 rounded-card`
+
+**Mobile icon-only action buttons require `aria-label`:**
+
+| Button | aria-label |
+|--------|------------|
+| Pencil (Edit) | `aria-label="Fahrt bearbeiten"` |
+| Trash2 (Delete) | `aria-label="Fahrt loeschen"` |
+| Copy (Nochmal) | `aria-label="Fahrt kopieren"` |
+| ArrowLeftRight (Rueckfahrt) | `aria-label="Rueckfahrt erstellen"` |
 
 **Fahrtenliste-spezifisch:**
 - Zeigt alle Fahrten (nicht nur letzte 3)
@@ -162,14 +184,14 @@ Accent reserved for:
 ```
 
 - Container: `card-container` (standard card with hover)
-- Avatar: 40x40px rounded-full div, `bg-primary-100 text-primary-700 font-medium`, zeigt Initialen (erste 2 Buchstaben des Usernamens)
-- Name: `text-sm font-medium text-value`
+- Avatar: 40x40px rounded-full div, `bg-primary-100 text-primary-700 font-semibold`, zeigt Initialen (erste 2 Buchstaben des Usernamens)
+- Name: `text-sm font-semibold text-value`
 - Email: `text-xs text-label`
 - Kirchengemeinde: `text-xs text-label`
 - Rolle-Badge: `status-badge-primary` fuer Admin, `status-badge` mit `bg-primary-50 text-primary-600` fuer User
 - Status-Badge: `status-badge-primary` fuer verifiziert (mit CheckCircle2 icon 12px), orange/secondary fuer nicht verifiziert
-- Bearbeiten: `btn-secondary` mit Pencil icon
-- Loeschen: `btn-destructive` mit Trash2 icon (nur wenn nicht eigener User)
+- Bearbeiten: `btn-secondary` mit Pencil icon, `aria-label="Benutzer bearbeiten"`
+- Loeschen: `btn-destructive` mit Trash2 icon (nur wenn nicht eigener User), `aria-label="Benutzer loeschen"`
 - Grid: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4`
 
 #### 4. Chart-Animation (Statistik)
@@ -199,7 +221,7 @@ Accent reserved for:
 |------|------------|-----------------|
 | 1 | Clicks Pencil on trip card | Card fades out (150ms), FahrtForm fades in (150ms) pre-filled |
 | 2 | Edits fields | Standard form interaction |
-| 3a | Clicks "Speichern" | Form disabled, API call, success notification, form collapses, updated card appears |
+| 3a | Clicks "Fahrt speichern" | Form disabled, API call, success notification, form collapses, updated card appears |
 | 3b | Clicks "Abbrechen" | Form collapses, original card restored |
 
 **Transition:** Use existing `tab-content-fade` animation (150ms ease-out) for card-to-form and form-to-card transitions.
@@ -232,7 +254,7 @@ Identical to Dashboard flow (D-06). Same FahrtForm component, same props, same a
 |---------|------|
 | Primary CTA (Dashboard) | "Fahrt speichern" |
 | Primary CTA (Verwaltung) | "+ Neuer Benutzer" |
-| Inline-Edit Save | "Speichern" |
+| Inline-Edit Save | "Fahrt speichern" |
 | Inline-Edit Cancel | "Abbrechen" |
 | Empty state heading (Fahrten) | "Keine Fahrten im gewaehlten Zeitraum" |
 | Empty state body (Fahrten) | "Erfasse deine erste Fahrt ueber das Dashboard." |
@@ -256,7 +278,7 @@ Identical to Dashboard flow (D-06). Same FahrtForm component, same props, same a
 | Default | Card with route, date, km, action buttons |
 | Hover | shadow-card-hover transition |
 | Editing | Card replaced by FahrtForm (fade transition) |
-| Saving | FahrtForm inputs disabled, save button disabled with "Speichern..." |
+| Saving | FahrtForm inputs disabled, save button disabled with "Fahrt speichern..." |
 
 ### Fahrtenliste Cards
 
@@ -293,6 +315,7 @@ Identical to Dashboard flow (D-06). Same FahrtForm component, same props, same a
 
 - Full width, stacked vertically with gap-3
 - Action buttons: icon-only (text labels hidden via `hidden sm:inline`, existing pattern)
+- All icon-only buttons MUST have `aria-label` (see Component Inventory section 2)
 - Touch targets: min 44x44px for all buttons
 - Route text wraps naturally
 
@@ -307,6 +330,7 @@ Identical to Dashboard flow (D-06). Same FahrtForm component, same props, same a
 - Single column: `grid-cols-1`
 - Full-width cards
 - Buttons stack: `flex-col`
+- All icon-only buttons MUST have `aria-label` (see Component Inventory section 3)
 
 ### User-Cards (Tablet >= 640px)
 
