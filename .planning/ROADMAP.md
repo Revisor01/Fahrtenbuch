@@ -272,7 +272,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19
 | 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
-| 19. Dashboard & Listen Feinschliff | v2.0 | 0/3 | Not Started |  |
+| 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | In Progress|  |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
@@ -287,7 +287,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19
 **Plans**: 3 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — CSS-Grundlagen, FahrtForm Edit-Modus, Dashboard Inline-Bearbeitung und Chart-Animation
+- [x] 19-01-PLAN.md — CSS-Grundlagen, FahrtForm Edit-Modus, Dashboard Inline-Bearbeitung und Chart-Animation
 - [ ] 19-02-PLAN.md — Verwaltung-Tab Card-Redesign
 - [ ] 19-03-PLAN.md — Fahrtenliste Card-Layout mit Inline-Edit
 
