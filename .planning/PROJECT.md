@@ -53,16 +53,15 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ Favoriten mit Rückfahrt-Dialog — v1.4
 - ✓ Umlaute korrigiert in allen Texten — v1.4
 
+- ✓ Inline-Bearbeitung und Löschen direkt auf dem Dashboard — v2.0 Phase 19
+- ✓ Fahrtenliste als Card-Layout statt Tabelle — v2.0 Phase 19
+- ✓ Verwaltung-Tab mit Card-Design wie Einstellungen — v2.0 Phase 19
+- ✓ Statistik-Chart-Animation wiederhergestellt — v2.0 Phase 19
+- ✓ Button-Farbschema konsistent (dunkelblau/hellblau/rot) — v2.0 Phase 19
+
 ### Active
 
-- [ ] Komplettes visuelles Redesign aller Ansichten (modern, mobile-first)
-- [ ] Cards als umgebende Container für alle Sektionen in jeder View
-- [ ] Dashboard Makeover (Formular, KPIs, Favoriten, Statistik — alles in Cards)
-- [ ] Einstellungen/Settings visuell aufwerten (Sub-Tab-Navigation, Formulare)
-- [ ] Fahrten & Export Redesign (Tabelle, Filter, Export-Bereich)
-- [ ] Monatsübersicht Redesign (übersichtlicher, Cards)
-- [ ] Mobile-First Optimierung (Touch-freundlich, responsive)
-- [ ] Einheitliches Designsystem (Typografie, Spacing, Farben)
+(keine — v2.0 Milestone abgeschlossen)
 
 ## Current Milestone: v2.0 Design Makeover
 
@@ -127,4 +126,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 14 (Navigation-Umbau) complete*
+*Last updated: 2026-04-02 after Phase 19 (Dashboard & Listen Feinschliff) complete — v2.0 Design Makeover Milestone finished*
