@@ -3,6 +3,7 @@ import axios from 'axios';
 import './index.css';
 import { AppContext } from './contexts/AppContext';
 import Modal from './Modal';
+import { Pencil, Trash2, CheckCircle2, AlertCircle, Plus } from 'lucide-react';
 
 const UserForm = ({ onSubmit, isEdit, initialData, onClose }) => {
    const formRef = useRef(null);
@@ -213,84 +214,103 @@ export default function UserManagement() {
 
    return (
       <div className="w-full max-w-full">
-      <div className="flex justify-end mb-6">
-      <button
-      onClick={() => setIsCreateModalOpen(true)}
-      className="btn-primary w-full-mobile"
-      >
-      + Neuer Benutzer
-      </button>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-base font-semibold text-value">{users.length} Benutzer</h2>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="btn-primary flex items-center gap-1"
+        >
+          <Plus size={16} />
+          <span>Neuer Benutzer</span>
+        </button>
       </div>
-      
-      <div className="table-container">
-      <table className="w-full">
-      <thead>
-      <tr className="table-head-row">
-      <th className="table-header">Benutzername</th>
-      <th className="table-header-sm">E-Mail</th>
-      <th className="table-header-sm">Kirchengemeinde</th>
-      <th className="table-header">Status</th>
-      <th className="table-header-sm">Rolle</th>
-      <th className="table-header text-right">Aktionen</th>
-      </tr>
-      </thead>
-      <tbody className="divide-y divide-primary-50 dark:divide-primary-700">
-      {users.map(user => (
-         <tr key={user.id} className="table-row">
-         <td className="table-cell">
-         <div className="flex flex-col">
-         <span className="text-value">{user.username}</span>
-         <span className="text-muted text-xs sm:hidden">{user.email}</span>
-         </div>
-         </td>
-         <td className="table-cell hidden sm:table-cell">
-         <span className="text-value">{user.email}</span>
-         </td>
-         <td className="table-cell hidden md:table-cell">
-         <span className="text-value">{user.kirchengemeinde || '-'}</span>
-         </td>
-         <td className="table-cell">
-         {user.email_verified ? (
-            <span className="status-badge-primary">● Verifiziert</span>
-         ) : (
-            <span className="status-badge-secondary">○ Ausstehend</span>
-         )}
-         </td>
-         <td className="table-cell hidden sm:table-cell">
-         <span className={`status-badge-${user.role === 'admin' ? 'primary' : 'secondary'}`}>
-         {user.role === 'admin' ? 'Administrator' : 'Benutzer'}
-         </span>
-         </td>
-         <td className="table-cell">
-         <div className="flex justify-end gap-2">
-         <button
-         onClick={() => openEditModal(user)}
-         className="table-action-button-primary"
-         title="Bearbeiten"
-         >
-         ✎
-         </button>
-         <button
-         onClick={() => {
-            showNotification(
-               'Benutzer löschen',
-               'Möchten Sie diesen Benutzer wirklich löschen?',
-               () => handleDelete(user.id),
-               true
+
+      {users.length === 0 ? (
+        <div className="card-container text-center py-12">
+          <p className="text-label text-sm">Keine Benutzer vorhanden</p>
+          <p className="text-muted text-xs mt-1">Erstelle einen neuen Benutzer ueber den Button oben.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {users.map(user => {
+            const initialen = (user.username || '??').slice(0, 2).toUpperCase();
+            const currentUserId = JSON.parse(localStorage.getItem('user') || '{}').id;
+            const isOwnUser = user.id === currentUserId;
+
+            return (
+              <div key={user.id} className="card-container hover:shadow-card-hover transition-shadow">
+                <div className="flex items-start gap-3">
+                  {/* Avatar mit Initialen */}
+                  <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 font-semibold flex items-center justify-center shrink-0 text-sm">
+                    {initialen}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-value truncate">{user.username}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
+                        user.role === 'admin'
+                          ? 'bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200'
+                          : 'bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-300'
+                      }`}>
+                        {user.role === 'admin' ? 'Admin' : 'Benutzer'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-label truncate mt-0.5">{user.email}</p>
+                    {user.kirchengemeinde && (
+                      <p className="text-xs text-label truncate">{user.kirchengemeinde}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status Badge */}
+                <div className="mt-3">
+                  {user.email_verified ? (
+                    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle2 size={12} />
+                      Verifiziert
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">
+                      <AlertCircle size={12} />
+                      Nicht verifiziert
+                    </span>
+                  )}
+                </div>
+
+                {/* Aktionen */}
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-card">
+                  <button
+                    onClick={() => openEditModal(user)}
+                    className="btn-secondary flex items-center gap-1 text-xs"
+                    aria-label="Benutzer bearbeiten"
+                  >
+                    <Pencil size={13} />
+                    <span>Bearbeiten</span>
+                  </button>
+                  {!isOwnUser && (
+                    <button
+                      onClick={() => {
+                        showNotification(
+                          'Benutzer loeschen',
+                          `Moechtest du ${user.username} wirklich loeschen?`,
+                          () => handleDelete(user.id),
+                          true
+                        );
+                      }}
+                      className="btn-destructive flex items-center gap-1 text-xs"
+                      aria-label="Benutzer loeschen"
+                    >
+                      <Trash2 size={13} />
+                      <span>Loeschen</span>
+                    </button>
+                  )}
+                </div>
+              </div>
             );
-         }}
-         className="table-action-button-secondary"
-         title="Löschen"
-         >
-         ×
-         </button>
-         </div>
-         </td>
-         </tr>
-      ))}
-      </tbody>
-      </table>
-      </div>
+          })}
+        </div>
+      )}
       
       <Modal
       isOpen={isCreateModalOpen}
