@@ -6,7 +6,7 @@ import axios from 'axios';
 import Modal from './Modal';
 import AddressAutocomplete from './components/AddressAutocomplete';
 
-function FahrtForm() {
+function FahrtForm({ editData, onUpdate, onCancel }) {
   const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger, setAbrechnungstraeger, addOrt, fetchOrte, refreshAllData } = useContext(AppContext);
   const [mitfahrer, setMitfahrer] = useState([]);
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
@@ -32,6 +32,25 @@ function FahrtForm() {
   const [addRueckfahrt, setAddRueckfahrt] = useState(false);
   const [useEinmaligenVonOrt, setUseEinmaligenVonOrt] = useState(false);
   const [useEinmaligenNachOrt, setUseEinmaligenNachOrt] = useState(false);
+
+  // Pre-fill form when editData is provided (edit mode)
+  useEffect(() => {
+    if (editData) {
+      setFormData({
+        datum: editData.datum ? editData.datum.slice(0, 10) : '',
+        vonOrtId: editData.von_ort_id ? String(editData.von_ort_id) : '',
+        nachOrtId: editData.nach_ort_id ? String(editData.nach_ort_id) : '',
+        einmaligerVonOrt: editData.einmaliger_von_ort || '',
+        einmaligerNachOrt: editData.einmaliger_nach_ort || '',
+        anlass: editData.anlass || '',
+        manuelleKilometer: editData.kilometer ? String(editData.kilometer) : '',
+        abrechnung: editData.abrechnung ? String(editData.abrechnung) : ''
+      });
+      setUseEinmaligenVonOrt(!!editData.einmaliger_von_ort);
+      setUseEinmaligenNachOrt(!!editData.einmaliger_nach_ort);
+      if (editData.mitfahrer) setMitfahrer(editData.mitfahrer);
+    }
+  }, [editData]);
 
   useEffect(() => {
     const fetchDistanz = async () => {
@@ -112,7 +131,21 @@ function FahrtForm() {
       abrechnung: parseInt(formData.abrechnung),
       mitfahrer: mitfahrer.filter(m => m.richtung === 'hin' || m.richtung === 'hin_rueck')
     };
-    
+
+    // Edit mode: update existing trip via PUT
+    if (editData && onUpdate) {
+      try {
+        await axios.put(`/api/fahrten/${editData.id}`, fahrtData);
+        showNotification("Erfolg", "Fahrt wurde aktualisiert.");
+        onUpdate();
+        return;
+      } catch (error) {
+        console.error('Fehler beim Aktualisieren:', error);
+        showNotification("Fehler", "Aenderungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
+        return;
+      }
+    }
+
     try {
       await addFahrt(fahrtData);
       
@@ -174,7 +207,7 @@ function FahrtForm() {
   };
   
   return (
-    <div className="card-container-highlight">
+    <div className={editData ? '' : 'card-container-highlight'}>
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Basis-Informationen */}
     <div className="form-row">
@@ -376,8 +409,13 @@ function FahrtForm() {
     >
     Mitfahrer:in
     </button>
+    {onCancel && (
+      <button type="button" onClick={onCancel} className="btn-secondary">
+      Abbrechen
+      </button>
+    )}
     <button type="submit" className="btn-primary">
-    Speichern
+    {editData ? 'Fahrt speichern' : 'Speichern'}
     </button>
     </div>
     </div>
