@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, Banknote, Users, Building2, Wallet } from 'lucide-react';
 import AbrechnungsStatusModal from '../AbrechnungsStatusModal';
 import { AppContext } from '../contexts/AppContext';
 
@@ -10,6 +10,14 @@ function MonthlyOverview() {
   const [hideCompleted, setHideCompleted] = useState(true);
   const [filteredData, setFilteredData] = useState([]);
   const currentYear = new Date().getFullYear().toString();
+
+  const kategorieStyles = [
+    { bg: 'bg-emerald-50 dark:bg-emerald-900/20', icon: Building2, iconColor: 'text-emerald-500' },
+    { bg: 'bg-blue-50 dark:bg-blue-900/20', icon: Wallet, iconColor: 'text-blue-500' },
+    { bg: 'bg-purple-50 dark:bg-purple-900/20', icon: Banknote, iconColor: 'text-purple-500' },
+    { bg: 'bg-amber-50 dark:bg-amber-900/20', icon: Building2, iconColor: 'text-amber-500' },
+  ];
+  const mitfahrerStyle = { bg: 'bg-indigo-50 dark:bg-indigo-900/20', icon: Users, iconColor: 'text-indigo-500' };
 
   const getMonthName = (month) => {
     return new Date(2000, month - 1, 1).toLocaleString('de-DE', { month: 'long' });
@@ -418,36 +426,46 @@ function MonthlyOverview() {
       ? 'sm:grid-cols-3 gap-4'
       : 'sm:grid-cols-2 lg:grid-cols-4 gap-4'
     }`}>
-    {getKategorienMitErstattung().map(([key, displayName, data]) => (
-      <div key={key} className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">{displayName}</span>
-      <span className="text-value font-medium">
-      {(data.ausstehend || 0).toFixed(2)} €
-      </span>
-      </div>
-      {data.original !== data.ausstehend && (
-        <div className="text-right text-muted text-xs">
-        Ursprünglich: {(data.original || 0).toFixed(2)} €
+    {getKategorienMitErstattung().map(([key, displayName, data], index) => {
+      const style = key === 'mitfahrer' ? mitfahrerStyle : kategorieStyles[index % kategorieStyles.length];
+      const IconComponent = style.icon;
+      return (
+        <div key={key} className={`rounded-card p-4 shadow-card border border-card ${style.bg}`}>
+        <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+        <p className="text-xs text-muted mb-1">{displayName}</p>
+        <p className="text-xl font-semibold text-value truncate">
+        {(data.ausstehend || 0).toFixed(2).replace('.', ',')} &euro;
+        </p>
+        {data.original !== data.ausstehend && (
+          <p className="text-xs text-muted">
+          Ursprünglich: {(data.original || 0).toFixed(2).replace('.', ',')} &euro;
+          </p>
+        )}
         </div>
-      )}
-      </div>
-    ))}
+        <IconComponent size={22} className={`${style.iconColor} shrink-0`} />
+        </div>
+        </div>
+      );
+    })}
 
     {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
       <div className="card-container-highlight col-span-1 sm:col-span-2 lg:col-span-full">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">Gesamt</span>
-      <span className="text-value font-medium">
-      {(yearTotal.gesamt?.ausstehend || 0).toFixed(2)} €
-      </span>
-      </div>
+      <div className="flex items-center justify-between gap-2">
+      <div className="min-w-0">
+      <p className="text-xs text-muted mb-1">Gesamt</p>
+      <p className="text-xl font-semibold text-value truncate">
+      {(yearTotal.gesamt?.ausstehend || 0).toFixed(2).replace('.', ',')} &euro;
+      </p>
       {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
-        <div className="text-right text-muted text-xs">
-        Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
-        </div>
+        <p className="text-xs text-muted">
+        Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2).replace('.', ',')} &euro;
+        </p>
       )}
+      </div>
+      <Banknote size={22} className="text-primary-500 shrink-0" />
+      </div>
       </div>
     )}
     </div>
@@ -492,28 +510,38 @@ function MonthlyOverview() {
             const betrag = month.erstattungen?.[traeger.id] || 0;
             return betrag > 0;
           })
-          .map(traeger => (
-            <div key={traeger.id} className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
-            <div className="flex justify-between items-start mb-2">
-            <span className="text-sm font-medium text-value">{traeger.name}</span>
-            <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
-            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
-            </span>
+          .map((traeger, index) => {
+            const style = kategorieStyles[index % kategorieStyles.length];
+            const IconComponent = style.icon;
+            return (
+            <div key={traeger.id} className={`rounded-card p-4 shadow-card border border-card ${style.bg}`}>
+            <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+            <p className="text-xs text-muted mb-1">{traeger.name}</p>
+            <p className="text-xl font-semibold text-value truncate">
+            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2).replace('.', ',')} &euro;
+            </p>
+            </div>
+            <IconComponent size={22} className={`${style.iconColor} shrink-0`} />
             </div>
             <div className="mt-2">
             {renderStatusCell(month, traeger.id)}
             </div>
             </div>
-          ))}
+            );
+          })}
 
         {/* Mitfahrer Card wenn vorhanden */}
         {month.erstattungen?.mitfahrer > 0 && (
-          <div className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
-          <div className="flex justify-between items-start mb-2">
-          <span className="text-sm font-medium text-value">Mitfahrer:innen</span>
-          <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
-          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
-          </span>
+          <div className={`rounded-card p-4 shadow-card border border-card ${mitfahrerStyle.bg}`}>
+          <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+          <p className="text-xs text-muted mb-1">Mitfahrer:innen</p>
+          <p className="text-xl font-semibold text-value truncate">
+          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2).replace('.', ',')} &euro;
+          </p>
+          </div>
+          <Users size={22} className={`${mitfahrerStyle.iconColor} shrink-0`} />
           </div>
           <div className="mt-2">
           {renderStatusCell(month, 'mitfahrer')}
