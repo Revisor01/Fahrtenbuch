@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Design Makeover
-status: executing
-stopped_at: Completed 19-01-PLAN.md
-last_updated: "2026-04-02T09:59:14.394Z"
-last_activity: 2026-04-01
+milestone: v1.3
+milestone_name: Dashboard & UX
+status: planning
+stopped_at: Roadmap v1.3 erstellt, bereit fuer Phase 10 Planung
+last_updated: "2026-04-02T09:56:26.124Z"
+last_activity: 2026-03-22 — Roadmap fuer v1.3 erstellt
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 12
-  completed_plans: 9
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,46 +18,35 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-28)
+See: .planning/PROJECT.md (updated 2026-03-22)
 
-**Core value:** Komplettes visuelles Redesign — modern, mobil, attraktiv
-**Current focus:** Phase 14 — navigation-umbau
+**Core value:** Schnellere Fahrteingabe durch Favoriten und bessere Uebersicht durch Dashboard
+**Current focus:** Phase 19 - Dashboard & Listen Feinschliff
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
-Status: Executing Phase 14
-Last activity: 2026-04-01
+Phase: 19 (Dashboard & Listen Feinschliff)
+Plan: 2 of 3 in current phase
+Status: Executing
+Last activity: 2026-04-02 — Plan 19-02 completed (Verwaltung-Tab Card-Layout)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████░░░░] 66%
 
 ## Performance Metrics
 
-**Velocity (v1.0-v1.4):**
+**Velocity (v1.0-v1.2):**
 
-- Total plans completed: 22
+- Total plans completed: 16
 - Avg ~2min/plan
 - Trend: Stable
 
-**Recent (v1.4):**
+**By Phase:**
 
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 13 P01 | 2min | 2 tasks | 1 files |
-| Phase 13 P02 | 2min | 2 tasks | 4 files |
-| Phase 13 P03 | 2min | 1 tasks | 4 files |
-| Phase 14 P01 | 2min | 2 tasks | 2 files |
-| Phase 14 P02 | 5min | 2 tasks | 1 files |
-| Phase 15 P01 | 3min | 2 tasks | 3 files |
-| Phase 15 P02 | 2min | 2 tasks | 1 files |
-| Phase 16 P02 | 1min | 1 tasks | 1 files |
-| Phase 17 P02 | 2min | 2 tasks | 1 files |
-| Phase 17 P01 | 2min | 2 tasks | 1 files |
-| Phase 18 P01 | 2min | 2 tasks | 1 files |
-| Phase 18 P02 | 2min | 2 tasks | 2 files |
-| Phase 18 P03 | 2min | 2 tasks | 3 files |
-| Phase 19 P01 | 3min | 2 tasks | 3 files |
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
@@ -66,21 +55,10 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v1.4]: Settings als Inline-Tab statt Modal — SettingsIcon Alias fuer Namenskonflikt
-- [v1.4]: Admin-only Tab via conditional tabs-Array Spread mit role-Check in AppContent
-- [v2.0]: Designsystem als Fundament zuerst (Phase 15), alle View-Redesigns bauen darauf auf
-- [v2.0]: Dashboard-Formular wird exklusiv — Fahrtenliste verliert ihr Formular (DASH-08 vor FE-01)
-- [v2.0]: Login/Landing und Animationen als letztes (am wenigsten kritisch)
-- [Phase 15]: Dark-Mode-Overrides als globaler html.dark Block statt pro Theme
-- [Phase 15]: Card-Klassen nutzen semantische Tokens (bg-card, shadow-card, rounded-card) statt hardcodierter Werte
-- [Phase 15]: Dashboard-Sektionen auf card-container migriert, KPI-Cards behalten individuelle Farben mit Token-Werten
-- [Phase 16]: FahrtForm-Import komplett aus AppContent entfernt — Dashboard-only Trip Entry
-- [Phase 17]: Inner cards use bg-primary-25 instead of nested card-container to avoid double shadows
-- [Phase 17]: Export-Bereich als eigene Card-Container statt inline Buttons
-- [Phase 18]: Filled bg-primary-500 for active Settings tab instead of border-bottom
-- [Phase 18]: Car-Icon als Branding-Element auf Login und Landing konsistent eingesetzt
-- [Phase 18]: Rein CSS-basierte Tab-Transitions (keyframes) statt JS-Animationsbibliothek
-- [Phase 19]: FahrtForm Edit-Mode via Props statt separater Komponente
+- [v1.3]: Favoriten vor Dashboard, weil Dashboard Favoriten anzeigt
+- [v1.3]: Navigation-Umbau: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
+- [Phase 09]: Excel/PDF Buttons nebeneinander pro Kategorie statt Dropdown
+- [Phase 19-02]: Card-Grid-Pattern fuer Entity-Listen (1/2/3 Spalten responsive)
 
 ### Pending Todos
 
@@ -92,6 +70,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T09:59:14.391Z
-Stopped at: Completed 19-01-PLAN.md
+Last session: 2026-04-02
+Stopped at: Completed 19-02-PLAN.md
 Resume file: None
