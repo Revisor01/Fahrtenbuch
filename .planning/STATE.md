@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Design Makeover
 status: planning
-stopped_at: Phase 20 context gathered
-last_updated: "2026-04-02T12:11:36.487Z"
+stopped_at: "Completed 20-01-PLAN.md, checkpoint:human-verify pending"
+last_updated: "2026-04-02T18:50:41.640Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
   percent: 0
 ---
 
@@ -48,6 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 19 P03 | 330s | 1 tasks | 1 files |
+| Phase 20 P01 | 109 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -60,6 +61,7 @@ Recent decisions affecting current work:
 - [v1.3]: Navigation-Umbau: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
 - [Phase 09]: Excel/PDF Buttons nebeneinander pro Kategorie statt Dropdown
 - [Phase 19]: FahrtenListe: Tabelle durch Card-Layout ersetzt, Inline-Edit via FahrtForm statt eigener Edit-Felder
+- [Phase 20]: Offene Erstattungen aus monthlyData statt summary berechnet (global ueber alle Monate)
 
 ### Pending Todos
 
@@ -71,6 +73,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T12:11:36.481Z
-Stopped at: Phase 20 context gathered
-Resume file: .planning/phases/20-dashboard-kpis-fahrten-layout-excel-export/20-CONTEXT.md
+Last session: 2026-04-02T18:50:30.417Z
+Stopped at: Completed 20-01-PLAN.md, checkpoint:human-verify pending
+Resume file: None

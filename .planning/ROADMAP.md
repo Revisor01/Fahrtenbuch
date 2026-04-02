@@ -274,7 +274,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
 | 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | Complete    | 2026-04-02 |
-| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 0/2 | Planned | - |
+| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 1/2 | In Progress|  |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
@@ -311,7 +311,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — Dashboard KPIs global, Fahrten-Cards auf Fahrten&Export angleichen
+- [x] 20-01-PLAN.md — Dashboard KPIs global, Fahrten-Cards auf Fahrten&Export angleichen
 - [ ] 20-02-PLAN.md — Monatsuebersicht KPI-Cards, Excel-Export Template-Formatierung
 
 **UI hint**: yes
