@@ -5,7 +5,7 @@ import { AppContext } from '../contexts/AppContext';
 import MitfahrerModal from '../MitfahrerModal';
 import Modal from '../Modal';
 import FahrtForm from '../FahrtForm';
-import { AlertCircle, Circle, CheckCircle2, Pencil, Trash2, RotateCcw, Users } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, Pencil, Trash2, RotateCcw, Users, Clock } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -697,9 +697,10 @@ function FahrtenListe() {
       </div>
     ) : (
       <div className="card-container">
-        <div className="px-0 pb-3 border-b border-card mb-3">
-          <h3 className="text-base font-semibold text-value">Fahrten</h3>
-          <p className="text-xs text-label mt-0.5">{sortedFahrten.length} Eintraege</p>
+        <div className="flex items-center gap-2 mb-3">
+          <Clock size={18} className="text-orange-500" />
+          <h2 className="text-base font-medium text-value">Fahrten</h2>
+          <span className="text-sm text-muted">({sortedFahrten.length})</span>
         </div>
         <div className="space-y-2">
           {sortedFahrten.map((fahrt) => {
