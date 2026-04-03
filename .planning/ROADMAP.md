@@ -165,7 +165,7 @@ Plans:
 
 </details>
 
-### 🚧 v2.0 Design Makeover (In Progress)
+### v2.0 Design Makeover (In Progress)
 
 **Milestone Goal:** Komplettes visuelles Redesign der gesamten App — modern, mobil-optimiert, attraktiv. Alle bestehenden Funktionen bleiben, aber jede Ansicht bekommt ein zeitgemaesses UI mit einheitlichem Designsystem.
 
@@ -252,7 +252,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20
+Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20 → 21
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -276,6 +276,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
 | 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | Complete    | 2026-04-02 |
 | 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 1/2 | Complete    | 2026-04-03 |
+| 21. Monatsübersicht Polish | v2.0 | 0/3 | Planning | - |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
@@ -320,9 +321,11 @@ Plans:
 ### Phase 21: Monatsübersicht Polish
 
 **Goal:** Monatsübersicht visuell aufräumen — Icons entfernen, Farben pro Abrechnungsträger konfigurierbar machen, Buttons stilistisch anpassen, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons ersetzen, Abbrechen als richtiger Button)
-**Requirements**: TBD
+**Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-09, D-10, D-11, D-12, D-13, D-14, D-15, D-16
 **Depends on:** Phase 20
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 21 to break down)
+- [ ] 21-01-PLAN.md — Backend Farbe-Feld: DB-Migration, Model, Controller, AbrechnungstraegerForm Farbwahl
+- [ ] 21-02-PLAN.md — MonthlyOverview: Icons entfernen, Farben dynamisch, Layout-Fixes (Leerzeichen, Kalender-Icons)
+- [ ] 21-03-PLAN.md — Status-Buttons redesign: CSS-Klassen ueberarbeiten, renderStatusCell aktualisieren, btn-secondary aufwerten
