@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, CalendarDays } from 'lucide-react';
 import AbrechnungsStatusModal from '../AbrechnungsStatusModal';
 import { AppContext } from '../contexts/AppContext';
 
+
+const DEFAULT_FARBE = '#6b7280';
+const MITFAHRER_FARBE = '#6366f1';
+
+// Erzeugt inline style fuer Card-Hintergrund mit niedriger Opacity
+const getCardBg = (hexColor) => ({
+  backgroundColor: `${hexColor || DEFAULT_FARBE}14`,
+});
 
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, abrechnungsStatusModal, setAbrechnungsStatusModal, handleAbrechnungsStatus , summary, showNotification } = useContext(AppContext);
@@ -417,21 +425,25 @@ function MonthlyOverview() {
       ? 'sm:grid-cols-3 gap-4'
       : 'sm:grid-cols-2 lg:grid-cols-4 gap-4'
     }`}>
-    {getKategorienMitErstattung().map(([key, displayName, data]) => (
-      <div key={key} className="card-container">
-      <div className="flex justify-between items-center mb-2">
-      <span className="text-sm text-label">{displayName}</span>
-      <span className="text-value font-medium">
-      {(data.ausstehend || 0).toFixed(2)} €
-      </span>
-      </div>
-      {data.original !== data.ausstehend && (
-        <div className="text-right text-muted text-xs">
-        Ursprünglich: {(data.original || 0).toFixed(2)} €
+    {getKategorienMitErstattung().map(([key, displayName, data]) => {
+      const traeger = abrechnungstraeger.find(t => t.id.toString() === key);
+      const farbe = key === 'mitfahrer' ? MITFAHRER_FARBE : (traeger?.farbe || DEFAULT_FARBE);
+      return (
+        <div key={key} className="rounded-card p-4 shadow-card border border-card" style={getCardBg(farbe)}>
+        <div className="flex justify-between items-center mb-2">
+        <span className="text-sm text-label">{displayName}</span>
+        <span className="text-value font-medium">
+        {(data.ausstehend || 0).toFixed(2)} €
+        </span>
         </div>
-      )}
-      </div>
-    ))}
+        {data.original !== data.ausstehend && (
+          <div className="text-right text-muted text-xs">
+          Ursprünglich: {(data.original || 0).toFixed(2)} €
+          </div>
+        )}
+        </div>
+      );
+    })}
 
     {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
@@ -492,7 +504,7 @@ function MonthlyOverview() {
             return betrag > 0;
           })
           .map(traeger => (
-            <div key={traeger.id} className="card-container">
+            <div key={traeger.id} className="rounded-card p-4 shadow-card border border-card" style={getCardBg(traeger.farbe)}>
             <div className="flex justify-between items-start mb-2">
             <span className="text-sm font-medium text-value">{traeger.name}</span>
             <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
@@ -507,7 +519,7 @@ function MonthlyOverview() {
 
         {/* Mitfahrer Card wenn vorhanden */}
         {month.erstattungen?.mitfahrer > 0 && (
-          <div className="bg-primary-25 dark:bg-primary-900/30 rounded-lg p-4">
+          <div className="rounded-card p-4 shadow-card border border-card" style={getCardBg(MITFAHRER_FARBE)}>
           <div className="flex justify-between items-start mb-2">
           <span className="text-sm font-medium text-value">Mitfahrer:innen</span>
           <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
