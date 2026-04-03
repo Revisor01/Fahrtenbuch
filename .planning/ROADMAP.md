@@ -175,7 +175,7 @@ Plans:
 - [x] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff (completed 2026-03-28)
 - [x] **Phase 19: Dashboard & Listen Feinschliff** - Inline-Bearbeitung auf Dashboard, Fahrtenliste als Card-Layout, Verwaltung-Tab redesignen, UI-Polish (completed 2026-04-02)
 - [x] **Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export** - Dashboard zeigt alle offenen/eingereichten Erstattungen, Fahrten-Cards wie Dashboard, Monatsübersicht wie KPIs, Excel-Export korrekt mit neuer 2026-Vorlage (completed 2026-04-03)
-- [ ] **Phase 21: Monatsübersicht Polish** - Icons raus, Farben pro Abrechnungsträger konfigurierbar, Buttons redesign, Abbrechen-Button als echter Button, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons)
+- [x] **Phase 21: Monatsübersicht Polish** - Icons raus, Farben pro Abrechnungsträger konfigurierbar, Buttons redesign, Abbrechen-Button als echter Button, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons) (completed 2026-04-03)
 
 ## Phase Details
 
@@ -276,7 +276,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20 → 21
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
 | 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | Complete    | 2026-04-02 |
 | 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 1/2 | Complete    | 2026-04-03 |
-| 21. Monatsübersicht Polish | v2.0 | 1/3 | In Progress | - |
+| 21. Monatsübersicht Polish | v2.0 | 1/3 | Complete    | 2026-04-03 |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
@@ -323,7 +323,7 @@ Plans:
 **Goal:** Monatsübersicht visuell aufräumen — Icons entfernen, Farben pro Abrechnungsträger konfigurierbar machen, Buttons stilistisch anpassen, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons ersetzen, Abbrechen als richtiger Button)
 **Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-09, D-10, D-11, D-12, D-13, D-14, D-15, D-16
 **Depends on:** Phase 20
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 21-01-PLAN.md — Backend Farbe-Feld: DB-Migration, Model, Controller, AbrechnungstraegerForm Farbwahl
