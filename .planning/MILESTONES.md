@@ -1,5 +1,26 @@
 # Milestones
 
+## v2.0 Design Makeover (Shipped: 2026-04-03)
+
+**Phases completed:** 7 phases, 17 plans, 29 tasks
+
+**Key accomplishments:**
+
+- CSS Design-Tokens (bg-card, shadow-card, border-card) in 9 Themes + Tailwind Config, modernisierte Card/Button/Input-Klassen mit verbessertem Dark-Mode-Kontrast
+- Dashboard-Sektionen (KPIs, Favoriten, Formular, Statistik, Letzte Fahrten) von undefinierter 'card'-Klasse auf zentrale card-container Tokens migriert
+- FahrtForm aus Fahrten-Tab entfernt — Dashboard ist jetzt einziger Ort fuer neue Fahrten
+- Card-Layout fuer Filter/Export/Tabelle mit 44px Touch-Targets und Empty-State in Desktop und Mobile
+- Monatsauebersicht visuell modernisiert mit Card-Layout, 44px Touch-Targets, Design-Token-Dropdown und Empty State
+- Modernisierte Settings-Navigation mit Lucide-Icons, gefuelltem aktiven Tab-Zustand und einheitlichem Card-Layout fuer alle 8 Sub-Tabs
+- Login-Seite mit Gradient-Hintergrund, Car-Branding-Icon und Text-Links; Landing-Page mit Card-Sections, Header-Shadow und konsistentem Branding
+- CSS Fade-In-Animation (200ms ease-out) fuer alle Tab-Wechsel in AppContent und Settings, plus Card-Hover-Shadow auf card-container
+- User-Tabelle durch responsive Card-Grid mit Avatar-Initialen, Rolle/Status-Badges und Lucide-Icons ersetzt
+- FahrtenListe von 1654-Zeilen Tabelle+Mobile-Doppelview zu 680-Zeilen einheitlichem Card-Layout mit FahrtForm-basiertem Inline-Edit umgebaut
+- Konfigurierbares Farbe-Feld pro Abrechnungstraeger mit DB-Migration, erweiterter API und Farbwahl-Widget in den Einstellungen
+- KPI-Cards ohne Icons, Hintergrundfarben dynamisch aus Abrechnungstraeger.farbe, Jahresuebersicht-Header und Monats-Trenner visuell aufgeraeumt
+
+---
+
 ## v1.4 UX Polish & Navigation (Shipped: 2026-03-28)
 
 **Phases completed:** 2 phases, 5 plans, 8 tasks
