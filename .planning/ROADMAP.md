@@ -175,6 +175,7 @@ Plans:
 - [x] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff (completed 2026-03-28)
 - [x] **Phase 19: Dashboard & Listen Feinschliff** - Inline-Bearbeitung auf Dashboard, Fahrtenliste als Card-Layout, Verwaltung-Tab redesignen, UI-Polish (completed 2026-04-02)
 - [x] **Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export** - Dashboard zeigt alle offenen/eingereichten Erstattungen, Fahrten-Cards wie Dashboard, Monatsübersicht wie KPIs, Excel-Export korrekt mit neuer 2026-Vorlage (completed 2026-04-03)
+- [ ] **Phase 21: Monatsübersicht Polish** - Icons raus, Farben pro Abrechnungsträger konfigurierbar, Buttons redesign, Abbrechen-Button als echter Button, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons)
 
 ## Phase Details
 
@@ -315,3 +316,13 @@ Plans:
 - [x] 20-02-PLAN.md — Monatsuebersicht KPI-Cards, Excel-Export Template-Formatierung
 
 **UI hint**: yes
+
+### Phase 21: Monatsübersicht Polish
+
+**Goal:** Monatsübersicht visuell aufräumen — Icons entfernen, Farben pro Abrechnungsträger konfigurierbar machen, Buttons stilistisch anpassen, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons ersetzen, Abbrechen als richtiger Button)
+**Requirements**: TBD
+**Depends on:** Phase 20
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 21 to break down)

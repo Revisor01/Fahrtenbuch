@@ -69,6 +69,10 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Roadmap Evolution
+
+- Phase 21 added: Monatsübersicht Polish — Icons raus, Farben konfigurierbar, Buttons redesign, Layout-Fixes
+
 ### Blockers/Concerns
 
 None yet.
