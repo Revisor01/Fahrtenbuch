@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Design Makeover
-status: executing
-stopped_at: "Completed 21-01-PLAN.md"
-last_updated: "2026-04-03T12:33:00Z"
-last_activity: 2026-04-03 -- Phase 21 Plan 01 completed
+milestone: v1.3
+milestone_name: Dashboard & UX
+status: planning
+stopped_at: Completed 21-02-PLAN.md
+last_updated: "2026-04-03T12:39:00.029Z"
+last_activity: 2026-03-22 — Roadmap fuer v1.3 erstellt
 progress:
-  total_phases: 7
-  completed_phases: 5
-  total_plans: 17
-  completed_plans: 14
-  percent: 82
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** Schnellere Fahrteingabe durch Favoriten und bessere Uebersicht durch Dashboard
-**Current focus:** Phase 21 — monatsuebersicht-polish
+**Current focus:** Phase 10 - Favoriten & Quick-Copy
 
 ## Current Position
 
-Phase: 21 (monatsuebersicht-polish) — EXECUTING
-Plan: 2 of 3
-Status: Executing Phase 21
-Last activity: 2026-04-03 -- Phase 21 Plan 01 completed
+Phase: 10 of 12 (Favoriten & Quick-Copy)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-03-22 — Roadmap fuer v1.3 erstellt
 
-Progress: [████████░░] 82%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -47,10 +47,7 @@ Progress: [████████░░] 82%
 | - | - | - | - |
 
 *Updated after each plan completion*
-| Phase 19 P03 | 330s | 1 tasks | 1 files |
-| Phase 20 P01 | 109 | 2 tasks | 2 files |
-| Phase 20 P02 | 150s | 2 tasks | 2 files |
-| Phase 21 P01 | 174s | 2 tasks | 4 files |
+| Phase 21 P02 | 2min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -62,18 +59,11 @@ Recent decisions affecting current work:
 - [v1.3]: Favoriten vor Dashboard, weil Dashboard Favoriten anzeigt
 - [v1.3]: Navigation-Umbau: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
 - [Phase 09]: Excel/PDF Buttons nebeneinander pro Kategorie statt Dropdown
-- [Phase 19]: FahrtenListe: Tabelle durch Card-Layout ersetzt, Inline-Edit via FahrtForm statt eigener Edit-Felder
-- [Phase 20]: Offene Erstattungen aus monthlyData statt summary berechnet (global ueber alle Monate)
-- [Phase 20]: Spread-based font adjustment in monatliche Abrechnung beibehalten da es Template-Fonts bewahrt
-- [Phase 21]: Vordefinierte 8-Farben-Palette statt freiem Hex-Input fuer Abrechnungstraeger-Farben
+- [Phase 21]: Hex-Farbe mit Alpha-Suffix 14 fuer dezenten Card-Hintergrund
 
 ### Pending Todos
 
 None yet.
-
-### Roadmap Evolution
-
-- Phase 21 added: Monatsübersicht Polish — Icons raus, Farben konfigurierbar, Buttons redesign, Layout-Fixes
 
 ### Blockers/Concerns
 
@@ -81,6 +71,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T12:33:00Z
-Stopped at: Completed 21-01-PLAN.md
-Resume file: .planning/phases/21-monatsuebersicht-polish/21-01-SUMMARY.md
+Last session: 2026-04-03T12:39:00.027Z
+Stopped at: Completed 21-02-PLAN.md
+Resume file: None

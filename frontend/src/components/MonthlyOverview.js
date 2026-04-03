@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AlertCircle, Circle, CheckCircle2, Banknote, Users, Building2, Wallet } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, CalendarDays } from 'lucide-react';
 import AbrechnungsStatusModal from '../AbrechnungsStatusModal';
 import { AppContext } from '../contexts/AppContext';
 
+
+const DEFAULT_FARBE = '#6b7280';
+const MITFAHRER_FARBE = '#6366f1';
+
+// Erzeugt inline style fuer Card-Hintergrund mit niedriger Opacity
+const getCardBg = (hexColor) => ({
+  backgroundColor: `${hexColor || DEFAULT_FARBE}14`,
+});
 
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, abrechnungsStatusModal, setAbrechnungsStatusModal, handleAbrechnungsStatus , summary, showNotification } = useContext(AppContext);
@@ -10,14 +18,6 @@ function MonthlyOverview() {
   const [hideCompleted, setHideCompleted] = useState(true);
   const [filteredData, setFilteredData] = useState([]);
   const currentYear = new Date().getFullYear().toString();
-
-  const kategorieStyles = [
-    { bg: 'bg-emerald-50 dark:bg-emerald-900/20', icon: Building2, iconColor: 'text-emerald-500' },
-    { bg: 'bg-blue-50 dark:bg-blue-900/20', icon: Wallet, iconColor: 'text-blue-500' },
-    { bg: 'bg-purple-50 dark:bg-purple-900/20', icon: Banknote, iconColor: 'text-purple-500' },
-    { bg: 'bg-amber-50 dark:bg-amber-900/20', icon: Building2, iconColor: 'text-amber-500' },
-  ];
-  const mitfahrerStyle = { bg: 'bg-indigo-50 dark:bg-indigo-900/20', icon: Users, iconColor: 'text-indigo-500' };
 
   const getMonthName = (month) => {
     return new Date(2000, month - 1, 1).toLocaleString('de-DE', { month: 'long' });
@@ -206,7 +206,7 @@ function MonthlyOverview() {
       <div className="relative">
       <button
       onClick={() => setIsOpen(!isOpen)}
-      className="btn-primary w-full sm:w-auto flex items-center justify-between gap-2 min-h-[44px]"
+      className="btn-primary w-full sm:w-auto flex items-center justify-between gap-2"
       >
       <span>Schnellaktionen</span>
       <span className={`transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}>
@@ -217,7 +217,7 @@ function MonthlyOverview() {
       {isOpen && (
         <>
         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-        <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-card shadow-card border border-primary-100 dark:border-primary-700 z-50">
+        <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-700 z-50">
         {actions.map((action, index) => (
           <button
           key={index}
@@ -225,7 +225,7 @@ function MonthlyOverview() {
             await action.action();
             setIsOpen(false);
           }}
-          className="w-full text-left px-4 py-2 text-sm text-value hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-150 min-h-[44px] flex items-center"
+          className="w-full text-left px-4 py-2 text-sm text-value hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-150"
           >
           {action.label}
           </button>
@@ -260,7 +260,7 @@ function MonthlyOverview() {
       return (
         <div className="flex items-center justify-between">
         <span
-        className="status-badge-primary cursor-pointer min-h-[44px] flex items-center"
+        className="status-badge-primary cursor-pointer"
         onClick={() => {
           showNotification(
             "Status zurücksetzen",
@@ -287,7 +287,7 @@ function MonthlyOverview() {
       return (
         <div className="flex items-center justify-between">
         <span
-        className="status-badge-secondary cursor-pointer min-h-[44px] flex items-center"
+        className="status-badge-secondary cursor-pointer"
         onClick={() => setAbrechnungsStatusModal({
           open: true,
           traegerId,
@@ -307,7 +307,7 @@ function MonthlyOverview() {
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
       <span
-      className="status-badge-secondary cursor-pointer min-h-[44px] flex items-center"
+      className="status-badge-secondary cursor-pointer"
       onClick={() => setAbrechnungsStatusModal({
         open: true,
         traegerId,
@@ -335,10 +335,11 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
     {/* Titel und Aktuelles Jahr - immer in einer Zeile */}
     <div className="flex justify-between items-center">
-    <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
-    <p className="text-sm text-label mt-1">{selectedYear === 'all' ? 'Alle Jahre' : selectedYear}</p>
+    <h2 className="text-lg font-medium text-value">
+      Jahresübersicht {selectedYear === 'all' ? '— Alle Jahre' : selectedYear}
+    </h2>
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary min-h-[44px]">
+      <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary">
       Aktuelles Jahr
       </button>
     )}
@@ -348,7 +349,7 @@ function MonthlyOverview() {
     <div className="hidden sm:flex items-center gap-4 ml-auto">
     <label className="checkbox-label">
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary min-h-[44px]">
+      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
       Aktuelles Jahr
       </button>
     )}
@@ -364,7 +365,7 @@ function MonthlyOverview() {
     <select
     value={selectedYear}
     onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select w-24 min-h-[44px]"
+    className="form-select w-24"
     >
     <option value="all">Gesamt</option>
     {[...new Set(monthlyData.map(m => m.year))]
@@ -379,7 +380,7 @@ function MonthlyOverview() {
 
     {/* Zweite Zeile - nur Mobile */}
     <div className="flex sm:hidden items-center justify-end gap-4">
-    <label className="checkbox-label min-h-[44px] flex items-center">
+    <label className="checkbox-label">
     <input
     type="checkbox"
     id="hideCompleted"
@@ -392,7 +393,7 @@ function MonthlyOverview() {
     <select
     value={selectedYear}
     onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select w-24 min-h-[44px]"
+    className="form-select w-24"
     >
     <option value="all">Gesamt</option>
     {[...new Set(monthlyData.map(m => m.year))]
@@ -426,46 +427,40 @@ function MonthlyOverview() {
       ? 'sm:grid-cols-3 gap-4'
       : 'sm:grid-cols-2 lg:grid-cols-4 gap-4'
     }`}>
-    {getKategorienMitErstattung().map(([key, displayName, data], index) => {
-      const style = key === 'mitfahrer' ? mitfahrerStyle : kategorieStyles[index % kategorieStyles.length];
-      const IconComponent = style.icon;
+    {getKategorienMitErstattung().map(([key, displayName, data]) => {
+      const traeger = abrechnungstraeger.find(t => t.id.toString() === key);
+      const farbe = key === 'mitfahrer' ? MITFAHRER_FARBE : (traeger?.farbe || DEFAULT_FARBE);
       return (
-        <div key={key} className={`rounded-card p-4 shadow-card border border-card ${style.bg}`}>
-        <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
-        <p className="text-xs text-muted mb-1">{displayName}</p>
-        <p className="text-xl font-semibold text-value truncate">
-        {(data.ausstehend || 0).toFixed(2).replace('.', ',')} &euro;
-        </p>
+        <div key={key} className="rounded-card p-4 shadow-card border border-card" style={getCardBg(farbe)}>
+        <div className="flex justify-between items-center mb-2">
+        <span className="text-sm text-label">{displayName}</span>
+        <span className="text-value font-medium">
+        {(data.ausstehend || 0).toFixed(2)} €
+        </span>
+        </div>
         {data.original !== data.ausstehend && (
-          <p className="text-xs text-muted">
-          Ursprünglich: {(data.original || 0).toFixed(2).replace('.', ',')} &euro;
-          </p>
+          <div className="text-right text-muted text-xs">
+          Ursprünglich: {(data.original || 0).toFixed(2)} €
+          </div>
         )}
-        </div>
-        <IconComponent size={22} className={`${style.iconColor} shrink-0`} />
-        </div>
         </div>
       );
     })}
 
     {/* Gesamt Card */}
     {yearTotal.gesamt && yearTotal.gesamt.original > 0 && (
-      <div className="card-container-highlight col-span-1 sm:col-span-2 lg:col-span-full">
-      <div className="flex items-center justify-between gap-2">
-      <div className="min-w-0">
-      <p className="text-xs text-muted mb-1">Gesamt</p>
-      <p className="text-xl font-semibold text-value truncate">
-      {(yearTotal.gesamt?.ausstehend || 0).toFixed(2).replace('.', ',')} &euro;
-      </p>
+      <div className="card-container col-span-1 sm:col-span-2 lg:col-span-full">
+      <div className="flex justify-between items-center mb-2">
+      <span className="text-sm text-label">Gesamt</span>
+      <span className="text-value font-medium">
+      {(yearTotal.gesamt?.ausstehend || 0).toFixed(2)} €
+      </span>
+      </div>
       {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
-        <p className="text-xs text-muted">
-        Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2).replace('.', ',')} &euro;
-        </p>
+        <div className="text-right text-muted text-xs">
+        Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
+        </div>
       )}
-      </div>
-      <Banknote size={22} className="text-primary-500 shrink-0" />
-      </div>
       </div>
     )}
     </div>
@@ -486,10 +481,13 @@ function MonthlyOverview() {
       return (
         <div key={month.yearMonth} className="card-container">
         {/* Header mit Monat und Gesamtsumme */}
-        <div className="flex justify-between items-center mb-4 pb-4 border-b border-primary-100 dark:border-primary-700">
+        <div className="flex justify-between items-center mb-4 pb-2">
+        <div className="flex items-center gap-2">
+        <CalendarDays size={20} className="text-primary-400 dark:text-primary-500" />
         <h3 className="text-lg font-medium text-value">
         {month.monthName} {month.year}
         </h3>
+        </div>
         <div className="text-right">
         <div className="text-value font-medium">
         {gesamtAusstehend.toFixed(2)} €
@@ -510,38 +508,28 @@ function MonthlyOverview() {
             const betrag = month.erstattungen?.[traeger.id] || 0;
             return betrag > 0;
           })
-          .map((traeger, index) => {
-            const style = kategorieStyles[index % kategorieStyles.length];
-            const IconComponent = style.icon;
-            return (
-            <div key={traeger.id} className={`rounded-card p-4 shadow-card border border-card ${style.bg}`}>
-            <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-            <p className="text-xs text-muted mb-1">{traeger.name}</p>
-            <p className="text-xl font-semibold text-value truncate">
-            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2).replace('.', ',')} &euro;
-            </p>
-            </div>
-            <IconComponent size={22} className={`${style.iconColor} shrink-0`} />
+          .map(traeger => (
+            <div key={traeger.id} className="rounded-card p-4 shadow-card border border-card" style={getCardBg(traeger.farbe)}>
+            <div className="flex justify-between items-start mb-2">
+            <span className="text-sm font-medium text-value">{traeger.name}</span>
+            <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
+            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
+            </span>
             </div>
             <div className="mt-2">
             {renderStatusCell(month, traeger.id)}
             </div>
             </div>
-            );
-          })}
+          ))}
 
         {/* Mitfahrer Card wenn vorhanden */}
         {month.erstattungen?.mitfahrer > 0 && (
-          <div className={`rounded-card p-4 shadow-card border border-card ${mitfahrerStyle.bg}`}>
-          <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0">
-          <p className="text-xs text-muted mb-1">Mitfahrer:innen</p>
-          <p className="text-xl font-semibold text-value truncate">
-          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2).replace('.', ',')} &euro;
-          </p>
-          </div>
-          <Users size={22} className={`${mitfahrerStyle.iconColor} shrink-0`} />
+          <div className="rounded-card p-4 shadow-card border border-card" style={getCardBg(MITFAHRER_FARBE)}>
+          <div className="flex justify-between items-start mb-2">
+          <span className="text-sm font-medium text-value">Mitfahrer:innen</span>
+          <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
+          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
+          </span>
           </div>
           <div className="mt-2">
           {renderStatusCell(month, 'mitfahrer')}
@@ -570,8 +558,11 @@ function MonthlyOverview() {
         <div key={month.yearMonth} className="mobile-card">
         <div className="mobile-card-header mb-4">
         <div className="flex justify-between items-center w-full">
-        <div className="text-lg font-semibold text-value">
+        <div className="flex items-center gap-2">
+        <CalendarDays size={18} className="text-primary-400 dark:text-primary-500" />
+        <span className="text-lg font-semibold text-value">
         {month.monthName} {month.year}
+        </span>
         </div>
         <div className="text-value font-medium">
         {gesamtAusstehend.toFixed(2)} €
@@ -592,7 +583,7 @@ function MonthlyOverview() {
             return betrag > 0;
           })
           .map(traeger => (
-            <div key={traeger.id} className="pt-4 border-t border-primary-100 dark:border-primary-700">
+            <div key={traeger.id} className="pt-4">
             <div className="flex justify-between items-start mb-2">
             <span className="text-label text-sm">{traeger.name}</span>
             <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
@@ -607,7 +598,7 @@ function MonthlyOverview() {
 
         {/* Mitfahrer */}
         {month.erstattungen?.mitfahrer > 0 && (
-          <div className="pt-4 border-t border-primary-100 dark:border-primary-700">
+          <div className="pt-4">
           <div className="flex justify-between items-start">
           <span className="text-label text-sm">Mitfahrer</span>
           <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
@@ -624,11 +615,6 @@ function MonthlyOverview() {
       );
     })}
     </div>
-    {filteredData.length === 0 && (
-      <div className="card-container text-center py-12">
-        <p className="text-label">Keine offenen Abrechnungen im ausgewaehlten Zeitraum</p>
-      </div>
-    )}
     <AbrechnungsStatusModal
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'}
     onClose={() => setAbrechnungsStatusModal({})}
