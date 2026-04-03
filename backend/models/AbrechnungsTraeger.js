@@ -50,7 +50,7 @@ class AbrechnungsTraeger {
     static async findById(id, userId) {
         try {
             const [rows] = await db.execute(`
-                SELECT id, name, kostenstelle, active
+                SELECT id, name, kostenstelle, farbe, active
                 FROM abrechnungstraeger
                 WHERE id = ? AND user_id = ?`,
                 [id, userId]
@@ -72,8 +72,8 @@ class AbrechnungsTraeger {
             }
             
             const [result] = await connection.execute(
-                'INSERT INTO abrechnungstraeger (user_id, name, kostenstelle, sort_order) VALUES (?, ?, ?, ?)',
-                [userData.userId, userData.name, userData.kostenstelle || null, userData.sortOrder]
+                'INSERT INTO abrechnungstraeger (user_id, name, kostenstelle, farbe, sort_order) VALUES (?, ?, ?, ?, ?)',
+                [userData.userId, userData.name, userData.kostenstelle || null, userData.farbe || null, userData.sortOrder]
             );
             
             await connection.commit();
@@ -94,8 +94,8 @@ class AbrechnungsTraeger {
 
             // Update Basisdaten
             await connection.execute(
-                'UPDATE abrechnungstraeger SET name = ?, kostenstelle = ?, active = ? WHERE id = ? AND user_id = ?',
-                [updateData.name, updateData.kostenstelle !== undefined ? updateData.kostenstelle : null, updateData.active, id, userId]
+                'UPDATE abrechnungstraeger SET name = ?, kostenstelle = ?, farbe = ?, active = ? WHERE id = ? AND user_id = ?',
+                [updateData.name, updateData.kostenstelle !== undefined ? updateData.kostenstelle : null, updateData.farbe || null, updateData.active, id, userId]
             );
 
             // Wenn ein neuer Erstattungsbetrag angegeben wurde

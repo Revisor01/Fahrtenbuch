@@ -3,6 +3,17 @@ import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
+const FARB_PALETTE = [
+    { hex: '#10b981', name: 'Gruen' },
+    { hex: '#3b82f6', name: 'Blau' },
+    { hex: '#8b5cf6', name: 'Violett' },
+    { hex: '#f59e0b', name: 'Gelb' },
+    { hex: '#ef4444', name: 'Rot' },
+    { hex: '#ec4899', name: 'Pink' },
+    { hex: '#06b6d4', name: 'Cyan' },
+    { hex: '#6366f1', name: 'Indigo' },
+];
+
 function AbrechnungstraegerForm() {
     const { showNotification, refreshAllData } = useContext(AppContext);
     const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
@@ -10,6 +21,7 @@ function AbrechnungstraegerForm() {
     const [newEntry, setNewEntry] = useState({
         name: '',
         kostenstelle: '',
+        farbe: '#10b981',
     });
 
     useEffect(() => {
@@ -39,6 +51,7 @@ function AbrechnungstraegerForm() {
             setNewEntry({
                 name: '',
                 kostenstelle: '',
+                farbe: '#10b981',
             });
             await refreshAllData((updatedAbrechnungstraeger) => {
                 setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
@@ -95,6 +108,7 @@ function AbrechnungstraegerForm() {
             await axios.put(`/api/abrechnungstraeger/${editingTraeger.id}`, {
                 name: editingTraeger.name,
                 kostenstelle: editingTraeger.kostenstelle,
+                farbe: editingTraeger.farbe,
             });
             showNotification('Erfolg', 'Abrechnungsträger wurde aktualisiert');
             setEditingTraeger(null);
@@ -177,6 +191,23 @@ function AbrechnungstraegerForm() {
                                 placeholder="z.B. 760130"
                             />
                         </div>
+                        <div className="w-full">
+                            <label className="form-label">Farbe</label>
+                            <div className="flex flex-wrap gap-2">
+                                {FARB_PALETTE.map(f => (
+                                    <button
+                                        key={f.hex}
+                                        type="button"
+                                        onClick={() => setNewEntry({ ...newEntry, farbe: f.hex })}
+                                        className={`w-8 h-8 rounded-full border-2 transition-all duration-150 ${
+                                            newEntry.farbe === f.hex ? 'border-gray-800 dark:border-white scale-110' : 'border-transparent'
+                                        }`}
+                                        style={{ backgroundColor: f.hex }}
+                                        title={f.name}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                         <div className="flex items-end w-full sm:w-auto">
                             <button type="submit" className="btn-primary w-full">
                                 Hinzufügen
@@ -216,6 +247,23 @@ function AbrechnungstraegerForm() {
                         placeholder="z.B. 760130"
                         />
                         </div>
+                        <div className="w-full">
+                        <label className="form-label">Farbe</label>
+                        <div className="flex flex-wrap gap-2">
+                            {FARB_PALETTE.map(f => (
+                                <button
+                                    key={f.hex}
+                                    type="button"
+                                    onClick={() => setEditingTraeger({ ...editingTraeger, farbe: f.hex })}
+                                    className={`w-8 h-8 rounded-full border-2 transition-all duration-150 ${
+                                        editingTraeger.farbe === f.hex ? 'border-gray-800 dark:border-white scale-110' : 'border-transparent'
+                                    }`}
+                                    style={{ backgroundColor: f.hex }}
+                                    title={f.name}
+                                />
+                            ))}
+                        </div>
+                        </div>
                         <div className="hidden sm:flex gap-2">
                         <button onClick={handleUpdate} className="table-action-button-primary" title="Speichern">✓</button>
                         <button onClick={() => setEditingTraeger(null)} className="table-action-button-secondary" title="Abbrechen">×</button>
@@ -227,8 +275,13 @@ function AbrechnungstraegerForm() {
                         </div>
                         </div>
                     ) : (
-                        <div className="font-medium text-value">
-                            {traeger.name}{traeger.kostenstelle ? ` — Kst.: ${traeger.kostenstelle}` : ''}
+                        <div className="flex items-center gap-2">
+                            {traeger.farbe && (
+                                <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: traeger.farbe }} />
+                            )}
+                            <span className="font-medium text-value">
+                                {traeger.name}{traeger.kostenstelle ? ` — Kst.: ${traeger.kostenstelle}` : ''}
+                            </span>
                         </div>
                     )}
                     </div>
