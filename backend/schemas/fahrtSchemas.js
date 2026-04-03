@@ -48,7 +48,7 @@ const updateMitfahrerSchema = z.object({
 const abrechnungsStatusSchema = z.object({
   jahr: z.coerce.number().int().positive(),
   monat: z.coerce.number().int().min(1).max(12),
-  typ: z.string().min(1),
+  typ: z.union([z.string().min(1), z.number()]).transform(String),
   aktion: z.string().min(1),
   datum: z.string().optional().nullable(),
 });
