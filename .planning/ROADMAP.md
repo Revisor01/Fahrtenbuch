@@ -276,7 +276,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20 → 21
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
 | 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | Complete    | 2026-04-02 |
 | 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 1/2 | Complete    | 2026-04-03 |
-| 21. Monatsübersicht Polish | v2.0 | 0/3 | Planning | - |
+| 21. Monatsübersicht Polish | v2.0 | 1/3 | In Progress | - |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
@@ -326,6 +326,6 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Backend Farbe-Feld: DB-Migration, Model, Controller, AbrechnungstraegerForm Farbwahl
+- [x] 21-01-PLAN.md — Backend Farbe-Feld: DB-Migration, Model, Controller, AbrechnungstraegerForm Farbwahl
 - [ ] 21-02-PLAN.md — MonthlyOverview: Icons entfernen, Farben dynamisch, Layout-Fixes (Leerzeichen, Kalender-Icons)
 - [ ] 21-03-PLAN.md — Status-Buttons redesign: CSS-Klassen ueberarbeiten, renderStatusCell aktualisieren, btn-secondary aufwerten
