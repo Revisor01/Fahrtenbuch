@@ -335,7 +335,9 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
     {/* Titel und Aktuelles Jahr - immer in einer Zeile */}
     <div className="flex justify-between items-center">
-    <h2 className="text-lg font-medium text-value">Jahresübersicht</h2>
+    <h2 className="text-lg font-medium text-value">
+      Jahresübersicht {selectedYear === 'all' ? '— Alle Jahre' : selectedYear}
+    </h2>
     {selectedYear !== currentYear && (
       <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary">
       Aktuelles Jahr
@@ -479,10 +481,13 @@ function MonthlyOverview() {
       return (
         <div key={month.yearMonth} className="card-container">
         {/* Header mit Monat und Gesamtsumme */}
-        <div className="flex justify-between items-center mb-4 pb-4 border-b border-primary-100 dark:border-primary-700">
+        <div className="flex justify-between items-center mb-4 pb-2">
+        <div className="flex items-center gap-2">
+        <CalendarDays size={20} className="text-primary-400 dark:text-primary-500" />
         <h3 className="text-lg font-medium text-value">
         {month.monthName} {month.year}
         </h3>
+        </div>
         <div className="text-right">
         <div className="text-value font-medium">
         {gesamtAusstehend.toFixed(2)} €
@@ -553,8 +558,11 @@ function MonthlyOverview() {
         <div key={month.yearMonth} className="mobile-card">
         <div className="mobile-card-header mb-4">
         <div className="flex justify-between items-center w-full">
-        <div className="mobile-card-title">
+        <div className="flex items-center gap-2">
+        <CalendarDays size={18} className="text-primary-400 dark:text-primary-500" />
+        <span className="text-lg font-semibold text-value">
         {month.monthName} {month.year}
+        </span>
         </div>
         <div className="text-value font-medium">
         {gesamtAusstehend.toFixed(2)} €
