@@ -95,7 +95,7 @@ function AbrechnungstraegerForm() {
     const handleEdit = async (id) => {
         try {
             const response = await axios.get(`/api/abrechnungstraeger/${id}`);
-            setEditingTraeger(response.data);
+            setEditingTraeger({ ...response.data, farbe: response.data.farbe || '#10b981' });
         } catch (error) {
             console.error('Fehler beim Laden des Abrechnungsträgers:', error);
             showNotification('Fehler', 'Abrechnungsträger konnte nicht geladen werden');
