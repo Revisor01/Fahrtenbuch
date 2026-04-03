@@ -14,7 +14,7 @@ exports.getAllAbrechnungstraeger = async (req, res) => {
 exports.getSimpleList = async (req, res) => {
     try {
         const [rows] = await db.execute(`
-            SELECT id, name, kostenstelle, active
+            SELECT id, name, kostenstelle, farbe, active
             FROM abrechnungstraeger
             WHERE user_id = ? AND active = TRUE
             ORDER BY sort_order ASC`,
@@ -143,7 +143,7 @@ exports.getErstattungshistorie = async (req, res) => {
 
 exports.createAbrechnungstraeger = async (req, res) => {
     try {
-        const { name, kostenstelle } = req.body;
+        const { name, kostenstelle, farbe } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'Name ist erforderlich' });
@@ -161,6 +161,7 @@ exports.createAbrechnungstraeger = async (req, res) => {
             userId: req.user.id,
             name,
             kostenstelle,
+            farbe,
             sortOrder: nextSortOrder
         });
         
@@ -178,7 +179,7 @@ exports.getById = async (req, res) => {
     try {
         const { id } = req.params;
         const [rows] = await db.execute(
-            'SELECT id, name, kostenstelle, active FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            'SELECT id, name, kostenstelle, farbe, active FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
             [id, req.user.id]
         );
         
@@ -196,7 +197,7 @@ exports.getById = async (req, res) => {
 exports.updateAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, active, kostenstelle } = req.body;
+        const { name, active, kostenstelle, farbe } = req.body;
 
         // Wenn nur active aktualisiert werden soll
         if (active !== undefined && Object.keys(req.body).length === 1) {
@@ -218,7 +219,7 @@ exports.updateAbrechnungstraeger = async (req, res) => {
                 return res.status(400).json({ message: 'Name ist erforderlich' });
             }
 
-            await AbrechnungsTraeger.update(id, req.user.id, { name, kostenstelle, active: active !== undefined ? active : 1 });
+            await AbrechnungsTraeger.update(id, req.user.id, { name, kostenstelle, farbe, active: active !== undefined ? active : 1 });
 
             return res.json({ message: 'Abrechnungsträger erfolgreich aktualisiert' });
         }
