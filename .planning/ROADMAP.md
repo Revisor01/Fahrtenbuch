@@ -174,7 +174,7 @@ Plans:
 - [x] **Phase 17: Listen & Uebersichten** - Fahrtenliste, Export-Bereich und Monatsuebersicht visuell modernisiert (completed 2026-03-28)
 - [x] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff (completed 2026-03-28)
 - [x] **Phase 19: Dashboard & Listen Feinschliff** - Inline-Bearbeitung auf Dashboard, Fahrtenliste als Card-Layout, Verwaltung-Tab redesignen, UI-Polish (completed 2026-04-02)
-- [ ] **Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export** - Dashboard zeigt alle offenen/eingereichten Erstattungen, Fahrten-Cards wie Dashboard, Monatsübersicht wie KPIs, Excel-Export korrekt mit neuer 2026-Vorlage
+- [x] **Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export** - Dashboard zeigt alle offenen/eingereichten Erstattungen, Fahrten-Cards wie Dashboard, Monatsübersicht wie KPIs, Excel-Export korrekt mit neuer 2026-Vorlage (completed 2026-04-03)
 
 ## Phase Details
 
@@ -274,7 +274,7 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20
 | 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
 | 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
 | 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | Complete    | 2026-04-02 |
-| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 1/2 | In Progress|  |
+| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 1/2 | Complete    | 2026-04-03 |
 
 ### Phase 19: Dashboard & Listen Feinschliff
 **Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
@@ -312,6 +312,6 @@ Plans:
 
 Plans:
 - [x] 20-01-PLAN.md — Dashboard KPIs global, Fahrten-Cards auf Fahrten&Export angleichen
-- [ ] 20-02-PLAN.md — Monatsuebersicht KPI-Cards, Excel-Export Template-Formatierung
+- [x] 20-02-PLAN.md — Monatsuebersicht KPI-Cards, Excel-Export Template-Formatierung
 
 **UI hint**: yes
