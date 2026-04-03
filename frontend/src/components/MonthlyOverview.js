@@ -260,7 +260,7 @@ function MonthlyOverview() {
       return (
         <div className="flex items-center justify-between">
         <span
-        className="status-badge-primary cursor-pointer"
+        className="status-badge-primary cursor-pointer min-h-[44px] flex items-center"
         onClick={() => {
           showNotification(
             "Status zurücksetzen",
@@ -287,7 +287,7 @@ function MonthlyOverview() {
       return (
         <div className="flex items-center justify-between">
         <span
-        className="status-badge-secondary cursor-pointer"
+        className="status-badge-info cursor-pointer min-h-[44px] flex items-center"
         onClick={() => setAbrechnungsStatusModal({
           open: true,
           traegerId,
@@ -307,7 +307,7 @@ function MonthlyOverview() {
     return betrag > 0 ? (
       <div className="flex items-center justify-between">
       <span
-      className="status-badge-secondary cursor-pointer"
+      className="status-badge-warning cursor-pointer min-h-[44px] flex items-center"
       onClick={() => setAbrechnungsStatusModal({
         open: true,
         traegerId,

@@ -183,20 +183,48 @@ code {
   /* Status Badges */
   .status-badge {
     @apply inline-flex items-center gap-2
-           px-2 py-0.5 rounded-full 
-           text-xs font-medium;
+           px-3 py-1.5 rounded-card
+           text-xs font-medium
+           border
+           transition-all duration-200;
   }
 
+  /* Erhalten = Erfolg (gruen) */
   .status-badge-primary {
     @apply status-badge
-           bg-primary-100 dark:bg-primary-900
-           text-primary-700 dark:text-primary-300;
+           bg-emerald-50 dark:bg-emerald-900/30
+           text-emerald-700 dark:text-emerald-300
+           border-emerald-200 dark:border-emerald-700
+           hover:bg-emerald-100 dark:hover:bg-emerald-800/40
+           hover:shadow-sm;
   }
 
+  /* Eingereicht = Info (blau) */
+  .status-badge-info {
+    @apply status-badge
+           bg-blue-50 dark:bg-blue-900/30
+           text-blue-700 dark:text-blue-300
+           border-blue-200 dark:border-blue-700
+           hover:bg-blue-100 dark:hover:bg-blue-800/40
+           hover:shadow-sm;
+  }
+
+  /* Nicht eingereicht = Warnung (amber/gelb) */
+  .status-badge-warning {
+    @apply status-badge
+           bg-amber-50 dark:bg-amber-900/30
+           text-amber-700 dark:text-amber-300
+           border-amber-200 dark:border-amber-700
+           hover:bg-amber-100 dark:hover:bg-amber-800/40
+           hover:shadow-sm;
+  }
+
+  /* Keine Abrechnung = neutral */
   .status-badge-secondary {
     @apply status-badge
-           bg-secondary-100 dark:bg-secondary-900
-           text-secondary-700 dark:text-secondary-300;
+           bg-gray-50 dark:bg-gray-800
+           text-gray-500 dark:text-gray-400
+           border-gray-200 dark:border-gray-700;
   }
 
   /* Text Styles */
@@ -250,12 +278,14 @@ code {
   }
 
   .btn-secondary {
-    @apply bg-primary-100 dark:bg-primary-800
+    @apply bg-white dark:bg-primary-800
            text-primary-700 dark:text-primary-200
-           px-4 h-8 rounded-card
-           hover:bg-primary-200 dark:hover:bg-primary-700
+           px-4 h-10 rounded-card
+           border border-primary-200 dark:border-primary-600
+           hover:bg-primary-50 dark:hover:bg-primary-700
+           hover:border-primary-300 dark:hover:border-primary-500
            transition-all duration-200
-           text-sm whitespace-nowrap
+           text-sm whitespace-nowrap font-medium
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
