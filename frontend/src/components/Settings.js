@@ -207,7 +207,7 @@ function Settings({ initialTab }) {
         {/* Content-Bereich */}
         <div className="flex-1">
         {activeTab === 'profile' && (
-            <div key="profile" ><div className="space-y-4">
+            <div key="profile" ><div className="space-y-6">
             <div className="card-container-highlight">
             <div className="section-header"><User size={18} className="text-primary-500" /><h2>Persönliche Daten</h2></div>
             <p className="text-sm text-muted mb-6">
@@ -566,7 +566,7 @@ function Settings({ initialTab }) {
             </div>
 
             <div className="flex justify-end">
-            <button type="submit" className="btn-primary w-full sm:w-auto">
+            <button type="submit" className="btn-primary mobile-full">
             Passwort ändern
             </button>
             </div>
