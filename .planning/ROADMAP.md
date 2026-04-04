@@ -314,7 +314,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 25-01-PLAN.md — Section-Headers mit Icons, Card-Struktur und Input-Styling vereinheitlichen
+- [x] 25-01-PLAN.md — Section-Headers mit Icons, Card-Struktur und Input-Styling vereinheitlichen
 **UI hint**: yes
 
 ### Phase 26: Navigation Check
