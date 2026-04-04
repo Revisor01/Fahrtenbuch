@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { HelpCircle, Users, LogOut, Info, Bell, LayoutDashboard, Car, CalendarDays, Settings as SettingsIcon } from 'lucide-react';
+import { HelpCircle, Users, LogOut, Info, Bell, LayoutDashboard, Car, Receipt, Settings as SettingsIcon } from 'lucide-react';
 import Settings from './Settings';
 import FahrtenListe from './FahrtenListe';
 import InfoModal from './InfoModal';
@@ -56,7 +56,7 @@ function AppContent() {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'fahrten', label: 'Fahrten & Export', icon: Car },
-    { id: 'abrechnungen', label: 'Abrechnungen', icon: CalendarDays },
+    { id: 'abrechnungen', label: 'Abrechnungen', icon: Receipt },
     { id: 'einstellungen', label: 'Einstellungen', icon: SettingsIcon },
     ...(user?.role === 'admin' ? [{ id: 'verwaltung', label: 'Verwaltung', icon: Users }] : []),
   ];
