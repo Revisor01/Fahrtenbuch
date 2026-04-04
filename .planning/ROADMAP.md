@@ -283,7 +283,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 23-01-PLAN.md — Section-Headers, Card-Struktur und Export-Aufwertung
+- [x] 23-01-PLAN.md — Section-Headers, Card-Struktur und Export-Aufwertung
 **UI hint**: yes
 
 ### Phase 24: Monatsuebersicht Refactor
