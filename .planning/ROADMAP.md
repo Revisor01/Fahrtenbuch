@@ -268,7 +268,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
+- [x] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
 - [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
 **UI hint**: yes
 
@@ -361,7 +361,7 @@ Phases execute in numeric order: 22 → 23 → 24 → 25 → 26
 | 19. Dashboard & Listen Feinschliff | v2.0 | 3/3 | Complete | 2026-04-02 |
 | 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 21. Monatsuebersicht Polish | v2.0 | 3/3 | Complete | 2026-04-03 |
-| 22. Globale Patterns | v2.1 | 0/? | Not started | - |
+| 22. Globale Patterns | v2.1 | 1/2 | In progress | - |
 | 23. FahrtenListe Polish | v2.1 | 0/? | Not started | - |
 | 24. Monatsuebersicht Refactor | v2.1 | 0/? | Not started | - |
 | 25. Einstellungen Konsistenz | v2.1 | 0/? | Not started | - |
