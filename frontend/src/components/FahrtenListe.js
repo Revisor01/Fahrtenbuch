@@ -579,7 +579,12 @@ function FahrtenListe() {
       </div>
 
       {/* Export */}
-      <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
+      <div className="pt-4 border-t border-card">
+      <div className="section-header">
+        <FileDown size={18} className="text-purple-500" />
+        <h2>Export</h2>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-2">
       {getKategorienMitErstattung().map(([key, displayName]) => (
         <button
         key={key}
@@ -597,10 +602,12 @@ function FahrtenListe() {
             "Beide"
           );
         }}
-        className="btn-primary">
+        className="btn-primary flex items-center gap-1.5">
+        <FileSpreadsheet size={14} />
         Export {displayName}
         </button>
       ))}
+      </div>
       </div>
       </div>
       </div>
