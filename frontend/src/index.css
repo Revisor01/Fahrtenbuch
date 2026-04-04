@@ -270,6 +270,40 @@ code {
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
+  /* KPI Cards */
+  .kpi-card {
+    @apply rounded-card p-4 shadow-card border border-card;
+  }
+
+  .kpi-card-emerald {
+    @apply bg-emerald-50 dark:bg-emerald-900/20;
+  }
+
+  .kpi-card-blue {
+    @apply bg-blue-50 dark:bg-blue-900/20;
+  }
+
+  .kpi-card-purple {
+    @apply bg-purple-50 dark:bg-purple-900/20;
+  }
+
+  .kpi-card-primary {
+    @apply bg-primary-50 dark:bg-primary-900/30;
+  }
+
+  /* Section Headers */
+  .section-header {
+    @apply flex items-center gap-2 mb-3;
+  }
+
+  .section-header h2 {
+    @apply text-base font-medium text-value;
+  }
+
+  .section-header .section-count {
+    @apply text-sm text-muted;
+  }
+
   /* Table Styles */
   .table-container {
     @apply base-container
