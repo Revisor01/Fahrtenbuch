@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: UI-Konsistenz & View-Architektur
 status: planning
-stopped_at: Milestone v2.1 started — defining requirements
-last_updated: "2026-04-04T10:00:00.000Z"
+stopped_at: v2.1 Roadmap erstellt — bereit fuer Phase 22 Planung
+last_updated: "2026-04-04T12:00:00.000Z"
 last_activity: 2026-04-04
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,26 +18,26 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-22)
+See: .planning/PROJECT.md (updated 2026-04-04)
 
-**Core value:** Schnellere Fahrteingabe durch Favoriten und bessere Uebersicht durch Dashboard
-**Current focus:** Phase 10 - Favoriten & Quick-Copy
+**Core value:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation
+**Current focus:** Phase 22 — Globale Patterns
 
 ## Current Position
 
-Phase: 21 of 12 (Favoriten & Quick-Copy)
-Plan: Not started
+Phase: 22 (first of 5 in v2.1)
+Plan: 0 of ? in current phase
 Status: Ready to plan
-Last activity: 2026-04-03
+Last activity: 2026-04-04 — v2.1 Roadmap erstellt, v2.0 als shipped markiert
 
 Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
-**Velocity (v1.0-v1.2):**
+**Velocity (v1.0-v2.0):**
 
-- Total plans completed: 16
-- Avg ~2min/plan
+- Total plans completed: 0 (v2.1)
+- Prior milestones: ~2min/plan average
 - Trend: Stable
 
 **By Phase:**
@@ -47,7 +47,6 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
-| Phase 21 P03 | 89s | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -56,9 +55,9 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v1.3]: Favoriten vor Dashboard, weil Dashboard Favoriten anzeigt
-- [v1.3]: Navigation-Umbau: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
-- [Phase 09]: Excel/PDF Buttons nebeneinander pro Kategorie statt Dropdown
+- [v2.0]: Design-Tokens (bg-card, shadow-card, border-card) als CSS-Fundament
+- [v2.0]: Card-basiertes Layout fuer alle Views
+- [v2.0]: Farbe-Feld pro Abrechnungstraeger (konfigurierbar)
 - [Phase 21]: Emerald/Blue/Amber Farbschema fuer Status-Badges
 
 ### Pending Todos
@@ -71,6 +70,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T12:38:20.908Z
-Stopped at: Completed 21-03-PLAN.md
+Last session: 2026-04-04
+Stopped at: v2.1 Roadmap erstellt, bereit fuer Phase 22 Planung
 Resume file: None

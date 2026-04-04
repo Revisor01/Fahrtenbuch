@@ -49,27 +49,27 @@
 
 | REQ-ID | Phase | Plan | Status |
 |--------|-------|------|--------|
-| GP-01 | - | - | Open |
-| GP-02 | - | - | Open |
-| GP-03 | - | - | Open |
-| GP-04 | - | - | Open |
-| FL-01 | - | - | Open |
-| FL-02 | - | - | Open |
-| FL-03 | - | - | Open |
-| MU-01 | - | - | Open |
-| MU-02 | - | - | Open |
-| MU-03 | - | - | Open |
-| MU-04 | - | - | Open |
-| ES-01 | - | - | Open |
-| ES-02 | - | - | Open |
-| ES-03 | - | - | Open |
-| NV-01 | - | - | Open |
-| NV-02 | - | - | Open |
+| GP-01 | Phase 22 | - | Open |
+| GP-02 | Phase 22 | - | Open |
+| GP-03 | Phase 22 | - | Open |
+| GP-04 | Phase 22 | - | Open |
+| FL-01 | Phase 23 | - | Open |
+| FL-02 | Phase 23 | - | Open |
+| FL-03 | Phase 23 | - | Open |
+| MU-01 | Phase 24 | - | Open |
+| MU-02 | Phase 24 | - | Open |
+| MU-03 | Phase 24 | - | Open |
+| MU-04 | Phase 24 | - | Open |
+| ES-01 | Phase 25 | - | Open |
+| ES-02 | Phase 25 | - | Open |
+| ES-03 | Phase 25 | - | Open |
+| NV-01 | Phase 26 | - | Open |
+| NV-02 | Phase 26 | - | Open |
 
 **Coverage:**
 - v2.1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-04*

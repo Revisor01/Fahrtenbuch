@@ -7,7 +7,8 @@
 - ✅ **v1.2 Features & Refactoring** - Phases 8-9 (shipped 2026-03-22)
 - ✅ **v1.3 Dashboard & UX** - Phases 10-12 (shipped 2026-03-28)
 - ✅ **v1.4 UX Polish & Navigation** - Phases 13-14 (shipped 2026-03-28)
-- 🚧 **v2.0 Design Makeover** - Phases 15-20 (in progress)
+- ✅ **v2.0 Design Makeover** - Phases 15-21 (shipped 2026-04-03)
+- 🚧 **v2.1 UI-Konsistenz & View-Architektur** - Phases 22-26 (in progress)
 
 ## Phases
 
@@ -165,81 +166,43 @@ Plans:
 
 </details>
 
-### v2.0 Design Makeover (In Progress)
-
-**Milestone Goal:** Komplettes visuelles Redesign der gesamten App — modern, mobil-optimiert, attraktiv. Alle bestehenden Funktionen bleiben, aber jede Ansicht bekommt ein zeitgemaesses UI mit einheitlichem Designsystem.
-
-- [x] **Phase 15: Designsystem** - Einheitliche Variablen, Card-Komponente und Dark Mode als Grundlage fuer alle Views (completed 2026-03-28)
-- [x] **Phase 16: Dashboard Makeover** - Dashboard komplett neu gestaltet mit Formular-Exklusivitaet, modernem Layout und Mobile-Optimierung (completed 2026-03-28)
-- [x] **Phase 17: Listen & Uebersichten** - Fahrtenliste, Export-Bereich und Monatsuebersicht visuell modernisiert (completed 2026-03-28)
-- [x] **Phase 18: Einstellungen, Login & Polish** - Einstellungen, Login/Landing aufgewertet und Animationen fuer den letzten Schliff (completed 2026-03-28)
-- [x] **Phase 19: Dashboard & Listen Feinschliff** - Inline-Bearbeitung auf Dashboard, Fahrtenliste als Card-Layout, Verwaltung-Tab redesignen, UI-Polish (completed 2026-04-02)
-- [x] **Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export** - Dashboard zeigt alle offenen/eingereichten Erstattungen, Fahrten-Cards wie Dashboard, Monatsübersicht wie KPIs, Excel-Export korrekt mit neuer 2026-Vorlage (completed 2026-04-03)
-- [x] **Phase 21: Monatsübersicht Polish** - Icons raus, Farben pro Abrechnungsträger konfigurierbar, Buttons redesign, Abbrechen-Button als echter Button, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons) (completed 2026-04-03)
-
-## Phase Details
+<details>
+<summary>v2.0 Design Makeover (Phases 15-21) - SHIPPED 2026-04-03</summary>
 
 ### Phase 15: Designsystem
 **Goal**: Die App hat ein einheitliches visuelles Fundament — Farben, Typografie, Spacing und Card-Komponente — das alle nachfolgenden View-Redesigns konsistent macht
 **Depends on**: Phase 14 (v1.4 abgeschlossen)
 **Requirements**: DS-01, DS-02, DS-03
-**Success Criteria** (what must be TRUE):
-  1. Alle Farb-, Spacing- und Typografie-Werte kommen aus CSS-Variablen (keine hardcodierten Werte in Komponenten)
-  2. Jede Sektion in jeder View ist in eine Card-Komponente mit einheitlichem Schatten, Radius und Padding eingebettet
-  3. Der Dark Mode zeigt korrekte Kontraste und abgestimmte Farben in allen bestehenden Views
-  4. Die Design-Tokens (Variablen) werden in einer zentralen Datei definiert und von allen Komponenten genutzt
 **Plans**: 2 plans
 
 Plans:
 - [x] 15-01-PLAN.md — Design-Tokens erweitern, Card-Klassen und Dark-Mode modernisieren
 - [x] 15-02-PLAN.md — Alle Views konsistent auf card-container umstellen
 
-**UI hint**: yes
-
 ### Phase 16: Dashboard Makeover
 **Goal**: Das Dashboard ist die zentrale Anlaufstelle mit exklusivem Fahrten-Formular, modernem Card-Layout, touch-freundlicher Mobile-Darstellung und Export-Schnellzugriff
 **Depends on**: Phase 15
 **Requirements**: DASH-08, DASH-09, DASH-10, DASH-11
-**Success Criteria** (what must be TRUE):
-  1. Das Formular "Neue Fahrt erfassen" existiert nur auf dem Dashboard — in der Fahrtenliste gibt es kein Eingabeformular mehr
-  2. Das Formular hat ein visuell ansprechendes, modernes Layout (kein Standard-Formular-Look)
-  3. Auf einem Smartphone sind alle Dashboard-Elemente (KPIs, Formular, Favoriten, Statistik) touch-freundlich und ohne horizontales Scrollen nutzbar
-  4. Ein Export-Schnellzugriff ist direkt vom Dashboard erreichbar
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Dashboard UI Makeover: KPI-Grid, Touch-Targets, Export-Schnellzugriff
+- [x] 16-01-PLAN.md — Dashboard UI Makeover: KPI-Grid, Touch-Targets, Export-Schnellzugriff
 - [x] 16-02-PLAN.md — FahrtForm aus Fahrten-Tab entfernen (Dashboard-Exklusivitaet)
-
-**UI hint**: yes
 
 ### Phase 17: Listen & Uebersichten
 **Goal**: Fahrtenliste, Export-Bereich und Monatsuebersicht sind visuell modernisiert mit Card-Layout, klarer Abgrenzung und kompakter Mobile-Darstellung
 **Depends on**: Phase 16
 **Requirements**: FE-01, FE-02, FE-03, MO-01, MO-02
-**Success Criteria** (what must be TRUE):
-  1. Die Fahrtenliste zeigt ausschliesslich die Liste der Fahrten (kein Eingabeformular) in modernem Card-Layout
-  2. Filter- und Export-Bereich sind visuell als eigene Cards abgegrenzt und modernisiert
-  3. Auf Mobile ist die Fahrtenliste kompakt dargestellt und per Touch bedienbar (kein Overflow, keine zu kleinen Buttons)
-  4. Die Monatsuebersicht nutzt Cards fuer Zusammenfassungen und Tabellen mit uebersichtlichem Layout
 **Plans**: 2 plans
 
 Plans:
 - [x] 17-01-PLAN.md — FahrtenListe modernisieren: Card-Layout, Export-Card, Touch-Targets
 - [x] 17-02-PLAN.md — MonthlyOverview modernisieren: Card-Layout, Touch-Targets, Empty States
 
-**UI hint**: yes
-
 ### Phase 18: Einstellungen, Login & Polish
 **Goal**: Einstellungen und Login/Landing haben ein aufgewertetes, modernes Design und Tab-Wechsel sowie Card-Interaktionen sind mit sanften Animationen versehen
 **Depends on**: Phase 17
 **Requirements**: SET-01, SET-02, LOG-01, LOG-02, ANI-01
-**Success Criteria** (what must be TRUE):
-  1. Einstellungen-Sub-Tabs haben eine aufgewertete Navigation mit Card-Layout und klarer visueller Hierarchie
-  2. Alle Formulare in den Einstellungen folgen dem einheitlichen Design aus Phase 15
-  3. Die Login-Seite hat ein modernes, einladendes Design mit responsivem Layout
-  4. Die Landing-Page ist visuell attraktiv und passt sich an verschiedene Bildschirmgroessen an
-  5. Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions (kein abruptes Umschalten)
 **Plans**: 3 plans
 
 Plans:
@@ -247,12 +210,113 @@ Plans:
 - [x] 18-02-PLAN.md — Login-Seite und Landing-Page modernisieren
 - [x] 18-03-PLAN.md — CSS-Transitions fuer Tab-Wechsel und Card-Interaktionen
 
+### Phase 19: Dashboard & Listen Feinschliff
+**Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
+**Depends on**: Phase 18
+**Requirements**: P19-01, P19-02, P19-03, P19-04, P19-05
+**Plans**: 3 plans
+
+Plans:
+- [x] 19-01-PLAN.md — CSS-Grundlagen, FahrtForm Edit-Modus, Dashboard Inline-Bearbeitung und Chart-Animation
+- [x] 19-02-PLAN.md — Verwaltung-Tab Card-Redesign
+- [x] 19-03-PLAN.md — Fahrtenliste Card-Layout mit Inline-Edit
+
+### Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export
+**Goal**: Dashboard zeigt alle offenen Erstattungen unabhaengig vom Monatsfilter plus eingereichte Betraege, Fahrten-Cards auf Fahrten&Export identisch zum Dashboard, Monatsuebersicht wie KPI-Cards, Excel-Export korrekt mit neuer 2026-Vorlage
+**Depends on**: Phase 19
+**Requirements**: SC-01, SC-02, SC-03, SC-04, SC-05, SC-06, SC-07, SC-08
+**Plans**: 2 plans
+
+Plans:
+- [x] 20-01-PLAN.md — Dashboard KPIs global, Fahrten-Cards auf Fahrten&Export angleichen
+- [x] 20-02-PLAN.md — Monatsuebersicht KPI-Cards, Excel-Export Template-Formatierung
+
+### Phase 21: Monatsuebersicht Polish
+**Goal**: Monatsuebersicht visuell aufraeumen — Icons entfernen, Farben pro Abrechnungstraeger konfigurierbar, Buttons redesign, Layout-Fixes
+**Depends on**: Phase 20
+**Requirements**: D-01 bis D-16
+**Plans**: 3 plans
+
+Plans:
+- [x] 21-01-PLAN.md — Backend Farbe-Feld: DB-Migration, Model, Controller, AbrechnungstraegerForm Farbwahl
+- [x] 21-02-PLAN.md — MonthlyOverview: Icons entfernen, Farben dynamisch, Layout-Fixes
+- [x] 21-03-PLAN.md — Status-Buttons redesign: CSS-Klassen ueberarbeiten, renderStatusCell aktualisieren
+
+</details>
+
+### v2.1 UI-Konsistenz & View-Architektur (In Progress)
+
+**Milestone Goal:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation. Das Vorhandene konsequent zu Ende bringen.
+
+- [ ] **Phase 22: Globale Patterns** - CSS-Fundament bereinigen: btn-Hoehen, Card-Backgrounds, KPI-Card-Pattern, Section-Header-Pattern
+- [ ] **Phase 23: FahrtenListe Polish** - FahrtenListe auf Dashboard-Niveau mit Section-Headers, Card-Struktur und Export-Aufwertung
+- [ ] **Phase 24: Monatsuebersicht Refactor** - Naming-Entscheidung, Desktop/Mobile-Vereinheitlichung, Section-Icons und Card-Konsistenz
+- [ ] **Phase 25: Einstellungen Konsistenz** - Form-Sections mit Icons, konsistente Card-Struktur und Input-Styling ueber alle Sub-Tabs
+- [ ] **Phase 26: Navigation Check** - Tab-Namen und -Icons pruefen, konsistente Navigation auf Desktop und Mobile
+
+## Phase Details
+
+### Phase 22: Globale Patterns
+**Goal**: Die App hat bereinigte, wiederverwendbare CSS-Patterns — alle Buttons gleich hoch, Card-Backgrounds aus Design-Tokens, KPI-Card und Section-Header als zentrale Bausteine
+**Depends on**: Phase 21 (v2.0 abgeschlossen)
+**Requirements**: GP-01, GP-02, GP-03, GP-04
+**Success Criteria** (what must be TRUE):
+  1. btn-primary und btn-secondary rendern mit identischer Hoehe (h-10) auf allen Views
+  2. Kein hardcodierter Farb-Background (bg-emerald-50, bg-blue-50 etc.) direkt in Komponenten — nur Design-Tokens
+  3. KPI-Cards auf Dashboard und Monatsuebersicht nutzen dieselbe kpi-card CSS-Klasse mit Farbvarianten
+  4. Section-Headers (Icon + Titel + optionale Anzahl) sind ein wiederverwendbares Pattern, das in allen Views gleich aussieht
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 23: FahrtenListe Polish
+**Goal**: Die FahrtenListe sieht aus wie eine Dashboard-Sektion — mit klaren Section-Headers, strukturiertem Card-Layout und aufgewertetem Export-Bereich
+**Depends on**: Phase 22
+**Requirements**: FL-01, FL-02, FL-03
+**Success Criteria** (what must be TRUE):
+  1. FahrtenListe hat Section-Headers mit Lucide-Icons (identisches Pattern wie Dashboard-Sektionen)
+  2. Card-Layout hat klare Sektionen mit konsistentem Whitespace (visuell auf Dashboard-Niveau)
+  3. Export-Bereich hat Icons und eine klare visuelle Struktur (nicht nur nackte Buttons)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 24: Monatsuebersicht Refactor
+**Goal**: Die Monatsuebersicht hat einen passenden Namen, rendert Desktop und Mobile aus einer Komponenten-Struktur und nutzt die globalen Patterns fuer Section-Headers und Cards
+**Depends on**: Phase 22
+**Requirements**: MU-01, MU-02, MU-03, MU-04
+**Success Criteria** (what must be TRUE):
+  1. Tab-Name und Seitentitel sind bewusst gewaehlt (ob "Monatsuebersicht", "Abrechnungen" oder anderes — Entscheidung dokumentiert)
+  2. Desktop und Mobile rendern aus einer einzigen Komponenten-Struktur (kein hidden/sm:hidden Doppel-Rendering)
+  3. Section-Headers nutzen das globale Pattern aus Phase 22 mit passenden Icons
+  4. Cards sind visuell identisch mit dem Rest der App (keine Sonder-Styles)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 25: Einstellungen Konsistenz
+**Goal**: Alle 8 Einstellungen-Sub-Tabs haben Icons in den Form-Sections, identische Card-Struktur und konsistentes Input-Styling
+**Depends on**: Phase 22
+**Requirements**: ES-01, ES-02, ES-03
+**Success Criteria** (what must be TRUE):
+  1. Jede Form-Section in jedem Sub-Tab hat ein Lucide-Icon und einen klaren Header-Text
+  2. Alle 8 Sub-Tabs haben identische Card-Struktur (gleiche Padding, Spacing, Border-Radius)
+  3. Formular-Inputs (Text, Select, Toggle) sehen in allen Tabs gleich aus
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 26: Navigation Check
+**Goal**: Navigation ist klar benannt, mit passenden Icons versehen und funktioniert konsistent auf Desktop und Mobile
+**Depends on**: Phase 23, Phase 24, Phase 25
+**Requirements**: NV-01, NV-02
+**Success Criteria** (what must be TRUE):
+  1. Alle Tab-Namen sind selbsterklaerend und die Icons passen zum Inhalt
+  2. Navigation funktioniert identisch auf Desktop (Tab-Leiste) und Mobile (Hamburger/Bottom-Nav) — kein Tab fehlt oder ist abgeschnitten
+**Plans**: TBD
 **UI hint**: yes
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20 → 21
+Phases execute in numeric order: 22 → 23 → 24 → 25 → 26
+(Phase 23, 24, 25 koennen nach Phase 22 parallel laufen — alle haengen nur von Phase 22 ab)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -269,63 +333,16 @@ Phases execute in numeric order: 15 → 16 → 17 → 18 → 19 → 20 → 21
 | 11. Dashboard, Navigation & Statistiken | v1.3 | 2/2 | Complete | 2026-03-28 |
 | 12. Adress-Autocomplete | v1.3 | 1/1 | Complete | 2026-03-28 |
 | 13. Dashboard-Polish & Kleinigkeiten | v1.4 | 3/3 | Complete | 2026-03-28 |
-| 14. Navigation-Umbau | v1.4 | 2/2 | Complete    | 2026-04-01 |
-| 15. Designsystem | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 16. Dashboard Makeover | v2.0 | 1/2 | Complete    | 2026-03-28 |
-| 17. Listen & Uebersichten | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete    | 2026-03-28 |
-| 19. Dashboard & Listen Feinschliff | v2.0 | 1/3 | Complete    | 2026-04-02 |
-| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 1/2 | Complete    | 2026-04-03 |
-| 21. Monatsübersicht Polish | v2.0 | 1/3 | Complete    | 2026-04-03 |
-
-### Phase 19: Dashboard & Listen Feinschliff
-**Goal**: Inline-Bearbeitung und Loeschen direkt auf dem Dashboard, Fahrtenliste als Card-Layout statt Tabelle, Verwaltung-Tab redesignen, offene UI-Polish-Issues (Statistik-Rendering, Button-Konsistenz)
-**Depends on**: Phase 18
-**Requirements**: P19-01, P19-02, P19-03, P19-04, P19-05
-**Success Criteria** (what must be TRUE):
-  1. Letzte Fahrten auf dem Dashboard koennen inline bearbeitet und geloescht werden
-  2. Fahrtenliste zeigt Fahrten als Cards statt Tabellenzeilen (wie Letzte Fahrten auf Dashboard)
-  3. Verwaltung-Tab hat das gleiche Card-Design wie Einstellungen
-  4. Statistik-Diagramm wird zuverlaessig beim ersten Load gerendert
-  5. Button-Farbschema ist konsistent (dunkelblau/hellblau/rot)
-**Plans**: 3 plans
-
-Plans:
-- [x] 19-01-PLAN.md — CSS-Grundlagen, FahrtForm Edit-Modus, Dashboard Inline-Bearbeitung und Chart-Animation
-- [ ] 19-02-PLAN.md — Verwaltung-Tab Card-Redesign
-- [ ] 19-03-PLAN.md — Fahrtenliste Card-Layout mit Inline-Edit
-
-**UI hint**: yes
-
-### Phase 20: Dashboard KPIs, Fahrten-Layout & Excel-Export
-**Goal**: Dashboard zeigt alle offenen Erstattungen unabhaengig vom Monatsfilter plus eingereichte Betraege, Fahrten-Cards auf Fahrten&Export identisch zum Dashboard (mit Icons), Monatsuebersicht wie KPI-Cards, Excel-Export korrekt mit neuer 2026-Quartals-Vorlage
-**Depends on**: Phase 19
-**Requirements**: SC-01, SC-02, SC-03, SC-04, SC-05, SC-06, SC-07, SC-08
-**Success Criteria** (what must be TRUE):
-  1. Dashboard Offene Erstattungen zeigt ALLE offenen Erstattungen unabhaengig vom Monatsfilter, plus eingereichte Betraege in Klammern
-  2. Dashboard letzte Fahrten zeigen alle nicht-exportierten/nicht-erhaltenen Fahrten, nicht nur aktuellen Monat
-  3. Fahrten-Cards auf Fahrten&Export haben identisches Layout wie Dashboard (inkl. orangenem Icon)
-  4. Kein Trennstrich zwischen Fahrten auf Fahrten&Export
-  5. Monatsuebersicht auf Fahrten&Export sieht aus wie KPI-Cards auf dem Dashboard
-  6. Fahrten-Anzahl ist korrekt angezeigt
-  7. Excel-Export bewahrt vollstaendig das Layout der 2026-Vorlage (Spaltenbreiten, Borders, Fonts, Merges)
-  8. Excel-Export nutzt korrekt das passende Quartals-Sheet
-**Plans**: 2 plans
-
-Plans:
-- [x] 20-01-PLAN.md — Dashboard KPIs global, Fahrten-Cards auf Fahrten&Export angleichen
-- [x] 20-02-PLAN.md — Monatsuebersicht KPI-Cards, Excel-Export Template-Formatierung
-
-**UI hint**: yes
-
-### Phase 21: Monatsübersicht Polish
-
-**Goal:** Monatsübersicht visuell aufräumen — Icons entfernen, Farben pro Abrechnungsträger konfigurierbar machen, Buttons stilistisch anpassen, Layout-Fixes (Leerzeichen, Hintergrundfarben, Trennstriche durch Kalender-Icons ersetzen, Abbrechen als richtiger Button)
-**Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-09, D-10, D-11, D-12, D-13, D-14, D-15, D-16
-**Depends on:** Phase 20
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 21-01-PLAN.md — Backend Farbe-Feld: DB-Migration, Model, Controller, AbrechnungstraegerForm Farbwahl
-- [ ] 21-02-PLAN.md — MonthlyOverview: Icons entfernen, Farben dynamisch, Layout-Fixes (Leerzeichen, Kalender-Icons)
-- [ ] 21-03-PLAN.md — Status-Buttons redesign: CSS-Klassen ueberarbeiten, renderStatusCell aktualisieren, btn-secondary aufwerten
+| 14. Navigation-Umbau | v1.4 | 2/2 | Complete | 2026-04-01 |
+| 15. Designsystem | v2.0 | 2/2 | Complete | 2026-03-28 |
+| 16. Dashboard Makeover | v2.0 | 2/2 | Complete | 2026-03-28 |
+| 17. Listen & Uebersichten | v2.0 | 2/2 | Complete | 2026-03-28 |
+| 18. Einstellungen, Login & Polish | v2.0 | 3/3 | Complete | 2026-03-28 |
+| 19. Dashboard & Listen Feinschliff | v2.0 | 3/3 | Complete | 2026-04-02 |
+| 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 2/2 | Complete | 2026-04-03 |
+| 21. Monatsuebersicht Polish | v2.0 | 3/3 | Complete | 2026-04-03 |
+| 22. Globale Patterns | v2.1 | 0/? | Not started | - |
+| 23. FahrtenListe Polish | v2.1 | 0/? | Not started | - |
+| 24. Monatsuebersicht Refactor | v2.1 | 0/? | Not started | - |
+| 25. Einstellungen Konsistenz | v2.1 | 0/? | Not started | - |
+| 26. Navigation Check | v2.1 | 0/? | Not started | - |
