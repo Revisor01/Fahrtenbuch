@@ -1,87 +1,75 @@
-# Requirements: Fahrtenbuch v2.0 — Design Makeover
+# Requirements: Fahrtenbuch v2.1 — UI-Konsistenz & View-Architektur
 
-**Defined:** 2026-03-28
-**Core Value:** Komplettes visuelles Redesign — modern, mobil-optimiert, attraktiv
+**Defined:** 2026-04-04
+**Core Value:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation
 
-## v2.0 Requirements
+## v2.1 Requirements
 
-### Designsystem
+### Globale Patterns
 
-- [x] **DS-01**: Einheitliche Spacing-, Typografie- und Farbvariablen in der gesamten App
-- [x] **DS-02**: Alle Sektionen in jeder View sind in Cards mit einheitlichem Schatten und Radius eingebettet
-- [x] **DS-03**: Dark Mode zeigt korrekte Kontraste und abgestimmte Farben in allen Views
+- [ ] **GP-01**: btn-primary und btn-secondary haben identische Hoehe (h-10)
+- [ ] **GP-02**: Card-Backgrounds nutzen neutrale Design-Tokens statt hardcoded Farben (kein bg-emerald-50, bg-blue-50 etc. direkt in Komponenten)
+- [ ] **GP-03**: KPI-Card-Pattern als wiederverwendbare CSS-Klasse definiert (kpi-card mit Farbvarianten)
+- [ ] **GP-04**: Section-Header-Pattern einheitlich (Icon + Titel + optionale Anzahl) als wiederverwendbares Pattern
 
-### Dashboard
+### FahrtenListe
 
-- [x] **DASH-08**: Dashboard ist die einzige Stelle zum Erfassen neuer Fahrten (Formular nur hier)
-- [ ] **DASH-09**: Formular "Neue Fahrt erfassen" hat ein visuell ansprechendes, modernes Layout
-- [ ] **DASH-10**: Alle Dashboard-Elemente sind auf Mobile touch-freundlich und optimal dargestellt
-- [ ] **DASH-11**: Export-Zugang auch vom Dashboard aus erreichbar (Schnellzugriff)
-
-### Fahrtenliste & Export
-
-- [x] **FE-01**: Fahrtenliste zeigt nur die Liste (kein Eingabeformular) in modernem Card-Layout
-- [x] **FE-02**: Filter- und Export-Bereich sind visuell modernisiert und klar abgegrenzt
-- [x] **FE-03**: Mobile Darstellung der Fahrtenliste ist kompakt und touch-freundlich
-
-### Einstellungen
-
-- [x] **SET-01**: Einstellungen-Sub-Tabs haben eine aufgewertete Navigation mit Card-Layout
-- [x] **SET-02**: Alle Formulare in den Einstellungen haben ein modernes, einheitliches Design
+- [ ] **FL-01**: FahrtenListe hat Section-Headers mit Lucide-Icons (wie Dashboard-Sektionen)
+- [ ] **FL-02**: FahrtenListe Card-Layout ist visuell strukturiert wie Dashboard (klare Sektionen, Whitespace)
+- [ ] **FL-03**: Export-Bereich visuell aufgewertet mit Icons und klarer Struktur
 
 ### Monatsuebersicht
 
-- [x] **MO-01**: Monatsuebersicht in modernem Card-Layout dargestellt
-- [x] **MO-02**: Tabellen und Zusammenfassungen sind uebersichtlich und visuell ansprechend
+- [ ] **MU-01**: Tab-Name und Seitentitel ueberpruefen — passt "Monatsuebersicht" oder besser "Abrechnungen"?
+- [ ] **MU-02**: Desktop und Mobile rendern aus einer einzigen Komponenten-Struktur (kein hidden/sm:hidden Doppel-Rendering)
+- [ ] **MU-03**: Section-Headers mit Icons (wie Dashboard)
+- [ ] **MU-04**: Cards visuell konsistent mit dem Rest der App (keine Sonder-Styles)
 
-### Transitions & Animationen
+### Einstellungen
 
-- [x] **ANI-01**: Tab-Wechsel und Card-Interaktionen haben sanfte CSS-Transitions
+- [ ] **ES-01**: Jede Form-Section in den Sub-Tabs hat ein Icon und klaren Header
+- [ ] **ES-02**: Alle 8 Sub-Tabs visuell konsistent (gleiche Card-Struktur, gleiche Spacing)
+- [ ] **ES-03**: Formular-Inputs haben konsistentes Styling ueber alle Tabs
 
-### Login & Landing
+### Navigation
 
-- [x] **LOG-01**: Login-Seite hat ein modernes, einladendes Design
-- [x] **LOG-02**: Landing-Page ist visuell attraktiv und responsive
-
-## Previous Milestone Requirements (v1.4 — Complete)
-
-- [x] NAV-01, NAV-02, DASH-04–07, FAV-04, TEXT-01 (all shipped)
+- [ ] **NV-01**: Tab-Namen und -Icons sind klar und selbsterklaerend
+- [ ] **NV-02**: Navigation funktioniert konsistent auf Desktop und Mobile
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Multi-User-Admin-Uebersicht | Eigener Milestone |
-| PWA / Offline-Support | Eigener Milestone |
-| Backend-Aenderungen | v2.0 ist rein visuell — kein Backend-Umbau |
-| Neue Features | Nur Redesign bestehender Funktionen |
+| Neue Features | Nur Konsistenz und Polish bestehender Views |
+| Backend-Aenderungen | Rein visueller Milestone |
+| Dashboard-Redesign | Dashboard ist bereits der Goldstandard — bleibt wie es ist |
+| Neue Seitenstruktur | Keine neuen Tabs — nur bestehende aufwerten |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| DS-01 | Phase 15 | Complete |
-| DS-02 | Phase 15 | Complete |
-| DS-03 | Phase 15 | Complete |
-| DASH-08 | Phase 16 | Complete |
-| DASH-09 | Phase 16 | Pending |
-| DASH-10 | Phase 16 | Pending |
-| DASH-11 | Phase 16 | Pending |
-| FE-01 | Phase 17 | Complete |
-| FE-02 | Phase 17 | Complete |
-| FE-03 | Phase 17 | Complete |
-| MO-01 | Phase 17 | Complete |
-| MO-02 | Phase 17 | Complete |
-| SET-01 | Phase 18 | Complete |
-| SET-02 | Phase 18 | Complete |
-| LOG-01 | Phase 18 | Complete |
-| LOG-02 | Phase 18 | Complete |
-| ANI-01 | Phase 18 | Complete |
+| REQ-ID | Phase | Plan | Status |
+|--------|-------|------|--------|
+| GP-01 | - | - | Open |
+| GP-02 | - | - | Open |
+| GP-03 | - | - | Open |
+| GP-04 | - | - | Open |
+| FL-01 | - | - | Open |
+| FL-02 | - | - | Open |
+| FL-03 | - | - | Open |
+| MU-01 | - | - | Open |
+| MU-02 | - | - | Open |
+| MU-03 | - | - | Open |
+| MU-04 | - | - | Open |
+| ES-01 | - | - | Open |
+| ES-02 | - | - | Open |
+| ES-03 | - | - | Open |
+| NV-01 | - | - | Open |
+| NV-02 | - | - | Open |
 
 **Coverage:**
-- v2.0 requirements: 17 total
-- Mapped to phases: 17
-- Unmapped: 0
+- v2.1 requirements: 16 total
+- Mapped to phases: 0
+- Unmapped: 16
 
 ---
-*Requirements defined: 2026-03-28*
+*Requirements defined: 2026-04-04*
