@@ -350,41 +350,13 @@ function MonthlyOverview() {
     )}
     </div>
 
-    {/* Checkbox und Select - nur auf Desktop hier */}
-    <div className="hidden sm:flex items-center gap-4 ml-auto">
-    <label className="checkbox-label">
+    {/* Controls — auf Mobile unter Titel, auf Desktop rechts */}
+    <div className="flex items-center gap-4 sm:ml-auto">
     {selectedYear !== currentYear && (
-      <button onClick={() => setSelectedYear(currentYear)} className="btn-secondary">
+      <button onClick={() => setSelectedYear(currentYear)} className="hidden sm:block btn-secondary">
       Aktuelles Jahr
       </button>
     )}
-    <input
-    type="checkbox"
-    id="hideCompleted"
-    checked={hideCompleted}
-    onChange={(e) => setHideCompleted(e.target.checked)}
-    className="checkbox-input h-3 w-3"
-    />
-    <span className="text-xs text-label">Abgeschlossene</span>
-    </label>
-    <select
-    value={selectedYear}
-    onChange={(e) => setSelectedYear(e.target.value)}
-    className="form-select w-24"
-    >
-    <option value="all">Gesamt</option>
-    {[...new Set(monthlyData.map(m => m.year))]
-      .sort((a, b) => b - a)
-      .map(year => (
-        <option key={year} value={year}>{year}</option>
-      ))
-    }
-    </select>
-    </div>
-    </div>
-
-    {/* Zweite Zeile - nur Mobile */}
-    <div className="flex sm:hidden items-center justify-end gap-4">
     <label className="checkbox-label">
     <input
     type="checkbox"
@@ -409,14 +381,14 @@ function MonthlyOverview() {
     }
     </select>
     </div>
+    </div>
 
-    {/* Dritte Zeile - Quick Actions nur auf Mobile */}
-    <div className="">
+    {/* Quick Actions */}
+    <div>
     <QuickActions
     filteredData={filteredData}
     handleAbrechnungsStatus={handleAbrechnungsStatus}
     abrechnungstraeger={abrechnungstraeger}
-    className="w-full text-center"
     />
     </div>
     </div>
@@ -470,14 +442,12 @@ function MonthlyOverview() {
     )}
     </div>
     </div>
-    {/* Desktop View - neue Card-basierte Ansicht */}
-    <div className="hidden sm:block space-y-4">
+    {/* Monats-Cards — eine responsive Struktur für Desktop und Mobile */}
+    <div className="space-y-4">
     {filteredData.map((month) => {
-
       const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) =>
         sum + Number(betrag || 0), 0
       );
-
       const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
         const received = month.abrechnungsStatus?.[id]?.erhalten_am;
         return sum + (received ? 0 : Number(betrag || 0));
@@ -505,11 +475,10 @@ function MonthlyOverview() {
         </div>
         </div>
 
-        {/* Grid für Abrechnungsträger */}
+        {/* Grid für Abrechnungsträger — responsiv */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {abrechnungstraeger
           .filter(traeger => {
-            // Nur anzeigen wenn ein Betrag > 0 existiert
             const betrag = month.erstattungen?.[traeger.id] || 0;
             return betrag > 0;
           })
@@ -527,85 +496,11 @@ function MonthlyOverview() {
             </div>
           ))}
 
-        {/* Mitfahrer Card wenn vorhanden */}
+        {/* Mitfahrer Card */}
         {month.erstattungen?.mitfahrer > 0 && (
           <div className="kpi-card" style={getCardBg(MITFAHRER_FARBE)}>
           <div className="flex justify-between items-start mb-2">
           <span className="text-sm font-medium text-value">Mitfahrer:innen</span>
-          <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
-          {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
-          </span>
-          </div>
-          <div className="mt-2">
-          {renderStatusCell(month, 'mitfahrer')}
-          </div>
-          </div>
-        )}
-        </div>
-        </div>
-      );
-    })}
-    </div>
-
-    {/* Mobile View */}
-    <div className="sm:hidden space-y-4">
-    {filteredData.map((month) => {
-      const gesamtAusstehend = Object.entries(month.erstattungen || {}).reduce((sum, [id, betrag]) => {
-        const received = month.abrechnungsStatus?.[id]?.erhalten_am;
-        return sum + (received ? 0 : Number(betrag || 0));
-      }, 0);
-
-      const originalGesamt = Object.values(month.erstattungen || {}).reduce((sum, betrag) =>
-        sum + Number(betrag || 0), 0
-      );
-
-      return (
-        <div key={month.yearMonth} className="mobile-card">
-        <div className="mobile-card-header mb-4">
-        <div className="flex justify-between items-center w-full">
-        <div className="flex items-center gap-2">
-        <CalendarDays size={18} className="text-primary-400 dark:text-primary-500" />
-        <span className="text-lg font-semibold text-value">
-        {month.monthName} {month.year}
-        </span>
-        </div>
-        <div className="text-value font-medium">
-        {gesamtAusstehend.toFixed(2)} €
-        </div>
-        </div>
-        </div>
-
-        {gesamtAusstehend !== originalGesamt && (
-          <div className="text-muted text-xs text-right mb-4">
-          Ursprünglich: {originalGesamt.toFixed(2)} €
-          </div>
-        )}
-
-        <div className="space-y-4">
-        {abrechnungstraeger
-          .filter(traeger => {
-            const betrag = month.erstattungen?.[traeger.id] || 0;
-            return betrag > 0;
-          })
-          .map(traeger => (
-            <div key={traeger.id} className="pt-4">
-            <div className="flex justify-between items-start mb-2">
-            <span className="text-label text-sm">{traeger.name}</span>
-            <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
-            {Number(month.erstattungen?.[traeger.id] || 0).toFixed(2)} €
-            </span>
-            </div>
-            <div className="mt-2">
-            {renderStatusCell(month, traeger.id)}
-            </div>
-            </div>
-          ))}
-
-        {/* Mitfahrer */}
-        {month.erstattungen?.mitfahrer > 0 && (
-          <div className="pt-4">
-          <div className="flex justify-between items-start">
-          <span className="text-label text-sm">Mitfahrer</span>
           <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
           {Number(month.erstattungen?.mitfahrer || 0).toFixed(2)} €
           </span>
