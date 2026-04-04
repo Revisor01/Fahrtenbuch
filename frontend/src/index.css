@@ -20,16 +20,16 @@ code {
 @layer components {
   /* Base Container */
   .base-container {
-    @apply bg-card
-        rounded-card shadow-card
-        border border-card
+    @apply bg-white dark:bg-gray-800 
+        rounded-lg shadow-sm 
+        border border-primary-100 dark:border-primary-700
         overflow-hidden
-        transition-all duration-200;
+        transition-colors duration-200;
   }
 
   /* Container Styles */
   .card-container {
-    @apply base-container p-6 hover:shadow-card-hover;
+    @apply base-container p-6;
   }
 
   .card-container-flush {
@@ -37,8 +37,8 @@ code {
   }
 
   .card-container-highlight {
-    @apply base-container p-6
-           bg-card-highlight;
+    @apply base-container p-6 
+           bg-primary-25 dark:border-primary-900;
   }
 
   /* Form Structure */
@@ -98,14 +98,16 @@ code {
   
 .table-action-button-primary {
   @apply table-action-button
-      text-primary-500 dark:text-primary-400
-      hover:bg-primary-50 dark:hover:bg-primary-900;
+      bg-primary-500 dark:bg-primary-600 
+      hover:bg-primary-600 dark:hover:bg-primary-700
+      text-white;
 }
-
+  
 .table-action-button-secondary {
   @apply table-action-button
-      text-secondary-500 dark:text-secondary-400
-      hover:bg-secondary-50 dark:hover:bg-secondary-900;
+      bg-secondary-400 dark:bg-secondary-500
+      hover:bg-secondary-500 dark:hover:bg-secondary-600 
+      text-white;
 }
   
 /* Status Styles */
@@ -124,10 +126,10 @@ code {
     @apply w-full max-w-full h-8 px-3
         bg-white dark:bg-gray-800
         border border-primary-200 dark:border-primary-700
-        rounded-lg text-sm
+        rounded text-sm
         focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600
         focus:border-transparent
-        shadow-card
+        shadow-sm
         text-primary-900 dark:text-primary-100
         placeholder-primary-900 dark:placeholder-primary-100  /* Angepasst */
         transition-colors duration-200
@@ -147,13 +149,14 @@ code {
 
   /* Mobile Card Styles */
   .mobile-card {
-    @apply bg-card
-        rounded-card
-        border border-card
-        p-4 space-y-4
-        shadow-card
+    @apply bg-white dark:bg-gray-800 
+        rounded-lg
+        border border-primary-100 dark:border-primary-800 
+        p-4 space-y-4 
+        shadow-sm
         transition-all duration-200
-        hover:shadow-card-hover;
+        hover:border-primary-200 dark:hover:border-primary-700
+        hover:shadow-md;
   }
 
   .mobile-card-header {
@@ -183,53 +186,25 @@ code {
   /* Status Badges */
   .status-badge {
     @apply inline-flex items-center gap-2
-           px-3 py-1.5 rounded-card
-           text-xs font-medium
-           border
-           transition-all duration-200;
+           px-2 py-0.5 rounded-full 
+           text-xs font-medium;
   }
 
-  /* Erhalten = Erfolg (gruen) */
   .status-badge-primary {
     @apply status-badge
-           bg-emerald-50 dark:bg-emerald-900/30
-           text-emerald-700 dark:text-emerald-300
-           border-emerald-200 dark:border-emerald-700
-           hover:bg-emerald-100 dark:hover:bg-emerald-800/40
-           hover:shadow-sm;
+           bg-primary-100 dark:bg-primary-900
+           text-primary-700 dark:text-primary-300;
   }
 
-  /* Eingereicht = Info (blau) */
-  .status-badge-info {
-    @apply status-badge
-           bg-blue-50 dark:bg-blue-900/30
-           text-blue-700 dark:text-blue-300
-           border-blue-200 dark:border-blue-700
-           hover:bg-blue-100 dark:hover:bg-blue-800/40
-           hover:shadow-sm;
-  }
-
-  /* Nicht eingereicht = Warnung (amber/gelb) */
-  .status-badge-warning {
-    @apply status-badge
-           bg-amber-50 dark:bg-amber-900/30
-           text-amber-700 dark:text-amber-300
-           border-amber-200 dark:border-amber-700
-           hover:bg-amber-100 dark:hover:bg-amber-800/40
-           hover:shadow-sm;
-  }
-
-  /* Keine Abrechnung = neutral */
   .status-badge-secondary {
     @apply status-badge
-           bg-gray-50 dark:bg-gray-800
-           text-gray-500 dark:text-gray-400
-           border-gray-200 dark:border-gray-700;
+           bg-secondary-100 dark:bg-secondary-900
+           text-secondary-700 dark:text-secondary-300;
   }
 
   /* Text Styles */
   .text-label {
-    @apply text-primary-600 dark:text-primary-300;
+    @apply text-primary-600 dark:text-primary-100;
   }
 
   .text-value {
@@ -270,32 +245,63 @@ code {
   /* Buttons */
   .btn-primary {
     @apply bg-primary-500 dark:bg-primary-600
-           text-white px-4 h-8 rounded-card
+           text-white px-4 h-10 rounded-card
            hover:bg-primary-600 dark:hover:bg-primary-700
-           transition-all duration-200
-           text-sm whitespace-nowrap
+           transition-colors duration-200
+           text-sm shadow-sm whitespace-nowrap
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-white dark:bg-primary-800
-           text-primary-700 dark:text-primary-200
-           px-4 h-10 rounded-card
-           border border-primary-200 dark:border-primary-600
-           hover:bg-primary-50 dark:hover:bg-primary-700
-           hover:border-primary-300 dark:hover:border-primary-500
-           transition-all duration-200
-           text-sm whitespace-nowrap font-medium
+    @apply bg-secondary-400 dark:bg-secondary-500
+           text-white px-4 h-10 rounded-card
+           hover:bg-secondary-500 dark:hover:bg-secondary-600
+           transition-colors duration-200
+           text-sm shadow-sm whitespace-nowrap
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-destructive {
-    @apply bg-secondary-500 dark:bg-secondary-600
-           text-white px-4 h-8 rounded-card
-           hover:bg-secondary-600 dark:hover:bg-secondary-700
-           transition-all duration-200
-           text-sm whitespace-nowrap
+    @apply bg-red-500 dark:bg-red-600
+           text-white px-4 h-10 rounded-card
+           hover:bg-red-600 dark:hover:bg-red-700
+           transition-colors duration-200
+           text-sm shadow-sm whitespace-nowrap
            disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* KPI Cards */
+  .kpi-card {
+    @apply rounded-card p-4 shadow-card border border-card;
+  }
+
+  .kpi-card-emerald {
+    @apply bg-emerald-50 dark:bg-emerald-900/20;
+  }
+
+  .kpi-card-blue {
+    @apply bg-blue-50 dark:bg-blue-900/20;
+  }
+
+  .kpi-card-purple {
+    @apply bg-purple-50 dark:bg-purple-900/20;
+  }
+
+  .kpi-card-primary {
+    @apply bg-primary-50 dark:bg-primary-900/30;
+  }
+
+  /* Section Headers */
+  .section-header {
+    @apply flex items-center gap-2 mb-3;
+  }
+
+  .section-header h2 {
+    @apply text-base font-medium text-value;
+  }
+
+  .section-header .section-count {
+    @apply text-sm text-muted;
   }
 
   /* Table Styles */
@@ -370,14 +376,16 @@ tbody {
   
 .table-action-button-primary {
   @apply table-action-button
-      text-primary-500 dark:text-primary-400
-      hover:bg-primary-50 dark:hover:bg-primary-900;
+      bg-primary-500 dark:bg-primary-600 
+      hover:bg-primary-600 dark:hover:bg-primary-700
+      text-white;
 }
-
+  
 .table-action-button-secondary {
   @apply table-action-button
-      text-secondary-500 dark:text-secondary-400
-      hover:bg-secondary-50 dark:hover:bg-secondary-900;
+      bg-secondary-400 dark:bg-secondary-500
+      hover:bg-secondary-500 dark:hover:bg-secondary-600 
+      text-white;
 }
   
 /* Details Row Style */
@@ -434,19 +442,6 @@ tbody {
   .w-full-mobile {
     @apply w-full sm:w-auto;
   }
-
-  .card-interactive {
-    @apply base-container p-6
-           cursor-pointer
-           hover:shadow-card-hover
-           hover:scale-[1.01]
-           transition-all duration-200;
-  }
-
-  /* Tab Content Transitions */
-  .tab-content-fade {
-    animation: tabFadeIn 150ms ease-out forwards;
-  }
 }
 
 /* Modal Content Fixes */
@@ -487,20 +482,4 @@ tbody {
   .tab-content {
     @apply -mx-6 px-6;
   }
-}
-
-@keyframes tabFadeIn {
-  from {
-    opacity: 0.7;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes barGrow {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
 }
