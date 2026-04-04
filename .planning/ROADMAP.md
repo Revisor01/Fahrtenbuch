@@ -249,7 +249,7 @@ Plans:
 **Milestone Goal:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation. Das Vorhandene konsequent zu Ende bringen.
 
 - [x] **Phase 22: Globale Patterns** - CSS-Fundament bereinigen: btn-Hoehen, Card-Backgrounds, KPI-Card-Pattern, Section-Header-Pattern (completed 2026-04-04)
-- [ ] **Phase 23: FahrtenListe Polish** - FahrtenListe auf Dashboard-Niveau mit Section-Headers, Card-Struktur und Export-Aufwertung
+- [x] **Phase 23: FahrtenListe Polish** - FahrtenListe auf Dashboard-Niveau mit Section-Headers, Card-Struktur und Export-Aufwertung (completed 2026-04-04)
 - [ ] **Phase 24: Monatsuebersicht Refactor** - Naming-Entscheidung, Desktop/Mobile-Vereinheitlichung, Section-Icons und Card-Konsistenz
 - [ ] **Phase 25: Einstellungen Konsistenz** - Form-Sections mit Icons, konsistente Card-Struktur und Input-Styling ueber alle Sub-Tabs
 - [ ] **Phase 26: Navigation Check** - Tab-Namen und -Icons pruefen, konsistente Navigation auf Desktop und Mobile
@@ -361,7 +361,7 @@ Phases execute in numeric order: 22 → 23 → 24 → 25 → 26
 | 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 21. Monatsuebersicht Polish | v2.0 | 3/3 | Complete | 2026-04-03 |
 | 22. Globale Patterns | v2.1 | 1/2 | Complete    | 2026-04-04 |
-| 23. FahrtenListe Polish | v2.1 | 0/1 | Not started | - |
+| 23. FahrtenListe Polish | v2.1 | 0/1 | Complete    | 2026-04-04 |
 | 24. Monatsuebersicht Refactor | v2.1 | 0/? | Not started | - |
 | 25. Einstellungen Konsistenz | v2.1 | 0/? | Not started | - |
 | 26. Navigation Check | v2.1 | 0/? | Not started | - |
