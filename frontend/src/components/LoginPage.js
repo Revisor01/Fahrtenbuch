@@ -165,7 +165,7 @@ function LoginPage() {
     </div>
 
     <div className="flex flex-col gap-2">
-    <button type="submit" className="btn-primary w-full h-10">
+    <button type="submit" className="btn-primary w-full">
     Login
     </button>
     <div className="relative my-4">

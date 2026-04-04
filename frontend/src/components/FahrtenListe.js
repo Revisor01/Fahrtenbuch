@@ -697,10 +697,10 @@ function FahrtenListe() {
       </div>
     ) : (
       <div className="card-container">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="section-header">
           <Clock size={18} className="text-orange-500" />
-          <h2 className="text-base font-medium text-value">Fahrten</h2>
-          <span className="text-sm text-muted">({sortedFahrten.length})</span>
+          <h2>Fahrten</h2>
+          <span className="section-count">({sortedFahrten.length})</span>
         </div>
         <div className="space-y-2">
           {sortedFahrten.map((fahrt) => {

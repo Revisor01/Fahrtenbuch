@@ -288,7 +288,11 @@ code {
   }
 
   .kpi-card-primary {
-    @apply bg-primary-50 dark:bg-primary-900/30;
+    @apply bg-primary-50;
+  }
+
+  :is(.dark .kpi-card-primary) {
+    background-color: color-mix(in srgb, var(--primary-900) 30%, transparent);
   }
 
   /* Section Headers */
