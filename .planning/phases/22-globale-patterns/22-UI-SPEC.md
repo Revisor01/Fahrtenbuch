@@ -51,11 +51,13 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (normal) | 1.5 |
-| Label | 12px (text-xs) | 500 (medium) | 1.5 |
+| Label | 12px (text-xs) | 400 (normal) | 1.5 |
 | Heading | 16px (text-base) | 500 (medium) | 1.2 |
-| KPI Value | 20px (text-xl) | 600 (semibold) | 1.2 |
+| KPI Value | 20px (text-xl) | 500 (medium) | 1.2 |
 
-Source: Bestehende Dashboard- und Card-Patterns (Dashboard.js Zeile 210, 224, 261)
+Declared weights: **400 (normal)** and **500 (medium)** — 2 weights total.
+
+Labels differenzieren sich von Body durch Schriftgroesse (12px vs 14px), nicht durch Gewicht. Headings und KPI Values teilen sich weight 500; die visuelle Hierarchie entsteht durch den Groessenunterschied (16px vs 20px).
 
 ---
 
@@ -132,7 +134,7 @@ Struktur (HTML-Vertrag):
   <div class="flex items-center justify-between gap-2">
     <div class="min-w-0">
       <p class="text-xs text-muted mb-1">{Label}</p>
-      <p class="text-xl font-semibold text-value truncate">{Wert}</p>
+      <p class="text-xl font-medium text-value truncate">{Wert}</p>
       <!-- Optional: Unterzeile -->
       <p class="text-xs text-muted">{Zusatzinfo}</p>
     </div>
@@ -215,7 +217,7 @@ Optionaler Count: text-sm text-muted in Klammern, rechts vom Titel.
 |-------|-------------|-----------|
 | frontend/src/index.css | 271-299 | btn-primary h-8 -> h-10, btn-destructive h-8 -> h-10 |
 | frontend/src/index.css | nach Zeile 299 | Neue Klassen: .kpi-card, .kpi-card-emerald, .kpi-card-blue, .kpi-card-purple, .kpi-card-primary, .section-header |
-| frontend/src/components/Dashboard.js | 206-254 | Hardcoded bg-* durch .kpi-card .kpi-card-* ersetzen |
+| frontend/src/components/Dashboard.js | 206-254 | Hardcoded bg-* durch .kpi-card .kpi-card-* ersetzen, font-semibold durch font-medium ersetzen |
 | frontend/src/components/Dashboard.js | 259, 295, 304, 479 | Ad-hoc Headers durch .section-header ersetzen |
 | frontend/src/components/MonthlyOverview.js | 430-446 | Inline-Style durch .kpi-card + dynamische CSS-Variable ersetzen |
 | frontend/src/components/MonthlyOverview.js | 485-489 | Ad-hoc Headers durch .section-header ersetzen |
