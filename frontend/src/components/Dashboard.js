@@ -203,11 +203,11 @@ function Dashboard({ onNavigate }) {
       {/* KPI Cards — 4 farbige Cards inkl. Export */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Offene Erstattungen */}
-        <div className="rounded-card p-4 shadow-card border border-card bg-emerald-50 dark:bg-emerald-900/20">
+        <div className="kpi-card kpi-card-emerald">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="text-xs text-muted mb-1">Offene Erstattungen</p>
-              <p className="text-xl font-semibold text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
+              <p className="text-xl font-medium text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
               {eingereichteSumme > 0 && (
                 <p className="text-xs text-muted">({eingereichteSumme.toFixed(2).replace('.', ',')} &euro; eingereicht)</p>
               )}
@@ -217,22 +217,22 @@ function Dashboard({ onNavigate }) {
         </div>
 
         {/* Kilometer diesen Monat */}
-        <div className="rounded-card p-4 shadow-card border border-card bg-blue-50 dark:bg-blue-900/20">
+        <div className="kpi-card kpi-card-blue">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="text-xs text-muted mb-1">km diesen Monat</p>
-              <p className="text-xl font-semibold text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
+              <p className="text-xl font-medium text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
             </div>
             <Route size={22} className="text-blue-500 shrink-0" />
           </div>
         </div>
 
         {/* Fahrten diesen Monat */}
-        <div className="rounded-card p-4 shadow-card border border-card bg-purple-50 dark:bg-purple-900/20">
+        <div className="kpi-card kpi-card-purple">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="text-xs text-muted mb-1">Fahrten diesen Monat</p>
-              <p className="text-xl font-semibold text-value">{fahrtenThisMonth}</p>
+              <p className="text-xl font-medium text-value">{fahrtenThisMonth}</p>
             </div>
             <Car size={22} className="text-purple-500 shrink-0" />
           </div>
@@ -241,12 +241,12 @@ function Dashboard({ onNavigate }) {
         {/* Export-Schnellzugriff als prominente 4. Card */}
         <button
           onClick={() => onNavigate && onNavigate('fahrten')}
-          className="rounded-card p-4 shadow-card border-2 border-primary-300 dark:border-primary-600 bg-primary-50 dark:bg-primary-900/30 hover:shadow-card-hover hover:border-primary-400 dark:hover:border-primary-500 transition-all text-left"
+          className="kpi-card kpi-card-primary border-2 border-primary-300 dark:border-primary-600 hover:shadow-card-hover hover:border-primary-400 dark:hover:border-primary-500 transition-all text-left"
         >
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="text-xs font-medium text-primary-600 dark:text-primary-400 mb-1">Fahrten & Export</p>
-              <p className="text-xl font-semibold text-value">{fahrtenGesamt}</p>
+              <p className="text-xl font-medium text-value">{fahrtenGesamt}</p>
               <p className="text-xs text-muted">alle anzeigen &rarr;</p>
             </div>
             <FileDown size={22} className="text-primary-500 shrink-0" />
@@ -256,9 +256,9 @@ function Dashboard({ onNavigate }) {
 
       {/* Favoriten-Schnelleingabe */}
       <div className="card-container">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="section-header">
           <Star size={18} className="text-yellow-500" />
-          <h2 className="text-base font-medium text-value">Favoriten</h2>
+          <h2>Favoriten</h2>
         </div>
         {favoriten.length === 0 ? (
           <p className="text-sm text-muted">Keine Favoriten gespeichert.</p>
@@ -292,18 +292,18 @@ function Dashboard({ onNavigate }) {
 
       {/* Fahrt-Formular — immer sichtbar */}
       <div className="card-container">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="section-header">
           <Plus size={18} className="text-primary-500" />
-          <h2 className="text-base font-medium text-value">Neue Fahrt erfassen</h2>
+          <h2>Neue Fahrt erfassen</h2>
         </div>
         <FahrtForm />
       </div>
 
       {/* Letzte 3 Fahrten */}
       <div className="card-container">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="section-header">
           <Clock size={18} className="text-orange-500" />
-          <h2 className="text-base font-medium text-value">Letzte Fahrten</h2>
+          <h2>Letzte Fahrten</h2>
         </div>
         {letzteTrips.length === 0 ? (
           <p className="text-sm text-muted">Keine Fahrten im gewählten Zeitraum. Wähle den aktuellen Monat für die neuesten Fahrten.</p>
@@ -404,9 +404,9 @@ function Dashboard({ onNavigate }) {
       {/* Statistik: km-Chart + Erstattungen in einem Card */}
       <div className="card-container">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+          <div className="section-header" style={{marginBottom: 0}}>
             <BarChart3 size={18} className="text-blue-500" />
-            <h2 className="text-base font-medium text-value">Statistik {statistikJahr}</h2>
+            <h2>Statistik {statistikJahr}</h2>
           </div>
           <div className="flex items-center gap-1">
             <button

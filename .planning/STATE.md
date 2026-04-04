@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: UI-Konsistenz & View-Architektur
 status: executing
-stopped_at: "Completed 22-01-PLAN.md"
-last_updated: "2026-04-04T20:30:00.000Z"
-last_activity: 2026-04-04
+stopped_at: Phase 22 UI-SPEC approved
+last_updated: "2026-04-04T20:26:55.546Z"
+last_activity: 2026-04-04 -- Phase 22 execution started
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 2
-  completed_plans: 1
-  percent: 10
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation
-**Current focus:** Phase 22 — Globale Patterns
+**Current focus:** Phase 22 — globale-patterns
 
 ## Current Position
 
-Phase: 22 (first of 5 in v2.1)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-04-04 — Plan 22-01 CSS-Fundament abgeschlossen
+Phase: 22 (globale-patterns) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 22
+Last activity: 2026-04-04 -- Phase 22 execution started
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -44,7 +44,7 @@ Progress: [█░░░░░░░░░] 10%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 22 (Plan 01) | 1 | 98s | 98s |
+| - | - | - | - |
 
 *Updated after each plan completion*
 
@@ -59,8 +59,6 @@ Recent decisions affecting current work:
 - [v2.0]: Card-basiertes Layout fuer alle Views
 - [v2.0]: Farbe-Feld pro Abrechnungstraeger (konfigurierbar)
 - [Phase 21]: Emerald/Blue/Amber Farbschema fuer Status-Badges
-- [Phase 22]: btn-destructive als neue Klasse angelegt (fehlte im Design-System)
-- [Phase 22]: rounded auf rounded-card vereinheitlicht fuer alle btn-* Klassen
 
 ### Pending Todos
 
@@ -72,6 +70,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04
-Stopped at: Completed 22-01-PLAN.md
-Resume file: None
+Last session: 2026-04-04T20:07:21.341Z
+Stopped at: Phase 22 UI-SPEC approved
+Resume file: .planning/phases/22-globale-patterns/22-UI-SPEC.md
