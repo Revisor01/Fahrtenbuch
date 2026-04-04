@@ -1,57 +1,75 @@
-# Requirements: Fahrtenbuch v1.3 — Dashboard & UX
+# Requirements: Fahrtenbuch v2.1 — UI-Konsistenz & View-Architektur
 
-**Defined:** 2026-03-22
-**Core Value:** Schnellere Fahrteingabe durch Favoriten und bessere Uebersicht durch Dashboard
+**Defined:** 2026-04-04
+**Core Value:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation
 
-## v1.3 Requirements
+## v2.1 Requirements
 
-### Dashboard
+### Globale Patterns
 
-- [ ] **DASH-01**: Dashboard als neue Startseite mit KPI-Cards (offene Erstattungen, km diesen Monat, Fahrten diesen Monat)
-- [ ] **DASH-02**: Aufklappbares Fahrt-Formular direkt im Dashboard (wie bisheriges Formular)
-- [ ] **DASH-03**: Navigation mit Tabs: Dashboard, Fahrten & Export, Monatsuebersicht, Einstellungen
+- [ ] **GP-01**: btn-primary und btn-secondary haben identische Hoehe (h-10)
+- [ ] **GP-02**: Card-Backgrounds nutzen neutrale Design-Tokens statt hardcoded Farben (kein bg-emerald-50, bg-blue-50 etc. direkt in Komponenten)
+- [ ] **GP-03**: KPI-Card-Pattern als wiederverwendbare CSS-Klasse definiert (kpi-card mit Farbvarianten)
+- [ ] **GP-04**: Section-Header-Pattern einheitlich (Icon + Titel + optionale Anzahl) als wiederverwendbares Pattern
 
-### Favoriten
+### FahrtenListe
 
-- [ ] **FAV-01**: Nutzer kann Fahrten als Favorit speichern (Von, Nach, Anlass, Abrechnungstraeger)
-- [ ] **FAV-02**: Favoriten im Dashboard als Schnelleingabe — ein Klick traegt Fahrt mit heutigem Datum ein
-- [ ] **FAV-03**: Letzte 3 Fahrten im Dashboard mit "Nochmal fuer heute"-Button
+- [ ] **FL-01**: FahrtenListe hat Section-Headers mit Lucide-Icons (wie Dashboard-Sektionen)
+- [ ] **FL-02**: FahrtenListe Card-Layout ist visuell strukturiert wie Dashboard (klare Sektionen, Whitespace)
+- [ ] **FL-03**: Export-Bereich visuell aufgewertet mit Icons und klarer Struktur
 
-### Statistiken
+### Monatsuebersicht
 
-- [ ] **STAT-01**: Jahres-Balkendiagramm im Dashboard (km pro Monat)
-- [ ] **STAT-02**: Erstattungs-Uebersicht pro Abrechnungstraeger ueber das Jahr
+- [ ] **MU-01**: Tab-Name und Seitentitel ueberpruefen — passt "Monatsuebersicht" oder besser "Abrechnungen"?
+- [ ] **MU-02**: Desktop und Mobile rendern aus einer einzigen Komponenten-Struktur (kein hidden/sm:hidden Doppel-Rendering)
+- [ ] **MU-03**: Section-Headers mit Icons (wie Dashboard)
+- [ ] **MU-04**: Cards visuell konsistent mit dem Rest der App (keine Sonder-Styles)
 
-### Adress-Autocomplete
+### Einstellungen
 
-- [ ] **ADDR-01**: Bei Ort-Eingabe Adress-Vorschlaege via OpenStreetMap/Nominatim API
+- [ ] **ES-01**: Jede Form-Section in den Sub-Tabs hat ein Icon und klaren Header
+- [ ] **ES-02**: Alle 8 Sub-Tabs visuell konsistent (gleiche Card-Struktur, gleiche Spacing)
+- [ ] **ES-03**: Formular-Inputs haben konsistentes Styling ueber alle Tabs
+
+### Navigation
+
+- [ ] **NV-01**: Tab-Namen und -Icons sind klar und selbsterklaerend
+- [ ] **NV-02**: Navigation funktioniert konsistent auf Desktop und Mobile
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Multi-User-Admin-Uebersicht | Zu komplex, eigener Milestone |
-| PWA / Service Worker | Eigener Milestone |
-| CRA → Vite Migration | Eigener Milestone |
+| Neue Features | Nur Konsistenz und Polish bestehender Views |
+| Backend-Aenderungen | Rein visueller Milestone |
+| Dashboard-Redesign | Dashboard ist bereits der Goldstandard — bleibt wie es ist |
+| Neue Seitenstruktur | Keine neuen Tabs — nur bestehende aufwerten |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| FAV-01 | Phase 10 | Pending |
-| FAV-02 | Phase 10 | Pending |
-| FAV-03 | Phase 10 | Pending |
-| DASH-01 | Phase 11 | Pending |
-| DASH-02 | Phase 11 | Pending |
-| DASH-03 | Phase 11 | Pending |
-| STAT-01 | Phase 11 | Pending |
-| STAT-02 | Phase 11 | Pending |
-| ADDR-01 | Phase 12 | Pending |
+| REQ-ID | Phase | Plan | Status |
+|--------|-------|------|--------|
+| GP-01 | Phase 22 | - | Open |
+| GP-02 | Phase 22 | - | Open |
+| GP-03 | Phase 22 | - | Open |
+| GP-04 | Phase 22 | - | Open |
+| FL-01 | Phase 23 | - | Open |
+| FL-02 | Phase 23 | - | Open |
+| FL-03 | Phase 23 | - | Open |
+| MU-01 | Phase 24 | - | Open |
+| MU-02 | Phase 24 | - | Open |
+| MU-03 | Phase 24 | - | Open |
+| MU-04 | Phase 24 | - | Open |
+| ES-01 | Phase 25 | - | Open |
+| ES-02 | Phase 25 | - | Open |
+| ES-03 | Phase 25 | - | Open |
+| NV-01 | Phase 26 | - | Open |
+| NV-02 | Phase 26 | - | Open |
 
 **Coverage:**
-- v1.3 requirements: 9 total
-- Mapped to phases: 9
+- v2.1 requirements: 16 total
+- Mapped to phases: 16
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-03-22*
+*Requirements defined: 2026-04-04*
