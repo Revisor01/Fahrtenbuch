@@ -311,11 +311,10 @@ Plans:
   1. Jede Form-Section in jedem Sub-Tab hat ein Lucide-Icon und einen klaren Header-Text
   2. Alle 8 Sub-Tabs haben identische Card-Struktur (gleiche Padding, Spacing, Border-Radius)
   3. Formular-Inputs (Text, Select, Toggle) sehen in allen Tabs gleich aus
-**Plans**: 2 plans
+**Plans**: 1 plan
 
 Plans:
-- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
-- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
+- [ ] 25-01-PLAN.md — Section-Headers mit Icons, Card-Struktur und Input-Styling vereinheitlichen
 **UI hint**: yes
 
 ### Phase 26: Navigation Check
@@ -364,5 +363,5 @@ Phases execute in numeric order: 22 → 23 → 24 → 25 → 26
 | 22. Globale Patterns | v2.1 | 1/2 | Complete    | 2026-04-04 |
 | 23. FahrtenListe Polish | v2.1 | 0/1 | Complete    | 2026-04-04 |
 | 24. Monatsuebersicht Refactor | v2.1 | 0/? | Complete    | 2026-04-04 |
-| 25. Einstellungen Konsistenz | v2.1 | 0/? | Not started | - |
+| 25. Einstellungen Konsistenz | v2.1 | 0/1 | Not started | - |
 | 26. Navigation Check | v2.1 | 0/? | Not started | - |
