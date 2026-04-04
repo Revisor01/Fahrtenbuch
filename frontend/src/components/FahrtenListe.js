@@ -5,7 +5,7 @@ import { AppContext } from '../contexts/AppContext';
 import MitfahrerModal from '../MitfahrerModal';
 import Modal from '../Modal';
 import FahrtForm from '../FahrtForm';
-import { AlertCircle, Circle, CheckCircle2, Pencil, Trash2, RotateCcw, Users, Clock } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, Pencil, Trash2, RotateCcw, Users, Clock, CreditCard, FileDown, CalendarRange, FileSpreadsheet } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
@@ -386,9 +386,10 @@ function FahrtenListe() {
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div className="w-full flex justify-between items-center">
-      <h2 className="text-lg font-medium text-value">
-        {selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum-Übersicht' : 'Monatsübersicht'}
-      </h2>
+      <div className="section-header" style={{marginBottom: 0}}>
+        <CreditCard size={18} className="text-emerald-500" />
+        <h2>{selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum-Übersicht' : 'Monatsübersicht'}</h2>
+      </div>
       {(selectedMonth !== currentMonth || selectedVonMonth) && (
         <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden">
         Aktueller Monat
@@ -402,6 +403,10 @@ function FahrtenListe() {
         Aktueller Monat
         </button>
       )}
+      <div className="section-header" style={{marginBottom: 0}}>
+        <CalendarRange size={18} className="text-blue-500" />
+        <h2>Zeitraum</h2>
+      </div>
       <div className="flex flex-col sm:flex-row gap-2">
       {/* Von-Dropdown (Monat + Jahr) */}
       <div className="flex items-center gap-1">
@@ -474,6 +479,11 @@ function FahrtenListe() {
       </div>
 
       {/* Cards Grid */}
+      <div className="section-header">
+        <CreditCard size={18} className="text-emerald-500" />
+        <h2>Erstattungen</h2>
+        <span className="section-count">({getKategorienMitErstattung().length})</span>
+      </div>
       <div className={`grid grid-cols-1 gap-4 ${
         allCategories() === 1
         ? 'sm:grid-cols-1'
