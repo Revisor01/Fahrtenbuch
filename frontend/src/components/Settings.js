@@ -209,7 +209,7 @@ function Settings({ initialTab }) {
         {activeTab === 'profile' && (
             <div key="profile" ><div className="space-y-4">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Persönliche Daten</h3>
+            <div className="section-header"><User size={18} className="text-primary-500" /><h2>Persönliche Daten</h2></div>
             <p className="text-sm text-muted mb-6">
             Ihre persönlichen Daten werden für die Abrechnungen benötigt.
             Bitte stellen Sie sicher, dass diese Daten aktuell sind.
@@ -312,12 +312,12 @@ function Settings({ initialTab }) {
         {activeTab === 'orte' && (
             <div key="orte" ><div className="space-y-6">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Neuen Ort anlegen</h3>
+            <div className="section-header"><MapPin size={18} className="text-primary-500" /><h2>Neuen Ort anlegen</h2></div>
             <p className="text-sm text-muted mb-6">Erfassen Sie Orte, die Sie regelmässig als Start- oder Zielort nutzen.</p>
             <OrtForm />
             </div>
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Gespeicherte Orte</h3>
+            <div className="section-header"><MapPin size={18} className="text-primary-500" /><h2>Gespeicherte Orte</h2></div>
             <OrteListe />
             </div>
             </div></div>
@@ -326,12 +326,12 @@ function Settings({ initialTab }) {
         {activeTab === 'distanzen' && (
             <div key="distanzen" ><div className="space-y-6">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Neue Distanz anlegen</h3>
+            <div className="section-header"><Route size={18} className="text-primary-500" /><h2>Neue Distanz anlegen</h2></div>
             <p className="text-sm text-muted mb-6">Hinterlegen Sie Entfernungen zwischen Orten fuer die automatische Kilometerberechnung.</p>
             <DistanzForm />
             </div>
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Gespeicherte Distanzen</h3>
+            <div className="section-header"><Route size={18} className="text-primary-500" /><h2>Gespeicherte Distanzen</h2></div>
             <DistanzenListe />
             </div>
             </div></div>
@@ -340,7 +340,7 @@ function Settings({ initialTab }) {
         {activeTab === 'abrechnungen' && (
             <div key="abrechnungen" ><div className="space-y-6">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Abrechnungstraeger verwalten</h3>
+            <div className="section-header"><Building2 size={18} className="text-primary-500" /><h2>Abrechnungsträger verwalten</h2></div>
             <p className="text-sm text-muted mb-6">Verwalten Sie die Organisationen und Traeger, an die Ihre Fahrten abgerechnet werden.</p>
             <AbrechnungstraegerForm />
             </div>
@@ -351,7 +351,7 @@ function Settings({ initialTab }) {
             <div key="favoriten" ><div className="space-y-6">
             {/* Formular zum Hinzufügen */}
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Neuen Favoriten anlegen</h3>
+            <div className="section-header"><Star size={18} className="text-yellow-500" /><h2>Neuen Favoriten anlegen</h2></div>
             <p className="text-sm text-muted mb-6">
             Speichern Sie häufig gefahrene Strecken als Favoriten, um sie später mit einem Klick zu wiederholen.
             </p>
@@ -493,7 +493,7 @@ function Settings({ initialTab }) {
         {activeTab === 'erstattungssaetze' && (
             <div key="erstattungssaetze" ><div className="space-y-6">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Erstattungssaetze verwalten</h3>
+            <div className="section-header"><Coins size={18} className="text-primary-500" /><h2>Erstattungssätze verwalten</h2></div>
             <p className="text-sm text-muted mb-6">Legen Sie fest, welche Kilometererstattung Sie von den einzelnen Traegern erhalten.</p>
             <ErstattungssaetzeForm />
             </div>
@@ -503,7 +503,7 @@ function Settings({ initialTab }) {
         {activeTab === 'security' && (
             <div key="security" ><div className="space-y-6">
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
+            <div className="section-header"><Lock size={18} className="text-primary-500" /><h2>Passwort ändern</h2></div>
             <p className="text-sm text-muted mb-6">
             Aus Sicherheitsgründen sollten Sie Ihr Passwort regelmäßig ändern.
             Wählen Sie ein sicheres Passwort mit mindestens 8 Zeichen.
@@ -579,7 +579,7 @@ function Settings({ initialTab }) {
             <div key="api" ><div className="space-y-6">
             {/* Form Card */}
             <div className="card-container-highlight">
-            <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
+            <div className="section-header"><Key size={18} className="text-primary-500" /><h2>API Key erstellen</h2></div>
             <p className="text-sm text-muted mb-6">
             Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.
             Jeder Key sollte einen eindeutigen Verwendungszweck haben.
