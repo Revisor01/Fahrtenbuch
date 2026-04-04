@@ -8,9 +8,13 @@ const DEFAULT_FARBE = '#6b7280';
 const MITFAHRER_FARBE = '#6366f1';
 
 // Erzeugt inline style fuer Card-Hintergrund mit niedriger Opacity
-const getCardBg = (hexColor) => ({
-  backgroundColor: `${hexColor || DEFAULT_FARBE}14`,
-});
+const getCardBg = (hexColor) => {
+  const hex = (hexColor || DEFAULT_FARBE).replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return { backgroundColor: `rgba(${r}, ${g}, ${b}, 0.08)` };
+};
 
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, updateAbrechnungsStatus, abrechnungstraeger, abrechnungsStatusModal, setAbrechnungsStatusModal, handleAbrechnungsStatus , summary, showNotification } = useContext(AppContext);
@@ -431,7 +435,7 @@ function MonthlyOverview() {
       const traeger = abrechnungstraeger.find(t => t.id.toString() === key);
       const farbe = key === 'mitfahrer' ? MITFAHRER_FARBE : (traeger?.farbe || DEFAULT_FARBE);
       return (
-        <div key={key} className="rounded-card p-4 shadow-card border border-card" style={getCardBg(farbe)}>
+        <div key={key} className="kpi-card" style={getCardBg(farbe)}>
         <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-label">{displayName}</span>
         <span className="text-value font-medium">
@@ -509,7 +513,7 @@ function MonthlyOverview() {
             return betrag > 0;
           })
           .map(traeger => (
-            <div key={traeger.id} className="rounded-card p-4 shadow-card border border-card" style={getCardBg(traeger.farbe)}>
+            <div key={traeger.id} className="kpi-card" style={getCardBg(traeger.farbe)}>
             <div className="flex justify-between items-start mb-2">
             <span className="text-sm font-medium text-value">{traeger.name}</span>
             <span className={month.abrechnungsStatus?.[traeger.id]?.erhalten_am ? "text-muted" : "text-value"}>
@@ -524,7 +528,7 @@ function MonthlyOverview() {
 
         {/* Mitfahrer Card wenn vorhanden */}
         {month.erstattungen?.mitfahrer > 0 && (
-          <div className="rounded-card p-4 shadow-card border border-card" style={getCardBg(MITFAHRER_FARBE)}>
+          <div className="kpi-card" style={getCardBg(MITFAHRER_FARBE)}>
           <div className="flex justify-between items-start mb-2">
           <span className="text-sm font-medium text-value">Mitfahrer:innen</span>
           <span className={month.abrechnungsStatus?.mitfahrer?.erhalten_am ? "text-muted" : "text-value"}>
