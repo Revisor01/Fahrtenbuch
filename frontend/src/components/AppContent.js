@@ -56,7 +56,7 @@ function AppContent() {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'fahrten', label: 'Fahrten & Export', icon: Car },
-    { id: 'monatsuebersicht', label: 'Monats\u00FCbersicht', icon: CalendarDays },
+    { id: 'abrechnungen', label: 'Abrechnungen', icon: CalendarDays },
     { id: 'einstellungen', label: 'Einstellungen', icon: SettingsIcon },
     ...(user?.role === 'admin' ? [{ id: 'verwaltung', label: 'Verwaltung', icon: Users }] : []),
   ];
@@ -131,7 +131,7 @@ function AppContent() {
     {/* Hauptinhalt */}
     {activeTab === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
     {activeTab === 'fahrten' && <FahrtenListe />}
-    {activeTab === 'monatsuebersicht' && <MonthlyOverview />}
+    {activeTab === 'abrechnungen' && <MonthlyOverview />}
     {activeTab === 'einstellungen' && <Settings initialTab={settingsSubTab} />}
     {activeTab === 'verwaltung' && <UserManagement />}
 
