@@ -298,9 +298,10 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
-- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
+- [ ] 24-01-PLAN.md — Tab-Umbenennung von "Monatsuebersicht" zu "Abrechnungen"
+- [ ] 24-02-PLAN.md — Desktop/Mobile-Merge, Section-Header und Card-Konsistenz
 **UI hint**: yes
+
 
 ### Phase 25: Einstellungen Konsistenz
 **Goal**: Alle 8 Einstellungen-Sub-Tabs haben Icons in den Form-Sections, identische Card-Struktur und konsistentes Input-Styling
