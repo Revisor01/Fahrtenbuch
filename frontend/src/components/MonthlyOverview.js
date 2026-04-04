@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AlertCircle, Circle, CheckCircle2, CalendarDays } from 'lucide-react';
+import { AlertCircle, Circle, CheckCircle2, CalendarDays, BarChart3 } from 'lucide-react';
 import AbrechnungsStatusModal from '../AbrechnungsStatusModal';
 import { AppContext } from '../contexts/AppContext';
 
@@ -339,9 +339,10 @@ function MonthlyOverview() {
     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
     {/* Titel und Aktuelles Jahr - immer in einer Zeile */}
     <div className="flex justify-between items-center">
-    <h2 className="text-lg font-medium text-value">
-      Jahresübersicht {selectedYear === 'all' ? '— Alle Jahre' : selectedYear}
-    </h2>
+    <div className="section-header" style={{marginBottom: 0}}>
+      <BarChart3 size={18} className="text-blue-500" />
+      <h2>Abrechnungen {selectedYear === 'all' ? '— Alle Jahre' : selectedYear}</h2>
+    </div>
     {selectedYear !== currentYear && (
       <button onClick={() => setSelectedYear(currentYear)} className="sm:hidden btn-secondary">
       Aktuelles Jahr
