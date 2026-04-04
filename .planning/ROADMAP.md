@@ -8,7 +8,7 @@
 - ✅ **v1.3 Dashboard & UX** - Phases 10-12 (shipped 2026-03-28)
 - ✅ **v1.4 UX Polish & Navigation** - Phases 13-14 (shipped 2026-03-28)
 - ✅ **v2.0 Design Makeover** - Phases 15-21 (shipped 2026-04-03)
-- 🚧 **v2.1 UI-Konsistenz & View-Architektur** - Phases 22-26 (in progress)
+- ✅ **v2.1 UI-Konsistenz & View-Architektur** - Phases 22-26 (shipped 2026-04-04)
 
 ## Phases
 
@@ -244,98 +244,54 @@ Plans:
 
 </details>
 
-### v2.1 UI-Konsistenz & View-Architektur (In Progress)
-
-**Milestone Goal:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation. Das Vorhandene konsequent zu Ende bringen.
-
-- [x] **Phase 22: Globale Patterns** - CSS-Fundament bereinigen: btn-Hoehen, Card-Backgrounds, KPI-Card-Pattern, Section-Header-Pattern (completed 2026-04-04)
-- [x] **Phase 23: FahrtenListe Polish** - FahrtenListe auf Dashboard-Niveau mit Section-Headers, Card-Struktur und Export-Aufwertung (completed 2026-04-04)
-- [x] **Phase 24: Monatsuebersicht Refactor** - Naming-Entscheidung, Desktop/Mobile-Vereinheitlichung, Section-Icons und Card-Konsistenz (completed 2026-04-04)
-- [x] **Phase 25: Einstellungen Konsistenz** - Form-Sections mit Icons, konsistente Card-Struktur und Input-Styling ueber alle Sub-Tabs (completed 2026-04-04)
-- [x] **Phase 26: Navigation Check** - Tab-Namen und -Icons pruefen, konsistente Navigation auf Desktop und Mobile (completed 2026-04-04)
-
-## Phase Details
+<details>
+<summary>v2.1 UI-Konsistenz & View-Architektur (Phases 22-26) - SHIPPED 2026-04-04</summary>
 
 ### Phase 22: Globale Patterns
-**Goal**: Die App hat bereinigte, wiederverwendbare CSS-Patterns — alle Buttons gleich hoch, Card-Backgrounds aus Design-Tokens, KPI-Card und Section-Header als zentrale Bausteine
-**Depends on**: Phase 21 (v2.0 abgeschlossen)
+**Goal**: CSS-Patterns bereinigen: btn-Hoehen, Card-Backgrounds, KPI-Card-Pattern, Section-Header-Pattern
 **Requirements**: GP-01, GP-02, GP-03, GP-04
-**Success Criteria** (what must be TRUE):
-  1. btn-primary und btn-secondary rendern mit identischer Hoehe (h-10) auf allen Views
-  2. Kein hardcodierter Farb-Background (bg-emerald-50, bg-blue-50 etc.) direkt in Komponenten — nur Design-Tokens
-  3. KPI-Cards auf Dashboard und Monatsuebersicht nutzen dieselbe kpi-card CSS-Klasse mit Farbvarianten
-  4. Section-Headers (Icon + Titel + optionale Anzahl) sind ein wiederverwendbares Pattern, das in allen Views gleich aussieht
 **Plans**: 2 plans
 
 Plans:
 - [x] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
 - [x] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
-**UI hint**: yes
 
 ### Phase 23: FahrtenListe Polish
-**Goal**: Die FahrtenListe sieht aus wie eine Dashboard-Sektion — mit klaren Section-Headers, strukturiertem Card-Layout und aufgewertetem Export-Bereich
-**Depends on**: Phase 22
+**Goal**: FahrtenListe auf Dashboard-Niveau mit Section-Headers, Card-Struktur und Export-Aufwertung
 **Requirements**: FL-01, FL-02, FL-03
-**Success Criteria** (what must be TRUE):
-  1. FahrtenListe hat Section-Headers mit Lucide-Icons (identisches Pattern wie Dashboard-Sektionen)
-  2. Card-Layout hat klare Sektionen mit konsistentem Whitespace (visuell auf Dashboard-Niveau)
-  3. Export-Bereich hat Icons und eine klare visuelle Struktur (nicht nur nackte Buttons)
 **Plans**: 1 plan
 
 Plans:
 - [x] 23-01-PLAN.md — Section-Headers, Card-Struktur und Export-Aufwertung
-**UI hint**: yes
 
 ### Phase 24: Monatsuebersicht Refactor
-**Goal**: Die Monatsuebersicht hat einen passenden Namen, rendert Desktop und Mobile aus einer Komponenten-Struktur und nutzt die globalen Patterns fuer Section-Headers und Cards
-**Depends on**: Phase 22
+**Goal**: Naming-Entscheidung (Abrechnungen), Desktop/Mobile-Vereinheitlichung, Section-Icons
 **Requirements**: MU-01, MU-02, MU-03, MU-04
-**Success Criteria** (what must be TRUE):
-  1. Tab-Name und Seitentitel sind bewusst gewaehlt (ob "Monatsuebersicht", "Abrechnungen" oder anderes — Entscheidung dokumentiert)
-  2. Desktop und Mobile rendern aus einer einzigen Komponenten-Struktur (kein hidden/sm:hidden Doppel-Rendering)
-  3. Section-Headers nutzen das globale Pattern aus Phase 22 mit passenden Icons
-  4. Cards sind visuell identisch mit dem Rest der App (keine Sonder-Styles)
 **Plans**: 2 plans
 
 Plans:
-- [x] 24-01-PLAN.md — Tab-Umbenennung von "Monatsuebersicht" zu "Abrechnungen"
-- [x] 24-02-PLAN.md — Desktop/Mobile-Merge, Section-Header und Card-Konsistenz
-**UI hint**: yes
-
+- [x] 24-01-PLAN.md — Tab-Umbenennung zu Abrechnungen
+- [x] 24-02-PLAN.md — Desktop/Mobile-Merge, Section-Header, Card-Konsistenz
 
 ### Phase 25: Einstellungen Konsistenz
-**Goal**: Alle 8 Einstellungen-Sub-Tabs haben Icons in den Form-Sections, identische Card-Struktur und konsistentes Input-Styling
-**Depends on**: Phase 22
+**Goal**: Form-Sections mit Icons, konsistente Card-Struktur und Input-Styling
 **Requirements**: ES-01, ES-02, ES-03
-**Success Criteria** (what must be TRUE):
-  1. Jede Form-Section in jedem Sub-Tab hat ein Lucide-Icon und einen klaren Header-Text
-  2. Alle 8 Sub-Tabs haben identische Card-Struktur (gleiche Padding, Spacing, Border-Radius)
-  3. Formular-Inputs (Text, Select, Toggle) sehen in allen Tabs gleich aus
 **Plans**: 1 plan
 
 Plans:
-- [x] 25-01-PLAN.md — Section-Headers mit Icons, Card-Struktur und Input-Styling vereinheitlichen
-**UI hint**: yes
+- [x] 25-01-PLAN.md — Section-Headers mit Icons, Card-Struktur vereinheitlichen
 
 ### Phase 26: Navigation Check
-**Goal**: Navigation ist klar benannt, mit passenden Icons versehen und funktioniert konsistent auf Desktop und Mobile
-**Depends on**: Phase 23, Phase 24, Phase 25
+**Goal**: Tab-Namen und -Icons pruefen, konsistente Navigation
 **Requirements**: NV-01, NV-02
-**Success Criteria** (what must be TRUE):
-  1. Alle Tab-Namen sind selbsterklaerend und die Icons passen zum Inhalt
-  2. Navigation funktioniert identisch auf Desktop (Tab-Leiste) und Mobile (Hamburger/Bottom-Nav) — kein Tab fehlt oder ist abgeschnitten
-**Plans**: 2 plans
+**Plans**: 1 plan (inline)
 
 Plans:
-- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
-- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
-**UI hint**: yes
+- [x] 26-01 — Abrechnungen Icon: CalendarDays → Receipt
+
+</details>
 
 ## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 22 → 23 → 24 → 25 → 26
-(Phase 23, 24, 25 koennen nach Phase 22 parallel laufen — alle haengen nur von Phase 22 ab)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
