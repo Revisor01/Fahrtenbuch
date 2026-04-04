@@ -265,7 +265,11 @@ Plans:
   2. Kein hardcodierter Farb-Background (bg-emerald-50, bg-blue-50 etc.) direkt in Komponenten — nur Design-Tokens
   3. KPI-Cards auf Dashboard und Monatsuebersicht nutzen dieselbe kpi-card CSS-Klasse mit Farbvarianten
   4. Section-Headers (Icon + Titel + optionale Anzahl) sind ein wiederverwendbares Pattern, das in allen Views gleich aussieht
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
+- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
 **UI hint**: yes
 
 ### Phase 23: FahrtenListe Polish
@@ -276,7 +280,11 @@ Plans:
   1. FahrtenListe hat Section-Headers mit Lucide-Icons (identisches Pattern wie Dashboard-Sektionen)
   2. Card-Layout hat klare Sektionen mit konsistentem Whitespace (visuell auf Dashboard-Niveau)
   3. Export-Bereich hat Icons und eine klare visuelle Struktur (nicht nur nackte Buttons)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
+- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
 **UI hint**: yes
 
 ### Phase 24: Monatsuebersicht Refactor
@@ -288,7 +296,11 @@ Plans:
   2. Desktop und Mobile rendern aus einer einzigen Komponenten-Struktur (kein hidden/sm:hidden Doppel-Rendering)
   3. Section-Headers nutzen das globale Pattern aus Phase 22 mit passenden Icons
   4. Cards sind visuell identisch mit dem Rest der App (keine Sonder-Styles)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
+- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
 **UI hint**: yes
 
 ### Phase 25: Einstellungen Konsistenz
@@ -299,7 +311,11 @@ Plans:
   1. Jede Form-Section in jedem Sub-Tab hat ein Lucide-Icon und einen klaren Header-Text
   2. Alle 8 Sub-Tabs haben identische Card-Struktur (gleiche Padding, Spacing, Border-Radius)
   3. Formular-Inputs (Text, Select, Toggle) sehen in allen Tabs gleich aus
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
+- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
 **UI hint**: yes
 
 ### Phase 26: Navigation Check
@@ -309,7 +325,11 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Alle Tab-Namen sind selbsterklaerend und die Icons passen zum Inhalt
   2. Navigation funktioniert identisch auf Desktop (Tab-Leiste) und Mobile (Hamburger/Bottom-Nav) — kein Tab fehlt oder ist abgeschnitten
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — CSS-Fundament: Button-Hoehen, KPI-Card-Klassen, Section-Header-Klassen
+- [ ] 22-02-PLAN.md — Komponenten umstellen: Dashboard, MonthlyOverview, FahrtenListe, LoginPage
 **UI hint**: yes
 
 ## Progress
