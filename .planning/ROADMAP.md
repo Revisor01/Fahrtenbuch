@@ -298,8 +298,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 24-01-PLAN.md — Tab-Umbenennung von "Monatsuebersicht" zu "Abrechnungen"
-- [ ] 24-02-PLAN.md — Desktop/Mobile-Merge, Section-Header und Card-Konsistenz
+- [x] 24-01-PLAN.md — Tab-Umbenennung von "Monatsuebersicht" zu "Abrechnungen"
+- [x] 24-02-PLAN.md — Desktop/Mobile-Merge, Section-Header und Card-Konsistenz
 **UI hint**: yes
 
 
