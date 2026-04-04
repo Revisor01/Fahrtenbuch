@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Design Makeover
+milestone: v2.1
+milestone_name: UI-Konsistenz & View-Architektur
 status: planning
-stopped_at: Completed 21-03-PLAN.md
-last_updated: "2026-04-03T13:59:46.911Z"
-last_activity: 2026-04-03
+stopped_at: Milestone v2.1 started — defining requirements
+last_updated: "2026-04-04T10:00:00.000Z"
+last_activity: 2026-04-04
 progress:
-  total_phases: 7
-  completed_phases: 6
-  total_plans: 17
-  completed_plans: 16
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 

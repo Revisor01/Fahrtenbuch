@@ -61,20 +61,22 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 
 ### Active
 
-(keine — v2.0 Milestone abgeschlossen)
+- [ ] Globale Pattern-Bereinigung: btn-Hoehen, Card-Backgrounds, Design-Tokens
+- [ ] FahrtenListe auf Dashboard-Niveau bringen
+- [ ] Monatsuebersicht ueberdenken (Naming, Desktop/Mobile zusammenfuehren)
+- [ ] Einstellungen: Form-Sections mit Icons, visuelle Konsistenz
+- [ ] Navigation pruefen: Tab-Namen, Aufteilung
 
-## Current Milestone: v2.0 Design Makeover
+## Current Milestone: v2.1 UI-Konsistenz & View-Architektur
 
-**Goal:** Komplettes visuelles Redesign der gesamten App — modern, mobil-optimiert, attraktiv. Alle bestehenden Funktionen bleiben, aber jede Ansicht bekommt ein zeitgemäßes UI.
+**Goal:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation. Das Vorhandene konsequent zu Ende bringen.
 
 **Target features:**
-- Cards als Container für alle Sektionen
-- Modernes, attraktives Dashboard-Layout
-- Einstellungen mit aufgewertetem UI
-- Fahrten & Export visuell modernisiert
-- Monatsübersicht redesigned
-- Mobile-First, Touch-freundlich
-- Einheitliches Designsystem (Typografie, Spacing)
+- Globale Pattern-Bereinigung (btn-Hoehen, Card-Backgrounds, Design-Tokens statt hardcoded Farben)
+- FahrtenListe auf Dashboard-Niveau (Section-Headers mit Icons, saubere Card-Struktur)
+- Monatsuebersicht ueberdenken (Naming, Desktop/Mobile-Doppelrendering zusammenfuehren, Section-Icons)
+- Einstellungen aufraeumen (Form-Sections mit Icons, visuelle Konsistenz in allen 8 Sub-Tabs)
+- Navigation pruefen (Tab-Namen, Aufteilung sinnvoll?)
 
 ### Out of Scope
 
@@ -85,6 +87,7 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 ## Context
 
 - App wird von kirchlichen Mitarbeitenden im Kirchenkreis Dithmarschen genutzt
+- v2.0 shipped: 7 Phasen, 17 Plans — komplettes visuelles Redesign mit Design-Tokens, Card-System, Dark Mode
 - v1.0 shipped: 4 Phasen, 7 Plans, 11 Tasks — alle aus konkretem Nutzerfeedback
 - Nutzerfeedback von Joerg, Benjamin und Jasmin Reusch vollständig umgesetzt
 - Tech Stack: React 18, Express 4, MySQL 8, ExcelJS, Docker Compose
@@ -126,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 19 (Dashboard & Listen Feinschliff) complete — v2.0 Design Makeover Milestone finished*
+*Last updated: 2026-04-04 after v2.0 — starting v2.1 UI-Konsistenz & View-Architektur*
