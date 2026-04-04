@@ -4,13 +4,13 @@ milestone: v2.1
 milestone_name: UI-Konsistenz & View-Architektur
 status: executing
 stopped_at: Phase 22 UI-SPEC approved
-last_updated: "2026-04-04T21:31:37.489Z"
+last_updated: "2026-04-04T21:34:34.922Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 6
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation
-**Current focus:** Phase 25 — einstellungen-konsistenz
+**Current focus:** Phase 26 — navigation-check
 
 ## Current Position
 
 Phase: 26
 Plan: Not started
-Status: Executing Phase 25
+Status: Executing Phase 26
 Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0%
