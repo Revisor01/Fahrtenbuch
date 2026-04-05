@@ -323,7 +323,7 @@ Plans:
   4. Export-Button ist ausgeblendet wenn alle Monate im Zeitraum bereits eingereicht/erhalten sind
 **Plans**: 1 plan
 Plans:
-- [ ] 28-01-PLAN.md — Zeitraum-Status-Chips und Export-Filter fuer offene Monate
+- [x] 28-01-PLAN.md — Zeitraum-Status-Chips und Export-Filter fuer offene Monate
 
 ## Progress
 
@@ -356,4 +356,4 @@ Plans:
 | 25. Einstellungen Konsistenz | v2.1 | 1/1 | Complete | 2026-04-04 |
 | 26. Navigation Check | v2.1 | 1/1 | Complete | 2026-04-04 |
 | 27. Backend-API & UI-Konsistenz | v2.2 | 2/2 | Complete    | 2026-04-05 |
-| 28. Zeitraum-Status Frontend & Export-Filter | v2.2 | 0/1 | Planning done | - |
+| 28. Zeitraum-Status Frontend & Export-Filter | v2.2 | 1/1 | Complete    | 2026-04-05 |

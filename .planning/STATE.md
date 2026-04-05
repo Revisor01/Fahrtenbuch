@@ -4,13 +4,13 @@ milestone: v2.2
 milestone_name: Erstattungs-Zeitraum & Konsistenz
 status: executing
 stopped_at: "Roadmap v2.2 erstellt, bereit fuer `/gsd:plan-phase 27`"
-last_updated: "2026-04-05T10:04:37.101Z"
+last_updated: "2026-04-05T10:10:41.916Z"
 last_activity: 2026-04-05
 progress:
   total_phases: 2
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
   percent: 100
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden
-**Current focus:** Phase 27 — backend-api-ui-konsistenz
+**Current focus:** Phase 28 — zeitraum-status-frontend-export-filter
 
 ## Current Position
 
 Phase: 28
 Plan: Not started
-Status: Executing Phase 27
+Status: Executing Phase 28
 Last activity: 2026-04-05
 
 Progress: [░░░░░░░░░░] 0%
