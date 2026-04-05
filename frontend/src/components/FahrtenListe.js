@@ -395,29 +395,11 @@ function FahrtenListe() {
     return (
       <div className="card-container mb-4">
       <div className="space-y-6">
-      {/* Header mit Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div className="w-full flex justify-between items-center">
-      <div className="section-header" style={{marginBottom: 0}}>
-        <CreditCard size={18} className="text-emerald-500" />
-        <h2>{selectedVonMonth && selectedVonMonth !== selectedMonth ? 'Zeitraum-Übersicht' : 'Monatsübersicht'}</h2>
-      </div>
-      {(selectedMonth !== currentMonth || selectedVonMonth) && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary sm:hidden">
-        Aktueller Monat
-        </button>
-      )}
-      </div>
-
-      <div className="w-full sm:w-auto flex flex-col gap-2">
-      {(selectedMonth !== currentMonth || selectedVonMonth) && (
-        <button onClick={resetToCurrentMonth} className="btn-secondary hidden sm:block self-end">
-        Aktueller Monat
-        </button>
-      )}
-      <div className="section-header" style={{marginBottom: 0}}>
+      {/* Zeitraum-Filter */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="flex items-center gap-2 shrink-0">
         <CalendarRange size={18} className="text-blue-500" />
-        <h2>Zeitraum</h2>
+        <span className="text-sm font-medium text-value">Zeitraum</span>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
       {/* Von-Dropdown (Monat + Jahr) */}
@@ -486,7 +468,11 @@ function FahrtenListe() {
       })}
       </select>
       </div>
-      </div>
+      {(selectedMonth !== currentMonth || selectedVonMonth) && (
+        <button onClick={resetToCurrentMonth} className="btn-secondary shrink-0">
+        Aktueller Monat
+        </button>
+      )}
       </div>
       </div>
 
