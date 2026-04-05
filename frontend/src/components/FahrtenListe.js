@@ -541,29 +541,45 @@ function FahrtenListe() {
         {value > 0 && (
           <div className="text-xs space-y-1">
           {isZeitraum ? (
-            /* Zeitraum-Modus: Pro-Monat-Status-Chips */
+            /* Zeitraum-Modus: Klickbare Pro-Monat-Status-Chips */
             <div className="flex flex-wrap gap-1 mt-1">
             {Object.entries(summary.abrechnungsStatus?.[key] || {})
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([monthKey, statusData]) => {
                 const label = getMonthLabel(monthKey);
+                const [chipYear, chipMonth] = monthKey.split('-');
                 if (statusData?.erhalten_am) {
                   return (
-                    <span key={monthKey} className="status-badge-primary text-xs">
+                    <span key={monthKey} className="status-badge-primary text-xs cursor-pointer"
+                      onClick={() => setAbrechnungsStatusModal({
+                        open: true, traegerId: key, aktion: 'reset',
+                        jahr: chipYear, monat: chipMonth, singleMonth: true
+                      })}
+                      title={`Erhalten am: ${new Date(statusData.erhalten_am).toLocaleDateString()}`}>
                       <CheckCircle2 size={12} />
                       <span>{label}</span>
                     </span>
                   );
                 } else if (statusData?.eingereicht_am) {
                   return (
-                    <span key={monthKey} className="status-badge-warning text-xs">
+                    <span key={monthKey} className="status-badge-warning text-xs cursor-pointer"
+                      onClick={() => setAbrechnungsStatusModal({
+                        open: true, traegerId: key, aktion: 'erhalten',
+                        jahr: chipYear, monat: chipMonth, singleMonth: true
+                      })}
+                      title={`Eingereicht am: ${new Date(statusData.eingereicht_am).toLocaleDateString()}`}>
                       <Circle size={12} />
                       <span>{label}</span>
                     </span>
                   );
                 } else {
                   return (
-                    <span key={monthKey} className="status-badge-secondary text-xs">
+                    <span key={monthKey} className="status-badge-secondary text-xs cursor-pointer"
+                      onClick={() => setAbrechnungsStatusModal({
+                        open: true, traegerId: key, aktion: 'eingereicht',
+                        jahr: chipYear, monat: chipMonth, singleMonth: true
+                      })}
+                      title="Nicht eingereicht">
                       <AlertCircle size={12} />
                       <span>{label}</span>
                     </span>

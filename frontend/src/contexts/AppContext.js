@@ -314,10 +314,10 @@ function AppProvider({ children }) {
     }
   };
 
-  const handleAbrechnungsStatus = async (jahr, monat, traegerId, aktion, datum) => {
+  const handleAbrechnungsStatus = async (jahr, monat, traegerId, aktion, datum, singleMonth = false) => {
     try {
-      // Bei aktiver Range: Status für jeden Monat im Zeitraum setzen
-      if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
+      // Bei aktiver Range UND nicht singleMonth: Status für jeden Monat im Zeitraum setzen
+      if (!singleMonth && selectedVonMonth && selectedVonMonth !== selectedMonth) {
         const [vonYear, vonMonth] = selectedVonMonth.split('-');
         const [bisYear, bisMonth] = selectedMonth.split('-');
         let current = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
@@ -528,7 +528,8 @@ function AppProvider({ children }) {
       abrechnungsStatusModal.monat,
       abrechnungsStatusModal.traegerId,
       abrechnungsStatusModal.aktion,
-      date
+      date,
+      abrechnungsStatusModal.singleMonth || false
     )}
     traegerId={abrechnungsStatusModal.traegerId}
     aktion={abrechnungsStatusModal.aktion}
@@ -558,7 +559,9 @@ function AppProvider({ children }) {
         abrechnungsStatusModal.jahr,
         abrechnungsStatusModal.monat,
         abrechnungsStatusModal.traegerId,
-        'reset'
+        'reset',
+        null,
+        abrechnungsStatusModal.singleMonth || false
       );
       setAbrechnungsStatusModal({});
     }}
