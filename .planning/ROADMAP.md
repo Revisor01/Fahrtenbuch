@@ -306,8 +306,11 @@ Plans:
   3. Status-Chips (eingereicht/nicht eingereicht) sind als klar unterscheidbare Badges erkennbar
   4. Kein hellblauer card-container-highlight Hintergrund mehr sichtbar — ueberall card-container
   5. Erstattungs-Bereich Layout folgt v2.1 Patterns (section-header, spacing)
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 2 plans
+
+Plans:
+- [ ] 27-01-PLAN.md — Backend: getReportRange pro-Monat-Status statt Aggregation
+- [ ] 27-02-PLAN.md — Frontend: Status-Badge-Warning, card-container-highlight Cleanup
 
 #### Phase 28: Zeitraum-Status Frontend & Export-Filter
 **Goal**: Nutzer sehen im Zeitraum-Modus den Status pro Monat aufgeschluesselt und koennen nur offene Monate exportieren
@@ -351,5 +354,5 @@ Plans:
 | 24. Monatsuebersicht Refactor | v2.1 | 2/2 | Complete | 2026-04-04 |
 | 25. Einstellungen Konsistenz | v2.1 | 1/1 | Complete | 2026-04-04 |
 | 26. Navigation Check | v2.1 | 1/1 | Complete | 2026-04-04 |
-| 27. Backend-API & UI-Konsistenz | v2.2 | 0/0 | Not started | - |
+| 27. Backend-API & UI-Konsistenz | v2.2 | 0/2 | In progress | - |
 | 28. Zeitraum-Status Frontend & Export-Filter | v2.2 | 0/0 | Not started | - |
