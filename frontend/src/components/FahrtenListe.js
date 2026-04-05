@@ -9,6 +9,18 @@ import { AlertCircle, Circle, CheckCircle2, Pencil, Trash2, RotateCcw, Users, Cl
 
 const API_BASE_URL = '/api';
 
+const DEFAULT_FARBE = '#6b7280';
+const MITFAHRER_FARBE = '#6366f1';
+
+// Erzeugt inline style fuer Card-Hintergrund mit niedriger Opacity
+const getCardBg = (hexColor) => {
+  const hex = (hexColor || DEFAULT_FARBE).replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return { backgroundColor: `rgba(${r}, ${g}, ${b}, 0.08)` };
+};
+
 function FahrtenListe() {
   const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
@@ -381,7 +393,7 @@ function FahrtenListe() {
     }
 
     return (
-      <div className="card-container-highlight mb-4">
+      <div className="card-container mb-4">
       <div className="space-y-6">
       {/* Header mit Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -493,8 +505,11 @@ function FahrtenListe() {
         ? 'sm:grid-cols-3'
         : 'sm:grid-cols-2 lg:grid-cols-4'
       }`}>
-      {getKategorienMitErstattung().map(([key, displayName, value]) => (
-        <div key={key} className="card-container">
+      {getKategorienMitErstattung().map(([key, displayName, value]) => {
+        const traeger = abrechnungstraeger.find(t => t.id.toString() === key);
+        const farbe = key === 'mitfahrer' ? MITFAHRER_FARBE : (traeger?.farbe || DEFAULT_FARBE);
+        return (
+        <div key={key} className="kpi-card" style={getCardBg(farbe)}>
         <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-label">{displayName}</span>
         <span className={summary.abrechnungsStatus?.[key]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
@@ -553,7 +568,8 @@ function FahrtenListe() {
           </div>
         )}
         </div>
-      ))}
+      );
+      })}
 
       {/* Gesamt Card */}
       <div className="card-container col-span-full">
