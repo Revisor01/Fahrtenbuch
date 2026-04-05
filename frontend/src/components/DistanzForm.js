@@ -41,7 +41,7 @@ function DistanzForm() {
   
   return (
     <div className="space-y-6">
-    <div className="card-container-highlight">
+    <div className="card-container">
     <h3 className="text-lg font-medium text-value mb-4">Distanz hinzufügen</h3>
     <p className="text-sm text-muted mb-6">
     Hier können Sie die Entfernungen zwischen zwei Orten festlegen. Die Distanzen werden automatisch 

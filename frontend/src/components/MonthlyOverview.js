@@ -331,7 +331,7 @@ function MonthlyOverview() {
 
   return (
     <div className="w-full max-w-full space-y-6">
-    <div className="card-container-highlight mb-4">
+    <div className="card-container mb-4">
     <div className="space-y-6 mb-4">
     {/* Header mit Navigation */}
     <div className="flex flex-col gap-4">

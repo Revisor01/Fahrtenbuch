@@ -75,7 +75,7 @@ export default function SetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-    <div className="card-container-highlight w-full max-w-md">
+    <div className="card-container w-full max-w-md">
     <h2 className="text-lg font-medium text-value text-center mb-6">
     {location.pathname.includes('reset-password') 
       ? 'Neues Passwort setzen' 

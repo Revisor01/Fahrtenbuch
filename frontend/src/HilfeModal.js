@@ -39,7 +39,7 @@ const HilfeModal = ({ isOpen, onClose, isFirstVisit }) => {
             title={isFirstVisit ? "Herzlich Willkommen!" : "Hilfe & Informationen"}
             size="wide"
         >
-            <div className="card-container-highlight space-y-6">
+            <div className="card-container space-y-6">
                 {isFirstVisit && (
                     <div className="text-value">
                         <p className="text-lg">Willkommen in Ihrem persönlichen Fahrtenbuch!</p>

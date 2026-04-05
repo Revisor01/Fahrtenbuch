@@ -28,7 +28,7 @@ function ForgotPasswordForm({ onClose }) {
   };
 
   return (
-    <div className="card-container-highlight">
+    <div className="card-container">
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
     <label className="form-label">
@@ -126,7 +126,7 @@ function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-100 dark:from-gray-900 dark:via-gray-900 dark:to-primary-900">
     <div className="w-full max-w-md mx-4">
-    <div className="card-container-highlight">
+    <div className="card-container">
     <div className="flex justify-center mb-6">
     <div className="w-16 h-16 bg-primary-500 dark:bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
     <Car size={32} className="text-white" />
@@ -213,7 +213,7 @@ function LoginPage() {
     onClose={() => setShowRegistration(false)}
     title="Registrierung"
     >
-    <div className="card-container-highlight">
+    <div className="card-container">
     <form onSubmit={handleRegistration} className="space-y-4">
     <div>
     <label className="form-label">Benutzername</label>

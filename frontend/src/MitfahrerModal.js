@@ -33,7 +33,7 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     onClose={onClose} 
     title={readOnly ? "Mitfahrer:in Details" : "Mitfahrer:in hinzufügen/bearbeiten"}
     >
-    <div className="card-container-highlight space-y-6">
+    <div className="card-container space-y-6">
     <form onSubmit={handleSubmit} className="space-y-4">
     <div>
     <label className="form-label">

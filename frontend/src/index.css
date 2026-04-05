@@ -36,11 +36,6 @@ code {
     @apply base-container;
   }
 
-  .card-container-highlight {
-    @apply base-container p-6 
-           bg-primary-25 dark:border-primary-900;
-  }
-
   /* Form Structure */
   .form-row {
     @apply flex flex-wrap gap-4;

@@ -32,7 +32,7 @@ const UserForm = ({ onSubmit, isEdit, initialData, onClose }) => {
    };
 
    return (
-      <div className="card-container-highlight">
+      <div className="card-container">
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
       <div>
