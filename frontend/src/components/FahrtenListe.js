@@ -537,7 +537,7 @@ function FahrtenListe() {
             </span>
           ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
             <span
-            className="status-badge-secondary cursor-pointer"
+            className="status-badge-warning cursor-pointer"
             onClick={() => setAbrechnungsStatusModal({
               open: true,
               traegerId: key,

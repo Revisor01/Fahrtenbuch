@@ -202,6 +202,12 @@ code {
            text-secondary-700 dark:text-secondary-300;
   }
 
+  .status-badge-warning {
+    @apply status-badge
+           bg-amber-100 dark:bg-amber-900
+           text-amber-700 dark:text-amber-300;
+  }
+
   /* Text Styles */
   .text-label {
     @apply text-primary-600 dark:text-primary-100;
