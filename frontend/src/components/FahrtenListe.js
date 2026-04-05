@@ -313,22 +313,47 @@ function FahrtenListe() {
   const askMarkAsSubmitted = (type) => {
     const [bisYear, bisMonth] = selectedMonth.split('-');
     const formattedBisMonth = bisMonth.padStart(2, '0');
+    const isRange = selectedVonMonth && selectedVonMonth !== selectedMonth;
+
+    // Ermittle welche Monate gerade exportiert wurden (nur offene)
+    let exportedMonths = [];
+    if (isRange) {
+      const traegerStatus = summary.abrechnungsStatus?.[type] || {};
+      const [vonY, vonM] = selectedVonMonth.split('-').map(Number);
+      const [bisY, bisM] = selectedMonth.split('-').map(Number);
+      let y = vonY, m = vonM;
+      while (y < bisY || (y === bisY && m <= bisM)) {
+        const mk = `${y}-${String(m).padStart(2, '0')}`;
+        const sd = traegerStatus[mk];
+        if (!sd?.eingereicht_am && !sd?.erhalten_am) {
+          exportedMonths.push(mk);
+        }
+        m++;
+        if (m > 12) { m = 1; y++; }
+      }
+    }
+
+    const monthNames = exportedMonths.map(mk => {
+      const [y, m] = mk.split('-');
+      return new Date(parseInt(y), parseInt(m) - 1).toLocaleString('de-DE', { month: 'long' });
+    });
+
+    const message = isRange && exportedMonths.length > 0
+      ? `Sollen ${monthNames.join(', ')} als eingereicht markiert werden?`
+      : "Soll der Monat als eingereicht markiert werden?";
+
     showNotification(
       "Export erfolgreich",
-      "Soll der Zeitraum als eingereicht markiert werden?",
+      message,
       async () => {
-        if (selectedVonMonth && selectedVonMonth !== selectedMonth) {
-          const [vonYear, vonMonth] = selectedVonMonth.split('-');
-          let current = new Date(parseInt(vonYear), parseInt(vonMonth) - 1);
-          const end = new Date(parseInt(bisYear), parseInt(bisMonth) - 1);
-          while (current <= end) {
-            const y = current.getFullYear().toString();
-            const m = (current.getMonth() + 1).toString().padStart(2, '0');
-            await updateAbrechnungsStatus(y, m, type, 'eingereicht', new Date().toISOString().split('T')[0]);
-            current.setMonth(current.getMonth() + 1);
+        const today = new Date().toISOString().split('T')[0];
+        if (isRange && exportedMonths.length > 0) {
+          for (const mk of exportedMonths) {
+            const [y, m] = mk.split('-');
+            await updateAbrechnungsStatus(y, m, type, 'eingereicht', today);
           }
         } else {
-          await updateAbrechnungsStatus(bisYear, formattedBisMonth, type, 'eingereicht', new Date().toISOString().split('T')[0]);
+          await updateAbrechnungsStatus(bisYear, formattedBisMonth, type, 'eingereicht', today);
         }
         await fetchMonthlyData();
         await fetchFahrten();
@@ -483,13 +508,29 @@ function FahrtenListe() {
           const [y, m] = yearMonth.split('-');
           return new Date(parseInt(y), parseInt(m) - 1).toLocaleString('de-DE', { month: 'short' });
         };
+        // Alle Monate im gewählten Zeitraum generieren
+        const getAllMonateInRange = () => {
+          if (!isZeitraum) return [];
+          const [vonY, vonM] = selectedVonMonth.split('-').map(Number);
+          const [bisY, bisM] = selectedMonth.split('-').map(Number);
+          const monate = [];
+          let y = vonY, m = vonM;
+          while (y < bisY || (y === bisY && m <= bisM)) {
+            monate.push(`${y}-${String(m).padStart(2, '0')}`);
+            m++;
+            if (m > 12) { m = 1; y++; }
+          }
+          return monate;
+        };
+
         const getOffeneMonateRange = (traegerKey) => {
           if (!isZeitraum) return null;
-          const traegerStatus = summary.abrechnungsStatus?.[traegerKey];
-          if (!traegerStatus || typeof traegerStatus !== 'object') return null;
-          return Object.entries(traegerStatus)
-            .filter(([, statusData]) => !statusData?.eingereicht_am && !statusData?.erhalten_am)
-            .map(([monthKey]) => monthKey);
+          const traegerStatus = summary.abrechnungsStatus?.[traegerKey] || {};
+          // Prüfe ALLE Monate im Zeitraum, nicht nur die mit DB-Einträgen
+          return getAllMonateInRange().filter(monthKey => {
+            const statusData = traegerStatus[monthKey];
+            return !statusData?.eingereicht_am && !statusData?.erhalten_am;
+          });
         };
         const hatOffeneMonate = (traegerKey) => {
           if (!isZeitraum) return true;
@@ -529,9 +570,8 @@ function FahrtenListe() {
           {isZeitraum ? (
             /* Zeitraum-Modus: Klickbare Pro-Monat-Status-Chips */
             <div className="flex flex-wrap gap-1 mt-1">
-            {Object.entries(summary.abrechnungsStatus?.[key] || {})
-              .sort(([a], [b]) => a.localeCompare(b))
-              .map(([monthKey, statusData]) => {
+            {getAllMonateInRange().map(monthKey => {
+                const statusData = (summary.abrechnungsStatus?.[key] || {})[monthKey];
                 const label = getMonthLabel(monthKey);
                 const [chipYear, chipMonth] = monthKey.split('-');
                 if (statusData?.erhalten_am) {
