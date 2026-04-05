@@ -58,8 +58,22 @@ function Dashboard({ onNavigate }) {
     return { kmThisMonth: km, fahrtenThisMonth: monthTrips.length };
   }, [fahrten, currentYearMonth]);
 
-  // KPI: total trips count
-  const fahrtenGesamt = fahrten.length;
+  // KPI: Offene Fahrten (deren Träger noch nicht eingereicht/erhalten ist) über alle Monate
+  const offeneFahrten = useMemo(() => {
+    let count = 0;
+    monthlyData.forEach(md => {
+      const monthFahrten = md.fahrtenCount || 0;
+      // Prüfe ob ALLE Träger in diesem Monat eingereicht/erhalten sind
+      const allTraegerDone = Object.entries(md.erstattungen || {}).every(([id]) => {
+        const status = md.abrechnungsStatus?.[id];
+        return status?.eingereicht_am || status?.erhalten_am;
+      });
+      if (!allTraegerDone) {
+        count += monthFahrten;
+      }
+    });
+    return count;
+  }, [monthlyData]);
 
   // Last 3 trips sorted by date descending, then by id descending
   const letzteTrips = useMemo(() => {
@@ -245,9 +259,9 @@ function Dashboard({ onNavigate }) {
         >
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-xs font-medium text-primary-600 dark:text-primary-400 mb-1">Fahrten & Export</p>
-              <p className="text-xl font-medium text-value">{fahrtenGesamt}</p>
-              <p className="text-xs text-muted">alle anzeigen &rarr;</p>
+              <p className="text-xs font-medium text-primary-600 dark:text-primary-400 mb-1">Offene Fahrten</p>
+              <p className="text-xl font-medium text-value">{offeneFahrten}</p>
+              <p className="text-xs text-muted">{offeneFahrten > 0 ? 'noch nicht eingereicht' : 'alles erledigt'} &rarr;</p>
             </div>
             <FileDown size={22} className="text-primary-500 shrink-0" />
           </div>
