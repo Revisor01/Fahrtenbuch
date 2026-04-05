@@ -491,6 +491,27 @@ function FahrtenListe() {
       </div>
 
       {/* Cards Grid */}
+      {(() => {
+        const isZeitraum = selectedVonMonth && selectedVonMonth !== selectedMonth;
+        const getMonthLabel = (yearMonth) => {
+          const [y, m] = yearMonth.split('-');
+          return new Date(parseInt(y), parseInt(m) - 1).toLocaleString('de-DE', { month: 'short' });
+        };
+        const getOffeneMonateRange = (traegerKey) => {
+          if (!isZeitraum) return null;
+          const traegerStatus = summary.abrechnungsStatus?.[traegerKey];
+          if (!traegerStatus || typeof traegerStatus !== 'object') return null;
+          return Object.entries(traegerStatus)
+            .filter(([, statusData]) => !statusData?.eingereicht_am && !statusData?.erhalten_am)
+            .map(([monthKey]) => monthKey);
+        };
+        const hatOffeneMonate = (traegerKey) => {
+          if (!isZeitraum) return true;
+          const offene = getOffeneMonateRange(traegerKey);
+          return offene === null || offene.length > 0;
+        };
+
+        return (<>
       <div className="section-header">
         <CreditCard size={18} className="text-emerald-500" />
         <h2>Erstattungen</h2>
@@ -512,59 +533,93 @@ function FahrtenListe() {
         <div key={key} className="kpi-card" style={getCardBg(farbe)}>
         <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-label">{displayName}</span>
-        <span className={summary.abrechnungsStatus?.[key]?.erhalten_am ? "font-medium text-muted" : "font-medium text-value"}>
+        <span className="font-medium text-value">
         {Number(value).toFixed(2)} €
         </span>
         </div>
 
         {value > 0 && (
           <div className="text-xs space-y-1">
-          <div className="flex items-center justify-between">
-          <span className="text-label">Status</span>
-          {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
-            <span
-            className="status-badge-primary cursor-pointer"
-            onClick={() => setAbrechnungsStatusModal({
-              open: true,
-              traegerId: key,
-              aktion: 'reset',
-              jahr: selectedYear,
-              monat: selectedMonth.split('-')[1]
-            })}
-            >
-            <CheckCircle2 size={14} />
-            <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
-            </span>
-          ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
-            <span
-            className="status-badge-warning cursor-pointer"
-            onClick={() => setAbrechnungsStatusModal({
-              open: true,
-              traegerId: key,
-              aktion: 'erhalten',
-              jahr: selectedYear,
-              monat: selectedMonth.split('-')[1]
-            })}
-            >
-            <Circle size={14} />
-            <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
-            </span>
+          {isZeitraum ? (
+            /* Zeitraum-Modus: Pro-Monat-Status-Chips */
+            <div className="flex flex-wrap gap-1 mt-1">
+            {Object.entries(summary.abrechnungsStatus?.[key] || {})
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([monthKey, statusData]) => {
+                const label = getMonthLabel(monthKey);
+                if (statusData?.erhalten_am) {
+                  return (
+                    <span key={monthKey} className="status-badge-primary text-xs">
+                      <CheckCircle2 size={12} />
+                      <span>{label}</span>
+                    </span>
+                  );
+                } else if (statusData?.eingereicht_am) {
+                  return (
+                    <span key={monthKey} className="status-badge-warning text-xs">
+                      <Circle size={12} />
+                      <span>{label}</span>
+                    </span>
+                  );
+                } else {
+                  return (
+                    <span key={monthKey} className="status-badge-secondary text-xs">
+                      <AlertCircle size={12} />
+                      <span>{label}</span>
+                    </span>
+                  );
+                }
+              })}
+            </div>
           ) : (
-            <span
-            className="status-badge-secondary cursor-pointer"
-            onClick={() => setAbrechnungsStatusModal({
-              open: true,
-              traegerId: key,
-              aktion: 'eingereicht',
-              jahr: selectedYear,
-              monat: selectedMonth.split('-')[1]
-            })}
-            >
-            <AlertCircle size={14} />
-            <span>Nicht eingereicht</span>
-            </span>
+            /* Einzelmonat-Modus: Klickbare Status-Badges */
+            <div className="flex items-center justify-between">
+            <span className="text-label">Status</span>
+            {summary.abrechnungsStatus?.[key]?.erhalten_am ? (
+              <span
+              className="status-badge-primary cursor-pointer"
+              onClick={() => setAbrechnungsStatusModal({
+                open: true,
+                traegerId: key,
+                aktion: 'reset',
+                jahr: selectedYear,
+                monat: selectedMonth.split('-')[1]
+              })}
+              >
+              <CheckCircle2 size={14} />
+              <span>Erhalten am: {new Date(summary.abrechnungsStatus[key].erhalten_am).toLocaleDateString()}</span>
+              </span>
+            ) : summary.abrechnungsStatus?.[key]?.eingereicht_am ? (
+              <span
+              className="status-badge-warning cursor-pointer"
+              onClick={() => setAbrechnungsStatusModal({
+                open: true,
+                traegerId: key,
+                aktion: 'erhalten',
+                jahr: selectedYear,
+                monat: selectedMonth.split('-')[1]
+              })}
+              >
+              <Circle size={14} />
+              <span>Eingereicht am: {new Date(summary.abrechnungsStatus[key].eingereicht_am).toLocaleDateString()}</span>
+              </span>
+            ) : (
+              <span
+              className="status-badge-secondary cursor-pointer"
+              onClick={() => setAbrechnungsStatusModal({
+                open: true,
+                traegerId: key,
+                aktion: 'eingereicht',
+                jahr: selectedYear,
+                monat: selectedMonth.split('-')[1]
+              })}
+              >
+              <AlertCircle size={14} />
+              <span>Nicht eingereicht</span>
+              </span>
+            )}
+            </div>
           )}
-          </div>
           </div>
         )}
         </div>
@@ -577,31 +632,27 @@ function FahrtenListe() {
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
       {Object.entries(summary.erstattungen || {}).reduce((sum, [id, betrag]) => {
-        const received = summary.abrechnungsStatus?.[id]?.erhalten_am;
-        return sum + (received ? 0 : Number(betrag || 0));
+        const isErhalten = isZeitraum
+          ? Object.values(summary.abrechnungsStatus?.[id] || {}).every(s => s?.erhalten_am)
+          : summary.abrechnungsStatus?.[id]?.erhalten_am;
+        return sum + (isErhalten ? 0 : Number(betrag || 0));
       }, 0).toFixed(2)} €
       </span>
       </div>
-      {Object.entries(summary.erstattungen || {}).some(([id, betrag]) =>
-        summary.abrechnungsStatus?.[id]?.erhalten_am
-      ) && (
-        <div className="text-muted text-xs text-right">
-        Ursprünglich: {Object.values(summary.erstattungen || {}).reduce((sum, betrag) =>
-          sum + Number(betrag || 0), 0
-        ).toFixed(2)} €
-        </div>
-      )}
       </div>
       </div>
 
-      {/* Export */}
+      {/* Export — nur anzeigen wenn offene Monate vorhanden */}
+      {getKategorienMitErstattung().some(([key]) => hatOffeneMonate(key)) && (
       <div className="pt-4 border-t border-card">
       <div className="section-header">
         <FileDown size={18} className="text-purple-500" />
         <h2>Export</h2>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
-      {getKategorienMitErstattung().map(([key, displayName]) => (
+      {getKategorienMitErstattung()
+        .filter(([key]) => hatOffeneMonate(key))
+        .map(([key, displayName]) => (
         <button
         key={key}
         onClick={() => {
@@ -625,6 +676,9 @@ function FahrtenListe() {
       ))}
       </div>
       </div>
+      )}
+      </>);
+      })()}
       </div>
       </div>
     );
