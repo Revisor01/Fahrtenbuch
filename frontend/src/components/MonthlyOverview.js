@@ -272,7 +272,9 @@ function MonthlyOverview() {
               month.year,
               month.monatNr,
               traegerId,
-              'reset'
+              'reset',
+              null,
+              true
             ),
             true
           );
@@ -294,7 +296,8 @@ function MonthlyOverview() {
           traegerId,
           aktion: 'erhalten',
           jahr: month.year,
-          monat: month.monatNr
+          monat: month.monatNr,
+          singleMonth: true
         })}
         >
         <Circle size={14} />
@@ -312,7 +315,8 @@ function MonthlyOverview() {
         traegerId,
         aktion: 'eingereicht',
         jahr: month.year,
-        monat: month.monatNr
+        monat: month.monatNr,
+        singleMonth: true
       })}
       >
       <AlertCircle size={14} />
