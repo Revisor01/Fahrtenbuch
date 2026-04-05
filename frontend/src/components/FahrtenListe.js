@@ -632,8 +632,9 @@ function FahrtenListe() {
       <span className="text-sm text-label">Gesamt</span>
       <span className="font-medium text-value">
       {Object.entries(summary.erstattungen || {}).reduce((sum, [id, betrag]) => {
+        const statusEntries = Object.values(summary.abrechnungsStatus?.[id] || {});
         const isErhalten = isZeitraum
-          ? Object.values(summary.abrechnungsStatus?.[id] || {}).every(s => s?.erhalten_am)
+          ? statusEntries.length > 0 && statusEntries.every(s => s?.erhalten_am)
           : summary.abrechnungsStatus?.[id]?.erhalten_am;
         return sum + (isErhalten ? 0 : Number(betrag || 0));
       }, 0).toFixed(2)} €
