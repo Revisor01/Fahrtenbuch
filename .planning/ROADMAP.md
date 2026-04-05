@@ -321,8 +321,9 @@ Plans:
   2. Status-Setzen im Zeitraum-Modus setzt alle Monate gleichzeitig (gewolltes Verhalten bleibt erhalten)
   3. Export im Zeitraum-Modus enthaelt nur offene Monate — eingereichte/erhaltene werden ausgefiltert
   4. Export-Button ist ausgeblendet wenn alle Monate im Zeitraum bereits eingereicht/erhalten sind
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 1 plan
+Plans:
+- [ ] 28-01-PLAN.md — Zeitraum-Status-Chips und Export-Filter fuer offene Monate
 
 ## Progress
 
@@ -355,4 +356,4 @@ Plans:
 | 25. Einstellungen Konsistenz | v2.1 | 1/1 | Complete | 2026-04-04 |
 | 26. Navigation Check | v2.1 | 1/1 | Complete | 2026-04-04 |
 | 27. Backend-API & UI-Konsistenz | v2.2 | 2/2 | Complete    | 2026-04-05 |
-| 28. Zeitraum-Status Frontend & Export-Filter | v2.2 | 0/0 | Not started | - |
+| 28. Zeitraum-Status Frontend & Export-Filter | v2.2 | 0/1 | Planning done | - |
