@@ -533,6 +533,8 @@ function AppProvider({ children }) {
     )}
     traegerId={abrechnungsStatusModal.traegerId}
     aktion={abrechnungsStatusModal.aktion}
+    monat={abrechnungsStatusModal.monat}
+    jahr={abrechnungsStatusModal.jahr}
     />
 
     <Modal

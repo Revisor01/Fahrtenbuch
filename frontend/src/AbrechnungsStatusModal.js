@@ -3,7 +3,7 @@ import Modal from './Modal';
 import './index.css';
 import { AppContext } from './contexts/AppContext';
 
-function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }) {
+function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion, monat, jahr }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
@@ -21,13 +21,19 @@ function AbrechnungsStatusModal({ isOpen, onClose, onSubmit, traegerId, aktion }
   ? 'Mitfahrer:innen' 
   : abrechnungstraeger.find(t => t.id === parseInt(traegerId))?.name || 'Unbekannt';
   
+  // Monatsname für kontextuelle Anzeige
+  const monatName = monat && jahr
+    ? new Date(parseInt(jahr), parseInt(monat) - 1).toLocaleString('de-DE', { month: 'long', year: 'numeric' })
+    : null;
+
   // Text je nach Aktion
   const getActionText = () => {
+    const zeitraum = monatName ? ` für ${monatName}` : '';
     if (aktion === 'eingereicht') {
-      return `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${displayName} eingereicht wurden.`;
+      return `Wann wurden die Fahrtkosten${zeitraum} bei ${displayName} eingereicht?`;
     }
     if (aktion === 'erhalten') {
-      return `Wählen Sie das Datum aus, an dem die Fahrtkosten für ${displayName} erhalten wurden.`;
+      return `Wann haben Sie das Geld${zeitraum} von ${displayName} erhalten?`;
     }
     return 'Wählen Sie das entsprechende Datum aus.';
   };
