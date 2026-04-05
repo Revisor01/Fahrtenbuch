@@ -182,7 +182,7 @@ function ErstattungssaetzeForm() {
     return (
         <div className="space-y-6">
         {/* Form Card */}
-        <div className="card-container-highlight">
+        <div className="card-container">
         <h3 className="text-lg font-medium text-value mb-4">Neuen Erstattungssatz hinzufügen</h3>
         <p className="text-sm text-muted mb-6">
         Legen Sie hier neue Erstattungssätze fest. Diese können zeitlich begrenzt sein und 

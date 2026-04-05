@@ -207,7 +207,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
   };
   
   return (
-    <div className={editData ? '' : 'card-container-highlight'}>
+    <div className={editData ? '' : 'card-container'}>
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Basis-Informationen */}
     <div className="form-row">

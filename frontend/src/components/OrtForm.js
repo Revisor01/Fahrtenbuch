@@ -28,7 +28,7 @@ function OrtForm() {
   
   return (
     <div className="space-y-6">
-    <div className="card-container-highlight">
+    <div className="card-container">
     <h3 className="text-lg font-medium text-value mb-4">Ort hinzufügen</h3>
     <p className="text-sm text-muted mb-6">
     Hier können Sie neue Orte für Ihre Fahrten anlegen. Für die Struktur der Orteauswahl ist es Hilfreich den Orten Label zuzuordnen: Dienstort, Heimatort, Kirchspiel. Diese werden im Auswahlfeld weiter oben angezeigt.

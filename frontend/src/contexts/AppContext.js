@@ -539,7 +539,7 @@ function AppProvider({ children }) {
     onClose={() => setAbrechnungsStatusModal({})}
     title="Status zurücksetzen"
     >
-    <div className="card-container-highlight">
+    <div className="card-container">
     <p className="text-value text-sm mb-6">
     Möchten Sie den Status wirklich zurücksetzen?
     </p>

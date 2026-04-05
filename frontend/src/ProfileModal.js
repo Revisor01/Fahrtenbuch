@@ -212,7 +212,7 @@ function ProfileModal({ isOpen, onClose }) {
         <div className="flex-1">
         {activeTab === 'profile' && (
             <div className="space-y-4">
-            <div className="card-container-highlight">
+            <div className="card-container">
             <h3 className="text-lg font-medium text-value mb-4">Persönliche Daten</h3>
             <p className="text-sm text-muted mb-6">
             Ihre persönlichen Daten werden für die Abrechnungen benötigt. 
@@ -340,7 +340,7 @@ function ProfileModal({ isOpen, onClose }) {
         {activeTab === 'favoriten' && (
             <div className="space-y-6">
             {/* Formular zum Hinzufügen */}
-            <div className="card-container-highlight">
+            <div className="card-container">
             <h3 className="text-lg font-medium text-value mb-4">Neuen Favoriten anlegen</h3>
             <p className="text-sm text-muted mb-6">
             Speichern Sie häufig gefahrene Strecken als Favoriten, um sie später mit einem Klick zu wiederholen.
@@ -488,7 +488,7 @@ function ProfileModal({ isOpen, onClose }) {
         
         {activeTab === 'security' && (
             <div className="space-y-6">
-            <div className="card-container-highlight">
+            <div className="card-container">
             <h3 className="text-lg font-medium text-value mb-4">Passwort ändern</h3>
             <p className="text-sm text-muted mb-6">
             Aus Sicherheitsgründen sollten Sie Ihr Passwort regelmäßig ändern. 
@@ -564,7 +564,7 @@ function ProfileModal({ isOpen, onClose }) {
         {activeTab === 'api' && (
             <div className="space-y-6">
             {/* Form Card */}
-            <div className="card-container-highlight">
+            <div className="card-container">
             <h3 className="text-lg font-medium text-value mb-4">API Key erstellen</h3>
             <p className="text-sm text-muted mb-6">
             Mit API Keys können Sie Ihre Fahrten über externe Anwendungen oder Kurzbefehle verwalten.

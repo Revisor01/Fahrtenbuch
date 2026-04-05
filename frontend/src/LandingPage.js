@@ -49,7 +49,7 @@ const VideoCard = ({ title, description, thumbnail, videoUrl, duration }) => {
     }, []);
 
     return (
-        <div className="card-container-highlight flex flex-col h-full rounded-lg" ref={cardRef}>
+        <div className="card-container flex flex-col h-full rounded-lg" ref={cardRef}>
             <div className="relative">
                 {!isPlaying ? (
                     <>
@@ -217,7 +217,7 @@ export default function LandingPage() {
       </section>
                 {/* Video Tutorials */}
                 <section id="videos">
-                    <div className="card-container-highlight mb-6">
+                    <div className="card-container mb-6">
                     <h2 className="text-xl font-bold text-value mb-2">Video-Anleitungen</h2>
                     <p className="text-sm text-label">Schauen Sie sich unsere Anleitungsvideos an, um schnell loszulegen.</p>
                     </div>
@@ -241,7 +241,7 @@ export default function LandingPage() {
                 </section>
 
                 {/* Hilfe & Informationen (früher FAQ) */}
-                <section id="faq" className="card-container-highlight">
+                <section id="faq" className="card-container">
                     <h2 className="text-xl font-bold text-value mb-6">Hilfe & Informationen</h2>
                     <div className="space-y-6">
 
