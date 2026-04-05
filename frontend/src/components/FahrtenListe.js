@@ -21,8 +21,8 @@ const getCardBg = (hexColor) => {
   return { backgroundColor: `rgba(${r}, ${g}, ${b}, 0.08)` };
 };
 
-function FahrtenListe() {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus } = useContext(AppContext);
+function FahrtenListe({ initialFilter, onFilterApplied }) {
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus, monthlyData } = useContext(AppContext);
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -34,6 +34,30 @@ function FahrtenListe() {
   useEffect(() => {
     fetchFahrten();
   }, [selectedMonth, selectedVonMonth]);
+
+  // Filter von Dashboard-Deeplink anwenden
+  useEffect(() => {
+    if (initialFilter?.von && initialFilter?.bis) {
+      setSelectedVonMonth(initialFilter.von);
+      setSelectedMonth(initialFilter.bis);
+      setSelectedYear(initialFilter.bis.split('-')[0]);
+      if (onFilterApplied) onFilterApplied();
+    }
+  }, [initialFilter]);
+
+  // Offene Monate berechnen für Schnellfilter-Button
+  const offenerZeitraum = useMemo(() => {
+    const offeneMonate = monthlyData
+      .filter(md => !Object.entries(md.erstattungen || {}).every(([id]) => {
+        const status = md.abrechnungsStatus?.[id];
+        return status?.eingereicht_am || status?.erhalten_am;
+      }))
+      .map(md => md.yearMonth)
+      .sort();
+    return offeneMonate.length > 0
+      ? { von: offeneMonate[0], bis: offeneMonate[offeneMonate.length - 1] }
+      : null;
+  }, [monthlyData]);
 
   useEffect(() => {
     if (fahrten.length > 0) {
@@ -496,6 +520,16 @@ function FahrtenListe() {
       {(selectedMonth !== currentMonth || selectedVonMonth) && (
         <button onClick={resetToCurrentMonth} className="btn-secondary shrink-0">
         Aktueller Monat
+        </button>
+      )}
+      {offenerZeitraum && (
+        <button onClick={() => {
+          setSelectedVonMonth(offenerZeitraum.von);
+          setSelectedMonth(offenerZeitraum.bis);
+          setSelectedYear(offenerZeitraum.bis.split('-')[0]);
+        }} className="btn-primary shrink-0 flex items-center gap-1.5">
+        <AlertCircle size={14} />
+        Offene anzeigen
         </button>
       )}
       </div>
