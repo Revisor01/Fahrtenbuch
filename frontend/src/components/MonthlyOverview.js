@@ -411,7 +411,7 @@ function MonthlyOverview() {
         </div>
         {data.original !== data.ausstehend && (
           <div className="text-right text-muted text-xs">
-          Ursprünglich: {(data.original || 0).toFixed(2)} €
+          Gesamt: {(data.original || 0).toFixed(2)} €
           </div>
         )}
         </div>
@@ -429,7 +429,7 @@ function MonthlyOverview() {
       </div>
       {yearTotal.gesamt?.original !== yearTotal.gesamt?.ausstehend && (
         <div className="text-right text-muted text-xs">
-        Ursprünglich: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
+        Gesamt: {(yearTotal.gesamt?.original || 0).toFixed(2)} €
         </div>
       )}
       </div>
@@ -463,7 +463,7 @@ function MonthlyOverview() {
         </div>
         {gesamtAusstehend !== originalGesamt && (
           <div className="text-xs text-muted">
-          Ursprünglich: {originalGesamt.toFixed(2)} €
+          Gesamt: {originalGesamt.toFixed(2)} €
           </div>
         )}
         </div>

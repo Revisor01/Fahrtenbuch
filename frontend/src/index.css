@@ -180,27 +180,31 @@ code {
 
   /* Status Badges */
   .status-badge {
-    @apply inline-flex items-center gap-2
-           px-2 py-0.5 rounded-full 
-           text-xs font-medium;
+    @apply inline-flex items-center gap-1.5
+           px-2.5 py-1 rounded-full
+           text-xs font-medium
+           border transition-colors;
   }
 
   .status-badge-primary {
     @apply status-badge
-           bg-primary-100 dark:bg-primary-900
-           text-primary-700 dark:text-primary-300;
+           bg-emerald-50 dark:bg-emerald-900/30
+           text-emerald-700 dark:text-emerald-300
+           border-emerald-200 dark:border-emerald-800;
   }
 
   .status-badge-secondary {
     @apply status-badge
-           bg-secondary-100 dark:bg-secondary-900
-           text-secondary-700 dark:text-secondary-300;
+           bg-gray-50 dark:bg-gray-800
+           text-gray-600 dark:text-gray-400
+           border-gray-200 dark:border-gray-700;
   }
 
   .status-badge-warning {
     @apply status-badge
-           bg-amber-100 dark:bg-amber-900
-           text-amber-700 dark:text-amber-300;
+           bg-amber-50 dark:bg-amber-900/30
+           text-amber-700 dark:text-amber-300
+           border-amber-200 dark:border-amber-800;
   }
 
   /* Text Styles */
