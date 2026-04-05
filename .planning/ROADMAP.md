@@ -9,6 +9,7 @@
 - ✅ **v1.4 UX Polish & Navigation** - Phases 13-14 (shipped 2026-03-28)
 - ✅ **v2.0 Design Makeover** - Phases 15-21 (shipped 2026-04-03)
 - ✅ **v2.1 UI-Konsistenz & View-Architektur** - Phases 22-26 (shipped 2026-04-04)
+- 🚧 **v2.2 Erstattungs-Zeitraum & Konsistenz** - Phases 27-28
 
 ## Phases
 
@@ -291,6 +292,35 @@ Plans:
 
 </details>
 
+### 🚧 v2.2 Erstattungs-Zeitraum & Konsistenz
+
+**Milestone Goal:** Im Zeitraum-Modus pro Monat differenzierten Abrechnungsstatus anzeigen, Export nur fuer offene Monate, FahrtenListe visuell abrunden.
+
+#### Phase 27: Backend-API & UI-Konsistenz
+**Goal**: Backend liefert pro-Monat-Status und FahrtenListe Erstattungs-Cards sind visuell konsistent mit v2.1 Design-Patterns
+**Depends on**: Phase 26 (v2.1 abgeschlossen)
+**Requirements**: ZS-01, UI-01, UI-02, UI-03, UI-04
+**Success Criteria** (what must be TRUE):
+  1. API-Endpunkt fuer Zeitraum-Abfragen liefert Status pro Monat als strukturiertes Objekt (z.B. `{2026-01: "eingereicht", 2026-02: "offen"}`) statt eines aggregierten Status
+  2. Erstattungs-Cards in der FahrtenListe nutzen Traeger-Farben ueber kpi-card/getCardBg Pattern
+  3. Status-Chips (eingereicht/nicht eingereicht) sind als klar unterscheidbare Badges erkennbar
+  4. Kein hellblauer card-container-highlight Hintergrund mehr sichtbar — ueberall card-container
+  5. Erstattungs-Bereich Layout folgt v2.1 Patterns (section-header, spacing)
+**Plans**: TBD
+**UI hint**: yes
+
+#### Phase 28: Zeitraum-Status Frontend & Export-Filter
+**Goal**: Nutzer sehen im Zeitraum-Modus den Status pro Monat aufgeschluesselt und koennen nur offene Monate exportieren
+**Depends on**: Phase 27
+**Requirements**: ZS-02, ZS-03, EX-01, EX-02
+**Success Criteria** (what must be TRUE):
+  1. Zeitraum-Ansicht zeigt pro Monat einen Status-Chip (z.B. "Jan: eingereicht", "Feb: offen")
+  2. Status-Setzen im Zeitraum-Modus setzt alle Monate gleichzeitig (gewolltes Verhalten bleibt erhalten)
+  3. Export im Zeitraum-Modus enthaelt nur offene Monate — eingereichte/erhaltene werden ausgefiltert
+  4. Export-Button ist ausgeblendet wenn alle Monate im Zeitraum bereits eingereicht/erhalten sind
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -316,8 +346,10 @@ Plans:
 | 19. Dashboard & Listen Feinschliff | v2.0 | 3/3 | Complete | 2026-04-02 |
 | 20. Dashboard KPIs, Fahrten-Layout & Excel-Export | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 21. Monatsuebersicht Polish | v2.0 | 3/3 | Complete | 2026-04-03 |
-| 22. Globale Patterns | v2.1 | 1/2 | Complete    | 2026-04-04 |
-| 23. FahrtenListe Polish | v2.1 | 0/1 | Complete    | 2026-04-04 |
-| 24. Monatsuebersicht Refactor | v2.1 | 0/? | Complete    | 2026-04-04 |
-| 25. Einstellungen Konsistenz | v2.1 | 0/1 | Complete    | 2026-04-04 |
-| 26. Navigation Check | v2.1 | 0/? | Complete    | 2026-04-04 |
+| 22. Globale Patterns | v2.1 | 2/2 | Complete | 2026-04-04 |
+| 23. FahrtenListe Polish | v2.1 | 1/1 | Complete | 2026-04-04 |
+| 24. Monatsuebersicht Refactor | v2.1 | 2/2 | Complete | 2026-04-04 |
+| 25. Einstellungen Konsistenz | v2.1 | 1/1 | Complete | 2026-04-04 |
+| 26. Navigation Check | v2.1 | 1/1 | Complete | 2026-04-04 |
+| 27. Backend-API & UI-Konsistenz | v2.2 | 0/0 | Not started | - |
+| 28. Zeitraum-Status Frontend & Export-Filter | v2.2 | 0/0 | Not started | - |

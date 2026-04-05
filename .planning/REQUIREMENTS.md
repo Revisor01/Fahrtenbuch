@@ -35,20 +35,20 @@
 
 | REQ-ID | Phase | Plan | Status |
 |--------|-------|------|--------|
-| ZS-01 | - | - | Open |
-| ZS-02 | - | - | Open |
-| ZS-03 | - | - | Open |
-| EX-01 | - | - | Open |
-| EX-02 | - | - | Open |
-| UI-01 | - | - | Open |
-| UI-02 | - | - | Open |
-| UI-03 | - | - | Open |
-| UI-04 | - | - | Open |
+| ZS-01 | 27 | - | Open |
+| ZS-02 | 28 | - | Open |
+| ZS-03 | 28 | - | Open |
+| EX-01 | 28 | - | Open |
+| EX-02 | 28 | - | Open |
+| UI-01 | 27 | - | Open |
+| UI-02 | 27 | - | Open |
+| UI-03 | 27 | - | Open |
+| UI-04 | 27 | - | Open |
 
 **Coverage:**
 - v2.2 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-05*
