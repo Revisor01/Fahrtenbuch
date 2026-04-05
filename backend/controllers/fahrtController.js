@@ -282,50 +282,23 @@ exports.getReportRange = async (req, res) => {
     // Hole Fahrten über den gesamten Zeitraum
     const fahrten = await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId);
 
-    // Sammle abrechnungsStatus für jeden Monat im Zeitraum
-    // Bei Zeiträumen: nur Status anzeigen wenn ALLE Monate denselben Status haben
-    // Sonst: Status entfernen (= nicht eingereicht), damit kein falscher Status angezeigt wird
+    // Pro-Monat-Status: { traegerId: { "2026-01": { eingereicht_am, erhalten_am }, ... } }
     const abrechnungsStatus = {};
-    const statusPerMonth = [];
     let y = startYear;
     let m = startMonth;
     while (y < endYear || (y === endYear && m <= endMonth)) {
+      const monthKey = `${y}-${String(m).padStart(2, '0')}`;
       const status = await Abrechnung.getStatus(userId, y, m);
       if (status && typeof status === 'object') {
-        statusPerMonth.push(status);
-      } else {
-        statusPerMonth.push({});
+        for (const [traegerId, statusData] of Object.entries(status)) {
+          if (!abrechnungsStatus[traegerId]) {
+            abrechnungsStatus[traegerId] = {};
+          }
+          abrechnungsStatus[traegerId][monthKey] = statusData;
+        }
       }
       m++;
       if (m > 12) { m = 1; y++; }
-    }
-
-    // Für Einzelmonat: direkt übernehmen
-    if (statusPerMonth.length === 1) {
-      Object.assign(abrechnungsStatus, statusPerMonth[0]);
-    } else {
-      // Für Zeiträume: pro Träger nur Status übernehmen wenn ALLE Monate konsistent sind
-      const allTraegerIds = new Set();
-      statusPerMonth.forEach(s => Object.keys(s).forEach(k => allTraegerIds.add(k)));
-
-      for (const traegerId of allTraegerIds) {
-        const statuses = statusPerMonth.map(s => s[traegerId]);
-        const allEingereicht = statuses.every(s => s?.eingereicht_am);
-        const allErhalten = statuses.every(s => s?.erhalten_am);
-
-        if (allErhalten) {
-          // Alle Monate erhalten — frühestes Datum anzeigen
-          abrechnungsStatus[traegerId] = statuses.reduce((earliest, s) =>
-            !earliest || new Date(s.erhalten_am) < new Date(earliest.erhalten_am) ? s : earliest
-          );
-        } else if (allEingereicht) {
-          // Alle Monate eingereicht — frühestes Datum anzeigen
-          abrechnungsStatus[traegerId] = statuses.reduce((earliest, s) =>
-            !earliest || new Date(s.eingereicht_am) < new Date(earliest.eingereicht_am) ? s : earliest
-          );
-        }
-        // Sonst: kein Status = "Nicht eingereicht" (korrekt, weil nicht alle Monate gleich)
-      }
     }
 
     // Füge Mitfahrer-Daten hinzu
