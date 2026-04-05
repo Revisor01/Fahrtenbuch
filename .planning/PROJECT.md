@@ -59,24 +59,28 @@ Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden — mi
 - ✓ Statistik-Chart-Animation wiederhergestellt — v2.0 Phase 19
 - ✓ Button-Farbschema konsistent (dunkelblau/hellblau/rot) — v2.0 Phase 19
 
+- ✓ Globale Pattern-Bereinigung: btn-Hoehen, Card-Backgrounds, Design-Tokens — v2.1
+- ✓ FahrtenListe auf Dashboard-Niveau bringen — v2.1
+- ✓ Monatsuebersicht umbenannt zu Abrechnungen, Desktop/Mobile zusammengefuehrt — v2.1
+- ✓ Einstellungen: Form-Sections mit Icons, visuelle Konsistenz — v2.1
+- ✓ Navigation: Receipt Icon fuer Abrechnungen, konsistente Tab-Leiste — v2.1
+
 ### Active
 
-- [ ] Globale Pattern-Bereinigung: btn-Hoehen, Card-Backgrounds, Design-Tokens
-- [ ] FahrtenListe auf Dashboard-Niveau bringen
-- [ ] Monatsuebersicht ueberdenken (Naming, Desktop/Mobile zusammenfuehren)
-- [ ] Einstellungen: Form-Sections mit Icons, visuelle Konsistenz
-- [ ] Navigation pruefen: Tab-Namen, Aufteilung
+- [ ] Zeitraum-Erstattungen pro Monat differenziert anzeigen (Status-Chips pro Monat)
+- [ ] Export nur fuer offene (nicht eingereichte) Monate
+- [ ] FahrtenListe Erstattungs-Cards: Traeger-Farben, Status-Chips visuell
+- [ ] Backend: pro-Monat-Status-API fuer Zeitraeume
 
-## Current Milestone: v2.1 UI-Konsistenz & View-Architektur
+## Current Milestone: v2.2 Erstattungs-Zeitraum & Konsistenz
 
-**Goal:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation. Das Vorhandene konsequent zu Ende bringen.
+**Goal:** Im Zeitraum-Modus pro Monat differenzierten Abrechnungsstatus anzeigen, Export nur fuer offene Monate, FahrtenListe visuell abrunden.
 
 **Target features:**
-- Globale Pattern-Bereinigung (btn-Hoehen, Card-Backgrounds, Design-Tokens statt hardcoded Farben)
-- FahrtenListe auf Dashboard-Niveau (Section-Headers mit Icons, saubere Card-Struktur)
-- Monatsuebersicht ueberdenken (Naming, Desktop/Mobile-Doppelrendering zusammenfuehren, Section-Icons)
-- Einstellungen aufraeumen (Form-Sections mit Icons, visuelle Konsistenz in allen 8 Sub-Tabs)
-- Navigation pruefen (Tab-Namen, Aufteilung sinnvoll?)
+- Zeitraum-Ansicht: Status pro Monat aufgeschluesselt (z.B. "Jan: eingereicht, Feb: offen")
+- Backend liefert pro-Monat-Status statt aggregiertem Objekt
+- Export filtert eingereichte/erhaltene Monate raus
+- FahrtenListe Erstattungs-Cards: Traeger-Farben, Status-Chips, konsistentes Layout
 
 ### Out of Scope
 

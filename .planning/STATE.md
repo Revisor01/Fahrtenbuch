@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.1
-milestone_name: UI-Konsistenz & View-Architektur
-status: executing
-stopped_at: Phase 22 UI-SPEC approved
-last_updated: "2026-04-04T21:34:34.922Z"
-last_activity: 2026-04-04
+milestone: v2.2
+milestone_name: Erstattungs-Zeitraum & Konsistenz
+status: planning
+stopped_at: v2.2 Milestone gestartet — bereit fuer Requirements
+last_updated: "2026-04-05T08:00:00.000Z"
+last_activity: 2026-04-05
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 6
-  completed_plans: 7
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,47 +18,36 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-04)
+See: .planning/PROJECT.md (updated 2026-04-05)
 
-**Core value:** Alle Views auf Dashboard-Niveau — einheitliche Patterns, saubere Struktur, sinnvolle Navigation
-**Current focus:** Phase 26 — navigation-check
+**Core value:** Der Excel-Export muss das offizielle Abrechnungsformular korrekt abbilden
+**Current focus:** v2.2 Requirements definieren
 
 ## Current Position
 
-Phase: 26
-Plan: Not started
-Status: Executing Phase 26
-Last activity: 2026-04-04
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-05 — Milestone v2.2 gestartet
 
 Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
-**Velocity (v1.0-v2.0):**
+**Velocity (v1.0-v2.1):**
 
-- Total plans completed: 0 (v2.1)
 - Prior milestones: ~2min/plan average
 - Trend: Stable
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| - | - | - | - |
-
-*Updated after each plan completion*
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- [v2.0]: Design-Tokens (bg-card, shadow-card, border-card) als CSS-Fundament
-- [v2.0]: Card-basiertes Layout fuer alle Views
-- [v2.0]: Farbe-Feld pro Abrechnungstraeger (konfigurierbar)
-- [Phase 21]: Emerald/Blue/Amber Farbschema fuer Status-Badges
+- [v2.1]: CSS-Klassen statt React-Komponenten fuer KPI-Card und Section-Header
+- [v2.1]: "Abrechnungen" statt "Monatsuebersicht" als Tab-Name
+- [v2.1]: Receipt Icon fuer Abrechnungen Tab
+- [v2.2]: Zeitraum-Status "fuer alle Monate setzen" ist gewollt
+- [v2.2]: Export soll eingereichte Monate rausfiltern
 
 ### Pending Todos
 
@@ -70,6 +59,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T20:07:21.341Z
-Stopped at: Phase 22 UI-SPEC approved
-Resume file: .planning/phases/22-globale-patterns/22-UI-SPEC.md
+Last session: 2026-04-05
+Stopped at: v2.2 Milestone gestartet, bereit fuer Requirements
+Resume file: None
