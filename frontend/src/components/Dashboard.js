@@ -59,20 +59,27 @@ function Dashboard({ onNavigate }) {
   }, [fahrten, currentYearMonth]);
 
   // KPI: Offene Fahrten (deren Träger noch nicht eingereicht/erhalten ist) über alle Monate
-  const offeneFahrten = useMemo(() => {
+  const { offeneFahrten, offenerZeitraum } = useMemo(() => {
     let count = 0;
+    const offeneMonate = [];
     monthlyData.forEach(md => {
       const monthFahrten = md.fahrtenCount || 0;
-      // Prüfe ob ALLE Träger in diesem Monat eingereicht/erhalten sind
       const allTraegerDone = Object.entries(md.erstattungen || {}).every(([id]) => {
         const status = md.abrechnungsStatus?.[id];
         return status?.eingereicht_am || status?.erhalten_am;
       });
       if (!allTraegerDone) {
         count += monthFahrten;
+        offeneMonate.push(md.yearMonth);
       }
     });
-    return count;
+    const sorted = offeneMonate.sort();
+    return {
+      offeneFahrten: count,
+      offenerZeitraum: sorted.length > 0
+        ? { von: sorted[0], bis: sorted[sorted.length - 1] }
+        : null
+    };
   }, [monthlyData]);
 
   // Last 3 trips sorted by date descending, then by id descending
@@ -252,9 +259,9 @@ function Dashboard({ onNavigate }) {
           </div>
         </div>
 
-        {/* Export-Schnellzugriff als prominente 4. Card */}
+        {/* Offene Fahrten — klickbar, springt zur Fahrten-Seite mit offenem Zeitraum */}
         <button
-          onClick={() => onNavigate && onNavigate('fahrten')}
+          onClick={() => onNavigate && onNavigate(offenerZeitraum ? `fahrten:offene:${offenerZeitraum.von}:${offenerZeitraum.bis}` : 'fahrten')}
           className="kpi-card kpi-card-primary border-2 border-primary-300 dark:border-primary-600 hover:shadow-card-hover hover:border-primary-400 dark:hover:border-primary-500 transition-all text-left"
         >
           <div className="flex items-center justify-between gap-2">
