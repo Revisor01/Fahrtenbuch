@@ -262,9 +262,8 @@ function MonthlyOverview() {
     // Wenn erhalten
     if (status?.erhalten_am) {
       return (
-        <div className="flex items-center justify-between">
         <span
-        className="status-badge-primary cursor-pointer min-h-[44px] flex items-center"
+        className="status-badge-primary cursor-pointer"
         onClick={() => {
           showNotification(
             "Status zurücksetzen",
@@ -275,23 +274,21 @@ function MonthlyOverview() {
               traegerId,
               'reset'
             ),
-            true // showCancel
+            true
           );
         }}
         >
         <CheckCircle2 size={14} />
         <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
         </span>
-        </div>
       );
     }
 
     // Wenn eingereicht aber nicht erhalten
     if (status?.eingereicht_am) {
       return (
-        <div className="flex items-center justify-between">
         <span
-        className="status-badge-info cursor-pointer min-h-[44px] flex items-center"
+        className="status-badge-warning cursor-pointer"
         onClick={() => setAbrechnungsStatusModal({
           open: true,
           traegerId,
@@ -303,15 +300,13 @@ function MonthlyOverview() {
         <Circle size={14} />
         <span>Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}</span>
         </span>
-        </div>
       );
     }
 
     // Wenn noch nicht eingereicht
     return betrag > 0 ? (
-      <div className="flex items-center justify-between">
       <span
-      className="status-badge-warning cursor-pointer min-h-[44px] flex items-center"
+      className="status-badge-secondary cursor-pointer"
       onClick={() => setAbrechnungsStatusModal({
         open: true,
         traegerId,
@@ -323,7 +318,6 @@ function MonthlyOverview() {
       <AlertCircle size={14} />
       <span>Nicht eingereicht</span>
       </span>
-      </div>
     ) : null;
   };
 
