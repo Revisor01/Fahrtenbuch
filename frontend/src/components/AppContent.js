@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { HelpCircle, Users, LogOut, Info, Bell, Home, Car, Receipt, MoreHorizontal } from 'lucide-react';
-import Settings from './Settings';
+import { Users, Home, Car, Receipt, MoreHorizontal } from 'lucide-react';
+import EinstellungenView from './einstellungen/EinstellungenView';
 import FahrtenListe from './FahrtenListe';
 import InfoModal from './InfoModal';
 import UserManagement from '../UserManagement';
-import ThemeToggle from '../ThemeToggle';
 import NewFeaturesModal from './NewFeaturesModal';
 import MonthlyOverview from './MonthlyOverview';
 import Dashboard from './Dashboard';
@@ -103,58 +101,6 @@ function AppContent() {
     setSettingsSubTab(null);
   };
 
-  // Sekundäraktionen (ehemals Header): Darstellung, Neuigkeiten, Info,
-  // Hilfe, Verwaltung (Admin), Abmelden — leben jetzt im „Mehr"-Bereich
-  const mehrAktionen = (
-    <div className="card-container mb-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <ThemeToggle />
-        <button
-          onClick={() => setShowNewFeaturesModal(true)}
-          className="table-action-button-secondary"
-          title="Neue Funktionen"
-          aria-label="Neue Funktionen"
-        >
-          <Bell size={18} />
-        </button>
-        <button
-          onClick={() => setShowInfoModal(true)}
-          className="table-action-button-secondary"
-          title="Info"
-          aria-label="Info"
-        >
-          <Info size={18} />
-        </button>
-        <Link
-          to="/help"
-          className="table-action-button-secondary"
-          title="Hilfe"
-          aria-label="Hilfe"
-        >
-          <HelpCircle size={18} />
-        </Link>
-        <div className="flex-1" />
-        {isAdmin && (
-          <button
-            onClick={() => setActiveTab('verwaltung')}
-            className="btn-secondary flex items-center gap-2"
-          >
-            <Users size={17} />
-            <span>Verwaltung</span>
-          </button>
-        )}
-        <button
-          onClick={logout}
-          className="btn-ghost flex items-center gap-2"
-          title="Abmelden"
-        >
-          <LogOut size={17} />
-          <span>Abmelden</span>
-        </button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="app-shell">
       {/* Sidebar (≥768px) */}
@@ -224,10 +170,11 @@ function AppContent() {
             {activeTab === 'fahrten' && <FahrtenListe />}
             {activeTab === 'abrechnungen' && <MonthlyOverview />}
             {activeTab === 'einstellungen' && (
-              <>
-                {mehrAktionen}
-                <Settings initialTab={settingsSubTab} />
-              </>
+              <EinstellungenView
+                initialTab={settingsSubTab}
+                onShowInfo={() => setShowInfoModal(true)}
+                onShowNewFeatures={() => setShowNewFeaturesModal(true)}
+              />
             )}
             {activeTab === 'verwaltung' && <UserManagement />}
           </div>
