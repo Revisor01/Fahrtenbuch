@@ -9,6 +9,7 @@ import FahrtForm from '../FahrtForm';
 import ZeitraumSegmente from './fahrten/ZeitraumSegmente';
 import StatusUebersicht from './fahrten/StatusUebersicht';
 import FahrtKarte from './fahrten/FahrtKarte';
+import FahrtenTabelle from './fahrten/FahrtenTabelle';
 import ExportSheet from './fahrten/ExportSheet';
 import { statusFromAbrechnung } from '../utils/statusLabels';
 import { formatBetrag, rundeKilometer } from './fahrten/zeitraumUtils';
@@ -109,6 +110,17 @@ function FahrtenListe() {
     setEditingFahrt(fahrt);
   };
 
+  // „Wiederholen" (Desktop-Tabelle): Erfassungsflow mit Prefill,
+  // startet dank nachOrtId direkt in Schritt 2 — Datum heute
+  const handleWiederholen = (fahrt) => {
+    erfassung.open({
+      vonOrtId: fahrt.von_ort_id,
+      nachOrtId: fahrt.nach_ort_id,
+      anlass: fahrt.anlass || '',
+      abrechnung: fahrt.abrechnung,
+    });
+  };
+
   const monatLabel = (ym) => {
     const [y, m] = ym.split('-');
     return new Date(parseInt(y), parseInt(m) - 1).toLocaleString('de-DE', {
@@ -156,20 +168,32 @@ function FahrtenListe() {
           onAction={() => erfassung.open()}
         />
       ) : (
-        <div className="fl-cards">
-          {sortierteFahrten.map((fahrt) => (
-            <FahrtKarte
-              key={fahrt.id}
-              fahrt={fahrt}
-              status={statusFuer(fahrt)}
-              traegerName={traegerNameFuer(fahrt)}
-              istOffen={swipeOffenId === fahrt.id}
-              onOeffnen={setSwipeOffenId}
-              onEdit={() => handleEdit(fahrt)}
-              onDelete={() => handleDelete(fahrt)}
-            />
-          ))}
-        </div>
+        <>
+          {/* < 768px: Karten mit Swipe */}
+          <div className="fl-cards">
+            {sortierteFahrten.map((fahrt) => (
+              <FahrtKarte
+                key={fahrt.id}
+                fahrt={fahrt}
+                status={statusFuer(fahrt)}
+                traegerName={traegerNameFuer(fahrt)}
+                istOffen={swipeOffenId === fahrt.id}
+                onOeffnen={setSwipeOffenId}
+                onEdit={() => handleEdit(fahrt)}
+                onDelete={() => handleDelete(fahrt)}
+              />
+            ))}
+          </div>
+          {/* ≥ 768px: Tabelle nach dem Dashboard-Tabellen-Muster */}
+          <FahrtenTabelle
+            fahrten={sortierteFahrten}
+            statusFuer={statusFuer}
+            traegerNameFuer={traegerNameFuer}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onWiederholen={handleWiederholen}
+          />
+        </>
       )}
 
       <ExportSheet isOpen={exportOffen} onClose={() => setExportOffen(false)} />

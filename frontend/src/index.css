@@ -2651,6 +2651,12 @@ code {
   gap: 10px;
 }
 
+@media (min-width: 768px) {
+  .fl-cards {
+    display: none;
+  }
+}
+
 .fl-swipe {
   position: relative;
   overflow: hidden;
@@ -2825,4 +2831,147 @@ code {
 .fl-export-btns .btn-secondary,
 .fl-export-btns .btn-ghost {
   gap: 6px;
+}
+
+/* ---------- Fahrtenliste desktop (≥ 768px): Tabelle nach dem
+   Dashboard-Tabellen-Muster (Spec Screen 5) ---------- */
+.fl-tablecard {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .fl-tablecard {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+}
+
+.fl-tablescroll {
+  overflow-x: auto;
+}
+
+.fl-tablehead,
+.fl-tablerow {
+  display: grid;
+  grid-template-columns: 96px 1fr 140px 64px 90px 116px 148px;
+  min-width: 820px;
+  align-items: center;
+  padding: 8px 22px;
+}
+
+.fl-tablehead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.fl-tablerow {
+  padding: 13px 22px;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 150ms ease;
+}
+
+.fl-tablerow:hover {
+  background: var(--surface-2);
+}
+
+.fl-tablerow:last-child {
+  border-bottom: none;
+}
+
+.fl-th-num {
+  text-align: right;
+}
+
+.fl-td-datum {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.fl-td-haupt {
+  min-width: 0;
+  padding-right: 12px;
+}
+
+.fl-td-anlass {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-td-route {
+  font-size: 13px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-td-traeger {
+  font-size: 13px;
+  color: var(--text-2);
+  padding-right: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-td-zahl {
+  font-size: 14px;
+  color: var(--text);
+  text-align: right;
+}
+
+.fl-td-status {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fl-td-aktionen {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Aktions-Icon-Buttons 36×36 (Spec: Tabellen-Aktionen in den
+   Einstellungen), Löschen in --danger */
+.fl-aktion-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.fl-aktion-btn:hover {
+  background: var(--surface-2);
+}
+
+.fl-aktion-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.fl-aktion-btn-danger {
+  color: var(--danger);
+}
+
+.fl-aktion-btn-danger:hover {
+  background: var(--danger-soft);
 }
