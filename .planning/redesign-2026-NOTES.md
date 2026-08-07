@@ -124,3 +124,11 @@ Jede Phase trägt hier Annahmen, Abweichungen und offene Fragen ein.
 - **Anmeldung:** Login/Registrierung/Passwort-vergessen als ein Screen mit Kartentausch im Auth-Layout (statt zwei Modals) — Titelzeile wechselt mit („Anmelden"/„Registrieren"/„Passwort zurücksetzen"), Untertitel = App-Titel. `registrationCode` wird unverändert mitgesendet (serverseitige Prüfung aus dem Security-Fix). Login-Fehler als `toast.error` statt `alert()`.
 - **`/reset-password` rendert jetzt `SetPassword`** — die Komponente bediente beide Endpunkte schon selbst (Pfad-Weiche), `ResetPassword.js` war ein Duplikat ohne Passwort-Checkliste und ist gelöscht. VerifyEmail ins Auth-Layout nachgezogen.
 - **LandingPage (/help) nicht umgebaut:** nutzt weiterhin die primary-/secondary-Aliasse aus R1 und rendert ohne Brüche; vollständiger Feinschliff auf die neuen Klassen bleibt als offener Punkt.
+
+### Phase R8 (Verifikation + Test-Deploy)
+
+- **Deployed auf Testumgebung** (fahrtenbuch.godsapp.de, Branch feature/v1.3-dashboard): Backend inkl. Security-Fixes (Migrationslauf sauber, „Admin-Passwort bereits gesetzt — kein Reset" greift) + komplettes Redesign.
+- **Visuell verifiziert** (Playwright, Screenshots in .playwright-mcp/): Login, Dashboard desktop hell/dunkel, Fahrten desktop, Abrechnungs-Matrix, Dashboard mobil, Erfassungsflow Schritt 1+2 mobil. Dark Mode kippt korrekt (helles Petrol, dunkler on-brand-Text).
+- **Gefixt nach Verifikation:** DEFAULT_TITLE auf Login (config.js-Platzhalter, neuer Helper utils/appConfig.js), Nav-Label „Mehr" → „Einstellungen" (User-Feedback), column-gap in Dashboard-Tabelle.
+- **Server-Stolperstein:** docker-compose v1 auf server.godsapp.de scheitert beim Container-Recreate mit KeyError 'ContainerConfig' (bekannter v1-Bug mit neuen Image-Manifesten). Workaround: `docker rm -f` + `up -d`. → Empfehlung: Test-Stack auf docker compose v2 heben (offener Punkt).
+- **Nicht getestet:** Excel-/PDF-Export-Inhalte nach den Satz-/Dedup-Fixes mit Echtdaten (User sollte einen Monat exportieren und das Formular prüfen), Registrierungs-Gates end-to-end, Swipe-Gesten auf echtem Touch-Gerät.
