@@ -2,6 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
+import EmptyState from './ui/EmptyState';
 import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock, Users, Pencil, Trash2 } from 'lucide-react';
 
 const API_BASE_URL = '/api';
@@ -282,7 +283,13 @@ function Dashboard({ onNavigate }) {
           <h2>Favoriten</h2>
         </div>
         {favoriten.length === 0 ? (
-          <p className="text-sm text-muted">Keine Favoriten gespeichert.</p>
+          <EmptyState
+            icon={<Star size={20} />}
+            title="Noch keine Favoriten"
+            text="Lege häufige Strecken als Favorit an — ein Tipp genügt dann zum Erfassen."
+            actionLabel="Favorit anlegen"
+            onAction={() => onNavigate && onNavigate('einstellungen:favoriten')}
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {favoriten.map((fav) => (

@@ -830,6 +830,109 @@ code {
   }
 }
 
+/* ============================================================
+   Sheet: mobil Bottom-Sheet, ab 768px zentriertes Modal-Panel
+   ============================================================ */
+.sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(8, 32, 31, 0.42);
+}
+
+.sheet-panel {
+  position: relative;
+  width: 100%;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  background-color: var(--surface);
+  border-radius: 28px 28px 0 0;
+  padding: 12px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -8px 40px -12px rgba(8, 32, 31, 0.4);
+  animation: sheet-in 300ms ease;
+  outline: none;
+}
+
+.sheet-handle {
+  width: 44px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background-color: var(--line-strong);
+  margin: 0 auto 16px;
+}
+
+.sheet-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* prefers-reduced-motion: ohne Transform einblenden
+   (zusätzlich zur globalen Regel, die Animationen verkürzt) */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel {
+    animation: sheet-fade-in 0.01ms linear;
+  }
+}
+
+@keyframes sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 768px) {
+  .sheet-root {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .sheet-panel {
+    max-width: 480px;
+    border-radius: var(--r-card);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    animation: sheet-in-desktop 300ms ease;
+  }
+
+  .sheet-handle {
+    display: none;
+  }
+}
+
+@keyframes sheet-in-desktop {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Toast-Viewport: mobil 16px über der Bottom-Nav, Desktop unten rechts */
 .toast-viewport {
   position: fixed;
