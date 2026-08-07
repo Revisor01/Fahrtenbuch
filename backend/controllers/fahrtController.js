@@ -510,6 +510,10 @@ exports.addMitfahrer = async (req, res) => {
   try {
     const { fahrtId } = req.params;
     const { name, arbeitsstaette, richtung } = req.body;
+    const fahrt = await Fahrt.findById(fahrtId, req.user.id);
+    if (!fahrt) {
+      return res.status(404).json({ message: 'Fahrt nicht gefunden' });
+    }
     const mitfahrerId = await Mitfahrer.create(fahrtId, name, arbeitsstaette, richtung);
     res.status(201).json({ id: mitfahrerId, message: 'Mitfahrer erfolgreich hinzugefügt' });
   } catch (error) {
@@ -522,7 +526,11 @@ exports.updateMitfahrer = async (req, res) => {
   try {
     const { fahrtId, mitfahrerId } = req.params;
     const { name, arbeitsstaette, richtung } = req.body;
-    const updated = await Mitfahrer.update(mitfahrerId, name, arbeitsstaette, richtung);
+    const fahrt = await Fahrt.findById(fahrtId, req.user.id);
+    if (!fahrt) {
+      return res.status(404).json({ message: 'Fahrt nicht gefunden' });
+    }
+    const updated = await Mitfahrer.update(mitfahrerId, fahrtId, name, arbeitsstaette, richtung);
     if (updated) {
       res.status(200).json({ message: 'Mitfahrer erfolgreich aktualisiert' });
     } else {
@@ -537,7 +545,11 @@ exports.updateMitfahrer = async (req, res) => {
 exports.deleteMitfahrer = async (req, res) => {
   try {
     const { fahrtId, mitfahrerId } = req.params;
-    const deleted = await Mitfahrer.delete(mitfahrerId);
+    const fahrt = await Fahrt.findById(fahrtId, req.user.id);
+    if (!fahrt) {
+      return res.status(404).json({ message: 'Fahrt nicht gefunden' });
+    }
+    const deleted = await Mitfahrer.delete(mitfahrerId, fahrtId);
     if (deleted) {
       res.status(200).json({ message: 'Mitfahrer erfolgreich gelöscht' });
     } else {

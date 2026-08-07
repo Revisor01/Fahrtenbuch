@@ -17,16 +17,19 @@ class Mitfahrer {
     return rows;
   }
 
-  static async update(id, name, arbeitsstaette, richtung) {
+  static async update(id, fahrtId, name, arbeitsstaette, richtung) {
     const [result] = await db.execute(
-      'UPDATE mitfahrer SET name = ?, arbeitsstaette = ?, richtung = ? WHERE id = ?',
-      [name, arbeitsstaette, richtung, id]
+      'UPDATE mitfahrer SET name = ?, arbeitsstaette = ?, richtung = ? WHERE id = ? AND fahrt_id = ?',
+      [name, arbeitsstaette, richtung, id, fahrtId]
     );
     return result.affectedRows > 0;
   }
 
-  static async delete(id) {
-    const [result] = await db.execute('DELETE FROM mitfahrer WHERE id = ?', [id]);
+  static async delete(id, fahrtId) {
+    const [result] = await db.execute(
+      'DELETE FROM mitfahrer WHERE id = ? AND fahrt_id = ?',
+      [id, fahrtId]
+    );
     return result.affectedRows > 0;
   }
 
@@ -58,20 +61,23 @@ class Mitfahrer {
       // 3. Neue Mitfahrer identifizieren 
       const zuErstellen = neueMitfahrer.filter(neu => !neu.id);
       
-      // 4. Zu aktualisierende Mitfahrer
-      const zuAktualisieren = neueMitfahrer.filter(neu => neu.id);
-      
+      // 4. Zu aktualisierende Mitfahrer — nur IDs, die zu dieser Fahrt gehören
+      // (fremde/unbekannte IDs werden stillschweigend ignoriert)
+      const zuAktualisieren = neueMitfahrer.filter(neu =>
+        neu.id && aktuelle.some(alt => alt.id === neu.id)
+      );
+
       // 5. Änderungen durchführen
       await Promise.all([
         // Löschungen
-        ...zuLoeschen.map(m => 
+        ...zuLoeschen.map(m =>
           db.execute('DELETE FROM mitfahrer WHERE id = ?', [m.id])
         ),
-        // Updates  
+        // Updates (defensiv zusätzlich per fahrt_id gescopt)
         ...zuAktualisieren.map(m =>
           db.execute(
-            'UPDATE mitfahrer SET name = ?, arbeitsstaette = ?, richtung = ? WHERE id = ?',
-            [m.name, m.arbeitsstaette, m.richtung, m.id]
+            'UPDATE mitfahrer SET name = ?, arbeitsstaette = ?, richtung = ? WHERE id = ? AND fahrt_id = ?',
+            [m.name, m.arbeitsstaette, m.richtung, m.id, fahrtId]
           )
         ),
         // Neue Einträge
