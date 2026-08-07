@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
 const Fahrt = require('../models/Fahrt');
 const db = require('../config/database');
+const { getErstattungssatzFuerTraeger } = require('./erstattung');
 
 // -- Helper functions (shared logic with excelExport.js) --
 
@@ -200,7 +201,7 @@ function renderTableRow(doc, y, rowData, columns, rowHeight) {
   return y + rowHeight;
 }
 
-function renderFooter(doc, y, gesamtKm, erstattung) {
+function renderFooter(doc, y, gesamtKm, erstattung, satz) {
   const x = MARGIN.left;
   const today = formatDate(new Date().toISOString());
   const currentYear = new Date().getFullYear();
@@ -228,7 +229,7 @@ function renderFooter(doc, y, gesamtKm, erstattung) {
   doc.text(today, x + 45, y);
 
   doc.text('Abrechnung der oben aufgeführten gefahrenen km:', x + 230, y, { width: 300 });
-  doc.text(`${gesamtKm} km x 0,30 \u20AC =`, x + 530, y, { width: 100, align: 'right' });
+  doc.text(`${gesamtKm} km x ${satz.toFixed(2).replace('.', ',')} \u20AC =`, x + 530, y, { width: 100, align: 'right' });
   doc.font('Helvetica-Bold').fontSize(9);
   doc.text(`${erstattung.toFixed(2).replace('.', ',')} \u20AC`, x + 640, y, { width: 80, align: 'right' });
 
@@ -245,7 +246,7 @@ function renderFooter(doc, y, gesamtKm, erstattung) {
   doc.text(`Fahrtenbuch Stand ${currentYear}`, x + CONTENT_WIDTH - 120, y, { width: 120, align: 'right' });
 }
 
-function renderPage(doc, chunk, userProfile, zeitraumHeader, traegerInfo, gesamtKm, erstattung, isLastPage) {
+function renderPage(doc, chunk, userProfile, zeitraumHeader, traegerInfo, gesamtKm, erstattung, satz, isLastPage) {
   let y = renderHeader(doc, userProfile, zeitraumHeader, traegerInfo);
   y = renderTableHeader(doc, y, COLUMNS);
 
@@ -262,7 +263,7 @@ function renderPage(doc, chunk, userProfile, zeitraumHeader, traegerInfo, gesamt
   });
 
   if (isLastPage) {
-    renderFooter(doc, y, gesamtKm, erstattung);
+    renderFooter(doc, y, gesamtKm, erstattung, satz);
   }
 }
 
@@ -451,7 +452,10 @@ exports.exportToPdf = async (req, res) => {
       : traegerName;
 
     const gesamtKm = formattedData.reduce((sum, row) => sum + (typeof row.kilometer === 'number' ? row.kilometer : 0), 0);
-    const erstattung = gesamtKm * 0.30;
+    // Erstattungssatz zum Stichtag (letzter Tag des Exportmonats) aus der DB
+    const stichtag = new Date(parseInt(year), parseInt(correctedMonth), 0);
+    const satz = await getErstattungssatzFuerTraeger(type, userId, stichtag);
+    const erstattung = gesamtKm * satz;
 
     const chunks = chunkData(formattedData, MAX_ROWS);
 
@@ -462,7 +466,7 @@ exports.exportToPdf = async (req, res) => {
 
     chunks.forEach((chunk, i) => {
       if (i > 0) doc.addPage({ layout: 'landscape', size: 'A4', margin: 0 });
-      renderPage(doc, chunk, userProfile, zeitraumHeader, traegerInfo, gesamtKm, erstattung, i === chunks.length - 1);
+      renderPage(doc, chunk, userProfile, zeitraumHeader, traegerInfo, gesamtKm, erstattung, satz, i === chunks.length - 1);
     });
 
     doc.end();
@@ -532,7 +536,10 @@ exports.exportToPdfRange = async (req, res) => {
       : traegerName;
 
     const gesamtKm = formattedData.reduce((sum, row) => sum + (typeof row.kilometer === 'number' ? row.kilometer : 0), 0);
-    const erstattung = gesamtKm * 0.30;
+    // Erstattungssatz zum Stichtag (letzter Tag des Endmonats) aus der DB
+    const stichtag = new Date(parseInt(endYear), parseInt(endMonth), 0);
+    const satz = await getErstattungssatzFuerTraeger(type, userId, stichtag);
+    const erstattung = gesamtKm * satz;
 
     const chunks = chunkData(formattedData, MAX_ROWS);
 
@@ -543,7 +550,7 @@ exports.exportToPdfRange = async (req, res) => {
 
     chunks.forEach((chunk, i) => {
       if (i > 0) doc.addPage({ layout: 'landscape', size: 'A4', margin: 0 });
-      renderPage(doc, chunk, userProfile, zeitraumHeader, traegerInfo, gesamtKm, erstattung, i === chunks.length - 1);
+      renderPage(doc, chunk, userProfile, zeitraumHeader, traegerInfo, gesamtKm, erstattung, satz, i === chunks.length - 1);
     });
 
     doc.end();

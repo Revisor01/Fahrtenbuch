@@ -4,6 +4,7 @@ const JSZip = require('jszip');
 const Fahrt = require('../models/Fahrt');
 const Abrechnung = require('../models/Abrechnung');
 const db = require('../config/database');
+const { getErstattungssatzFuerTraeger } = require('./erstattung');
 
 async function getUserProfile(userId) {
  const [rows] = await db.execute(
@@ -73,7 +74,7 @@ function fillVorlageSheet(worksheet, year, kostentraeger, kostenstelle, userProf
  worksheet.getCell('C14').value = formatIBAN(userProfile.iban);
 }
 
-function fillQuartalSheet(worksheet, data, year) {
+function fillQuartalSheet(worksheet, data, year, satz) {
  // Update year
  worksheet.getCell('B2').value = parseInt(year);
 
@@ -95,9 +96,11 @@ function fillQuartalSheet(worksheet, data, year) {
  const gesamtKm = data.reduce((sum, row) => sum + (typeof row.kilometer === 'number' ? row.kilometer : 0), 0);
  worksheet.getCell('K37').value = gesamtKm;
 
- // Erstattungsberechnung in Zeile 40
+ // Erstattungsberechnung in Zeile 40 — Satz aus der DB (Template enthält
+ // statisch "km x 0,30 € =" in I40 und Formel H40*0.3 in J40, beides überschreiben)
  worksheet.getCell('H40').value = gesamtKm;
- worksheet.getCell('J40').value = Math.round(gesamtKm * 0.30 * 100) / 100;
+ worksheet.getCell('I40').value = `km x ${satz.toFixed(2).replace('.', ',')} € =`;
+ worksheet.getCell('J40').value = Math.round(gesamtKm * satz * 100) / 100;
 }
 
 function removeUnusedQuartalSheets(workbook, keepSheetName) {
@@ -234,6 +237,10 @@ exports.exportToExcel = async (req, res) => {
    const traegerName = abrechnungstraeger[0]?.name || '';
    const kostenstelle = abrechnungstraeger[0]?.kostenstelle;
 
+   // Erstattungssatz zum Stichtag (letzter Tag des Exportmonats) aus der DB
+   const stichtag = new Date(parseInt(year), parseInt(correctedMonth), 0);
+   const satz = await getErstattungssatzFuerTraeger(type, userId, stichtag);
+
    const workbooks = await Promise.all(chunkedData.map(async (chunk) => {
      const workbook = new ExcelJS.Workbook();
      await workbook.xlsx.readFile(templatePath);
@@ -250,7 +257,7 @@ exports.exportToExcel = async (req, res) => {
      if (quartalWorksheet) {
        // Set month name in D2
        quartalWorksheet.getCell('D2').value = getMonthName(parseInt(correctedMonth));
-       fillQuartalSheet(quartalWorksheet, chunk, year);
+       fillQuartalSheet(quartalWorksheet, chunk, year, satz);
      }
 
      return workbook;
@@ -421,6 +428,10 @@ exports.exportToExcelRange = async (req, res) => {
    const traegerName = abrechnungstraeger[0]?.name || '';
    const kostenstelle = abrechnungstraeger[0]?.kostenstelle;
 
+   // Erstattungssatz zum Stichtag (letzter Tag des Endmonats) aus der DB
+   const stichtag = new Date(parseInt(endYear), parseInt(endMonth), 0);
+   const satz = await getErstattungssatzFuerTraeger(type, userId, stichtag);
+
    const workbooks = await Promise.all(chunkedData.map(async (chunk) => {
      const workbook = new ExcelJS.Workbook();
      await workbook.xlsx.readFile(templatePath);
@@ -436,7 +447,7 @@ exports.exportToExcelRange = async (req, res) => {
      const quartalWorksheet = workbook.getWorksheet(quartalSheetName);
      if (quartalWorksheet) {
        quartalWorksheet.getCell('D2').value = zeitraumHeader;
-       fillQuartalSheet(quartalWorksheet, chunk, startYear);
+       fillQuartalSheet(quartalWorksheet, chunk, startYear, satz);
      }
 
      return workbook;
