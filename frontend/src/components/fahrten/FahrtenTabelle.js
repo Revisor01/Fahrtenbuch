@@ -66,7 +66,7 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onEdit, onDelete
                 <span className="num">{formatBetrag(fahrt.erstattung)} €</span>
                 {fahrt.mitfahrerErstattung > 0 && (
                   <div className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
-                    +{formatBetrag(fahrt.mitfahrerErstattung)} € MF
+                    +{formatBetrag(fahrt.mitfahrerErstattung)} € Mitfahrer
                   </div>
                 )}
               </div>
