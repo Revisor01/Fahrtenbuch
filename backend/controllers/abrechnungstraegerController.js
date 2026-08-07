@@ -31,12 +31,21 @@ exports.updateErstattungssatz = async (req, res) => {
     try {
         const { id, erstattungssatzId } = req.params;
         const { betrag, gueltig_ab } = req.body;
-        
+
         // Validierung der Eingabewerte
         if (betrag === undefined || betrag === null || isNaN(parseFloat(betrag))) {
             return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
         }
-        
+
+        // Ownership-Check: Träger muss dem eingeloggten User gehören
+        const [owned] = await db.execute(
+            'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            [id, req.user.id]
+        );
+        if (owned.length === 0) {
+            return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
+        }
+
         // Prüfen ob für das neue Datum bereits ein anderer Eintrag existiert
         if (gueltig_ab) {
             const [existing] = await db.execute(
@@ -89,14 +98,25 @@ exports.deleteErstattungssatz = async (req, res) => {
         await connection.beginTransaction();
         
         const { id, erstattungssatzId } = req.params;
-        
+
+        // Ownership-Check: Träger muss dem eingeloggten User gehören
+        const [owned] = await connection.execute(
+            'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            [id, req.user.id]
+        );
+        if (owned.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
+        }
+
         // Prüfen ob es der letzte Satz ist
         const [saetze] = await connection.execute(
             'SELECT COUNT(*) as count FROM erstattungsbetraege WHERE abrechnungstraeger_id = ?',
             [id]
         );
-        
+
         if (saetze[0].count <= 1) {
+            await connection.rollback();
             return res.status(400).json({ message: 'Der letzte Erstattungssatz kann nicht gelöscht werden' });
         }
         
@@ -118,13 +138,8 @@ exports.deleteErstattungssatz = async (req, res) => {
 
 exports.getErstattungshistorie = async (req, res) => {
     try {
-        const [rows] = await db.execute(`
-            SELECT id, betrag, gueltig_ab, created_at
-            FROM erstattungsbetraege
-            WHERE abrechnungstraeger_id = ?
-            ORDER BY gueltig_ab DESC, created_at DESC`,
-            [req.params.id]
-        );
+        // User-gescopte Model-Methode (JOIN auf user_id) statt ungescopter Query
+        const rows = await AbrechnungsTraeger.getErstattungshistorie(req.params.id, req.user.id);
         // Entferne Duplikate basierend auf gueltig_ab
         const uniqueRows = rows.reduce((acc, current) => {
             const x = acc.find(item => item.gueltig_ab === current.gueltig_ab);
@@ -241,7 +256,16 @@ exports.addErstattungssatz = async (req, res) => {
         if (betrag === undefined || betrag === null || isNaN(parseFloat(betrag))) {
             return res.status(400).json({ message: 'Betrag muss eine gültige Zahl sein' });
         }
-        
+
+        // Ownership-Check: Träger muss dem eingeloggten User gehören
+        const [owned] = await db.execute(
+            'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+            [id, req.user.id]
+        );
+        if (owned.length === 0) {
+            return res.status(404).json({ message: 'Abrechnungsträger nicht gefunden' });
+        }
+
         await db.execute(
             'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
             [id, parseFloat(betrag), gueltig_ab || new Date().toISOString().split('T')[0]]
