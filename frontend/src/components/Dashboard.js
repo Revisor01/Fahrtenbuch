@@ -86,6 +86,9 @@ function Dashboard({ onNavigate }) {
     user,
     executeFavorit,
     refreshAllData,
+    updateAbrechnungsStatus,
+    fetchMonthlyData,
+    fetchFahrten,
   } = useContext(AppContext);
   const toast = useToast();
   const erfassung = useErfassung();
@@ -132,38 +135,85 @@ function Dashboard({ onNavigate }) {
   // Effektiver Durchschnittssatz über alle Träger (Erstattung/km)
   const effSatz = bisher.km > 0 ? bisher.betrag / bisher.km : null;
 
-  // ---- „Unterwegs" (Desktop): ältester eingereichter, nicht erstatteter Monat
-  const unterwegs = useMemo(() => {
+  // ---- „Unterwegs" (Desktop): ALLE eingereichten, nicht erstatteten Monate —
+  // jeder mit Schnellaktion „erhalten" (User-Feedback 07.08.)
+  const unterwegsListe = useMemo(() => {
     const istUnterwegs = (md, id) => {
       const status = md.abrechnungsStatus?.[id];
       return status?.eingereicht_am && !status?.erhalten_am;
     };
-    const monate = monthlyData
+    return monthlyData
       .filter((md) =>
         Object.entries(md.erstattungen || {}).some(([id, b]) => b > 0 && istUnterwegs(md, id))
       )
-      .sort((a, b) => a.yearMonth.localeCompare(b.yearMonth));
-    if (monate.length === 0) return null;
-    const md = monate[0];
-    const eintraege = Object.entries(md.erstattungen || {}).filter(
-      ([id, b]) => b > 0 && istUnterwegs(md, id)
-    );
-    const fruehestes = eintraege
-      .map(([id]) => new Date(md.abrechnungsStatus[id].eingereicht_am))
-      .filter((d) => !Number.isNaN(d.getTime()))
-      .sort((a, b) => a - b)[0];
-    const tage = fruehestes
-      ? Math.max(0, Math.floor((Date.now() - fruehestes.getTime()) / 86400000))
-      : null;
-    return {
-      ym: md.yearMonth,
-      betrag: eintraege.reduce((sum, [, b]) => sum + Number(b || 0), 0),
-      tage,
-      traegerNamen: eintraege.map(([id]) => getTraegerName(id)).join(', '),
-      weitere: monate.length - 1,
-    };
+      .sort((a, b) => a.yearMonth.localeCompare(b.yearMonth))
+      .map((md) => {
+        const eintraege = Object.entries(md.erstattungen || {})
+          .filter(([id, b]) => b > 0 && istUnterwegs(md, id))
+          .map(([id]) => ({
+            key: id,
+            name: getTraegerName(id),
+            eingereicht_am: md.abrechnungsStatus[id].eingereicht_am,
+          }));
+        const fruehestes = eintraege
+          .map((e) => new Date(e.eingereicht_am))
+          .filter((d) => !Number.isNaN(d.getTime()))
+          .sort((a, b) => a - b)[0];
+        return {
+          ym: md.yearMonth,
+          betrag: eintraege.reduce(
+            (sum, e) => sum + Number(md.erstattungen[e.key] || 0),
+            0
+          ),
+          tage: fruehestes
+            ? Math.max(0, Math.floor((Date.now() - fruehestes.getTime()) / 86400000))
+            : null,
+          traegerNamen: eintraege.map((e) => e.name).join(', '),
+          eintraege,
+        };
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthlyData, abrechnungstraeger]);
+
+  // Schnellaktion: alle eingereichten Träger eines Monats als erstattet
+  // markieren — direkt mit Undo-Toast, ein Refresh (Muster aus useEinreichen)
+  const monatErhalten = async (u) => {
+    const [jahr, monat] = u.ym.split('-');
+    const heute = new Date().toISOString().split('T')[0];
+    const datumsTeil = (w) => (w ? String(w).slice(0, 10) : null);
+    try {
+      for (const e of u.eintraege) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateAbrechnungsStatus(jahr, monat, e.key, 'erhalten', heute, true, false);
+      }
+      await fetchMonthlyData();
+      await fetchFahrten();
+      toast.success(`${monatName(u.ym)} als erstattet markiert.`, {
+        undo: async () => {
+          try {
+            for (const e of u.eintraege) {
+              const alt = datumsTeil(e.eingereicht_am);
+              // eslint-disable-next-line no-await-in-loop
+              await updateAbrechnungsStatus(jahr, monat, e.key, 'reset', null, true, false);
+              if (alt) {
+                // eslint-disable-next-line no-await-in-loop
+                await updateAbrechnungsStatus(jahr, monat, e.key, 'eingereicht', alt, true, false);
+              }
+            }
+            await fetchMonthlyData();
+            await fetchFahrten();
+            toast.success('Rückgängig gemacht.');
+          } catch (error) {
+            console.error('Fehler beim Zurücknehmen:', error);
+            toast.error('Status konnte nicht zurückgesetzt werden.');
+          }
+        },
+      });
+    } catch (error) {
+      console.error('Fehler beim Markieren als erstattet:', error);
+      toast.error('Status konnte nicht aktualisiert werden.');
+    }
+  };
 
   // ---- Chart: die letzten 8 Monate, Farbe nach Monatsstatus ---------------
   const chart = useMemo(() => {
@@ -411,7 +461,7 @@ function Dashboard({ onNavigate }) {
 
   // Erfolgszustand: nichts fällig — aber eingereichte Monate, die noch auf
   // die Erstattung warten, werden ehrlich benannt (User-Feedback 07.08.)
-  const nUnterwegs = unterwegs ? unterwegs.weitere + 1 : 0;
+  const nUnterwegs = unterwegsListe.length;
   const heroErfolg = (
     <section
       className="dash-hero-ok"
@@ -432,6 +482,27 @@ function Dashboard({ onNavigate }) {
       </span>
     </section>
   );
+
+  // Favoriten-Kacheln — gemeinsam für mobil („Ein Tipp genügt") und Desktop
+  const favTiles = favoriten.map((fav) => {
+    const km = findDistanz(fav.von_ort_id, fav.nach_ort_id);
+    return (
+      <button
+        key={fav.id}
+        type="button"
+        className="dash-fav-tile"
+        onClick={() => handleFavorit(fav)}
+      >
+        <span className="dash-fav-ort">{fav.nach_ort_name}</span>
+        <span>
+          {fav.anlass && <span className="dash-fav-anlass">{fav.anlass}</span>}
+          <span className="dash-fav-km num">
+            {km !== null ? `${formatKm(km)} km · ` : ''}{traegerKuerzel(fav.traeger_name)}
+          </span>
+        </span>
+      </button>
+    );
+  });
 
   const favoritenLeer = (
     <div className="dash-block">
@@ -490,27 +561,7 @@ function Dashboard({ onNavigate }) {
           </button>
         </div>
         {favoriten.length === 0 ? favoritenLeer : (
-          <div className="dash-fav-grid">
-            {favoriten.map((fav) => {
-              const km = findDistanz(fav.von_ort_id, fav.nach_ort_id);
-              return (
-                <button
-                  key={fav.id}
-                  type="button"
-                  className="dash-fav-tile"
-                  onClick={() => handleFavorit(fav)}
-                >
-                  <span className="dash-fav-ort">{fav.nach_ort_name}</span>
-                  <span>
-                    {fav.anlass && <span className="dash-fav-anlass">{fav.anlass}</span>}
-                    <span className="dash-fav-km num">
-                      {km !== null ? `${formatKm(km)} km · ` : ''}{traegerKuerzel(fav.traeger_name)}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <div className="dash-fav-grid">{favTiles}</div>
         )}
 
         <div className="dash-label-row">
@@ -619,23 +670,33 @@ function Dashboard({ onNavigate }) {
             </section>
             <section className="dash-d-card">
               <div className="dash-label dash-d-card-label">Unterwegs</div>
-              {unterwegs ? (
-                <>
-                  <div className="dash-d-unterwegs-zeile">
-                    <span className="dash-d-unterwegs-dot" aria-hidden="true" />
-                    <span className="dash-d-unterwegs-text">{monatName(unterwegs.ym)} eingereicht</span>
-                    <span className="dash-d-unterwegs-betrag num">{formatEuro(unterwegs.betrag)} €</span>
+              {unterwegsListe.length > 0 ? (
+                unterwegsListe.map((u) => (
+                  <div key={u.ym} className="dash-uw-row">
+                    <div className="dash-uw-main">
+                      <div className="dash-d-unterwegs-zeile">
+                        <span className="dash-d-unterwegs-dot" aria-hidden="true" />
+                        <span className="dash-d-unterwegs-text">{monatName(u.ym)} eingereicht</span>
+                        <span className="dash-d-unterwegs-betrag num">{formatEuro(u.betrag)} €</span>
+                      </div>
+                      <div className="dash-d-unterwegs-sub">
+                        {u.tage !== null && (
+                          <>seit {u.tage} {u.tage === 1 ? 'Tag' : 'Tagen'} · </>
+                        )}
+                        {u.traegerNamen}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="dash-uw-btn"
+                      title={`${monatName(u.ym)} als erstattet markieren`}
+                      aria-label={`${monatName(u.ym)} als erstattet markieren`}
+                      onClick={() => monatErhalten(u)}
+                    >
+                      ✓
+                    </button>
                   </div>
-                  <div className="dash-d-unterwegs-sub">
-                    {unterwegs.tage !== null && (
-                      <>seit {unterwegs.tage} {unterwegs.tage === 1 ? 'Tag' : 'Tagen'} · </>
-                    )}
-                    {unterwegs.traegerNamen}
-                    {unterwegs.weitere > 0 && (
-                      <> · +{unterwegs.weitere} {unterwegs.weitere === 1 ? 'weiterer Monat' : 'weitere Monate'}</>
-                    )}
-                  </div>
-                </>
+                ))
               ) : (
                 <div className="dash-d-card-sub">
                   Kein eingereichter Monat wartet auf Erstattung.
@@ -644,6 +705,23 @@ function Dashboard({ onNavigate }) {
             </section>
           </div>
         </div>
+
+        {/* Favoriten auch auf dem Desktop (User-Feedback 07.08.) */}
+        {favoriten.length > 0 && (
+          <section className="dash-d-favsektion">
+            <div className="dash-label-row">
+              <span className="dash-label">Ein Tipp genügt</span>
+              <button
+                type="button"
+                className="dash-link"
+                onClick={() => onNavigate && onNavigate('einstellungen:favoriten')}
+              >
+                Alle
+              </button>
+            </div>
+            <div className="dash-fav-grid dash-fav-grid-desktop">{favTiles}</div>
+          </section>
+        )}
 
         <div className="dash-d-row">
           <section className="dash-d-tablecard">
@@ -660,7 +738,7 @@ function Dashboard({ onNavigate }) {
             <div className="dash-d-tablescroll">
               <div className="dash-d-tablehead">
                 <div>Datum</div>
-                <div>Anlass · Ziel</div>
+                <div>Anlass</div>
                 <div>Träger</div>
                 <div className="dash-d-th-num">km</div>
                 <div className="dash-d-th-num">Betrag</div>
@@ -677,7 +755,7 @@ function Dashboard({ onNavigate }) {
                       {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                     </div>
                     <div className="dash-d-td-anlass" title={`${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${zielName(fahrt)}`}>
-                      {fahrt.anlass || zielName(fahrt) || '—'}
+                      {fahrt.anlass || '—'}
                     </div>
                     <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
                     <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>

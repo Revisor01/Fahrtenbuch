@@ -960,17 +960,17 @@ code {
   width: 36px;
   height: 36px;
   flex-shrink: 0;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--r-btn);
-  background: var(--surface-2);
-  color: var(--text-2);
+  background: transparent;
+  color: var(--text-3);
   cursor: pointer;
   transition: background-color 150ms ease, color 150ms ease;
 }
 
 .sidebar-tool:hover {
-  background: var(--surface-3);
-  color: var(--text);
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .sidebar-tool:focus-visible {
@@ -1841,6 +1841,60 @@ code {
   margin-bottom: 22px;
 }
 
+/* Desktop-Favoriten: eine luftige Kachelreihe zwischen den Karten-Reihen */
+.dash-d-favsektion {
+  margin-bottom: 18px;
+}
+
+.dash-fav-grid-desktop {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  margin-bottom: 0;
+}
+
+/* „Unterwegs"-Zeilen mit Schnellaktion „erhalten" */
+.dash-uw-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.dash-uw-row + .dash-uw-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.dash-uw-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-uw-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ok-line);
+  border-radius: var(--r-btn);
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease;
+}
+
+.dash-uw-btn:hover {
+  filter: brightness(0.96);
+}
+
+.dash-uw-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
 .dash-fav-tile {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -2255,9 +2309,9 @@ code {
 .dash-d-tablehead,
 .dash-d-tablerow {
   display: grid;
-  grid-template-columns: 82px 1fr 132px 68px 78px 108px;
+  grid-template-columns: 66px 1fr 108px 52px 72px 106px;
   column-gap: 12px;
-  min-width: 560px;
+  min-width: 540px;
   padding: 8px 22px;
   align-items: center;
 }
@@ -2304,7 +2358,9 @@ code {
 
 .dash-d-td-traeger {
   font-size: 13px;
+  line-height: 1.3;
   color: var(--text-2);
+  overflow-wrap: break-word;
 }
 
 .dash-d-td-zahl {
@@ -4306,4 +4362,12 @@ code {
   font-size: 13px;
   color: var(--text-2);
   margin: -8px 0 16px;
+}
+
+/* Unterabschnitt innerhalb eines Einstellungen-Bereichs (z. B. Mitfahrer-Satz
+   unter den Erstattungssätzen) */
+.set-subbereich {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
 }

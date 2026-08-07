@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  MapPin, Building2, Coins, Star, Users2, User, SunMoon, Key, Users,
+  MapPin, Building2, Coins, Star, User, SunMoon, Key, Users,
   ChevronRight, ArrowLeft, Bell, Info, HelpCircle, LogOut,
 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
@@ -10,7 +10,6 @@ import OrteDistanzenBereich from './OrteDistanzenBereich';
 import TraegerBereich from './TraegerBereich';
 import ErstattungBereich from './ErstattungBereich';
 import FavoritenBereich from './FavoritenBereich';
-import MitfahrerBereich from './MitfahrerBereich';
 import ProfilBereich from './ProfilBereich';
 import DarstellungBereich from './DarstellungBereich';
 import ApiBereich from './ApiBereich';
@@ -25,7 +24,6 @@ const BEREICHE = [
   { id: 'traeger', label: 'Abrechnungsträger', Icon: Building2, Component: TraegerBereich },
   { id: 'erstattung', label: 'Erstattungssätze', Icon: Coins, Component: ErstattungBereich },
   { id: 'favoriten', label: 'Favoriten', Icon: Star, Component: FavoritenBereich },
-  { id: 'mitfahrer', label: 'Mitfahrer', Icon: Users2, Component: MitfahrerBereich },
   { id: 'profil', label: 'Profil & Passwort', Icon: User, Component: ProfilBereich },
   { id: 'darstellung', label: 'Darstellung', Icon: SunMoon, Component: DarstellungBereich },
   { id: 'api', label: 'API-Zugriff', Icon: Key, Component: ApiBereich },
@@ -39,6 +37,7 @@ const LEGACY_MAP = {
   abrechnungen: 'traeger',
   erstattungssaetze: 'erstattung',
   distanzen: 'orte',
+  mitfahrer: 'erstattung',
 };
 
 function EinstellungenView({ initialTab, onShowInfo, onShowNewFeatures }) {
