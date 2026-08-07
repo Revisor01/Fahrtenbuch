@@ -10,16 +10,23 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Added
 - Redesign 2026, Fundament: Design-Token-Set (`tokens.css`) mit zwei eigenständig abgestimmten Modi (hell/dunkel), Statusklassen Erfasst/Eingereicht/Erstattet, Toast- und Empty-State-Bausteine, `.num`-Utility für Zahlen in JetBrains Mono
 - PWA-Grundlagen: Manifest mit Icons und Shortcuts, self-hosted Fonts (Instrument Sans, JetBrains Mono), neues App-Icon inkl. Favicon
+- Toast-System (`ToastProvider`/`useToast`): Erfolg/Fehler mit Statuskreis, „Rückgängig"-Aktion, aria-live; mobil über der Bottom-Nav, Desktop unten rechts
+- StatusBadge-Komponente mit drei Darstellungsformen (Badge, Punkt+Wort, Fortschrittsleiste) und zentralem Wording-Mapping (`utils/statusLabels.js`)
+- Sheet-Komponente: mobil Bottom-Sheet mit Griff und Fokusfalle, ab 768 px zentriertes Modal-Panel
+- EmptyState-Komponente (gestrichelter Rahmen, Icon-Fläche, Primäraktion)
 
 ### Changed
 - Tailwind auf semantische Farbnamen umgestellt (brand/accent/ok/danger/surface/line/bg/text); alte primary-/secondary-Klassen laufen übergangsweise über Aliasse weiter
 - Komponentenklassen nach Design-Spec: Eingabefelder 52 px/16 px (kein iOS-Zoom mehr), Buttons 48 px, Icon-Buttons 48×48 px, einheitlicher Fokusring ohne Layout-Sprung
 - Theme-Auswahl auf Hell/Dunkel/System reduziert (Default: Systemeinstellung); gespeicherte alte Theme-Werte werden migriert
 - index.html: deutsche Sprache/Beschreibung, Titel „Fahrtenbuch", dynamische theme-color
+- App-Shell umgebaut: Bottom-Nav mit vier Zielen (Start/Fahrten/Abrechnung/Mehr) auf Mobilgeräten, Sidebar 232 px mit Nutzerzeile ab 768 px; Fälligkeits-Punkt bzw. Zähler-Badge auf „Abrechnung"
+- Bestätigungen laufen ohne Modal: Löschen (Fahrten, Orte, Distanzen, Mitfahrer, Favoriten) direkt mit Toast + „Rückgängig"; Favoriten-Tipp legt die Fahrt sofort an; Export-Formatwahl als direkte Buttons; Statusanzeige heißt jetzt Erfasst/Eingereicht/Erstattet
 
 ### Removed
 - Die neun wählbaren Farbthemes (`themes.css`) und die globale Transition auf allen Elementen (`darkMode.css`)
 - CRA-Reste (logo192/logo512, Google-Fonts-Link, Standard-Manifest)
+- `NotificationModal` (Bestätigungs-/Hinweis-Modal) — vollständig durch Toasts ersetzt; alter Header- und Tab-Streifen zugunsten von Bottom-Nav/Sidebar
 
 ### Security
 - IDOR behoben: Erstattungssätze fremder Nutzer waren les-, änder- und löschbar (Ownership-Check auf Abrechnungsträger)
