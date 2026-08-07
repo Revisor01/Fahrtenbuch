@@ -18,6 +18,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - `useErfassung().open(prefill?)` als zentraler Einstieg für alle „Neue Fahrt"-Aktionen (Prefill-Signatur für „Wiederholen"/FAB bereits enthalten)
 - Dashboard komplett neu (mobil + Desktop): Hero-Karte mit dem ältesten nicht eingereichten Monat („Alles abgerechnet" als Erfolgszustand), „Ein Tipp genügt"-Favoriten-Kacheln (legen die Fahrt sofort an, Toast mit „Rückgängig"), „Zuletzt" mit Wiederholen-Button, FAB über der Bottom-Nav; Desktop mit tageszeitabhängiger Begrüßung, Trägerkacheln im Hero, Karten „{Monat} bisher"/„Unterwegs", Tabelle „Letzte Fahrten" und Kilometer-Chart (Balkenfarbe = Monatsstatus)
 - Fahrtenliste komplett neu: Segmented Control (aktueller Monat / Vormonat / Zeitraum mit ausklappbarer Von-/Bis-Wahl und „Offene anzeigen"), Summenzeile „km · €" mit Export-Sheet (Excel/PDF/ZIP je Träger); mobil Karten mit Wischen-nach-links für Bearbeiten/Löschen (auch per Tipp/Tastatur erreichbar), ab 768 px Tabelle mit Inline-Aktionen inkl. „Wiederholen" über den Erfassungsflow; Bearbeiten öffnet das Formular im Sheet, leerer Monat mit konkretem Empty-State
+- Abrechnung komplett neu: mobil Monatskarten (fällige Monate aufgeklappt mit Fortschrittsleiste, Trägerzeilen und Einreichen-Button; übrige eingeklappt mit Statuspunkt + Datum, erstattete gedimmt), ab 768 px die Matrix Monat × Träger mit klebender Monatsspalte, „Details"-Aufklappzeile, Kopf-Aktionen „Zeitraum-Export" und „{ältester fälliger Monat} einreichen"; „Einreichen" stößt den Excel-Export je offenem Träger an und setzt die Status direkt mit Toast + „Rückgängig" — Download-Button exportiert ohne Statuswechsel
 
 ### Changed
 - Tailwind auf semantische Farbnamen umgestellt (brand/accent/ok/danger/surface/line/bg/text); alte primary-/secondary-Klassen laufen übergangsweise über Aliasse weiter
@@ -28,12 +29,14 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Bestätigungen laufen ohne Modal: Löschen (Fahrten, Orte, Distanzen, Mitfahrer, Favoriten) direkt mit Toast + „Rückgängig"; Favoriten-Tipp legt die Fahrt sofort an; Export-Formatwahl als direkte Buttons; Statusanzeige heißt jetzt Erfasst/Eingereicht/Erstattet
 - Neue Fahrten laufen nur noch über den Erfassungsflow; `FahrtForm` dient ausschließlich dem Bearbeiten bestehender Fahrten (Create-Code entfernt)
 - Status in der Fahrtenliste einheitlich über StatusBadge (Punkt+Wort; Zeitraum als Monats-Chips); Status-Reset bei „Erstattet" funktioniert wieder (Klick lief zuvor ins nie öffnende Modal); Erstattungen je Träger als neutrale Karte statt farbiger KPI-Kacheln
+- Statusaktionen der Abrechnung laufen direkt mit Undo-Toast statt über das Bestätigungs-Modal; der Datums-Dialog (Nachfolger des AbrechnungsStatusModal) ist ein kompaktes Sheet und existiert nur noch einmal global — der Doppel-Mount, bei dem die Abrechnungs-Instanz `singleMonth` nicht übergab, ist behoben
 
 ### Removed
 - Die neun wählbaren Farbthemes (`themes.css`) und die globale Transition auf allen Elementen (`darkMode.css`)
 - CRA-Reste (logo192/logo512, Google-Fonts-Link, Standard-Manifest)
 - `NotificationModal` (Bestätigungs-/Hinweis-Modal) — vollständig durch Toasts ersetzt; alter Header- und Tab-Streifen zugunsten von Bottom-Nav/Sidebar
 - Alte Dashboard-Bausteine (KPI-Cards, Jahres-Statistik-Chart, Erstattungstabelle, Inline-Bearbeiten) sowie ungenutzte `ProfileModal.js`/`HilfeModal.js`
+- Alte Abrechnungs-Bausteine: Schnellaktionen-Dropdown (arbeitete auf dem Zeitraum-Filter des Fahrten-Tabs), dreifache Statuszellen-Logik, farbige Träger-KPI-Karten samt Jahres-Summenkacheln und „Abgeschlossene ausblenden"-Filter (erstattete Monate bleiben sichtbar, gedimmt)
 
 ### Security
 - IDOR behoben: Erstattungssätze fremder Nutzer waren les-, änder- und löschbar (Ownership-Check auf Abrechnungsträger)
