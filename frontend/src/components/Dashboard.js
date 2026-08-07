@@ -1,568 +1,440 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { useErfassung } from '../contexts/ErfassungContext';
-import FahrtForm from '../FahrtForm';
 import EmptyState from './ui/EmptyState';
 import { useToast } from './ui/Toast';
-import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock, Users, Pencil, Trash2 } from 'lucide-react';
+import { Star } from 'lucide-react';
+
+// Dashboard (Redesign 2026, Phase R4).
+//
+// KRITISCH: Das Dashboard hängt NICHT am Monatsfilter des Fahrten-Tabs —
+// `fahrten`/`summary` aus dem AppContext sind tab-gefiltert und werden hier
+// bewusst nicht verwendet. Alle Daten kommen aus `monthlyData` (ungefilterte
+// Monats-Aggregate) plus einem eigenen Abruf der jüngsten Monatsreports für
+// die „Zuletzt"-Liste (liefert Erstattung + Mitfahrer je Fahrt).
 
 const API_BASE_URL = '/api';
 
+const heuteISO = () => new Date().toISOString().slice(0, 10);
+
+const formatEuro = (betrag) => (Number(betrag) || 0).toFixed(2).replace('.', ',');
+
+const formatKm = (km) => {
+  const n = parseFloat(km) || 0;
+  return Number.isInteger(n) ? String(n) : n.toFixed(1).replace('.', ',');
+};
+
+const monatName = (ym) => {
+  const [y, m] = ym.split('-');
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('de-DE', { month: 'long' });
+};
+
+const monatJahr = (ym) => `${monatName(ym)} ${ym.slice(0, 4)}`;
+
+// Offene (weder eingereichte noch erstattete) Träger eines Monats
+function offeneTraeger(md) {
+  return Object.entries(md.erstattungen || {}).filter(([id, betrag]) => {
+    if (!(betrag > 0)) return false;
+    const status = md.abrechnungsStatus?.[id];
+    return !status?.eingereicht_am && !status?.erhalten_am;
+  });
+}
+
+// Träger-Kürzel für die Favoriten-Kachel: Mehrwort-Namen → Initialen (max. 3),
+// Einzelwort → erste zwei Buchstaben („Kirchenkreis Dithmarschen" → „KD")
+function traegerKuerzel(name) {
+  if (!name) return '';
+  const teile = String(name).split(/[\s-]+/).filter((w) => w.length > 1);
+  if (teile.length >= 2) {
+    return teile.slice(0, 3).map((w) => w[0].toUpperCase()).join('');
+  }
+  return String(name).slice(0, 2).toUpperCase();
+}
+
 function Dashboard({ onNavigate }) {
   const {
-    summary,
-    fahrten,
-    favoriten,
-    executeFavorit,
-    showNotification,
-    refreshAllData,
     monthlyData,
+    favoriten,
+    distanzen,
     abrechnungstraeger,
-    deleteFahrt,
-    addFahrt
+    user,
+    executeFavorit,
+    refreshAllData,
   } = useContext(AppContext);
   const toast = useToast();
   const erfassung = useErfassung();
 
-  const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
-  const [editingFahrtId, setEditingFahrtId] = useState(null);
+  const currentYM = new Date().toISOString().slice(0, 7);
 
-  const editingFahrt = editingFahrtId ? fahrten.find(f => f.id === editingFahrtId) : null;
-
-  const handleEditComplete = () => {
-    setEditingFahrtId(null);
-    refreshAllData();
+  const getTraegerName = (id) => {
+    if (String(id) === 'mitfahrer') return 'Mitfahrer:innen';
+    const t = (abrechnungstraeger || []).find((x) => String(x.id) === String(id));
+    return t ? t.name : `Träger ${id}`;
   };
 
-  const handleEditCancel = () => {
-    setEditingFahrtId(null);
-  };
-
-  const { offeneErstattungen, eingereichteSumme } = useMemo(() => {
-    let offen = 0;
-    let eingereicht = 0;
-    monthlyData.forEach(md => {
-      Object.entries(md.erstattungen || {}).forEach(([id, betrag]) => {
-        const status = md.abrechnungsStatus?.[id];
-        if (!status?.erhalten_am) {
-          offen += Number(betrag || 0);
-          if (status?.eingereicht_am) {
-            eingereicht += Number(betrag || 0);
-          }
-        }
-      });
-    });
-    return { offeneErstattungen: offen, eingereichteSumme: eingereicht };
-  }, [monthlyData]);
-
-  // KPI: km and count for current month
-  const currentYearMonth = new Date().toISOString().slice(0, 7);
-  const { kmThisMonth, fahrtenThisMonth } = useMemo(() => {
-    const monthTrips = fahrten.filter(f => f.datum && f.datum.startsWith(currentYearMonth));
-    const km = monthTrips.reduce((sum, f) => sum + (parseFloat(f.kilometer) || 0), 0);
-    return { kmThisMonth: km, fahrtenThisMonth: monthTrips.length };
-  }, [fahrten, currentYearMonth]);
-
-  // KPI: Offene Fahrten (deren Träger noch nicht eingereicht/erhalten ist) über alle Monate
-  const { offeneFahrten, offenerZeitraum } = useMemo(() => {
-    let count = 0;
-    const offeneMonate = [];
-    monthlyData.forEach(md => {
-      const monthFahrten = md.fahrtenCount || 0;
-      const allTraegerDone = Object.entries(md.erstattungen || {}).every(([id]) => {
-        const status = md.abrechnungsStatus?.[id];
-        return status?.eingereicht_am || status?.erhalten_am;
-      });
-      if (!allTraegerDone) {
-        count += monthFahrten;
-        offeneMonate.push(md.yearMonth);
-      }
-    });
-    const sorted = offeneMonate.sort();
+  // ---- Hero: ältester nicht eingereichter (abgeschlossener) Monat ---------
+  // Der laufende Monat zählt nicht — er ist noch nicht fällig.
+  const hero = useMemo(() => {
+    const kandidaten = monthlyData
+      .filter((md) => md.yearMonth < currentYM && offeneTraeger(md).length > 0)
+      .sort((a, b) => a.yearMonth.localeCompare(b.yearMonth));
+    if (kandidaten.length === 0) return null;
+    const md = kandidaten[0];
+    const offen = offeneTraeger(md);
     return {
-      offeneFahrten: count,
-      offenerZeitraum: sorted.length > 0
-        ? { von: sorted[0], bis: sorted[sorted.length - 1] }
-        : null
+      ym: md.yearMonth,
+      betrag: offen.reduce((sum, [, b]) => sum + Number(b || 0), 0),
+      km: md.totalKm || 0,
+      traeger: offen.map(([id, b]) => ({ id, name: getTraegerName(id), betrag: Number(b || 0) })),
     };
-  }, [monthlyData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monthlyData, abrechnungstraeger, currentYM]);
 
-  // Last 3 trips sorted by date descending, then by id descending
-  const letzteTrips = useMemo(() => {
-    const sorted = [...fahrten].sort((a, b) => {
-      const dateA = new Date(a.datum);
-      const dateB = new Date(b.datum);
-      if (dateB - dateA !== 0) return dateB - dateA;
-      return (b.id || 0) - (a.id || 0);
-    });
-    return sorted.slice(0, 3);
-  }, [fahrten]);
+  // ---- „Zuletzt": eigener, ungefilterter Abruf ----------------------------
+  // Die jüngsten Monate mit Fahrten (aus monthlyData), bis ≥ 5 Fahrten
+  // abgedeckt sind — die Monatsreports liefern Erstattung + Mitfahrer je Fahrt.
+  const [recent, setRecent] = useState(null); // null = lädt
 
-  // Month abbreviations for chart labels
-  const monatLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
-
-  // km per month from monthlyData (has totalKm per month from all loaded months)
-  const kmProMonat = useMemo(() => {
-    const result = Array(12).fill(0);
-    monthlyData.forEach(md => {
-      if (md.year === statistikJahr) {
-        result[md.monatNr - 1] += md.totalKm || 0;
-      }
-    });
-    return result;
-  }, [monthlyData, statistikJahr]);
-
-  // Fahrten count per month from monthlyData
-  const fahrtenProMonat = useMemo(() => {
-    const result = Array(12).fill(0);
-    monthlyData.forEach(md => {
-      if (md.year === statistikJahr) {
-        result[md.monatNr - 1] += md.fahrtenCount || 0;
-      }
-    });
-    return result;
-  }, [monthlyData, statistikJahr]);
-
-  const maxKm = useMemo(() => Math.max(...kmProMonat, 1), [kmProMonat]);
-  const hasKmData = useMemo(() => kmProMonat.some(km => km > 0), [kmProMonat]);
-
-  // Erstattungen per Traeger for the selected year from monthlyData
-  const erstattungenProTraeger = useMemo(() => {
-    const traegerMap = {};
-    monthlyData
-      .filter(md => md.year === statistikJahr)
-      .forEach(md => {
-        if (!md.erstattungen) return;
-        Object.entries(md.erstattungen).forEach(([traeger, betrag]) => {
-          traegerMap[traeger] = (traegerMap[traeger] || 0) + (betrag || 0);
-        });
-      });
-    return traegerMap;
-  }, [monthlyData, statistikJahr]);
-
-  const gesamtErstattung = useMemo(() => {
-    return Object.values(erstattungenProTraeger).reduce((sum, val) => sum + val, 0);
-  }, [erstattungenProTraeger]);
-
-  const hasErstattungen = Object.keys(erstattungenProTraeger).length > 0;
-
-  // Map Träger-IDs to names
-  const getTraegerName = (traegerId) => {
-    if (!abrechnungstraeger) return traegerId;
-    const found = abrechnungstraeger.find(t => String(t.id) === String(traegerId));
-    return found ? found.name : traegerId;
-  };
-
-  const handleNochmal = async (fahrt) => {
-    try {
-      await axios.post(`${API_BASE_URL}/fahrten`, {
-        vonOrtId: fahrt.von_ort_id || null,
-        nachOrtId: fahrt.nach_ort_id || null,
-        datum: new Date().toISOString().slice(0, 10),
-        anlass: fahrt.anlass,
-        abrechnung: fahrt.abrechnung,
-        einmaligerVonOrt: fahrt.einmaliger_von_ort || null,
-        einmaligerNachOrt: fahrt.einmaliger_nach_ort || null,
-        kilometer: fahrt.kilometer
-      });
-      showNotification('Fahrt erstellt', `Fahrt ${fahrt.von_ort_name || fahrt.einmaliger_von_ort} \u2192 ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} wurde f\u00FCr heute eingetragen.`);
-      refreshAllData();
-    } catch (error) {
-      console.error('Fehler beim Duplizieren der Fahrt:', error);
-      showNotification('Fehler', 'Fahrt konnte nicht erstellt werden.');
-    }
-  };
-
-  // Ein Tipp legt die Fahrt sofort an \u2014 kein Zwischenschritt, kein Modal.
-  // Best\u00E4tigung ausschlie\u00DFlich per Toast mit \u201ER\u00FCckg\u00E4ngig" (l\u00F6scht die Fahrt).
-  const handleExecuteFavorit = async (favorit) => {
-    try {
-      const result = await executeFavorit(favorit.id, false);
-      toast.success(`${favorit.von_ort_name} \u2192 ${favorit.nach_ort_name} f\u00FCr heute eingetragen.`, {
-        undo: result?.id ? async () => {
-          try {
-            await deleteFahrt(result.id);
-            toast.success('Fahrt wieder entfernt.');
-          } catch (error) {
-            console.error('Fehler beim Entfernen der Fahrt:', error);
-            toast.error('Fahrt konnte nicht entfernt werden.');
-          }
-        } : undefined
-      });
-    } catch (error) {
-      console.error('Fehler beim Ausf\u00FChren des Favoriten:', error);
-      toast.error('Favorit konnte nicht ausgef\u00FChrt werden.');
-    }
-  };
-
-  // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt die Fahrt mit
-  // denselben Daten neu an)
-  const handleDeleteFahrt = async (fahrt) => {
-    try {
-      await deleteFahrt(fahrt.id);
-      toast.success('Fahrt gelöscht.', {
-        undo: async () => {
-          try {
-            await addFahrt({
-              datum: fahrt.datum?.slice(0, 10),
-              vonOrtId: fahrt.von_ort_id || null,
-              nachOrtId: fahrt.nach_ort_id || null,
-              einmaligerVonOrt: fahrt.einmaliger_von_ort || null,
-              einmaligerNachOrt: fahrt.einmaliger_nach_ort || null,
-              anlass: fahrt.anlass || '',
-              kilometer: fahrt.kilometer,
-              abrechnung: fahrt.abrechnung,
-              mitfahrer: fahrt.mitfahrer || []
-            });
-            toast.success('Fahrt wiederhergestellt.');
-          } catch (error) {
-            console.error('Fehler beim Wiederherstellen der Fahrt:', error);
-            toast.error('Fahrt konnte nicht wiederhergestellt werden.');
+  useEffect(() => {
+    let aktiv = true;
+    const laden = async () => {
+      try {
+        const monate = [];
+        let abgedeckt = 0;
+        for (const md of monthlyData) { // bereits neueste zuerst sortiert
+          if (md.fahrtenCount > 0) {
+            monate.push(md.yearMonth);
+            abgedeckt += md.fahrtenCount;
+            if (abgedeckt >= 5 || monate.length >= 3) break;
           }
         }
-      });
-    } catch (error) {
-      console.error('Fehler beim Löschen der Fahrt:', error);
-      toast.error('Fahrt konnte nicht gelöscht werden.');
-    }
+        if (monate.length === 0) {
+          if (aktiv) setRecent([]);
+          return;
+        }
+        const antworten = await Promise.all(
+          monate.map((ym) => {
+            const [y, m] = ym.split('-');
+            return axios.get(`${API_BASE_URL}/fahrten/report/${y}/${parseInt(m, 10)}`);
+          })
+        );
+        const alle = antworten.flatMap((r) => r.data.fahrten || []);
+        alle.sort((a, b) => {
+          const diff = new Date(b.datum) - new Date(a.datum);
+          return diff !== 0 ? diff : (b.id || 0) - (a.id || 0);
+        });
+        if (aktiv) setRecent(alle.slice(0, 5));
+      } catch (error) {
+        console.error('Fehler beim Laden der letzten Fahrten:', error);
+        if (aktiv) setRecent([]);
+      }
+    };
+    laden();
+    return () => { aktiv = false; };
+  }, [monthlyData]);
+
+  const zielName = (fahrt) => fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
+
+  // Distanz zwischen zwei gespeicherten Orten (beide Richtungen)
+  const findDistanz = (vonId, nachId) => {
+    if (!vonId || !nachId) return null;
+    const hit = (distanzen || []).find(
+      (d) =>
+        (String(d.von_ort_id) === String(vonId) && String(d.nach_ort_id) === String(nachId)) ||
+        (String(d.von_ort_id) === String(nachId) && String(d.nach_ort_id) === String(vonId))
+    );
+    return hit ? parseFloat(hit.distanz) : null;
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  // ---- Aktionen: sofort + optimistisch, Toast mit „Rückgängig" ------------
+
+  const entferneOptimistisch = (tempId) => {
+    setRecent((prev) => (prev || []).filter((f) => f.id !== tempId));
   };
+
+  // Favoriten-Tipp legt die Fahrt SOFORT an — kein Zwischenschritt, kein Modal.
+  const handleFavorit = (fav) => {
+    const km = findDistanz(fav.von_ort_id, fav.nach_ort_id);
+    const tempId = `optimistisch-fav-${Date.now()}`;
+    setRecent((prev) => [
+      {
+        id: tempId,
+        datum: heuteISO(),
+        anlass: fav.anlass,
+        kilometer: km || 0,
+        abrechnung: fav.abrechnungstraeger_id,
+        von_ort_name: fav.von_ort_name,
+        nach_ort_name: fav.nach_ort_name,
+        mitfahrer: [],
+        _optimistisch: true,
+      },
+      ...(prev || []),
+    ].slice(0, 5));
+
+    const op = { abgebrochen: false, id: null };
+    const entferneAngelegte = async () => {
+      try {
+        await axios.delete(`${API_BASE_URL}/fahrten/${op.id}`);
+        entferneOptimistisch(tempId);
+        await refreshAllData();
+        toast.success('Fahrt wieder entfernt.');
+      } catch (error) {
+        console.error('Fehler beim Entfernen der Fahrt:', error);
+        toast.error('Fahrt konnte nicht entfernt werden.');
+      }
+    };
+
+    toast.success(`${fav.von_ort_name} → ${fav.nach_ort_name} für heute eingetragen.`, {
+      undo: () => {
+        op.abgebrochen = true;
+        if (op.id) {
+          entferneAngelegte();
+        } else {
+          entferneOptimistisch(tempId);
+        }
+      },
+    });
+
+    (async () => {
+      try {
+        const result = await executeFavorit(fav.id, false);
+        op.id = result?.id || null;
+        if (op.abgebrochen && op.id) {
+          await entferneAngelegte();
+        }
+      } catch (error) {
+        console.error('Fehler beim Ausführen des Favoriten:', error);
+        entferneOptimistisch(tempId);
+        if (!op.abgebrochen) toast.error('Favorit konnte nicht ausgeführt werden.');
+      }
+    })();
+  };
+
+  // „Wiederholen" schreibt SOFORT eine neue Fahrt mit heutigem Datum und
+  // denselben Daten — INKLUSIVE Mitfahrer (das alte „Nochmal" verlor sie).
+  const handleWiederholen = (fahrt) => {
+    const tempId = `optimistisch-wdh-${Date.now()}`;
+    setRecent((prev) => [
+      { ...fahrt, id: tempId, datum: heuteISO(), _optimistisch: true },
+      ...(prev || []),
+    ].slice(0, 5));
+
+    const op = { abgebrochen: false, id: null };
+    const entferneAngelegte = async () => {
+      try {
+        await axios.delete(`${API_BASE_URL}/fahrten/${op.id}`);
+        entferneOptimistisch(tempId);
+        await refreshAllData();
+        toast.success('Fahrt wieder entfernt.');
+      } catch (error) {
+        console.error('Fehler beim Entfernen der Fahrt:', error);
+        toast.error('Fahrt konnte nicht entfernt werden.');
+      }
+    };
+
+    toast.success(`${zielName(fahrt)} für heute eingetragen.`, {
+      undo: () => {
+        op.abgebrochen = true;
+        if (op.id) {
+          entferneAngelegte();
+        } else {
+          entferneOptimistisch(tempId);
+        }
+      },
+    });
+
+    (async () => {
+      try {
+        const res = await axios.post(`${API_BASE_URL}/fahrten`, {
+          datum: heuteISO(),
+          vonOrtId: fahrt.von_ort_id || null,
+          nachOrtId: fahrt.nach_ort_id || null,
+          einmaligerVonOrt: fahrt.einmaliger_von_ort || null,
+          einmaligerNachOrt: fahrt.einmaliger_nach_ort || null,
+          anlass: fahrt.anlass || '',
+          kilometer: parseFloat(fahrt.kilometer) || 0,
+          abrechnung: fahrt.abrechnung,
+          mitfahrer: (fahrt.mitfahrer || []).map((m) => ({
+            name: m.name,
+            arbeitsstaette: m.arbeitsstaette,
+            richtung: m.richtung,
+          })),
+        });
+        op.id = res.data.id;
+        if (op.abgebrochen) {
+          await entferneAngelegte();
+          return;
+        }
+        await refreshAllData();
+      } catch (error) {
+        console.error('Fehler beim Wiederholen der Fahrt:', error);
+        entferneOptimistisch(tempId);
+        if (!op.abgebrochen) toast.error('Fahrt konnte nicht erstellt werden.');
+      }
+    })();
+  };
+
+  // ---- Kopfdaten -----------------------------------------------------------
+
+  const initialen = (() => {
+    const fn = (user?.full_name || '').trim();
+    if (fn) {
+      const teile = fn.split(/\s+/);
+      return (teile[0][0] + (teile[1]?.[0] || '')).toUpperCase();
+    }
+    return (user?.username || '?').slice(0, 2).toUpperCase();
+  })();
+
+  const zuletztSub = (fahrt) => {
+    const d = new Date(fahrt.datum);
+    const wt = d.toLocaleDateString('de-DE', { weekday: 'short' });
+    const dat = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    return `${wt} ${dat} ${fahrt.anlass ? `· ${fahrt.anlass}` : ''}`.trim();
+  };
+
+  // ---- Wiederverwendete Teilstücke ----------------------------------------
+
+  const heroErfolg = (
+    <section className="dash-hero-ok" aria-label="Alles abgerechnet">
+      <span className="dash-hero-ok-icon" aria-hidden="true">✓</span>
+      <span>
+        <span className="dash-hero-ok-titel">Alles abgerechnet</span>
+        <span className="dash-hero-ok-text">Kein Monat wartet auf die Abrechnung.</span>
+      </span>
+    </section>
+  );
+
+  const favoritenLeer = (
+    <div className="dash-block">
+      <EmptyState
+        icon={<Star size={20} />}
+        title="Noch keine Favoriten"
+        text="Lege häufige Strecken als Favorit an — ein Tipp genügt dann zum Erfassen."
+        actionLabel="Favorit anlegen"
+        onAction={() => onNavigate && onNavigate('einstellungen:favoriten')}
+      />
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      {/* KPI Cards — 4 farbige Cards inkl. Export */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Offene Erstattungen */}
-        <div className="kpi-card kpi-card-emerald">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-muted mb-1">Offene Erstattungen</p>
-              <p className="text-xl font-medium text-value truncate">{offeneErstattungen.toFixed(2).replace('.', ',')} &euro;</p>
-              {eingereichteSumme > 0 && (
-                <p className="text-xs text-muted">({eingereichteSumme.toFixed(2).replace('.', ',')} &euro; eingereicht)</p>
-              )}
-            </div>
-            <Banknote size={22} className="text-emerald-500 shrink-0" />
-          </div>
+    <div className="dashboard">
+      {/* ================= Mobil (<768px) ================= */}
+      <div className="dash-mobile">
+        <div className="dash-m-head">
+          <h1 className="dash-m-monat">{monatName(currentYM)}</h1>
+          <button
+            type="button"
+            className="dash-avatar"
+            onClick={() => onNavigate && onNavigate('einstellungen')}
+            title="Einstellungen"
+            aria-label="Einstellungen öffnen"
+          >
+            {initialen}
+          </button>
         </div>
 
-        {/* Kilometer diesen Monat */}
-        <div className="kpi-card kpi-card-blue">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-muted mb-1">km diesen Monat</p>
-              <p className="text-xl font-medium text-value truncate">{kmThisMonth.toFixed(1).replace('.', ',')} km</p>
+        {hero ? (
+          <section className="dash-hero">
+            <div className="dash-hero-label">Noch nicht eingereicht</div>
+            <div className="dash-hero-betrag num">{formatEuro(hero.betrag)} €</div>
+            <div className="dash-hero-zeile">
+              {monatJahr(hero.ym)} · <span className="num">{formatKm(hero.km)}</span> km · {hero.traeger.length} Träger
             </div>
-            <Route size={22} className="text-blue-500 shrink-0" />
-          </div>
-        </div>
+            <button
+              type="button"
+              className="dash-hero-btn"
+              onClick={() => onNavigate && onNavigate('abrechnungen')}
+            >
+              {monatName(hero.ym)} abrechnen
+            </button>
+          </section>
+        ) : heroErfolg}
 
-        {/* Fahrten diesen Monat */}
-        <div className="kpi-card kpi-card-purple">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs text-muted mb-1">Fahrten diesen Monat</p>
-              <p className="text-xl font-medium text-value">{fahrtenThisMonth}</p>
-            </div>
-            <Car size={22} className="text-purple-500 shrink-0" />
-          </div>
+        <div className="dash-label-row">
+          <span className="dash-label">Ein Tipp genügt</span>
+          <button
+            type="button"
+            className="dash-link"
+            onClick={() => onNavigate && onNavigate('einstellungen:favoriten')}
+          >
+            Alle
+          </button>
         </div>
-
-        {/* Offene Fahrten — klickbar, springt zur Fahrten-Seite mit offenem Zeitraum */}
-        <button
-          onClick={() => onNavigate && onNavigate(offenerZeitraum ? `fahrten:offene:${offenerZeitraum.von}:${offenerZeitraum.bis}` : 'fahrten')}
-          className="kpi-card kpi-card-primary border-2 border-primary-300 dark:border-primary-600 hover:shadow-card-hover hover:border-primary-400 dark:hover:border-primary-500 transition-all text-left"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-primary-600 dark:text-primary-400 mb-1">Offene Fahrten</p>
-              <p className="text-xl font-medium text-value">{offeneFahrten}</p>
-              <p className="text-xs text-muted">{offeneFahrten > 0 ? 'noch nicht eingereicht' : 'alles erledigt'} &rarr;</p>
-            </div>
-            <FileDown size={22} className="text-primary-500 shrink-0" />
+        {favoriten.length === 0 ? favoritenLeer : (
+          <div className="dash-fav-grid">
+            {favoriten.map((fav) => {
+              const km = findDistanz(fav.von_ort_id, fav.nach_ort_id);
+              return (
+                <button
+                  key={fav.id}
+                  type="button"
+                  className="dash-fav-tile"
+                  onClick={() => handleFavorit(fav)}
+                >
+                  <span className="dash-fav-ort">{fav.nach_ort_name}</span>
+                  <span>
+                    {fav.anlass && <span className="dash-fav-anlass">{fav.anlass}</span>}
+                    <span className="dash-fav-km num">
+                      {km !== null ? `${formatKm(km)} km · ` : ''}{traegerKuerzel(fav.traeger_name)}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </button>
-      </div>
+        )}
 
-      {/* Favoriten-Schnelleingabe */}
-      <div className="card-container">
-        <div className="section-header">
-          <Star size={18} className="text-yellow-500" />
-          <h2>Favoriten</h2>
+        <div className="dash-label-row">
+          <span className="dash-label">Zuletzt</span>
         </div>
-        {favoriten.length === 0 ? (
+        {recent !== null && recent.length === 0 ? (
           <EmptyState
-            icon={<Star size={20} />}
-            title="Noch keine Favoriten"
-            text="Lege häufige Strecken als Favorit an — ein Tipp genügt dann zum Erfassen."
-            actionLabel="Favorit anlegen"
-            onAction={() => onNavigate && onNavigate('einstellungen:favoriten')}
+            title="Noch keine Fahrten"
+            text="Erfasse deine erste Fahrt — ein Tipp auf + genügt."
+            actionLabel="Fahrt erfassen"
+            onAction={() => erfassung.open()}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {favoriten.map((fav) => (
-              <button
-                key={fav.id}
-                onClick={() => handleExecuteFavorit(fav)}
-                className="text-left rounded-card border border-primary-200 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 min-h-[44px] p-3 hover:shadow-card-hover hover:bg-primary-100 dark:hover:bg-primary-800 transition-all"
-              >
-                <p className="text-sm font-medium text-value">
-                  {fav.von_ort_name} &rarr; {fav.nach_ort_name}
-                </p>
-                {fav.anlass && (
-                  <p className="text-xs text-muted mt-1">{fav.anlass}</p>
-                )}
-              </button>
-            ))}
+          <div className="dash-zuletzt-card">
+            {recent === null ? (
+              <div className="dash-zuletzt-laden">Fahrten werden geladen…</div>
+            ) : (
+              recent.map((fahrt) => (
+                <div
+                  key={fahrt.id}
+                  className={`dash-zuletzt-row${fahrt._optimistisch ? ' is-neu' : ''}`}
+                >
+                  <div className="dash-zuletzt-main">
+                    <div className="dash-zuletzt-ziel">{zielName(fahrt)}</div>
+                    <div className="dash-zuletzt-sub">{zuletztSub(fahrt)}</div>
+                  </div>
+                  <div className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</div>
+                  <button
+                    type="button"
+                    className="dash-repeat-btn"
+                    onClick={() => handleWiederholen(fahrt)}
+                    disabled={!!fahrt._optimistisch}
+                    aria-label={`Fahrt nach ${zielName(fahrt)} für heute wiederholen`}
+                    title="Für heute wiederholen"
+                  >
+                    ↻
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         )}
-        <div className="flex justify-end mt-3">
-          <button
-            onClick={() => onNavigate && onNavigate('einstellungen:favoriten')}
-            className="text-sm px-3 py-1.5 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
-          >
-            Favoriten verwalten &rarr;
-          </button>
-        </div>
-      </div>
 
-      {/* Neue Fahrt: öffnet den zweistufigen Erfassungsflow (Sheet) —
-          ersetzt das frühere Inline-Formular (FahrtForm bleibt nur fürs Bearbeiten) */}
-      <div className="card-container">
-        <div className="section-header">
-          <Plus size={18} className="text-primary-500" />
-          <h2>Neue Fahrt erfassen</h2>
-        </div>
+        {/* FAB: gehört zum Dashboard-Screen, steht über der Bottom-Nav */}
         <button
           type="button"
-          className="btn-sheet-primary"
+          className="dash-fab"
           onClick={() => erfassung.open()}
+          aria-label="Neue Fahrt erfassen"
         >
-          + Neue Fahrt
+          +
         </button>
-      </div>
-
-      {/* Letzte 3 Fahrten */}
-      <div className="card-container">
-        <div className="section-header">
-          <Clock size={18} className="text-orange-500" />
-          <h2>Letzte Fahrten</h2>
-        </div>
-        {letzteTrips.length === 0 ? (
-          <p className="text-sm text-muted">Keine Fahrten im gewählten Zeitraum. Wähle den aktuellen Monat für die neuesten Fahrten.</p>
-        ) : (
-          <div className="space-y-2">
-            {letzteTrips.map((fahrt) => (
-              editingFahrtId === fahrt.id ? (
-                <div key={fahrt.id} className="rounded-card border border-card p-4 animate-tab-content-fade">
-                  <FahrtForm
-                    editData={fahrt}
-                    onUpdate={handleEditComplete}
-                    onCancel={handleEditCancel}
-                  />
-                </div>
-              ) : (
-              <div
-                key={fahrt.id}
-                className="flex items-center justify-between rounded-card border border-card p-3 gap-2"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted text-xs whitespace-nowrap">{formatDate(fahrt.datum)}</span>
-                    <span className="text-value font-medium truncate">
-                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} &rarr; {fahrt.nach_ort_name || fahrt.einmaliger_nach_ort}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-xs text-muted">
-                    <span>{fahrt.kilometer} km</span>
-                    {fahrt.anlass && <span>&middot; <em>{fahrt.anlass}</em></span>}
-                    {fahrt.abrechnung && <span>&middot; {getTraegerName(fahrt.abrechnung)}</span>}
-                    {fahrt.mitfahrer && fahrt.mitfahrer.length > 0 && (
-                      <span className="relative group inline-flex items-center gap-1 cursor-help">
-                        <span>&middot;</span>
-                        <Users size={11} />
-                        <span className="underline decoration-dotted underline-offset-2">
-                          {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}
-                        </span>
-                        <span className="absolute bottom-full left-0 mb-1 hidden group-hover:block z-10 bg-card shadow-card-hover border border-card rounded-card px-3 py-2 text-xs text-value whitespace-nowrap">
-                          {fahrt.mitfahrer.map((m, i) => (
-                            <span key={i} className="block">{m.name}{m.arbeitsstaette ? ` (${m.arbeitsstaette})` : ''}</span>
-                          ))}
-                        </span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={() => handleNochmal(fahrt)}
-                    className="btn-primary flex items-center gap-1 text-xs"
-                    aria-label="Fahrt kopieren"
-                    title="Nochmal für heute"
-                  >
-                    <RotateCcw size={12} />
-                    <span className="hidden sm:inline">Nochmal</span>
-                  </button>
-                  <button
-                    onClick={() => handleNochmal({ ...fahrt, von_ort_id: fahrt.nach_ort_id, nach_ort_id: fahrt.von_ort_id, von_ort_name: fahrt.nach_ort_name, nach_ort_name: fahrt.von_ort_name, einmaliger_von_ort: fahrt.einmaliger_nach_ort, einmaliger_nach_ort: fahrt.einmaliger_von_ort })}
-                    className="btn-secondary flex items-center gap-1 text-xs"
-                    aria-label="Rueckfahrt erstellen"
-                    title="Rückfahrt für heute eintragen"
-                  >
-                    <RotateCcw size={12} className="scale-x-[-1]" />
-                    <span className="hidden sm:inline">Rückfahrt</span>
-                  </button>
-                  <button
-                    onClick={() => setEditingFahrtId(fahrt.id)}
-                    className="p-1.5 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
-                    aria-label="Fahrt bearbeiten"
-                    title="Bearbeiten"
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteFahrt(fahrt)}
-                    className="p-1.5 rounded-card text-muted hover:text-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-900 transition-colors"
-                    aria-label="Fahrt loeschen"
-                    title="Löschen"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              </div>
-              )
-            ))}
-            <div className="flex justify-end mt-3">
-              <button
-                onClick={() => onNavigate && onNavigate('fahrten')}
-                className="text-sm px-3 py-1.5 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
-              >
-                Alle Fahrten anzeigen &rarr;
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Statistik: km-Chart + Erstattungen in einem Card */}
-      <div className="card-container">
-        <div className="flex items-center justify-between mb-4">
-          <div className="section-header" style={{marginBottom: 0}}>
-            <BarChart3 size={18} className="text-blue-500" />
-            <h2>Statistik {statistikJahr}</h2>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setStatistikJahr(statistikJahr - 1)}
-              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
-              title="Vorheriges Jahr"
-            >
-              <ChevronLeft size={18} className="text-muted" />
-            </button>
-            <button
-              onClick={() => setStatistikJahr(statistikJahr + 1)}
-              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
-              title="N&auml;chstes Jahr"
-            >
-              <ChevronRight size={18} className="text-muted" />
-            </button>
-          </div>
-        </div>
-        {!hasKmData && !hasErstattungen ? (
-          <p className="text-sm text-muted text-center py-8">{monthlyData.length === 0 ? 'Statistik wird geladen...' : `Keine Daten in ${statistikJahr}`}</p>
-        ) : (
-          <>
-            {/* km-Balkendiagramm */}
-            {hasKmData && (
-              <div>
-                <div key={statistikJahr} className="flex items-end gap-1" style={{ height: '160px' }}>
-                  {kmProMonat.map((km, i) => {
-                    const heightPercent = (km / maxKm) * 100;
-                    return (
-                      <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
-                        <div className="relative w-full group flex items-end justify-center" style={{ height: '100%' }}>
-                          <div
-                            className="w-full rounded-t bg-primary-500 transition-all duration-300 relative"
-                            style={{
-                              height: `${Math.max(heightPercent, 1.5)}%`,
-                              animation: 'barGrow 400ms ease-out forwards',
-                              animationDelay: `${i * 50}ms`,
-                              transformOrigin: 'bottom'
-                            }}
-                            title={`${km.toFixed(1)} km | ${fahrtenProMonat[i]} Fahrten`}
-                          >
-                            {km > 0 && (
-                              <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-muted whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center">
-                                <span>{km.toFixed(0)} km</span>
-                                <span>{fahrtenProMonat[i]} F.</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex gap-1 mt-1">
-                  {monatLabels.map((label, i) => (
-                    <div key={i} className="flex-1 text-center text-xs text-muted">{label}</div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Trennlinie zwischen Chart und Erstattungen */}
-            {hasKmData && hasErstattungen && (
-              <hr className="border-border my-4" />
-            )}
-
-            {/* Erstattungen pro Abrechnungstraeger */}
-            {hasErstattungen && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Banknote size={18} className="text-emerald-500" />
-                  <h3 className="text-sm font-medium text-value">Erstattungen</h3>
-                </div>
-                <table className="table-auto w-full text-sm">
-                  <thead>
-                    <tr>
-                      <th className="text-left text-muted font-normal pb-2">Abrechnungstr&auml;ger</th>
-                      <th className="text-right text-muted font-normal pb-2">Gesamt (EUR)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(erstattungenProTraeger)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([traeger, betrag]) => (
-                        <tr key={traeger} className="border-b border-border">
-                          <td className="py-2 text-value">{getTraegerName(traeger)}</td>
-                          <td className="py-2 text-right text-value">{betrag.toFixed(2).replace('.', ',')} &euro;</td>
-                        </tr>
-                      ))}
-                    <tr className="font-semibold">
-                      <td className="pt-2 text-value">Gesamt</td>
-                      <td className="pt-2 text-right text-value">{gesamtErstattung.toFixed(2).replace('.', ',')} &euro;</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
-        <div className="flex justify-end mt-4">
-          <button
-            onClick={() => onNavigate && onNavigate('abrechnungen')}
-            className="text-sm px-3 py-1.5 rounded-card bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
-          >
-            Monatsübersicht öffnen →
-          </button>
-        </div>
       </div>
     </div>
   );
