@@ -7,6 +7,20 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+- Redesign 2026, Fundament: Design-Token-Set (`tokens.css`) mit zwei eigenständig abgestimmten Modi (hell/dunkel), Statusklassen Erfasst/Eingereicht/Erstattet, Toast- und Empty-State-Bausteine, `.num`-Utility für Zahlen in JetBrains Mono
+- PWA-Grundlagen: Manifest mit Icons und Shortcuts, self-hosted Fonts (Instrument Sans, JetBrains Mono), neues App-Icon inkl. Favicon
+
+### Changed
+- Tailwind auf semantische Farbnamen umgestellt (brand/accent/ok/danger/surface/line/bg/text); alte primary-/secondary-Klassen laufen übergangsweise über Aliasse weiter
+- Komponentenklassen nach Design-Spec: Eingabefelder 52 px/16 px (kein iOS-Zoom mehr), Buttons 48 px, Icon-Buttons 48×48 px, einheitlicher Fokusring ohne Layout-Sprung
+- Theme-Auswahl auf Hell/Dunkel/System reduziert (Default: Systemeinstellung); gespeicherte alte Theme-Werte werden migriert
+- index.html: deutsche Sprache/Beschreibung, Titel „Fahrtenbuch", dynamische theme-color
+
+### Removed
+- Die neun wählbaren Farbthemes (`themes.css`) und die globale Transition auf allen Elementen (`darkMode.css`)
+- CRA-Reste (logo192/logo512, Google-Fonts-Link, Standard-Manifest)
+
 ### Security
 - IDOR behoben: Erstattungssätze fremder Nutzer waren les-, änder- und löschbar (Ownership-Check auf Abrechnungsträger)
 - IDOR behoben: Mitfahrer fremder Fahrten waren änder- und löschbar (Fahrt-Ownership-Prüfung)
