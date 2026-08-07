@@ -16,6 +16,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - EmptyState-Komponente (gestrichelter Rahmen, Icon-Fläche, Primäraktion)
 - Zweistufiger Erfassungsflow als Sheet: „Wohin?" (Ortsliste nach Häufigkeit mit Distanz vom Startort, Startort/Datum antippbar, freie Zieleingabe) und „Bestätigen" (km · € live aus dem Erstattungssatz, Anlass-Chips aus dem Verlauf des Ziels, Rückfahrt-Switch mit Verlaufs-Heuristik, Trägerauswahl); Speichern optimistisch mit Toast + „Rückgängig", Rückfahrt legt eine zweite Fahrt an
 - `useErfassung().open(prefill?)` als zentraler Einstieg für alle „Neue Fahrt"-Aktionen (Prefill-Signatur für „Wiederholen"/FAB bereits enthalten)
+- Dashboard komplett neu (mobil + Desktop): Hero-Karte mit dem ältesten nicht eingereichten Monat („Alles abgerechnet" als Erfolgszustand), „Ein Tipp genügt"-Favoriten-Kacheln (legen die Fahrt sofort an, Toast mit „Rückgängig"), „Zuletzt" mit Wiederholen-Button, FAB über der Bottom-Nav; Desktop mit tageszeitabhängiger Begrüßung, Trägerkacheln im Hero, Karten „{Monat} bisher"/„Unterwegs", Tabelle „Letzte Fahrten" und Kilometer-Chart (Balkenfarbe = Monatsstatus)
 
 ### Changed
 - Tailwind auf semantische Farbnamen umgestellt (brand/accent/ok/danger/surface/line/bg/text); alte primary-/secondary-Klassen laufen übergangsweise über Aliasse weiter
@@ -30,6 +31,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die neun wählbaren Farbthemes (`themes.css`) und die globale Transition auf allen Elementen (`darkMode.css`)
 - CRA-Reste (logo192/logo512, Google-Fonts-Link, Standard-Manifest)
 - `NotificationModal` (Bestätigungs-/Hinweis-Modal) — vollständig durch Toasts ersetzt; alter Header- und Tab-Streifen zugunsten von Bottom-Nav/Sidebar
+- Alte Dashboard-Bausteine (KPI-Cards, Jahres-Statistik-Chart, Erstattungstabelle, Inline-Bearbeiten) sowie ungenutzte `ProfileModal.js`/`HilfeModal.js`
 
 ### Security
 - IDOR behoben: Erstattungssätze fremder Nutzer waren les-, änder- und löschbar (Ownership-Check auf Abrechnungsträger)
@@ -40,6 +42,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Admin-Passwort wird nicht mehr bei jedem Container-Start auf `INITIAL_ADMIN_PASSWORD` zurückgesetzt (nur noch beim Erstlauf)
 
 ### Fixed
+- Dashboard hing am Monatsfilter des Fahrten-Tabs (KPIs/„Letzte Fahrten" zeigten je nach gewähltem Monat falsche Werte) — alle Dashboard-Daten werden jetzt eigenständig und ungefiltert abgeleitet
+- „Wiederholen" (früher „Nochmal") verlor die Mitfahrer der Vorlage-Fahrt — die neue Fahrt übernimmt sie jetzt vollständig
 - Bearbeiten einer Fahrt setzte den Abrechnungsträger asynchron auf den Default zurück und überschrieb den gespeicherten Wert (Mount-Effect in `FahrtForm` entfernt)
 - Excel-/PDF-Export und Monatsreport zählten Fahrten mit mehreren Mitfahrern mehrfach (Dedup nach Fahrt-ID)
 - Export rechnete hartcodiert mit 0,30 €/km statt mit den gepflegten, zeitabhängigen Erstattungssätzen des Trägers
