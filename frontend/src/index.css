@@ -4802,3 +4802,16 @@ code {
   background: var(--danger-soft);
   color: var(--danger);
 }
+
+/* Kurze Rückfrage-Sheets (Favoriten-Rückfahrt, Löschen) */
+.fav-frage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fav-frage-text {
+  font-size: 15px;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}

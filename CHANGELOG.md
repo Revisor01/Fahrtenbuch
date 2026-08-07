@@ -7,6 +7,10 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Changed
+- Favoriten-Tipp fragt jetzt kurz nach: „Hin- und Rückfahrt" oder „Nur Hinfahrt" (statt stillschweigend nur die Hinfahrt anzulegen)
+- Fahrt löschen fragt vor dem Löschen nach (Datum, Ziel, Anlass, km werden gezeigt); der Rückgängig-Toast bleibt als zweites Netz
+
 ### Fixed
 - Mitfahrer-Erstattung sauber getrennt: kein gemischter €/km-Satz mehr auf dem Dashboard („0,33 €/km"), stattdessen „davon x € Mitfahrer"; Fahrt-Betrag und Mitfahrer-Betrag werden getrennt berechnet (0,30 €/km Fahrt + 0,05 €/km je Mitfahrer)
 

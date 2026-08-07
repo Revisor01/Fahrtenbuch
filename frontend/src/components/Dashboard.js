@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { useErfassung } from '../contexts/ErfassungContext';
 import EmptyState from './ui/EmptyState';
+import Sheet from './ui/Sheet';
 import StatusBadge from './ui/StatusBadge';
 import { useToast } from './ui/Toast';
 import { statusFromAbrechnung } from '../utils/statusLabels';
@@ -309,8 +310,11 @@ function Dashboard({ onNavigate }) {
     setRecent((prev) => (prev || []).filter((f) => f.id !== tempId));
   };
 
-  // Favoriten-Tipp legt die Fahrt SOFORT an — kein Zwischenschritt, kein Modal.
-  const handleFavorit = (fav) => {
+  // Favoriten-Tipp: kurze Rückfrage „mit Rückfahrt?" (User-Feedback 07.08.),
+  // danach sofortige Anlage mit Undo-Toast.
+  const [favFrage, setFavFrage] = useState(null);
+
+  const handleFavorit = (fav, mitRueckfahrt = false) => {
     const km = findDistanz(fav.von_ort_id, fav.nach_ort_id);
     const tempId = `optimistisch-fav-${Date.now()}`;
     setRecent((prev) => [
@@ -341,20 +345,25 @@ function Dashboard({ onNavigate }) {
       }
     };
 
-    toast.success(`${fav.von_ort_name} → ${fav.nach_ort_name} für heute eingetragen.`, {
-      undo: () => {
-        op.abgebrochen = true;
-        if (op.id) {
-          entferneAngelegte();
-        } else {
-          entferneOptimistisch(tempId);
-        }
-      },
-    });
+    toast.success(
+      mitRueckfahrt
+        ? `${fav.von_ort_name} → ${fav.nach_ort_name} mit Rückfahrt eingetragen.`
+        : `${fav.von_ort_name} → ${fav.nach_ort_name} für heute eingetragen.`,
+      {
+        undo: () => {
+          op.abgebrochen = true;
+          if (op.id) {
+            entferneAngelegte();
+          } else {
+            entferneOptimistisch(tempId);
+          }
+        },
+      }
+    );
 
     (async () => {
       try {
-        const result = await executeFavorit(fav.id, false);
+        const result = await executeFavorit(fav.id, mitRueckfahrt);
         op.id = result?.id || null;
         if (op.abgebrochen && op.id) {
           await entferneAngelegte();
@@ -499,7 +508,7 @@ function Dashboard({ onNavigate }) {
         key={fav.id}
         type="button"
         className="dash-fav-tile"
-        onClick={() => handleFavorit(fav)}
+        onClick={() => setFavFrage(fav)}
       >
         <span className="dash-fav-ort">{fav.nach_ort_name}</span>
         <span>
@@ -856,6 +865,35 @@ function Dashboard({ onNavigate }) {
           </div>
         </section>
       </div>
+
+      {/* Rückfrage beim Favoriten-Tipp: Hinfahrt oder Hin- und Rückfahrt */}
+      <Sheet
+        isOpen={favFrage !== null}
+        onClose={() => setFavFrage(null)}
+        title={favFrage ? `${favFrage.von_ort_name} → ${favFrage.nach_ort_name}` : ''}
+      >
+        {favFrage && (
+          <div className="fav-frage">
+            <p className="fav-frage-text">
+              {[favFrage.anlass, heuteLang].filter(Boolean).join(' · ')}
+            </p>
+            <button
+              type="button"
+              className="btn-primary w-full"
+              onClick={() => { handleFavorit(favFrage, true); setFavFrage(null); }}
+            >
+              Hin- und Rückfahrt
+            </button>
+            <button
+              type="button"
+              className="btn-secondary w-full"
+              onClick={() => { handleFavorit(favFrage, false); setFavFrage(null); }}
+            >
+              Nur Hinfahrt
+            </button>
+          </div>
+        )}
+      </Sheet>
     </div>
   );
 }
