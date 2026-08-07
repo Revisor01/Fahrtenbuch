@@ -16,6 +16,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Dashboard „Unterwegs": zeigt das Einreich-Datum („am 05.04. · seit 124 Tagen", heute = „heute")
 
 ### Changed
+- Info- und Neuigkeiten-Dialog ins neue Design umgezogen (Sheet statt Alt-Modal); Impressum und Datenschutzerklärung als Unteransichten mit Zurück-Navigation statt gestapelter Modals
+- Verwaltung (Admin): Benutzer-Übersicht als Tabelle (desktop) bzw. gestapelte Zeilenliste (mobil) statt Kacheln — Spalten Benutzer, E-Mail (+ Verifiziert-Status), Rolle, Aktionen; Anlegen/Bearbeiten als Sheet, Löschen weiter mit Inline-Zweischritt
 - Dashboard desktop neu komponiert: Vierer-Kachel-Grid oben (Noch nicht eingereicht · Monat bisher · Unterwegs · Kilometer-Chart), darunter Favoriten, unten „Letzte Fahrten" in voller Breite mit ↻-Schnellbutton pro Zeile (Fahrt für heute wiederholen)
 
 ### Added
