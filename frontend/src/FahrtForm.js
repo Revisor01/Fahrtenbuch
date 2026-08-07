@@ -6,8 +6,11 @@ import axios from 'axios';
 import Modal from './Modal';
 import AddressAutocomplete from './components/AddressAutocomplete';
 
+// Bearbeiten einer bestehenden Fahrt (Edit-Modal). Das Anlegen neuer Fahrten
+// läuft seit dem Redesign 2026 ausschließlich über den zweistufigen
+// Erfassungsflow (components/erfassung/ErfassungsFlow.js, useErfassung()).
 function FahrtForm({ editData, onUpdate, onCancel }) {
-  const { orte, addFahrt, fetchMonthlyData, showNotification, setFahrten, fahrten, abrechnungstraeger, setAbrechnungstraeger, addOrt, fetchOrte, refreshAllData } = useContext(AppContext);
+  const { orte, showNotification, abrechnungstraeger, addOrt, refreshAllData } = useContext(AppContext);
   const [mitfahrer, setMitfahrer] = useState([]);
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
@@ -29,7 +32,6 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     manuelleKilometer: '',
     abrechnung: ''
   });
-  const [addRueckfahrt, setAddRueckfahrt] = useState(false);
   const [useEinmaligenVonOrt, setUseEinmaligenVonOrt] = useState(false);
   const [useEinmaligenNachOrt, setUseEinmaligenNachOrt] = useState(false);
 
@@ -82,23 +84,11 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     fetchDistanz();
   }, [formData.vonOrtId, formData.nachOrtId, useEinmaligenVonOrt, useEinmaligenNachOrt]);
 
-  useEffect(() => {
-    const fetchAbrechnungstraeger = async () => {
-      try {
-        const response = await axios.get('/api/abrechnungstraeger/simple');
-        setAbrechnungstraeger(response.data.data.sort((a, b) => a.sort_order - b.sort_order));
-        // Setze den ersten Abrechnungsträger als Default, falls vorhanden
-        if (response.data.data.length > 0) {
-          setFormData(prev => ({...prev, abrechnung: response.data.data[0].id}));
-        }
-      } catch (error) {
-        console.error('Fehler beim Laden der Abrechnungsträger:', error);
-        showNotification('Fehler', 'Abrechnungsträger konnten nicht geladen werden');
-      }
-    };
-    fetchAbrechnungstraeger();
-  }, []);
-  
+  // Bugfix Redesign R3: Der frühere Mount-Effect setzte den Abrechnungsträger
+  // asynchron auf den Default und überschrieb damit im Edit-Modus den
+  // bestehenden Wert der Fahrt. Die Trägerliste kommt aus dem AppContext
+  // (refreshAllData) — hier wird kein Default mehr gesetzt.
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -132,55 +122,14 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       mitfahrer: mitfahrer.filter(m => m.richtung === 'hin' || m.richtung === 'hin_rueck')
     };
 
-    // Edit mode: update existing trip via PUT
-    if (editData && onUpdate) {
-      try {
-        await axios.put(`/api/fahrten/${editData.id}`, fahrtData);
-        showNotification("Erfolg", "Fahrt wurde aktualisiert.");
-        onUpdate();
-        return;
-      } catch (error) {
-        console.error('Fehler beim Aktualisieren:', error);
-        showNotification("Fehler", "Aenderungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
-        return;
-      }
-    }
-
+    // Nur noch Edit-Modus: bestehende Fahrt per PUT aktualisieren
     try {
-      await addFahrt(fahrtData);
-      
-      if (addRueckfahrt) {
-        const rueckfahrtData = {
-          ...fahrtData,
-          vonOrtId: fahrtData.nachOrtId,
-          nachOrtId: fahrtData.vonOrtId,
-          einmaligerVonOrt: fahrtData.einmaligerNachOrt,
-          einmaligerNachOrt: fahrtData.einmaligerVonOrt,
-          anlass: `Rückfahrt: ${fahrtData.anlass}`,
-          mitfahrer: mitfahrer.filter(m => m.richtung === 'rueck' || m.richtung === 'hin_rueck')
-        };
-        await addFahrt(rueckfahrtData);
-      }
-      
-      // Reset form data and states
-      setFormData({
-        datum: '',
-        vonOrtId: '',
-        nachOrtId: '',
-        einmaligerVonOrt: '',
-        einmaligerNachOrt: '',
-        anlass: '',
-        manuelleKilometer: '',
-        abrechnung: abrechnungstraeger.length > 0 ? abrechnungstraeger[0].id : ''
-      });
-      setUseEinmaligenVonOrt(false);
-      setUseEinmaligenNachOrt(false);
-      setAddRueckfahrt(false);
-      setMitfahrer([]);
-      showNotification("Erfolg", "Die neue Fahrt wurde erfolgreich hinzugefügt.");
+      await axios.put(`/api/fahrten/${editData.id}`, fahrtData);
+      showNotification("Erfolg", "Fahrt wurde aktualisiert.");
+      if (onUpdate) onUpdate();
     } catch (error) {
-      console.error('Fehler beim Hinzufügen der Fahrt:', error);
-      showNotification("Fehler", "Beim Hinzufügen der Fahrt ist ein Fehler aufgetreten.");
+      console.error('Fehler beim Aktualisieren:', error);
+      showNotification("Fehler", "Aenderungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
     }
   };
   
@@ -207,7 +156,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
   };
   
   return (
-    <div className={editData ? '' : 'card-container'}>
+    <div>
     <form onSubmit={handleSubmit} className="space-y-6">
     {/* Basis-Informationen */}
     <div className="form-row">
@@ -388,18 +337,8 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     </div>
     </div>
     
-    {/* Checkboxen und Buttons */}
-    <div className="flex flex-wrap items-center gap-4">
-    <label className="checkbox-label">
-    <input
-    type="checkbox"
-    checked={addRueckfahrt}
-    onChange={(e) => setAddRueckfahrt(e.target.checked)}
-    className="checkbox-input"
-    />
-    <span className="text-xs text-label">Rückfahrt anlegen</span>
-    </label>
-    
+    {/* Buttons */}
+    <div className="flex flex-wrap items-center justify-end gap-4">
     <div className="button-group">
     <div className="button-group-stack">
     <button
@@ -415,7 +354,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       </button>
     )}
     <button type="submit" className="btn-primary">
-    {editData ? 'Fahrt speichern' : 'Speichern'}
+    Fahrt speichern
     </button>
     </div>
     </div>
