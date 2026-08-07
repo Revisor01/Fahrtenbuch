@@ -3817,7 +3817,9 @@ code {
 .abr-matrix-detail-fuss {
   display: flex;
   justify-content: flex-end;
-  padding: 0 16px;
+  padding: 0;
+  /* nach rechts außen aus dem Summen-Einzug herausziehen (176px − 24px Rand) */
+  margin-right: -152px;
 }
 
 /* ---------- Export-Sheet: Zeitraum-Wahl + Betrag je Träger ---------- */

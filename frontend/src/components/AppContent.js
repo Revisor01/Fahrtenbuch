@@ -95,9 +95,10 @@ function AppContent() {
   const initials = (user?.username || '?').slice(0, 2).toUpperCase();
   const roleLabel = isAdmin ? 'Administrator' : 'Nutzer:in';
 
-  // „Mehr" ist aktiv, wenn Einstellungen oder Verwaltung offen sind
-  const isNavItemActive = (id) =>
-    activeTab === id || (id === 'einstellungen' && activeTab === 'verwaltung');
+  // Verwaltung hat in der Sidebar einen eigenen Eintrag — mobil (ohne eigenen
+  // Eintrag) markiert „Einstellungen" auch die Verwaltung als aktiv
+  const isNavItemActive = (id, mobil = false) =>
+    activeTab === id || (mobil && id === 'einstellungen' && activeTab === 'verwaltung');
 
   const handleNavClick = (id) => {
     setActiveTab(id);
@@ -241,8 +242,8 @@ function AppContent() {
                 key={item.id}
                 type="button"
                 onClick={() => handleNavClick(item.id)}
-                className={`bottom-nav-item${isNavItemActive(item.id) ? ' is-active' : ''}`}
-                aria-current={isNavItemActive(item.id) ? 'page' : undefined}
+                className={`bottom-nav-item${isNavItemActive(item.id, true) ? ' is-active' : ''}`}
+                aria-current={isNavItemActive(item.id, true) ? 'page' : undefined}
               >
                 <span className="bottom-nav-icon">
                   <Icon size={19} />
