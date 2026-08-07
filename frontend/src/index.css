@@ -2986,6 +2986,26 @@ code {
   }
 }
 
+/* < 768 Monatskarten, ab 768 Matrix (konsistent zur App-Shell; zwischen
+   768 und 1023 scrollt die Matrix bei Bedarf horizontal in der Karte) */
+.abr-mobile {
+  display: block;
+}
+
+.abr-desktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .abr-mobile {
+    display: none;
+  }
+
+  .abr-desktop {
+    display: block;
+  }
+}
+
 /* ---------- Kopf mobil ---------- */
 .abr-m-kopf {
   display: flex;
@@ -3236,6 +3256,192 @@ code {
 .abr-download-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+/* ---------- Desktop-Kopf: Titel 30px/600 + Untertitel, rechts
+   Jahr-Wahl, „Zeitraum-Export" und „{Monat} einreichen" ---------- */
+.abr-d-kopf {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.abr-d-titel {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+.abr-d-untertitel {
+  font-size: 16px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+
+.abr-d-aktionen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---------- Matrix Monat × Träger ---------- */
+.abr-matrix-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+/* Ab fünf Trägern horizontal scrollbar, Monatsspalte klebt */
+.abr-matrix-scroll {
+  overflow-x: auto;
+}
+
+.abr-matrix-head,
+.abr-matrix-row {
+  display: grid;
+  align-items: center;
+  column-gap: 12px;
+  padding-right: 24px;
+}
+
+.abr-matrix-head {
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.abr-matrix-head > div {
+  padding: 12px 0;
+}
+
+.abr-matrix-row {
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.abr-matrix-row > div {
+  padding: 16px 0;
+}
+
+.abr-matrix-row:hover {
+  background: var(--surface-2);
+}
+
+.abr-matrix-row:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--brand), inset 0 0 0 4px var(--brand-soft);
+}
+
+.abr-matrix-row:last-child {
+  border-bottom: none;
+}
+
+/* Klebende Monatsspalte: streckt sich über die Zeilenhöhe und trägt
+   den Zeilen-Hintergrund, damit beim Scrollen nichts durchscheint */
+.abr-td-monat {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--surface);
+  padding-left: 24px !important;
+}
+
+.abr-matrix-head .abr-td-monat {
+  background: var(--bg);
+}
+
+.abr-matrix-row:hover .abr-td-monat {
+  background: var(--surface-2);
+}
+
+.abr-td-monat-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.abr-td-monat-km {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Trägerzellen: Statuspunkt + Wort 14px/600; kein Vorgang → „—" */
+.abr-td-status .status-dot {
+  font-size: 14px;
+}
+
+.abr-td-leer {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.abr-td-summe,
+.abr-td-summe-head {
+  text-align: right;
+}
+
+.abr-td-summe {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.abr-td-aktion {
+  text-align: right;
+}
+
+.abr-td-aktion .abr-link {
+  min-height: 0;
+}
+
+.abr-td-laeuft {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+/* Aufgeklappte Detail-Zeile („Details"): Trägerzeilen + Aktionen; klebt
+   links, damit sie beim horizontalen Scrollen lesbar bleibt */
+.abr-matrix-detail {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.abr-matrix-detail-inner {
+  position: sticky;
+  left: 0;
+  max-width: 720px;
+  padding: 0 24px 8px 12px;
+}
+
+.abr-matrix-detail-inner .abr-traeger-row:first-child {
+  border-top: none;
+}
+
+.abr-matrix-detail-leer {
+  font-size: 14px;
+  color: var(--text-2);
+  padding: 14px 16px;
+}
+
+.abr-matrix-detail-fuss {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 16px;
 }
 
 /* ---------- Export-Sheet: Zeitraum-Wahl + Betrag je Träger ---------- */
