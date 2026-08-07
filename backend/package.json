@@ -21,10 +21,9 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
-    "mysql2": "^2.3.0",
+    "mysql2": "^3.23.2",
     "nodemailer": "^6.9.16",
     "pdfkit": "^0.18.0",
-    "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
