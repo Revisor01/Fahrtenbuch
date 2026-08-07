@@ -11,7 +11,7 @@ import React, { useEffect, useRef } from 'react';
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-function Sheet({ isOpen, onClose, title, ariaLabel, children }) {
+function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   const panelRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -72,7 +72,7 @@ function Sheet({ isOpen, onClose, title, ariaLabel, children }) {
       <div className="sheet-overlay" onClick={onClose} aria-hidden="true" />
       <div
         ref={panelRef}
-        className="sheet-panel"
+        className={`sheet-panel${wide ? ' sheet-panel-wide' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel || title}
