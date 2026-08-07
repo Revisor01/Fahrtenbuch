@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { AuthLogo } from './components/LoginPage';
 
 export default function VerifyEmail() {
   const [status, setStatus] = useState({ type: '', message: '' });
@@ -44,27 +45,28 @@ export default function VerifyEmail() {
   }, [location.search, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-    <div className="card-container w-full max-w-md">
-    <h2 className="text-lg font-medium text-value text-center mb-6">
-    E-Mail Verifizierung
-    </h2>
-    
+    <div className="auth-page">
+    <div className="auth-box">
+    <AuthLogo />
+    <h1 className="auth-titel">E-Mail-Verifizierung</h1>
+    <div className="auth-sub">Fahrtenbuch</div>
+
+    <div className="auth-card">
     {status.message && (
       <div className={status.type === 'success' ? 'status-success' : 'status-error'}>
       {status.message}
       </div>
     )}
-    
+
     {status.type === 'error' && (
-      <div className="flex justify-center mt-6">
       <button
       onClick={() => navigate('/')}
-      className="btn-primary">
-      Zurück zum Dashboard
+      className="auth-btn"
+      style={{ marginTop: 16 }}>
+      Zurück zur Anmeldung
       </button>
-      </div>
     )}
+    </div>
     </div>
     </div>
   );

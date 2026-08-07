@@ -3,7 +3,6 @@ import './index.css';
 import LandingPage from './LandingPage';
 import VerifyEmail from './VerifyEmail';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ResetPassword from './ResetPassword';
 import SetPassword from './SetPassword';
 import { ThemeProvider } from './ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
@@ -26,7 +25,7 @@ function App() {
     <Routes>
     <Route path="/help" element={<LandingPage />} />
     <Route path="/verify-email" element={<VerifyEmail />} />
-    <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/reset-password" element={<SetPassword />} />
     <Route path="/set-password" element={<SetPassword />} />
     <Route path="/*" element={<AppContent />} />
     </Routes>
