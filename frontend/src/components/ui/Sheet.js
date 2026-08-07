@@ -11,7 +11,7 @@ import React, { useEffect, useRef } from 'react';
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-function Sheet({ isOpen, onClose, title, children }) {
+function Sheet({ isOpen, onClose, title, ariaLabel, children }) {
   const panelRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -75,7 +75,7 @@ function Sheet({ isOpen, onClose, title, children }) {
         className="sheet-panel"
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={ariaLabel || title}
         tabIndex={-1}
       >
         <div className="sheet-handle" aria-hidden="true" />
