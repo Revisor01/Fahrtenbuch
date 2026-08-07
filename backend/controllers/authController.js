@@ -42,10 +42,41 @@ exports.login = async (req, res) => {
     }
 };
 
+// Timing-sicherer String-Vergleich (bei unterschiedlicher Länge normal ungleich)
+function sicherGleich(a, b) {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 exports.register = async (req, res) => {
-  const { username, email } = req.body;
-  
+  const { username, email, registrationCode } = req.body;
+
   try {
+    // Serverseitige Registrierungs-Gates (abwärtskompatibel: greifen nur bei gesetzter,
+    // nicht-leerer Env-Variable — Docker-Compose liefert für unset Variablen Leerstrings)
+    if (process.env.ALLOW_REGISTRATION && process.env.ALLOW_REGISTRATION !== 'true') {
+      return res.status(403).json({ message: 'Registrierung ist deaktiviert' });
+    }
+
+    if (process.env.ALLOWED_EMAIL_DOMAINS) {
+      const erlaubteDomains = process.env.ALLOWED_EMAIL_DOMAINS
+        .split(',')
+        .map(d => d.trim().toLowerCase())
+        .filter(Boolean);
+      const emailDomain = (email.split('@')[1] || '').toLowerCase();
+      if (!erlaubteDomains.includes(emailDomain)) {
+        return res.status(403).json({ message: 'Diese E-Mail-Domain ist nicht für die Registrierung zugelassen' });
+      }
+    }
+
+    if (process.env.REGISTRATION_CODE) {
+      if (!registrationCode || !sicherGleich(registrationCode, process.env.REGISTRATION_CODE)) {
+        return res.status(403).json({ message: 'Ungültiger Registrierungscode' });
+      }
+    }
+
     // Prüfe ob Benutzer bereits existiert
     const [existingUsers] = await db.execute(
       'SELECT u.*, p.email FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id WHERE u.username = ? OR p.email = ?',

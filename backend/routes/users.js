@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const userController = require('../controllers/userController');
 const User = require('../models/User');  // Wichtig: User-Model importieren
 const {
@@ -11,8 +12,16 @@ const {
 const { validate } = require('../middleware/validate');
 const { createUserSchema, updateUserSchema, resetPasswordRequestSchema, resetPasswordSchema, setPasswordSchema, verifyEmailSchema, resendVerificationSchema, changePasswordSchema } = require('../schemas/userSchemas');
 
+const resetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 60 Minuten
+  max: 5, // max 5 Reset-Anfragen pro IP
+  message: { message: 'Zu viele Passwort-Reset-Anfragen. Bitte in einer Stunde erneut versuchen.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Public routes first
-router.post('/reset-password/request', validate(resetPasswordRequestSchema), userController.requestPasswordReset);
+router.post('/reset-password/request', resetLimiter, validate(resetPasswordRequestSchema), userController.requestPasswordReset);
 router.post('/reset-password/verify', validate(resetPasswordSchema), userController.resetPassword);
 router.post('/set-password', validate(setPasswordSchema), userController.setPassword);
 router.post('/verify-email', validate(verifyEmailSchema), userController.verifyEmail);
