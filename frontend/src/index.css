@@ -1625,13 +1625,33 @@ code {
 }
 
 /* ============================================================
-   Dashboard (Phase R4) — mobil nach Design-Spec Screen 1
+   Dashboard (Phase R4) — mobil nach Design-Spec Screen 1,
+   Desktop nach Screen 5 (< 768 mobil, ab 768 Desktop-Layout,
+   volles Zweispalten-Raster erst ab 1024)
    ============================================================ */
 
 /* Shell-Padding mobil ist 16px; +4px ergibt die geforderten 20px Ränder */
 @media (max-width: 767px) {
   .dashboard {
     padding: 0 4px;
+  }
+}
+
+.dash-mobile {
+  display: block;
+}
+
+.dash-desktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dash-mobile {
+    display: none;
+  }
+
+  .dash-desktop {
+    display: block;
   }
 }
 
@@ -1966,4 +1986,382 @@ code {
   .dash-fab {
     display: none;
   }
+}
+
+/* ---------- Dashboard Desktop ---------- */
+
+/* Kopf: Begrüßung 30px/600 + Datum, rechts Primärbutton 44px */
+.dash-d-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.dash-d-gruss {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  margin: 0;
+}
+
+.dash-d-datum {
+  font-size: 16px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+
+.dash-d-btn {
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--r-btn);
+  background: var(--brand);
+  color: var(--on-brand);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 150ms ease;
+}
+
+.dash-d-btn:hover {
+  background: var(--brand-strong);
+}
+
+.dash-d-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+/* Reihen: einspaltig 768–1023, Raster 1.55fr/1fr ab 1024 */
+.dash-d-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+@media (min-width: 1024px) {
+  .dash-d-row {
+    grid-template-columns: 1.55fr 1fr;
+  }
+}
+
+/* Hero Desktop: --brand, 28px Padding, Betrag 52px */
+.dash-d-hero {
+  background: var(--brand);
+  border-radius: var(--r-card);
+  padding: 28px;
+  color: var(--on-brand);
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-d-hero-betragzeile {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dash-d-hero-betrag {
+  font-size: 52px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.dash-d-hero-aus {
+  font-size: 16px;
+  opacity: 0.75;
+}
+
+.dash-d-hero-unten {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex: 1;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.dash-d-hero-tile {
+  flex: 1;
+  min-width: 130px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-btn);
+  padding: 14px 16px;
+}
+
+.dash-d-hero-tile-name {
+  font-size: 13px;
+  opacity: 0.75;
+  margin-bottom: 3px;
+}
+
+.dash-d-hero-tile-betrag {
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.dash-d-hero-btn {
+  height: 48px;
+  padding: 0 22px;
+  border: none;
+  border-radius: var(--r-btn);
+  background: var(--on-brand);
+  color: var(--brand);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Erfolgszustand im Desktop-Raster ohne Extra-Abstand */
+.dash-desktop .dash-hero-ok {
+  margin-bottom: 0;
+}
+
+/* Rechte Spalte: zwei gestapelte Karten */
+.dash-d-stack {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 18px;
+}
+
+.dash-d-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dash-d-card-label {
+  margin-bottom: 8px;
+}
+
+.dash-d-card-sub {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-top: 6px;
+}
+
+/* „{Monat} bisher": km Mono 30px, Betrag Mono 17px */
+.dash-d-bisher-zeile {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.dash-d-bisher-km {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.dash-d-bisher-betrag {
+  font-size: 17px;
+  color: var(--text-2);
+}
+
+/* „Unterwegs": Punkt + Wort + Betrag, Untertitel mit 20px Einzug */
+.dash-d-unterwegs-zeile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-d-unterwegs-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.dash-d-unterwegs-text {
+  font-size: 15px;
+  color: var(--text);
+  flex: 1;
+}
+
+.dash-d-unterwegs-betrag {
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+.dash-d-unterwegs-sub {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 6px;
+  padding-left: 20px;
+}
+
+/* Tabelle „Letzte Fahrten" */
+.dash-d-tablecard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+
+.dash-d-tabletitel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dash-d-tablescroll {
+  overflow-x: auto;
+}
+
+.dash-d-tablehead,
+.dash-d-tablerow {
+  display: grid;
+  grid-template-columns: 82px 1fr 132px 68px 78px 108px;
+  min-width: 560px;
+  padding: 8px 22px;
+  align-items: center;
+}
+
+.dash-d-tablehead {
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.dash-d-tablerow {
+  padding: 13px 22px;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 150ms ease;
+}
+
+.dash-d-tablerow:hover {
+  background: var(--surface-2);
+}
+
+.dash-d-tablerow:last-child {
+  border-bottom: none;
+}
+
+.dash-d-th-num {
+  text-align: right;
+}
+
+.dash-d-td-datum {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.dash-d-td-anlass {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.dash-d-td-route {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.dash-d-td-traeger {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.dash-d-td-zahl {
+  font-size: 14px;
+  color: var(--text);
+  text-align: right;
+}
+
+.dash-d-td-status {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Chart „Kilometer {Jahr}": 8 Balken, max. 150px, Farbe = Monatsstatus */
+.dash-d-chartcard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 22px 24px;
+}
+
+.dash-d-charttitel {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+/* Balkenhöhen kommen in px (max. 150) inline aus dem Monats-km-Anteil;
+   die Monatsinitiale sitzt unterhalb, daher keine feste Container-Höhe */
+.dash-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  min-height: 150px;
+}
+
+.dash-chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dash-chart-bar {
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+}
+
+.dash-chart-monat {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.dash-chart-legende {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.dash-chart-legende > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dash-chart-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
