@@ -3,7 +3,9 @@ import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { useErfassung } from '../contexts/ErfassungContext';
 import EmptyState from './ui/EmptyState';
+import StatusBadge from './ui/StatusBadge';
 import { useToast } from './ui/Toast';
+import { statusFromAbrechnung } from '../utils/statusLabels';
 import { Star } from 'lucide-react';
 
 // Dashboard (Redesign 2026, Phase R4).
@@ -32,6 +34,23 @@ const monatName = (ym) => {
 
 const monatJahr = (ym) => `${monatName(ym)} ${ym.slice(0, 4)}`;
 
+// Monatsstatus = Minimum der Trägerstatus (offen < eingereicht < erhalten).
+// Träger ohne Erstattung zählen nicht; Monat mit Fahrten aber ohne
+// Erstattungen gilt als „Erfasst".
+const STATUS_RANG = { offen: 0, eingereicht: 1, erhalten: 2 };
+
+function monatsStatus(md) {
+  if (!md) return null;
+  const traeger = Object.entries(md.erstattungen || {}).filter(([, b]) => b > 0);
+  if (traeger.length === 0) return md.fahrtenCount > 0 ? 'offen' : null;
+  let min = 'erhalten';
+  traeger.forEach(([id]) => {
+    const s = statusFromAbrechnung(md.abrechnungsStatus?.[id]);
+    if (STATUS_RANG[s] < STATUS_RANG[min]) min = s;
+  });
+  return min;
+}
+
 // Offene (weder eingereichte noch erstattete) Träger eines Monats
 function offeneTraeger(md) {
   return Object.entries(md.erstattungen || {}).filter(([id, betrag]) => {
@@ -52,6 +71,12 @@ function traegerKuerzel(name) {
   return String(name).slice(0, 2).toUpperCase();
 }
 
+const CHART_FARBEN = {
+  erhalten: 'var(--ok)',
+  eingereicht: 'var(--accent)',
+  offen: 'var(--brand)',
+};
+
 function Dashboard({ onNavigate }) {
   const {
     monthlyData,
@@ -66,6 +91,12 @@ function Dashboard({ onNavigate }) {
   const erfassung = useErfassung();
 
   const currentYM = new Date().toISOString().slice(0, 7);
+
+  const byYM = useMemo(() => {
+    const map = {};
+    monthlyData.forEach((md) => { map[md.yearMonth] = md; });
+    return map;
+  }, [monthlyData]);
 
   const getTraegerName = (id) => {
     if (String(id) === 'mitfahrer') return 'Mitfahrer:innen';
@@ -91,7 +122,69 @@ function Dashboard({ onNavigate }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthlyData, abrechnungstraeger, currentYM]);
 
-  // ---- „Zuletzt": eigener, ungefilterter Abruf ----------------------------
+  // ---- „{Monat} bisher" (Desktop) -----------------------------------------
+  const aktuellerMonat = byYM[currentYM];
+  const bisher = {
+    km: aktuellerMonat?.totalKm || 0,
+    fahrten: aktuellerMonat?.fahrtenCount || 0,
+    betrag: aktuellerMonat?.totalErstattung || 0,
+  };
+  // Effektiver Durchschnittssatz über alle Träger (Erstattung/km)
+  const effSatz = bisher.km > 0 ? bisher.betrag / bisher.km : null;
+
+  // ---- „Unterwegs" (Desktop): ältester eingereichter, nicht erstatteter Monat
+  const unterwegs = useMemo(() => {
+    const istUnterwegs = (md, id) => {
+      const status = md.abrechnungsStatus?.[id];
+      return status?.eingereicht_am && !status?.erhalten_am;
+    };
+    const monate = monthlyData
+      .filter((md) =>
+        Object.entries(md.erstattungen || {}).some(([id, b]) => b > 0 && istUnterwegs(md, id))
+      )
+      .sort((a, b) => a.yearMonth.localeCompare(b.yearMonth));
+    if (monate.length === 0) return null;
+    const md = monate[0];
+    const eintraege = Object.entries(md.erstattungen || {}).filter(
+      ([id, b]) => b > 0 && istUnterwegs(md, id)
+    );
+    const fruehestes = eintraege
+      .map(([id]) => new Date(md.abrechnungsStatus[id].eingereicht_am))
+      .filter((d) => !Number.isNaN(d.getTime()))
+      .sort((a, b) => a - b)[0];
+    const tage = fruehestes
+      ? Math.max(0, Math.floor((Date.now() - fruehestes.getTime()) / 86400000))
+      : null;
+    return {
+      ym: md.yearMonth,
+      betrag: eintraege.reduce((sum, [, b]) => sum + Number(b || 0), 0),
+      tage,
+      traegerNamen: eintraege.map(([id]) => getTraegerName(id)).join(', '),
+      weitere: monate.length - 1,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monthlyData, abrechnungstraeger]);
+
+  // ---- Chart: die letzten 8 Monate, Farbe nach Monatsstatus ---------------
+  const chart = useMemo(() => {
+    const jetzt = new Date();
+    const monate = [];
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(jetzt.getFullYear(), jetzt.getMonth() - i, 1);
+      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const md = byYM[ym];
+      monate.push({
+        ym,
+        km: md?.totalKm || 0,
+        status: monatsStatus(md),
+        initiale: d.toLocaleDateString('de-DE', { month: 'narrow' }),
+      });
+    }
+    return monate;
+  }, [byYM]);
+  const chartMax = Math.max(...chart.map((c) => c.km), 1);
+
+  // ---- „Zuletzt"/„Letzte Fahrten": eigener, ungefilterter Abruf -----------
   // Die jüngsten Monate mit Fahrten (aus monthlyData), bis ≥ 5 Fahrten
   // abgedeckt sind — die Monatsreports liefern Erstattung + Mitfahrer je Fahrt.
   const [recent, setRecent] = useState(null); // null = lädt
@@ -133,6 +226,11 @@ function Dashboard({ onNavigate }) {
     laden();
     return () => { aktiv = false; };
   }, [monthlyData]);
+
+  const statusFuerFahrt = (fahrt) => {
+    const md = byYM[String(fahrt.datum).slice(0, 7)];
+    return statusFromAbrechnung(md?.abrechnungsStatus?.[fahrt.abrechnung]);
+  };
 
   const zielName = (fahrt) => fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
 
@@ -276,6 +374,22 @@ function Dashboard({ onNavigate }) {
   };
 
   // ---- Kopfdaten -----------------------------------------------------------
+
+  // Begrüßung tageszeitabhängig — Grenzen: 5–10 Uhr Morgen, 11–17 Uhr Tag,
+  // sonst Abend
+  const stunde = new Date().getHours();
+  const gruss = stunde >= 5 && stunde < 11
+    ? 'Guten Morgen'
+    : stunde >= 11 && stunde < 18
+      ? 'Guten Tag'
+      : 'Guten Abend';
+  const vorname = (user?.full_name || '').trim().split(/\s+/)[0] || user?.username || '';
+  const heuteLang = new Date().toLocaleDateString('de-DE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   const initialen = (() => {
     const fn = (user?.full_name || '').trim();
@@ -435,6 +549,163 @@ function Dashboard({ onNavigate }) {
         >
           +
         </button>
+      </div>
+
+      {/* ================= Desktop (≥768px, volles Raster ab 1024px) ================= */}
+      <div className="dash-desktop">
+        <div className="dash-d-head">
+          <div>
+            <h1 className="dash-d-gruss">{gruss}{vorname ? `, ${vorname}` : ''}</h1>
+            <div className="dash-d-datum">{heuteLang}</div>
+          </div>
+          <button type="button" className="dash-d-btn" onClick={() => erfassung.open()}>
+            + Neue Fahrt
+          </button>
+        </div>
+
+        <div className="dash-d-row">
+          {hero ? (
+            <section className="dash-d-hero">
+              <div className="dash-hero-label">Noch nicht eingereicht</div>
+              <div className="dash-d-hero-betragzeile">
+                <span className="dash-d-hero-betrag num">{formatEuro(hero.betrag)} €</span>
+                <span className="dash-d-hero-aus">aus {monatJahr(hero.ym)}</span>
+              </div>
+              <div className="dash-d-hero-unten">
+                {hero.traeger.map((t) => (
+                  <div key={t.id} className="dash-d-hero-tile">
+                    <div className="dash-d-hero-tile-name">{t.name}</div>
+                    <div className="dash-d-hero-tile-betrag num">{formatEuro(t.betrag)} €</div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="dash-d-hero-btn"
+                  onClick={() => onNavigate && onNavigate('abrechnungen')}
+                >
+                  {monatName(hero.ym)} abrechnen →
+                </button>
+              </div>
+            </section>
+          ) : heroErfolg}
+
+          <div className="dash-d-stack">
+            <section className="dash-d-card">
+              <div className="dash-label dash-d-card-label">{monatName(currentYM)} bisher</div>
+              <div className="dash-d-bisher-zeile">
+                <span className="dash-d-bisher-km num">{formatKm(bisher.km)} km</span>
+                <span className="dash-d-bisher-betrag num">{formatEuro(bisher.betrag)} €</span>
+              </div>
+              <div className="dash-d-card-sub">
+                {bisher.fahrten} {bisher.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
+                {effSatz !== null && (
+                  <> · <span className="num">{formatEuro(effSatz)}</span> €/km</>
+                )}
+              </div>
+            </section>
+            <section className="dash-d-card">
+              <div className="dash-label dash-d-card-label">Unterwegs</div>
+              {unterwegs ? (
+                <>
+                  <div className="dash-d-unterwegs-zeile">
+                    <span className="dash-d-unterwegs-dot" aria-hidden="true" />
+                    <span className="dash-d-unterwegs-text">{monatName(unterwegs.ym)} eingereicht</span>
+                    <span className="dash-d-unterwegs-betrag num">{formatEuro(unterwegs.betrag)} €</span>
+                  </div>
+                  <div className="dash-d-unterwegs-sub">
+                    {unterwegs.tage !== null && (
+                      <>seit {unterwegs.tage} {unterwegs.tage === 1 ? 'Tag' : 'Tagen'} · </>
+                    )}
+                    {unterwegs.traegerNamen}
+                    {unterwegs.weitere > 0 && (
+                      <> · +{unterwegs.weitere} {unterwegs.weitere === 1 ? 'weiterer Monat' : 'weitere Monate'}</>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="dash-d-card-sub">
+                  Kein eingereichter Monat wartet auf Erstattung.
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+
+        <div className="dash-d-row">
+          <section className="dash-d-tablecard">
+            <div className="dash-d-tabletitel">
+              <span>Letzte Fahrten</span>
+              <button
+                type="button"
+                className="dash-link"
+                onClick={() => onNavigate && onNavigate('fahrten')}
+              >
+                Alle ansehen
+              </button>
+            </div>
+            <div className="dash-d-tablescroll">
+              <div className="dash-d-tablehead">
+                <div>Datum</div>
+                <div>Anlass · Ziel</div>
+                <div>Träger</div>
+                <div className="dash-d-th-num">km</div>
+                <div className="dash-d-th-num">Betrag</div>
+                <div className="dash-d-th-num">Status</div>
+              </div>
+              {recent === null ? (
+                <div className="dash-zuletzt-laden">Fahrten werden geladen…</div>
+              ) : recent.length === 0 ? (
+                <div className="dash-zuletzt-laden">Noch keine Fahrten erfasst.</div>
+              ) : (
+                recent.map((fahrt) => (
+                  <div key={fahrt.id} className="dash-d-tablerow">
+                    <div className="dash-d-td-datum num">
+                      {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                    </div>
+                    <div>
+                      <div className="dash-d-td-anlass">{fahrt.anlass || '—'}</div>
+                      <div className="dash-d-td-route">
+                        {fahrt.von_ort_name || fahrt.einmaliger_von_ort} → {zielName(fahrt)}
+                      </div>
+                    </div>
+                    <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
+                    <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
+                    <div className="dash-d-td-zahl num">
+                      {fahrt.erstattung !== undefined ? formatEuro(fahrt.erstattung) : '—'}
+                    </div>
+                    <div className="dash-d-td-status">
+                      <StatusBadge status={statusFuerFahrt(fahrt)} variant="dot" />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          <section className="dash-d-chartcard">
+            <div className="dash-d-charttitel">Kilometer {new Date().getFullYear()}</div>
+            <div className="dash-chart-bars">
+              {chart.map((c) => (
+                <div key={c.ym} className="dash-chart-col">
+                  <div
+                    className="dash-chart-bar"
+                    style={{
+                      height: `${Math.max(Math.round((c.km / chartMax) * 150), c.km > 0 ? 4 : 2)}px`,
+                      background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
+                    }}
+                    title={`${monatJahr(c.ym)}: ${formatKm(c.km)} km`}
+                  />
+                  <div className="dash-chart-monat num">{c.initiale}</div>
+                </div>
+              ))}
+            </div>
+            <div className="dash-chart-legende">
+              <span><span className="dash-chart-swatch" style={{ background: 'var(--ok)' }} />Erstattet</span>
+              <span><span className="dash-chart-swatch" style={{ background: 'var(--accent)' }} />Eingereicht</span>
+              <span><span className="dash-chart-swatch" style={{ background: 'var(--brand)' }} />Erfasst</span>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
