@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthLogo } from './components/LoginPage';
+import { appConfigValue } from './utils/appConfig';
 
 // Passwort setzen/zurücksetzen im Anmelde-Layout (Spec Screen 8):
 // Vollfläche --brand, zentrierte Formularkarte. Bedient beide Routen —
@@ -66,7 +67,7 @@ export default function SetPassword() {
   ];
 
   const appTitle =
-    window.appConfig?.appTitle || process.env.REACT_APP_TITLE || 'Fahrtenbuch Kirchenkreis Dithmarschen';
+    appConfigValue('appTitle', process.env.REACT_APP_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
 
   return (
     <div className="auth-page">
