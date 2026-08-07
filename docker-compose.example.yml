@@ -30,6 +30,12 @@ services:
       - DEFAULT_ERSTATTUNG_TRAEGER=${DEFAULT_ERSTATTUNG_TRAEGER}
       - DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
       - DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
+      # Serverseitige Registrierungs-Gates — Pendants zu den REACT_APP_-Frontend-Variablen
+      # (die Frontend-ARGs steuern nur die UI-Anzeige, die Durchsetzung passiert hier).
+      # Unset = abwärtskompatibel: Registrierung offen, keine Domain-/Code-Pflicht.
+      - ALLOW_REGISTRATION=${ALLOW_REGISTRATION}
+      - ALLOWED_EMAIL_DOMAINS=${ALLOWED_EMAIL_DOMAINS}
+      - REGISTRATION_CODE=${REGISTRATION_CODE}
     restart: unless-stopped
     volumes:
       - fahrtenbuch_data:/app/data
