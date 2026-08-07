@@ -8,6 +8,14 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Fixed
+- Statuswechsel scheiterte, sobald irgendwo eine Mitfahrer-Erstattung existierte: die Spalte `abrechnungen.typ` enthält Träger-IDs und den Text „mitfahrer" gemischt, wodurch MySQL beim numerischen Vergleich die ganze Spalte casten wollte und abbrach — betraf Einreichen, Erstattet-Markieren und Zurücksetzen (fiel im Zeitraum-Modus auf, weil dort ein Monat mit Mitfahrern enthalten war)
+- Info-Dialog zeigte die Version des letzten GitHub-Releases (v1.2.0 von Mai 2025) und bei fehlender Netzverbindung „v1.0.0" — jetzt kommt sie aus dem eigenen Build
+
+### Changed
+- Statusmeldungen benennen die Aktion („Als erstattet markiert.", „Status zurückgesetzt — wieder ‚Erfasst'.") statt „wurde aktualisiert"; Backend-Fehlermeldungen erscheinen im Toast
+- Frontend-Version auf 2.2.0 gesetzt (war 1.6.0 und damit weit hinter dem Stand)
+
+### Fixed
 - Statusänderungen und alle anderen validierten Endpunkte antworteten bei Eingabefehlern mit einem Absturz (500) statt einer Meldung — Ursache: Zod 4 nennt die Fehlerliste `issues`, nicht `errors`
 - „Als erstattet markieren" ohne vorheriges Einreichen meldet jetzt verständlich „muss erst eingereicht werden" (409) statt eines Serverfehlers; die Backend-Meldung erscheint im Toast
 - Zeitraum-Übersicht: Monate ohne Vorgang zeigen einen neutralen Strich statt „Erfasst" (Backend liefert dazu die Beträge je Träger und Monat)
