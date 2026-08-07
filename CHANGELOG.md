@@ -7,6 +7,13 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+- Login zeigte den Platzhalter `DEFAULT_TITLE` statt des App-Titels (unersetzte `config.js`-Platzhalter zählen jetzt als „nicht gesetzt")
+- Dashboard-Tabelle: Routen-Text lief ohne Abstand in die Träger-Spalte
+
+### Changed
+- Navigation: „Mehr" heißt jetzt „Einstellungen" (mit Zahnrad-Icon)
+
 ### Added
 - Redesign 2026, Fundament: Design-Token-Set (`tokens.css`) mit zwei eigenständig abgestimmten Modi (hell/dunkel), Statusklassen Erfasst/Eingereicht/Erstattet, Toast- und Empty-State-Bausteine, `.num`-Utility für Zahlen in JetBrains Mono
 - PWA-Grundlagen: Manifest mit Icons und Shortcuts, self-hosted Fonts (Instrument Sans, JetBrains Mono), neues App-Icon inkl. Favicon

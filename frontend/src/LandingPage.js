@@ -5,6 +5,7 @@ import './index.css';
 import { ChevronDown, ChevronUp, Play, Book, ArrowLeft, Smartphone, Download, Car } from 'lucide-react';
 import { useTheme } from './ThemeContext';
 import { AppContext } from './contexts/AppContext';
+import { appConfigValue } from './utils/appConfig';
 
 // AccordionItem Komponente
 const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
@@ -96,7 +97,7 @@ const VideoCard = ({ title, description, thumbnail, videoUrl, duration }) => {
 export default function LandingPage() {
     const { isLoggedIn } = useContext(AppContext) || { isLoggedIn: false };
     const [openItem, setOpenItem] = useState(null);
-    const appTitle = window.appConfig?.appTitle || process.env.REACT_APP_TITLE || "Fahrtenbuch Kirchenkreis Dithmarschen";
+    const appTitle = appConfigValue('appTitle', process.env.REACT_APP_TITLE, "Fahrtenbuch Kirchenkreis Dithmarschen");
 
     const toggleItem = (index) => {
         setOpenItem(openItem === index ? null : index);

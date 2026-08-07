@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { Users, Home, Car, Receipt, MoreHorizontal } from 'lucide-react';
+import { Users, Home, Car, Receipt, Settings } from 'lucide-react';
 import EinstellungenView from './einstellungen/EinstellungenView';
 import FahrtenListe from './FahrtenListe';
 import InfoModal from './InfoModal';
@@ -31,7 +31,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Start', icon: Home },
   { id: 'fahrten', label: 'Fahrten', icon: Car },
   { id: 'abrechnungen', label: 'Abrechnung', icon: Receipt },
-  { id: 'einstellungen', label: 'Mehr', icon: MoreHorizontal },
+  { id: 'einstellungen', label: 'Einstellungen', icon: Settings },
 ];
 
 function AppContent() {
@@ -112,7 +112,7 @@ function AppContent() {
         <nav className="sidebar-nav" aria-label="Hauptnavigation">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
-            const label = item.id === 'einstellungen' ? 'Mehr' : item.label;
+            const label = item.label;
             return (
               <button
                 key={item.id}

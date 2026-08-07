@@ -2211,6 +2211,7 @@ code {
 .dash-d-tablerow {
   display: grid;
   grid-template-columns: 82px 1fr 132px 68px 78px 108px;
+  column-gap: 12px;
   min-width: 560px;
   padding: 8px 22px;
   align-items: center;

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { useToast } from './ui/Toast';
+import { appConfigValue } from '../utils/appConfig';
 
 // Anmeldung nach Spec Screen 8: Vollfläche --brand, Logo 52px in
 // rgba(255,255,255,.14), Titel 26px/600 --on-brand, Formularkarte
@@ -42,10 +43,10 @@ function LoginPage() {
     registrationCode: '',
   });
 
-  const appTitle = window.appConfig?.appTitle || process.env.REACT_APP_TITLE || 'Fahrtenbuch Kirchenkreis Dithmarschen';
-  const allowRegistration = window.appConfig?.allowRegistration === 'true' || process.env.REACT_APP_ALLOW_REGISTRATION === 'true';
-  const allowedEmailDomains = window.appConfig?.allowedEmailDomains || process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS;
-  const registrationCode = window.appConfig?.registrationCode || process.env.REACT_APP_REGISTRATION_CODE;
+  const appTitle = appConfigValue('appTitle', process.env.REACT_APP_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
+  const allowRegistration = appConfigValue('allowRegistration', process.env.REACT_APP_ALLOW_REGISTRATION) === 'true';
+  const allowedEmailDomains = appConfigValue('allowedEmailDomains', process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS);
+  const registrationCode = appConfigValue('registrationCode', process.env.REACT_APP_REGISTRATION_CODE);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
