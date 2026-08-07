@@ -1,25 +1,63 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "name": "Fahrtenbuch Kirchenkreis Dithmarschen",
+  "short_name": "Fahrtenbuch",
+  "description": "Dienstfahrten erfassen und monatlich abrechnen.",
+  "lang": "de",
+  "dir": "ltr",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "background_color": "#0F5257",
+  "theme_color": "#0F5257",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "logo192.png",
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "192x192"
+      "purpose": "any"
     },
     {
-      "src": "logo512.png",
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-monochrome.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "monochrome"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "shortcuts": [
+    {
+      "name": "Fahrt erfassen",
+      "short_name": "Erfassen",
+      "url": "/neu?source=pwa-shortcut",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Abrechnung",
+      "short_name": "Abrechnung",
+      "url": "/abrechnung?source=pwa-shortcut",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }
