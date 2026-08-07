@@ -22,3 +22,21 @@ Jede Phase trägt hier Annahmen, Abweichungen und offene Fragen ein.
 - **ThemeToggle-Platzierung:** Der Dreifach-Umschalter ersetzt den alten Sonne/Mond+Palette-Toggle in AppContent unverändert an Ort und Stelle; Feinstyling und Verlagerung in „Einstellungen → Darstellung" macht die Einstellungen-Phase.
 - **`viewport-fit=cover`** in index.html ergänzt (Voraussetzung für `env(safe-area-inset-bottom)` der späteren Bottom-Nav).
 - **`noscript`-Text** eingedeutscht (war CRA-Englisch) — Konsequenz aus lang="de".
+
+### Phase R2 (App-Shell + Kernkomponenten)
+
+- **Toast mit Aktion bleibt bis zum Klick (Spec), zusätzlich per Tipp auf die Meldung schließbar** — sonst gäbe es keinen Weg, einen nie geklickten „Rückgängig"-Toast loszuwerden. Toasts ohne Aktion: 5 s Standzeit.
+- **Toast-Viewport-Abstand mobil: `bottom: 90px + safe-area`** — approximiert „16 px über der Bottom-Nav" (Nav ≈ 74 px hoch). Exakte Kopplung an die Nav-Höhe folgt, falls die Screen-Phasen die Nav-Maße ändern.
+- **Sidebar ab 768 px statt erst ab 1024 px** (Zwischenbereich 768–1023): Spec erlaubt „232 px oder Icon-Leiste" — entschieden für volle 232 px, da der Inhalt dort ohnehin einspaltig läuft und keine zweite Nav-Variante gepflegt werden muss. Bottom-Nav nur < 768 px.
+- **Sekundäraktionen des alten Headers** (ThemeToggle, Neuigkeiten-Bell, Info, Hilfe, Abmelden) leben jetzt in einer Aktionszeile oben im „Mehr"-Bereich (vor Settings). Endgültige Platzierung entscheidet die Einstellungen-Screen-Phase.
+- **Verwaltung (Admin)**: fünfter Sidebar-Eintrag auf Desktop; mobil erreichbar über Button im „Mehr"-Bereich (Bottom-Nav bleibt bei vier Zielen à 25 %). Bei aktivem „verwaltung"-Tab ist mobil „Mehr" als aktiv markiert.
+- **Fällig-Logik** (Nav-Punkt/Badge): Monate vor dem aktuellen Monat, in denen mindestens ein Träger mit Erstattung > 0 weder `eingereicht_am` noch `erhalten_am` hat — abgeleitet aus `monthlyData` (inkl. Mitfahrer-Pseudo-Träger).
+- **Favoriten-Tipp im Dashboard führt sofort aus (nur Hinfahrt)** — Spec Screen 1: „Ein Tipp legt die Fahrt sofort an". Die alte Auswahl „Mit Rückfahrt" entfällt an dieser Stelle; der Rückfahrt-Standard („an, wenn Ziel überwiegend mit Rückfahrt") kommt mit dem neuen Erfassungsflow (Screen-Phase 2). Undo löscht die angelegte Fahrt (`executeFavorit` liefert die Fahrt-ID).
+- **Undo bei Fahrt-Löschung = Wiederanlegen mit denselben Daten** (Datum, Orte, Anlass, km, Träger, Mitfahrer). Die Fahrt bekommt eine neue ID und startet wieder als „Erfasst" — Abrechnungsstatus einer bereits eingereichten Einzelfahrt wird nicht rekonstruiert (Status hängt am Monat/Träger, nicht an der Fahrt).
+- **Ohne Undo (dokumentiert statt erzwungen):** Abrechnungsträger (Erstattungssätze/Historie hängen dran), API-Keys (Klartext nicht rekonstruierbar), Erstattungssätze (trivial neu anlegbar), Status-Reset (Wiederherstellen bräuchte das alte Datum je Aktion — Screen-Phase 4 kann das über die Monatskarte lösen).
+- **Benutzer-Löschen (Verwaltung): Inline-Zweischritt** (erster Klick „Wirklich löschen?", 4 s Timeout) statt Modal — Konto-Löschung ist nicht undo-bar, ein Ein-Klick-Löschen wäre fahrlässig, ein Modal verletzt die Spec-Regel.
+- **Export-Formatwahl** (Excel/PDF/Beide) war ein Drei-Optionen-Modal → jetzt direkte Buttons je Träger. „Als eingereicht markieren" nach Export hängt als Aktions-Button am Erfolgs-Toast (bleibt bis zum Klick).
+- **`showNotification` bleibt als Brücke** in AppContext (Titel „Fehler" → `toast.error`, sonst `toast.success`), damit ~50 Bestands-Callsites ohne Umbau weiterlaufen. Screen-Phasen ersetzen sie sukzessive durch direkte `useToast`-Nutzung. `hasActiveNotification` wird konstant `false` geliefert (Modal.js-Konsument).
+- **MonthlyOverview-Statuszellen** nutzen bereits StatusBadge (Badge-Variante + Datum als Kleinzeile darunter); „Keine Abrechnung" wurde zur Matrix-Zelle „—" (Spec Screen 6). Der Rest der View bleibt für Screen-Phase 4.
+- **Sheet wird in R2 noch nirgends gerendert** (Erfassungsflow kommt in Screen-Phase 2); Syntax per Babel-Transform verifiziert. EmptyState hat eine erste echte Nutzung (Dashboard, Favoriten leer).
+- **Sidebar-Logo**: Inline-SVG-Ring in `--brand` (Geometrie aus icon-monochrome.svg), ohne Akzent-Punkt — bei 26 px trägt der Ring allein.
