@@ -2345,18 +2345,12 @@ code {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* Vierer-Grid der Dashboard-Kacheln (User-Feedback 07.08.) */
+/* 2×2-Grid der Dashboard-Kacheln (User-Feedback 07.08.) */
 .dash-d-grid4 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 18px;
-}
-
-@media (min-width: 1200px) {
-  .dash-d-grid4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
 
 .dash-d-tile {
@@ -2475,6 +2469,12 @@ code {
   font-size: 15px;
   font-weight: 500;
   color: var(--text);
+}
+
+.dash-d-td-route {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 2px;
 }
 
 .dash-d-td-traeger {

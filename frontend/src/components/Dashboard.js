@@ -767,7 +767,7 @@ function Dashboard({ onNavigate }) {
           <div className="dash-d-tablescroll">
             <div className="dash-d-tablehead">
               <div>Datum</div>
-              <div>Anlass</div>
+              <div>Anlass · Route</div>
               <div>Träger</div>
               <div className="dash-d-th-num">km</div>
               <div className="dash-d-th-num">Betrag</div>
@@ -784,8 +784,11 @@ function Dashboard({ onNavigate }) {
                   <div className="dash-d-td-datum num">
                     {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                   </div>
-                  <div className="dash-d-td-anlass" title={`${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${zielName(fahrt)}`}>
-                    {fahrt.anlass || '—'}
+                  <div>
+                    <div className="dash-d-td-anlass">{fahrt.anlass || '—'}</div>
+                    <div className="dash-d-td-route">
+                      {fahrt.von_ort_name || fahrt.einmaliger_von_ort} → {zielName(fahrt)}
+                    </div>
                   </div>
                   <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
                   <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
