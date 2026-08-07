@@ -14,6 +14,15 @@ exports.exportToExcelRange = exportToExcelRange;
 exports.exportToPdf = exportToPdf;
 exports.exportToPdfRange = exportToPdfRange;
 
+// Ownership-Check: gehört der Ort dem eingeloggten User?
+async function ortGehoertUser(ortId, userId) {
+  const [rows] = await db.execute(
+    'SELECT id FROM orte WHERE id = ? AND user_id = ?',
+    [ortId, userId]
+  );
+  return rows.length > 0;
+}
+
 exports.createFahrt = async (req, res) => {
   try {
     const { 
@@ -35,7 +44,14 @@ exports.createFahrt = async (req, res) => {
     if (!abrechnungCheck || abrechnungCheck.length === 0) {
       return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
     }
-    
+
+    // Ort-Ownership: fremde Ort-IDs abweisen (einmalige Orte als Freitext bleiben unberührt)
+    for (const ortId of [vonOrtId, nachOrtId]) {
+      if (ortId !== null && ortId !== undefined && !(await ortGehoertUser(ortId, userId))) {
+        return res.status(400).json({ message: 'Ort nicht gefunden' });
+      }
+    }
+
     let calculatedKilometer = kilometer;
     
     // Kilometer automatisch berechnen, falls vonOrtId und nachOrtId vorhanden sind
@@ -94,7 +110,14 @@ exports.updateFahrt = async (req, res) => {
     if (!abrechnungCheck || abrechnungCheck.length === 0) {
       return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
     }
-    
+
+    // Ort-Ownership: fremde Ort-IDs abweisen (einmalige Orte als Freitext bleiben unberührt)
+    for (const ortId of [vonOrtId, nachOrtId]) {
+      if (ortId !== null && ortId !== undefined && !(await ortGehoertUser(ortId, userId))) {
+        return res.status(400).json({ message: 'Ort nicht gefunden' });
+      }
+    }
+
     const updateData = {
       vonOrtId: vonOrtId || null,
       nachOrtId: nachOrtId || null,
