@@ -3154,7 +3154,7 @@ code {
   gap: 6px;
   margin-top: 6px;
   font-size: 13px;
-  color: var(--text-3);
+  color: var(--brand);
 }
 
 .fl-card-mitfahrer span {
@@ -4814,4 +4814,22 @@ code {
   font-size: 15px;
   color: var(--text-2);
   margin-bottom: 6px;
+}
+
+/* Mitfahrer-Hinweis hinter der Strecke — farblich abgesetzt mit Punkt */
+.fl-mf-hinweis {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  color: var(--brand);
+  font-weight: 500;
+}
+
+.fl-mf-punkt {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  flex-shrink: 0;
 }

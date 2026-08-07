@@ -836,10 +836,12 @@ function Dashboard({ onNavigate }) {
                   <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
                   <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
                   <div className="dash-d-td-zahl">
-                    <span className="num">{fahrt.erstattung !== undefined ? formatEuro(fahrt.erstattung) : '—'}</span>
+                    <span className="num">
+                      {fahrt.erstattung !== undefined ? `${formatEuro(fahrt.erstattung)} €` : '—'}
+                    </span>
                     {fahrt.mitfahrerErstattung > 0 && (
                       <div className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
-                        +{formatEuro(fahrt.mitfahrerErstattung)} € Mitfahrer
+                        +{formatEuro(fahrt.mitfahrerErstattung)} €
                       </div>
                     )}
                   </div>
