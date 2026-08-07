@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
+import { useToast } from './ui/Toast';
 
 function ErstattungssaetzeForm() {
     const { showNotification, refreshAllData } = useContext(AppContext);
+    const toast = useToast();
     const [erstattungssaetze, setErstattungssaetze] = useState({
         mitfahrer: [],
         abrechnungstraeger: []
@@ -151,31 +153,21 @@ function ErstattungssaetzeForm() {
         }
     };
 
+    // Löschen ohne Rückfrage (Design-Spec) — kein Undo, da Betrag und
+    // Gültigkeitsdatum jederzeit neu angelegt werden können
     const handleDelete = async (id, typ) => {
         try {
-            showNotification(
-                'Löschen bestätigen',
-                'Möchten Sie diesen Erstattungssatz wirklich löschen?',
-                async () => {
-                    try {
-                        if (typ === 'mitfahrer') {
-                            await axios.delete(`/api/mitfahrer-erstattung/${id}`);
-                        } else {
-                            await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
-                        }
-                        showNotification('Erfolg', 'Erstattungssatz wurde gelöscht');
-                        await fetchAllErstattungssaetze();
-                        await refreshAllData(); // Hier hinzufügen
-                    } catch (error) {
-                        console.error('Fehler beim Löschen:', error);
-                        showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
-                    }
-                },
-                true // showCancel
-            );
+            if (typ === 'mitfahrer') {
+                await axios.delete(`/api/mitfahrer-erstattung/${id}`);
+            } else {
+                await axios.delete(`/api/abrechnungstraeger/${typ}/erstattung/${id}`);
+            }
+            toast.success('Erstattungssatz gelöscht.');
+            await fetchAllErstattungssaetze();
+            await refreshAllData();
         } catch (error) {
             console.error('Fehler beim Löschen:', error);
-            showNotification('Fehler', error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden');
+            toast.error(error.response?.data?.message || 'Erstattungssatz konnte nicht gelöscht werden.');
         }
     };
 

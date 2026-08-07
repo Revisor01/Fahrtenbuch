@@ -153,6 +153,22 @@ export default function UserManagement() {
    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
    const [selectedUser, setSelectedUser] = useState(null);
+   // Inline-Zweischritt statt Bestätigungs-Modal: erster Klick „scharf",
+   // zweiter Klick löscht (kein Undo möglich — Nutzerkonto samt Daten)
+   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+   const confirmTimer = useRef(null);
+
+   const requestDelete = (userId) => {
+       if (confirmingDeleteId === userId) {
+           clearTimeout(confirmTimer.current);
+           setConfirmingDeleteId(null);
+           handleDelete(userId);
+           return;
+       }
+       setConfirmingDeleteId(userId);
+       clearTimeout(confirmTimer.current);
+       confirmTimer.current = setTimeout(() => setConfirmingDeleteId(null), 4000);
+   };
 
    useEffect(() => {
        fetchUsers();
@@ -290,19 +306,12 @@ export default function UserManagement() {
                   </button>
                   {!isOwnUser && (
                     <button
-                      onClick={() => {
-                        showNotification(
-                          'Benutzer loeschen',
-                          `Moechtest du ${user.username} wirklich loeschen?`,
-                          () => handleDelete(user.id),
-                          true
-                        );
-                      }}
+                      onClick={() => requestDelete(user.id)}
                       className="btn-destructive flex items-center gap-1 text-xs"
                       aria-label="Benutzer loeschen"
                     >
                       <Trash2 size={13} />
-                      <span>Loeschen</span>
+                      <span>{confirmingDeleteId === user.id ? 'Wirklich löschen?' : 'Loeschen'}</span>
                     </button>
                   )}
                 </div>

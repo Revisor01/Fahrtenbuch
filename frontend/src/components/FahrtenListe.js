@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { AppContext } from '../contexts/AppContext';
+import { useToast } from './ui/Toast';
 import MitfahrerModal from '../MitfahrerModal';
-import Modal from '../Modal';
 import FahrtForm from '../FahrtForm';
 import { AlertCircle, Circle, CheckCircle2, Pencil, Trash2, RotateCcw, Users, Clock, CreditCard, FileDown, CalendarRange, FileSpreadsheet } from 'lucide-react';
 
@@ -22,7 +22,8 @@ const getCardBg = (hexColor) => {
 };
 
 function FahrtenListe({ initialFilter, onFilterApplied }) {
-  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus, monthlyData } = useContext(AppContext);
+  const { fahrten, selectedMonth, setSelectedMonth, fetchFahrten, deleteFahrt, addFahrt, fetchMonthlyData, showNotification, summary, setFahrten, refreshAllData, abrechnungstraeger, setAbrechnungstraeger, abrechnungsStatusModal, handleAbrechnungsStatus, setAbrechnungsStatusModal, selectedVonMonth, setSelectedVonMonth, updateAbrechnungsStatus, monthlyData } = useContext(AppContext);
+  const toast = useToast();
   const [expandedFahrten, setExpandedFahrten] = useState({});
   const [isMitfahrerModalOpen, setIsMitfahrerModalOpen] = useState(false);
   const [viewingMitfahrer, setViewingMitfahrer] = useState(null);
@@ -83,23 +84,38 @@ function FahrtenListe({ initialFilter, onFilterApplied }) {
   };
 
 
-  const handleDelete = async (id) => {
-    showNotification(
-      "Fahrt löschen",
-      "Sind Sie sicher, dass Sie diese Fahrt löschen möchten?",
-      async () => {
-        try {
-          await deleteFahrt(id);
-          fetchFahrten();
-          fetchMonthlyData();
-          showNotification("Erfolg", "Die Fahrt wurde erfolgreich gelöscht.");
-        } catch (error) {
-          console.error('Fehler beim Löschen der Fahrt:', error);
-          showNotification("Fehler", "Beim Löschen der Fahrt ist ein Fehler aufgetreten.");
+  // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt die Fahrt mit
+  // denselben Daten neu an — neue ID, Status wieder „Erfasst")
+  const handleDelete = async (fahrt) => {
+    try {
+      await deleteFahrt(fahrt.id);
+      fetchMonthlyData();
+      toast.success('Fahrt gelöscht.', {
+        undo: async () => {
+          try {
+            await addFahrt({
+              datum: fahrt.datum?.slice(0, 10),
+              vonOrtId: fahrt.von_ort_id || null,
+              nachOrtId: fahrt.nach_ort_id || null,
+              einmaligerVonOrt: fahrt.einmaliger_von_ort || null,
+              einmaligerNachOrt: fahrt.einmaliger_nach_ort || null,
+              anlass: fahrt.anlass || '',
+              kilometer: fahrt.kilometer,
+              abrechnung: fahrt.abrechnung,
+              mitfahrer: fahrt.mitfahrer || []
+            });
+            fetchMonthlyData();
+            toast.success('Fahrt wiederhergestellt.');
+          } catch (error) {
+            console.error('Fehler beim Wiederherstellen der Fahrt:', error);
+            toast.error('Fahrt konnte nicht wiederhergestellt werden.');
+          }
         }
-      },
-      true // showCancel
-    );
+      });
+    } catch (error) {
+      console.error('Fehler beim Löschen der Fahrt:', error);
+      toast.error('Beim Löschen der Fahrt ist ein Fehler aufgetreten.');
+    }
   };
 
   const handleEditComplete = () => {
@@ -362,28 +378,39 @@ function FahrtenListe({ initialFilter, onFilterApplied }) {
       return new Date(parseInt(y), parseInt(m) - 1).toLocaleString('de-DE', { month: 'long' });
     });
 
-    const message = isRange && exportedMonths.length > 0
-      ? `Sollen ${monthNames.join(', ')} als eingereicht markiert werden?`
-      : "Soll der Monat als eingereicht markiert werden?";
+    // Kein Bestätigungs-Modal: Export-Erfolg als Toast, das Einreichen
+    // hängt als Aktions-Button am Toast (bleibt bis zum Klick stehen)
+    if (isRange && exportedMonths.length === 0) {
+      toast.success('Export erstellt.');
+      return;
+    }
 
-    showNotification(
-      "Export erfolgreich",
-      message,
-      async () => {
-        const today = new Date().toISOString().split('T')[0];
-        if (isRange && exportedMonths.length > 0) {
-          for (const mk of exportedMonths) {
-            const [y, m] = mk.split('-');
-            await updateAbrechnungsStatus(y, m, type, 'eingereicht', today);
+    const message = isRange
+      ? `Export erstellt (${monthNames.join(', ')}).`
+      : 'Export erstellt.';
+
+    toast.success(message, {
+      actionLabel: 'Als eingereicht markieren',
+      onAction: async () => {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          if (isRange) {
+            for (const mk of exportedMonths) {
+              const [y, m] = mk.split('-');
+              await updateAbrechnungsStatus(y, m, type, 'eingereicht', today, true);
+            }
+          } else {
+            await updateAbrechnungsStatus(bisYear, formattedBisMonth, type, 'eingereicht', today, true);
           }
-        } else {
-          await updateAbrechnungsStatus(bisYear, formattedBisMonth, type, 'eingereicht', today);
+          await fetchMonthlyData();
+          await fetchFahrten();
+          toast.success('Als eingereicht markiert.');
+        } catch (error) {
+          console.error('Fehler beim Markieren als eingereicht:', error);
+          toast.error('Status konnte nicht aktualisiert werden.');
         }
-        await fetchMonthlyData();
-        await fetchFahrten();
-      },
-      true
-    );
+      }
+    });
   };
 
 
@@ -726,31 +753,38 @@ function FahrtenListe({ initialFilter, onFilterApplied }) {
         <FileDown size={18} className="text-purple-500" />
         <h2>Export</h2>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
+      {/* Formatwahl direkt als Buttons — kein Auswahl-Modal mehr */}
+      <div className="flex flex-col gap-3">
       {getKategorienMitErstattung()
         .filter(([key]) => hatOffeneMonate(key))
-        .map(([key, displayName]) => (
-        <button
-        key={key}
-        onClick={() => {
+        .map(([key, displayName]) => {
           const typeKey = key.toLowerCase();
-          showNotification(
-            "Export " + displayName,
-            "In welchem Format möchten Sie exportieren?",
-            () => handleExportToExcel(typeKey),
-            true,
-            "Excel",
-            () => handleExportToPdf(typeKey),
-            "PDF",
-            () => handleExportBoth(typeKey),
-            "Beide"
+          return (
+            <div key={key} className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium text-value min-w-[10rem]">{displayName}</span>
+              <button
+                onClick={() => handleExportToExcel(typeKey)}
+                className="btn-secondary flex items-center gap-1.5"
+              >
+                <FileSpreadsheet size={14} />
+                Excel
+              </button>
+              <button
+                onClick={() => handleExportToPdf(typeKey)}
+                className="btn-secondary flex items-center gap-1.5"
+              >
+                <FileDown size={14} />
+                PDF
+              </button>
+              <button
+                onClick={() => handleExportBoth(typeKey)}
+                className="btn-ghost"
+              >
+                Beide (ZIP)
+              </button>
+            </div>
           );
-        }}
-        className="btn-primary flex items-center gap-1.5">
-        <FileSpreadsheet size={14} />
-        Export {displayName}
-        </button>
-      ))}
+        })}
       </div>
       </div>
       )}
@@ -806,23 +840,36 @@ function FahrtenListe({ initialFilter, onFilterApplied }) {
     setIsMitfahrerModalOpen(true);
   };
 
+  // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt den Mitfahrer
+  // mit denselben Daten neu an)
   const handleDeleteMitfahrer = async (fahrtId, mitfahrerId) => {
-    showNotification(
-      "Mitfahrer löschen",
-      "Sind Sie sicher, dass Sie diesen Mitfahrer löschen möchten?",
-      async () => {
-        try {
-          await axios.delete(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer/${mitfahrerId}`);
-          fetchFahrten();
-          await refreshAllData(); // Hier hinzufügen
-          showNotification("Erfolg", "Der Mitfahrer wurde erfolgreich gelöscht.");
-        } catch (error) {
-          console.error('Fehler beim Löschen des Mitfahrers:', error);
-          showNotification("Fehler", "Beim Löschen des Mitfahrers ist ein Fehler aufgetreten.");
+    const fahrt = fahrten.find(f => f.id === fahrtId);
+    const mitfahrer = fahrt?.mitfahrer?.find(m => m.id === mitfahrerId);
+    try {
+      await axios.delete(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer/${mitfahrerId}`);
+      fetchFahrten();
+      await refreshAllData();
+      toast.success('Mitfahrer:in gelöscht.', mitfahrer ? {
+        undo: async () => {
+          try {
+            await axios.post(`${API_BASE_URL}/fahrten/${fahrtId}/mitfahrer`, {
+              name: mitfahrer.name,
+              arbeitsstaette: mitfahrer.arbeitsstaette,
+              richtung: mitfahrer.richtung
+            });
+            fetchFahrten();
+            await refreshAllData();
+            toast.success('Mitfahrer:in wiederhergestellt.');
+          } catch (error) {
+            console.error('Fehler beim Wiederherstellen des Mitfahrers:', error);
+            toast.error('Mitfahrer:in konnte nicht wiederhergestellt werden.');
+          }
         }
-      },
-      true // showCancel
-    );
+      } : undefined);
+    } catch (error) {
+      console.error('Fehler beim Löschen des Mitfahrers:', error);
+      toast.error('Beim Löschen des Mitfahrers ist ein Fehler aufgetreten.');
+    }
   };
 
   const handleSaveMitfahrer = async (updatedMitfahrer) => {
@@ -945,7 +992,7 @@ function FahrtenListe({ initialFilter, onFilterApplied }) {
                     <Pencil size={13} />
                   </button>
                   <button
-                    onClick={() => handleDelete(fahrt.id)}
+                    onClick={() => handleDelete(fahrt)}
                     className="p-1.5 rounded-card text-muted hover:text-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-900 transition-colors"
                     aria-label="Fahrt loeschen"
                     title="Loeschen"
