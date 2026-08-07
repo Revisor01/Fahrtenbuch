@@ -244,26 +244,24 @@ code {
       color 150ms ease;
   }
 
-  /* Erfasst: gestrichelter Ring, transparent
-     (Alias: .status-badge-secondary — entfernen nach Screen-Phasen) */
-  .status-erfasst,
-  .status-badge-secondary {
+  /* Erfasst: gestrichelter Ring, transparent */
+  .status-erfasst {
     @apply status-badge;
     background-color: transparent;
     color: var(--text-2);
     border: 1px dashed var(--line-strong);
   }
 
-  /* Eingereicht: Sand — Alias: .status-badge-warning */
-  .status-eingereicht,
-  .status-badge-warning {
+  /* Eingereicht: Sand */
+  .status-eingereicht {
     @apply status-badge;
     background-color: var(--accent-soft);
     color: var(--accent-text);
     border: 1px solid var(--accent-line);
   }
 
-  /* Erstattet: Grün — Alias: .status-badge-primary */
+  /* Erstattet: Grün — Alias .status-badge-primary bleibt für die
+     Mitfahrer-Pills in FahrtForm (fliegt mit deren Phase) */
   .status-erstattet,
   .status-badge-primary {
     @apply status-badge;
