@@ -14,6 +14,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - StatusBadge-Komponente mit drei Darstellungsformen (Badge, Punkt+Wort, Fortschrittsleiste) und zentralem Wording-Mapping (`utils/statusLabels.js`)
 - Sheet-Komponente: mobil Bottom-Sheet mit Griff und Fokusfalle, ab 768 px zentriertes Modal-Panel
 - EmptyState-Komponente (gestrichelter Rahmen, Icon-Fläche, Primäraktion)
+- Zweistufiger Erfassungsflow als Sheet: „Wohin?" (Ortsliste nach Häufigkeit mit Distanz vom Startort, Startort/Datum antippbar, freie Zieleingabe) und „Bestätigen" (km · € live aus dem Erstattungssatz, Anlass-Chips aus dem Verlauf des Ziels, Rückfahrt-Switch mit Verlaufs-Heuristik, Trägerauswahl); Speichern optimistisch mit Toast + „Rückgängig", Rückfahrt legt eine zweite Fahrt an
+- `useErfassung().open(prefill?)` als zentraler Einstieg für alle „Neue Fahrt"-Aktionen (Prefill-Signatur für „Wiederholen"/FAB bereits enthalten)
 
 ### Changed
 - Tailwind auf semantische Farbnamen umgestellt (brand/accent/ok/danger/surface/line/bg/text); alte primary-/secondary-Klassen laufen übergangsweise über Aliasse weiter
@@ -22,6 +24,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - index.html: deutsche Sprache/Beschreibung, Titel „Fahrtenbuch", dynamische theme-color
 - App-Shell umgebaut: Bottom-Nav mit vier Zielen (Start/Fahrten/Abrechnung/Mehr) auf Mobilgeräten, Sidebar 232 px mit Nutzerzeile ab 768 px; Fälligkeits-Punkt bzw. Zähler-Badge auf „Abrechnung"
 - Bestätigungen laufen ohne Modal: Löschen (Fahrten, Orte, Distanzen, Mitfahrer, Favoriten) direkt mit Toast + „Rückgängig"; Favoriten-Tipp legt die Fahrt sofort an; Export-Formatwahl als direkte Buttons; Statusanzeige heißt jetzt Erfasst/Eingereicht/Erstattet
+- Neue Fahrten laufen nur noch über den Erfassungsflow; `FahrtForm` dient ausschließlich dem Bearbeiten bestehender Fahrten (Create-Code entfernt)
 
 ### Removed
 - Die neun wählbaren Farbthemes (`themes.css`) und die globale Transition auf allen Elementen (`darkMode.css`)
@@ -37,6 +40,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Admin-Passwort wird nicht mehr bei jedem Container-Start auf `INITIAL_ADMIN_PASSWORD` zurückgesetzt (nur noch beim Erstlauf)
 
 ### Fixed
+- Bearbeiten einer Fahrt setzte den Abrechnungsträger asynchron auf den Default zurück und überschrieb den gespeicherten Wert (Mount-Effect in `FahrtForm` entfernt)
 - Excel-/PDF-Export und Monatsreport zählten Fahrten mit mehreren Mitfahrern mehrfach (Dedup nach Fahrt-ID)
 - Export rechnete hartcodiert mit 0,30 €/km statt mit den gepflegten, zeitabhängigen Erstattungssätzen des Trägers
 
