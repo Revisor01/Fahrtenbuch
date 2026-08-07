@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
+import { useErfassung } from '../contexts/ErfassungContext';
 import FahrtForm from '../FahrtForm';
 import EmptyState from './ui/EmptyState';
 import { useToast } from './ui/Toast';
@@ -22,6 +23,7 @@ function Dashboard({ onNavigate }) {
     addFahrt
   } = useContext(AppContext);
   const toast = useToast();
+  const erfassung = useErfassung();
 
   const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
   const [editingFahrtId, setEditingFahrtId] = useState(null);
@@ -330,13 +332,20 @@ function Dashboard({ onNavigate }) {
         </div>
       </div>
 
-      {/* Fahrt-Formular — immer sichtbar */}
+      {/* Neue Fahrt: öffnet den zweistufigen Erfassungsflow (Sheet) —
+          ersetzt das frühere Inline-Formular (FahrtForm bleibt nur fürs Bearbeiten) */}
       <div className="card-container">
         <div className="section-header">
           <Plus size={18} className="text-primary-500" />
           <h2>Neue Fahrt erfassen</h2>
         </div>
-        <FahrtForm />
+        <button
+          type="button"
+          className="btn-sheet-primary"
+          onClick={() => erfassung.open()}
+        >
+          + Neue Fahrt
+        </button>
       </div>
 
       {/* Letzte 3 Fahrten */}
