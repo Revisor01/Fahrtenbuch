@@ -15,8 +15,8 @@ class Distanz {
       }
 
       const [existingDistanz] = await connection.execute(
-        'SELECT * FROM distanzen WHERE (von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)',
-        [vonOrtId, nachOrtId, nachOrtId, vonOrtId]
+        'SELECT * FROM distanzen WHERE ((von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)) AND user_id = ?',
+        [vonOrtId, nachOrtId, nachOrtId, vonOrtId, userId]
       );
 
       let resultId;
@@ -25,10 +25,10 @@ class Distanz {
           'UPDATE distanzen SET distanz = ? WHERE ((von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)) AND user_id = ?',
           [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId, userId]
         );
-        // Fahrten rueckwirkend aktualisieren (bidirektional)
+        // Fahrten rueckwirkend aktualisieren (bidirektional) — nur eigene Fahrten
         await connection.execute(
-          `UPDATE fahrten SET kilometer = ? WHERE (von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)`,
-          [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId]
+          `UPDATE fahrten SET kilometer = ? WHERE ((von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)) AND user_id = ?`,
+          [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId, userId]
         );
         resultId = existingDistanz[0].id;
       } else {
@@ -71,10 +71,10 @@ class Distanz {
       );
 
       if (result.affectedRows > 0) {
-        // Fahrten rueckwirkend aktualisieren (bidirektional)
+        // Fahrten rueckwirkend aktualisieren (bidirektional) — nur eigene Fahrten
         await connection.execute(
-          `UPDATE fahrten SET kilometer = ? WHERE (von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)`,
-          [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId]
+          `UPDATE fahrten SET kilometer = ? WHERE ((von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)) AND user_id = ?`,
+          [distanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId, userId]
         );
       }
 

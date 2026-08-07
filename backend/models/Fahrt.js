@@ -115,12 +115,12 @@ class Fahrt {
     return result.affectedRows > 0;
   }
 
-  static async updateFahrtenByDistanz(vonOrtId, nachOrtId, neueDistanz) {
+  static async updateFahrtenByDistanz(vonOrtId, nachOrtId, neueDistanz, userId) {
     const [result] = await db.execute(
-      `UPDATE fahrten 
-      SET kilometer = ? 
-      WHERE (von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)`,
-      [neueDistanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId]
+      `UPDATE fahrten
+      SET kilometer = ?
+      WHERE ((von_ort_id = ? AND nach_ort_id = ?) OR (von_ort_id = ? AND nach_ort_id = ?)) AND user_id = ?`,
+      [neueDistanz, vonOrtId, nachOrtId, nachOrtId, vonOrtId, userId]
     );
     return result.affectedRows;
   }

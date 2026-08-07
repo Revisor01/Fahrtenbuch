@@ -2,6 +2,16 @@ const FavoritFahrt = require('../models/FavoritFahrt');
 const Fahrt = require('../models/Fahrt');
 const { getDistance } = require('../utils/distanceCalculator');
 const { createFavoritSchema } = require('../schemas/favoritSchemas');
+const db = require('../config/database');
+
+// Ownership-Check: gehört die ID in der Tabelle dem eingeloggten User?
+async function gehoertUser(tabelle, id, userId) {
+  const [rows] = await db.execute(
+    `SELECT id FROM ${tabelle} WHERE id = ? AND user_id = ?`,
+    [id, userId]
+  );
+  return rows.length > 0;
+}
 
 exports.getAllFavoriten = async (req, res) => {
   try {
@@ -16,6 +26,16 @@ exports.getAllFavoriten = async (req, res) => {
 exports.createFavorit = async (req, res) => {
   try {
     const data = createFavoritSchema.parse(req.body);
+
+    // Ort-/Träger-Ownership: fremde IDs abweisen
+    if (!(await gehoertUser('orte', data.vonOrtId, req.user.id)) ||
+        !(await gehoertUser('orte', data.nachOrtId, req.user.id))) {
+      return res.status(400).json({ message: 'Ort nicht gefunden' });
+    }
+    if (!(await gehoertUser('abrechnungstraeger', data.abrechnungstraegerId, req.user.id))) {
+      return res.status(400).json({ message: 'Abrechnungsträger nicht gefunden' });
+    }
+
     const id = await FavoritFahrt.create(data, req.user.id);
     const favorit = await FavoritFahrt.findById(id, req.user.id);
     res.status(201).json(favorit);
