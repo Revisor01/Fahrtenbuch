@@ -104,33 +104,46 @@ function AbrechnungsMatrix({ rows, spalten, expandedMonths, onToggle, aktionen, 
               </div>
 
               {expanded && (
-                <div className="abr-matrix-detail">
-                  <div className="abr-matrix-detail-inner">
-                    {row.kategorien.length === 0 ? (
-                      <p className="abr-matrix-detail-leer">
-                        Keine Erstattungen in diesem Monat.
-                      </p>
-                    ) : (
-                      row.kategorien.map((kategorie) => (
-                        <TraegerZeile
-                          key={kategorie.key}
-                          month={row.month}
-                          kategorie={kategorie}
-                          aktionen={aktionen}
-                        />
-                      ))
-                    )}
-                    <div className="abr-matrix-detail-fuss">
+                row.kategorien.length === 0 ? (
+                  <div className="abr-matrix-detail-leerzeile">
+                    <p className="abr-matrix-detail-leer">Keine Erstattungen in diesem Monat.</p>
+                  </div>
+                ) : (
+                  // Detail im selben Raster wie die Matrix: jede Trägerzelle
+                  // steht direkt unter ihrer Spalte.
+                  <div className="abr-matrix-detail" style={gridStyle}>
+                    <div className="abr-detail-monatzelle">
                       <button
                         type="button"
-                        className="abr-link"
+                        className="abr-link abr-link-leise"
                         onClick={() => onExport(row.month)}
                       >
-                        Exportieren ohne Statuswechsel
+                        Export ohne
+                        <br />
+                        Statuswechsel
                       </button>
                     </div>
+                    {spalten.map((s) => {
+                      const kategorie = row.kategorien.find((k) => k.key === s.key);
+                      return (
+                        <div key={s.key} className="abr-detail-zelle">
+                          {kategorie ? (
+                            <TraegerZeile
+                              month={row.month}
+                              kategorie={kategorie}
+                              aktionen={aktionen}
+                              variante="zelle"
+                            />
+                          ) : (
+                            <span className="abr-td-leer" aria-hidden="true">—</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                    <div aria-hidden="true" />
+                    <div aria-hidden="true" />
                   </div>
-                </div>
+                )
               )}
             </React.Fragment>
           );

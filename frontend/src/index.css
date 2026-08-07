@@ -3417,20 +3417,54 @@ code {
 
 /* Aufgeklappte Detail-Zeile („Details"): Trägerzeilen + Aktionen; klebt
    links, damit sie beim horizontalen Scrollen lesbar bleibt */
+/* Detail im Matrix-Raster: gleiche Spalten wie Kopf/Zeile, damit jede
+   Trägerzelle direkt unter ihrer Spalte steht */
 .abr-matrix-detail {
+  display: grid;
+  align-items: start;
+  column-gap: 12px;
+  padding-right: 24px;
   border-bottom: 1px solid var(--line);
   background: var(--bg);
 }
 
-.abr-matrix-detail-inner {
-  position: sticky;
-  left: 0;
-  max-width: 720px;
-  padding: 0 24px 8px 12px;
+.abr-matrix-detail > div {
+  padding: 14px 0 16px;
 }
 
-.abr-matrix-detail-inner .abr-traeger-row:first-child {
-  border-top: none;
+.abr-detail-monatzelle {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  align-self: stretch;
+  background: var(--bg);
+  padding-left: 24px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.abr-traeger-zelle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: none;
+  padding: 0;
+}
+
+.abr-traeger-zelle .abr-traeger-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.abr-traeger-zelle .abr-traeger-betrag {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.abr-matrix-detail-leerzeile {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
 }
 
 .abr-matrix-detail-leer {

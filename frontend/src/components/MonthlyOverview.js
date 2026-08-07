@@ -57,27 +57,69 @@ function MonthlyOverview() {
     [monthlyData, selectedYear, abrechnungstraeger, currentYM]
   );
 
+  // Alle Monate mit Kategorien/Fälligkeit — Basis für Unterzeile,
+  // Kopf-Button und die automatische Jahresvorwahl
+  const alleMonate = useMemo(
+    () =>
+      monthlyData.map((m) => {
+        const kategorien = monatKategorien(m, abrechnungstraeger);
+        return {
+          month: m,
+          kategorien,
+          faellig: istFaellig(m, kategorien, currentYM),
+        };
+      }),
+    [monthlyData, abrechnungstraeger, currentYM]
+  );
+
   // Fällige Monate über alle Jahre — konsistent zum Zähler der Navigation,
   // ältester zuerst (für den Kopf-Button und die Unterzeile)
   const alleFaelligen = useMemo(
     () =>
-      monthlyData
-        .map((m) => ({ month: m, kategorien: monatKategorien(m, abrechnungstraeger) }))
-        .filter((r) => istFaellig(r.month, r.kategorien, currentYM))
+      alleMonate
+        .filter((r) => r.faellig)
         .sort((a, b) => a.month.yearMonth.localeCompare(b.month.yearMonth)),
-    [monthlyData, abrechnungstraeger, currentYM]
+    [alleMonate]
+  );
+
+  // Liegt ein fälliger Monat außerhalb des vorgewählten Jahres (z. B.
+  // Dezember des Vorjahres), weite die Ansicht einmalig auf „Alle Jahre" —
+  // sonst ist der Monat, den der Kopf-Button nennt, in der Liste unsichtbar.
+  const autoYearDone = React.useRef(false);
+  useEffect(() => {
+    if (autoYearDone.current || monthlyData.length === 0) return;
+    autoYearDone.current = true;
+    if (alleFaelligen.some((r) => r.month.year.toString() !== selectedYear)) {
+      setSelectedYear('all');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alleFaelligen, monthlyData]);
+
+  // Eingereicht, aber noch nicht erstattet — „unterwegs"
+  const nUnterwegs = useMemo(
+    () =>
+      alleMonate.filter(
+        (r) => !r.faellig && r.kategorien.some((k) => k.status === 'eingereicht')
+      ).length,
+    [alleMonate]
   );
 
   const nFaellig = alleFaelligen.length;
+  const unterwegsText = (satzEnde) =>
+    nUnterwegs === 0
+      ? `Alles abgerechnet${satzEnde}`
+      : nUnterwegs === 1
+        ? `Alles eingereicht — 1 Monat wartet auf die Erstattung${satzEnde}`
+        : `Alles eingereicht — ${nUnterwegs} Monate warten auf die Erstattung${satzEnde}`;
   const unterzeileMobil =
     nFaellig === 0
-      ? 'Alles eingereicht — nichts wartet auf dich'
+      ? unterwegsText('')
       : nFaellig === 1
         ? '1 Monat wartet auf dich'
         : `${nFaellig} Monate warten auf dich`;
   const unterzeileDesktop =
     nFaellig === 0
-      ? 'Alles eingereicht — nichts wartet auf dich.'
+      ? unterwegsText('.')
       : nFaellig === 1
         ? 'Ein Monat ist noch nicht eingereicht.'
         : `${nFaellig} Monate sind noch nicht eingereicht.`;
