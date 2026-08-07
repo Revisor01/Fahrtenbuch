@@ -9,6 +9,15 @@ import { monateImZeitraum } from './zeitraumUtils';
 // Verhalten unverändert aus dem Bestand: Einzelmonat- vs. Zeitraum-Routen,
 // Dateiname aus Content-Disposition, danach Erfolgs-Toast mit der Aktion
 // „Als eingereicht markieren" (nur für offene Monate, bleibt bis zum Klick).
+//
+// Seit Phase R6 nimmt jede Export-Funktion optional Optionen:
+//   { von, bis }   Monats-Keys "YYYY-MM" — überschreiben den Kontext-Zeitraum
+//                  (von === bis → Einzelmonat-Route). Für die Abrechnung,
+//                  die unabhängig vom Fahrten-Tab exportiert.
+//   { erfolg }     'aktion' (Default: Toast mit „Als eingereicht markieren"),
+//                  'einfach' (nur „Export erstellt."), 'keiner' (kein Toast —
+//                  der Aufrufer übernimmt, z. B. der Einreichen-Flow).
+// Rückgabe: true bei Erfolg, false bei Fehler (Fehler-Toast kommt von hier).
 export function useFahrtenExport() {
   const {
     selectedMonth,
@@ -35,19 +44,34 @@ export function useFahrtenExport() {
     return true;
   };
 
-  // URL-Teile: Einzelmonat "jahr/monat", Zeitraum "vonJahr/vonMonat/bisJahr/bisMonat"
-  const pfadTeile = () => {
-    const [bisYear, bisMonth] = selectedMonth.split('-');
-    const bis = `${bisYear}/${bisMonth.padStart(2, '0')}`;
-    if (!istZeitraum) {
-      return { pfad: bis, dateiname: `${bisYear}_${bisMonth.padStart(2, '0')}` };
+  // URL-Teile: Einzelmonat "jahr/monat", Zeitraum "vonJahr/vonMonat/bisJahr/bisMonat".
+  // Mit opts.von/opts.bis wird der Kontext-Zeitraum überschrieben.
+  const pfadTeile = (opts = {}) => {
+    const von = opts.von && opts.bis ? opts.von : (istZeitraum ? selectedVonMonth : selectedMonth);
+    const bis = opts.von && opts.bis ? opts.bis : selectedMonth;
+    const range = von !== bis;
+    const [bisYear, bisMonth] = bis.split('-');
+    const bisPfad = `${bisYear}/${bisMonth.padStart(2, '0')}`;
+    if (!range) {
+      return { range, pfad: bisPfad, dateiname: `${bisYear}_${bisMonth.padStart(2, '0')}` };
     }
-    const [vonYear, vonMonth] = selectedVonMonth.split('-');
-    const von = `${vonYear}/${vonMonth.padStart(2, '0')}`;
+    const [vonYear, vonMonth] = von.split('-');
     return {
-      pfad: `${von}/${bis}`,
+      range,
+      pfad: `${vonYear}/${vonMonth.padStart(2, '0')}/${bisPfad}`,
       dateiname: `${vonYear}_${vonMonth.padStart(2, '0')}_bis_${bisYear}_${bisMonth.padStart(2, '0')}`,
     };
+  };
+
+  // Erfolgs-Meldung je nach opts.erfolg; Zeitraum-Overrides bekommen nie den
+  // „Als eingereicht markieren"-Toast (der hängt an den Kontext-Daten des Tabs)
+  const erfolgsToast = (type, opts = {}) => {
+    if (opts.erfolg === 'keiner') return;
+    if (opts.erfolg === 'einfach' || (opts.von && opts.bis)) {
+      toast.success('Export erstellt.');
+      return;
+    }
+    markAlsEingereichtToast(type);
   };
 
   const downloadBlob = (blob, filename) => {
@@ -128,11 +152,11 @@ export function useFahrtenExport() {
     });
   };
 
-  const exportExcel = async (type) => {
-    if (!zeitraumGueltig()) return;
+  const exportExcel = async (type, opts = {}) => {
+    if (!opts.von && !zeitraumGueltig()) return false;
     try {
-      const { pfad, dateiname } = pfadTeile();
-      const route = istZeitraum ? 'export-range' : 'export';
+      const { range, pfad, dateiname } = pfadTeile(opts);
+      const route = range ? 'export-range' : 'export';
       const response = await axios.get(`/api/fahrten/${route}/${type}/${pfad}`, { responseType: 'blob' });
 
       const contentType = response.headers['content-type'];
@@ -150,17 +174,19 @@ export function useFahrtenExport() {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
       downloadBlob(blob, filename);
-      markAlsEingereichtToast(type);
+      erfolgsToast(type, opts);
+      return true;
     } catch (error) {
       fehlerToast(error, 'Excel');
+      return false;
     }
   };
 
-  const exportPdf = async (type) => {
-    if (!zeitraumGueltig()) return;
+  const exportPdf = async (type, opts = {}) => {
+    if (!opts.von && !zeitraumGueltig()) return false;
     try {
-      const { pfad, dateiname } = pfadTeile();
-      const route = istZeitraum ? 'export-pdf-range' : 'export-pdf';
+      const { range, pfad, dateiname } = pfadTeile(opts);
+      const route = range ? 'export-pdf-range' : 'export-pdf';
       const response = await axios.get(`/api/fahrten/${route}/${type}/${pfad}`, { responseType: 'blob' });
 
       let filename = dateinameAusHeader(response, `fahrtenabrechnung_${type}_${dateiname}.pdf`);
@@ -171,18 +197,20 @@ export function useFahrtenExport() {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
       downloadBlob(blob, filename);
-      markAlsEingereichtToast(type);
+      erfolgsToast(type, opts);
+      return true;
     } catch (error) {
       fehlerToast(error, 'PDF');
+      return false;
     }
   };
 
-  const exportBeides = async (type) => {
-    if (!zeitraumGueltig()) return;
+  const exportBeides = async (type, opts = {}) => {
+    if (!opts.von && !zeitraumGueltig()) return false;
     try {
-      const { pfad, dateiname } = pfadTeile();
-      const excelUrl = `/api/fahrten/${istZeitraum ? 'export-range' : 'export'}/${type}/${pfad}`;
-      const pdfUrl = `/api/fahrten/${istZeitraum ? 'export-pdf-range' : 'export-pdf'}/${type}/${pfad}`;
+      const { range, pfad, dateiname } = pfadTeile(opts);
+      const excelUrl = `/api/fahrten/${range ? 'export-range' : 'export'}/${type}/${pfad}`;
+      const pdfUrl = `/api/fahrten/${range ? 'export-pdf-range' : 'export-pdf'}/${type}/${pfad}`;
       const baseFilename = `fahrtenabrechnung_${type}_${dateiname}`;
 
       const [excelRes, pdfRes] = await Promise.all([
@@ -195,9 +223,11 @@ export function useFahrtenExport() {
       zip.file(`${baseFilename}.pdf`, pdfRes.data);
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       downloadBlob(zipBlob, `${baseFilename}.zip`);
-      markAlsEingereichtToast(type);
+      erfolgsToast(type, opts);
+      return true;
     } catch (error) {
       fehlerToast(error, 'ZIP');
+      return false;
     }
   };
 
