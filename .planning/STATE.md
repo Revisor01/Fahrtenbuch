@@ -56,6 +56,12 @@ None yet.
 
 None yet.
 
+## Quick Tasks Completed
+
+| Quick ID | Slug | Datum | Status | Summary |
+|----------|------|-------|--------|---------|
+| 260807-dq7 | security-fixes | 2026-08-07 | complete | 8 Audit-Findings behoben (4 IDOR, Registrierung, Admin-Passwort, Export-Doppelzählung, DB-Erstattungssätze) + mysql2 v3, xlsx entfernt — 8 Commits auf feature/v1.3-dashboard, [SUMMARY](.planning/quick/260807-dq7-security-fixes/SUMMARY.md) |
+
 ## Session Continuity
 
 Last session: 2026-04-05
