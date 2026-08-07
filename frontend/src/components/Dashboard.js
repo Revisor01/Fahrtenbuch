@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import FahrtForm from '../FahrtForm';
 import EmptyState from './ui/EmptyState';
+import { useToast } from './ui/Toast';
 import { Banknote, Route, Car, Star, RotateCcw, ChevronLeft, ChevronRight, BarChart3, FileDown, Plus, Clock, Users, Pencil, Trash2 } from 'lucide-react';
 
 const API_BASE_URL = '/api';
@@ -17,8 +18,10 @@ function Dashboard({ onNavigate }) {
     refreshAllData,
     monthlyData,
     abrechnungstraeger,
-    deleteFahrt
+    deleteFahrt,
+    addFahrt
   } = useContext(AppContext);
+  const toast = useToast();
 
   const [statistikJahr, setStatistikJahr] = useState(new Date().getFullYear());
   const [editingFahrtId, setEditingFahrtId] = useState(null);
@@ -169,49 +172,58 @@ function Dashboard({ onNavigate }) {
     }
   };
 
-  const handleExecuteFavorit = (favorit) => {
-    showNotification(
-      'Favorit ausf\u00FChren',
-      `${favorit.von_ort_name} \u2192 ${favorit.nach_ort_name}`,
-      async () => {
-        try {
-          await executeFavorit(favorit.id, false);
-          showNotification('Fahrt erstellt', 'Hinfahrt wurde f\u00FCr heute eingetragen.');
-        } catch (error) {
-          console.error('Fehler beim Ausf\u00FChren des Favoriten:', error);
-          showNotification('Fehler', 'Favorit konnte nicht ausgef\u00FChrt werden.');
-        }
-      },
-      true,
-      'Nur Hinfahrt',
-      async () => {
-        try {
-          await executeFavorit(favorit.id, true);
-          showNotification('Fahrten erstellt', 'Hin- und R\u00FCckfahrt wurden f\u00FCr heute eingetragen.');
-        } catch (error) {
-          console.error('Fehler beim Ausf\u00FChren des Favoriten:', error);
-          showNotification('Fehler', 'Favorit konnte nicht ausgef\u00FChrt werden.');
-        }
-      },
-      'Mit R\u00FCckfahrt'
-    );
+  // Ein Tipp legt die Fahrt sofort an \u2014 kein Zwischenschritt, kein Modal.
+  // Best\u00E4tigung ausschlie\u00DFlich per Toast mit \u201ER\u00FCckg\u00E4ngig" (l\u00F6scht die Fahrt).
+  const handleExecuteFavorit = async (favorit) => {
+    try {
+      const result = await executeFavorit(favorit.id, false);
+      toast.success(`${favorit.von_ort_name} \u2192 ${favorit.nach_ort_name} f\u00FCr heute eingetragen.`, {
+        undo: result?.id ? async () => {
+          try {
+            await deleteFahrt(result.id);
+            toast.success('Fahrt wieder entfernt.');
+          } catch (error) {
+            console.error('Fehler beim Entfernen der Fahrt:', error);
+            toast.error('Fahrt konnte nicht entfernt werden.');
+          }
+        } : undefined
+      });
+    } catch (error) {
+      console.error('Fehler beim Ausf\u00FChren des Favoriten:', error);
+      toast.error('Favorit konnte nicht ausgef\u00FChrt werden.');
+    }
   };
 
-  const handleDeleteFahrt = (fahrt) => {
-    showNotification(
-      'Fahrt löschen',
-      `${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${fahrt.nach_ort_name || fahrt.einmaliger_nach_ort} (${formatDate(fahrt.datum)}) wirklich löschen?`,
-      async () => {
-        try {
-          await deleteFahrt(fahrt.id);
-          await refreshAllData();
-          showNotification('Erfolg', 'Fahrt wurde gelöscht.');
-        } catch (error) {
-          showNotification('Fehler', 'Fahrt konnte nicht gelöscht werden.');
+  // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt die Fahrt mit
+  // denselben Daten neu an)
+  const handleDeleteFahrt = async (fahrt) => {
+    try {
+      await deleteFahrt(fahrt.id);
+      toast.success('Fahrt gelöscht.', {
+        undo: async () => {
+          try {
+            await addFahrt({
+              datum: fahrt.datum?.slice(0, 10),
+              vonOrtId: fahrt.von_ort_id || null,
+              nachOrtId: fahrt.nach_ort_id || null,
+              einmaligerVonOrt: fahrt.einmaliger_von_ort || null,
+              einmaligerNachOrt: fahrt.einmaliger_nach_ort || null,
+              anlass: fahrt.anlass || '',
+              kilometer: fahrt.kilometer,
+              abrechnung: fahrt.abrechnung,
+              mitfahrer: fahrt.mitfahrer || []
+            });
+            toast.success('Fahrt wiederhergestellt.');
+          } catch (error) {
+            console.error('Fehler beim Wiederherstellen der Fahrt:', error);
+            toast.error('Fahrt konnte nicht wiederhergestellt werden.');
+          }
         }
-      },
-      true
-    );
+      });
+    } catch (error) {
+      console.error('Fehler beim Löschen der Fahrt:', error);
+      toast.error('Fahrt konnte nicht gelöscht werden.');
+    }
   };
 
   const formatDate = (dateStr) => {

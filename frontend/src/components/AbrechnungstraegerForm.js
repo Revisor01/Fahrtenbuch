@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
+import { useToast } from './ui/Toast';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const FARB_PALETTE = [
@@ -16,6 +17,7 @@ const FARB_PALETTE = [
 
 function AbrechnungstraegerForm() {
     const { showNotification, refreshAllData } = useContext(AppContext);
+    const toast = useToast();
     const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [newEntry, setNewEntry] = useState({
@@ -136,27 +138,19 @@ function AbrechnungstraegerForm() {
         }
     };
 
+    // Löschen ohne Rückfrage (Design-Spec) — kein Undo möglich, da am
+    // Träger Erstattungssätze und Historie hängen
     const handleDelete = async (id) => {
-        showNotification(
-            "Abrechnungsträger löschen",
-            "Möchten Sie diesen Abrechnungsträger wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-            async () => {
-                try {
-                    await axios.delete(`/api/abrechnungstraeger/${id}`);
-                    showNotification('Erfolg', 'Abrechnungsträger wurde gelöscht');
-                    await refreshAllData((updatedAbrechnungstraeger) => {
-                        setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
-                    });
-                } catch (error) {
-                    console.error('Fehler beim Löschen:', error);
-                    showNotification(
-                        'Fehler',
-                        error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden'
-                    );
-                }
-            },
-            true  // showCancel = true für den Bestätigungsdialog
-        );
+        try {
+            await axios.delete(`/api/abrechnungstraeger/${id}`);
+            toast.success('Abrechnungsträger gelöscht.');
+            await refreshAllData((updatedAbrechnungstraeger) => {
+                setAbrechnungstraeger(updatedAbrechnungstraeger.sort((a, b) => a.sort_order - b.sort_order));
+            });
+        } catch (error) {
+            console.error('Fehler beim Löschen:', error);
+            toast.error(error.response?.data?.message || 'Abrechnungsträger konnte nicht gelöscht werden.');
+        }
     };
 
     return (

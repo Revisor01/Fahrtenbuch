@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
+import { useToast } from './ui/Toast';
 import { User, MapPin, Route, Building2, Star, Coins, Lock, Key } from 'lucide-react';
 import AbrechnungstraegerForm from './AbrechnungstraegerForm';
 import ErstattungssaetzeForm from './ErstattungssaetzeForm';
@@ -11,6 +12,7 @@ import DistanzenListe from './DistanzenListe';
 
 function Settings({ initialTab }) {
     const { token, user, setUser, showNotification, refreshAllData, favoriten, orte, abrechnungstraeger, addFavorit, deleteFavorit, fetchFavoriten } = useContext(AppContext);
+    const toast = useToast();
     const [profile, setProfile] = useState({});
     const [activeTab, setActiveTab] = useState(initialTab || 'profile');
     const [oldPassword, setOldPassword] = useState('');
@@ -72,22 +74,17 @@ function Settings({ initialTab }) {
         }
     };
 
-    const handleDeleteKey = (keyId) => {
-        showNotification(
-            'API-Key löschen',
-            'Möchten Sie diesen API-Key wirklich löschen?',
-            async () => {
-                try {
-                    await axios.delete(`/api/keys/${keyId}`);
-                    await fetchApiKeys();
-                    showNotification('Erfolg', 'API Key wurde gelöscht');
-                } catch (error) {
-                    console.error('Fehler beim Löschen des API Keys:', error);
-                    showNotification('Fehler', 'API Key konnte nicht gelöscht werden');
-                }
-            },
-            true
-        );
+    // Löschen ohne Rückfrage (Design-Spec) — kein Undo möglich, da der
+    // Klartext-Key nach dem Anlegen nicht mehr rekonstruierbar ist
+    const handleDeleteKey = async (keyId) => {
+        try {
+            await axios.delete(`/api/keys/${keyId}`);
+            await fetchApiKeys();
+            toast.success('API-Key gelöscht.');
+        } catch (error) {
+            console.error('Fehler beim Löschen des API Keys:', error);
+            toast.error('API-Key konnte nicht gelöscht werden.');
+        }
     };
 
     const handleProfileUpdate = async (e) => {
@@ -462,20 +459,29 @@ function Settings({ initialTab }) {
                     )}
                     </div>
                     <button
-                    onClick={() => {
-                        showNotification(
-                            'Favorit löschen',
-                            `Möchten Sie den Favoriten "${fav.von_ort_name} → ${fav.nach_ort_name}" wirklich löschen?`,
-                            async () => {
-                                try {
-                                    await deleteFavorit(fav.id);
-                                    showNotification('Erfolg', 'Favorit wurde gelöscht.');
-                                } catch (error) {
-                                    showNotification('Fehler', 'Favorit konnte nicht gelöscht werden.');
+                    onClick={async () => {
+                        // Löschen ohne Rückfrage, mit Toast + „Rückgängig"
+                        try {
+                            await deleteFavorit(fav.id);
+                            toast.success('Favorit gelöscht.', {
+                                undo: async () => {
+                                    try {
+                                        await addFavorit({
+                                            vonOrtId: fav.von_ort_id,
+                                            nachOrtId: fav.nach_ort_id,
+                                            anlass: fav.anlass || '',
+                                            abrechnungstraegerId: fav.abrechnungstraeger_id
+                                        });
+                                        toast.success('Favorit wiederhergestellt.');
+                                    } catch (error) {
+                                        console.error('Fehler beim Wiederherstellen des Favoriten:', error);
+                                        toast.error('Favorit konnte nicht wiederhergestellt werden.');
+                                    }
                                 }
-                            },
-                            true
-                        );
+                            });
+                        } catch (error) {
+                            toast.error('Favorit konnte nicht gelöscht werden.');
+                        }
                     }}
                     className="table-action-button-secondary ml-2 flex-shrink-0"
                     title="Löschen"

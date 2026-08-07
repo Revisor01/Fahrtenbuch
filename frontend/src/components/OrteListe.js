@@ -1,8 +1,10 @@
 import React, { useState, useContext, useMemo } from 'react';
 import { AppContext } from '../contexts/AppContext';
+import { useToast } from './ui/Toast';
 
 function OrteListe() {
-  const { orte, updateOrt, deleteOrt, showNotification } = useContext(AppContext);
+  const { orte, updateOrt, deleteOrt, addOrt, showNotification } = useContext(AppContext);
+  const toast = useToast();
   const [editingOrt, setEditingOrt] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
 
@@ -16,21 +18,32 @@ function OrteListe() {
     showNotification("Erfolg", "Der Ort wurde erfolgreich aktualisiert.");
   };
 
-  const handleDelete = async (id) => {
-    showNotification(
-      "Ort löschen",
-      "Sind Sie sicher, dass Sie diesen Ort löschen möchten?",
-      async () => {
-        try {
-          await deleteOrt(id);
-          showNotification("Erfolg", "Der Ort wurde erfolgreich gelöscht.");
-        } catch (error) {
-          console.error('Fehler beim Löschen des Ortes:', error);
-          showNotification("Fehler", "Dieser Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird oder noch eine Distanz zu diesem Ort hinterlegt ist.");
+  // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt den Ort mit
+  // denselben Daten neu an)
+  const handleDelete = async (ort) => {
+    try {
+      await deleteOrt(ort.id);
+      toast.success('Ort gelöscht.', {
+        undo: async () => {
+          try {
+            await addOrt({
+              name: ort.name,
+              adresse: ort.adresse,
+              istWohnort: !!ort.ist_wohnort,
+              istDienstort: !!ort.ist_dienstort,
+              istKirchspiel: !!ort.ist_kirchspiel
+            });
+            toast.success('Ort wiederhergestellt.');
+          } catch (error) {
+            console.error('Fehler beim Wiederherstellen des Ortes:', error);
+            toast.error('Ort konnte nicht wiederhergestellt werden.');
+          }
         }
-      },
-      true
-    );
+      });
+    } catch (error) {
+      console.error('Fehler beim Löschen des Ortes:', error);
+      toast.error('Dieser Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird oder noch eine Distanz zu diesem Ort hinterlegt ist.');
+    }
   };
   
   const sortedOrte = useMemo(() => {
@@ -153,7 +166,7 @@ function OrteListe() {
       ) : (
         <>
         <button onClick={() => handleEdit(ort)} className="table-action-button-primary">✎</button>
-        <button onClick={() => handleDelete(ort.id)} className="table-action-button-secondary">×</button>
+        <button onClick={() => handleDelete(ort)} className="table-action-button-secondary">×</button>
         </>
       )}
       </div>
@@ -222,7 +235,7 @@ function OrteListe() {
         ✎
         </button>
         <button
-        onClick={() => handleDelete(ort.id)}
+        onClick={() => handleDelete(ort)}
         className="table-action-button-secondary"
         title="Löschen"
         >

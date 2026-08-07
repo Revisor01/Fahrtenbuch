@@ -1,8 +1,10 @@
 import React, { useState, useContext, useMemo } from 'react';
 import { AppContext } from '../contexts/AppContext';
+import { useToast } from './ui/Toast';
 
 function DistanzenListe() {
-    const { distanzen, orte, updateDistanz, deleteDistanz, showNotification } = useContext(AppContext);
+    const { distanzen, orte, updateDistanz, deleteDistanz, addDistanz, showNotification } = useContext(AppContext);
+    const toast = useToast();
     const [editingDistanz, setEditingDistanz] = useState(null);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [sortConfig, setSortConfig] = useState({ key: 'von_ort_id', direction: 'ascending' });
@@ -22,21 +24,30 @@ function DistanzenListe() {
         return ort ? ort.name : 'Unbekannt';
     };
     
-    const handleDelete = async (id) => {
-        showNotification(
-        "Distanz löschen",
-        "Sind Sie sicher, dass Sie diese Distanz löschen möchten?",
-        async () => {
-            try {
-            await deleteDistanz(id);
-            showNotification("Erfolg", "Die Distanz wurde erfolgreich gelöscht.");
-            } catch (error) {
+    // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt die Distanz
+    // mit denselben Werten neu an)
+    const handleDelete = async (distanz) => {
+        try {
+            await deleteDistanz(distanz.id);
+            toast.success('Distanz gelöscht.', {
+                undo: async () => {
+                    try {
+                        await addDistanz({
+                            vonOrtId: distanz.von_ort_id,
+                            nachOrtId: distanz.nach_ort_id,
+                            distanz: distanz.distanz
+                        });
+                        toast.success('Distanz wiederhergestellt.');
+                    } catch (error) {
+                        console.error('Fehler beim Wiederherstellen der Distanz:', error);
+                        toast.error('Distanz konnte nicht wiederhergestellt werden.');
+                    }
+                }
+            });
+        } catch (error) {
             console.error('Fehler beim Löschen der Distanz:', error);
-            showNotification("Fehler", "Beim Löschen der Distanz ist ein Fehler aufgetreten.");
-            }
-        },
-        true
-        );
+            toast.error('Beim Löschen der Distanz ist ein Fehler aufgetreten.');
+        }
     };
     
     const sortedDistanzen = useMemo(() => {
@@ -159,7 +170,7 @@ function DistanzenListe() {
                 ✎
                 </button>
                 <button
-                onClick={() => handleDelete(distanz.id)}
+                onClick={() => handleDelete(distanz)}
                 className="table-action-button-secondary"
                 title="Löschen"
                 >
@@ -226,7 +237,7 @@ function DistanzenListe() {
           ✎
           </button>
           <button
-          onClick={() => handleDelete(distanz.id)}
+          onClick={() => handleDelete(distanz)}
           className="table-action-button-secondary"
           title="Löschen"
           >

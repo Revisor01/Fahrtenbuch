@@ -1,8 +1,7 @@
 import React, { useState, useEffect, createContext, useContext, useMemo, useRef } from 'react';
 import axios from 'axios';
-import NotificationModal from '../NotificationModal';
 import AbrechnungsStatusModal from '../AbrechnungsStatusModal';
-import Modal from '../Modal';
+import { useToast } from '../components/ui/Toast';
 
 const API_BASE_URL = '/api';
 
@@ -25,10 +24,9 @@ function AppProvider({ children }) {
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
   const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
-  const [notification, setNotification] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {}, showCancel: false });
   const [summary, setSummary] = useState({});
-  const [hasActiveNotification, setHasActiveNotification] = useState(false);
   const isLoggingOut = useRef(false);
+  const toast = useToast();
 
   const [favoriten, setFavoriten] = useState([]);
 
@@ -114,14 +112,15 @@ function AppProvider({ children }) {
     }
   };
 
-  const showNotification = (title, message, onConfirm = () => {}, showCancel = false, confirmLabel, onSecondAction, secondLabel, onThirdAction, thirdLabel) => {
-    setHasActiveNotification(true);
-    setNotification({ isOpen: true, title, message, onConfirm, showCancel, confirmLabel, onSecondAction, secondLabel, onThirdAction, thirdLabel });
-  };
-
-  const closeNotification = () => {
-    setNotification(prev => ({ ...prev, isOpen: false }));
-    setHasActiveNotification(false);
+  // Brücke für Bestandscode: reine Erfolgs-/Fehler-/Hinweismeldungen laufen
+  // als Toast. Bestätigungs-Flows wurden auf direkte Ausführung + Toast mit
+  // „Rückgängig" umgebaut — kein Modal für Bestätigungen (Design-Spec).
+  const showNotification = (title, message) => {
+    if (title === 'Fehler') {
+      toast.error(message);
+    } else {
+      toast.success(message);
+    }
   };
 
   useEffect(() => {
@@ -202,7 +201,8 @@ function AppProvider({ children }) {
     }
   };
 
-  const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum) => {
+  // silent = true: kein eigener Toast (für Mehrfach-Updates in Schleifen)
+  const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum, silent = false) => {
     try {
       await axios.post(`${API_BASE_URL}/fahrten/abrechnungsstatus`, {
         jahr,
@@ -213,10 +213,11 @@ function AppProvider({ children }) {
       });
       await fetchFahrten();
       await fetchMonthlyData();
-      showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
+      if (!silent) toast.success('Abrechnungsstatus wurde aktualisiert.');
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
-      showNotification("Fehler", "Status konnte nicht aktualisiert werden");
+      if (!silent) toast.error('Status konnte nicht aktualisiert werden.');
+      throw error;
     }
   };
 
@@ -325,18 +326,18 @@ function AppProvider({ children }) {
         while (current <= end) {
           const y = current.getFullYear().toString();
           const m = (current.getMonth() + 1).toString().padStart(2, '0');
-          await updateAbrechnungsStatus(y, m, traegerId, aktion, datum);
+          await updateAbrechnungsStatus(y, m, traegerId, aktion, datum, true);
           current.setMonth(current.getMonth() + 1);
         }
       } else {
-        await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum);
+        await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum, true);
       }
       await fetchMonthlyData();
       await fetchFahrten();
-      showNotification("Erfolg", "Abrechnungsstatus wurde aktualisiert");
+      toast.success('Abrechnungsstatus wurde aktualisiert.');
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Status:', error);
-      showNotification("Fehler", "Status konnte nicht aktualisiert werden");
+      toast.error('Status konnte nicht aktualisiert werden.');
     }
   };
 
@@ -488,9 +489,10 @@ function AppProvider({ children }) {
       setIsProfileModalOpen,
       isProfileModalOpen,
       updateAbrechnungsStatus,
-      hasActiveNotification,
+      // Kein Bestätigungs-Modal mehr aktiv — konstante Rückgabe für
+      // Bestandskonsumenten (Modal.js)
+      hasActiveNotification: false,
       showNotification,
-      closeNotification,
       setFahrten,
       refreshAllData,
       abrechnungsStatusModal,
@@ -507,19 +509,6 @@ function AppProvider({ children }) {
       executeFavorit
     }}>
     {children}
-    <NotificationModal
-    isOpen={notification.isOpen}
-    onClose={closeNotification}
-    title={notification.title}
-    message={notification.message}
-    onConfirm={notification.onConfirm}
-    showCancel={notification.showCancel}
-    confirmLabel={notification.confirmLabel}
-    onSecondAction={notification.onSecondAction}
-    secondLabel={notification.secondLabel}
-    onThirdAction={notification.onThirdAction}
-    thirdLabel={notification.thirdLabel}
-    />
     <AbrechnungsStatusModal
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'}
     onClose={() => setAbrechnungsStatusModal({})}
@@ -536,44 +525,6 @@ function AppProvider({ children }) {
     monat={abrechnungsStatusModal.monat}
     jahr={abrechnungsStatusModal.jahr}
     />
-
-    <Modal
-    isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion === 'reset'}
-    onClose={() => setAbrechnungsStatusModal({})}
-    title="Status zurücksetzen"
-    >
-    <div className="card-container">
-    <p className="text-value text-sm mb-6">
-    Möchten Sie den Status wirklich zurücksetzen?
-    </p>
-    <div className="flex flex-col sm:flex-row gap-2">
-    <button
-    type="button"
-    onClick={() => setAbrechnungsStatusModal({})}
-    className="btn-secondary w-full"
-    >
-    Abbrechen
-    </button>
-    <button
-    type="button"
-    onClick={() => {
-      handleAbrechnungsStatus(
-        abrechnungsStatusModal.jahr,
-        abrechnungsStatusModal.monat,
-        abrechnungsStatusModal.traegerId,
-        'reset',
-        null,
-        abrechnungsStatusModal.singleMonth || false
-      );
-      setAbrechnungsStatusModal({});
-    }}
-    className="btn-primary w-full"
-    >
-    Zurücksetzen
-    </button>
-    </div>
-    </div>
-    </Modal>
     </AppContext.Provider>
   );
 }
