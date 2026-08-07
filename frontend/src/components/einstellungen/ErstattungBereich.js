@@ -4,6 +4,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import BereichKopf from './BereichKopf';
 import { SatzSheet, SatzListe } from './SatzBausteine';
+import MitfahrerBereich from './MitfahrerBereich';
 
 // Erstattungssätze der Abrechnungsträger. Der Mitfahrer-Satz hat seit R7
 // einen eigenen Bereich („Mitfahrer").
@@ -142,6 +143,12 @@ function ErstattungBereich() {
           }
         />
       )}
+
+      {/* Mitfahrer-Erstattungssatz gehört fachlich zu den Sätzen
+          (User-Feedback 07.08.) — eigener Unterabschnitt statt Bereich */}
+      <div className="set-subbereich">
+        <MitfahrerBereich />
+      </div>
     </div>
   );
 }

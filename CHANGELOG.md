@@ -7,6 +7,15 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+- Dashboard desktop: Favoriten-Kachelreihe „Ein Tipp genügt" (fehlte am Desktop komplett — Favoriten waren nur mobil sichtbar)
+- Dashboard „Unterwegs": listet jetzt ALLE eingereichten Monate einzeln, jeder mit ✓-Schnellaktion „als erstattet markieren" (mit Rückgängig)
+
+### Changed
+- Dashboard „Letzte Fahrten": Spalte zeigt nur noch den Anlass (Ziel entfällt, Route im Tooltip); Träger-Spalte schmaler mit Zeilenumbruch, Datum ohne Jahr
+- Sidebar-Werkzeugknöpfe dezenter: rahmenlos, Teal-Hover statt grauer Kacheln
+- Einstellungen: „Mitfahrer" (Mitfahrer-Erstattungssatz) ist jetzt Unterabschnitt von „Erstattungssätze" statt eigener Bereich
+
 ### Fixed
 - Dashboard-Erfolgszustand meldet jetzt „Alles eingereicht — n Monate warten noch auf die Erstattung" statt pauschal „Alles abgerechnet"
 - Einstellungen: der Abmelden-Bereich wurde am Desktop abgeschnitten — Sekundäraktionen erscheinen dort jetzt nur noch mobil
