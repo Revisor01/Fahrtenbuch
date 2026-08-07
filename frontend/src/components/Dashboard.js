@@ -409,12 +409,26 @@ function Dashboard({ onNavigate }) {
 
   // ---- Wiederverwendete Teilstücke ----------------------------------------
 
+  // Erfolgszustand: nichts fällig — aber eingereichte Monate, die noch auf
+  // die Erstattung warten, werden ehrlich benannt (User-Feedback 07.08.)
+  const nUnterwegs = unterwegs ? unterwegs.weitere + 1 : 0;
   const heroErfolg = (
-    <section className="dash-hero-ok" aria-label="Alles abgerechnet">
+    <section
+      className="dash-hero-ok"
+      aria-label={nUnterwegs > 0 ? 'Alles eingereicht' : 'Alles abgerechnet'}
+    >
       <span className="dash-hero-ok-icon" aria-hidden="true">✓</span>
       <span>
-        <span className="dash-hero-ok-titel">Alles abgerechnet</span>
-        <span className="dash-hero-ok-text">Kein Monat wartet auf die Abrechnung.</span>
+        <span className="dash-hero-ok-titel">
+          {nUnterwegs > 0 ? 'Alles eingereicht' : 'Alles abgerechnet'}
+        </span>
+        <span className="dash-hero-ok-text">
+          {nUnterwegs === 0
+            ? 'Kein Monat wartet auf die Abrechnung.'
+            : nUnterwegs === 1
+              ? '1 Monat wartet noch auf die Erstattung.'
+              : `${nUnterwegs} Monate warten noch auf die Erstattung.`}
+        </span>
       </span>
     </section>
   );
@@ -662,11 +676,8 @@ function Dashboard({ onNavigate }) {
                     <div className="dash-d-td-datum num">
                       {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                     </div>
-                    <div>
-                      <div className="dash-d-td-anlass">{fahrt.anlass || '—'}</div>
-                      <div className="dash-d-td-route">
-                        {fahrt.von_ort_name || fahrt.einmaliger_von_ort} → {zielName(fahrt)}
-                      </div>
+                    <div className="dash-d-td-anlass" title={`${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${zielName(fahrt)}`}>
+                      {fahrt.anlass || zielName(fahrt) || '—'}
                     </div>
                     <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
                     <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
