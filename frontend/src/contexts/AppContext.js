@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, useMemo, useRef } from 'react';
 import axios from 'axios';
-import AbrechnungsStatusModal from '../AbrechnungsStatusModal';
+import StatusDatumSheet from '../components/abrechnung/StatusDatumSheet';
 import { useToast } from '../components/ui/Toast';
 
 const API_BASE_URL = '/api';
@@ -518,7 +518,9 @@ function AppProvider({ children }) {
       executeFavorit
     }}>
     {children}
-    <AbrechnungsStatusModal
+    {/* Einziger Mount des Status-Datums-Dialogs (Nachfolger des
+        AbrechnungsStatusModal) — jede Aktion läuft singleMonth-korrekt */}
+    <StatusDatumSheet
     isOpen={abrechnungsStatusModal.open && abrechnungsStatusModal.aktion !== 'reset'}
     onClose={() => setAbrechnungsStatusModal({})}
     onSubmit={(date) => handleAbrechnungsStatus(
@@ -533,6 +535,7 @@ function AppProvider({ children }) {
     aktion={abrechnungsStatusModal.aktion}
     monat={abrechnungsStatusModal.monat}
     jahr={abrechnungsStatusModal.jahr}
+    abrechnungstraeger={abrechnungstraeger}
     />
     </AppContext.Provider>
   );

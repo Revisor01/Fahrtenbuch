@@ -3460,3 +3460,21 @@ code {
   font-weight: 400;
   color: var(--text-2);
 }
+
+/* ---------- Status-Datums-Sheet (Nachfolger AbrechnungsStatusModal) ---------- */
+.abr-sheet-frage {
+  font-size: 15px;
+  color: var(--text-2);
+  margin-bottom: 16px;
+}
+
+.abr-sheet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.abr-sheet-buttons {
+  display: flex;
+  gap: 10px;
+}
