@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ResetPassword from './ResetPassword';
 import SetPassword from './SetPassword';
 import { ThemeProvider } from './ThemeContext';
+import { ToastProvider } from './components/ui/Toast';
 import AppProvider from './contexts/AppContext';
 import AppContent from './components/AppContent';
 
@@ -18,6 +19,7 @@ function App() {
   return (
     <ThemeProvider>
     <BrowserRouter>
+    <ToastProvider>
     <AppProvider>
     <Routes>
     <Route path="/help" element={<LandingPage />} />
@@ -27,6 +29,7 @@ function App() {
     <Route path="/*" element={<AppContent />} />
     </Routes>
     </AppProvider>
+    </ToastProvider>
     </BrowserRouter>
     </ThemeProvider>
   );

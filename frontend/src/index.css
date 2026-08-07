@@ -643,6 +643,34 @@ code {
     border: none;
     cursor: pointer;
     min-height: var(--tap-min);
+    flex-shrink: 0;
+  }
+
+  /* Statuskreis links im Toast: 22px, --ok bzw. --danger */
+  .toast-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--r-pill);
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--bg);
+  }
+
+  .toast-status-ok {
+    background-color: var(--ok);
+  }
+
+  .toast-status-error {
+    background-color: var(--danger);
+  }
+
+  .toast-message {
+    flex: 1;
+    min-width: 0;
   }
 
   /* ---------- Utility ---------- */
@@ -652,6 +680,33 @@ code {
 
   .w-full-mobile {
     @apply w-full sm:w-auto;
+  }
+}
+
+/* Toast-Viewport: mobil 16px über der Bottom-Nav, Desktop unten rechts */
+.toast-viewport {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast-viewport .toast {
+  pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+  .toast-viewport {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    width: auto;
+    max-width: 420px;
   }
 }
 
