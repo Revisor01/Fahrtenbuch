@@ -17,6 +17,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Zweistufiger Erfassungsflow als Sheet: „Wohin?" (Ortsliste nach Häufigkeit mit Distanz vom Startort, Startort/Datum antippbar, freie Zieleingabe) und „Bestätigen" (km · € live aus dem Erstattungssatz, Anlass-Chips aus dem Verlauf des Ziels, Rückfahrt-Switch mit Verlaufs-Heuristik, Trägerauswahl); Speichern optimistisch mit Toast + „Rückgängig", Rückfahrt legt eine zweite Fahrt an
 - `useErfassung().open(prefill?)` als zentraler Einstieg für alle „Neue Fahrt"-Aktionen (Prefill-Signatur für „Wiederholen"/FAB bereits enthalten)
 - Dashboard komplett neu (mobil + Desktop): Hero-Karte mit dem ältesten nicht eingereichten Monat („Alles abgerechnet" als Erfolgszustand), „Ein Tipp genügt"-Favoriten-Kacheln (legen die Fahrt sofort an, Toast mit „Rückgängig"), „Zuletzt" mit Wiederholen-Button, FAB über der Bottom-Nav; Desktop mit tageszeitabhängiger Begrüßung, Trägerkacheln im Hero, Karten „{Monat} bisher"/„Unterwegs", Tabelle „Letzte Fahrten" und Kilometer-Chart (Balkenfarbe = Monatsstatus)
+- Fahrtenliste komplett neu: Segmented Control (aktueller Monat / Vormonat / Zeitraum mit ausklappbarer Von-/Bis-Wahl und „Offene anzeigen"), Summenzeile „km · €" mit Export-Sheet (Excel/PDF/ZIP je Träger); mobil Karten mit Wischen-nach-links für Bearbeiten/Löschen (auch per Tipp/Tastatur erreichbar), ab 768 px Tabelle mit Inline-Aktionen inkl. „Wiederholen" über den Erfassungsflow; Bearbeiten öffnet das Formular im Sheet, leerer Monat mit konkretem Empty-State
 
 ### Changed
 - Tailwind auf semantische Farbnamen umgestellt (brand/accent/ok/danger/surface/line/bg/text); alte primary-/secondary-Klassen laufen übergangsweise über Aliasse weiter
@@ -26,6 +27,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - App-Shell umgebaut: Bottom-Nav mit vier Zielen (Start/Fahrten/Abrechnung/Mehr) auf Mobilgeräten, Sidebar 232 px mit Nutzerzeile ab 768 px; Fälligkeits-Punkt bzw. Zähler-Badge auf „Abrechnung"
 - Bestätigungen laufen ohne Modal: Löschen (Fahrten, Orte, Distanzen, Mitfahrer, Favoriten) direkt mit Toast + „Rückgängig"; Favoriten-Tipp legt die Fahrt sofort an; Export-Formatwahl als direkte Buttons; Statusanzeige heißt jetzt Erfasst/Eingereicht/Erstattet
 - Neue Fahrten laufen nur noch über den Erfassungsflow; `FahrtForm` dient ausschließlich dem Bearbeiten bestehender Fahrten (Create-Code entfernt)
+- Status in der Fahrtenliste einheitlich über StatusBadge (Punkt+Wort; Zeitraum als Monats-Chips); Status-Reset bei „Erstattet" funktioniert wieder (Klick lief zuvor ins nie öffnende Modal); Erstattungen je Träger als neutrale Karte statt farbiger KPI-Kacheln
 
 ### Removed
 - Die neun wählbaren Farbthemes (`themes.css`) und die globale Transition auf allen Elementen (`darkMode.css`)
