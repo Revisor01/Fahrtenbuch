@@ -62,7 +62,14 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onEdit, onDelete
               </div>
               <div className="fl-td-traeger">{traegerNameFuer(fahrt)}</div>
               <div className="fl-td-zahl num">{rundeKilometer(fahrt.kilometer)}</div>
-              <div className="fl-td-zahl num">{formatBetrag(fahrt.erstattung)} €</div>
+              <div className="fl-td-zahl">
+                <span className="num">{formatBetrag(fahrt.erstattung)} €</span>
+                {fahrt.mitfahrerErstattung > 0 && (
+                  <div className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
+                    +{formatBetrag(fahrt.mitfahrerErstattung)} € MF
+                  </div>
+                )}
+              </div>
               <div className="fl-td-status">
                 <StatusBadge status={statusFuer(fahrt)} variant="dot" />
               </div>

@@ -132,8 +132,9 @@ function Dashboard({ onNavigate }) {
     fahrten: aktuellerMonat?.fahrtenCount || 0,
     betrag: aktuellerMonat?.totalErstattung || 0,
   };
-  // Effektiver Durchschnittssatz über alle Träger (Erstattung/km)
-  const effSatz = bisher.km > 0 ? bisher.betrag / bisher.km : null;
+  // Mitfahrer-Anteil getrennt ausweisen — KEIN gemischter €/km-Satz
+  // (0,30 €/km Fahrt + 0,05 €/km Mitfahrer dürfen nicht verschmelzen)
+  const bisherMitfahrer = Number(aktuellerMonat?.erstattungen?.mitfahrer || 0);
 
   // ---- „Unterwegs" (Desktop): ALLE eingereichten, nicht erstatteten Monate —
   // jeder mit Schnellaktion „erhalten" (User-Feedback 07.08.)
@@ -167,6 +168,9 @@ function Dashboard({ onNavigate }) {
           ),
           tage: fruehestes
             ? Math.max(0, Math.floor((Date.now() - fruehestes.getTime()) / 86400000))
+            : null,
+          eingereichtAm: fruehestes
+            ? fruehestes.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
             : null,
           traegerNamen: eintraege.map((e) => e.name).join(', '),
           eintraege,
@@ -223,9 +227,13 @@ function Dashboard({ onNavigate }) {
       const d = new Date(jetzt.getFullYear(), jetzt.getMonth() - i, 1);
       const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const md = byYM[ym];
+      const mf = Number(md?.erstattungen?.mitfahrer || 0);
       monate.push({
         ym,
         km: md?.totalKm || 0,
+        fahrten: md?.fahrtenCount || 0,
+        betrag: Number(md?.totalErstattung || 0),
+        mitfahrer: mf,
         status: monatsStatus(md),
         initiale: d.toLocaleDateString('de-DE', { month: 'narrow' }),
       });
@@ -670,8 +678,8 @@ function Dashboard({ onNavigate }) {
             </div>
             <div className="dash-d-card-sub">
               {bisher.fahrten} {bisher.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
-              {effSatz !== null && (
-                <> · <span className="num">{formatEuro(effSatz)}</span> €/km</>
+              {bisherMitfahrer > 0 && (
+                <> · davon <span className="num">{formatEuro(bisherMitfahrer)}</span> € Mitfahrer</>
               )}
             </div>
           </section>
@@ -688,8 +696,9 @@ function Dashboard({ onNavigate }) {
                       <span className="dash-d-unterwegs-betrag num">{formatEuro(u.betrag)} €</span>
                     </div>
                     <div className="dash-d-unterwegs-sub">
+                      {u.eingereichtAm && <>am <span className="num">{u.eingereichtAm}</span></>}
                       {u.tage !== null && (
-                        <>seit {u.tage} {u.tage === 1 ? 'Tag' : 'Tagen'}</>
+                        <>{u.eingereichtAm ? ' · ' : ''}{u.tage === 0 ? 'heute' : `seit ${u.tage} ${u.tage === 1 ? 'Tag' : 'Tagen'}`}</>
                       )}
                     </div>
                   </div>
@@ -715,16 +724,41 @@ function Dashboard({ onNavigate }) {
             <div className="dash-label dash-d-card-label">Kilometer {new Date().getFullYear()}</div>
             <div className="dash-chart-bars dash-chart-bars-tile">
               {chart.map((c) => (
-                <div key={c.ym} className="dash-chart-col">
+                <div
+                  key={c.ym}
+                  className="dash-chart-col"
+                  tabIndex={c.km > 0 ? 0 : -1}
+                  aria-label={`${monatJahr(c.ym)}: ${formatKm(c.km)} km, ${formatEuro(c.betrag)} €`}
+                >
                   <div
                     className="dash-chart-bar"
                     style={{
                       height: `${Math.max(Math.round((c.km / chartMax) * 88), c.km > 0 ? 4 : 2)}px`,
                       background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
                     }}
-                    title={`${monatJahr(c.ym)}: ${formatKm(c.km)} km`}
                   />
                   <div className="dash-chart-monat num">{c.initiale}</div>
+                  {c.km > 0 && (
+                    <div className="dash-chart-pop" role="tooltip">
+                      <div className="dash-chart-pop-titel">{monatJahr(c.ym)}</div>
+                      <div className="dash-chart-pop-zeile">
+                        <span className="num">{formatKm(c.km)}</span> km · {c.fahrten} {c.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
+                      </div>
+                      <div className="dash-chart-pop-zeile">
+                        Erstattung <span className="num">{formatEuro(c.betrag - c.mitfahrer)} €</span>
+                      </div>
+                      {c.mitfahrer > 0 && (
+                        <div className="dash-chart-pop-zeile">
+                          Mitfahrer <span className="num">+{formatEuro(c.mitfahrer)} €</span>
+                        </div>
+                      )}
+                      {c.status && (
+                        <div className="dash-chart-pop-status">
+                          <StatusBadge status={c.status} variant="dot" />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -792,8 +826,13 @@ function Dashboard({ onNavigate }) {
                   </div>
                   <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
                   <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
-                  <div className="dash-d-td-zahl num">
-                    {fahrt.erstattung !== undefined ? formatEuro(fahrt.erstattung) : '—'}
+                  <div className="dash-d-td-zahl">
+                    <span className="num">{fahrt.erstattung !== undefined ? formatEuro(fahrt.erstattung) : '—'}</span>
+                    {fahrt.mitfahrerErstattung > 0 && (
+                      <div className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
+                        +{formatEuro(fahrt.mitfahrerErstattung)} € MF
+                      </div>
+                    )}
                   </div>
                   <div className="dash-d-td-status">
                     <StatusBadge status={statusFuerFahrt(fahrt)} variant="dot" />
