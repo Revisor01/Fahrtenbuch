@@ -197,7 +197,7 @@ function AppContent() {
             </button>
             <button
               type="button"
-              className="sidebar-tool"
+              className="sidebar-tool sidebar-logout"
               onClick={logout}
               title="Abmelden"
               aria-label="Abmelden"

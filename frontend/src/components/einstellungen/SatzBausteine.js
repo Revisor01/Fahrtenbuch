@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pencil, X } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import Sheet from '../ui/Sheet';
 
 // Gemeinsame Bausteine für Erstattungssätze (Träger + Mitfahrer):
@@ -85,7 +85,7 @@ export function SatzListe({ saetze, onEdit, onDelete, leerText }) {
             aria-label="Erstattungssatz löschen"
             onClick={() => onDelete(satz)}
           >
-            <X size={15} />
+            <Trash2 size={15} />
           </button>
         </div>
       ))}

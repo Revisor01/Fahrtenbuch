@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useContext } from 'react';
-import { Search, Pencil, X } from 'lucide-react';
+import { Search, Pencil, Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
@@ -341,7 +341,7 @@ function OrteDistanzenBereich() {
         aria-label={`${ort.name} löschen`}
         onClick={() => handleOrtDelete(ort)}
       >
-        <X size={15} />
+        <Trash2 size={15} />
       </button>
     </>
   );
@@ -373,7 +373,7 @@ function OrteDistanzenBereich() {
         aria-label="Distanz löschen"
         onClick={() => handleDistanzDelete(distanz)}
       >
-        <X size={15} />
+        <Trash2 size={15} />
       </button>
     </>
   );

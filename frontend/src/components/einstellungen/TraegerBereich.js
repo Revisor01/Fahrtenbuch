@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { ChevronUp, ChevronDown, Pencil, X } from 'lucide-react';
+import { GripVertical, Check, Pencil, Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
@@ -102,11 +102,17 @@ function TraegerBereich() {
     }
   };
 
-  const handleMove = async (index, richtung) => {
+  // Reihenfolge: Drag & Drop über den Griff (User-Feedback 07.08. — die
+  // Pfeil-Buttons entfallen); Tastatur: Pfeil hoch/runter auf dem Griff.
+  const [dragIndex, setDragIndex] = useState(null);
+  const [overIndex, setOverIndex] = useState(null);
+
+  const handleReorder = async (von, nach) => {
+    if (von === null || nach === null || von === nach) return;
     const neu = [...traegerListe];
-    const ziel = richtung === 'up' ? index - 1 : index + 1;
-    if (ziel < 0 || ziel >= neu.length) return;
-    [neu[index], neu[ziel]] = [neu[ziel], neu[index]];
+    const [bewegt] = neu.splice(von, 1);
+    neu.splice(nach, 0, bewegt);
+    setTraegerListe(neu); // optimistisch
     const sortOrder = neu.map((item, idx) => ({ id: item.id, sort_order: idx + 1 }));
     try {
       await axios.put('/api/abrechnungstraeger/sort', { sortOrder });
@@ -115,6 +121,16 @@ function TraegerBereich() {
       console.error('Fehler beim Sortieren:', error);
       toast.error('Reihenfolge konnte nicht aktualisiert werden.');
       fetchTraeger();
+    }
+  };
+
+  const handleGripKeyDown = (e, index) => {
+    if (e.key === 'ArrowUp' && index > 0) {
+      e.preventDefault();
+      handleReorder(index, index - 1);
+    } else if (e.key === 'ArrowDown' && index < traegerListe.length - 1) {
+      e.preventDefault();
+      handleReorder(index, index + 1);
     }
   };
 
@@ -153,7 +169,38 @@ function TraegerBereich() {
 
       <div className="set-zeilen">
         {traegerListe.map((traeger, index) => (
-          <div key={traeger.id} className="set-row">
+          <div
+            key={traeger.id}
+            className={`set-row${dragIndex === index ? ' is-dragging' : ''}${overIndex === index && dragIndex !== null && dragIndex !== index ? ' is-dragover' : ''}`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              if (overIndex !== index) setOverIndex(index);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              handleReorder(dragIndex, index);
+              setDragIndex(null);
+              setOverIndex(null);
+            }}
+          >
+            <button
+              type="button"
+              className="set-grip"
+              draggable
+              onDragStart={(e) => {
+                setDragIndex(index);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onDragEnd={() => {
+                setDragIndex(null);
+                setOverIndex(null);
+              }}
+              onKeyDown={(e) => handleGripKeyDown(e, index)}
+              title="Ziehen zum Sortieren (Pfeiltasten: verschieben)"
+              aria-label={`${traeger.name} verschieben — Pfeiltasten nutzen`}
+            >
+              <GripVertical size={15} />
+            </button>
             <div className="set-row-main">
               <div className="set-row-titel" style={traeger.active ? undefined : { opacity: 0.55 }}>
                 {traeger.name}
@@ -166,32 +213,13 @@ function TraegerBereich() {
             </div>
             <button
               type="button"
-              className="set-action"
-              onClick={() => handleMove(index, 'up')}
-              disabled={index === 0}
-              title="Nach oben"
-              aria-label={`${traeger.name} nach oben`}
-            >
-              <ChevronUp size={15} />
-            </button>
-            <button
-              type="button"
-              className="set-action"
-              onClick={() => handleMove(index, 'down')}
-              disabled={index === traegerListe.length - 1}
-              title="Nach unten"
-              aria-label={`${traeger.name} nach unten`}
-            >
-              <ChevronDown size={15} />
-            </button>
-            <button
-              type="button"
-              className={`set-action${traeger.active ? ' is-on' : ''}`}
+              className={`set-check${traeger.active ? ' is-on' : ''}`}
               onClick={() => handleToggleActive(traeger)}
               title={traeger.active ? 'Aktiv — klicken zum Deaktivieren' : 'Inaktiv — klicken zum Aktivieren'}
               aria-pressed={!!traeger.active}
+              aria-label={`${traeger.name} ${traeger.active ? 'deaktivieren' : 'aktivieren'}`}
             >
-              {traeger.active ? '●' : '○'}
+              {traeger.active && <Check size={14} strokeWidth={3} />}
             </button>
             <button
               type="button"
@@ -209,7 +237,7 @@ function TraegerBereich() {
               title="Löschen"
               aria-label={`${traeger.name} löschen`}
             >
-              <X size={15} />
+              <Trash2 size={15} />
             </button>
           </div>
         ))}
