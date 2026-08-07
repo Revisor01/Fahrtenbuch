@@ -125,27 +125,18 @@ const DatenschutzInhalt = () => (
   </>
 );
 
+// Version aus dem eigenen Build (package.json, via REACT_APP_VERSION zur
+// Build-Zeit eingebacken). Der frühere Live-Abruf des letzten GitHub-Releases
+// zeigte den Stand des letzten *Releases* — und war offline/bei Ratelimit
+// schlicht falsch („v1.0.0"-Fallback).
+const APP_VERSION = process.env.REACT_APP_VERSION || null;
+
 const InfoModal = ({ isOpen, onClose }) => {
-  const [version, setVersion] = useState(null);
   // 'info' | 'impressum' | 'datenschutz'
   const [view, setView] = useState('info');
 
   useEffect(() => {
-    const fetchVersion = async () => {
-      try {
-        const response = await fetch('https://api.github.com/repos/Revisor01/Fahrtenbuch/releases/latest');
-        const data = await response.json();
-        setVersion(data.tag_name);
-      } catch (error) {
-        console.error('Error fetching version:', error);
-        setVersion('v1.0.0');
-      }
-    };
-
-    if (isOpen) {
-      setView('info');
-      fetchVersion();
-    }
+    if (isOpen) setView('info');
   }, [isOpen]);
 
   return (
@@ -161,8 +152,8 @@ const InfoModal = ({ isOpen, onClose }) => {
         <>
           <div className="sheet-abschnitt">
             <div className="form-label">Version &amp; Copyright</div>
-            <p className="sheet-text">Version: {version || 'Lädt…'}</p>
-            <p className="sheet-text">© 2025 Simon Luthe. Alle Rechte vorbehalten.</p>
+            <p className="sheet-text">Version: {APP_VERSION ? `v${APP_VERSION}` : 'unbekannt'}</p>
+            <p className="sheet-text">© 2026 Simon Luthe. Alle Rechte vorbehalten.</p>
           </div>
 
           <div className="sheet-abschnitt">

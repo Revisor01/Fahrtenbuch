@@ -340,10 +340,16 @@ function AppProvider({ children }) {
       }
       await fetchMonthlyData();
       await fetchFahrten();
-      toast.success('Abrechnungsstatus wurde aktualisiert.');
+      // Aussagekräftige Meldung je Aktion (statt „wurde aktualisiert")
+      const meldung = {
+        eingereicht: 'Als eingereicht markiert.',
+        erhalten: 'Als erstattet markiert.',
+        reset: 'Status zurückgesetzt — wieder „Erfasst".',
+      }[aktion] || 'Abrechnungsstatus wurde aktualisiert.';
+      toast.success(meldung);
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Status:', error);
-      toast.error('Status konnte nicht aktualisiert werden.');
+      toast.error(error.response?.data?.message || 'Status konnte nicht aktualisiert werden.');
     }
   };
 
