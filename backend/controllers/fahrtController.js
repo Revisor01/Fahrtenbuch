@@ -14,6 +14,18 @@ exports.exportToExcelRange = exportToExcelRange;
 exports.exportToPdf = exportToPdf;
 exports.exportToPdfRange = exportToPdfRange;
 
+// Der mitfahrer-JOIN in getMonthlyReport/getDateRangeReport liefert pro Mitfahrer
+// eine Row — für Reports je Fahrt genau eine Zeile behalten (Mitfahrer werden
+// separat per Mitfahrer.findByFahrtId geladen, keine Informationsverluste).
+function dedupeByFahrtId(rows) {
+  const seen = new Set();
+  return rows.filter(r => {
+    if (seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
+}
+
 // Ownership-Check: gehört der Ort dem eingeloggten User?
 async function ortGehoertUser(ortId, userId) {
   const [rows] = await db.execute(
@@ -194,11 +206,14 @@ exports.getMonthlyReport = async (req, res) => {
     const userId = req.user.id;
     
     // Hole zuerst die Fahrten
-    const [fahrten, abrechnungsStatus] = await Promise.all([
+    const [fahrtenRaw, abrechnungsStatus] = await Promise.all([
       Fahrt.getMonthlyReport(year, month, userId),
       Abrechnung.getStatus(userId, year, month)
     ]);
-    
+
+    // Mitfahrer-JOIN-Duplikate entfernen (eine Zeile pro Fahrt)
+    const fahrten = dedupeByFahrtId(fahrtenRaw);
+
     // Füge Mitfahrer-Daten hinzu
     for (let fahrt of fahrten) {
       fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
@@ -302,8 +317,10 @@ exports.getReportRange = async (req, res) => {
     const endMonth = parseInt(req.params.endMonth);
     const userId = req.user.id;
 
-    // Hole Fahrten über den gesamten Zeitraum
-    const fahrten = await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId);
+    // Hole Fahrten über den gesamten Zeitraum — Mitfahrer-JOIN-Duplikate entfernen
+    const fahrten = dedupeByFahrtId(
+      await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId)
+    );
 
     // Pro-Monat-Status: { traegerId: { "2026-01": { eingereicht_am, erhalten_am }, ... } }
     const abrechnungsStatus = {};

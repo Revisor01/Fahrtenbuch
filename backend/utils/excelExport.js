@@ -52,6 +52,17 @@ function getQuartalSheet(month) {
 // Max data rows per quartal sheet (rows 8-36)
 const MAX_ROWS_PER_SHEET = 29;
 
+// Der mitfahrer-JOIN in getMonthlyReport/getDateRangeReport liefert pro Mitfahrer
+// eine Row — für den normalen Export je Fahrt genau eine Zeile behalten.
+function dedupeByFahrtId(rows) {
+  const seen = new Set();
+  return rows.filter(r => {
+    if (seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
+}
+
 function fillVorlageSheet(worksheet, year, kostentraeger, kostenstelle, userProfile) {
  worksheet.getCell('C7').value = parseInt(year);
  worksheet.getCell('C8').value = kostenstelle
@@ -177,8 +188,8 @@ exports.exportToExcel = async (req, res) => {
      return res.send(buffer);
    }
 
-   // Normaler Export
-   const formattedData = fahrten.flatMap(fahrt => {
+   // Normaler Export — Mitfahrer-JOIN-Duplikate entfernen (eine Zeile pro Fahrt)
+   const formattedData = dedupeByFahrtId(fahrten).flatMap(fahrt => {
      if (fahrt.autosplit) {
        return fahrt.details
        .filter(detail => detail.abrechnung.toLowerCase() === type)
@@ -364,8 +375,8 @@ exports.exportToExcelRange = async (req, res) => {
      return res.send(buffer);
    }
 
-   // Normaler Export für andere Typen
-   const formattedData = fahrten.flatMap(fahrt => {
+   // Normaler Export für andere Typen — Mitfahrer-JOIN-Duplikate entfernen (eine Zeile pro Fahrt)
+   const formattedData = dedupeByFahrtId(fahrten).flatMap(fahrt => {
      if (fahrt.autosplit) {
        return fahrt.details
          .filter(detail => detail.abrechnung.toLowerCase() === type)

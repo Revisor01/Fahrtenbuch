@@ -306,8 +306,19 @@ function renderMitfahrerPage(doc, chunk, userProfile, zeitraumHeader, gesamtKm) 
 
 // -- Data preparation (same logic as excelExport.js) --
 
+// Der mitfahrer-JOIN in getMonthlyReport/getDateRangeReport liefert pro Mitfahrer
+// eine Row — für den normalen Export je Fahrt genau eine Zeile behalten.
+function dedupeByFahrtId(rows) {
+  const seen = new Set();
+  return rows.filter(r => {
+    if (seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
+}
+
 function prepareFormattedData(fahrten, type) {
-  return fahrten.flatMap(fahrt => {
+  return dedupeByFahrtId(fahrten).flatMap(fahrt => {
     if (fahrt.autosplit) {
       return fahrt.details
         .filter(detail => detail.abrechnung.toLowerCase() === type)
