@@ -56,8 +56,12 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onEdit, onDelete
                   }
                 >
                   {von} → {nach}
-                  {mitfahrer.length > 0 &&
-                    ` · ${mitfahrer.length} Mitfahrer:in${mitfahrer.length > 1 ? 'nen' : ''}`}
+                  {mitfahrer.length > 0 && (
+                    <span className="fl-mf-hinweis">
+                      <span className="fl-mf-punkt" aria-hidden="true" />
+                      {mitfahrer.length} Mitfahrer:in{mitfahrer.length > 1 ? 'nen' : ''}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="fl-td-traeger">{traegerNameFuer(fahrt)}</div>
@@ -66,7 +70,7 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onEdit, onDelete
                 <span className="num">{formatBetrag(fahrt.erstattung)} €</span>
                 {fahrt.mitfahrerErstattung > 0 && (
                   <div className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
-                    +{formatBetrag(fahrt.mitfahrerErstattung)} € Mitfahrer
+                    +{formatBetrag(fahrt.mitfahrerErstattung)} €
                   </div>
                 )}
               </div>
