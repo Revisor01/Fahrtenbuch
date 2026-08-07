@@ -7,6 +7,14 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+- Mitfahrer-Erstattung sauber getrennt: kein gemischter €/km-Satz mehr auf dem Dashboard („0,33 €/km"), stattdessen „davon x € Mitfahrer"; Fahrt-Betrag und Mitfahrer-Betrag werden getrennt berechnet (0,30 €/km Fahrt + 0,05 €/km je Mitfahrer)
+
+### Added
+- Fahrten mit Mitfahrern zeigen die Mitfahrer-Erstattung als kleine Zweitzahl unter dem Betrag (Fahrtenliste mobil + desktop, Dashboard „Letzte Fahrten"); Backend liefert `mitfahrerErstattung` jetzt pro Fahrt
+- Kilometer-Chart: Hover/Fokus öffnet eine Monats-Aufschlüsselung (km, Fahrten, Erstattung, Mitfahrer-Anteil, Status)
+- Dashboard „Unterwegs": zeigt das Einreich-Datum („am 05.04. · seit 124 Tagen", heute = „heute")
+
 ### Changed
 - Dashboard desktop neu komponiert: Vierer-Kachel-Grid oben (Noch nicht eingereicht · Monat bisher · Unterwegs · Kilometer-Chart), darunter Favoriten, unten „Letzte Fahrten" in voller Breite mit ↻-Schnellbutton pro Zeile (Fahrt für heute wiederholen)
 

@@ -4492,3 +4492,67 @@ code {
   padding-top: 24px;
   border-top: 1px solid var(--line);
 }
+
+/* Mitfahrer-Erstattung als kleine Zweitzahl unter dem Fahrt-Betrag */
+.fl-betrag-mit-mf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.fl-mf-betrag {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* Chart-Hover: Monats-Aufschlüsselung als Popover */
+.dash-chart-col {
+  position: relative;
+}
+
+.dash-chart-col:focus-visible {
+  outline: none;
+  border-radius: var(--r-btn);
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.dash-chart-pop {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  min-width: 168px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  text-align: left;
+}
+
+.dash-chart-col:hover .dash-chart-pop,
+.dash-chart-col:focus-within .dash-chart-pop,
+.dash-chart-col:focus .dash-chart-pop {
+  display: block;
+}
+
+.dash-chart-pop-titel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.dash-chart-pop-zeile {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.dash-chart-pop-status {
+  margin-top: 6px;
+}

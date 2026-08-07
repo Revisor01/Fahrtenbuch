@@ -276,22 +276,24 @@ exports.getMonthlyReport = async (req, res) => {
       }
       erstattungen[fahrt.abrechnung] += erstattung;
       
-      // Berechne Mitfahrer-Erstattung
+      // Berechne Mitfahrer-Erstattung (auch pro Fahrt ausweisen)
+      let mitfahrerErstattung = 0;
       if (fahrt.mitfahrer?.length > 0) {
         const mitfahrerSatz = getErstattungssatz('mitfahrer', fahrt.datum);
-        const mitfahrerErstattung = fahrt.mitfahrer.length * mitfahrerSatz * fahrt.kilometer;
+        mitfahrerErstattung = fahrt.mitfahrer.length * mitfahrerSatz * fahrt.kilometer;
         if (!erstattungen.mitfahrer) {
           erstattungen.mitfahrer = 0;
         }
         erstattungen.mitfahrer += mitfahrerErstattung;
       }
-      
+
       return {
         ...fahrt,
         vonOrtName: fahrt.von_ort_name || fahrt.einmaliger_von_ort,
         nachOrtName: fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
         erstattungssatz,
-        erstattung
+        erstattung,
+        mitfahrerErstattung
       };
     });
     
@@ -403,10 +405,11 @@ exports.getReportRange = async (req, res) => {
       }
       erstattungen[fahrt.abrechnung] += erstattung;
 
-      // Berechne Mitfahrer-Erstattung
+      // Berechne Mitfahrer-Erstattung (auch pro Fahrt ausweisen)
+      let mitfahrerErstattung = 0;
       if (fahrt.mitfahrer?.length > 0) {
         const mitfahrerSatz = getErstattungssatz('mitfahrer', fahrt.datum);
-        const mitfahrerErstattung = fahrt.mitfahrer.length * mitfahrerSatz * fahrt.kilometer;
+        mitfahrerErstattung = fahrt.mitfahrer.length * mitfahrerSatz * fahrt.kilometer;
         if (!erstattungen.mitfahrer) {
           erstattungen.mitfahrer = 0;
         }
@@ -418,7 +421,8 @@ exports.getReportRange = async (req, res) => {
         vonOrtName: fahrt.von_ort_name || fahrt.einmaliger_von_ort,
         nachOrtName: fahrt.nach_ort_name || fahrt.einmaliger_nach_ort,
         erstattungssatz,
-        erstattung
+        erstattung,
+        mitfahrerErstattung
       };
     });
 
