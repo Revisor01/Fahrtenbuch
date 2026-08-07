@@ -222,7 +222,13 @@ function AppContent() {
                 onShowNewFeatures={() => setShowNewFeaturesModal(true)}
               />
             )}
-            {activeTab === 'verwaltung' && <UserManagement />}
+            {/* Desktop-Tab: Karte als Untergrund (in den Einstellungen liefert
+                der Drilldown die set-content-Karte) */}
+            {activeTab === 'verwaltung' && (
+              <div className="set-content">
+                <UserManagement />
+              </div>
+            )}
           </div>
         </main>
 

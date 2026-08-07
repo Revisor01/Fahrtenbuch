@@ -4181,6 +4181,43 @@ code {
   grid-template-columns: 1fr 1fr 96px 96px;
 }
 
+/* Verwaltung: Benutzer | E-Mail | Rolle | Aktionen */
+.set-grid-benutzer {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.5fr) 92px 88px;
+}
+
+/* Zeilen-Hover nach Spec Screen 7 (nur wo Zeilen interaktive Aktionen tragen) */
+.set-tr-hover:hover {
+  background-color: var(--surface-2);
+}
+
+/* Verifiziert-Status als Punkt + Wort (12px, --ok bzw. Akzent) */
+.set-verif {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.set-verif::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex-shrink: 0;
+}
+
+.set-verif.is-ok {
+  color: var(--ok);
+}
+
+.set-verif.is-offen {
+  color: var(--accent-text);
+}
+
 .set-td-haupt {
   font-size: 15px;
   font-weight: 600;
@@ -4321,6 +4358,23 @@ code {
 /* Löschen direkt in --danger */
 .set-action-danger {
   color: var(--danger);
+}
+
+/* Inline-Zweischritt: erster Klick macht den Löschknopf „scharf" */
+.set-action-confirm {
+  width: auto;
+  padding: 0 12px;
+  border-color: var(--danger);
+  background-color: var(--danger);
+  color: var(--on-brand);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.set-action-confirm:hover:not(:disabled) {
+  background-color: var(--danger);
+  opacity: 0.9;
 }
 
 .set-action.is-on {
