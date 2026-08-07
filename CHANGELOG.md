@@ -8,7 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Fixed
-- Abrechnungs-Matrix: aufgeklappte Trägerdetails stehen jetzt im Spaltenraster direkt unter ihren Spalten (vorher gestapelte Liste links)
+- Abrechnungs-Matrix: aufgeklappte Trägerdetails nutzen jetzt die volle Zeilenbreite (vorher auf 720 px begrenzt)
 - Abrechnung: fällige Monate außerhalb des vorgewählten Jahres (z. B. Dezember des Vorjahres) waren in der Liste unsichtbar — die Ansicht weitet sich jetzt automatisch auf „Alle Jahre"
 - Abrechnung: Untertitel meldete „nichts wartet auf dich", obwohl eingereichte Monate noch auf die Erstattung warten — zeigt jetzt „{n} Monate warten auf die Erstattung"
 - Toasts mit „Rückgängig"-Aktion blieben dauerhaft stehen und stapelten sich — blenden jetzt nach 8 s aus (Abweichung von der Design-Spec, User-Feedback)

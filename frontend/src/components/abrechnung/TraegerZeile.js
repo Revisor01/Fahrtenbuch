@@ -10,12 +10,9 @@ import { formatDatumKurz } from './abrechnungUtils';
 //   Erfasst     → „Einreichen" (Export + Status)
 //   Eingereicht → „Als erstattet markieren" · „Datum ändern"
 //   Erstattet   → „Zurücksetzen" · „Datum ändern"
-// Wird auch in der aufgeklappten Detail-Zeile der Desktop-Matrix genutzt:
-// variante="zelle" rendert ohne Namen (der Spaltenkopf trägt ihn) und
-// vertikal gestapelt, damit die Zelle unter ihrer Matrix-Spalte steht.
-function TraegerZeile({ month, kategorie, aktionen, variante }) {
+// Wird auch in der aufgeklappten Detail-Zeile der Desktop-Matrix genutzt.
+function TraegerZeile({ month, kategorie, aktionen }) {
   const { name, betrag, km, status, statusData } = kategorie;
-  const zelle = variante === 'zelle';
   const datum = status === 'erhalten'
     ? statusData?.erhalten_am
     : status === 'eingereicht'
@@ -23,14 +20,9 @@ function TraegerZeile({ month, kategorie, aktionen, variante }) {
       : null;
 
   return (
-    <div className={`abr-traeger-row${zelle ? ' abr-traeger-zelle' : ''}`}>
+    <div className="abr-traeger-row">
       <div className="abr-traeger-main">
-        {!zelle && <div className="abr-traeger-name">{name}</div>}
-        {zelle && (
-          <span className={`abr-traeger-betrag num${status === 'erhalten' ? ' abr-betrag-erstattet' : ''}`}>
-            {formatBetrag(betrag)} €
-          </span>
-        )}
+        <div className="abr-traeger-name">{name}</div>
         <div className="abr-traeger-sub">
           <StatusBadge status={status} variant="dot" />
           {datum && <span className="num">am {formatDatumKurz(datum)}</span>}
@@ -77,11 +69,9 @@ function TraegerZeile({ month, kategorie, aktionen, variante }) {
           )}
         </div>
       </div>
-      {!zelle && (
-        <span className={`abr-traeger-betrag num${status === 'erhalten' ? ' abr-betrag-erstattet' : ''}`}>
-          {formatBetrag(betrag)} €
-        </span>
-      )}
+      <span className={`abr-traeger-betrag num${status === 'erhalten' ? ' abr-betrag-erstattet' : ''}`}>
+        {formatBetrag(betrag)} €
+      </span>
     </div>
   );
 }
