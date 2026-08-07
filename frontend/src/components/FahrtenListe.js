@@ -144,6 +144,14 @@ function FahrtenListe() {
         {sortierteFahrten.length > 0 && (
           <span className="fl-anzahl num">{sortierteFahrten.length}</span>
         )}
+        {/* Gleicher Einstieg wie auf dem Dashboard: öffnet den Erfassungsflow */}
+        <button
+          type="button"
+          className="dash-d-btn fl-neu-btn"
+          onClick={() => erfassung.open()}
+        >
+          + Neue Fahrt
+        </button>
       </div>
 
       <ZeitraumSegmente />
@@ -203,6 +211,16 @@ function FahrtenListe() {
           />
         </>
       )}
+
+      {/* FAB wie auf dem Dashboard — nur mobil sichtbar (CSS blendet ihn ≥768px aus) */}
+      <button
+        type="button"
+        className="dash-fab"
+        onClick={() => erfassung.open()}
+        aria-label="Neue Fahrt erfassen"
+      >
+        +
+      </button>
 
       <ExportSheet isOpen={exportOffen} onClose={() => setExportOffen(false)} />
 

@@ -696,7 +696,8 @@ function Dashboard({ onNavigate }) {
           <section className="dash-d-tile dash-d-tile-scroll">
             <div className="dash-label dash-d-card-label">Unterwegs</div>
             {unterwegsListe.length > 0 ? (
-              unterwegsListe.map((u) => (
+              <div className="dash-uw-liste">
+                {unterwegsListe.map((u) => (
                 <div key={u.ym} className="dash-uw-row">
                   <div className="dash-uw-main">
                     <div className="dash-d-unterwegs-zeile">
@@ -721,7 +722,8 @@ function Dashboard({ onNavigate }) {
                     ✓
                   </button>
                 </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="dash-d-card-sub">
                 Kein eingereichter Monat wartet auf Erstattung.

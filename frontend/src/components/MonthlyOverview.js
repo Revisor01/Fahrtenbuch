@@ -4,6 +4,7 @@ import { AppContext } from '../contexts/AppContext';
 import EmptyState from './ui/EmptyState';
 import MonatKarte from './abrechnung/MonatKarte';
 import AbrechnungsMatrix from './abrechnung/AbrechnungsMatrix';
+import Sheet from './ui/Sheet';
 import AbrechnungExportSheet from './abrechnung/AbrechnungExportSheet';
 import { useEinreichen } from './abrechnung/useEinreichen';
 import {
@@ -264,6 +265,47 @@ function MonthlyOverview() {
         onClose={() => setExportSheet(null)}
         monat={exportSheet?.monat || null}
       />
+
+      {/* Formatwahl vor dem Einreichen (User-Feedback 07.08.): der Export
+          gehört zum Einreichen, das Format soll man trotzdem wählen können */}
+      <Sheet
+        isOpen={!!aktionen.formatFrage}
+        onClose={aktionen.formatFrageSchliessen}
+        title={
+          aktionen.formatFrage
+            ? `${monatLabel(aktionen.formatFrage.month)} einreichen`
+            : 'Einreichen'
+        }
+      >
+        {aktionen.formatFrage && (
+          <div className="fav-frage">
+            <p className="fav-frage-text">
+              Beim Einreichen wird die Abrechnung heruntergeladen — in welchem Format?
+            </p>
+            <button
+              type="button"
+              className="btn-primary w-full"
+              onClick={() => aktionen.einreichenBestaetigen('excel')}
+            >
+              Excel
+            </button>
+            <button
+              type="button"
+              className="btn-secondary w-full"
+              onClick={() => aktionen.einreichenBestaetigen('pdf')}
+            >
+              PDF
+            </button>
+            <button
+              type="button"
+              className="btn-secondary w-full"
+              onClick={() => aktionen.einreichenBestaetigen('beides')}
+            >
+              Beides (ZIP)
+            </button>
+          </div>
+        )}
+      </Sheet>
     </div>
   );
 }

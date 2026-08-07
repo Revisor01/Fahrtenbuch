@@ -2142,7 +2142,8 @@ code {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* FAB 62×62px über der Bottom-Nav — nur mobil, gehört zum Dashboard-Screen */
+/* FAB 62×62px über der Bottom-Nav — nur mobil; auf Dashboard UND Fahrtenliste
+   der Einstieg in den Erfassungsflow */
 .dash-fab {
   position: fixed;
   right: 20px;
@@ -2479,9 +2480,17 @@ code {
   padding: 18px 20px;
 }
 
+/* Kacheln einer Rasterzeile sind gleich hoch (align-items: stretch ist
+   Grid-Standard) — die scrollende Kachel darf die Zeile nicht aufziehen:
+   sie scrollt innerhalb ihrer Höhe. */
 .dash-d-tile-scroll {
+  min-height: 0;
+}
+
+.dash-d-tile-scroll > .dash-uw-liste {
   overflow-y: auto;
-  max-height: 260px;
+  min-height: 0;
+  flex: 1;
 }
 
 .dash-d-tile-hero {
@@ -2702,6 +2711,20 @@ code {
 .fl-anzahl {
   font-size: 14px;
   color: var(--text-3);
+}
+
+/* „+ Neue Fahrt" in der Titelzeile: rechtsbündig, nur Desktop —
+   mobil übernimmt der FAB (wie auf dem Dashboard) */
+.fl-neu-btn {
+  display: none;
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .fl-neu-btn {
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 /* Segmented Control: --surface-2, --r-btn, 4px Padding, Segmente 40px,

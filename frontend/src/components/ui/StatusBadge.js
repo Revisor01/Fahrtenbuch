@@ -68,7 +68,13 @@ function Progress({ status, className }) {
             {i > 0 && <span className={`status-progress-line status-progress-line-${i <= currentIndex ? 'done' : 'open'}`} aria-hidden="true" />}
             <span className="status-progress-station">
               <span className={`status-progress-circle status-progress-${state}`} aria-hidden="true">
-                {state === 'done' ? '✓' : state === 'current' && step === 'eingereicht' ? '↑' : ''}
+                {/* „Erstattet" ist die Endstation — dort gehört der Haken
+                    auch dann hin, wenn sie die aktuelle Station ist */}
+                {state === 'done' || (state === 'current' && step === 'erhalten')
+                  ? '✓'
+                  : state === 'current' && step === 'eingereicht'
+                    ? '↑'
+                    : ''}
               </span>
               <span className={`status-progress-label${state === 'open' ? ' status-progress-label-open' : ''}`}>
                 {statusLabel(step)}

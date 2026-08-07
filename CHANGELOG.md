@@ -7,6 +7,14 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+- „+ Neue Fahrt" in der Fahrtenliste (Desktop) und FAB auf Mobilgeräten — gleicher Erfassungsflow wie auf dem Dashboard
+- Einreichen fragt nach dem Exportformat (Excel / PDF / Beides als ZIP), statt stillschweigend Excel zu laden
+
+### Fixed
+- Fortschrittsleiste (mobil): „Erstattet" als Endstation zeigt jetzt den Haken statt eines leeren Kreises
+- Dashboard-Kacheln der unteren Zeile sind gleich hoch; die „Unterwegs"-Liste scrollt innerhalb ihrer Kachel
+
 ### Fixed
 - Statuswechsel scheiterte, sobald irgendwo eine Mitfahrer-Erstattung existierte: die Spalte `abrechnungen.typ` enthält Träger-IDs und den Text „mitfahrer" gemischt, wodurch MySQL beim numerischen Vergleich die ganze Spalte casten wollte und abbrach — betraf Einreichen, Erstattet-Markieren und Zurücksetzen (fiel im Zeitraum-Modus auf, weil dort ein Monat mit Mitfahrern enthalten war)
 - Info-Dialog zeigte die Version des letzten GitHub-Releases (v1.2.0 von Mai 2025) und bei fehlender Netzverbindung „v1.0.0" — jetzt kommt sie aus dem eigenen Build
