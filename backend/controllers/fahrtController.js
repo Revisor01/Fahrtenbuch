@@ -395,8 +395,16 @@ exports.getReportRange = async (req, res) => {
 
     // Erstelle die Zusammenfassung
     const erstattungen = {};
+    // Beträge je Träger UND Monat — die Zeitraum-Übersicht braucht sie, um
+    // Monate ohne Vorgang von wirklich offenen zu unterscheiden
+    const erstattungenProMonat = {};
+    const merkeMonat = (key, ym, betrag) => {
+      if (!erstattungenProMonat[key]) erstattungenProMonat[key] = {};
+      erstattungenProMonat[key][ym] = (erstattungenProMonat[key][ym] || 0) + betrag;
+    };
 
     const report = fahrten.map((fahrt) => {
+      const fahrtYM = String(fahrt.datum).slice(0, 7);
       const erstattungssatz = getErstattungssatz(fahrt.abrechnung, fahrt.datum);
       const erstattung = fahrt.kilometer * erstattungssatz;
 
@@ -404,6 +412,7 @@ exports.getReportRange = async (req, res) => {
         erstattungen[fahrt.abrechnung] = 0;
       }
       erstattungen[fahrt.abrechnung] += erstattung;
+      merkeMonat(String(fahrt.abrechnung), fahrtYM, erstattung);
 
       // Berechne Mitfahrer-Erstattung (auch pro Fahrt ausweisen)
       let mitfahrerErstattung = 0;
@@ -414,6 +423,7 @@ exports.getReportRange = async (req, res) => {
           erstattungen.mitfahrer = 0;
         }
         erstattungen.mitfahrer += mitfahrerErstattung;
+        merkeMonat('mitfahrer', fahrtYM, mitfahrerErstattung);
       }
 
       return {
@@ -433,6 +443,7 @@ exports.getReportRange = async (req, res) => {
       fahrten: report,
       summary: {
         erstattungen,
+        erstattungenProMonat,
         gesamtErstattung: Object.values(erstattungen).reduce((a, b) => a + b, 0),
         abrechnungsStatus
       }
@@ -722,6 +733,10 @@ exports.updateAbrechnungsStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
+    // Fachliche Vorbedingung (z. B. „erst einreichen") ist kein Serverfehler
+    if (/erst eingereicht/i.test(error.message || '')) {
+      return res.status(409).json({ message: error.message });
+    }
     res.status(500).json({ message: 'Fehler beim Aktualisieren des Status' });
   }
 };

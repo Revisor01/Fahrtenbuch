@@ -219,7 +219,10 @@ function AppProvider({ children }) {
       if (!silent) toast.success('Abrechnungsstatus wurde aktualisiert.');
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
-      if (!silent) toast.error('Status konnte nicht aktualisiert werden.');
+      if (!silent) {
+        // Backend-Meldung durchreichen (z. B. „muss erst eingereicht werden")
+        toast.error(error.response?.data?.message || 'Status konnte nicht aktualisiert werden.');
+      }
       throw error;
     }
   };
