@@ -201,7 +201,9 @@ function AppProvider({ children }) {
   };
 
   // silent = true: kein eigener Toast (für Mehrfach-Updates in Schleifen)
-  const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum, silent = false) => {
+  // refresh = false: keine Fetches — der Aufrufer lädt am Ende selbst nach
+  // (fetchMonthlyData feuert ~28 Requests; in Schleifen wäre das ein Sturm)
+  const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum, silent = false, refresh = true) => {
     try {
       await axios.post(`${API_BASE_URL}/fahrten/abrechnungsstatus`, {
         jahr,
@@ -210,8 +212,10 @@ function AppProvider({ children }) {
         aktion,
         datum
       });
-      await fetchFahrten();
-      await fetchMonthlyData();
+      if (refresh) {
+        await fetchFahrten();
+        await fetchMonthlyData();
+      }
       if (!silent) toast.success('Abrechnungsstatus wurde aktualisiert.');
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
@@ -383,6 +387,14 @@ function AppProvider({ children }) {
           abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
           totalErstattung: response.data.summary.gesamtErstattung || 0,
           totalKm: (response.data.fahrten || []).reduce((sum, f) => sum + (parseFloat(f.kilometer) || 0), 0),
+          // km je Abrechnungsträger (für die Trägerzeilen der Abrechnung)
+          kmProTraeger: (response.data.fahrten || []).reduce((acc, f) => {
+            if (f.abrechnung != null) {
+              const key = f.abrechnung.toString();
+              acc[key] = (acc[key] || 0) + (parseFloat(f.kilometer) || 0);
+            }
+            return acc;
+          }, {}),
           fahrtenCount: (response.data.fahrten || []).length
         };
       })
