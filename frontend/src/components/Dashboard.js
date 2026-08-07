@@ -628,82 +628,112 @@ function Dashboard({ onNavigate }) {
           </button>
         </div>
 
-        <div className="dash-d-row">
+        {/* Vierer-Grid: Hero · Monat bisher · Unterwegs · Kilometer (User-Feedback 07.08.) */}
+        <div className="dash-d-grid4">
           {hero ? (
-            <section className="dash-d-hero">
+            <section className="dash-d-tile dash-d-tile-hero">
               <div className="dash-hero-label">Noch nicht eingereicht</div>
-              <div className="dash-d-hero-betragzeile">
-                <span className="dash-d-hero-betrag num">{formatEuro(hero.betrag)} €</span>
-                <span className="dash-d-hero-aus">aus {monatJahr(hero.ym)}</span>
+              <div className="dash-d-tile-hero-betrag num">{formatEuro(hero.betrag)} €</div>
+              <div className="dash-d-tile-hero-aus">
+                aus {monatJahr(hero.ym)} · {hero.traeger.length}{' '}
+                {hero.traeger.length === 1 ? 'Träger' : 'Träger'}
               </div>
-              <div className="dash-d-hero-unten">
-                {hero.traeger.map((t) => (
-                  <div key={t.id} className="dash-d-hero-tile">
-                    <div className="dash-d-hero-tile-name">{t.name}</div>
-                    <div className="dash-d-hero-tile-betrag num">{formatEuro(t.betrag)} €</div>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="dash-d-hero-btn"
-                  onClick={() => onNavigate && onNavigate('abrechnungen')}
-                >
-                  {monatName(hero.ym)} abrechnen →
-                </button>
-              </div>
+              <button
+                type="button"
+                className="dash-d-tile-hero-btn"
+                onClick={() => onNavigate && onNavigate('abrechnungen')}
+              >
+                {monatName(hero.ym)} abrechnen →
+              </button>
             </section>
-          ) : heroErfolg}
+          ) : (
+            <section className="dash-d-tile dash-d-tile-ok" aria-label={nUnterwegs > 0 ? 'Alles eingereicht' : 'Alles abgerechnet'}>
+              <span className="dash-hero-ok-icon" aria-hidden="true">✓</span>
+              <span className="dash-hero-ok-titel">
+                {nUnterwegs > 0 ? 'Alles eingereicht' : 'Alles abgerechnet'}
+              </span>
+              <span className="dash-hero-ok-text">
+                {nUnterwegs === 0
+                  ? 'Kein Monat wartet auf die Abrechnung.'
+                  : nUnterwegs === 1
+                    ? '1 Monat wartet noch auf die Erstattung.'
+                    : `${nUnterwegs} Monate warten noch auf die Erstattung.`}
+              </span>
+            </section>
+          )}
 
-          <div className="dash-d-stack">
-            <section className="dash-d-card">
-              <div className="dash-label dash-d-card-label">{monatName(currentYM)} bisher</div>
-              <div className="dash-d-bisher-zeile">
-                <span className="dash-d-bisher-km num">{formatKm(bisher.km)} km</span>
-                <span className="dash-d-bisher-betrag num">{formatEuro(bisher.betrag)} €</span>
-              </div>
-              <div className="dash-d-card-sub">
-                {bisher.fahrten} {bisher.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
-                {effSatz !== null && (
-                  <> · <span className="num">{formatEuro(effSatz)}</span> €/km</>
-                )}
-              </div>
-            </section>
-            <section className="dash-d-card">
-              <div className="dash-label dash-d-card-label">Unterwegs</div>
-              {unterwegsListe.length > 0 ? (
-                unterwegsListe.map((u) => (
-                  <div key={u.ym} className="dash-uw-row">
-                    <div className="dash-uw-main">
-                      <div className="dash-d-unterwegs-zeile">
-                        <span className="dash-d-unterwegs-dot" aria-hidden="true" />
-                        <span className="dash-d-unterwegs-text">{monatName(u.ym)} eingereicht</span>
-                        <span className="dash-d-unterwegs-betrag num">{formatEuro(u.betrag)} €</span>
-                      </div>
-                      <div className="dash-d-unterwegs-sub">
-                        {u.tage !== null && (
-                          <>seit {u.tage} {u.tage === 1 ? 'Tag' : 'Tagen'} · </>
-                        )}
-                        {u.traegerNamen}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="dash-uw-btn"
-                      title={`${monatName(u.ym)} als erstattet markieren`}
-                      aria-label={`${monatName(u.ym)} als erstattet markieren`}
-                      onClick={() => monatErhalten(u)}
-                    >
-                      ✓
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="dash-d-card-sub">
-                  Kein eingereichter Monat wartet auf Erstattung.
-                </div>
+          <section className="dash-d-tile">
+            <div className="dash-label dash-d-card-label">{monatName(currentYM)} bisher</div>
+            <div className="dash-d-bisher-zeile">
+              <span className="dash-d-bisher-km num">{formatKm(bisher.km)} km</span>
+              <span className="dash-d-bisher-betrag num">{formatEuro(bisher.betrag)} €</span>
+            </div>
+            <div className="dash-d-card-sub">
+              {bisher.fahrten} {bisher.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
+              {effSatz !== null && (
+                <> · <span className="num">{formatEuro(effSatz)}</span> €/km</>
               )}
-            </section>
-          </div>
+            </div>
+          </section>
+
+          <section className="dash-d-tile dash-d-tile-scroll">
+            <div className="dash-label dash-d-card-label">Unterwegs</div>
+            {unterwegsListe.length > 0 ? (
+              unterwegsListe.map((u) => (
+                <div key={u.ym} className="dash-uw-row">
+                  <div className="dash-uw-main">
+                    <div className="dash-d-unterwegs-zeile">
+                      <span className="dash-d-unterwegs-dot" aria-hidden="true" />
+                      <span className="dash-d-unterwegs-text">{monatName(u.ym)} eingereicht</span>
+                      <span className="dash-d-unterwegs-betrag num">{formatEuro(u.betrag)} €</span>
+                    </div>
+                    <div className="dash-d-unterwegs-sub">
+                      {u.tage !== null && (
+                        <>seit {u.tage} {u.tage === 1 ? 'Tag' : 'Tagen'}</>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="dash-uw-btn"
+                    title={`${monatName(u.ym)} als erstattet markieren`}
+                    aria-label={`${monatName(u.ym)} als erstattet markieren`}
+                    onClick={() => monatErhalten(u)}
+                  >
+                    ✓
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="dash-d-card-sub">
+                Kein eingereichter Monat wartet auf Erstattung.
+              </div>
+            )}
+          </section>
+
+          <section className="dash-d-tile">
+            <div className="dash-label dash-d-card-label">Kilometer {new Date().getFullYear()}</div>
+            <div className="dash-chart-bars dash-chart-bars-tile">
+              {chart.map((c) => (
+                <div key={c.ym} className="dash-chart-col">
+                  <div
+                    className="dash-chart-bar"
+                    style={{
+                      height: `${Math.max(Math.round((c.km / chartMax) * 88), c.km > 0 ? 4 : 2)}px`,
+                      background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
+                    }}
+                    title={`${monatJahr(c.ym)}: ${formatKm(c.km)} km`}
+                  />
+                  <div className="dash-chart-monat num">{c.initiale}</div>
+                </div>
+              ))}
+            </div>
+            <div className="dash-chart-legende">
+              <span><span className="dash-chart-swatch" style={{ background: 'var(--ok)' }} />Erstattet</span>
+              <span><span className="dash-chart-swatch" style={{ background: 'var(--accent)' }} />Eingereicht</span>
+              <span><span className="dash-chart-swatch" style={{ background: 'var(--brand)' }} />Erfasst</span>
+            </div>
+          </section>
         </div>
 
         {/* Favoriten auch auf dem Desktop (User-Feedback 07.08.) */}
@@ -723,78 +753,66 @@ function Dashboard({ onNavigate }) {
           </section>
         )}
 
-        <div className="dash-d-row">
-          <section className="dash-d-tablecard">
-            <div className="dash-d-tabletitel">
-              <span>Letzte Fahrten</span>
-              <button
-                type="button"
-                className="dash-link"
-                onClick={() => onNavigate && onNavigate('fahrten')}
-              >
-                Alle ansehen
-              </button>
+        <section className="dash-d-tablecard">
+          <div className="dash-d-tabletitel">
+            <span>Letzte Fahrten</span>
+            <button
+              type="button"
+              className="dash-link"
+              onClick={() => onNavigate && onNavigate('fahrten')}
+            >
+              Alle ansehen
+            </button>
+          </div>
+          <div className="dash-d-tablescroll">
+            <div className="dash-d-tablehead">
+              <div>Datum</div>
+              <div>Anlass</div>
+              <div>Träger</div>
+              <div className="dash-d-th-num">km</div>
+              <div className="dash-d-th-num">Betrag</div>
+              <div className="dash-d-th-num">Status</div>
+              <div aria-hidden="true" />
             </div>
-            <div className="dash-d-tablescroll">
-              <div className="dash-d-tablehead">
-                <div>Datum</div>
-                <div>Anlass</div>
-                <div>Träger</div>
-                <div className="dash-d-th-num">km</div>
-                <div className="dash-d-th-num">Betrag</div>
-                <div className="dash-d-th-num">Status</div>
-              </div>
-              {recent === null ? (
-                <div className="dash-zuletzt-laden">Fahrten werden geladen…</div>
-              ) : recent.length === 0 ? (
-                <div className="dash-zuletzt-laden">Noch keine Fahrten erfasst.</div>
-              ) : (
-                recent.map((fahrt) => (
-                  <div key={fahrt.id} className="dash-d-tablerow">
-                    <div className="dash-d-td-datum num">
-                      {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
-                    </div>
-                    <div className="dash-d-td-anlass" title={`${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${zielName(fahrt)}`}>
-                      {fahrt.anlass || '—'}
-                    </div>
-                    <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
-                    <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
-                    <div className="dash-d-td-zahl num">
-                      {fahrt.erstattung !== undefined ? formatEuro(fahrt.erstattung) : '—'}
-                    </div>
-                    <div className="dash-d-td-status">
-                      <StatusBadge status={statusFuerFahrt(fahrt)} variant="dot" />
-                    </div>
+            {recent === null ? (
+              <div className="dash-zuletzt-laden">Fahrten werden geladen…</div>
+            ) : recent.length === 0 ? (
+              <div className="dash-zuletzt-laden">Noch keine Fahrten erfasst.</div>
+            ) : (
+              recent.map((fahrt) => (
+                <div key={fahrt.id} className="dash-d-tablerow">
+                  <div className="dash-d-td-datum num">
+                    {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                   </div>
-                ))
-              )}
-            </div>
-          </section>
-
-          <section className="dash-d-chartcard">
-            <div className="dash-d-charttitel">Kilometer {new Date().getFullYear()}</div>
-            <div className="dash-chart-bars">
-              {chart.map((c) => (
-                <div key={c.ym} className="dash-chart-col">
-                  <div
-                    className="dash-chart-bar"
-                    style={{
-                      height: `${Math.max(Math.round((c.km / chartMax) * 150), c.km > 0 ? 4 : 2)}px`,
-                      background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
-                    }}
-                    title={`${monatJahr(c.ym)}: ${formatKm(c.km)} km`}
-                  />
-                  <div className="dash-chart-monat num">{c.initiale}</div>
+                  <div className="dash-d-td-anlass" title={`${fahrt.von_ort_name || fahrt.einmaliger_von_ort} → ${zielName(fahrt)}`}>
+                    {fahrt.anlass || '—'}
+                  </div>
+                  <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
+                  <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
+                  <div className="dash-d-td-zahl num">
+                    {fahrt.erstattung !== undefined ? formatEuro(fahrt.erstattung) : '—'}
+                  </div>
+                  <div className="dash-d-td-status">
+                    <StatusBadge status={statusFuerFahrt(fahrt)} variant="dot" />
+                  </div>
+                  <div className="dash-d-td-aktion">
+                    {!fahrt._optimistisch && (
+                      <button
+                        type="button"
+                        className="dash-d-wdh-btn"
+                        title={`Fahrt nach ${zielName(fahrt)} für heute wiederholen`}
+                        aria-label={`Fahrt nach ${zielName(fahrt)} für heute wiederholen`}
+                        onClick={() => handleWiederholen(fahrt)}
+                      >
+                        ↻
+                      </button>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-            <div className="dash-chart-legende">
-              <span><span className="dash-chart-swatch" style={{ background: 'var(--ok)' }} />Erstattet</span>
-              <span><span className="dash-chart-swatch" style={{ background: 'var(--accent)' }} />Eingereicht</span>
-              <span><span className="dash-chart-swatch" style={{ background: 'var(--brand)' }} />Erfasst</span>
-            </div>
-          </section>
-        </div>
+              ))
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );

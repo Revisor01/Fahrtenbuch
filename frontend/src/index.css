@@ -2309,11 +2309,132 @@ code {
 .dash-d-tablehead,
 .dash-d-tablerow {
   display: grid;
-  grid-template-columns: 66px 1fr 108px 52px 72px 106px;
+  grid-template-columns: 66px 1fr 140px 52px 72px 106px 44px;
   column-gap: 12px;
-  min-width: 540px;
+  min-width: 560px;
   padding: 8px 22px;
   align-items: center;
+}
+
+.dash-d-td-aktion {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dash-d-wdh-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+  color: var(--brand);
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.dash-d-wdh-btn:hover {
+  background: var(--surface-3);
+}
+
+.dash-d-wdh-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+/* Vierer-Grid der Dashboard-Kacheln (User-Feedback 07.08.) */
+.dash-d-grid4 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (min-width: 1200px) {
+  .dash-d-grid4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.dash-d-tile {
+  display: flex;
+  flex-direction: column;
+  min-height: 190px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+
+.dash-d-tile-scroll {
+  overflow-y: auto;
+  max-height: 260px;
+}
+
+.dash-d-tile-hero {
+  background: var(--brand);
+  border-color: transparent;
+  color: var(--on-brand);
+}
+
+.dash-d-tile-hero .dash-hero-label {
+  margin-bottom: 8px;
+}
+
+.dash-d-tile-hero-betrag {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.dash-d-tile-hero-aus {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.82;
+}
+
+.dash-d-tile-hero-btn {
+  margin-top: auto;
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: var(--r-btn);
+  background: var(--on-brand);
+  color: var(--brand);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease;
+}
+
+.dash-d-tile-hero-btn:hover {
+  filter: brightness(0.95);
+}
+
+.dash-d-tile-ok {
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  border-color: var(--ok-line);
+}
+
+.dash-d-tile .dash-uw-row + .dash-uw-row {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.dash-chart-bars-tile {
+  margin-top: auto;
+}
+
+.dash-chart-bars-tile .dash-chart-bar {
+  min-height: 2px;
 }
 
 .dash-d-tablehead {
