@@ -7,6 +7,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Changed
+- Dashboard desktop neu komponiert: Vierer-Kachel-Grid oben (Noch nicht eingereicht · Monat bisher · Unterwegs · Kilometer-Chart), darunter Favoriten, unten „Letzte Fahrten" in voller Breite mit ↻-Schnellbutton pro Zeile (Fahrt für heute wiederholen)
+
 ### Added
 - Dashboard desktop: Favoriten-Kachelreihe „Ein Tipp genügt" (fehlte am Desktop komplett — Favoriten waren nur mobil sichtbar)
 - Dashboard „Unterwegs": listet jetzt ALLE eingereichten Monate einzeln, jeder mit ✓-Schnellaktion „als erstattet markieren" (mit Rückgängig)
