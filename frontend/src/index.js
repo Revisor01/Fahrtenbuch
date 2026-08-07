@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import './tokens.css';
 import './index.css';
-import './themes.css';
-import './darkMode.css';
 import App from './App';
 
 ReactDOM.render(
