@@ -1,6 +1,5 @@
 import React from 'react';
 import './index.css';
-import './darkMode.css';
 import LandingPage from './LandingPage';
 import VerifyEmail from './VerifyEmail';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
