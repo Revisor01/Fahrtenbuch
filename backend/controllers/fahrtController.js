@@ -404,7 +404,10 @@ exports.getReportRange = async (req, res) => {
     };
 
     const report = fahrten.map((fahrt) => {
-      const fahrtYM = String(fahrt.datum).slice(0, 7);
+      // fahrt.datum ist ein Date-Objekt (mysql2) — String(...) ergäbe
+      // „Wed Jan 01 ...“; lokal formatieren, damit „YYYY-MM“ herauskommt
+      const fahrtDatum = new Date(fahrt.datum);
+      const fahrtYM = `${fahrtDatum.getFullYear()}-${String(fahrtDatum.getMonth() + 1).padStart(2, '0')}`;
       const erstattungssatz = getErstattungssatz(fahrt.abrechnung, fahrt.datum);
       const erstattung = fahrt.kilometer * erstattungssatz;
 
