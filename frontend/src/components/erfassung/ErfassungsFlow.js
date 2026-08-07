@@ -41,7 +41,7 @@ function formatEuro(betrag) {
 }
 
 function ErfassungsFlow({ isOpen, onClose, prefill }) {
-  const { orte, distanzen, fahrten, abrechnungstraeger, setFahrten, refreshAllData } =
+  const { orte, distanzen, abrechnungstraeger, setFahrten, refreshAllData } =
     useContext(AppContext);
   const toast = useToast();
 
