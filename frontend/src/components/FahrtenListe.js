@@ -70,10 +70,18 @@ function FahrtenListe() {
   const traegerNameFuer = (fahrt) =>
     abrechnungstraeger?.find((t) => t.id === parseInt(fahrt.abrechnung))?.name || 'Unbekannt';
 
-  // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt die Fahrt mit
-  // denselben Daten neu an — neue ID, Status wieder „Erfasst")
+  // Löschen mit Rückfrage (User-Feedback 07.08.) — Fahrten sind Belege,
+  // das versehentliche Wegwischen soll nicht unbemerkt passieren.
+  const [loeschFrage, setLoeschFrage] = useState(null);
+
+  const fragenObLoeschen = (fahrt) => {
+    setSwipeOffenId(null);
+    setLoeschFrage(fahrt);
+  };
+
   const handleDelete = async (fahrt) => {
     setSwipeOffenId(null);
+    setLoeschFrage(null);
     try {
       await deleteFahrt(fahrt.id);
       fetchMonthlyData();
@@ -180,7 +188,7 @@ function FahrtenListe() {
                 istOffen={swipeOffenId === fahrt.id}
                 onOeffnen={setSwipeOffenId}
                 onEdit={() => handleEdit(fahrt)}
-                onDelete={() => handleDelete(fahrt)}
+                onDelete={() => fragenObLoeschen(fahrt)}
               />
             ))}
           </div>
@@ -190,13 +198,45 @@ function FahrtenListe() {
             statusFuer={statusFuer}
             traegerNameFuer={traegerNameFuer}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={fragenObLoeschen}
             onWiederholen={handleWiederholen}
           />
         </>
       )}
 
       <ExportSheet isOpen={exportOffen} onClose={() => setExportOffen(false)} />
+
+      {/* Rückfrage vor dem Löschen; danach bleibt der Undo-Toast als Netz */}
+      <Sheet
+        isOpen={!!loeschFrage}
+        onClose={() => setLoeschFrage(null)}
+        title="Fahrt löschen?"
+      >
+        {loeschFrage && (
+          <div className="fav-frage">
+            <p className="fav-frage-text">
+              {new Date(loeschFrage.datum).toLocaleDateString('de-DE')} ·{' '}
+              {loeschFrage.nach_ort_name || loeschFrage.einmaliger_nach_ort}
+              {loeschFrage.anlass ? ` · ${loeschFrage.anlass}` : ''} ·{' '}
+              {rundeKilometer(loeschFrage.kilometer)} km
+            </p>
+            <button
+              type="button"
+              className="btn-destructive w-full"
+              onClick={() => handleDelete(loeschFrage)}
+            >
+              Löschen
+            </button>
+            <button
+              type="button"
+              className="btn-secondary w-full"
+              onClick={() => setLoeschFrage(null)}
+            >
+              Abbrechen
+            </button>
+          </div>
+        )}
+      </Sheet>
 
       <Sheet
         isOpen={!!editingFahrt}
