@@ -1,91 +1,65 @@
 import React from 'react';
-import Modal from '../Modal';
-import { CheckSquare } from 'lucide-react';
+import { Check } from 'lucide-react';
+import Sheet from './ui/Sheet';
+
+// Neuigkeiten-Sheet nach Design-Spec (Redesign 2026): Abschnitts-Labels
+// 12px/700 uppercase (--text-3), Feature-Zeilen 14px mit Petrol-Häkchen
+// (--brand), Bestätigen als Primärbutton 48px.
+
+const FEATURES = [
+  {
+    titel: 'Dashboard',
+    punkte: [
+      'Neues Dashboard als Startseite mit Übersicht über Erstattungen, Kilometer und Fahrten',
+      'Jahres-Statistik mit Balkendiagramm (km pro Monat) und Erstattungsübersicht',
+      'Neue Tab-Navigation: Dashboard, Fahrten & Export, Monatsübersicht, Einstellungen',
+    ],
+  },
+  {
+    titel: 'Favoriten & Schnelleingabe',
+    punkte: [
+      'Wiederkehrende Fahrten als Favoriten speichern (unter Einstellungen → Favoriten)',
+      'Ein Klick auf einen Favoriten trägt die Fahrt mit heutigem Datum ein',
+      '"Nochmal"-Button bei den letzten Fahrten — kopiert die Fahrt für heute',
+    ],
+  },
+  {
+    titel: 'Adress-Vervollständigung',
+    punkte: [
+      'Bei der Eingabe von Adressen erscheinen automatisch Vorschläge aus OpenStreetMap',
+      'Funktioniert bei neuen Orten und einmaligen Orten im Fahrt-Formular',
+    ],
+  },
+  {
+    titel: 'Weitere Verbesserungen',
+    punkte: [
+      'PDF-Export neben Excel — mit Format-Auswahl (Excel, PDF oder beides als ZIP)',
+      'Verbesserte Sicherheit, Eingabevalidierung und mobile Darstellung',
+    ],
+  },
+];
 
 const NewFeaturesModal = ({ isOpen, onClose }) => {
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={
-        <div className="flex items-center gap-2">
-          <span>Neuigkeiten</span>
+    <Sheet isOpen={isOpen} onClose={onClose} title="Neuigkeiten" wide>
+      {FEATURES.map(({ titel, punkte }) => (
+        <div key={titel} className="sheet-abschnitt">
+          <div className="form-label">{titel}</div>
+          {punkte.map((punkt) => (
+            <div key={punkt} className="sheet-feature">
+              <Check size={16} strokeWidth={2.5} aria-hidden="true" />
+              <p>{punkt}</p>
+            </div>
+          ))}
         </div>
-      }
-      size="wide"
-    >
-      <div className="space-y-6">
-        <div className="card-container">
-          <h3 className="text-value font-medium mb-3">Dashboard</h3>
-          <div className="space-y-2 text-sm text-label">
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Neues Dashboard als Startseite mit Übersicht über Erstattungen, Kilometer und Fahrten</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Jahres-Statistik mit Balkendiagramm (km pro Monat) und Erstattungsübersicht</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Neue Tab-Navigation: Dashboard, Fahrten & Export, Monatsübersicht, Einstellungen</p>
-            </div>
-          </div>
-        </div>
+      ))}
 
-        <div className="card-container">
-          <h3 className="text-value font-medium mb-3">Favoriten & Schnelleingabe</h3>
-          <div className="space-y-2 text-sm text-label">
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Wiederkehrende Fahrten als Favoriten speichern (unter Einstellungen → Favoriten)</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Ein Klick auf einen Favoriten trägt die Fahrt mit heutigem Datum ein</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>"Nochmal"-Button bei den letzten Fahrten — kopiert die Fahrt für heute</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card-container">
-          <h3 className="text-value font-medium mb-3">Adress-Vervollständigung</h3>
-          <div className="space-y-2 text-sm text-label">
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Bei der Eingabe von Adressen erscheinen automatisch Vorschläge aus OpenStreetMap</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Funktioniert bei neuen Orten und einmaligen Orten im Fahrt-Formular</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card-container">
-          <h3 className="text-value font-medium mb-3">Weitere Verbesserungen</h3>
-          <div className="space-y-2 text-sm text-label">
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>PDF-Export neben Excel — mit Format-Auswahl (Excel, PDF oder beides als ZIP)</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckSquare size={16} className="text-primary-500 mt-0.5" />
-              <p>Verbesserte Sicherheit, Eingabevalidierung und mobile Darstellung</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <button onClick={onClose} className="btn-primary">
-            Verstanden
-          </button>
-        </div>
+      <div className="sheet-fuss">
+        <button type="button" className="btn-primary" onClick={onClose}>
+          Verstanden
+        </button>
       </div>
-    </Modal>
+    </Sheet>
   );
 };
 

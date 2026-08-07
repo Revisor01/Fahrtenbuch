@@ -1203,6 +1203,121 @@ code {
   }
 }
 
+/* Breite Variante für textlastige Sheets (Info, Neuigkeiten, Rechtliches) */
+@media (min-width: 768px) {
+  .sheet-panel-wide {
+    max-width: 640px;
+  }
+}
+
+/* ---------- Fließtext-Inhalte in Sheets (Info / Neuigkeiten) ---------- */
+.sheet-abschnitt + .sheet-abschnitt {
+  margin-top: 22px;
+}
+
+.sheet-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.sheet-text + .sheet-text {
+  margin-top: 4px;
+}
+
+.sheet-link {
+  display: inline-block;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sheet-link:hover {
+  color: var(--brand-strong);
+  text-decoration: underline;
+}
+
+.sheet-link + .sheet-link,
+.sheet-text + .sheet-link {
+  margin-top: 6px;
+}
+
+.sheet-liste {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-2);
+  list-style: disc;
+}
+
+.sheet-liste li + li {
+  margin-top: 2px;
+}
+
+/* Zwischenüberschrift im Fließtext (z.B. Datenschutz-Unterpunkte) */
+.sheet-untertitel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 12px 0 4px;
+}
+
+/* Feature-Zeile mit Petrol-Icon (Neuigkeiten) */
+.sheet-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.sheet-feature + .sheet-feature {
+  margin-top: 8px;
+}
+
+.sheet-feature svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--brand);
+}
+
+/* Zurück-Link in Unteransichten eines Sheets */
+.sheet-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  margin-bottom: 14px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand);
+  cursor: pointer;
+}
+
+.sheet-back:hover {
+  color: var(--brand-strong);
+}
+
+/* Fußzeile mit Schließen-/Bestätigen-Button */
+.sheet-fuss {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.sheet-fuss > * {
+  flex: 1;
+}
+
 /* Toast-Viewport: mobil 16px über der Bottom-Nav, Desktop unten rechts */
 .toast-viewport {
   position: fixed;
