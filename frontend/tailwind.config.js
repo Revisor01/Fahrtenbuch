@@ -5,30 +5,51 @@ module.exports = {
   ],
   theme: {
     extend: {
-      spacing: {
-        'card': '1.5rem',
-        'card-sm': '1rem',
-        'card-lg': '2rem',
-        'section': '1.5rem',
-      },
-      borderRadius: {
-        'card': '0.75rem',
-        'card-lg': '1rem',
-      },
-      boxShadow: {
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-        'card-elevated': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
-      },
-      backgroundColor: {
-        surface: 'var(--bg-surface)',
-        card: 'var(--bg-card)',
-        'card-highlight': 'var(--bg-card-highlight)',
-      },
-      borderColor: {
-        card: 'var(--border-card)',
+      fontFamily: {
+        sans: ['"Instrument Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
+        // Semantische Namen — zeigen auf die Tokens in src/tokens.css
+        brand: {
+          DEFAULT: 'var(--brand)',
+          strong: 'var(--brand-strong)',
+          soft: 'var(--brand-soft)',
+        },
+        'on-brand': 'var(--on-brand)',
+        accent: {
+          DEFAULT: 'var(--accent)',
+          soft: 'var(--accent-soft)',
+          text: 'var(--accent-text)',
+          line: 'var(--accent-line)',
+        },
+        ok: {
+          DEFAULT: 'var(--ok)',
+          soft: 'var(--ok-soft)',
+          line: 'var(--ok-line)',
+        },
+        danger: {
+          DEFAULT: 'var(--danger)',
+          soft: 'var(--danger-soft)',
+        },
+        surface: {
+          DEFAULT: 'var(--surface)',
+          '2': 'var(--surface-2)',
+          '3': 'var(--surface-3)',
+        },
+        line: {
+          DEFAULT: 'var(--line)',
+          strong: 'var(--line-strong)',
+        },
+        bg: 'var(--bg)',
+        text: {
+          DEFAULT: 'var(--text)',
+          '2': 'var(--text-2)',
+          '3': 'var(--text-3)',
+        },
+        /* ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen
+           (alte primary-/secondary-Skalen, gemappt auf die neuen
+           Tokens via Alias-Variablen in src/tokens.css) */
         primary: {
           25: 'var(--primary-25)',
           50: 'var(--primary-50)',
@@ -56,8 +77,44 @@ module.exports = {
           800: 'var(--secondary-800)',
           900: 'var(--secondary-900)',
           950: 'var(--secondary-950)',
-        }
-      }
+        },
+      },
+      borderRadius: {
+        card: 'var(--r-card)',
+        btn: 'var(--r-btn)',
+        pill: 'var(--r-pill)',
+        'card-lg': 'var(--r-card)', /* ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen */
+      },
+      boxShadow: {
+        card: 'var(--shadow)',
+        'card-hover': 'var(--shadow)', /* ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen */
+        'card-elevated': 'var(--shadow)', /* ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen */
+      },
+      /* ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen (bg-card, border-card …) */
+      backgroundColor: {
+        card: 'var(--surface)',
+        'card-highlight': 'var(--surface-2)',
+      },
+      borderColor: {
+        card: 'var(--line)',
+      },
+      /* ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen (p-card, gap-section …) */
+      spacing: {
+        'card': '1.25rem',
+        'card-sm': '1rem',
+        'card-lg': '1.75rem',
+        'section': '1.25rem',
+      },
+      height: {
+        control: 'var(--control-h)',
+        field: 'var(--field-h)',
+      },
+      minWidth: {
+        tap: 'var(--tap-min)',
+      },
+      minHeight: {
+        tap: 'var(--tap-min)',
+      },
     },
   },
   plugins: [],

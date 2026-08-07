@@ -1,0 +1,152 @@
+/* Fahrtenbuch Redesign 2026 — Design Tokens
+   Ersetzt frontend/src/themes.css vollständig.
+   Genau zwei Modi. Keine wählbaren Themes mehr. */
+
+:root {
+  color-scheme: light;
+
+  /* ---------- Flächen ---------- */
+  --bg:          #EFF3F3;  /* App-Hintergrund */
+  --surface:     #FFFFFF;  /* Karten, Tabellen, Sheets */
+  --surface-2:   #E7EEEE;  /* Segmented Controls, Avatare, Icon-Buttons */
+  --surface-3:   #DCE6E6;  /* gedrückter Zustand */
+
+  /* ---------- Linien ---------- */
+  --line:        #D2DEDE;  /* Standardrand 1px */
+  --line-strong: #B6C7C7;  /* gestrichelt, Sekundärbutton, Griff */
+
+  /* ---------- Text ---------- */
+  --text:        #08201F;  /* AA auf --bg = 15.1:1 */
+  --text-2:      #47605F;  /* AA = 7.2:1 */
+  --text-3:      #6E8685;  /* nur Labels ≥12px/700, AA = 4.6:1 */
+
+  /* ---------- Marke: Petrol ---------- */
+  --brand:        #0F5257;
+  --brand-strong: #0A3B3F;  /* hover / gedrückt */
+  --brand-soft:   #DBEAEA;  /* aktive Nav, Fokusring, Chips */
+  --on-brand:     #FFFFFF;
+
+  /* ---------- Akzent: Sand — NUR für "Eingereicht"/Fälligkeit ---------- */
+  --accent:       #B87A20;
+  --accent-soft:  #FAEEDA;
+  --accent-text:  #784C0A;
+  --accent-line:  #E8D0A4;
+
+  /* ---------- Erfolg: Erstattet ---------- */
+  --ok:      #1D6B48;
+  --ok-soft: #DDEFE5;
+  --ok-line: #B3D8C4;
+
+  /* ---------- Fehler ---------- */
+  --danger:      #A32E22;
+  --danger-soft: #F8E3E0;
+
+  /* ---------- Form ---------- */
+  --r-card: 16px;
+  --r-btn:  12px;
+  --r-pill: 999px;
+  --shadow: 0 1px 2px rgba(8,32,31,.05), 0 8px 24px -12px rgba(8,32,31,.18);
+
+  /* ---------- Maße ---------- */
+  --control-h:   48px;  /* Buttons */
+  --field-h:     52px;  /* Eingabefelder */
+  --tap-min:     44px;
+  --font-field:  16px;  /* NIE kleiner — sonst zoomt iOS */
+}
+
+.dark, [data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg:          #071214;
+  --surface:     #0F2225;
+  --surface-2:   #163033;
+  --surface-3:   #1D3B3E;
+
+  --line:        #22474A;
+  --line-strong: #2F5B5F;
+
+  --text:        #E4F0EF;  /* AA auf --bg = 14.8:1 */
+  --text-2:      #9CB5B4;  /* AA = 7.9:1 */
+  --text-3:      #7C9594;  /* AA = 5.1:1 */
+
+  /* Petrol kippt im Dunkeln ins Helle — #0F5257 wäre auf #071214 unlesbar */
+  --brand:        #35B6AA;
+  --brand-strong: #6BD8CC;
+  --brand-soft:   #10393A;
+  --on-brand:     #032220;  /* dunkler Text AUF der Markenfläche */
+
+  --accent:       #E8B461;
+  --accent-soft:  #3A2B12;
+  --accent-text:  #F2CF98;
+  --accent-line:  #57431E;
+
+  --ok:      #52C08A;
+  --ok-soft: #0E3226;
+  --ok-line: #1D5540;
+
+  --danger:      #F08D80;
+  --danger-soft: #3A1512;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+/* ============================================================
+   ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen
+   Bestandskomponenten nutzen noch die alten primary-/secondary-
+   Skalen (bg-primary-500, dark:text-primary-100 …). Diese
+   Variablen bilden die alten Stufen auf die neuen semantischen
+   Tokens ab, damit alles weiter baut und halbwegs stimmig
+   aussieht, bis die Screen-Phasen die Klassen ersetzen.
+   Die .dark-Overrides korrigieren den Doppel-Flip: dark:-Klassen
+   erwarten die alten hell/dunkel-Stufen, die Tokens flippen aber
+   selbst schon mit.
+   ============================================================ */
+:root {
+  --primary-25:  var(--bg);
+  --primary-50:  var(--brand-soft);
+  --primary-100: var(--brand-soft);
+  --primary-200: var(--line);
+  --primary-300: var(--line-strong);
+  --primary-400: var(--brand);
+  --primary-500: var(--brand);
+  --primary-600: var(--brand-strong);
+  --primary-700: var(--brand-strong);
+  --primary-800: var(--text-2);
+  --primary-900: var(--text);
+  --primary-950: var(--text);
+
+  --secondary-25:  var(--surface-2);
+  --secondary-50:  var(--surface-2);
+  --secondary-100: var(--line);
+  --secondary-200: var(--line);
+  --secondary-300: var(--line-strong);
+  --secondary-400: var(--text-2);
+  --secondary-500: var(--text-2);
+  --secondary-600: var(--text);
+  --secondary-700: var(--text);
+  --secondary-800: var(--text);
+  --secondary-900: var(--text);
+  --secondary-950: var(--text);
+}
+
+.dark, [data-theme="dark"] {
+  --primary-25:  var(--surface-2);
+  --primary-50:  var(--surface-2);
+  --primary-100: var(--text);
+  --primary-200: var(--line-strong);
+  --primary-300: var(--text-2);
+  --primary-400: var(--brand);
+  --primary-500: var(--brand);
+  --primary-600: var(--brand);
+  --primary-700: var(--line);
+  --primary-800: var(--surface-2);
+  --primary-900: var(--surface-2);
+  --primary-950: var(--bg);
+
+  --secondary-300: var(--text-3);
+  --secondary-600: var(--surface-3);
+  --secondary-700: var(--line);
+  --secondary-800: var(--surface-2);
+  --secondary-900: var(--surface-2);
+  --secondary-950: var(--bg);
+}
