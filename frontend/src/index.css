@@ -4833,3 +4833,15 @@ code {
   background: var(--brand);
   flex-shrink: 0;
 }
+
+/* Mitfahrer-Hinweis in gedeckter Variante (Dashboard-Tabelle) */
+.fl-mf-hinweis-leise,
+.fl-mf-hinweis-leise .fl-mf-punkt {
+  color: var(--text-3);
+  background-color: var(--text-3);
+  font-weight: 400;
+}
+
+.fl-mf-hinweis-leise {
+  background-color: transparent;
+}

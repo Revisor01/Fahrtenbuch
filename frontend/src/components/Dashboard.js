@@ -831,6 +831,15 @@ function Dashboard({ onNavigate }) {
                     <div className="dash-d-td-anlass">{fahrt.anlass || '—'}</div>
                     <div className="dash-d-td-route">
                       {fahrt.von_ort_name || fahrt.einmaliger_von_ort} → {zielName(fahrt)}
+                      {fahrt.mitfahrer?.length > 0 && (
+                        <span
+                          className="fl-mf-hinweis fl-mf-hinweis-leise"
+                          title={`Mitfahrer:innen: ${fahrt.mitfahrer.map((m) => m.name).join(', ')}`}
+                        >
+                          <span className="fl-mf-punkt" aria-hidden="true" />
+                          {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
