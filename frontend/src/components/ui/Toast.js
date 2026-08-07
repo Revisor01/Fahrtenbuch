@@ -32,10 +32,10 @@ export function ToastProvider({ children }) {
     const onAction = options.undo || options.onAction || null;
     const actionLabel = options.undo ? 'Rückgängig' : options.actionLabel || null;
     setToasts((prev) => [...prev, { id, variant, message, actionLabel, onAction }]);
-    // Standzeit 5 s — bei Aktion bleibt der Toast bis zum Klick stehen
-    if (!onAction) {
-      timers.current[id] = setTimeout(() => dismiss(id), 5000);
-    }
+    // Standzeit 5 s; Toasts mit Aktion („Rückgängig") bekommen 8 s.
+    // (Abweichung von der Spec „bis zum Klick": dauerhaft stehende Toasts
+    // stapelten sich in der Praxis — User-Feedback vom 07.08.2026.)
+    timers.current[id] = setTimeout(() => dismiss(id), onAction ? 8000 : 5000);
     return id;
   }, [dismiss]);
 
