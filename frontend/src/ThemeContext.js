@@ -2,38 +2,79 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const ThemeContext = createContext();
 
+// Eigener Schlüssel für die neue Drei-Wert-Logik
+const STORAGE_KEY = 'fahrtenbuch-mode';
+
+// theme-color für die Browser-Chrome-Leiste (PWA)
+const THEME_COLOR_LIGHT = '#0F5257';
+const THEME_COLOR_DARK = '#071214';
+
+const VALID_MODES = ['light', 'dark', 'system'];
+
+function readInitialMode() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (VALID_MODES.includes(saved)) return saved;
+
+  // Migration alter Einstellungen: 'darkMode' (bool) + 'theme'
+  // (neun Farbthemes). Die Farbthemes entfallen ersatzlos;
+  // eine explizite Hell/Dunkel-Wahl bleibt erhalten.
+  const legacyDark = localStorage.getItem('darkMode');
+  localStorage.removeItem('darkMode');
+  localStorage.removeItem('theme');
+  if (legacyDark === 'true') return 'dark';
+  if (legacyDark === 'false') return 'light';
+  return 'system';
+}
+
+function getSystemPrefersDark() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    if (saved !== null) return JSON.parse(saved);
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+  const [mode, setModeState] = useState(readInitialMode);
+  const [systemDark, setSystemDark] = useState(getSystemPrefersDark);
 
-  const [activeTheme, setActiveTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'classic';
-  });
-
-  // Dark Mode Handler
+  // Systemeinstellung live verfolgen
   useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(isDark));
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => setSystemDark(e.matches);
+    if (mq.addEventListener) {
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+    // Safari < 14
+    mq.addListener(handler);
+    return () => mq.removeListener(handler);
+  }, []);
+
+  const isDark = mode === 'dark' || (mode === 'system' && systemDark);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, mode);
+  }, [mode]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    // Altlast der Farbthemes entfernen — tokens.css bedient .dark
+    root.removeAttribute('data-theme');
+    root.classList.toggle('dark', isDark);
+
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content', isDark ? THEME_COLOR_DARK : THEME_COLOR_LIGHT);
     }
   }, [isDark]);
 
-  // Theme Handler
-  useEffect(() => {
-    localStorage.setItem('theme', activeTheme);
-    document.documentElement.setAttribute('data-theme', activeTheme);
-  }, [activeTheme]);
+  const setMode = (next) => {
+    if (VALID_MODES.includes(next)) setModeState(next);
+  };
 
-  const toggleDarkMode = () => setIsDark(prev => !prev);
-  const setTheme = (theme) => setActiveTheme(theme);
+  // toggleDarkMode bleibt für Bestandsaufrufer erhalten:
+  // schaltet explizit zwischen hell und dunkel um
+  const toggleDarkMode = () => setModeState(isDark ? 'light' : 'dark');
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleDarkMode, activeTheme, setTheme }}>
+    <ThemeContext.Provider value={{ mode, setMode, isDark, toggleDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );

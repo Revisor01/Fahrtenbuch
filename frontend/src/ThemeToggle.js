@@ -1,63 +1,37 @@
-import { Moon, Sun, Palette } from 'lucide-react';
+import { Moon, Sun, Monitor } from 'lucide-react';
 import { useTheme } from './ThemeContext';
-import { useState } from 'react';
+
+const OPTIONS = [
+  { id: 'light', label: 'Hell', Icon: Sun },
+  { id: 'dark', label: 'Dunkel', Icon: Moon },
+  { id: 'system', label: 'System', Icon: Monitor },
+];
 
 export default function ThemeToggle() {
-  const { isDark, toggleDarkMode, activeTheme, setTheme } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const themes = [
-    { id: 'classic', name: 'Classic' },
-    { id: 'monochrome', name: 'Monochrome' },
-    { id: 'slate', name: 'Slate' },
-    { id: 'sunset', name: 'Sunset' },
-    { id: 'mint', name: 'Mint' },
-    { id: 'teal', name: 'Teal' },
-    { id: 'vibrant', name: 'Vibrant' },
-    { id: 'deep-purple', name: 'Deep Purple' },
-    { id: 'forest', name: 'Forest' }
-  ];
+  const { mode, setMode } = useTheme();
 
   return (
-    <div className="relative flex gap-2">
-      <button
-        onClick={toggleDarkMode}
-        className="p-2 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
-        title={isDark ? 'Light Mode' : 'Dark Mode'}
-      >
-        {isDark ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
-
-      <div className="relative">
+    <div
+      className="flex items-center gap-1 p-1 rounded-btn bg-surface-2"
+      role="group"
+      aria-label="Darstellung"
+    >
+      {OPTIONS.map(({ id, label, Icon }) => (
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="p-2 rounded-card text-muted hover:text-value hover:bg-primary-50 dark:hover:bg-primary-900 transition-colors"
-          title="Farbthema ändern"
+          key={id}
+          type="button"
+          onClick={() => setMode(id)}
+          title={label}
+          aria-pressed={mode === id}
+          className={`flex items-center justify-center h-9 w-9 rounded-btn transition-colors duration-150 ${
+            mode === id
+              ? 'bg-surface text-brand shadow-card'
+              : 'text-text-2 hover:bg-surface-3'
+          }`}
         >
-          <Palette size={18} />
+          <Icon size={17} />
         </button>
-
-        {isOpen && (
-          <div className="absolute mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-primary-100 dark:border-primary-800 z-50">
-            {themes.map((theme) => (
-              <button
-                key={theme.id}
-                onClick={() => {
-                  setTheme(theme.id);
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-900/50 
-                  ${activeTheme === theme.id ? 'bg-primary-100 dark:bg-primary-800' : ''}`}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-primary-500" />
-                  {theme.name}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      ))}
     </div>
   );
 }
