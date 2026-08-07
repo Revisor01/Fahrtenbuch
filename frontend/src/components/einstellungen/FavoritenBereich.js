@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
@@ -164,7 +164,7 @@ function FavoritenBereich() {
               aria-label={`Favorit ${fav.von_ort_name} → ${fav.nach_ort_name} löschen`}
               onClick={() => handleDelete(fav)}
             >
-              <X size={15} />
+              <Trash2 size={15} />
             </button>
           </div>
         ))}

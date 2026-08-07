@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
 import BereichKopf from './BereichKopf';
@@ -146,7 +146,7 @@ function ApiBereich() {
               aria-label={`API-Key ${key.description || ''} löschen`}
               onClick={() => handleDelete(key)}
             >
-              <X size={15} />
+              <Trash2 size={15} />
             </button>
           </div>
         ))}
