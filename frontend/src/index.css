@@ -272,6 +272,153 @@ code {
     border: 1px solid var(--ok-line);
   }
 
+  /* Badge-Icons 16px: Form trägt den Status auch ohne Farbe */
+  .status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  /* Erfasst: gestrichelter leerer Ring */
+  .status-icon-erfasst {
+    border: 1.5px dashed var(--line-strong);
+    background-color: transparent;
+  }
+
+  /* Eingereicht: gefüllter Kreis mit ↑ */
+  .status-icon-eingereicht {
+    background-color: var(--accent);
+    color: var(--accent-soft);
+  }
+
+  /* Erstattet: gefüllter Kreis mit ✓ */
+  .status-icon-erstattet {
+    background-color: var(--ok);
+    color: var(--ok-soft);
+  }
+
+  /* ---------- Status als Punkt + Wort (dichte Listen/Tabellen) ---------- */
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .status-dot-circle {
+    width: 9px;
+    height: 9px;
+    border-radius: var(--r-pill);
+    flex-shrink: 0;
+  }
+
+  .status-dot-offen {
+    color: var(--text-2);
+  }
+
+  .status-dot-offen .status-dot-circle {
+    border: 1.5px dashed var(--line-strong);
+    background-color: transparent;
+  }
+
+  .status-dot-eingereicht {
+    color: var(--accent-text);
+  }
+
+  .status-dot-eingereicht .status-dot-circle {
+    background-color: var(--accent);
+  }
+
+  .status-dot-erhalten {
+    color: var(--ok);
+  }
+
+  .status-dot-erhalten .status-dot-circle {
+    background-color: var(--ok);
+  }
+
+  /* ---------- Status als Fortschrittsleiste (Monatskopf) ---------- */
+  .status-progress {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .status-progress-station {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .status-progress-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .status-progress-done {
+    background-color: var(--ok);
+    color: var(--ok-soft);
+  }
+
+  .status-progress-current {
+    background-color: var(--accent);
+    color: var(--accent-soft);
+  }
+
+  .status-progress-open {
+    border: 1.5px dashed var(--line-strong);
+    background-color: transparent;
+  }
+
+  .status-progress-line {
+    flex: 1;
+    height: 2px;
+    margin-top: 12px; /* mittig zur 26px-Station */
+    min-width: 16px;
+  }
+
+  .status-progress-line-done {
+    background-color: var(--ok);
+  }
+
+  .status-progress-line-open {
+    background-image: linear-gradient(
+      to right,
+      var(--line-strong) 50%,
+      transparent 50%
+    );
+    background-size: 8px 2px;
+    background-repeat: repeat-x;
+  }
+
+  .status-progress-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+
+  .status-progress-label-open {
+    color: var(--text-3);
+    font-weight: 400;
+  }
+
   /* Erfolgs-/Fehlerboxen */
   .status-success {
     padding: 16px;

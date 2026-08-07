@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AlertCircle, Circle, CheckCircle2, CalendarDays, BarChart3 } from 'lucide-react';
+import { CalendarDays, BarChart3 } from 'lucide-react';
 import AbrechnungsStatusModal from '../AbrechnungsStatusModal';
+import StatusBadge from './ui/StatusBadge';
 import { AppContext } from '../contexts/AppContext';
 
 
@@ -247,50 +248,40 @@ function MonthlyOverview() {
     ? month.erstattungen?.mitfahrer || 0
     : month.erstattungen?.[traegerId] || 0;
 
-    // Wenn Betrag 0 ist
+    // Kein Vorgang in diesem Monat → „—" (Spec: Abrechnungs-Matrix)
     if (betrag === 0) {
-      return (
-        <div className="flex items-center justify-between">
-        <span className="status-badge-secondary">
-        <CheckCircle2 size={14} className="text-secondary-600 dark:text-secondary-400" />
-        <span>Keine Abrechnung</span>
-        </span>
-        </div>
-      );
+      return <span className="text-muted">&mdash;</span>;
     }
 
-    // Wenn erhalten
+    // Erstattet (DB: erhalten)
     if (status?.erhalten_am) {
       return (
-        <span
-        className="status-badge-primary cursor-pointer"
-        onClick={() => {
-          showNotification(
-            "Status zurücksetzen",
-            "Möchten Sie den Status wirklich zurücksetzen?",
-            () => handleAbrechnungsStatus(
-              month.year,
-              month.monatNr,
-              traegerId,
-              'reset',
-              null,
-              true
-            ),
-            true
-          );
-        }}
+        <button
+        type="button"
+        className="flex flex-col items-start gap-1 cursor-pointer"
+        title="Status zurücksetzen"
+        onClick={() => handleAbrechnungsStatus(
+          month.year,
+          month.monatNr,
+          traegerId,
+          'reset',
+          null,
+          true
+        )}
         >
-        <CheckCircle2 size={14} />
-        <span>Erhalten am: {new Date(status.erhalten_am).toLocaleDateString()}</span>
-        </span>
+        <StatusBadge status="erhalten" variant="badge" />
+        <span className="text-xs text-label num">am {new Date(status.erhalten_am).toLocaleDateString('de-DE')}</span>
+        </button>
       );
     }
 
-    // Wenn eingereicht aber nicht erhalten
+    // Eingereicht, aber noch nicht erstattet
     if (status?.eingereicht_am) {
       return (
-        <span
-        className="status-badge-warning cursor-pointer"
+        <button
+        type="button"
+        className="flex flex-col items-start gap-1 cursor-pointer"
+        title="Als erstattet markieren"
         onClick={() => setAbrechnungsStatusModal({
           open: true,
           traegerId,
@@ -300,16 +291,18 @@ function MonthlyOverview() {
           singleMonth: true
         })}
         >
-        <Circle size={14} />
-        <span>Eingereicht am: {new Date(status.eingereicht_am).toLocaleDateString()}</span>
-        </span>
+        <StatusBadge status="eingereicht" variant="badge" />
+        <span className="text-xs text-label num">am {new Date(status.eingereicht_am).toLocaleDateString('de-DE')}</span>
+        </button>
       );
     }
 
-    // Wenn noch nicht eingereicht
+    // Erfasst (DB: offen) — noch nicht eingereicht
     return betrag > 0 ? (
-      <span
-      className="status-badge-secondary cursor-pointer"
+      <button
+      type="button"
+      className="cursor-pointer"
+      title="Als eingereicht markieren"
       onClick={() => setAbrechnungsStatusModal({
         open: true,
         traegerId,
@@ -319,9 +312,8 @@ function MonthlyOverview() {
         singleMonth: true
       })}
       >
-      <AlertCircle size={14} />
-      <span>Nicht eingereicht</span>
-      </span>
+      <StatusBadge status="offen" variant="badge" />
+      </button>
     ) : null;
   };
 
