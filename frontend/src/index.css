@@ -2345,3 +2345,484 @@ code {
   border-radius: 2px;
   flex-shrink: 0;
 }
+
+/* ============================================================
+   Fahrtenliste (Phase R5) — mobil Karten mit Swipe-Aktionen
+   nach Design-Spec Screen 3; Kopf mit Segmented Control und
+   Summenzeile gilt für alle Breakpoints
+   ============================================================ */
+
+.fl-titelzeile {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.fl-titel {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Fahrten-Anzahl: muss immer stimmen (wiederholtes Nutzerfeedback) */
+.fl-anzahl {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+/* Segmented Control: --surface-2, --r-btn, 4px Padding, Segmente 40px,
+   aktiv --surface + --shadow, 15px/600 */
+.seg-control {
+  display: flex;
+  background: var(--surface-2);
+  border-radius: var(--r-btn);
+  padding: 4px;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.seg-btn {
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.seg-btn.is-active {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+
+.seg-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.seg-btn.is-active:focus-visible {
+  box-shadow: var(--shadow), 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+/* Ausklappbare Von-/Bis-Monatswahl unterm Segment „Zeitraum" */
+.fl-zeitraum-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-btn);
+  margin-bottom: 12px;
+}
+
+.fl-zeitraum-gruppe {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fl-zeitraum-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+
+.fl-zeitraum-panel .form-select {
+  height: 44px;
+  width: auto;
+  padding: 0 10px;
+  font-size: 15px;
+}
+
+.fl-offene-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-btn);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.fl-offene-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+/* Summenzeile: Mono 15px/600 „km · €", rechts „Export" in --brand/600 */
+.fl-summe {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.fl-summe-wert {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fl-summe-punkt {
+  color: var(--text-3);
+}
+
+.fl-export-link {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 12px 0 12px 12px;
+  margin-top: -12px;
+  margin-bottom: -12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand);
+  cursor: pointer;
+}
+
+.fl-export-link:hover {
+  color: var(--brand-strong);
+}
+
+.fl-export-link:focus-visible {
+  outline: none;
+  border-radius: var(--r-btn);
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+/* ---------- Erstattungen je Träger (StatusBadge statt alter Chips) ---------- */
+.fl-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+
+.fl-erst-card {
+  margin-bottom: 16px;
+}
+
+.fl-erst-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.fl-erst-row + .fl-erst-row {
+  border-top: 1px solid var(--line);
+}
+
+.fl-erst-row-block {
+  display: block;
+}
+
+.fl-erst-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fl-erst-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.fl-erst-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fl-erst-betrag {
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.fl-status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap-min);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.fl-status-btn:focus-visible {
+  outline: none;
+  border-radius: var(--r-btn);
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.fl-status-datum {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Zeitraum-Modus: kompakte Chip-Zeile, ein Chip je Monat */
+.fl-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.fl-monat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap-min);
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.fl-monat-chip:hover {
+  background: var(--surface-2);
+}
+
+.fl-monat-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.fl-monat-chip-label {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.fl-erst-offen {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.fl-erst-offen .num {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---------- Fahrt-Karten mit Swipe (< 768px) ---------- */
+.fl-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fl-swipe {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-card);
+}
+
+/* Aktionsfläche hinter der Karte: Bearbeiten/Löschen, Buttons ≥ 44px */
+.fl-swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 112px;
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.fl-swipe-btn {
+  width: 52px;
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-btn);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.fl-swipe-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.fl-swipe-btn-edit {
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--line);
+}
+
+.fl-swipe-btn-delete {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+/* Karte: --surface, --r-card, 14/16px Padding; touch-action pan-y,
+   damit vertikales Scrollen frei bleibt und nur der Swipe greift */
+.fl-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.fl-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.fl-card-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.fl-card-datum {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.fl-card-zeile {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.fl-card-zeile + .fl-card-zeile {
+  margin-top: 3px;
+}
+
+.fl-card-ziel {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-card-km {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.fl-card-sub {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-card-betrag {
+  font-size: 14px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.fl-card-mitfahrer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.fl-card-mitfahrer span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Export-Sheet ---------- */
+.fl-export-sub {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: -4px 0 12px;
+}
+
+.fl-export-leer {
+  font-size: 14px;
+  color: var(--text-2);
+  padding-bottom: 8px;
+}
+
+.fl-export-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.fl-export-row + .fl-export-row {
+  border-top: 1px solid var(--line);
+}
+
+.fl-export-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fl-export-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fl-export-btns .btn-secondary,
+.fl-export-btns .btn-ghost {
+  gap: 6px;
+}
