@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import { useFahrtenExport } from '../fahrten/useFahrtenExport';
@@ -21,7 +21,7 @@ export function useEinreichen() {
     fetchFahrten,
     setAbrechnungsStatusModal,
   } = useContext(AppContext);
-  const { exportExcel } = useFahrtenExport();
+  const { exportExcel, exportPdf, exportBeides } = useFahrtenExport();
   const toast = useToast();
 
   const refresh = async () => {
@@ -37,18 +37,22 @@ export function useEinreichen() {
   const jahrMonat = (month) => [month.year.toString(), String(month.monatNr).padStart(2, '0')];
 
   // Einreichen: alle übergebenen Kategorien mit Status „Erfasst" exportieren
-  // (Excel, bestehende Export-Logik) und auf „eingereicht" setzen.
+  // und auf „eingereicht" setzen. Das Format wählt der Aufrufer (Rückfrage
+  // im Sheet — User-Feedback 07.08.); Standard bleibt Excel.
   // Für die Zeilen-Aktion einzelner Träger einfach [kategorie] übergeben.
-  const einreichen = async (month, kategorien) => {
+  const einreichen = async (month, kategorien, format = 'excel') => {
     const offene = (kategorien || []).filter((k) => k.status === 'offen');
     if (offene.length === 0) return;
     const [jahr, monat] = jahrMonat(month);
+
+    const exportFn =
+      format === 'pdf' ? exportPdf : format === 'beides' ? exportBeides : exportExcel;
 
     // 1. Export-Downloads anstoßen (sequentiell, je Träger eine Datei)
     const exportiert = [];
     for (const k of offene) {
       // eslint-disable-next-line no-await-in-loop
-      const ok = await exportExcel(k.key, {
+      const ok = await exportFn(k.key, {
         von: month.yearMonth,
         bis: month.yearMonth,
         erfolg: 'keiner',
@@ -164,5 +168,30 @@ export function useEinreichen() {
     });
   };
 
-  return { einreichen, alsErstattetMarkieren, zuruecksetzen, datumAendern };
+  // Vor dem Einreichen nach dem Format fragen (Excel / PDF / Beide) —
+  // der Aufrufer öffnet damit ein Sheet, bestätigt wird über `bestaetigen`.
+  const [formatFrage, setFormatFrage] = useState(null);
+
+  const einreichenFragen = (month, kategorien) => {
+    const offene = (kategorien || []).filter((k) => k.status === 'offen');
+    if (offene.length === 0) return;
+    setFormatFrage({ month, kategorien });
+  };
+
+  const einreichenBestaetigen = async (format) => {
+    const frage = formatFrage;
+    setFormatFrage(null);
+    if (frage) await einreichen(frage.month, frage.kategorien, format);
+  };
+
+  return {
+    einreichen: einreichenFragen,
+    einreichenDirekt: einreichen,
+    formatFrage,
+    einreichenBestaetigen,
+    formatFrageSchliessen: () => setFormatFrage(null),
+    alsErstattetMarkieren,
+    zuruecksetzen,
+    datumAendern,
+  };
 }
