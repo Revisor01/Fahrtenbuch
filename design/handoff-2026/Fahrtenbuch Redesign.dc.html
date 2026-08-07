@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html { -webkit-font-smoothing: antialiased; }
+  body { margin: 0; font-family: 'Instrument Sans', system-ui, sans-serif; background: #E7ECEC; }
+  a { color: var(--brand); text-decoration: none; }
+  a:hover { color: var(--brand-strong); }
+  :root, [data-mode="light"] {
+    --bg: #EFF3F3; --surface: #FFFFFF; --surface-2: #E7EEEE; --surface-3: #DCE6E6;
+    --line: #D2DEDE; --line-strong: #B6C7C7;
+    --text: #08201F; --text-2: #47605F; --text-3: #6E8685;
+    --brand: #0F5257; --brand-strong: #0A3B3F; --brand-soft: #DBEAEA; --on-brand: #FFFFFF;
+    --accent: #B87A20; --accent-soft: #FAEEDA; --accent-text: #784C0A; --accent-line: #E8D0A4;
+    --ok: #1D6B48; --ok-soft: #DDEFE5; --ok-line: #B3D8C4;
+    --danger: #A32E22; --danger-soft: #F8E3E0;
+    --r-card: 16px; --r-btn: 12px; --r-pill: 999px;
+    --shadow: 0 1px 2px rgba(8,32,31,.05), 0 8px 24px -12px rgba(8,32,31,.18);
+  }
+  [data-mode="dark"] {
+    --bg: #071214; --surface: #0F2225; --surface-2: #163033; --surface-3: #1D3B3E;
+    --line: #22474A; --line-strong: #2F5B5F;
+    --text: #E4F0EF; --text-2: #9CB5B4; --text-3: #7C9594;
+    --brand: #35B6AA; --brand-strong: #6BD8CC; --brand-soft: #10393A; --on-brand: #032220;
+    --accent: #E8B461; --accent-soft: #3A2B12; --accent-text: #F2CF98; --accent-line: #57431E;
+    --ok: #52C08A; --ok-soft: #0E3226; --ok-line: #1D5540;
+    --danger: #F08D80; --danger-soft: #3A1512;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+</style>
+</helmet>
+
+<div style="{{ themeVars }}" data-mode="{{ mode }}">
+<div style="background:#E7ECEC;min-height:100vh;padding:0 0 120px">
+
+  <div style="position:sticky;top:0;z-index:50;background:rgba(231,236,236,.86);backdrop-filter:blur(14px);border-bottom:1px solid #CFD9D9">
+    <div style="max-width:1360px;margin:0 auto;padding:18px 40px;display:flex;align-items:center;gap:24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:34px;height:34px;border-radius:10px;background:#0F5257;display:flex;align-items:center;justify-content:center">
+          <div style="width:15px;height:15px;border:2.5px solid #35B6AA;border-radius:50%;border-left-color:transparent"></div>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:#08201F;letter-spacing:-.01em">Fahrtenbuch — Designrichtung</div>
+          <div style="font-size:12px;color:#5E7473">Eine Identität, zwei Modi, mobile-first</div>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;background:#FFFFFF;border:1px solid #CFD9D9;border-radius:999px;padding:3px;gap:2px">
+        <button onClick="{{ setLight }}" style="{{ lightBtnStyle }}">Hell</button>
+        <button onClick="{{ setDark }}" style="{{ darkBtnStyle }}">Dunkel</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1360px;margin:0 auto;padding:0 40px">
+
+    <!-- ========== INTRO ========== -->
+    <section style="padding:72px 0 56px;max-width:760px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#0F5257;margin-bottom:20px">Kirchenkreis Dithmarschen · kkd-fahrtenbuch.de</div>
+      <h1 style="font-size:54px;line-height:1.04;letter-spacing:-.035em;font-weight:600;color:#08201F;margin:0 0 24px;text-wrap:balance">Ein Werkzeug, das weiß,<br>was noch offen ist.</h1>
+      <p style="font-size:19px;line-height:1.55;color:#3E5554;margin:0;text-wrap:pretty">Kein Theme-Baukasten mehr. Eine Farbwelt aus tiefem Petrol mit einem einzigen warmen Signalton für Geld und Status — hell und dunkel gleichwertig gebaut. Der Einstieg ist mobil: Fahrt erfassen in unter zehn Sekunden, ohne ein einziges Modal.</p>
+    </section>
+
+    <!-- ========== 01 IDENTITÄT ========== -->
+    <section style="padding:24px 0 88px">
+      <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:20px;border-bottom:1px solid #CFD9D9;margin-bottom:36px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0F5257;font-weight:600">01</span>
+        <h2 style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#08201F;margin:0">Identität</h2>
+        <span style="font-size:14px;color:#6E8685">Farbe, Schrift, Ton</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+        <div style="background:var(--bg);border:1px solid var(--line);border-radius:var(--r-card);padding:28px;box-shadow:var(--shadow)" data-mode="light">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6E8685;margin-bottom:20px">Hell — Standard</div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+            <div style="height:64px;border-radius:10px;background:#0F5257"></div>
+            <div style="height:64px;border-radius:10px;background:#35B6AA"></div>
+            <div style="height:64px;border-radius:10px;background:#DBEAEA"></div>
+            <div style="height:64px;border-radius:10px;background:#B87A20"></div>
+            <div style="height:64px;border-radius:10px;background:#1D6B48"></div>
+            <div style="height:64px;border-radius:10px;background:#FFFFFF;border:1px solid #D2DEDE"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#6E8685">
+            <div>0F5257</div><div>35B6AA</div><div>DBEAEA</div><div>B87A20</div><div>1D6B48</div><div>FFFFFF</div>
+          </div>
+        </div>
+        <div style="background:#071214;border:1px solid #22474A;border-radius:var(--r-card);padding:28px" data-mode="dark">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7C9594;margin-bottom:20px">Dunkel — eigenständig abgestimmt</div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+            <div style="height:64px;border-radius:10px;background:#35B6AA"></div>
+            <div style="height:64px;border-radius:10px;background:#6BD8CC"></div>
+            <div style="height:64px;border-radius:10px;background:#10393A"></div>
+            <div style="height:64px;border-radius:10px;background:#E8B461"></div>
+            <div style="height:64px;border-radius:10px;background:#52C08A"></div>
+            <div style="height:64px;border-radius:10px;background:#0F2225;border:1px solid #22474A"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#7C9594">
+            <div>35B6AA</div><div>6BD8CC</div><div>10393A</div><div>E8B461</div><div>52C08A</div><div>0F2225</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:24px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:32px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:24px">Instrument Sans · JetBrains Mono</div>
+          <div style="font-size:44px;line-height:1.05;letter-spacing:-.03em;font-weight:600;color:var(--text)">Nicht eingereicht</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:500;letter-spacing:-.02em;color:var(--brand);margin:14px 0 4px;font-variant-numeric:tabular-nums">174,96 €</div>
+          <div style="font-size:16px;color:var(--text-2);margin-bottom:24px">486 km aus drei Monaten warten auf die Abrechnung.</div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:22px;border-top:1px solid var(--line)">
+            <div style="display:flex;gap:20px;align-items:baseline"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);width:104px">Display 44/600</span><span style="font-size:20px;font-weight:600;color:var(--text);letter-spacing:-.02em">Monatsabschluss</span></div>
+            <div style="display:flex;gap:20px;align-items:baseline"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);width:104px">Body 16/400</span><span style="font-size:16px;color:var(--text)">Fahrt zum Konfirmandenunterricht nach Hennstedt</span></div>
+            <div style="display:flex;gap:20px;align-items:baseline"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);width:104px">Zahlen Mono</span><span style="font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--text);font-variant-numeric:tabular-nums">412 km · 148,32 €</span></div>
+            <div style="display:flex;gap:20px;align-items:baseline"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);width:104px">Label 12/700</span><span style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)">Abrechnungsträger</span></div>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:32px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px">Haltung</div>
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">Petrol trägt, Sand meldet</div><div style="font-size:14px;line-height:1.5;color:var(--text-2)">Die Fläche ist ruhig und kühl. Der warme Ton erscheint nur dort, wo etwas von dir verlangt wird.</div></div>
+            <div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">Zahlen sind Monospace</div><div style="font-size:14px;line-height:1.5;color:var(--text-2)">Kilometer und Beträge stehen in Tabellenziffern untereinander bündig — es geht um Geld.</div></div>
+            <div><div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">Keine Rundungs-Romantik</div><div style="font-size:14px;line-height:1.5;color:var(--text-2)">16 px Radien, ein Schatten, keine Verläufe. Verwaltung, aber gut gemacht.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 02 STATUS ========== -->
+    <section style="padding:24px 0 88px">
+      <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:20px;border-bottom:1px solid #CFD9D9;margin-bottom:36px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0F5257;font-weight:600">02</span>
+        <h2 style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#08201F;margin:0">Statussprache</h2>
+        <span style="font-size:14px;color:#6E8685">Erfasst → Eingereicht → Erstattet</span>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:36px;margin-bottom:20px">
+        <p style="font-size:16px;line-height:1.55;color:var(--text-2);margin:0 0 32px;max-width:740px">Drei Zustände, drei Wörter, immer dieselbe Reihenfolge. Jeder Status trägt <strong style="color:var(--text);font-weight:600">Form + Wort + Farbe</strong> — die Form allein genügt zum Unterscheiden. „Offen" wird zu <strong style="color:var(--text);font-weight:600">Erfasst</strong>, weil offen nach Versäumnis klingt; „Erhalten" wird zu <strong style="color:var(--text);font-weight:600">Erstattet</strong>, weil das die Tatsache benennt: das Geld ist da.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+          <div style="border:1px solid var(--line);border-radius:var(--r-btn);padding:24px;background:var(--bg)">
+            <div style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border-radius:var(--r-pill);border:1px dashed var(--line-strong);color:var(--text-2);font-size:14px;font-weight:600">
+              <span style="width:16px;height:16px;border:1.5px dashed currentColor;border-radius:50%;display:inline-block"></span>Erfasst
+            </div>
+            <div style="font-size:14px;line-height:1.5;color:var(--text-2);margin-top:16px">Fahrt steht im Buch, gehört noch zu keiner Abrechnung. Neutral, kein Alarm.</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);margin-top:14px">gestrichelt · neutral</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:var(--r-btn);padding:24px;background:var(--bg)">
+            <div style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border-radius:var(--r-pill);background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent-text);font-size:14px;font-weight:600">
+              <span style="width:16px;height:16px;border-radius:50%;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:1">↑</span>Eingereicht
+            </div>
+            <div style="font-size:14px;line-height:1.5;color:var(--text-2);margin-top:16px">Abrechnung ist raus, das Geld steht aus. Der einzige warme Ton der App.</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);margin-top:14px">gefüllt · Pfeil hoch</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:var(--r-btn);padding:24px;background:var(--bg)">
+            <div style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border-radius:var(--r-pill);background:var(--ok-soft);border:1px solid var(--ok-line);color:var(--ok);font-size:14px;font-weight:600">
+              <span style="width:16px;height:16px;border-radius:50%;background:var(--ok);color:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1">✓</span>Erstattet
+            </div>
+            <div style="font-size:14px;line-height:1.5;color:var(--text-2);margin-top:16px">Erledigt. Häkchen und Grün, danach verschwindet der Monat aus dem Blickfeld.</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);margin-top:14px">gefüllt · Häkchen</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:18px">Als Fortschritt — im Monatskopf</div>
+          <div style="display:flex;align-items:center;gap:0">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1"><span style="width:26px;height:26px;border-radius:50%;background:var(--ok);color:var(--surface);display:flex;align-items:center;justify-content:center;font-size:13px">✓</span><span style="font-size:13px;font-weight:600;color:var(--text)">Erfasst</span></div>
+            <div style="height:2px;flex:1;background:var(--ok);margin-bottom:22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1"><span style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--surface);display:flex;align-items:center;justify-content:center;font-size:13px">↑</span><span style="font-size:13px;font-weight:600;color:var(--text)">Eingereicht</span></div>
+            <div style="height:2px;flex:1;background:var(--line);margin-bottom:22px"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1"><span style="width:26px;height:26px;border-radius:50%;border:1.5px dashed var(--line-strong);display:flex"></span><span style="font-size:13px;font-weight:600;color:var(--text-3)">Erstattet</span></div>
+          </div>
+          <div style="font-size:14px;color:var(--text-2);margin-top:20px">Juni 2026 · Kirchenkreis — eingereicht am 12.07., Auszahlung offen</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:18px">Als Punkt — in dichten Tabellen</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:10px;height:10px;border-radius:50%;border:1.5px dashed var(--line-strong)"></span><span style="font-size:15px;color:var(--text)">Erfasst</span><span style="flex:1"></span><span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">148,32 €</span></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></span><span style="font-size:15px;color:var(--text)">Eingereicht</span><span style="flex:1"></span><span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">181,08 €</span></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:10px;height:10px;border-radius:50%;background:var(--ok)"></span><span style="font-size:15px;color:var(--text)">Erstattet</span><span style="flex:1"></span><span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">158,76 €</span></div>
+          </div>
+          <div style="font-size:14px;color:var(--text-2);margin-top:20px">Punkt plus Wort — nie der Punkt allein. Auch bei Farbfehlsicht lesbar.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 03 MOBIL ========== -->
+    <section style="padding:24px 0 88px">
+      <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:20px;border-bottom:1px solid #CFD9D9;margin-bottom:36px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0F5257;font-weight:600">03</span>
+        <h2 style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#08201F;margin:0">Mobil — der Hauptweg</h2>
+        <span style="font-size:14px;color:#6E8685">390 px · alle Ziele ≥ 48 px</span>
+      </div>
+
+      <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start">
+
+        <!-- Phone 1: Dashboard -->
+        <div style="width:390px">
+          <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:4px">Start</div>
+          <div style="font-size:13px;color:#5E7473;margin-bottom:14px;height:36px">Was ist offen — dann sofort erfassen.</div>
+          <div style="border-radius:44px;border:9px solid #0C1414;background:#0C1414;box-shadow:0 24px 60px -24px rgba(8,32,31,.5)">
+            <div style="border-radius:36px;overflow:hidden;background:var(--bg);height:800px;display:flex;flex-direction:column;position:relative">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 24px 6px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text)"><span>9:41</span><span style="letter-spacing:.1em">▮▮▮</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 16px">
+                <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--text)">August</div>
+                <div style="width:40px;height:40px;border-radius:var(--r-pill);background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--text-2)">SL</div>
+              </div>
+              <div style="flex:1;overflow:hidden;padding:0 20px">
+                <div style="background:var(--brand);border-radius:var(--r-card);padding:22px;color:var(--on-brand);margin-bottom:20px">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.72;margin-bottom:10px">Noch nicht eingereicht</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:500;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums">174,96 €</div>
+                  <div style="font-size:15px;opacity:.82;margin-top:8px">Juli 2026 · 486 km · 2 Träger</div>
+                  <button style="margin-top:18px;width:100%;height:48px;border:none;border-radius:var(--r-btn);background:var(--on-brand);color:var(--brand);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer">Juli abrechnen</button>
+                </div>
+
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)">Ein Tipp genügt</div>
+                  <div style="font-size:14px;color:var(--brand);font-weight:600">Alle</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px">
+                  <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-btn);padding:14px;min-height:88px;display:flex;flex-direction:column;justify-content:space-between">
+                    <div style="font-size:16px;font-weight:600;color:var(--text)">Heide</div>
+                    <div><div style="font-size:13px;color:var(--text-2)">Dienstbesprechung</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--brand);font-weight:600;margin-top:2px">32 km · KK</div></div>
+                  </div>
+                  <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-btn);padding:14px;min-height:88px;display:flex;flex-direction:column;justify-content:space-between">
+                    <div style="font-size:16px;font-weight:600;color:var(--text)">Büsum</div>
+                    <div><div style="font-size:13px;color:var(--text-2)">Gottesdienst</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--brand);font-weight:600;margin-top:2px">24 km · KG</div></div>
+                  </div>
+                </div>
+
+                <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px">Zuletzt</div>
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden">
+                  <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+                    <div style="flex:1"><div style="font-size:16px;font-weight:600;color:var(--text)">Hennstedt</div><div style="font-size:13px;color:var(--text-2)">Di 04.08. · Konfirmanden</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">18 km</div>
+                    <button style="width:44px;height:44px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--surface-2);color:var(--brand);font-size:17px;cursor:pointer">↻</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="position:absolute;right:20px;bottom:112px;width:62px;height:62px;border-radius:22px;background:var(--brand);color:var(--on-brand);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:300;box-shadow:0 12px 28px -8px rgba(8,32,31,.55)">+</div>
+
+              <div style="display:flex;border-top:1px solid var(--line);background:var(--surface);padding:10px 8px 26px">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--brand)"><span style="font-size:19px">◧</span><span style="font-size:11px;font-weight:600">Start</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">☰</span><span style="font-size:11px;font-weight:600">Fahrten</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3);position:relative"><span style="font-size:19px">▤</span><span style="font-size:11px;font-weight:600">Abrechnung</span><span style="position:absolute;top:4px;right:22px;width:8px;height:8px;border-radius:50%;background:var(--accent)"></span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">⚙</span><span style="font-size:11px;font-weight:600">Mehr</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 2: Sheet Schritt 1 -->
+        <div style="width:390px">
+          <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:4px">Erfassen · Schritt 1</div>
+          <div style="font-size:13px;color:#5E7473;margin-bottom:14px;height:36px">Das Sheet öffnet auf den Zielen, nicht auf einem leeren Formular.</div>
+          <div style="border-radius:44px;border:9px solid #0C1414;background:#0C1414;box-shadow:0 24px 60px -24px rgba(8,32,31,.5)">
+            <div style="border-radius:36px;overflow:hidden;background:var(--bg);height:800px;display:flex;flex-direction:column;position:relative">
+              <div style="flex:1;background:var(--bg);opacity:.4"></div>
+              <div style="position:absolute;inset:0;background:rgba(8,32,31,.42)"></div>
+              <div style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:28px 28px 36px 36px;padding:12px 20px 28px;box-shadow:0 -8px 40px -12px rgba(8,32,31,.4)">
+                <div style="width:44px;height:5px;border-radius:99px;background:var(--line-strong);margin:0 auto 18px"></div>
+                <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--text);margin-bottom:4px">Wohin?</div>
+                <div style="font-size:15px;color:var(--text-2);margin-bottom:18px">Ab Wesselburen · heute, Di 04.08.</div>
+                <div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--bg);margin-bottom:16px">
+                  <span style="color:var(--text-3);font-size:17px">⌕</span><span style="font-size:17px;color:var(--text-3)">Ort suchen</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:1.5px solid var(--brand);border-radius:var(--r-btn);background:var(--brand-soft)">
+                    <div style="flex:1"><div style="font-size:17px;font-weight:600;color:var(--text)">Heide</div><div style="font-size:14px;color:var(--text-2)">Kirchenkreisamt</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--brand)">32 km</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--surface)">
+                    <div style="flex:1"><div style="font-size:17px;font-weight:600;color:var(--text)">Büsum</div><div style="font-size:14px;color:var(--text-2)">St.-Clemens-Kirche</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--text-2)">24 km</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--surface)">
+                    <div style="flex:1"><div style="font-size:17px;font-weight:600;color:var(--text)">Hennstedt</div><div style="font-size:14px;color:var(--text-2)">Gemeindehaus</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--text-2)">18 km</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px dashed var(--line-strong);border-radius:var(--r-btn)">
+                    <div style="font-size:17px;color:var(--text-2)">Anderes Ziel eingeben</div>
+                  </div>
+                </div>
+                <button style="margin-top:20px;width:100%;height:54px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:17px;font-weight:600;cursor:pointer">Weiter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 3: Sheet Schritt 2 -->
+        <div style="width:390px">
+          <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:4px">Erfassen · Schritt 2</div>
+          <div style="font-size:13px;color:#5E7473;margin-bottom:14px;height:36px">Anlass aus dem Verlauf, Rückfahrt als Schalter. Speichern ist immer erreichbar.</div>
+          <div style="border-radius:44px;border:9px solid #0C1414;background:#0C1414;box-shadow:0 24px 60px -24px rgba(8,32,31,.5)">
+            <div style="border-radius:36px;overflow:hidden;background:var(--bg);height:800px;display:flex;flex-direction:column;position:relative">
+              <div style="flex:1"></div>
+              <div style="position:absolute;inset:0;background:rgba(8,32,31,.42)"></div>
+              <div style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:28px 28px 36px 36px;padding:12px 20px 28px;box-shadow:0 -8px 40px -12px rgba(8,32,31,.4)">
+                <div style="width:44px;height:5px;border-radius:99px;background:var(--line-strong);margin:0 auto 18px"></div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+                  <div style="flex:1"><div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--text)">Wesselburen → Heide</div><div style="font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--brand);font-weight:600;margin-top:2px">32 km · 11,52 €</div></div>
+                  <button style="width:44px;height:44px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--surface-2);color:var(--text-2);font-size:16px;cursor:pointer">✎</button>
+                </div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Anlass</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+                  <div style="padding:11px 16px;border-radius:var(--r-pill);background:var(--brand);color:var(--on-brand);font-size:15px;font-weight:600">Dienstbesprechung</div>
+                  <div style="padding:11px 16px;border-radius:var(--r-pill);border:1px solid var(--line);color:var(--text-2);font-size:15px">Konvent</div>
+                  <div style="padding:11px 16px;border-radius:var(--r-pill);border:1px solid var(--line);color:var(--text-2);font-size:15px">Seelsorge</div>
+                  <div style="padding:11px 16px;border-radius:var(--r-pill);border:1px dashed var(--line-strong);color:var(--text-2);font-size:15px">Frei eingeben…</div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-btn);margin-bottom:10px;background:var(--bg)">
+                  <div><div style="font-size:16px;font-weight:600;color:var(--text)">Rückfahrt</div><div style="font-size:13px;color:var(--text-2)">Legt eine zweite Fahrt an</div></div>
+                  <div style="width:52px;height:31px;border-radius:99px;background:var(--brand);position:relative"><span style="position:absolute;top:3px;right:3px;width:25px;height:25px;border-radius:50%;background:var(--surface)"></span></div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-btn);margin-bottom:20px;background:var(--bg)">
+                  <div><div style="font-size:16px;font-weight:600;color:var(--text)">Abrechnungsträger</div><div style="font-size:13px;color:var(--text-2)">Zuletzt: Kirchenkreis</div></div>
+                  <div style="font-size:15px;font-weight:600;color:var(--brand)">Kirchenkreis ›</div>
+                </div>
+                <button style="width:100%;height:54px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:17px;font-weight:600;cursor:pointer">2 Fahrten speichern · 64 km</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 4: Toast -->
+        <div style="width:390px">
+          <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:4px">Erfassen · fertig</div>
+          <div style="font-size:13px;color:#5E7473;margin-bottom:14px;height:36px">Kein Bestätigungs-Modal. Ein Toast mit Rückgängig — 5 Sekunden, dann weg.</div>
+          <div style="border-radius:44px;border:9px solid #0C1414;background:#0C1414;box-shadow:0 24px 60px -24px rgba(8,32,31,.5)">
+            <div style="border-radius:36px;overflow:hidden;background:var(--bg);height:800px;display:flex;flex-direction:column;position:relative">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 24px 6px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text)"><span>9:41</span><span style="letter-spacing:.1em">▮▮▮</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 16px">
+                <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--text)">August</div>
+                <div style="width:40px;height:40px;border-radius:var(--r-pill);background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--text-2)">SL</div>
+              </div>
+              <div style="flex:1;padding:0 20px">
+                <div style="background:var(--brand);border-radius:var(--r-card);padding:22px;color:var(--on-brand);margin-bottom:20px">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.72;margin-bottom:10px">Noch nicht eingereicht</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:500;letter-spacing:-.03em;line-height:1">174,96 €</div>
+                  <div style="font-size:15px;opacity:.82;margin-top:8px">Juli 2026 · 486 km · 2 Träger</div>
+                </div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px">Zuletzt</div>
+                <div style="background:var(--surface);border:1.5px solid var(--brand);border-radius:var(--r-card);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px">
+                  <div style="flex:1"><div style="font-size:16px;font-weight:600;color:var(--text)">Heide · Rückfahrt</div><div style="font-size:13px;color:var(--text-2)">Di 04.08. · Dienstbesprechung</div></div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">32 km</div>
+                </div>
+                <div style="background:var(--surface);border:1.5px solid var(--brand);border-radius:var(--r-card);padding:14px 16px;display:flex;align-items:center;gap:12px">
+                  <div style="flex:1"><div style="font-size:16px;font-weight:600;color:var(--text)">Heide</div><div style="font-size:13px;color:var(--text-2)">Di 04.08. · Dienstbesprechung</div></div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">32 km</div>
+                </div>
+              </div>
+              <div style="position:absolute;left:16px;right:16px;bottom:110px;background:var(--text);color:var(--bg);border-radius:var(--r-btn);padding:16px 18px;display:flex;align-items:center;gap:14px;animation:toastIn .3s ease both;box-shadow:0 12px 32px -10px rgba(0,0,0,.5)">
+                <span style="width:24px;height:24px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px">✓</span>
+                <div style="flex:1;font-size:16px;font-weight:600">2 Fahrten gespeichert</div>
+                <div style="font-size:16px;font-weight:600;color:var(--brand-strong)">Rückgängig</div>
+              </div>
+              <div style="display:flex;border-top:1px solid var(--line);background:var(--surface);padding:10px 8px 26px">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--brand)"><span style="font-size:19px">◧</span><span style="font-size:11px;font-weight:600">Start</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">☰</span><span style="font-size:11px;font-weight:600">Fahrten</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">▤</span><span style="font-size:11px;font-weight:600">Abrechnung</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">⚙</span><span style="font-size:11px;font-weight:600">Mehr</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 5: Fahrtenliste -->
+        <div style="width:390px">
+          <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:4px">Fahrten</div>
+          <div style="font-size:13px;color:#5E7473;margin-bottom:14px;height:36px">Monat als Segment, Status als Punkt. Wischen öffnet Bearbeiten.</div>
+          <div style="border-radius:44px;border:9px solid #0C1414;background:#0C1414;box-shadow:0 24px 60px -24px rgba(8,32,31,.5)">
+            <div style="border-radius:36px;overflow:hidden;background:var(--bg);height:800px;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 24px 6px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text)"><span>9:41</span><span style="letter-spacing:.1em">▮▮▮</span></div>
+              <div style="padding:10px 20px 14px">
+                <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--text);margin-bottom:14px">Fahrten</div>
+                <div style="display:flex;background:var(--surface-2);border-radius:var(--r-btn);padding:4px;gap:2px;margin-bottom:12px">
+                  <div style="flex:1;height:40px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--surface);font-size:15px;font-weight:600;color:var(--text);box-shadow:var(--shadow)">August</div>
+                  <div style="flex:1;height:40px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:15px;color:var(--text-2)">Juli</div>
+                  <div style="flex:1;height:40px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:15px;color:var(--text-2)">Zeitraum</div>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--text)">412 km</span>
+                  <span style="color:var(--text-3)">·</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--text)">148,32 €</span>
+                  <span style="flex:1"></span>
+                  <span style="font-size:14px;font-weight:600;color:var(--brand)">Export</span>
+                </div>
+              </div>
+              <div style="flex:1;min-height:0;overflow:hidden;padding:0 20px 8px;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ fahrtenKurz }}" as="f" hint-placeholder-count="4">
+                  <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:14px 16px">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-3)">{{ f.datum }}</span>
+                      <span style="flex:1"></span>
+                      <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:{{ f.dotText }}"><span style="width:9px;height:9px;border-radius:50%;background:{{ f.dotBg }};border:1.5px {{ f.dotStyle }} {{ f.dotBorder }}"></span>{{ f.status }}</span>
+                    </div>
+                    <div style="display:flex;align-items:baseline;gap:8px">
+                      <div style="font-size:17px;font-weight:600;color:var(--text);flex:1">{{ f.nach }}</div>
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--text)">{{ f.km }} km</div>
+                    </div>
+                    <div style="display:flex;align-items:baseline;gap:8px;margin-top:3px">
+                      <div style="font-size:14px;color:var(--text-2);flex:1">{{ f.anlass }} · {{ f.traeger }}</div>
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">{{ f.betrag }} €</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;border-top:1px solid var(--line);background:var(--surface);padding:10px 8px 26px;flex-shrink:0">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">◧</span><span style="font-size:11px;font-weight:600">Start</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--brand)"><span style="font-size:19px">☰</span><span style="font-size:11px;font-weight:600">Fahrten</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">▤</span><span style="font-size:11px;font-weight:600">Abrechnung</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">⚙</span><span style="font-size:11px;font-weight:600">Mehr</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 6: Abrechnung -->
+        <div style="width:390px">
+          <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:4px">Abrechnung</div>
+          <div style="font-size:13px;color:#5E7473;margin-bottom:14px;height:36px">Ein Monat, eine Karte, je Träger eine Zeile mit ihrem Status.</div>
+          <div style="border-radius:44px;border:9px solid #0C1414;background:#0C1414;box-shadow:0 24px 60px -24px rgba(8,32,31,.5)">
+            <div style="border-radius:36px;overflow:hidden;background:var(--bg);height:800px;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 24px 6px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text)"><span>9:41</span><span style="letter-spacing:.1em">▮▮▮</span></div>
+              <div style="padding:10px 20px 14px">
+                <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--text)">Abrechnung</div>
+                <div style="font-size:15px;color:var(--text-2);margin-top:2px">2 Monate warten auf dich</div>
+              </div>
+              <div style="flex:1;padding:0 20px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+                <div style="background:var(--surface);border:1.5px solid var(--accent-line);border-radius:var(--r-card);overflow:hidden">
+                  <div style="display:flex;align-items:center;gap:10px;padding:16px;background:var(--accent-soft)">
+                    <div style="flex:1"><div style="font-size:18px;font-weight:600;color:var(--text)">Juli 2026</div><div style="font-size:14px;color:var(--accent-text);font-weight:600">Fällig — noch nicht eingereicht</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:var(--text)">174,96 €</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)">
+                    <span style="width:10px;height:10px;border-radius:50%;border:1.5px dashed var(--line-strong)"></span>
+                    <div style="flex:1"><div style="font-size:16px;color:var(--text)">Kirchenkreis</div><div style="font-size:13px;color:var(--text-2)">Erfasst · 312 km</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">112,32 €</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+                    <span style="width:10px;height:10px;border-radius:50%;border:1.5px dashed var(--line-strong)"></span>
+                    <div style="flex:1"><div style="font-size:16px;color:var(--text)">Gemeinde Wesselburen</div><div style="font-size:13px;color:var(--text-2)">Erfasst · 174 km</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text-2)">62,64 €</div>
+                  </div>
+                  <div style="padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:10px">
+                    <button style="flex:1;height:48px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer">Einreichen</button>
+                    <button style="width:48px;height:48px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--surface);color:var(--text-2);font-size:17px;cursor:pointer">↓</button>
+                  </div>
+                </div>
+
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:16px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="flex:1"><div style="font-size:18px;font-weight:600;color:var(--text)">Juni 2026</div><div style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--accent-text);margin-top:3px"><span style="width:9px;height:9px;border-radius:50%;background:var(--accent)"></span>Eingereicht am 12.07.</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:var(--text)">181,08 €</div>
+                  </div>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:16px;opacity:.72">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="flex:1"><div style="font-size:18px;font-weight:600;color:var(--text)">Mai 2026</div><div style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--ok);margin-top:3px"><span style="width:9px;height:9px;border-radius:50%;background:var(--ok)"></span>Erstattet am 28.06.</div></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:var(--text-2)">158,76 €</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;border-top:1px solid var(--line);background:var(--surface);padding:10px 8px 26px;margin-top:16px">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">◧</span><span style="font-size:11px;font-weight:600">Start</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">☰</span><span style="font-size:11px;font-weight:600">Fahrten</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--brand)"><span style="font-size:19px">▤</span><span style="font-size:11px;font-weight:600">Abrechnung</span></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;color:var(--text-3)"><span style="font-size:19px">⚙</span><span style="font-size:11px;font-weight:600">Mehr</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========== 04 DESKTOP ========== -->
+    <section style="padding:24px 0 88px">
+      <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:20px;border-bottom:1px solid #CFD9D9;margin-bottom:36px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0F5257;font-weight:600">04</span>
+        <h2 style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#08201F;margin:0">Desktop — der Monatsabschluss</h2>
+        <span style="font-size:14px;color:#6E8685">1280 px</span>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:12px">Dashboard</div>
+      <div style="border-radius:14px;overflow:hidden;border:1px solid #CFD9D9;box-shadow:0 20px 50px -24px rgba(8,32,31,.4);margin-bottom:40px">
+        <div style="height:38px;background:var(--surface-2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:8px">
+          <span style="width:11px;height:11px;border-radius:50%;background:var(--line-strong)"></span>
+          <span style="width:11px;height:11px;border-radius:50%;background:var(--line-strong)"></span>
+          <span style="width:11px;height:11px;border-radius:50%;background:var(--line-strong)"></span>
+          <span style="margin-left:16px;font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace">kkd-fahrtenbuch.de</span>
+        </div>
+        <div style="display:flex;background:var(--bg);min-height:760px">
+          <div style="width:232px;background:var(--surface);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;gap:10px;padding:0 10px 22px">
+              <div style="width:32px;height:32px;border-radius:9px;background:var(--brand);display:flex;align-items:center;justify-content:center"><div style="width:14px;height:14px;border:2.5px solid var(--brand-strong);border-radius:50%;border-left-color:transparent"></div></div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">Fahrtenbuch</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r-btn);background:var(--brand-soft);color:var(--brand);font-size:15px;font-weight:600"><span style="font-size:16px">◧</span>Übersicht</div>
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px"><span style="font-size:16px">☰</span>Fahrten</div>
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px"><span style="font-size:16px">▤</span>Abrechnung<span style="flex:1"></span><span style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--surface);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">2</span></div>
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px"><span style="font-size:16px">⚙</span>Einstellungen</div>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-top:1px solid var(--line)">
+              <div style="width:32px;height:32px;border-radius:var(--r-pill);background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text-2)">SL</div>
+              <div><div style="font-size:14px;font-weight:600;color:var(--text)">Simon Luthe</div><div style="font-size:12px;color:var(--text-3)">Kirchspiel West</div></div>
+            </div>
+          </div>
+
+          <div style="flex:1;padding:32px 36px">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:26px">
+              <div>
+                <div style="font-size:30px;font-weight:600;letter-spacing:-.025em;color:var(--text)">Guten Morgen, Simon</div>
+                <div style="font-size:16px;color:var(--text-2);margin-top:4px">Dienstag, 4. August 2026</div>
+              </div>
+              <button style="height:44px;padding:0 20px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">+ Neue Fahrt</button>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-bottom:18px">
+              <div style="background:var(--brand);border-radius:var(--r-card);padding:28px;color:var(--on-brand);display:flex;flex-direction:column">
+                <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:12px">Noch nicht eingereicht</div>
+                <div style="display:flex;align-items:baseline;gap:16px">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:52px;font-weight:500;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums">174,96 €</div>
+                  <div style="font-size:16px;opacity:.75">aus Juli 2026</div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:20px;flex:1;align-items:flex-end">
+                  <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-btn);padding:14px 16px">
+                    <div style="font-size:13px;opacity:.75;margin-bottom:3px">Kirchenkreis</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:600">112,32 €</div>
+                  </div>
+                  <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-btn);padding:14px 16px">
+                    <div style="font-size:13px;opacity:.75;margin-bottom:3px">Gemeinde Wesselburen</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:600">62,64 €</div>
+                  </div>
+                  <button style="height:48px;padding:0 22px;border:none;border-radius:var(--r-btn);background:var(--on-brand);color:var(--brand);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap">Juli abrechnen →</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-rows:1fr 1fr;gap:18px">
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px;display:flex;flex-direction:column;justify-content:center">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">August bisher</div>
+                  <div style="display:flex;align-items:baseline;gap:14px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:500;letter-spacing:-.02em;color:var(--text)">412 km</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:17px;color:var(--text-2)">148,32 €</span>
+                  </div>
+                  <div style="font-size:14px;color:var(--text-2);margin-top:6px">14 Fahrten · 0,36 €/km</div>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px;display:flex;flex-direction:column;justify-content:center">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Unterwegs</div>
+                  <div style="display:flex;align-items:center;gap:10px"><span style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></span><span style="font-size:15px;color:var(--text)">Juni eingereicht</span><span style="flex:1"></span><span style="font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--text-2)">181,08 €</span></div>
+                  <div style="font-size:13px;color:var(--text-3);margin-top:6px;padding-left:20px">seit 23 Tagen · Kirchenkreisamt</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:18px">
+              <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden">
+                <div style="display:flex;align-items:center;padding:18px 22px 14px">
+                  <div style="font-size:16px;font-weight:600;color:var(--text)">Letzte Fahrten</div>
+                  <span style="flex:1"></span>
+                  <span style="font-size:14px;font-weight:600;color:var(--brand)">Alle ansehen</span>
+                </div>
+                <div style="display:grid;grid-template-columns:82px 1fr 132px 68px 78px 108px;padding:8px 22px;background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)">
+                  <div>Datum</div><div>Anlass · Ziel</div><div>Träger</div><div style="text-align:right">km</div><div style="text-align:right">Betrag</div><div style="text-align:right">Status</div>
+                </div>
+                <sc-for list="{{ fahrten }}" as="f" hint-placeholder-count="5">
+                  <div style="display:grid;grid-template-columns:82px 1fr 132px 68px 78px 108px;padding:13px 22px;border-bottom:1px solid var(--line);align-items:center">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-2)">{{ f.datum }}</div>
+                    <div><div style="font-size:15px;color:var(--text);font-weight:500">{{ f.anlass }}</div><div style="font-size:13px;color:var(--text-3)">{{ f.von }} → {{ f.nach }}</div></div>
+                    <div style="font-size:13px;color:var(--text-2)">{{ f.traeger }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);text-align:right">{{ f.km }}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);text-align:right">{{ f.betrag }}</div>
+                    <div style="text-align:right"><span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:{{ f.dotText }}"><span style="width:9px;height:9px;border-radius:50%;background:{{ f.dotBg }};border:1.5px {{ f.dotStyle }} {{ f.dotBorder }}"></span>{{ f.status }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px">
+                <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:20px">Kilometer 2026</div>
+                <div style="display:flex;align-items:flex-end;gap:8px;height:150px">
+                  <sc-for list="{{ chart }}" as="c" hint-placeholder-count="8">
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px">
+                      <div style="width:100%;border-radius:5px 5px 0 0;background:{{ c.color }};height:{{ c.h }}"></div>
+                      <div style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace">{{ c.m }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;gap:16px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--text-2)">
+                  <div style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:2px;background:var(--ok)"></span>Erstattet</div>
+                  <div style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:2px;background:var(--accent)"></span>Eingereicht</div>
+                  <div style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:2px;background:var(--brand)"></span>Erfasst</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Abrechnung -->
+      <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:12px">Abrechnung — Monat × Träger als Matrix</div>
+      <div style="border-radius:14px;overflow:hidden;border:1px solid #CFD9D9;box-shadow:0 20px 50px -24px rgba(8,32,31,.4)">
+        <div style="background:var(--bg);padding:32px 36px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px">
+            <div>
+              <div style="font-size:30px;font-weight:600;letter-spacing:-.025em;color:var(--text)">Abrechnung 2026</div>
+              <div style="font-size:16px;color:var(--text-2);margin-top:4px">Zwei Monate sind noch nicht eingereicht.</div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button style="height:44px;padding:0 18px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--surface);color:var(--text);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">Zeitraum-Export</button>
+              <button style="height:44px;padding:0 20px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">Juli einreichen</button>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden">
+            <div style="display:grid;grid-template-columns:150px 1fr 1fr 1fr 118px 130px;padding:12px 24px;background:var(--bg);border-bottom:1px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)">
+              <div>Monat</div><div>Kirchenkreis</div><div>Gem. Wesselburen</div><div>Gem. Neuenkirchen</div><div style="text-align:right">Summe</div><div></div>
+            </div>
+            <sc-for list="{{ monate }}" as="m" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:150px 1fr 1fr 1fr 118px 130px;padding:16px 24px;border-bottom:1px solid var(--line);align-items:center">
+                <div><div style="font-size:16px;font-weight:600;color:var(--text)">{{ m.monat }}</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-3)">{{ m.km }} km</div></div>
+                <div><span style="display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:{{ m.aText }}"><span style="width:9px;height:9px;border-radius:50%;background:{{ m.aBg }};border:1.5px {{ m.aStyle }} {{ m.aBorder }}"></span>{{ m.a }}</span></div>
+                <div><span style="display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:{{ m.bText }}"><span style="width:9px;height:9px;border-radius:50%;background:{{ m.bBg }};border:1.5px {{ m.bStyle }} {{ m.bBorder }}"></span>{{ m.b }}</span></div>
+                <div><span style="display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:{{ m.cText }}"><span style="width:9px;height:9px;border-radius:50%;background:{{ m.cBg }};border:1.5px {{ m.cStyle }} {{ m.cBorder }}"></span>{{ m.c }}</span></div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--text);text-align:right">{{ m.betrag }} €</div>
+                <div style="text-align:right"><span style="font-size:14px;font-weight:600;color:var(--brand)">{{ m.aktion }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 05 EINSTELLUNGEN & LOGIN ========== -->
+    <section style="padding:24px 0 88px">
+      <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:20px;border-bottom:1px solid #CFD9D9;margin-bottom:36px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0F5257;font-weight:600">05</span>
+        <h2 style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#08201F;margin:0">Einstellungen & Anmeldung</h2>
+        <span style="font-size:14px;color:#6E8685">8 Tabs werden zu einer Liste</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.75fr 1fr;gap:24px">
+        <div style="background:var(--bg);border:1px solid var(--line);border-radius:var(--r-card);padding:30px;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:600;letter-spacing:-.02em;color:var(--text);margin-bottom:22px">Einstellungen</div>
+          <div style="display:flex;gap:24px">
+            <div style="width:212px;display:flex;flex-direction:column;gap:2px">
+              <div style="padding:12px 14px;border-radius:var(--r-btn);background:var(--brand-soft);color:var(--brand);font-size:15px;font-weight:600">Orte & Distanzen</div>
+              <div style="padding:12px 14px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px">Abrechnungsträger</div>
+              <div style="padding:12px 14px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px">Erstattungssätze</div>
+              <div style="padding:12px 14px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px">Favoriten</div>
+              <div style="padding:12px 14px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px">Mitfahrer</div>
+              <div style="padding:12px 14px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px">Profil & Passwort</div>
+              <div style="padding:12px 14px;border-radius:var(--r-btn);color:var(--text-2);font-size:15px">Darstellung</div>
+            </div>
+            <div style="flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:24px">
+              <div style="display:flex;align-items:center;margin-bottom:18px">
+                <div><div style="font-size:17px;font-weight:600;color:var(--text)">Orte</div><div style="font-size:14px;color:var(--text-2);margin-top:2px">Distanzen werden einmal gepflegt und danach nie wieder getippt.</div></div>
+                <span style="flex:1"></span>
+                <button style="height:44px;padding:0 18px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">+ Ort</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--bg);margin-bottom:16px;font-size:16px;color:var(--text-3)">⌕ Ort oder Adresse suchen</div>
+              <div style="border:1px solid var(--line);border-radius:var(--r-btn);overflow:hidden">
+                <div style="display:grid;grid-template-columns:1fr 1.4fr 96px 96px;padding:11px 18px;background:var(--bg);border-bottom:1px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)"><div>Ort</div><div>Adresse</div><div style="text-align:right">ab Wesselburen</div><div></div></div>
+                <div style="display:grid;grid-template-columns:1fr 1.4fr 96px 96px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center"><div style="font-size:15px;font-weight:600;color:var(--text)">Heide</div><div style="font-size:14px;color:var(--text-2)">Kirchenkreisamt, Rüsdorfer Str. 8</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);text-align:right">32 km</div><div style="display:flex;gap:6px;justify-content:flex-end"><span style="width:36px;height:36px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:14px">✎</span><span style="width:36px;height:36px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:14px">✕</span></div></div>
+                <div style="display:grid;grid-template-columns:1fr 1.4fr 96px 96px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center"><div style="font-size:15px;font-weight:600;color:var(--text)">Büsum</div><div style="font-size:14px;color:var(--text-2)">St.-Clemens-Kirche, Kirchenstr. 1</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);text-align:right">24 km</div><div style="display:flex;gap:6px;justify-content:flex-end"><span style="width:36px;height:36px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:14px">✎</span><span style="width:36px;height:36px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:14px">✕</span></div></div>
+                <div style="display:grid;grid-template-columns:1fr 1.4fr 96px 96px;padding:14px 18px;align-items:center"><div style="font-size:15px;font-weight:600;color:var(--text)">Hennstedt</div><div style="font-size:14px;color:var(--text-2)">Gemeindehaus, Kirchspielsweg 4</div><div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);text-align:right">18 km</div><div style="display:flex;gap:6px;justify-content:flex-end"><span style="width:36px;height:36px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:14px">✎</span><span style="width:36px;height:36px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:14px">✕</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--brand);border-radius:var(--r-card);padding:40px 36px;display:flex;flex-direction:column;justify-content:center">
+          <div style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;margin-bottom:24px"><div style="width:24px;height:24px;border:3px solid var(--on-brand);border-radius:50%;border-left-color:transparent"></div></div>
+          <div style="font-size:26px;font-weight:600;letter-spacing:-.025em;color:var(--on-brand);margin-bottom:6px">Anmelden</div>
+          <div style="font-size:15px;color:var(--on-brand);opacity:.72;margin-bottom:26px">Fahrtenbuch des Kirchenkreises Dithmarschen</div>
+          <div style="background:var(--surface);border-radius:var(--r-card);padding:24px">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px">E-Mail</div>
+            <div style="height:52px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--bg);display:flex;align-items:center;padding:0 16px;font-size:16px;color:var(--text);margin-bottom:16px">simon.luthe@kirche-dith.de</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px">Passwort</div>
+            <div style="height:52px;border:1.5px solid var(--brand);border-radius:var(--r-btn);background:var(--bg);display:flex;align-items:center;padding:0 16px;font-size:16px;color:var(--text);margin-bottom:20px">••••••••••</div>
+            <button style="width:100%;height:52px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer">Anmelden</button>
+            <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:14px"><a href="#0">Passwort vergessen</a><a href="#0">Registrieren</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 06 KOMPONENTEN ========== -->
+    <section style="padding:24px 0 60px">
+      <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:20px;border-bottom:1px solid #CFD9D9;margin-bottom:36px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0F5257;font-weight:600">06</span>
+        <h2 style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#08201F;margin:0">Bausteine</h2>
+        <span style="font-size:14px;color:#6E8685">Touch ≥ 44 px, Schrift ≥ 16 px in Feldern</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px">Buttons — 48 px hoch</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+            <button style="height:48px;padding:0 22px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer">Speichern</button>
+            <button style="height:48px;padding:0 22px;border:1px solid var(--line-strong);border-radius:var(--r-btn);background:var(--surface);color:var(--text);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer">Abbrechen</button>
+            <button style="height:48px;padding:0 22px;border:none;border-radius:var(--r-btn);background:transparent;color:var(--brand);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer">Alle ansehen</button>
+            <button style="height:48px;padding:0 22px;border:1px solid var(--danger);border-radius:var(--r-btn);background:transparent;color:var(--danger);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer">Löschen</button>
+          </div>
+          <div style="display:flex;gap:10px">
+            <div style="width:48px;height:48px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:17px">✎</div>
+            <div style="width:48px;height:48px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:17px">↻</div>
+            <div style="width:48px;height:48px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:17px">↓</div>
+            <div style="flex:1"></div>
+            <div style="font-size:13px;color:var(--text-3);align-self:center;text-align:right;max-width:190px">Statt 26-px-Icon-Buttons: 48 px Trefferfläche, sichtbare Fläche.</div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px">Felder — 52 px, 16 px Schrift</div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px">Anlass</div>
+          <div style="height:52px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--bg);display:flex;align-items:center;padding:0 16px;font-size:16px;color:var(--text-3);margin-bottom:14px">Wofür bist du gefahren?</div>
+          <div style="height:52px;border:1.5px solid var(--brand);border-radius:var(--r-btn);background:var(--bg);display:flex;align-items:center;padding:0 16px;font-size:16px;color:var(--text);margin-bottom:6px;box-shadow:0 0 0 3px var(--brand-soft)">Dienstbesprechung</div>
+          <div style="font-size:13px;color:var(--text-3);margin-bottom:14px">Fokus: 1,5 px Rand plus weicher Ring — kein Sprung im Layout.</div>
+          <div style="height:52px;border:1.5px solid var(--danger);border-radius:var(--r-btn);background:var(--bg);display:flex;align-items:center;padding:0 16px;font-size:16px;color:var(--text);margin-bottom:6px">0</div>
+          <div style="font-size:13px;color:var(--danger);font-weight:500">Kilometer müssen größer als 0 sein.</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px">Toast statt Modal</div>
+          <div style="background:var(--text);color:var(--bg);border-radius:var(--r-btn);padding:15px 17px;display:flex;align-items:center;gap:13px;margin-bottom:10px">
+            <span style="width:22px;height:22px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">✓</span>
+            <div style="flex:1;font-size:15px;font-weight:600">Fahrt gespeichert</div>
+            <div style="font-size:15px;font-weight:600;color:var(--brand-strong)">Rückgängig</div>
+          </div>
+          <div style="background:var(--text);color:var(--bg);border-radius:var(--r-btn);padding:15px 17px;display:flex;align-items:center;gap:13px">
+            <span style="width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">!</span>
+            <div style="flex:1;font-size:15px;font-weight:600">Keine Verbindung — später erneut</div>
+          </div>
+          <div style="font-size:13px;color:var(--text-3);margin-top:14px">Bestätigungs-Modals entfallen. Rückgängig ist billiger als Nachfragen.</div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px">Leerer Zustand</div>
+          <div style="border:1px dashed var(--line-strong);border-radius:var(--r-btn);padding:28px 20px;text-align:center">
+            <div style="width:44px;height:44px;border-radius:14px;background:var(--brand-soft);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--brand);font-size:20px">☰</div>
+            <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:5px">Im August noch nichts</div>
+            <div style="font-size:14px;color:var(--text-2);margin-bottom:16px">Die erste Fahrt dauert zehn Sekunden.</div>
+            <button style="height:48px;padding:0 20px;border:none;border-radius:var(--r-btn);background:var(--brand);color:var(--on-brand);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">Fahrt erfassen</button>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px">Abstände & Radien</div>
+          <div style="display:flex;flex-direction:column;gap:11px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-2)">
+            <div style="display:flex;justify-content:space-between"><span>space</span><span style="color:var(--text)">4 · 8 · 12 · 16 · 20 · 28</span></div>
+            <div style="display:flex;justify-content:space-between"><span>radius-card</span><span style="color:var(--text)">16</span></div>
+            <div style="display:flex;justify-content:space-between"><span>radius-control</span><span style="color:var(--text)">12</span></div>
+            <div style="display:flex;justify-content:space-between"><span>control-h</span><span style="color:var(--text)">48 / 52</span></div>
+            <div style="display:flex;justify-content:space-between"><span>tap-min</span><span style="color:var(--text)">44</span></div>
+            <div style="display:flex;justify-content:space-between"><span>font-min-input</span><span style="color:var(--text)">16</span></div>
+            <div style="display:flex;justify-content:space-between"><span>border</span><span style="color:var(--text)">1 · 1,5 fokus</span></div>
+          </div>
+          <div style="font-size:13px;color:var(--text-3);margin-top:16px;line-height:1.5">Ein Schatten für Karten, keiner für Felder. Alles andere trägt der Rand.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 07 PWA ========== -->
+    <section style="padding:24px 0 60px">
+      <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:20px;border-bottom:1px solid #CFD9D9;margin-bottom:36px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0F5257;font-weight:600">07</span>
+        <h2 style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#08201F;margin:0">App-Identität</h2>
+        <span style="font-size:14px;color:#6E8685">Homescreen, Splash, Manifest</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:32px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:24px">Das Zeichen — Weg und Ziel</div>
+          <div style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:152px;height:152px;border-radius:34px;background:#0F5257;display:flex;align-items:center;justify-content:center;box-shadow:0 16px 36px -14px rgba(8,32,31,.55)">
+                <div style="position:relative;width:82px;height:82px">
+                  <div style="position:absolute;inset:0;border:12px solid #35B6AA;border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                  <div style="position:absolute;left:2px;bottom:2px;width:20px;height:20px;border-radius:50%;background:#E8B461"></div>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3)">512 · any</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:96px;height:96px;border-radius:22px;background:#0F5257;display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:52px;height:52px">
+                  <div style="position:absolute;inset:0;border:8px solid #35B6AA;border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                  <div style="position:absolute;left:1px;bottom:1px;width:13px;height:13px;border-radius:50%;background:#E8B461"></div>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3)">192</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:60px;height:60px;border-radius:14px;background:#0F5257;display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:32px;height:32px">
+                  <div style="position:absolute;inset:0;border:5.5px solid #35B6AA;border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                  <div style="position:absolute;left:1px;bottom:1px;width:8px;height:8px;border-radius:50%;background:#E8B461"></div>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3)">96</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:9px;background:#0F5257;display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:20px;height:20px">
+                  <div style="position:absolute;inset:0;border:4px solid #35B6AA;border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3)">32</div>
+            </div>
+          </div>
+          <div style="font-size:14px;line-height:1.55;color:var(--text-2);margin-top:26px;max-width:520px">Ein offener Ring: die gefahrene Strecke. Der Sandpunkt sitzt am Anfang und markiert, was noch aussteht — dasselbe Signal wie im Status. Ab 32 px fällt der Punkt weg, der Ring allein trägt.</div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:32px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:24px">Maskable & Monochrom</div>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:26px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:112px;height:112px;border-radius:50%;background:#0F5257;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+                <div style="position:relative;width:48px;height:48px">
+                  <div style="position:absolute;inset:0;border:8px solid #35B6AA;border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                  <div style="position:absolute;left:1px;bottom:1px;width:12px;height:12px;border-radius:50%;background:#E8B461"></div>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3)">maskable · Kreis</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:112px;height:112px;border-radius:14px;background:#0F5257;display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:48px;height:48px">
+                  <div style="position:absolute;inset:0;border:8px solid #35B6AA;border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                  <div style="position:absolute;left:1px;bottom:1px;width:12px;height:12px;border-radius:50%;background:#E8B461"></div>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3)">maskable · Squircle</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:112px;height:112px;border-radius:14px;background:var(--surface-2);display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:48px;height:48px">
+                  <div style="position:absolute;inset:0;border:8px solid var(--text-2);border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                </div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3)">monochrome</div>
+            </div>
+          </div>
+          <div style="font-size:14px;line-height:1.55;color:var(--text-2)">Sicherer Bereich: das Zeichen belegt 42 % der Kantenlänge, zentriert. Damit übersteht es Androids Kreis-, Squircle- und Tropfenmasken ohne Beschnitt.</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:20px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#08201F;margin-bottom:12px">Splash — Kaltstart</div>
+          <div style="border-radius:44px;border:9px solid #0C1414;background:#0C1414;width:322px">
+            <div style="border-radius:36px;overflow:hidden;background:#0F5257;height:660px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px">
+              <div style="position:relative;width:88px;height:88px">
+                <div style="position:absolute;inset:0;border:13px solid #35B6AA;border-radius:50%;border-left-color:transparent;transform:rotate(-45deg)"></div>
+                <div style="position:absolute;left:2px;bottom:2px;width:21px;height:21px;border-radius:50%;background:#E8B461"></div>
+              </div>
+              <div style="font-size:22px;font-weight:600;letter-spacing:-.02em;color:#FFFFFF">Fahrtenbuch</div>
+              <div style="position:absolute;bottom:52px;font-size:13px;color:rgba(255,255,255,.55)">Kirchenkreis Dithmarschen</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:32px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px">manifest.json</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.85;color:var(--text-2);background:var(--bg);border:1px solid var(--line);border-radius:var(--r-btn);padding:20px;overflow:auto">
+            <div><span style="color:var(--text-3)">"name":</span> <span style="color:var(--brand)">"Fahrtenbuch Kirchenkreis Dithmarschen"</span>,</div>
+            <div><span style="color:var(--text-3)">"short_name":</span> <span style="color:var(--brand)">"Fahrtenbuch"</span>,</div>
+            <div><span style="color:var(--text-3)">"description":</span> <span style="color:var(--brand)">"Dienstfahrten erfassen und monatlich abrechnen."</span>,</div>
+            <div><span style="color:var(--text-3)">"lang":</span> <span style="color:var(--brand)">"de"</span>,</div>
+            <div><span style="color:var(--text-3)">"display":</span> <span style="color:var(--brand)">"standalone"</span>,</div>
+            <div><span style="color:var(--text-3)">"orientation":</span> <span style="color:var(--brand)">"portrait"</span>,</div>
+            <div><span style="color:var(--text-3)">"start_url":</span> <span style="color:var(--brand)">"/?source=pwa"</span>,</div>
+            <div><span style="color:var(--text-3)">"scope":</span> <span style="color:var(--brand)">"/"</span>,</div>
+            <div><span style="color:var(--text-3)">"background_color":</span> <span style="color:var(--brand)">"#0F5257"</span>,</div>
+            <div><span style="color:var(--text-3)">"theme_color":</span> <span style="color:var(--brand)">"#0F5257"</span>  <span style="color:var(--text-3)">// dunkel: #071214</span></div>
+          </div>
+          <div style="display:flex;gap:24px;margin-top:22px;flex-wrap:wrap">
+            <div><div style="font-size:13px;color:var(--text-3);margin-bottom:4px">Shortcut 1</div><div style="font-size:15px;font-weight:600;color:var(--text)">Fahrt erfassen → /neu</div></div>
+            <div><div style="font-size:13px;color:var(--text-3);margin-bottom:4px">Shortcut 2</div><div style="font-size:15px;font-weight:600;color:var(--text)">Abrechnung → /abrechnung</div></div>
+            <div><div style="font-size:13px;color:var(--text-3);margin-bottom:4px">theme-color</div><div style="font-size:15px;font-weight:600;color:var(--text)">folgt dem Modus</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;brandFarbe&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Petrol&quot;,&quot;Tiefsee&quot;,&quot;Moosgrün&quot;,&quot;Graphit&quot;],&quot;default&quot;:&quot;Petrol&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Farbwelt&quot;},&quot;akzentFarbe&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sand&quot;,&quot;Kupfer&quot;,&quot;Zitrus&quot;,&quot;Magenta&quot;],&quot;default&quot;:&quot;Sand&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Farbwelt&quot;},&quot;ecken&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Weich&quot;,&quot;Kantig&quot;],&quot;default&quot;:&quot;Weich&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Form&quot;}}">
+const BRANDS = {
+  Petrol: { l: { b: '#0F5257', bs: '#0A3B3F', soft: '#DBEAEA', on: '#FFFFFF' }, d: { b: '#35B6AA', bs: '#6BD8CC', soft: '#10393A', on: '#032220' } },
+  Tiefsee: { l: { b: '#123F73', bs: '#0C2C52', soft: '#DEE7F3', on: '#FFFFFF' }, d: { b: '#5FA0EE', bs: '#93C0F7', soft: '#122840', on: '#04162B' } },
+  Moosgrün: { l: { b: '#245439', bs: '#173B27', soft: '#DEEBE2', on: '#FFFFFF' }, d: { b: '#57C088', bs: '#8CDCAF', soft: '#102E1F', on: '#04180E' } },
+  Graphit: { l: { b: '#2B3236', bs: '#171C1F', soft: '#E2E7E9', on: '#FFFFFF' }, d: { b: '#B6C3C8', bs: '#DCE5E8', soft: '#242B2F', on: '#0E1214' } }
+};
+const ACCENTS = {
+  Sand: { l: { a: '#B87A20', soft: '#FAEEDA', t: '#784C0A', ln: '#E8D0A4' }, d: { a: '#E8B461', soft: '#3A2B12', t: '#F2CF98', ln: '#57431E' } },
+  Kupfer: { l: { a: '#B0521C', soft: '#FBE6DA', t: '#7A3711', ln: '#EBC3AC' }, d: { a: '#E89060', soft: '#3C2314', t: '#F5C6A5', ln: '#5B3A22' } },
+  Zitrus: { l: { a: '#8A7212', soft: '#F6F0D0', t: '#5B4A06', ln: '#DDD198' }, d: { a: '#DCC64A', soft: '#332E0E', t: '#EEE29B', ln: '#544C19' } },
+  Magenta: { l: { a: '#A63469', soft: '#FBE3EE', t: '#711F46', ln: '#EBB9D2' }, d: { a: '#E87BB0', soft: '#3A1728', t: '#F5B4D2', ln: '#5C2743' } }
+};
+
+class Component extends DCLogic {
+  state = { mode: 'light' };
+
+  setMode = (m) => this.setState({ mode: m });
+
+  vars() {
+    const dark = this.state.mode === 'dark';
+    const k = dark ? 'd' : 'l';
+    const B = (BRANDS[this.props.brandFarbe] || BRANDS.Petrol)[k];
+    const A = (ACCENTS[this.props.akzentFarbe] || ACCENTS.Sand)[k];
+    const kantig = this.props.ecken === 'Kantig';
+    return {
+      '--brand': B.b, '--brand-strong': B.bs, '--brand-soft': B.soft, '--on-brand': B.on,
+      '--accent': A.a, '--accent-soft': A.soft, '--accent-text': A.t, '--accent-line': A.ln,
+      '--r-card': kantig ? '6px' : '16px', '--r-btn': kantig ? '5px' : '12px'
+    };
+  }
+
+  chip(active) {
+    return {
+      height: '34px', padding: '0 18px', border: 'none', borderRadius: '999px', cursor: 'pointer',
+      fontFamily: 'inherit', fontSize: '14px', fontWeight: 600,
+      background: active ? '#0F5257' : 'transparent', color: active ? '#fff' : '#4A6261'
+    };
+  }
+
+  dot(status) {
+    if (status === 'Erstattet') return { dotBg: 'var(--ok)', dotBorder: 'var(--ok)', dotStyle: 'solid', dotText: 'var(--ok)' };
+    if (status === 'Eingereicht') return { dotBg: 'var(--accent)', dotBorder: 'var(--accent)', dotStyle: 'solid', dotText: 'var(--accent-text)' };
+    return { dotBg: 'transparent', dotBorder: 'var(--line-strong)', dotStyle: 'dashed', dotText: 'var(--text-2)' };
+  }
+
+  renderVals() {
+    const fahrten = [
+      { datum: 'Di 04.08.', anlass: 'Konfirmandenunterricht', von: 'Wesselburen', nach: 'Hennstedt', km: '18', betrag: '6,48', traeger: 'Kirchenkreis', status: 'Erfasst' },
+      { datum: 'Mo 03.08.', anlass: 'Dienstbesprechung', von: 'Wesselburen', nach: 'Heide', km: '32', betrag: '11,52', traeger: 'Kirchenkreis', status: 'Erfasst' },
+      { datum: 'Sa 01.08.', anlass: 'Taufgespräch', von: 'Wesselburen', nach: 'Büsum', km: '24', betrag: '8,64', traeger: 'Gem. Wesselburen', status: 'Erfasst' },
+      { datum: 'Do 30.07.', anlass: 'Gute-Nacht-Kirche', von: 'Wesselburen', nach: 'Neuenkirchen', km: '12', betrag: '4,32', traeger: 'Gem. Neuenkirchen', status: 'Eingereicht' },
+      { datum: 'Mi 29.07.', anlass: 'Krankenhausbesuch', von: 'Wesselburen', nach: 'Heide', km: '32', betrag: '11,52', traeger: 'Kirchenkreis', status: 'Eingereicht' }
+    ].map(f => Object.assign({}, f, this.dot(f.status)));
+
+    const raw = [
+      { monat: 'August 2026', km: '412', betrag: '148,32', a: 'Erfasst', b: 'Erfasst', c: '—', aktion: 'läuft' },
+      { monat: 'Juli 2026', km: '486', betrag: '174,96', a: 'Erfasst', b: 'Erfasst', c: 'Erfasst', aktion: 'Einreichen →' },
+      { monat: 'Juni 2026', km: '503', betrag: '181,08', a: 'Eingereicht', b: 'Eingereicht', c: 'Erstattet', aktion: 'Details' },
+      { monat: 'Mai 2026', km: '441', betrag: '158,76', a: 'Erstattet', b: 'Erstattet', c: 'Erstattet', aktion: 'Details' }
+    ];
+    const monate = raw.map(m => {
+      const A = this.dot(m.a), B = this.dot(m.b), C = this.dot(m.c);
+      return Object.assign({}, m,
+        { aBg: A.dotBg, aBorder: A.dotBorder, aStyle: A.dotStyle, aText: A.dotText },
+        { bBg: B.dotBg, bBorder: B.dotBorder, bStyle: B.dotStyle, bText: B.dotText },
+        { cBg: m.c === '—' ? 'transparent' : C.dotBg, cBorder: m.c === '—' ? 'transparent' : C.dotBorder, cStyle: C.dotStyle, cText: m.c === '—' ? 'var(--text-3)' : C.dotText });
+    });
+
+    const chart = [
+      { m: 'J', v: 380, s: 'Erstattet' }, { m: 'F', v: 420, s: 'Erstattet' }, { m: 'M', v: 350, s: 'Erstattet' },
+      { m: 'A', v: 470, s: 'Erstattet' }, { m: 'M', v: 441, s: 'Erstattet' }, { m: 'J', v: 503, s: 'Eingereicht' },
+      { m: 'J', v: 486, s: 'Erfasst' }, { m: 'A', v: 412, s: 'Erfasst' }
+    ].map(c => ({
+      m: c.m, h: Math.round((c.v / 520) * 150) + 'px',
+      color: c.s === 'Erstattet' ? 'var(--ok)' : c.s === 'Eingereicht' ? 'var(--accent)' : 'var(--brand)'
+    }));
+
+    return {
+      mode: this.state.mode,
+      themeVars: this.vars(),
+      setLight: () => this.setMode('light'),
+      setDark: () => this.setMode('dark'),
+      lightBtnStyle: this.chip(this.state.mode === 'light'),
+      darkBtnStyle: this.chip(this.state.mode === 'dark'),
+      fahrten, fahrtenKurz: fahrten.slice(0, 4), monate, chart
+    };
+  }
+}
+</script>
+</body>
+</html>
