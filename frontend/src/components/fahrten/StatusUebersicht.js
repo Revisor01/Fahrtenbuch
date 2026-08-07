@@ -99,7 +99,7 @@ function StatusUebersicht() {
                     <button
                       key={monthKey}
                       type="button"
-                      className="fl-monat-chip"
+                      className={`fl-monat-chip fl-monat-chip-${status}`}
                       title={statusTitle(statusData)}
                       aria-label={`${name}, ${monatKurz(monthKey)} ${jahr}: ${statusLabel(status)}`}
                       onClick={() => handleStatusClick(key, jahr, monat, statusData)}

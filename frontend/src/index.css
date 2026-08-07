@@ -946,6 +946,48 @@ code {
   padding-top: 12px;
 }
 
+/* Werkzeugleiste über der Nutzerzeile: Dark-Mode, Neuigkeiten, Info, Hilfe */
+.sidebar-tools {
+  display: flex;
+  gap: 6px;
+  padding: 0 4px 10px;
+}
+
+.sidebar-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface-2);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.sidebar-tool:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.sidebar-tool:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.sidebar-user-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar-user-row .sidebar-tool {
+  margin-right: 4px;
+}
+
 .sidebar-user {
   display: flex;
   align-items: center;
@@ -2257,11 +2299,6 @@ code {
   color: var(--text);
 }
 
-.dash-d-td-route {
-  font-size: 13px;
-  color: var(--text-3);
-}
-
 .dash-d-td-traeger {
   font-size: 13px;
   color: var(--text-2);
@@ -2615,6 +2652,46 @@ code {
 
 .fl-monat-chip:hover {
   background: var(--surface-2);
+}
+
+/* Statusfarbene Chips (User-Feedback 07.08.): Fläche und Rand folgen dem
+   Status — Erfasst bleibt neutral mit gestricheltem Rand (Statussystem) */
+.fl-monat-chip-offen {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--line-strong);
+}
+
+.fl-monat-chip-offen:hover {
+  background: var(--surface-2);
+}
+
+.fl-monat-chip-eingereicht {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
+.fl-monat-chip-eingereicht:hover {
+  background: var(--accent-soft);
+  filter: brightness(0.97);
+}
+
+.fl-monat-chip-eingereicht .fl-monat-chip-label {
+  color: var(--accent-text);
+}
+
+.fl-monat-chip-erhalten {
+  background: var(--ok-soft);
+  border-color: var(--ok-line);
+}
+
+.fl-monat-chip-erhalten:hover {
+  background: var(--ok-soft);
+  filter: brightness(0.97);
+}
+
+.fl-monat-chip-erhalten .fl-monat-chip-label {
+  color: var(--ok);
 }
 
 .fl-monat-chip:focus-visible {
@@ -3541,7 +3618,9 @@ code {
   display: none; /* Chevron nur in der mobilen Drilldown-Liste */
 }
 
-/* Sekundäraktionen (Neuigkeiten/Info/Hilfe/Abmelden) unter der Liste */
+/* Sekundäraktionen (Neuigkeiten/Info/Hilfe/Abmelden) unter der Liste —
+   nur mobil: ab 768px wohnen sie in der Sidebar (Werkzeugleiste + Abmelden
+   an der Nutzerzeile); der Desktop-Footer wurde zudem abgeschnitten */
 .set-nav-foot {
   margin-top: 16px;
   padding-top: 12px;
@@ -3549,6 +3628,12 @@ code {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .set-nav-foot {
+    display: none;
+  }
 }
 
 .set-nav-foot-icons {

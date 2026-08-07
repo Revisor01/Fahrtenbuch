@@ -8,6 +8,15 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Fixed
+- Dashboard-Erfolgszustand meldet jetzt „Alles eingereicht — n Monate warten noch auf die Erstattung" statt pauschal „Alles abgerechnet"
+- Einstellungen: der Abmelden-Bereich wurde am Desktop abgeschnitten — Sekundäraktionen erscheinen dort jetzt nur noch mobil
+
+### Changed
+- Sidebar unten: Werkzeugleiste mit Dark-Mode-Schalter, Neuigkeiten, Info und Hilfe über der Nutzerzeile; Abmelden sitzt als Icon direkt an der Nutzerzeile
+- Dashboard „Letzte Fahrten": schlankere Zeilen — nur noch der Anlass (Route als Tooltip)
+- Fahrtenseite: Monats-Status-Chips der Erstattungsübersicht tragen jetzt Statusfarben (Sand für Eingereicht, Grün für Erstattet, gestrichelt für Erfasst)
+
+### Fixed
 - Abrechnungs-Matrix: aufgeklappte Trägerdetails nutzen jetzt die volle Zeilenbreite (vorher auf 720 px begrenzt)
 - Abrechnung: fällige Monate außerhalb des vorgewählten Jahres (z. B. Dezember des Vorjahres) waren in der Liste unsichtbar — die Ansicht weitet sich jetzt automatisch auf „Alle Jahre"
 - Abrechnung: Untertitel meldete „nichts wartet auf dich", obwohl eingereichte Monate noch auf die Erstattung warten — zeigt jetzt „{n} Monate warten auf die Erstattung"

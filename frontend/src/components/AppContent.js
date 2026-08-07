@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { Users, Home, Car, Receipt, Settings } from 'lucide-react';
+import { Users, Home, Car, Receipt, Settings, Sun, Moon, Bell, Info, HelpCircle, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useTheme } from '../ThemeContext';
 import EinstellungenView from './einstellungen/EinstellungenView';
 import FahrtenListe from './FahrtenListe';
 import InfoModal from './InfoModal';
@@ -36,6 +38,7 @@ const NAV_ITEMS = [
 
 function AppContent() {
   const { isLoggedIn, logout, user, monthlyData } = useContext(AppContext);
+  const { isDark, toggleDarkMode } = useTheme();
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -147,18 +150,61 @@ function AppContent() {
           )}
         </nav>
         <div className="sidebar-footer">
-          <button
-            type="button"
-            className="sidebar-user"
-            onClick={() => handleNavClick('einstellungen')}
-            title="Einstellungen öffnen"
-          >
-            <span className="sidebar-avatar" aria-hidden="true">{initials}</span>
-            <span className="min-w-0">
-              <span className="sidebar-username">{user?.username || 'Unbekannt'}</span>
-              <span className="sidebar-role">{roleLabel}</span>
-            </span>
-          </button>
+          <div className="sidebar-tools">
+            <button
+              type="button"
+              className="sidebar-tool"
+              onClick={toggleDarkMode}
+              title={isDark ? 'Helles Design' : 'Dunkles Design'}
+              aria-label={isDark ? 'Zum hellen Design wechseln' : 'Zum dunklen Design wechseln'}
+            >
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+            <button
+              type="button"
+              className="sidebar-tool"
+              onClick={() => setShowNewFeaturesModal(true)}
+              title="Neue Funktionen"
+              aria-label="Neue Funktionen"
+            >
+              <Bell size={17} />
+            </button>
+            <button
+              type="button"
+              className="sidebar-tool"
+              onClick={() => setShowInfoModal(true)}
+              title="Info"
+              aria-label="Info"
+            >
+              <Info size={17} />
+            </button>
+            <Link to="/help" className="sidebar-tool" title="Hilfe" aria-label="Hilfe">
+              <HelpCircle size={17} />
+            </Link>
+          </div>
+          <div className="sidebar-user-row">
+            <button
+              type="button"
+              className="sidebar-user"
+              onClick={() => handleNavClick('einstellungen')}
+              title="Einstellungen öffnen"
+            >
+              <span className="sidebar-avatar" aria-hidden="true">{initials}</span>
+              <span className="min-w-0">
+                <span className="sidebar-username">{user?.username || 'Unbekannt'}</span>
+                <span className="sidebar-role">{roleLabel}</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="sidebar-tool"
+              onClick={logout}
+              title="Abmelden"
+              aria-label="Abmelden"
+            >
+              <LogOut size={17} />
+            </button>
+          </div>
         </div>
       </aside>
 
