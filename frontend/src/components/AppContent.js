@@ -42,23 +42,16 @@ function AppContent() {
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [settingsSubTab, setSettingsSubTab] = useState(null);
-  const [fahrtenFilter, setFahrtenFilter] = useState(null);
 
-  // Extended navigation: supports "einstellungen:favoriten" and "fahrten:offene:von:bis" deeplinks
+  // Extended navigation: supports "einstellungen:favoriten" deeplinks
   const handleNavigate = (target) => {
-    if (target && target.startsWith('fahrten:offene:')) {
-      const parts = target.split(':');
-      setActiveTab('fahrten');
-      setFahrtenFilter({ von: parts[2], bis: parts[3] });
-    } else if (target && target.includes(':')) {
+    if (target && target.includes(':')) {
       const [tab, subTab] = target.split(':');
       setActiveTab(tab);
       setSettingsSubTab(subTab);
-      setFahrtenFilter(null);
     } else {
       setActiveTab(target);
       setSettingsSubTab(null);
-      setFahrtenFilter(null);
     }
   };
 
@@ -108,7 +101,6 @@ function AppContent() {
   const handleNavClick = (id) => {
     setActiveTab(id);
     setSettingsSubTab(null);
-    setFahrtenFilter(null);
   };
 
   // Sekundäraktionen (ehemals Header): Darstellung, Neuigkeiten, Info,
@@ -229,7 +221,7 @@ function AppContent() {
         <main className="app-content">
           <div className="app-content-inner">
             {activeTab === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
-            {activeTab === 'fahrten' && <FahrtenListe initialFilter={fahrtenFilter} onFilterApplied={() => setFahrtenFilter(null)} />}
+            {activeTab === 'fahrten' && <FahrtenListe />}
             {activeTab === 'abrechnungen' && <MonthlyOverview />}
             {activeTab === 'einstellungen' && (
               <>

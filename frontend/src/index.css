@@ -609,26 +609,6 @@ code {
     transition: background-color 150ms ease, border-color 150ms ease;
   }
 
-  /* Farbvarianten transitional — Screen-Phasen ersetzen sie durch das
-     Statussystem (ok/accent/brand) */
-  .kpi-card-emerald {
-    background-color: var(--ok-soft);
-    border-color: var(--ok-line);
-  }
-
-  .kpi-card-blue {
-    background-color: var(--brand-soft);
-  }
-
-  .kpi-card-purple {
-    background-color: var(--accent-soft);
-    border-color: var(--accent-line);
-  }
-
-  .kpi-card-primary {
-    background-color: var(--brand-soft);
-  }
-
   /* ---------- Abschnittsköpfe ---------- */
   .section-header {
     @apply flex items-center gap-2 mb-3;

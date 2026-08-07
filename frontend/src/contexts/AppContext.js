@@ -18,7 +18,6 @@ function AppProvider({ children }) {
   const [monthlyData, setMonthlyData] = useState([]);
   const [distanzen, setDistanzen] = useState([]);
   const [fahrten, setFahrten] = useState([]);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [selectedVonMonth, setSelectedVonMonth] = useState(''); // '' = Einzelmonat-Modus
   const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
@@ -486,8 +485,6 @@ function AppProvider({ children }) {
       fetchMonthlyData,
       summary,
       setSummary,
-      setIsProfileModalOpen,
-      isProfileModalOpen,
       updateAbrechnungsStatus,
       // Kein Bestätigungs-Modal mehr aktiv — konstante Rückgabe für
       // Bestandskonsumenten (Modal.js)
