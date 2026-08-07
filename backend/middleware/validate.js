@@ -6,10 +6,13 @@ const validate = (schema) => (req, res, next) => {
     next();
   } catch (error) {
     if (error instanceof ZodError) {
+      // Zod 4 liefert die Fehlerliste als `issues`; `errors` existiert dort
+      // nicht mehr — ohne Fallback stürzt dieser Handler selbst ab (500).
+      const issues = error.issues || error.errors || [];
       return res.status(400).json({
         message: 'Validierungsfehler',
-        errors: error.errors.map((err) => ({
-          field: err.path.join('.'),
+        errors: issues.map((err) => ({
+          field: Array.isArray(err.path) ? err.path.join('.') : String(err.path ?? ''),
           message: err.message,
         })),
       });

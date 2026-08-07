@@ -95,6 +95,24 @@ function StatusUebersicht() {
                   const statusData = traegerStatus[monthKey];
                   const [jahr, monat] = monthKey.split('-');
                   const status = statusFromAbrechnung(statusData);
+                  // Kein Vorgang in diesem Monat → neutraler Strich statt
+                  // „Erfasst" (wo nichts ist, kann nichts offen sein)
+                  const betragImMonat = Number(
+                    summary?.erstattungenProMonat?.[key]?.[monthKey] || 0
+                  );
+                  if (betragImMonat === 0 && !statusData) {
+                    return (
+                      <span
+                        key={monthKey}
+                        className="fl-monat-chip fl-monat-chip-leer"
+                        title={`${monatKurz(monthKey)} ${jahr}: keine Fahrten`}
+                      >
+                        <span className="fl-monat-chip-label num">{monatKurz(monthKey)}</span>
+                        <span className="fl-chip-strich" aria-hidden="true">—</span>
+                        <span className="sr-only">keine Fahrten</span>
+                      </span>
+                    );
+                  }
                   return (
                     <button
                       key={monthKey}

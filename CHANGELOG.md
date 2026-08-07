@@ -7,6 +7,14 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+- Statusänderungen und alle anderen validierten Endpunkte antworteten bei Eingabefehlern mit einem Absturz (500) statt einer Meldung — Ursache: Zod 4 nennt die Fehlerliste `issues`, nicht `errors`
+- „Als erstattet markieren" ohne vorheriges Einreichen meldet jetzt verständlich „muss erst eingereicht werden" (409) statt eines Serverfehlers; die Backend-Meldung erscheint im Toast
+- Zeitraum-Übersicht: Monate ohne Vorgang zeigen einen neutralen Strich statt „Erfasst" (Backend liefert dazu die Beträge je Träger und Monat)
+
+### Added
+- Mitfahrer-Hinweis auch in der Startseiten-Tabelle (gedeckt), in der Fahrtenliste farblich abgesetzt mit Punkt
+
 ### Changed
 - Favoriten-Tipp fragt jetzt kurz nach: „Hin- und Rückfahrt" oder „Nur Hinfahrt" (statt stillschweigend nur die Hinfahrt anzulegen)
 - Fahrt löschen fragt vor dem Löschen nach (Datum, Ziel, Anlass, km werden gezeigt); der Rückgängig-Toast bleibt als zweites Netz

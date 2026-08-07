@@ -4845,3 +4845,16 @@ code {
 .fl-mf-hinweis-leise {
   background-color: transparent;
 }
+
+/* Monats-Chip ohne Vorgang: neutral, nicht klickbar */
+.fl-monat-chip-leer {
+  border-style: dashed;
+  border-color: var(--line);
+  background: transparent;
+  color: var(--text-3);
+  cursor: default;
+}
+
+.fl-chip-strich {
+  color: var(--text-3);
+}
