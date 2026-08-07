@@ -26,16 +26,24 @@ class Abrechnung {
 
     static async updateStatus(userId, jahr, monat, typ, aktion, datum) {
         try {
-            // Konvertiere typ zu einer Zahl, wenn es nicht 'mitfahrer' ist
-            const typForDb = typ === 'mitfahrer' ? 'mitfahrer' : parseInt(typ);
-            
+            // `abrechnungen.typ` ist VARCHAR und enthält gemischt Träger-IDs
+            // und den Sonderwert 'mitfahrer'. Wird ein numerischer Wert
+            // gebunden, castet MySQL die ganze Spalte auf DOUBLE und bricht
+            // an der Zeile 'mitfahrer' ab (ER_TRUNCATED_WRONG_VALUE).
+            // Daher IMMER als String vergleichen/schreiben.
+            const istMitfahrer = String(typ) === 'mitfahrer';
+            const typForDb = istMitfahrer ? 'mitfahrer' : String(parseInt(typ, 10));
+
             // Prüfen ob der Abrechnungsträger existiert - nur für numerische IDs
-            if (typForDb !== 'mitfahrer') {
+            if (!istMitfahrer) {
+                if (!Number.isInteger(parseInt(typ, 10))) {
+                    throw new Error('Ungültiger Abrechnungsträger');
+                }
                 const [traeger] = await db.execute(
                     'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
-                    [typForDb, userId]
+                    [parseInt(typ, 10), userId]
                 );
-                
+
                 if (traeger.length === 0) {
                     throw new Error('Ungültiger Abrechnungsträger');
                 }
