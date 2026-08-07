@@ -830,7 +830,7 @@ function Dashboard({ onNavigate }) {
                     <span className="num">{fahrt.erstattung !== undefined ? formatEuro(fahrt.erstattung) : '—'}</span>
                     {fahrt.mitfahrerErstattung > 0 && (
                       <div className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
-                        +{formatEuro(fahrt.mitfahrerErstattung)} € MF
+                        +{formatEuro(fahrt.mitfahrerErstattung)} € Mitfahrer
                       </div>
                     )}
                   </div>

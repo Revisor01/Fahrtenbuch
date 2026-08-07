@@ -146,7 +146,7 @@ function FahrtKarte({ fahrt, status, traegerName, istOffen, onOeffnen, onEdit, o
             <span className="fl-card-betrag num">{formatBetrag(fahrt.erstattung)} €</span>
             {fahrt.mitfahrerErstattung > 0 && (
               <span className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
-                +{formatBetrag(fahrt.mitfahrerErstattung)} € MF
+                +{formatBetrag(fahrt.mitfahrerErstattung)} € Mitfahrer
               </span>
             )}
           </span>
