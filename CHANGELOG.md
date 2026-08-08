@@ -8,8 +8,12 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Added
+- Hilfeseite (/help) komplett neu: Inhaltsverzeichnis mit Sprungmarken und aufklappbare FAQ zu jedem Bereich der App (Start, Fahrt erfassen, Fahrten, Abrechnung, Statussystem, Mitfahrer:innen, Einstellungen, Verwaltung, Export & Formular, Installation auf dem Homescreen) — im Design des Redesigns 2026, hell wie dunkel
 - „+ Neue Fahrt" in der Fahrtenliste (Desktop) und FAB auf Mobilgeräten — gleicher Erfassungsflow wie auf dem Dashboard
 - Einreichen fragt nach dem Exportformat (Excel / PDF / Beides als ZIP), statt stillschweigend Excel zu laden
+
+### Removed
+- Video-Anleitungen auf der Hilfeseite entfernt (die Aufnahmen zeigten die alte Oberfläche) — neue Videos folgen
 
 ### Fixed
 - Fortschrittsleiste (mobil): „Erstattet" als Endstation zeigt jetzt den Haken statt eines leeren Kreises
