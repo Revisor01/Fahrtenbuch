@@ -1530,24 +1530,233 @@ code {
   color: var(--brand);
 }
 
-/* „Anderes Ziel eingeben" — gestrichelt */
-.erf-ort-row-dashed {
-  border: 1px dashed var(--line-strong);
-  background: transparent;
+/* --- Adressvorschläge (Photon) ------------------------------------------- */
+
+.adr-wrap {
+  position: relative;
 }
 
-.erf-ort-frei-label {
-  font-size: 17px;
+.adr-liste {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+/* Im Sheet läuft die Liste im Fluss mit, statt über den Rand zu ragen */
+.adr-liste-inline {
+  position: static;
+  box-shadow: none;
+  max-height: 200px;
+}
+
+.adr-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.adr-option:hover,
+.adr-option:focus-visible {
+  background: var(--surface-2);
+}
+
+.adr-option > svg {
+  flex-shrink: 0;
   color: var(--text-2);
 }
 
-.erf-ort-row-frei {
-  display: block;
-  cursor: default;
+/* Live-Adressen in der Zielliste — wie eigene Orte, nur mit Pin markiert */
+.erf-ort-row-adresse {
+  border-style: dashed;
 }
 
-.erf-ort-row-frei > div {
+.erf-adresse-icon {
+  flex-shrink: 0;
+  color: var(--text-2);
+}
+
+.erf-ort-row-adresse.is-selected .erf-adresse-icon {
+  color: var(--brand);
+}
+
+.erf-liste-trenner {
+  padding: 6px 2px 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3, var(--text-2));
+}
+
+.erf-liste-hinweis {
+  padding: 10px 2px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+/* „Von"/„Wann"-Block: der Ab-Ort muss immer sichtbar sein */
+.erf-feld {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.erf-feld-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.erf-von-zeile {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.erf-von-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease;
+}
+
+.erf-von-btn:hover {
+  border-color: var(--line-strong);
+}
+
+.erf-von-btn > svg {
+  flex-shrink: 0;
+  color: var(--text-2);
+}
+
+.erf-von-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Standort übernehmen — 48px, damit es mobil sicher treffbar bleibt */
+.erf-standort-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  color: var(--brand);
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.erf-standort-btn:hover:not(:disabled) {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+}
+
+.erf-standort-btn:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.erf-feld-hinweis {
+  font-size: 13px;
+  color: var(--danger, #b3261e);
+}
+
+.erf-start-auswahl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.erf-start-suche {
+  position: relative;
+}
+
+.erf-row-text {
+  min-width: 0;
+}
+
+/* „Ort dauerhaft speichern" */
+.erf-merken {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.erf-merken.is-active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.erf-merken-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--on-brand);
+}
+
+.erf-merken.is-active .erf-merken-box {
+  border-color: var(--brand);
+  background: var(--brand);
 }
 
 /* Primärbutton 54px volle Breite */
@@ -1747,6 +1956,9 @@ code {
   display: flex;
   align-items: center;
   gap: 2px;
+  /* Darf schrumpfen: lange Trägernamen liefen sonst aus dem Sheet heraus */
+  min-width: 0;
+  flex-shrink: 1;
   border: none;
   background: none;
   padding: 8px 0;
@@ -1756,7 +1968,18 @@ code {
   font-weight: 600;
   color: var(--brand);
   cursor: pointer;
+  text-align: right;
+}
+
+/* Name kürzen statt überlaufen, Chevron bleibt immer sichtbar */
+.erf-traeger-btn > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.erf-traeger-btn > svg {
+  flex-shrink: 0;
 }
 
 /* ============================================================
@@ -2094,9 +2317,18 @@ code {
   white-space: nowrap;
 }
 
-.dash-zuletzt-sub {
+/* Route „von → nach" zwischen Anlass und Datum/Träger */
+.dash-zuletzt-route {
   font-size: 13px;
   color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-zuletzt-sub {
+  font-size: 13px;
+  color: var(--text-3, var(--text-2));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2591,7 +2823,7 @@ code {
 
 .dash-d-td-anlass {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
 }
 
@@ -3165,6 +3397,17 @@ code {
   white-space: nowrap;
 }
 
+/* Route „von → nach" unter dem Anlass */
+.fl-card-route {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .fl-card-betrag {
   font-size: 14px;
   color: var(--text-2);
@@ -3296,7 +3539,7 @@ code {
 
 .fl-td-anlass {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;

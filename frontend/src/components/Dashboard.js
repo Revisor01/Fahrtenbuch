@@ -467,11 +467,20 @@ function Dashboard({ onNavigate }) {
     return (user?.username || '?').slice(0, 2).toUpperCase();
   })();
 
+  // Route unter dem Anlass: „von → nach"
+  const routeText = (fahrt) => {
+    const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';
+    const nach = zielName(fahrt);
+    return von ? `${von} → ${nach}` : nach;
+  };
+
+  // Zeile darunter: Datum und Abrechnungsträger
   const zuletztSub = (fahrt) => {
     const d = new Date(fahrt.datum);
     const wt = d.toLocaleDateString('de-DE', { weekday: 'short' });
     const dat = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-    return `${wt} ${dat} ${fahrt.anlass ? `· ${fahrt.anlass}` : ''}`.trim();
+    const traeger = getTraegerName(fahrt.abrechnung);
+    return [`${wt} ${dat}`, traeger].filter(Boolean).join(' · ');
   };
 
   // ---- Wiederverwendete Teilstücke ----------------------------------------
@@ -602,7 +611,8 @@ function Dashboard({ onNavigate }) {
                   className={`dash-zuletzt-row${fahrt._optimistisch ? ' is-neu' : ''}`}
                 >
                   <div className="dash-zuletzt-main">
-                    <div className="dash-zuletzt-ziel">{zielName(fahrt)}</div>
+                    <div className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</div>
+                    <div className="dash-zuletzt-route">{routeText(fahrt)}</div>
                     <div className="dash-zuletzt-sub">{zuletztSub(fahrt)}</div>
                   </div>
                   <div className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</div>
