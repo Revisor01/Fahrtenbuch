@@ -3,9 +3,10 @@ import { Pencil, Trash2, Users } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 import { formatBetrag, rundeKilometer } from './zeitraumUtils';
 
-// Fahrt-Karte mobil (< 768px) nach Design-Spec Screen 3:
-// Kopfzeile Datum Mono 13px + Status Punkt+Wort, Ziel 17px/600 + km Mono,
-// „Anlass · Träger" + Betrag Mono; Mitfahrer als kompakte Zusatzzeile.
+// Fahrt-Karte mobil (< 768px):
+// Kopfzeile Datum Mono 13px + Status Punkt+Wort, dann Anlass 17px/600 + km Mono,
+// darunter die Route „von → nach", darunter Träger + Betrag Mono;
+// Mitfahrer als kompakte Zusatzzeile.
 //
 // Wischen nach links legt Bearbeiten/Löschen frei (Buttons ≥ 44px).
 // Ohne Swipe (A11y/Tastatur): Tipp bzw. Enter/Leertaste auf die Karte
@@ -87,7 +88,9 @@ function FahrtKarte({ fahrt, status, traegerName, istOffen, onOeffnen, onEdit, o
 
   const ziel = fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
   const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';
-  const sub = [fahrt.anlass, traegerName].filter(Boolean).join(' · ');
+  // Anlass führt, darunter die Route, darunter der Träger
+  const titel = fahrt.anlass || ziel;
+  const route = von ? `${von} → ${ziel}` : ziel;
   const mitfahrer = fahrt.mitfahrer || [];
 
   return (
@@ -137,11 +140,14 @@ function FahrtKarte({ fahrt, status, traegerName, istOffen, onOeffnen, onEdit, o
           <StatusBadge status={status} variant="dot" />
         </div>
         <div className="fl-card-zeile">
-          <span className="fl-card-ziel">{ziel}</span>
+          <span className="fl-card-ziel">{titel}</span>
           <span className="fl-card-km num">{rundeKilometer(fahrt.kilometer)} km</span>
         </div>
         <div className="fl-card-zeile">
-          <span className="fl-card-sub">{sub}</span>
+          <span className="fl-card-route">{route}</span>
+        </div>
+        <div className="fl-card-zeile">
+          <span className="fl-card-sub">{traegerName}</span>
           <span className="fl-betrag-mit-mf">
             <span className="fl-card-betrag num">{formatBetrag(fahrt.erstattung)} €</span>
             {fahrt.mitfahrerErstattung > 0 && (

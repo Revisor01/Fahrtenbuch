@@ -3,8 +3,8 @@ import axios from 'axios';
 import { AppContext } from '../../contexts/AppContext';
 import Sheet from '../ui/Sheet';
 import { useToast } from '../ui/Toast';
-import AddressAutocomplete from '../AddressAutocomplete';
-import { Pencil, Search, ChevronRight } from 'lucide-react';
+import { useAdressSuche, adresseZuKoordinaten } from '../useAdressSuche';
+import { Pencil, Search, ChevronRight, MapPin, Crosshair, Check } from 'lucide-react';
 
 // Zweistufiger Erfassungsflow nach Design-Spec (Redesign 2026, Screen 2):
 // Schritt 1 „Wohin?" — Startort/Datum vorbelegt und antippbar, Ortsliste nach
@@ -50,8 +50,6 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   const [startOrtId, setStartOrtId] = useState(prefill?.vonOrtId ? String(prefill.vonOrtId) : null);
   const [datum, setDatum] = useState(prefill?.datum || heute());
   const [zielOrtId, setZielOrtId] = useState(prefill?.nachOrtId ? String(prefill.nachOrtId) : null);
-  const [freiesZielAktiv, setFreiesZielAktiv] = useState(false);
-  const [freiesZiel, setFreiesZiel] = useState('');
   const [suche, setSuche] = useState('');
   const [anlass, setAnlass] = useState(prefill?.anlass || '');
   const [freiAnlassAktiv, setFreiAnlassAktiv] = useState(false);
@@ -69,6 +67,13 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   const [kmEdit, setKmEdit] = useState(false);
   const [editStart, setEditStart] = useState(false);
   const [editDatum, setEditDatum] = useState(false);
+  // Freier Startort (per Standort ermittelt oder aus der Adresssuche gewählt)
+  const [freierStart, setFreierStart] = useState(null);
+  const [startSuche, setStartSuche] = useState('');
+  const [ortenStatus, setOrtenStatus] = useState(null); // 'laedt' | 'fehler' | null
+  // Gewählte Live-Adresse als Ziel + ob sie dauerhaft gespeichert werden soll
+  const [zielAdresse, setZielAdresse] = useState(null);
+  const [zielMerken, setZielMerken] = useState(false);
 
   // Verlauf (alle Fahrten) und Träger inkl. heute gültigem Erstattungssatz —
   // je ein GET beim Öffnen; Context-`fahrten` ist auf den gewählten Monat
@@ -111,11 +116,13 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     return orte.length > 0 ? String(orte[0].id) : null;
   }, [orte, historie]);
 
-  const effStartOrtId = startOrtId ?? defaultStartOrtId;
+  // Freier Startort (Standort/Adresssuche) hat Vorrang vor der Ortsliste
+  const effStartOrtId = freierStart ? null : startOrtId ?? defaultStartOrtId;
   const startOrt = orte.find((o) => String(o.id) === String(effStartOrtId));
   const zielOrt = orte.find((o) => String(o.id) === String(zielOrtId));
 
   const ortName = (ort) => (ort ? ort.name : '');
+  const startLabel = freierStart ? freierStart.text : ortName(startOrt);
 
   // Distanz zwischen zwei gespeicherten Orten (beide Richtungen)
   const findDistanz = (vonId, nachId) => {
@@ -150,6 +157,19 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         (o.adresse && o.adresse.toLowerCase().includes(q))
     );
   }, [sortierteZiele, suche]);
+
+  // Live-Adressen zusätzlich zur eigenen Ortsliste — kein Chip-Klick nötig.
+  // Erst ab 3 Zeichen und nur, wenn die eigenen Orte wenig hergeben.
+  const { vorschlaege: adressTreffer, laedt: adressenLaden, zuruecksetzen: adressenLeeren } =
+    useAdressSuche(suche, { aktiv: !zielAdresse });
+
+  // Adressen ausblenden, die schon als eigener Ort in der Liste stehen
+  const neueAdressen = useMemo(() => {
+    const bekannt = new Set(
+      orte.flatMap((o) => [o.name, o.adresse].filter(Boolean).map((s) => s.toLowerCase()))
+    );
+    return adressTreffer.filter((a) => !bekannt.has(a.text.toLowerCase()));
+  }, [adressTreffer, orte]);
 
   // Anlass-Vorschläge aus dem Verlauf für DIESES Ziel (häufigste zuerst).
   // „Rückfahrt: "-Präfixe aus Altdaten werden für die Vorschläge entfernt.
@@ -219,21 +239,67 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   const satz = traegerMitSatz?.aktueller_betrag ? parseFloat(traegerMitSatz.aktueller_betrag) : null;
   const effSatz = satz ?? STANDARD_SATZ;
 
-  // Kilometer: manuelle Eingabe > gepflegte Distanz
-  const distanzKm = freiesZielAktiv ? null : findDistanz(effStartOrtId, zielOrtId);
+  // Kilometer: manuelle Eingabe > gepflegte Distanz (nur zwischen echten Orten)
+  const distanzKm =
+    zielAdresse || freierStart ? null : findDistanz(effStartOrtId, zielOrtId);
   const km = kmManuell !== '' ? parseFloat(kmManuell) : distanzKm;
   const kmGueltig = km !== null && !Number.isNaN(km) && km > 0;
   const betrag = kmGueltig ? km * effSatz : null;
 
-  const zielLabel = freiesZielAktiv ? freiesZiel : ortName(zielOrt);
+  const zielLabel = zielAdresse ? zielAdresse.text : ortName(zielOrt);
   const fahrtenAnzahl = rueckfahrt ? 2 : 1;
   const gesamtKm = kmGueltig ? km * fahrtenAnzahl : null;
 
-  const kannWeiter = freiesZielAktiv ? freiesZiel.trim().length > 0 : !!zielOrtId;
+  const kannWeiter = !!zielAdresse || !!zielOrtId;
   const kannSpeichern =
-    kannWeiter && kmGueltig && !!anlass.trim() && !!effTraegerId && !!effStartOrtId && !!datum;
+    kannWeiter &&
+    kmGueltig &&
+    !!anlass.trim() &&
+    !!effTraegerId &&
+    (!!effStartOrtId || !!freierStart) &&
+    !!datum;
 
   // ---- Aktionen ----------------------------------------------------------
+
+  // Standort -> exakte Adresse (Reverse-Geocoding). Ein gespeicherter Ort wird
+  // nur übernommen, wenn er praktisch am selben Punkt liegt (~60 m, also
+  // Nachbarhausnummer); sonst zählt die tatsächlich ermittelte Adresse.
+  const handleStandort = () => {
+    if (!navigator.geolocation) {
+      setOrtenStatus('fehler');
+      return;
+    }
+    setOrtenStatus('laedt');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const treffer = await adresseZuKoordinaten(latitude, longitude);
+          if (!treffer) {
+            setOrtenStatus('fehler');
+            return;
+          }
+          const naher = orte.find(
+            (o) => o.adresse && o.adresse.toLowerCase() === treffer.text.toLowerCase()
+          );
+          if (naher) {
+            setStartOrtId(String(naher.id));
+            setFreierStart(null);
+          } else {
+            setFreierStart(treffer);
+            setStartOrtId(null);
+          }
+          setOrtenStatus(null);
+          setEditStart(false);
+        } catch (err) {
+          console.error('Reverse-Geocoding fehlgeschlagen:', err);
+          setOrtenStatus('fehler');
+        }
+      },
+      () => setOrtenStatus('fehler'),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
 
   const handleWeiter = () => {
     setStep(2);
@@ -241,17 +307,35 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     if (!kmGueltig) setKmEdit(true);
   };
 
-  const handleSpeichern = () => {
+  const handleSpeichern = async () => {
     const anlassClean = anlass.trim();
+
+    // „Ort dauerhaft speichern": Adresse vor der Fahrt als Ort anlegen, damit
+    // sie beim nächsten Mal in der eigenen Liste steht (inkl. Distanz).
+    let gemerkteZielId = null;
+    if (zielAdresse && zielMerken) {
+      try {
+        const res = await axios.post('/api/orte', {
+          name: zielAdresse.text.split(',')[0].trim(),
+          adresse: zielAdresse.text,
+        });
+        gemerkteZielId = res.data?.id ?? null;
+      } catch (err) {
+        // Nicht blockieren: die Fahrt wird trotzdem mit freiem Ziel gespeichert
+        console.error('Ort konnte nicht gespeichert werden:', err);
+      }
+    }
+
+    const zielId = gemerkteZielId ?? (zielAdresse ? null : parseInt(zielOrtId, 10));
     const hinfahrt = {
       datum,
       anlass: anlassClean,
       kilometer: km,
       abrechnung: parseInt(effTraegerId, 10),
-      vonOrtId: parseInt(effStartOrtId, 10),
-      nachOrtId: freiesZielAktiv ? null : parseInt(zielOrtId, 10),
-      einmaligerVonOrt: null,
-      einmaligerNachOrt: freiesZielAktiv ? freiesZiel.trim() : null,
+      vonOrtId: effStartOrtId ? parseInt(effStartOrtId, 10) : null,
+      nachOrtId: zielId,
+      einmaligerVonOrt: freierStart ? freierStart.text : null,
+      einmaligerNachOrt: zielId ? null : zielAdresse?.text ?? null,
       mitfahrer: [],
     };
     const trips = [hinfahrt];
@@ -381,34 +465,80 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   if (step === 1) {
     return (
       <Sheet isOpen={isOpen} onClose={onClose} title="Wohin?">
-        <div className="erf-subline">
-          <span>Ab</span>
-          <button type="button" className="erf-subline-btn" onClick={() => setEditStart((v) => !v)}>
-            {ortName(startOrt) || 'Startort wählen'}
-          </button>
-          <span>·</span>
-          <button type="button" className="erf-subline-btn" onClick={() => setEditDatum((v) => !v)}>
-            {formatDatumZeile(datum)}
-          </button>
+        {/* Ab-Ort dauerhaft sichtbar: es muss immer klar sein, von wo es losgeht */}
+        <div className="erf-feld">
+          <span className="erf-feld-label">Von</span>
+          <div className="erf-von-zeile">
+            <button
+              type="button"
+              className="erf-von-btn"
+              onClick={() => setEditStart((v) => !v)}
+              aria-expanded={editStart}
+            >
+              <MapPin size={16} aria-hidden="true" />
+              <span className="erf-von-name">{startLabel || 'Startort wählen'}</span>
+            </button>
+            <button
+              type="button"
+              className="erf-standort-btn"
+              onClick={handleStandort}
+              disabled={ortenStatus === 'laedt'}
+              title="Aktuellen Standort als Startort übernehmen"
+              aria-label="Aktuellen Standort als Startort übernehmen"
+            >
+              <Crosshair size={17} aria-hidden="true" />
+            </button>
+          </div>
+          {ortenStatus === 'fehler' && (
+            <span className="erf-feld-hinweis">Standort nicht verfügbar — bitte Ort wählen.</span>
+          )}
         </div>
 
         {editStart && (
-          <select
-            className="form-select mb-3"
-            value={effStartOrtId || ''}
-            onChange={(e) => {
-              setStartOrtId(e.target.value);
-              setEditStart(false);
-            }}
-            aria-label="Startort ändern"
-          >
-            {orte.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.name}
+          <div className="erf-start-auswahl">
+            <select
+              className="form-select"
+              value={effStartOrtId || ''}
+              onChange={(e) => {
+                setStartOrtId(e.target.value);
+                setFreierStart(null);
+                setEditStart(false);
+              }}
+              aria-label="Startort ändern"
+            >
+              <option value="" disabled>
+                Ort wählen…
               </option>
-            ))}
-          </select>
+              {orte.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+            <StartAdressSuche
+              wert={startSuche}
+              setWert={setStartSuche}
+              onWahl={(v) => {
+                setFreierStart(v);
+                setStartOrtId(null);
+                setStartSuche('');
+                setEditStart(false);
+              }}
+            />
+          </div>
         )}
+
+        <div className="erf-feld">
+          <span className="erf-feld-label">Wann</span>
+          <button
+            type="button"
+            className="erf-von-btn"
+            onClick={() => setEditDatum((v) => !v)}
+            aria-expanded={editDatum}
+          >
+            {formatDatumZeile(datum)}
+          </button>
+        </div>
 
         {editDatum && (
           <input
@@ -423,20 +553,28 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           />
         )}
 
+        {/* Eine Suche für beides: eigene Orte und Live-Adressen */}
+        <span className="erf-feld-label">Nach</span>
         <div className="erf-search">
           <Search size={17} aria-hidden="true" />
           <input
             type="text"
-            value={suche}
-            onChange={(e) => setSuche(e.target.value)}
-            placeholder="Ort suchen"
-            aria-label="Ort suchen"
+            value={zielAdresse ? zielAdresse.text : suche}
+            onChange={(e) => {
+              setSuche(e.target.value);
+              if (zielAdresse) {
+                setZielAdresse(null);
+                setZielMerken(false);
+              }
+            }}
+            placeholder="Ort oder Adresse suchen"
+            aria-label="Ziel suchen"
           />
         </div>
 
         <div className="erf-ort-liste">
           {gefilterteZiele.map((o) => {
-            const gewaehlt = !freiesZielAktiv && String(o.id) === String(zielOrtId);
+            const gewaehlt = !zielAdresse && String(o.id) === String(zielOrtId);
             const dist = findDistanz(effStartOrtId, o.id);
             return (
               <button
@@ -445,7 +583,8 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                 className={`erf-ort-row${gewaehlt ? ' is-selected' : ''}`}
                 onClick={() => {
                   setZielOrtId(String(o.id));
-                  setFreiesZielAktiv(false);
+                  setZielAdresse(null);
+                  setZielMerken(false);
                 }}
               >
                 <span className="erf-ort-main">
@@ -461,27 +600,60 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
             );
           })}
 
-          {freiesZielAktiv ? (
-            <div className="erf-ort-row is-selected erf-ort-row-frei">
-              <AddressAutocomplete
-                value={freiesZiel}
-                onChange={setFreiesZiel}
-                placeholder="Adresse oder Zielname eingeben"
-              />
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="erf-ort-row erf-ort-row-dashed"
-              onClick={() => {
-                setFreiesZielAktiv(true);
-                setZielOrtId(null);
-              }}
-            >
-              <span className="erf-ort-frei-label">Anderes Ziel eingeben</span>
-            </button>
+          {/* Live-Adressen direkt in derselben Liste — kein Extra-Klick nötig */}
+          {neueAdressen.length > 0 && (
+            <>
+              <span className="erf-liste-trenner">Adressen aus der Karte</span>
+              {neueAdressen.map((a) => {
+                const gewaehlt = zielAdresse?.id === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    className={`erf-ort-row erf-ort-row-adresse${gewaehlt ? ' is-selected' : ''}`}
+                    onClick={() => {
+                      setZielAdresse(a);
+                      setZielOrtId(null);
+                      adressenLeeren();
+                    }}
+                  >
+                    <MapPin size={16} aria-hidden="true" className="erf-adresse-icon" />
+                    <span className="erf-ort-main">
+                      <span className="erf-ort-name">{a.text}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </>
           )}
+
+          {adressenLaden && neueAdressen.length === 0 && (
+            <span className="erf-liste-hinweis">Adressen werden gesucht…</span>
+          )}
+
+          {!adressenLaden &&
+            suche.trim().length >= 3 &&
+            gefilterteZiele.length === 0 &&
+            neueAdressen.length === 0 &&
+            !zielAdresse && (
+              <span className="erf-liste-hinweis">Nichts gefunden — Schreibweise prüfen.</span>
+            )}
         </div>
+
+        {/* Nur bei frisch gewählter Adresse: dauerhaft in die eigene Liste */}
+        {zielAdresse && (
+          <button
+            type="button"
+            className={`erf-merken${zielMerken ? ' is-active' : ''}`}
+            onClick={() => setZielMerken((v) => !v)}
+            aria-pressed={zielMerken}
+          >
+            <span className="erf-merken-box" aria-hidden="true">
+              {zielMerken && <Check size={13} strokeWidth={3} />}
+            </span>
+            <span>Ort dauerhaft speichern</span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -604,7 +776,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       </div>
 
       <div className="erf-row erf-row-letzte">
-        <div>
+        <div className="erf-row-text">
           <div className="erf-row-titel">Abrechnungsträger</div>
           <div className="erf-row-hinweis">
             {defaultTraegerId && traegerWahl === null ? 'Zuletzt für dieses Ziel' : 'Ausgewählt'}
@@ -614,8 +786,9 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           type="button"
           className="erf-traeger-btn"
           onClick={() => setTraegerAuswahlOffen(true)}
+          title={effTraeger ? effTraeger.name : 'Wählen'}
         >
-          {effTraeger ? effTraeger.name : 'Wählen'}
+          <span>{effTraeger ? effTraeger.name : 'Wählen'}</span>
           <ChevronRight size={16} aria-hidden="true" />
         </button>
       </div>
@@ -630,6 +803,41 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         {gesamtKm !== null && <span className="num"> · {formatKm(gesamtKm)} km</span>}
       </button>
     </Sheet>
+  );
+}
+
+// Adresssuche für den Startort — nur nötig, wenn der Ab-Ort nicht in der
+// eigenen Ortsliste steht (z. B. unterwegs gestartet).
+function StartAdressSuche({ wert, setWert, onWahl }) {
+  const { vorschlaege, laedt } = useAdressSuche(wert);
+  return (
+    <div className="erf-start-suche">
+      <div className="erf-search">
+        <Search size={17} aria-hidden="true" />
+        <input
+          type="text"
+          value={wert}
+          onChange={(e) => setWert(e.target.value)}
+          placeholder="oder Adresse suchen"
+          aria-label="Startadresse suchen"
+        />
+      </div>
+      {vorschlaege.length > 0 && (
+        <ul className="adr-liste adr-liste-inline" role="listbox">
+          {vorschlaege.map((v) => (
+            <li key={v.id} role="option" aria-selected="false">
+              <button type="button" className="adr-option" onClick={() => onWahl(v)}>
+                <MapPin size={15} aria-hidden="true" />
+                <span>{v.text}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {laedt && vorschlaege.length === 0 && (
+        <span className="erf-liste-hinweis">Adressen werden gesucht…</span>
+      )}
+    </div>
   );
 }
 
