@@ -22,5 +22,8 @@ RUN npm run build
 FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./docker-entrypoint.sh /docker-entrypoint-fahrtenbuch.sh
+RUN chmod +x /docker-entrypoint-fahrtenbuch.sh
 EXPOSE 80
+ENTRYPOINT ["/docker-entrypoint-fahrtenbuch.sh"]
 CMD ["nginx", "-g", "daemon off;"]
