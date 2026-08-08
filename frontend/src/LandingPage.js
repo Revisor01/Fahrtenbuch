@@ -1,571 +1,906 @@
-// LandingPage.js
-import React, { useState, useContext, useEffect, useRef } from 'react';
+// LandingPage.js — Hilfeseite unter /help (auch ohne Login erreichbar).
+//
+// Redesign 2026: eigenes Layout auf den Design-Tokens aus tokens.css
+// (--brand, --surface, --text-2, --r-card …) und den globalen Klassen
+// (.card-container, .btn-*, .form-label). Kein AppContext-Zwang — die
+// Inhalte stehen auch anonymen Besucher:innen zur Verfügung.
+//
+// Die FAQ beschreibt ausschließlich, was die App tatsächlich tut; die
+// Abschnitte folgen der Navigation (Start · Fahrt erfassen · Fahrten ·
+// Abrechnung · Einstellungen · Verwaltung) plus Querschnittsthemen.
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './index.css';
-import { ChevronDown, ChevronUp, Play, Book, ArrowLeft, Smartphone, Download, Car } from 'lucide-react';
-import { useTheme } from './ThemeContext';
+import { ChevronDown, ArrowLeft, Car, Mail } from 'lucide-react';
 import { AppContext } from './contexts/AppContext';
 import { appConfigValue } from './utils/appConfig';
 
-// AccordionItem Komponente
-const AccordionItem = ({ title, children, isOpen, toggleOpen }) => {
+// ---------------------------------------------------------------------------
+// Bausteine
+// ---------------------------------------------------------------------------
+
+function AccordionItem({ id, title, isOpen, onToggle, children }) {
   return (
-    <div className="card-container-flush mb-2 border border-primary-100 dark:border-primary-700">
-    <button
-    className="w-full text-left p-4 bg-white dark:bg-gray-800 hover:bg-primary-25 dark:hover:bg-primary-900 transition-colors duration-200 flex justify-between items-center rounded-lg"
-    onClick={toggleOpen}
-    >
-    <span className="text-value font-medium">{title}</span>
-    {isOpen ? <ChevronUp className="text-label" size={20} /> : <ChevronDown className="text-label" size={20} />}
-    </button>
-    {isOpen && (
-      <div className="p-4 border-t border-primary-100 dark:border-primary-800">
-      <div className="text-label text-sm space-y-2">
-      {children}
-      </div>
-      </div>
-    )}
+    <div className={`help-item${isOpen ? ' is-open' : ''}`}>
+      <button
+        type="button"
+        className="help-item-btn"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={`${id}-panel`}
+        id={`${id}-btn`}
+      >
+        <span className="help-item-titel">{title}</span>
+        <ChevronDown className="help-item-chevron" size={18} aria-hidden="true" />
+      </button>
+      {isOpen && (
+        <div className="help-item-panel" id={`${id}-panel`} role="region" aria-labelledby={`${id}-btn`}>
+          {children}
+        </div>
+      )}
     </div>
   );
-};
+}
 
-const VideoCard = ({ title, description, thumbnail, videoUrl, duration }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [iframeHeight, setIframeHeight] = useState(null);  // Höhe wird dynamisch berechnet
-    const cardRef = useRef(null);
+// Ein Themenblock mit Sprungmarke
+function Abschnitt({ id, titel, satz, children }) {
+  return (
+    <section className="help-abschnitt" id={id}>
+      <h2 className="help-abschnitt-titel">{titel}</h2>
+      {satz && <p className="help-abschnitt-satz">{satz}</p>}
+      <div className="help-liste">{children}</div>
+    </section>
+  );
+}
 
-    useEffect(() => {
-        const calculateIframeHeight = () => {
-            if (!cardRef.current) return;  // Stellen Sie sicher, dass die Ref gesetzt ist
+const Tipp = ({ children }) => <div className="help-tipp">{children}</div>;
 
-            const cardWidth = cardRef.current.offsetWidth;
-            const aspectRatio = 9 / 16;
-            setIframeHeight(cardWidth * aspectRatio);
-        };
+// ---------------------------------------------------------------------------
+// Inhalte
+// ---------------------------------------------------------------------------
 
-        calculateIframeHeight();
-        window.addEventListener('resize', calculateIframeHeight);
-
-        return () => window.removeEventListener('resize', calculateIframeHeight);
-    }, []);
-
-    return (
-        <div className="card-container flex flex-col h-full rounded-lg" ref={cardRef}>
-            <div className="relative">
-                {!isPlaying ? (
-                    <>
-                        <img
-                            src={thumbnail}
-                            alt={title}
-                            className="w-full object-cover rounded-t-lg"
-                            style={{ height: iframeHeight ? `${iframeHeight}px` : 'auto' }} // Höhe basierend auf Berechnung
-                        />
-                        <button
-                            onClick={() => setIsPlaying(true)}
-                            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 hover:bg-opacity-40 transition-all duration-200"
-                        >
-                            <div className="bg-primary-500 text-white rounded-full p-3">
-                                <Play size={24} />
-                            </div>
-                        </button>
-                        <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                            {duration}
-                        </div>
-                    </>
-                ) : (
-                    <div className="aspect-video">
-                        <iframe
-                            src={videoUrl}
-                            title={title}
-                            className="w-full"
-                            style={{ height: iframeHeight ? `${iframeHeight}px` : 'auto' }} // Höhe basierend auf Berechnung
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        ></iframe>
-                    </div>
-                )}
-            </div>
-            <div className="p-4 flex-1 flex flex-col">
-                <h3 className="text-lg font-medium text-value mb-2">{title}</h3>
-                <p className="text-sm text-label flex-1">{description}</p>
-            </div>
-        </div>
-    );
-};
+const ABSCHNITTE = [
+  { id: 'start', titel: 'Erste Schritte' },
+  { id: 'dashboard', titel: 'Start (Dashboard)' },
+  { id: 'erfassen', titel: 'Fahrt erfassen' },
+  { id: 'fahrten', titel: 'Fahrten' },
+  { id: 'abrechnung', titel: 'Abrechnung' },
+  { id: 'status', titel: 'Statussystem' },
+  { id: 'mitfahrer', titel: 'Mitfahrer:innen' },
+  { id: 'einstellungen', titel: 'Einstellungen' },
+  { id: 'verwaltung', titel: 'Verwaltung (Admin)' },
+  { id: 'export', titel: 'Export & Formular' },
+  { id: 'installation', titel: 'App installieren' },
+];
 
 export default function LandingPage() {
-    const { isLoggedIn } = useContext(AppContext) || { isLoggedIn: false };
-    const [openItem, setOpenItem] = useState(null);
-    const appTitle = appConfigValue('appTitle', process.env.REACT_APP_TITLE, "Fahrtenbuch Kirchenkreis Dithmarschen");
+  const { isLoggedIn } = useContext(AppContext) || { isLoggedIn: false };
+  const [offen, setOffen] = useState(null);
+  const appTitle = appConfigValue(
+    'appTitle',
+    process.env.REACT_APP_TITLE,
+    'Fahrtenbuch Kirchenkreis Dithmarschen'
+  );
 
-    const toggleItem = (index) => {
-        setOpenItem(openItem === index ? null : index);
-    };
+  const toggle = (key) => setOffen((prev) => (prev === key ? null : key));
+  const item = (key) => ({ id: key, isOpen: offen === key, onToggle: () => toggle(key) });
 
-    const videos = [
-        {
-            id: 1,
-            title: "Registrieren",
-            description: "So legen Sie ihren Benutzeraccount an.",
-            thumbnail: "https://media.godsapp.de/media/original/thumbnails/user/Simon/bc49d8ced7b947fba2d70f7bf0e320e7_AZxwP9x.1Benutzererstellen.mp4.jpg",
-            videoUrl: "https://media.godsapp.de/embed?m=irWJ4ut4p",
-            duration: "1:15"
-        },
-        {
-            id: 2,
-            title: "Grundfunktionen",
-            description: "Profil einrichten, Orte und Distanzen speichern, Abrechnungsträger verwalten.",
-            thumbnail: "https://media.godsapp.de/media/original/thumbnails/user/Simon/8e530b6fc0b34536be3e0d511bf554ca_0wOWmP6.2Grundfunktionen.mp4.jpg",
-            videoUrl: "https://media.godsapp.de/embed?m=vthFrHWjI",
-            duration: "3:10"
-        },
-        {
-            id: 3,
-            title: "Fahrten & Abrechnung",
-            description: "Fahrten eintragen, exportieren und den Abrechnungsstatus verwalten.",
-            thumbnail: "https://media.godsapp.de/media/original/thumbnails/user/Simon/f9d62ff48dfb44efbbf81013250d83a0_van9Mq8.3Fahrteneintragenundexportieren.mp4.jpg",
-            videoUrl: "https://media.godsapp.de/embed?m=hZJphkTvu",
-            duration: "4:10"
-        },
-        {
-            id: 4,
-            title: "iOS Kurzbefehl einrichten",
-            description: "Erfahren Sie, wie Sie Fahrten per Kurzbefehle auf dem iPhone erfassen können.",
-            thumbnail: "https://media.godsapp.de/media/original/thumbnails/user/Simon/5d881e9156494dbf9f1e581627cb645b_kiyvVqw.4KurzbefehliOS.mp4.jpg",
-            videoUrl: "https://media.godsapp.de/embed?m=mhHRVFXDD",
-            duration: "4:40"
-        }
-    ];
-
-    return (
-        <div className="min-h-screen bg-gradient-to-b from-white via-primary-25 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-primary-100 dark:border-primary-800 shadow-sm">
-      <div className="container mx-auto p-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-      <h1 className="text-lg font-medium text-value">
-      {appTitle}
-      </h1>
-      <Link to="/" className="w-full sm:w-auto btn-secondary flex items-center justify-center gap-2">
-      <ArrowLeft size={16} />
-      <span>{isLoggedIn ? "Zurück zum Fahrtenbuch" : "Zum Login"}</span>
-      </Link>
-      </div>
-      </div>
+  return (
+    <div className="help-root">
+      {/* ---------------- Kopf ---------------- */}
+      <header className="help-header">
+        <div className="help-wrap help-header-inner">
+          <span className="help-header-titel">{appTitle}</span>
+          <Link to="/" className="btn-secondary help-zurueck">
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>{isLoggedIn ? 'Zurück zur App' : 'Zum Login'}</span>
+          </Link>
+        </div>
       </header>
 
-            {/* Main Content */}
-            <main className="container mx-auto p-4 py-8 space-y-12">
-      {/* Intro Section */}
-      <section className="text-center max-w-3xl mx-auto">
-      <div className="flex justify-center mb-6">
-      <div className="w-20 h-20 bg-primary-500 dark:bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
-      <Car size={40} className="text-white" />
-      </div>
-      </div>
-      <h2 className="text-3xl font-bold text-primary-900 dark:text-primary-100 mb-4">
-      Willkommen im Fahrtenbuch für kirchliche Mitarbeiter:innen
-      </h2>
-      <p className="text-label mb-6">
-      Hier finden Sie Anleitungen und Hilfevideos, die Ihnen bei der Nutzung des Fahrtenbuchs helfen.
-      Lernen Sie, wie Sie Ihre Fahrten effizient erfassen und abrechnen können.
-      </p>
-      
-      {/* Button-Gruppe für Desktop: 3 Buttons nebeneinander */}
-      <div className="hidden sm:flex justify-center gap-4">
-      <a href="#videos" className="btn-primary flex items-center gap-2">
-      <Play size={16} />
-      Videos ansehen
-      </a>
-      <a href="#faq" className="btn-secondary flex items-center gap-2">
-      <Book size={16} />
-      FAQs lesen
-      </a>
-      <a 
-      href="https://www.icloud.com/shortcuts/a41b3e30b8da4dff8c2f28e7c1a84361" 
-      className="btn-primary flex items-center gap-2"
-      target="_blank"
-      rel="noopener noreferrer"
-      >
-      <Download size={16} />
-      Kurzbefehl installieren
-      </a>
-      </div>
-      
-      {/* Button-Gruppe für Mobile: gestapelte Buttons mit voller Breite */}
-      <div className="flex sm:hidden flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
-      <a href="#videos" className="btn-primary flex items-center justify-center gap-2">
-      <Play size={16} />
-      Videos
-      </a>
-      <a href="#faq" className="btn-secondary flex items-center justify-center gap-2">
-      <Book size={16} />
-      FAQs
-      </a>
-      </div>
-      <a 
-      href="https://www.icloud.com/shortcuts/a41b3e30b8da4dff8c2f28e7c1a84361" 
-      className="btn-primary flex items-center justify-center gap-2 w-full"
-      target="_blank"
-      rel="noopener noreferrer"
-      >
-      <Download size={16} />
-      iOS Kurzbefehl installieren
-      </a>
-      </div>
-      </section>
-                {/* Video Tutorials */}
-                <section id="videos">
-                    <div className="card-container mb-6">
-                    <h2 className="text-xl font-bold text-value mb-2">Video-Anleitungen</h2>
-                    <p className="text-sm text-label">Schauen Sie sich unsere Anleitungsvideos an, um schnell loszulegen.</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {videos.map(video => (
-                            <VideoCard key={video.id} {...video} />
-                        ))}
-                    </div>
-                    <div className="text-center mt-6">
-                        <p className="text-sm text-label mb-2">Alle Videos in einer Playlist ansehen:</p>
-      
-      <a
-      href="https://media.godsapp.de/playlists/lIkPjeALd"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="btn-primary w-full sm:w-auto inline-flex justify-center items-center"
-      >
-      Zur kompletten Playlist
-      </a>
-                    </div>
-                </section>
+      <main className="help-wrap help-main">
+        {/* ---------------- Einleitung ---------------- */}
+        <section className="help-intro">
+          <span className="help-intro-icon" aria-hidden="true">
+            <Car size={26} />
+          </span>
+          <h1 className="help-intro-titel">Hilfe &amp; Anleitung</h1>
+          <p className="help-intro-satz">
+            Hier steht, wie du Dienstfahrten erfasst, den Überblick behältst und am
+            Monatsende abrechnest — Bereich für Bereich, so wie die App aufgebaut ist.
+            Tippe eine Frage an, um die Antwort aufzuklappen.
+          </p>
+        </section>
 
-                {/* Hilfe & Informationen (früher FAQ) */}
-                <section id="faq" className="card-container">
-                    <h2 className="text-xl font-bold text-value mb-6">Hilfe & Informationen</h2>
-                    <div className="space-y-6">
+        {/* ---------------- Inhaltsverzeichnis ---------------- */}
+        <nav className="help-toc" aria-label="Inhalt">
+          <div className="form-label help-toc-label">Inhalt</div>
+          <ul className="help-toc-liste">
+            {ABSCHNITTE.map(({ id, titel }) => (
+              <li key={id}>
+                <a href={`#${id}`} className="help-toc-link">{titel}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-                        <div className="text-value">
-                            <p className="text-lg">Willkommen in Ihrem persönlichen Fahrtenbuch!</p>
-                            <p className="mt-2 text-label">
-                                Diese Anwendung hilft Ihnen, Ihre dienstlichen Fahrten einfach und übersichtlich zu verwalten.
-                                Sie können Fahrten eintragen, Abrechnungen erstellen und den Überblick über Ihre Erstattungen behalten.
-                                </p>
-                        </div>
+        {/* Videos folgen — VideoCard wurde am 08.08.2026 entfernt (Neuaufnahme geplant) */}
 
-                        <div className="space-y-2">
-                            <AccordionItem
-                                title="Erste Schritte: Einrichtung"
-                                isOpen={openItem === 0}
-                                toggleOpen={() => toggleItem(0)}
-                            >
-                                <div className="space-y-4">
-                                    <p>Bevor Sie mit dem Fahrtenbuch arbeiten können, sind einige Grundeinstellungen nötig:</p>
+        {/* ================= Erste Schritte ================= */}
+        <Abschnitt
+          id="start"
+          titel="Erste Schritte"
+          satz="In dieser Reihenfolge bist du in etwa zehn Minuten startklar."
+        >
+          <AccordionItem {...item('start-1')} title="1. Profil ausfüllen">
+            <p>
+              Öffne <strong>Einstellungen → Profil &amp; Passwort</strong> und trage
+              <strong> vollen Namen</strong>, <strong>E-Mail</strong> und <strong>IBAN</strong> ein,
+              dazu bei Bedarf Kirchengemeinde, Kirchspiel und Kirchenkreis.
+            </p>
+            <p>
+              Diese Angaben landen direkt im Abrechnungsformular. Ohne Name und IBAN kann
+              die Verwaltung dir nichts überweisen — das ist der wichtigste Schritt.
+            </p>
+            <p>
+              Deine E-Mail-Adresse zeigt hinter dem Feld „Verifiziert" oder „Ausstehend"; ist
+              sie noch nicht bestätigt, kannst du die Verifizierungs-Mail dort erneut anfordern.
+            </p>
+          </AccordionItem>
 
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">1. Profil vervollständigen</h4>
-                                        <p>Öffnen Sie die Einstellungen über den Button oben rechts:</p>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Hinterlegen Sie Ihre persönlichen Daten</li>
-                                            <li>Wichtig für die Abrechnung: Name, E-Mail, IBAN</li>
-                                            <li>Optional: Organisationsdetails</li>
-                                        </ul>
-                                    </div>
+          <AccordionItem {...item('start-2')} title="2. Orte anlegen">
+            <p>
+              Unter <strong>Einstellungen → Orte &amp; Distanzen</strong> legst du die Orte an,
+              zwischen denen du unterwegs bist: Name, Adresse und die Art des Ortes
+              (Wohnort, Dienstort, Kirchspiel oder sonstiger Ort).
+            </p>
+            <p>
+              Wohnort und Dienstort gibt es jeweils nur einmal. Der Wohnort ist die
+              Vorbelegung für den Startort beim Erfassen, der Dienstort dient als Bezugspunkt
+              für die Distanzspalte in der Ortsliste.
+            </p>
+          </AccordionItem>
 
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">2. Orte anlegen</h4>
-                                        <p>Unter "Orte" in den Einstellungen:</p>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Legen Sie Ihren Wohnort fest (wird oben in der Liste angezeigt)</li>
-                                            <li>Bestimmen Sie Ihren Dienstort (wird oben in der Liste angezeigt)</li>
-                                            <li>Speichern Sie häufig besuchte Adressen</li>
-                                            <li>Tipp: Nutzen Sie aussagekräftige Namen für die Orte</li>
-                                        </ul>
-                                    </div>
+          <AccordionItem {...item('start-3')} title="3. Distanzen pflegen">
+            <p>
+              Im selben Bereich trägst du unter „Distanzen" die Kilometer zwischen zwei
+              gespeicherten Orten ein. Eine Distanz gilt automatisch in beide Richtungen.
+            </p>
+            <p>
+              Sobald eine Strecke gepflegt ist, füllt die App die Kilometer beim Erfassen von
+              selbst aus — und alle Fahrten auf dieser Strecke haben dieselbe Zahl.
+            </p>
+            <Tipp>
+              Leg eine Distanz am besten direkt beim ersten Mal an. Nach ein paar Wochen ist
+              deine Streckenliste vollständig und du tippst beim Erfassen fast nichts mehr.
+            </Tipp>
+          </AccordionItem>
 
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">3. Distanzen hinterlegen</h4>
-                                        <p>Im Tab "Distanzen" der Einstellungen:</p>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Häufige Strecken mit korrekter Kilometerzahl speichern</li>
-                                            <li>Gilt automatisch für beide Richtungen</li>
-                                            <li>Ermöglicht schnellere Erfassung von Fahrten</li>
-                                            <li>Verhindert Abweichungen bei wiederkehrenden Strecken</li>
-                                        </ul>
-                                    </div>
+          <AccordionItem {...item('start-4')} title="4. Abrechnungsträger und Erstattungssätze prüfen">
+            <p>
+              Unter <strong>Einstellungen → Abrechnungsträger</strong> stehen die
+              Organisationen, die deine Fahrten erstatten — mit optionaler Kostenstelle.
+              Unter <strong>Erstattungssätze</strong> hinterlegst du je Träger, was pro
+              Kilometer gezahlt wird, jeweils mit einem „gültig ab"-Datum.
+            </p>
+            <p>
+              Ist für einen Träger kein Satz gepflegt, rechnet die App beim Erfassen
+              vorläufig mit <span className="num">0,30 €/km</span> und markiert das im
+              Erfassungsschritt als „(Standardsatz)".
+            </p>
+          </AccordionItem>
 
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">4. Abrechnungsträger einrichten</h4>
-                                        <p>Im Tab "Träger" der Einstellungen:</p>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Definieren Sie alle Organisationen, die Ihre Fahrtkosten erstatten</li>
-                                            <li>Die Reihenfolge können Sie per Drag & Drop anpassen</li>
-                                            <li>Nicht mehr benötigte Träger können deaktiviert werden</li>
-                                            <li>Ein Löschen ist nur möglich, wenn keine Fahrten zugeordnet sind</li>
-                                        </ul>
-                                    </div>
+          <AccordionItem {...item('start-5')} title="5. Erste Fahrt erfassen und am Monatsende einreichen">
+            <p>
+              Tippe auf <strong>+ Neue Fahrt</strong> (Desktop) bzw. den runden
+              <strong> +</strong>-Knopf unten rechts (Mobil), wähle das Ziel, bestätige
+              Anlass und Träger — fertig.
+            </p>
+            <p>
+              Ist der Monat vorbei, zeigt dir der Bereich <strong>Abrechnung</strong> ihn als
+              „fällig" an. Dort lädst du die Abrechnung herunter und der Status springt auf
+              „Eingereicht". Kommt das Geld an, markierst du den Monat als „Erstattet".
+            </p>
+          </AccordionItem>
+        </Abschnitt>
 
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">5. Erstattungssätze festlegen</h4>
-                                        <p>Im Tab "Erstattungen" der Einstellungen:</p>
-                                        <ul className="list-disc ml-4 space-y-1">
-                                            <li>Für jeden Abrechnungsträger Kilometersatz festlegen</li>
-                                            <li>Mitfahrer:innen-Erstattung separat definieren</li>
-                                            <li>Gültig-ab-Datum beachten - ermöglicht zeitliche Änderungen</li>
-                                            <li>Historische Sätze bleiben für alte Fahrten erhalten</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </AccordionItem>
+        {/* ================= Dashboard ================= */}
+        <Abschnitt
+          id="dashboard"
+          titel="Start (Dashboard)"
+          satz="Die Startseite beantwortet zwei Fragen: Was ist noch offen? Und wie erfasse ich schnell?"
+        >
+          <AccordionItem {...item('dash-1')} title={'„Noch nicht eingereicht" / „Alles eingereicht"'}>
+            <p>
+              Die große Kachel oben zeigt den <strong>ältesten abgeschlossenen Monat</strong>,
+              in dem noch mindestens ein Träger weder eingereicht noch erstattet ist — mit
+              Summe, Kilometern und der Zahl der betroffenen Träger. Der Knopf
+              „{'{'}Monat{'}'} abrechnen" springt direkt in die Abrechnung.
+            </p>
+            <p>
+              Der laufende Monat taucht dort bewusst nicht auf — er ist noch nicht fällig.
+            </p>
+            <p>
+              Ist nichts offen, steht dort „Alles eingereicht" (wenn noch Monate auf die
+              Erstattung warten) bzw. „Alles abgerechnet" (wenn wirklich alles durch ist).
+            </p>
+          </AccordionItem>
 
-      <AccordionItem
-      title="Fahrten eintragen"
-      isOpen={openItem === 1}
-      toggleOpen={() => toggleItem(1)}
-      >
-      <div className="space-y-4">
-      <p>So erfassen Sie eine neue Fahrt:</p>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">1. Grunddaten der Fahrt</h4>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Wählen Sie das Datum der Fahrt</li>
-      <li>Geben Sie einen aussagekräftigen Anlass ein</li>
-      <li>Wählen Sie den passenden Abrechnungsträger</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">2. Start- und Zielort</h4>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Wählen Sie aus Ihren gespeicherten Orten</li>
-      <li>Oder nutzen Sie "Einmaliger Ort" für neue Adressen</li>
-      <li>Die Kilometer werden bei gespeicherten Orten automatisch berechnet</li>
-      <li>Bei einmaligen Orten: Kilometer manuell eingeben</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">3. Mitfahrer:innen (optional)</h4>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Button "+ Mitfahrer:in" klicken</li>
-      <li>Name und Arbeitsstätte eingeben</li>
-      <li>Fahrtrichtung wählen: Hin, Rück oder Beides</li>
-      <li>Mehrere Mitfahrer:innen möglich</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">4. Rückfahrt</h4>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Option "Rückfahrt anlegen" aktivieren</li>
-      <li>Erstellt automatisch eine zweite Fahrt</li>
-      <li>Übernimmt alle Daten in umgekehrter Richtung</li>
-      <li>Mitfahrer:innen werden entsprechend ihrer Auswahl übernommen</li>
-      </ul>
-      </div>
-      </div>
-      </AccordionItem>
-      <AccordionItem
-      title="Orte und Distanzen verwalten"
-      isOpen={openItem === 4}
-      toggleOpen={() => toggleItem(4)}
-      >
-      <div className="space-y-4">
-      <div className="space-y-2">
-      <h4 className="font-medium">Orte verwalten</h4>
-      <p>In den Einstellungen unter "Orte":</p>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Neue Orte anlegen mit Name und Adresse</li>
-      <li>Spezielle Kennzeichnungen möglich:
-      <ul className="list-disc ml-4 mt-1">
-      <li>Wohnort (nur einer möglich)</li>
-      <li>Dienstort (nur einer möglich)</li>
-      <li>Kirchspiel/Zweigstelle (mehrere möglich)</li>
-      </ul>
-      </li>
-      <li>Orte bearbeiten oder löschen</li>
-      <li>Sortierung erfolgt automatisch nach Typ</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">Distanzen festlegen</h4>
-      <p>In den Einstellungen unter "Distanzen":</p>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Entfernungen zwischen gespeicherten Orten definieren</li>
-      <li>Gilt automatisch für beide Richtungen</li>
-      <li>Nachträgliche Änderungen möglich</li>
-      <li>Auswirkung auf bestehende Fahrten prüfbar</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">Automatische Berechnung</h4>
-      <p>Vorteile der Distanzverwaltung:</p>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Schnellere Erfassung von Fahrten</li>
-      <li>Konsistente Kilometerzahlen</li>
-      <li>Weniger Fehlerquellen</li>
-      <li>Bessere Nachvollziehbarkeit</li>
-      </ul>
-      </div>
-      
-      <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
-      <h4 className="font-medium mb-2">Tipp zur Distanzpflege:</h4>
-      <p className="text-sm">
-      Legen Sie neue Distanzen am besten direkt an, wenn Sie eine Strecke zum 
-      ersten Mal fahren. So bauen Sie nach und nach eine vollständige 
-      Distanzdatenbank auf und sparen langfristig Zeit bei der Erfassung.
-      </p>
-      </div>
-      </div>
-      </AccordionItem>
-      <AccordionItem
-      title="Abrechnung und Erstattung"
-      isOpen={openItem === 2}
-      toggleOpen={() => toggleItem(2)}
-      >
-      <div className="space-y-4">
-      <div className="space-y-2">
-      <h4 className="font-medium">Monatsübersicht</h4>
-      <p>Im oberen Bereich sehen Sie die Zusammenfassung des aktuellen Monats:</p>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Summen pro Abrechnungsträger</li>
-      <li>Mitfahrer-Erstattungen</li>
-      <li>Gesamtsumme des Monats</li>
-      <li>Status der Abrechnungen (nicht eingereicht/eingereicht/erhalten)</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">Export der Abrechnungen</h4>
-      <p>Für jeden Abrechnungsträger separat:</p>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Excel-Export über den "Export"-Button</li>
-      <li>Enthält alle relevanten Informationen</li>
-      <li>Optimiert für die Einreichung</li>
-      <li>Bei vielen Fahrten: Automatische Aufteilung</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">Abrechnungsstatus verwalten</h4>
-      <p>Halten Sie den Status Ihrer Abrechnungen aktuell:</p>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Nach Export: Als "Eingereicht" markieren</li>
-      <li>Nach Erhalt: Als "Erhalten" markieren</li>
-      <li>Status einzeln oder per Schnellaktion ändern</li>
-      <li>Filterung nach offenen Abrechnungen möglich</li>
-      </ul>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">Jahresübersicht</h4>
-      <p>Behalten Sie den Überblick:</p>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Summen pro Jahr und Abrechnungsträger</li>
-      <li>Ausstehende und erhaltene Beträge</li>
-      <li>Filterung nach Jahren</li>
-      <li>Export für Steuererklärung möglich</li>
-      </ul>
-      </div>
-      
-      <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
-      <h4 className="font-medium mb-2">Wichtig für die Abrechnung:</h4>
-      <ul className="list-disc ml-4 space-y-1">
-      <li>Rechtzeitige Einreichung beachten</li>
-      <li>Vollständigkeit der Angaben prüfen</li>
-      <li>Status aktuell halten</li>
-      <li>Belege gemäß Vorgaben aufbewahren</li>
-      </ul>
-      </div>
-      </div>
-      </AccordionItem>
-      <AccordionItem
-      title={
-        <div className="flex items-center gap-2">
-        <Smartphone size={16} className="text-primary-500" />
-        <span>Automatisierung mit iOS-Kurzbefehlen</span>
+          <AccordionItem {...item('dash-2')} title={'„{Monat} bisher"'}>
+            <p>
+              Diese Kachel (Desktop) summiert den laufenden Monat: Kilometer, Betrag und die
+              Anzahl der Fahrten. Gibt es Mitfahrer:innen, steht deren Anteil getrennt dahinter
+              („davon x € Mitfahrer") — Fahrt- und Mitfahrer-Satz werden nie vermischt.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('dash-3')} title={'„Unterwegs" und die ✓-Schnellaktion'}>
+            <p>
+              „Unterwegs" listet alle Monate, die <strong>eingereicht, aber noch nicht
+              erstattet</strong> sind — mit Betrag, Einreichdatum und der Zahl der Tage
+              seitdem.
+            </p>
+            <p>
+              Der <strong>✓</strong>-Knopf rechts markiert alle eingereichten Träger dieses
+              Monats in einem Rutsch als erstattet. Es erscheint ein Hinweis mit
+              „Rückgängig", falls du dich vertippt hast.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('dash-4')} title="Kilometer-Balken und Hover-Aufschlüsselung">
+            <p>
+              Das Diagramm zeigt die <strong>letzten acht Monate</strong>. Die Farbe eines
+              Balkens ist der Monatsstatus: grün = erstattet, sandfarben = eingereicht,
+              petrol = erfasst.
+            </p>
+            <p>
+              Zeigst du mit der Maus auf einen Balken (oder springst per Tabulator darauf),
+              klappt die Aufschlüsselung auf: Kilometer, Anzahl Fahrten, Erstattung, bei
+              Bedarf der Mitfahrer-Anteil und der Status.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('dash-5')} title={'Favoriten — „Ein Tipp genügt"'}>
+            <p>
+              Unter „Ein Tipp genügt" liegen deine gespeicherten Strecken als Kacheln: Ziel,
+              Anlass, Kilometer und das Kürzel des Trägers.
+            </p>
+            <p>
+              Ein Tipp fragt kurz nach — <strong>„Hin- und Rückfahrt"</strong> oder
+              <strong> „Nur Hinfahrt"</strong> — und legt die Fahrt(en) sofort mit dem heutigen
+              Datum an. Auch hier gibt es „Rückgängig".
+            </p>
+            <p>
+              Favoriten pflegst du unter <strong>Einstellungen → Favoriten</strong>; „Alle"
+              auf dem Dashboard führt direkt dorthin.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('dash-6')} title={'„Letzte Fahrten" und ↻ Wiederholen'}>
+            <p>
+              Die Liste zeigt die fünf jüngsten Fahrten — unabhängig davon, welcher Monat in
+              der Fahrtenliste gerade gefiltert ist.
+            </p>
+            <p>
+              Der <strong>↻</strong>-Knopf legt dieselbe Fahrt noch einmal an, mit dem
+              heutigen Datum und <strong>samt Mitfahrer:innen</strong>. Der Eintrag erscheint
+              sofort in der Liste; „Rückgängig" entfernt ihn wieder.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('dash-7')} title="Wo starte ich eine neue Fahrt?">
+            <p>
+              Auf dem Desktop über <strong>+ Neue Fahrt</strong> oben rechts, auf dem Handy
+              über den runden <strong>+</strong>-Knopf unten rechts (er schwebt über der
+              unteren Navigation). Beide öffnen denselben zweistufigen Erfassungsflow.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Erfassen ================= */}
+        <Abschnitt
+          id="erfassen"
+          titel="Fahrt erfassen"
+          satz={'Zwei Schritte: „Wohin?" und „Bestätigen". Alles andere füllt die App aus dem Verlauf.'}
+        >
+          <AccordionItem {...item('erf-1')} title={'Schritt 1: „Wohin?"'}>
+            <p>
+              Oben steht „Ab {'{'}Startort{'}'} · {'{'}Datum{'}'}". Beides ist antippbar:
+              Der Startort wird als Auswahl aufgeklappt, das Datum als Datumsfeld.
+            </p>
+            <p>
+              Vorbelegt ist als Startort dein <strong>Wohnort</strong>, ersatzweise der
+              Dienstort, sonst der Ort, von dem du bisher am häufigsten gestartet bist. Das
+              Datum steht auf heute.
+            </p>
+            <p>
+              Darunter liegt die Zielliste — nach Häufigkeit sortiert, mit der gepflegten
+              Distanz rechts. Das Suchfeld filtert nach Name und Adresse. Ist das Ziel nicht
+              dabei, nimmst du <strong>„Anderes Ziel eingeben"</strong> und tippst die Adresse
+              (mit Adressvorschlägen) ein.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('erf-2')} title={'Schritt 2: „Bestätigen"'}>
+            <p>
+              Oben stehen Route und Rechnung: „{'{'}km{'}'} km · {'{'}Betrag{'}'} €" — mit dem
+              heute gültigen Satz des gewählten Trägers. Ein Klick auf die Route bringt dich
+              zurück zu Schritt 1, der Stift daneben öffnet das Kilometerfeld.
+            </p>
+            <p>
+              Ist für die Strecke keine Distanz gepflegt (oder das Ziel frei eingegeben),
+              öffnet sich das Kilometerfeld gleich von selbst — dort trägst du die
+              <strong> einfache Strecke</strong> ein.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('erf-3')} title="Anlass-Chips">
+            <p>
+              Für das gewählte Ziel schlägt die App bis zu drei Anlässe vor, die du dort
+              bisher am häufigsten eingetragen hast — ein Tipp genügt. Über
+              „Frei eingeben…" schreibst du stattdessen einen eigenen Text.
+            </p>
+            <p>Ein Anlass ist Pflicht — ohne ihn bleibt der Speichern-Knopf inaktiv.</p>
+          </AccordionItem>
+
+          <AccordionItem {...item('erf-4')} title="Rückfahrt-Schalter">
+            <p>
+              Ist der Schalter an, legt die App <strong>zwei eigenständige Fahrten</strong> an:
+              die Hinfahrt und die Rückfahrt mit vertauschten Orten, gleichem Datum, gleichem
+              Anlass und gleichem Träger.
+            </p>
+            <p>
+              Die Vorbelegung kommt aus deinem Verlauf: Wurde dieses Ziel bisher überwiegend
+              mit Rückfahrt am selben Tag erfasst, ist der Schalter an. Ohne Verlauf ist er
+              ebenfalls an. Deine Auswahl gilt immer vor der Vorbelegung.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('erf-5')} title="Abrechnungsträger wählen">
+            <p>
+              Vorgeschlagen wird der Träger, den du für dieses Ziel zuletzt verwendet hast
+              („Zuletzt für dieses Ziel"), sonst der erste aktive Träger deiner Liste. Ein Tipp
+              auf die Zeile öffnet die Auswahl mit allen <strong>aktiven</strong> Trägern samt
+              Kostenstelle.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('erf-6')} title="Speichern und Rückgängig">
+            <p>
+              Der Knopf sagt, was passiert: „1 Fahrt speichern" oder „2 Fahrten speichern",
+              dahinter die Gesamtkilometer. Das Fenster schließt sofort, die Fahrten stehen
+              unmittelbar in der Liste.
+            </p>
+            <p>
+              Im Hinweis unten steht <strong>„Rückgängig"</strong> — damit werden die eben
+              angelegten Fahrten wieder entfernt, auch wenn das Speichern im Hintergrund noch
+              läuft.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('erf-7')} title="Mitfahrer:innen beim Erfassen">
+            <p>
+              Der schnelle Zwei-Schritt-Flow legt Fahrten <strong>ohne</strong> Mitfahrer:innen
+              an. Wenn jemand mitfährt, erfasse die Fahrt zuerst normal und ergänze die
+              Mitfahrer:innen anschließend über <strong>Fahrten → Bearbeiten</strong>. Mehr
+              dazu im Abschnitt „Mitfahrer:innen".
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Fahrten ================= */}
+        <Abschnitt
+          id="fahrten"
+          titel="Fahrten"
+          satz="Die Liste aller erfassten Fahrten eines Monats oder Zeitraums — mit Summen, Status und Export."
+        >
+          <AccordionItem {...item('fl-1')} title="Zeitraum wählen: aktueller Monat, Vormonat, Zeitraum">
+            <p>
+              Über der Liste stehen drei Schaltflächen. Die ersten beiden springen direkt auf
+              den <strong>aktuellen Monat</strong> bzw. den <strong>Vormonat</strong>.
+            </p>
+            <p>
+              <strong>„Zeitraum"</strong> klappt eine Von-/Bis-Auswahl auf. Steht „Von" auf
+              „—", siehst du genau den Bis-Monat; sonst alle Monate dazwischen. Der Knopf
+              <strong> „Offene anzeigen"</strong> setzt den Zeitraum automatisch auf die Spanne
+              vom ältesten bis zum jüngsten Monat, in dem noch etwas offen ist.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('fl-2')} title="Summenzeile und Export">
+            <p>
+              Direkt unter der Auswahl stehen die Gesamtkilometer und der Gesamtbetrag des
+              gewählten Zeitraums. Rechts liegt <strong>„Export"</strong>.
+            </p>
+            <p>
+              Das Export-Fenster bietet je Abrechnungsträger drei Formate:
+              <strong> Excel</strong>, <strong>PDF</strong> und <strong>Beide (ZIP)</strong>.
+              Im Zeitraum-Modus erscheinen dabei nur Träger, bei denen noch offene Monate
+              enthalten sind — bereits eingereichte oder erstattete brauchen keinen Export.
+            </p>
+            <p>Dieser Export ändert keinen Status.</p>
+          </AccordionItem>
+
+          <AccordionItem {...item('fl-3')} title="Erstattungsübersicht mit Status-Chips">
+            <p>
+              Der Block „Erstattungen" listet die Summe je Abrechnungsträger (und, falls
+              vorhanden, Mitfahrer:innen) und darunter „Noch nicht erstattet" als Restsumme.
+            </p>
+            <p>
+              Bei einem einzelnen Monat steht neben jedem Träger sein Status samt Datum. Ein
+              Klick schaltet weiter: <em>Erfasst</em> → Datumsabfrage „eingereicht",
+              <em> Eingereicht</em> → Datumsabfrage „erstattet", <em>Erstattet</em> → Status
+              wird direkt zurückgesetzt.
+            </p>
+            <p>
+              Im Zeitraum-Modus siehst du je Träger eine Chip-Reihe mit einem Chip pro Monat.
+              Ein Klick wirkt immer nur auf diesen einen Monat. Monate ohne Vorgang zeigen
+              einen neutralen Strich.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('fl-4')} title="Karten mit Wischen (mobil) und Tabelle (Desktop)">
+            <p>
+              <strong>Auf dem Handy</strong> steht jede Fahrt als Karte: Datum und Status oben,
+              Ziel und Kilometer, darunter „Anlass · Träger" und der Betrag; Mitfahrer:innen
+              als Zusatzzeile.
+            </p>
+            <p>
+              Wischen nach links legt <strong>Bearbeiten</strong> und <strong>Löschen</strong>
+              frei. Wer nicht wischen mag: Ein Tipp auf die Karte (oder Enter/Leertaste)
+              zeigt dieselben Knöpfe. Es ist immer nur eine Karte geöffnet.
+            </p>
+            <p>
+              <strong>Ab Tablet-Breite</strong> wird daraus eine Tabelle mit Datum,
+              Anlass · Route, Träger, km, Betrag und Status. Rechts liegen Bearbeiten,
+              Löschen und <strong>↻ Wiederholen</strong> — Letzteres öffnet den
+              Erfassungsflow vorausgefüllt in Schritt 2 und erscheint nur bei Fahrten
+              zwischen zwei gespeicherten Orten.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('fl-5')} title="Fahrt bearbeiten oder löschen">
+            <p>
+              <strong>Bearbeiten</strong> öffnet das vollständige Fahrtformular — dort änderst
+              du Datum, Orte, Anlass, Kilometer, Träger und die Mitfahrer:innen.
+            </p>
+            <p>
+              <strong>Löschen</strong> fragt vorher nach und zeigt dabei Datum, Ziel, Anlass
+              und Kilometer. Nach dem Löschen bleibt „Rückgängig" als zweites Netz: Die Fahrt
+              wird mit allen Daten wieder angelegt.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Abrechnung ================= */}
+        <Abschnitt
+          id="abrechnung"
+          titel="Abrechnung"
+          satz="Monat für Monat: einreichen, Erstattung bestätigen, Belege nachladen."
+        >
+          <AccordionItem {...item('abr-1')} title="Monatskarten (mobil)">
+            <p>
+              Jeder Monat ist eine Karte. <strong>Fällige Monate</strong> — also abgeschlossene
+              Monate mit mindestens einem noch nicht eingereichten Träger — sind hervorgehoben,
+              immer aufgeklappt und tragen den Hinweis „Fällig — noch nicht eingereicht" samt
+              Fortschrittsleiste.
+            </p>
+            <p>
+              Alle anderen Monate sind eingeklappt und zeigen Statuspunkt und Datum
+              („Eingereicht am …" / „Erstattet am …"); erstattete sind gedämpft dargestellt.
+              Ein Tipp klappt die Trägerzeilen samt Aktionen auf. Der laufende Monat steht als
+              „Läuft · noch nicht fällig" da.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('abr-2')} title="Matrix Monat × Träger (Desktop)">
+            <p>
+              Ab Tablet-Breite wird daraus eine Tabelle: Zeilen sind Monate, Spalten die
+              Abrechnungsträger (Mitfahrer:innen als eigene Spalte, wenn es welche gibt),
+              dazu Summe und Aktion. Wo kein Vorgang existiert, steht ein Strich.
+            </p>
+            <p>
+              Die Aktion rechts heißt bei fälligen Monaten <strong>„Einreichen →"</strong>,
+              sonst <strong>„Details"</strong> — das klappt die Trägerzeilen inline auf. Beim
+              laufenden Monat steht „läuft". Bei vielen Trägern scrollt die Matrix seitwärts,
+              die Monatsspalte bleibt stehen.
+            </p>
+            <p>
+              Über der Tabelle wählst du das Jahr (oder „Alle Jahre"). Liegt ein fälliger
+              Monat außerhalb des vorgewählten Jahres, schaltet die Ansicht einmalig
+              automatisch auf „Alle Jahre" um.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('abr-3')} title="Einreichen — mit Formatwahl">
+            <p>
+              „Einreichen" fragt zuerst nach dem Format: <strong>Excel</strong>,
+              <strong> PDF</strong> oder <strong>Beides (ZIP)</strong>. Danach passiert
+              zweierlei, in dieser Reihenfolge:
+            </p>
+            <ol className="help-ol">
+              <li>Für jeden noch offenen Träger wird eine Datei heruntergeladen.</li>
+              <li>
+                Erst wenn das geklappt hat, springen diese Träger auf „Eingereicht" mit dem
+                heutigen Datum.
+              </li>
+            </ol>
+            <p>
+              Schlägt der Download fehl, bleibt der Status unangetastet. Der Hinweis danach
+              enthält „Rückgängig" und setzt die eben eingereichten Träger wieder zurück.
+            </p>
+            <p>
+              Auf dem Desktop steht oben zusätzlich ein Knopf für den ältesten fälligen Monat
+              („{'{'}Monat{'}'} einreichen"). Einzelne Träger reichst du über den Link
+              „Einreichen" in ihrer Zeile ein.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('abr-4')} title={'„Als erstattet markieren", „Datum ändern", „Zurücksetzen"'}>
+            <p>
+              In jeder Trägerzeile stehen je nach Status passende Links:
+            </p>
+            <ul className="help-ul">
+              <li><strong>Erfasst</strong> → „Einreichen"</li>
+              <li><strong>Eingereicht</strong> → „Als erstattet markieren" · „Datum ändern"</li>
+              <li><strong>Erstattet</strong> → „Zurücksetzen" · „Datum ändern"</li>
+            </ul>
+            <p>
+              „Als erstattet markieren" setzt das heutige Datum. „Datum ändern" öffnet die
+              Datumsauswahl, wenn du nachträglich das echte Einreich- oder Gutschriftsdatum
+              eintragen willst. „Zurücksetzen" bringt den Träger zurück auf „Erfasst".
+            </p>
+            <p>Alle drei laufen ohne Sicherheitsabfrage — dafür mit „Rückgängig" im Hinweis.</p>
+          </AccordionItem>
+
+          <AccordionItem {...item('abr-5')} title="Export ohne Statuswechsel">
+            <p>
+              Willst du eine Datei nur noch einmal herunterladen, nutze den
+              <strong> Download-Knopf</strong> auf der Monatskarte bzw. den Link
+              „Exportieren". Das ändert keinen Status — die Fahrten bleiben, wie sie sind.
+            </p>
+            <p>
+              Der Knopf <strong>„Zeitraum-Export"</strong> im Desktop-Kopf macht dasselbe über
+              eine frei wählbare Von-/Bis-Spanne, je Träger als Excel, PDF oder ZIP.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Status ================= */}
+        <Abschnitt
+          id="status"
+          titel="Statussystem"
+          satz="Drei Stationen, gleiche Bedeutung überall in der App."
+        >
+          <AccordionItem {...item('st-1')} title="Erfasst → Eingereicht → Erstattet">
+            <ul className="help-ul">
+              <li>
+                <strong>Erfasst</strong> — die Fahrten stehen in der App, aber die Abrechnung
+                ist noch nicht raus. Hier kannst du noch alles ändern.
+              </li>
+              <li>
+                <strong>Eingereicht</strong> — die Abrechnung wurde exportiert und
+                weitergegeben; das Einreichdatum ist gespeichert. Du wartest auf das Geld.
+              </li>
+              <li>
+                <strong>Erstattet</strong> — die Erstattung ist gutgeschrieben; das
+                Gutschriftsdatum ist gespeichert. Der Vorgang ist abgeschlossen.
+              </li>
+            </ul>
+            <p>
+              Der Status hängt immer an der Kombination aus <strong>Monat und
+              Abrechnungsträger</strong>, nicht an der einzelnen Fahrt. Eine Fahrt zeigt daher
+              den Status ihres Trägers in ihrem Monat.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('st-2')} title={'Warum steht mein Monat noch auf „Erfasst"?'}>
+            <p>
+              Weil der <strong>Monatsstatus das Minimum aller Trägerstatus</strong> ist: Solange
+              ein einziger Träger noch „Erfasst" ist, gilt der ganze Monat als „Erfasst" — auch
+              wenn die anderen längst erstattet sind. Erst wenn alle Träger erstattet sind, ist
+              der Monat erstattet.
+            </p>
+            <p>
+              Träger ohne Erstattungsbetrag zählen dabei nicht mit. Klapp den Monat in der
+              Abrechnung auf, dann siehst du, welcher Träger noch aussteht.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('st-3')} title={'Was heißt „fällig"?'}>
+            <p>
+              Fällig ist ein Monat, der <strong>vor dem laufenden Monat</strong> liegt und in
+              dem mindestens ein Träger noch auf „Erfasst" steht. Genau diese Monate zählt
+              das Abzeichen an der Navigation und die Kachel auf dem Dashboard.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Mitfahrer ================= */}
+        <Abschnitt
+          id="mitfahrer"
+          titel="Mitfahrer:innen"
+          satz="Wer mitfährt, wird an der Fahrt erfasst — und getrennt vergütet."
+        >
+          <AccordionItem {...item('mf-1')} title="Mitfahrer:innen eintragen">
+            <p>
+              Öffne die Fahrt über <strong>Fahrten → Bearbeiten</strong> und nutze dort
+              <strong> „+ Mitfahrer:in"</strong>. Pro Person trägst du <strong>Name</strong>,
+              <strong> Arbeitsstätte</strong> und die <strong>Richtung</strong> ein:
+              „Hin", „Rück" oder „Hin &amp; Rück". Mehrere Personen sind möglich.
+            </p>
+            <p>
+              Legst du beim Bearbeiten zugleich eine Rückfahrt an, werden nur die
+              Mitfahrer:innen übernommen, deren Richtung dazu passt.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('mf-2')} title="Eigener Erstattungssatz">
+            <p>
+              Für Mitfahrer:innen gilt ein <strong>eigener Satz pro Kilometer und Person</strong>.
+              Du pflegst ihn unter <strong>Einstellungen → Erstattungssätze</strong> im Bereich
+              „Mitfahrer" — genau wie die Trägersätze mit „gültig ab"-Datum und Historie.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('mf-3')} title="Wo die Beträge auftauchen">
+            <p>
+              Die Mitfahrer-Erstattung wird <strong>nie</strong> mit dem Fahrt-Betrag
+              vermischt. In den Listen steht sie als eigener „+ x €"-Zusatz unter dem Betrag,
+              auf dem Dashboard als „davon x € Mitfahrer", und in der Abrechnung erscheinen
+              „Mitfahrer:innen" als eigene Kategorie mit eigenem Status — also auch als eigene
+              Zeile bzw. Spalte und als eigener Export.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Einstellungen ================= */}
+        <Abschnitt
+          id="einstellungen"
+          titel="Einstellungen"
+          satz="Sieben Bereiche, sortiert nach dem, was du am häufigsten brauchst."
+        >
+          <AccordionItem {...item('set-1')} title="Orte & Distanzen">
+            <p>
+              Zwei Blöcke untereinander, jeder mit eigenem „+"-Knopf.
+              <strong> Orte</strong> haben Name, Adresse (mit Adressvorschlägen) und eine Art:
+              Wohnort, Dienstort, Kirchspiel oder sonstiger Ort. Wohnort und Dienstort gibt es
+              jeweils nur einmal.
+            </p>
+            <p>
+              Die Ortsliste zeigt in der dritten Spalte die Entfernung <strong>ab deinem
+              Dienstort</strong>, sofern eine Distanz gepflegt ist — sonst einen Strich.
+            </p>
+            <p>
+              <strong>Distanzen</strong> verbinden zwei gespeicherte Orte mit einer
+              Kilometerzahl und gelten in beide Richtungen. Ab etwa fünf Einträgen erscheint
+              ein Suchfeld, das Orte und Distanzen zugleich filtert. Gelöschte Orte und
+              Distanzen lassen sich über „Rückgängig" zurückholen.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('set-2')} title="Abrechnungsträger">
+            <p>
+              Hier stehen die Organisationen, die deine Fahrten erstatten — mit Name und
+              optionaler <strong>Kostenstelle</strong> (die im Formular auftaucht).
+            </p>
+            <p>
+              Die <strong>Reihenfolge</strong> änderst du per Drag &amp; Drop am Griff links;
+              mit der Tastatur gehen dort Pfeil hoch und runter. Sie bestimmt, wie die Träger
+              überall in der App sortiert erscheinen.
+            </p>
+            <p>
+              Der <strong>Haken rechts</strong> schaltet einen Träger aktiv oder inaktiv.
+              Inaktive Träger stehen beim Erfassen nicht mehr zur Auswahl, ihre bisherigen
+              Fahrten bleiben aber erhalten. Löschen entfernt den Träger endgültig — das geht
+              nicht mehr rückgängig und schlägt fehl, wenn noch Daten daran hängen.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('set-3')} title="Erstattungssätze (inkl. Mitfahrer-Satz)">
+            <p>
+              Je Träger legst du Sätze mit <strong>Betrag in €/km</strong> und
+              <strong> „gültig ab"-Datum</strong> an. Oben steht immer der aktuell gültige
+              Satz, darunter die vollständige Historie.
+            </p>
+            <p>
+              Dadurch bleiben alte Fahrten korrekt: Eine Fahrt wird mit dem Satz gerechnet,
+              der an ihrem Datum galt. Ändert sich der Kilometersatz zum 1. Januar, legst du
+              einfach einen neuen Satz mit diesem Datum an — die alten Abrechnungen ändern
+              sich nicht.
+            </p>
+            <p>
+              Der <strong>Mitfahrer-Satz</strong> steht im eigenen Bereich „Mitfahrer",
+              funktioniert aber genauso (Betrag, gültig ab, Historie). Für ein Datum kann es
+              je Träger nur einen Satz geben.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('set-4')} title="Favoriten">
+            <p>
+              Ein Favorit besteht aus <strong>Von-Ort</strong>, <strong>Nach-Ort</strong>,
+              optionalem <strong>Anlass</strong> und optionalem <strong>Träger</strong>. Er
+              erscheint auf dem Dashboard unter „Ein Tipp genügt" und legt dort mit einem
+              Tipp die Fahrt für heute an.
+            </p>
+            <p>Gelöschte Favoriten lassen sich über „Rückgängig" zurückholen.</p>
+          </AccordionItem>
+
+          <AccordionItem {...item('set-5')} title="Profil & Passwort">
+            <p>
+              E-Mail, voller Name, IBAN sowie Kirchengemeinde, Kirchspiel und Kirchenkreis —
+              diese Angaben erscheinen auf den Abrechnungen. Hinter der E-Mail steht, ob sie
+              verifiziert ist; die Verifizierungs-Mail lässt sich dort erneut anfordern.
+            </p>
+            <p>
+              Darunter änderst du das <strong>Passwort</strong>: aktuelles Passwort, neues
+              Passwort, Wiederholung. Das neue Passwort braucht mindestens 8 Zeichen mit Groß-
+              und Kleinbuchstaben und einer Zahl; die Prüfliste hakt live mit ab.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('set-6')} title="Darstellung">
+            <p>
+              Drei Optionen: <strong>Hell</strong>, <strong>Dunkel</strong> und
+              <strong> System</strong> (folgt der Einstellung deines Geräts). Die Wahl gilt
+              sofort und bleibt gespeichert.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('set-7')} title="API-Zugriff">
+            <p>
+              Hier erzeugst du API-Schlüssel für externe Anwendungen und Kurzbefehle. Jeder
+              Schlüssel bekommt eine Beschreibung, damit du ihn später wiedererkennst.
+            </p>
+            <p>
+              <strong>Wichtig:</strong> Der Schlüssel wird genau einmal im Klartext angezeigt
+              — kopiere ihn sofort. Danach siehst du nur noch den Eintrag in der Liste und
+              kannst ihn löschen. Ein gelöschter Schlüssel funktioniert sofort nicht mehr.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Verwaltung ================= */}
+        <Abschnitt
+          id="verwaltung"
+          titel="Verwaltung (nur Admins)"
+          satz={'Der Bereich erscheint ausschließlich bei Konten mit der Rolle „Administrator".'}
+        >
+          <AccordionItem {...item('vw-1')} title="Nutzer anlegen, bearbeiten, löschen">
+            <p>
+              Auf dem Desktop liegt „Verwaltung" als eigener Eintrag in der Seitenleiste,
+              auf dem Handy als Punkt in der Einstellungsliste.
+            </p>
+            <p>
+              Beim <strong>Anlegen</strong> sind E-Mail und Benutzername Pflicht; dazu kommen
+              Rolle (Benutzer oder Administrator), voller Name, IBAN sowie Kirchengemeinde,
+              Kirchspiel und Kirchenkreis. Dieselben Felder lassen sich später bearbeiten.
+            </p>
+            <p>
+              <strong>Löschen</strong> läuft in zwei Schritten: Der erste Klick auf das
+              Papierkorb-Symbol schaltet es scharf („Sicher?"), der zweite löscht endgültig —
+              samt aller Daten des Kontos und ohne Rückgängig. Das eigene Konto lässt sich
+              nicht löschen.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Export ================= */}
+        <Abschnitt
+          id="export"
+          titel="Export & Abrechnungsformular"
+          satz="Die Excel-Datei ist das offizielle Formular — direkt einreichbar."
+        >
+          <AccordionItem {...item('ex-1')} title="Was die Excel-Datei enthält">
+            <p>
+              Der Excel-Export nutzt das <strong>offizielle Dienstfahrten-Abrechnungsformular
+              des Kirchenkreises</strong>. Deine Profildaten (Name, Anschrift, IBAN) und die
+              Kostenstelle des Trägers stehen im Kopf, die Fahrten mit Datum, Route, Anlass
+              und Kilometern in den Zeilen, dazu der Erstattungssatz und die Summen.
+            </p>
+            <p>
+              Deshalb lohnt es sich, das Profil vollständig auszufüllen — sonst musst du im
+              Formular nacharbeiten.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('ex-2')} title="Quartalsblätter und mehrere Dateien">
+            <p>
+              Das Formular ist in <strong>Quartalsblätter</strong> gegliedert
+              (Januar–März, April–Juni, Juli–September, Oktober–Dezember); die Datei enthält
+              das Blatt des passenden Quartals.
+            </p>
+            <p>
+              Pro Blatt passen <strong>maximal 29 Fahrten</strong>. Hast du mehr, teilt die App
+              den Export automatisch auf mehrere Dateien auf und liefert sie zusammen als
+              <strong> ZIP-Archiv</strong>.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('ex-3')} title="PDF als Alternative">
+            <p>
+              Überall, wo Excel angeboten wird, gibt es auch <strong>PDF</strong> und
+              <strong> „Beide (ZIP)"</strong>. Das PDF hat denselben Inhalt und ist praktisch,
+              wenn die Abrechnung nur unterschrieben und weitergereicht werden soll.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('ex-4')} title="Ausschlussfrist: sechs Monate">
+            <p>
+              Für Dienstreisen gilt eine <strong>Ausschlussfrist von sechs Monaten</strong> je
+              abgeschlossener Dienstreise (§ 3 Abs. 1 BRKG). Dieser Hinweis steht auch auf dem
+              Formular selbst.
+            </p>
+            <p>
+              Praktisch heißt das: Reiche jeden Monat zeitnah ein. Die Kachel auf dem
+              Dashboard und das Abzeichen an „Abrechnung" zeigen dir, was noch offen ist.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ================= Installation ================= */}
+        <Abschnitt
+          id="installation"
+          titel="App installieren (Homescreen)"
+          satz="Das Fahrtenbuch lässt sich wie eine App auf dem Startbildschirm ablegen."
+        >
+          <AccordionItem {...item('pwa-1')} title="iPhone und iPad (Safari)">
+            <ol className="help-ol">
+              <li>Öffne das Fahrtenbuch in <strong>Safari</strong>.</li>
+              <li>Tippe unten auf das <strong>Teilen-Symbol</strong> (Quadrat mit Pfeil nach oben).</li>
+              <li>Wähle <strong>„Zum Home-Bildschirm"</strong>.</li>
+              <li>Namen bestätigen, fertig.</li>
+            </ol>
+            <p>
+              Das Symbol liegt danach zwischen deinen Apps, und das Fahrtenbuch startet ohne
+              Browserleiste im Vollbild.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('pwa-2')} title="Android (Chrome)">
+            <ol className="help-ol">
+              <li>Öffne das Fahrtenbuch in <strong>Chrome</strong>.</li>
+              <li>Tippe oben rechts auf das <strong>Menü</strong> (drei Punkte).</li>
+              <li>Wähle <strong>„App installieren"</strong> bzw. „Zum Startbildschirm hinzufügen".</li>
+            </ol>
+            <p>
+              Häufig blendet Chrome die Installation auch von selbst als Leiste am unteren
+              Rand ein.
+            </p>
+          </AccordionItem>
+
+          <AccordionItem {...item('pwa-3')} title="Was bringt die Installation?">
+            <p>
+              Das Fahrtenbuch startet im Vollbild ohne Adressleiste und ist mit einem Tipp
+              erreichbar. Über einen langen Druck auf das Symbol erreichst du direkt
+              <strong> „Fahrt erfassen"</strong> und <strong>„Abrechnung"</strong>.
+            </p>
+            <p>
+              Eine Internetverbindung wird weiterhin gebraucht — die Daten liegen auf dem
+              Server, nicht auf dem Gerät.
+            </p>
+          </AccordionItem>
+        </Abschnitt>
+
+        {/* ---------------- Kontakt ---------------- */}
+        <section className="help-kontakt">
+          <h2 className="help-kontakt-titel">Frage offen geblieben?</h2>
+          <p className="help-kontakt-satz">
+            Wenn hier etwas fehlt, etwas nicht funktioniert oder du eine Idee für das
+            Fahrtenbuch hast — schreib einfach.
+          </p>
+          <a href="mailto:support@kkd-fahrtenbuch.de" className="btn-primary help-kontakt-btn">
+            <Mail size={16} aria-hidden="true" />
+            support@kkd-fahrtenbuch.de
+          </a>
+        </section>
+      </main>
+
+      <footer className="help-footer">
+        <div className="help-wrap">
+          © {new Date().getFullYear()} Simon Luthe · Alle Rechte vorbehalten
         </div>
-      }
-      isOpen={openItem === 5}
-      toggleOpen={() => toggleItem(5)}
-      >
-      <p>Nutzen Sie iOS-Kurzbefehle, um das Erfassen von Fahrten noch einfacher zu gestalten:</p>
-      <div className="space-y-4 mt-4">
-      <div>
-      <a 
-      href="https://www.icloud.com/shortcuts/a41b3e30b8da4dff8c2f28e7c1a84361" 
-      className="btn-primary w-full md:w-auto flex items-center justify-center md:justify-start gap-2 text-sm"
-      target="_blank"
-      rel="noopener noreferrer"
-      >
-      <Download size={16} />
-      <span className="hidden md:inline">Kurzbefehl: "Neue Fahrt eintragen" installieren</span>
-      <span className="md:hidden">Kurzbefehl installieren</span>
-      </a>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">So richten Sie den Kurzbefehl ein:</h4>
-      <ol className="list-decimal ml-4 space-y-2">
-      <li>Klicken Sie auf den Button "Kurzbefehl installieren"</li>
-      <li>Öffnen Sie in den Einstellungen den Bereich "API-Zugriff"</li>
-      <li>Generieren Sie einen neuen API-Schlüssel für iOS-Kurzbefehle</li>
-      <li>Kopieren Sie den generierten Schlüssel</li>
-      <li>Beim ersten Start des Kurzbefehls werden Sie nach dem API-Schlüssel gefragt</li>
-      <li>Der Schlüssel wird sicher in Ihrer iCloud gespeichert</li>
-      </ol>
-      </div>
-      
-      <div className="space-y-2">
-      <h4 className="font-medium">Funktionen des Kurzbefehls:</h4>
-      <ul className="list-disc ml-4 space-y-2">
-      <li>Schnelle Erfassung von Fahrten direkt vom Homescreen</li>
-      <li>Den aktuellen Standort mittels GPS als Adresse angeben</li>
-      <li>Siri Unterstützung: "Hey Siri, neue Fahrt eintragen."</li>
-      </ul>
-      </div>
-      
-      <div className="bg-primary-50 dark:bg-primary-900 p-4 rounded-lg mt-4">
-      <h4 className="font-medium mb-2">Tipp:</h4>
-      <p className="text-sm">
-      Fügen Sie den Kurzbefehl zu Ihrem Home-Bildschirm hinzu, um mit einem Tipp 
-      eine neue Fahrt zu erfassen. Sie können auch "Hey Siri, neue Fahrt eintragen." 
-      verwenden.
-      </p>
-      </div>
-      </div>
-      </AccordionItem>
-                       
-                        </div>
-                    </div>
-                </section>
-
-                {/* Contact */}
-                <section className="card-container text-center max-w-3xl mx-auto">
-                    <h2 className="text-xl font-bold text-value mb-4">Weitere Hilfe benötigt?</h2>
-                    <p className="text-label mb-6">
-                        Wenn Sie weitere Fragen haben oder Unterstützung benötigen, kontaktieren Sie uns.
-                    </p>
-      <a
-      href="mailto:support@kkd-fahrtenbuch.de"
-      className="btn-primary w-full sm:w-auto inline-flex justify-center items-center"
-      >
-      Kontakt aufnehmen
-      </a>
-
-                </section>
-            </main>
-
-            {/* Footer */}
-            <footer className="bg-primary-50 dark:bg-primary-900 border-t border-primary-100 dark:border-primary-800 py-6">
-                <div className="container mx-auto px-4 text-center text-sm text-label">
-                    <p>© {new Date().getFullYear()} Simon Luthe. Alle Rechte vorbehalten.</p>
-                </div>
-            </footer>
-        </div>
-    );
+      </footer>
+    </div>
+  );
 }
