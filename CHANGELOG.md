@@ -12,10 +12,16 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - „+ Neue Fahrt" in der Fahrtenliste (Desktop) und FAB auf Mobilgeräten — gleicher Erfassungsflow wie auf dem Dashboard
 - Einreichen fragt nach dem Exportformat (Excel / PDF / Beides als ZIP), statt stillschweigend Excel zu laden
 
+### Changed
+- PDF-Export sieht jetzt 1:1 wie die Excel-Liste aus: Statt das Formular nachzuzeichnen, wird die fertige Excel-Arbeitsmappe nach PDF konvertiert (LibreOffice headless im Backend-Container) — ein PDF ist damit genau „das Excel gedruckt", nur leichter zu drucken. Chunking (29 Zeilen je Blatt), ZIP ab zwei Dateien und der Mitfahrer-Export verhalten sich wie beim Excel-Export
+
 ### Removed
 - Video-Anleitungen auf der Hilfeseite entfernt (die Aufnahmen zeigten die alte Oberfläche) — neue Videos folgen
+- Freies Nachzeichnen des Formulars per PDFKit (samt Abhängigkeit `pdfkit`) — ersetzt durch die Excel-Konvertierung
 
 ### Fixed
+- Abrechnungsformular (Excel **und** PDF): Kostenträger, Name, Anschrift und IBAN blieben im Quartals- und im Mitnahmeblatt leer bzw. standen auf „0", weil diese Felder im Template per Querverweis aus dem Vorlage-Blatt kamen und beim Schreiben ohne berechneten Wert zurückblieben — sie werden jetzt direkt gefüllt, ebenso Ausstellungsdatum, Gesamt-km und die Mitnahme-Erstattung
+- PDF des normalen Abrechnungsexports enthält keine leere Seite „Mitnahmeentschädigung" mehr (in der Excel-Datei bleibt das Blatt erhalten)
 - Fortschrittsleiste (mobil): „Erstattet" als Endstation zeigt jetzt den Haken statt eines leeren Kreises
 - Dashboard-Kacheln der unteren Zeile sind gleich hoch; die „Unterwegs"-Liste scrollt innerhalb ihrer Kachel
 
