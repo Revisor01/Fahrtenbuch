@@ -5,18 +5,21 @@ const authController = require('../controllers/authController');
 const { validate } = require('../middleware/validate');
 const { loginSchema, registerSchema } = require('../schemas/authSchemas');
 
+// Alltagstauglich statt streng: Vertippen darf niemanden aussperren.
+// Erfolgreiche Logins zählen nicht mit, gebremst wird nur das Raten.
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 Minuten
-  max: 10, // max 10 Versuche pro IP
-  message: { message: 'Zu viele Login-Versuche. Bitte in 15 Minuten erneut versuchen.' },
+  windowMs: 10 * 60 * 1000, // 10 Minuten
+  max: 20, // max 20 Fehlversuche pro IP
+  skipSuccessfulRequests: true,
+  message: { message: 'Zu viele Login-Versuche. Bitte in 10 Minuten erneut versuchen.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 60 Minuten
+  windowMs: 10 * 60 * 1000, // 10 Minuten
   max: 5, // max 5 Registrierungen pro IP
-  message: { message: 'Zu viele Registrierungsversuche. Bitte in einer Stunde erneut versuchen.' },
+  message: { message: 'Zu viele Registrierungsversuche. Bitte in 10 Minuten erneut versuchen.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
