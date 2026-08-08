@@ -166,3 +166,21 @@ Jede Phase trägt hier Annahmen, Abweichungen und offene Fragen ein.
 - **pageSetup nicht angefasst:** Das Template bringt bereits A4 quer, `fitToPage` mit `fitToWidth: 1`/`fitToHeight: 1`, zentriert und ohne Gitternetz mit — jedes Blatt passt damit auf genau eine Seite (im gerenderten PDF als MediaBox 841×595 pt bestätigt). Eigene pageSetup-Werte hätten die Skalierung (74–96 % je Blatt) nur verschlechtert.
 - **Dateiname landet sichtbar im PDF:** Die Fußzeile des Formulars enthält `&R&F` (rechtsbündig Dateiname). Deshalb bekommt der Konverter den echten Exportnamen (`fahrtenabrechnung_<typ>_<jahr>_<monat>_1`) statt eines Zufallsnamens.
 - **Unverändert:** Chunking à 29 Zeilen je Blatt, ZIP ab zwei Dateien (beim PDF-Export jetzt ein PDF-ZIP), Mitfahrer als eigener Pfad, Dedup nach Fahrt-ID, zeitabhängige Sätze aus `utils/erstattung.js` und das Statuswechsel-Verhalten des Zeitraum-Exports (`eingereicht` je Monat, auch im Mitfahrer-Pfad).
+
+### PDF-Export — Verifikation im Container (08.08.2026)
+
+Getestet auf der Testumgebung mit echten Produktionsdaten (Konto JJ, 967 Fahrten):
+- Backend-Image mit libreoffice-calc gebaut: **1,51 GB** (ohne JRE, Calc-Export braucht es nicht)
+- LibreOffice 7.4.7.2 im Container vorhanden, Konvertierung läuft
+- Juni 2026 (66 Fahrten): Excel → ZIP mit 2 Dateien, PDF → ZIP mit 2 PDFs à 2 Seiten
+- **Sichtprüfung bestanden:** Deckblatt mit Name/Anschrift/IBAN korrekt gefüllt (der vom Agent
+  gefundene Querverweis-Bug hätte hier „0" gezeigt), Fahrtentabelle vollständig, Summenzeile
+  „437 km x 0,30 € = 131,10 €", Unterschriftsfelder, A4 quer, eine Seite je Blatt
+- Zeitraum Jan–Jun: 28 s, 11 PDFs im ZIP (437 KB)
+- Zweiter Aufruf spürbar schneller als der erste (LibreOffice-Profil bereits angelegt)
+
+Offen/bewusst so gelassen:
+- Der Exportdateiname erscheint in der PDF-Fußzeile (Formular nutzt &F) — gewollt, damit im
+  Ausdruck erkennbar bleibt, welche Datei gedruckt wurde.
+- In einer Zeile mit sehr langem Reisezweck überlappt der Text minimal mit der Nachbarspalte
+  (Excel-Verhalten bei fester Spaltenbreite, im PDF sichtbar). Nur kosmetisch, Werte stimmen.
