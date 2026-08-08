@@ -17,7 +17,14 @@ import { Pencil, Search, ChevronRight, MapPin, Crosshair, Check } from 'lucide-r
 
 const STANDARD_SATZ = 0.3; // Fallback, wenn kein Erstattungssatz gepflegt ist
 
-const heute = () => new Date().toISOString().slice(0, 10);
+// Lokales Datum, nicht UTC: toISOString() liefert zwischen Mitternacht und
+// 2 Uhr (Sommerzeit) noch den Vortag und wuerde Fahrten falsch datieren.
+const heute = () => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
 
 function formatDatumZeile(datum) {
   const d = new Date(`${datum}T00:00:00`);

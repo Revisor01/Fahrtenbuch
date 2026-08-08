@@ -19,7 +19,14 @@ import { Star } from 'lucide-react';
 
 const API_BASE_URL = '/api';
 
-const heuteISO = () => new Date().toISOString().slice(0, 10);
+// Lokales Datum, nicht UTC: toISOString() liefert zwischen Mitternacht und
+// 2 Uhr (Sommerzeit) noch den Vortag und wuerde Fahrten falsch datieren.
+const heuteISO = () => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
 
 const formatEuro = (betrag) => (Number(betrag) || 0).toFixed(2).replace('.', ',');
 
