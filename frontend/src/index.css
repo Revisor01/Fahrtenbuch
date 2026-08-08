@@ -1715,6 +1715,13 @@ code {
 
 .erf-row-text {
   min-width: 0;
+  flex-shrink: 0;
+}
+
+/* Träger darf höchstens die Hälfte der Zeile beanspruchen, damit das Label
+   daneben lesbar bleibt */
+.erf-row-letzte .erf-traeger-btn {
+  max-width: 52%;
 }
 
 /* „Ort dauerhaft speichern" */
