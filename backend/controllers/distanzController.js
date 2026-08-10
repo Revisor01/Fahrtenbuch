@@ -1,5 +1,5 @@
 const Distanz = require('../models/Distanz');
-const { getDistance, calculateAutoSplit } = require('../utils/distanceCalculator');
+const { calculateAutoSplit } = require('../utils/distanceCalculator');
 
 exports.createOrUpdateDistanz = async (req, res) => {
   try {

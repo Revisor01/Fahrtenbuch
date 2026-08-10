@@ -158,7 +158,7 @@ exports.resendVerification = async (req, res) => {
         const verificationToken = crypto.randomBytes(32).toString('hex');
         
         // Speichere den neuen Token
-        const [result] = await db.execute(
+        await db.execute(
             'INSERT INTO email_verifications (user_id, new_email, verification_token, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))',
             [userId, email, verificationToken]
         );

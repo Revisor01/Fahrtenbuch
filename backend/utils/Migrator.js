@@ -89,11 +89,15 @@ class Migrator {
             try {
                 await connection.query(statement);
             } catch (error) {
-                // Nur die erste Zeile loggen: die Statements enthalten
-                // eingesetzte Umgebungsvariablen (Admin-Mail, Startpasswoerter),
-                // die sonst im Klartext im Log landen.
-                const kurz = statement.split('\n').find((z) => z.trim() && !z.trim().startsWith('--')) || '';
-                console.error(`Fehler beim Ausführen eines SQL-Statements (${kurz.trim().slice(0, 60)}…):`, error.sqlMessage || error.message);
+                // Kein Statement-Inhalt ins Log: die Statements enthalten
+                // eingesetzte Umgebungsvariablen (Admin-Mail, Startpasswort) -
+                // auch in der ersten Zeile. Zum Auffinden reichen die Position
+                // und die DB-Meldung, die den Spalten-/Tabellennamen nennt.
+                const nummer = statements.indexOf(statement) + 1;
+                console.error(
+                    `Fehler bei SQL-Statement ${nummer} von ${statements.length}:`,
+                    error.sqlMessage || error.message
+                );
                 throw error;
             }
         }

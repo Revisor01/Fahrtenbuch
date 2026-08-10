@@ -15,7 +15,6 @@ const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const { authMiddleware } = require('./middleware/authMiddleware');
-const util = require('util');
 
 const app = express();
 
