@@ -4,7 +4,11 @@ const JSZip = require('jszip');
 const Fahrt = require('../models/Fahrt');
 const Abrechnung = require('../models/Abrechnung');
 const db = require('../config/database');
-const { getErstattungssatzFuerTraeger } = require('./erstattung');
+const {
+  getErstattungssatzFuerTraeger,
+  ladeSaetzeFuerTraeger,
+  berechneErstattung,
+} = require('./erstattung');
 
 async function getUserProfile(userId) {
  const [rows] = await db.execute(
@@ -95,7 +99,7 @@ function fillQuartalHeader(worksheet, year, kostentraeger, kostenstelle, userPro
  worksheet.getCell('G4').value = formatIBAN(userProfile.iban);
 }
 
-function fillQuartalSheet(worksheet, data, year, satz) {
+function fillQuartalSheet(worksheet, data, year, satz, saetze) {
  // Update year
  worksheet.getCell('B2').value = parseInt(year);
 
@@ -122,10 +126,19 @@ function fillQuartalSheet(worksheet, data, year, satz) {
  worksheet.getCell('B40').numFmt = 'DD.MM.YYYY';
 
  // Erstattungsberechnung in Zeile 40 — Satz aus der DB (Template enthält
- // statisch "km x 0,30 € =" in I40 und Formel H40*0.3 in J40, beides überschreiben)
+ // statisch "km x 0,30 € =" in I40 und Formel H40*0.3 in J40, beides überschreiben).
+ // Jede Fahrt wird mit dem an IHREM Datum gueltigen Satz gerechnet. Frueher galt
+ // ein einziger Stichtagssatz fuer den gesamten Zeitraum - bei einer
+ // Satzaenderung standen dadurch falsche Betraege im eingereichten Formular.
+ const { betrag, gemischt, effektivSatz } = berechneErstattung(data, saetze);
+
  worksheet.getCell('H40').value = gesamtKm;
- worksheet.getCell('I40').value = `km x ${satz.toFixed(2).replace('.', ',')} € =`;
- worksheet.getCell('J40').value = Math.round(gesamtKm * satz * 100) / 100;
+ worksheet.getCell('I40').value = gemischt
+   // Bei Satzwechsel im Zeitraum passt keine einzelne "km x Satz"-Zeile; der
+   // Mischsatz macht den Betrag nachvollziehbar statt ihn zu verschleiern.
+   ? `km, Mischsatz ${effektivSatz.toFixed(4).replace('.', ',')} € =`
+   : `km x ${(gemischt ? effektivSatz : satz).toFixed(2).replace('.', ',')} € =`;
+ worksheet.getCell('J40').value = betrag;
 }
 
 function removeUnusedQuartalSheets(workbook, keepSheetName) {
@@ -179,6 +192,9 @@ function prepareMitfahrerData(fahrten) {
  const mitfahrerData = fahrten.map(fahrt => {
    if (fahrt.mitfahrer_id) {
      return {
+       // fahrt_id/mitfahrer_id nur zum Entduplizieren, nicht fuers Formular
+       _fahrtId: fahrt.id ?? fahrt.fahrt_id,
+       _mitfahrerId: fahrt.mitfahrer_id,
        datum: formatDate(fahrt.datum),
        anlass: fahrt.anlass,
        name: fahrt.mitfahrer_name,
@@ -193,10 +209,36 @@ function prepareMitfahrerData(fahrten) {
    return null;
  }).filter(Boolean);
 
- // Duplikate entfernen
- return mitfahrerData.filter((mitfahrer, index, self) =>
-   index === self.findIndex((t) => t.datum === mitfahrer.datum && t.name === mitfahrer.name)
- );
+ // Echte Duplikate aus dem JOIN entfernen — also dieselbe Person auf derselben
+ // Fahrt. Frueher lief der Filter ueber (Datum, Name) und verwarf damit die
+ // zweite Fahrt einer Person am selben Tag: bei getrennt erfasster Hin- und
+ // Rueckfahrt fiel die Rueckfahrt still aus der Mitnahmeentschaedigung.
+ const gesehen = new Set();
+ return mitfahrerData.filter((m) => {
+   const schluessel = `${m._fahrtId}|${m._mitfahrerId}`;
+   if (gesehen.has(schluessel)) return false;
+   gesehen.add(schluessel);
+   return true;
+ });
+}
+
+/**
+ * Konfigurierter Mitnahmesatz des Nutzers. Der Export rechnete bisher immer mit
+ * 0,05 €, obwohl der Satz in den Einstellungen aenderbar ist — Anzeige und
+ * Formular wichen dadurch voneinander ab.
+ */
+async function getMitnahmeSatz(userId) {
+ try {
+   const [rows] = await db.execute(
+     'SELECT betrag FROM mitfahrer_erstattung WHERE user_id = ? ORDER BY gueltig_ab DESC LIMIT 1',
+     [userId]
+   );
+   const betrag = parseFloat(rows[0]?.betrag);
+   return Number.isFinite(betrag) ? betrag : MITNAHME_SATZ;
+ } catch (error) {
+   console.error('Mitnahmesatz konnte nicht geladen werden, nutze Standard:', error);
+   return MITNAHME_SATZ;
+ }
 }
 
 function chunkFormattedData(formattedData) {
@@ -207,7 +249,7 @@ function chunkFormattedData(formattedData) {
  return chunkedData;
 }
 
-async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfahrerData }) {
+async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfahrerData, satz = MITNAHME_SATZ }) {
  const workbook = await ladeTemplate();
 
  const vorlageWorksheet = workbook.getWorksheet('Vorlage');
@@ -237,34 +279,52 @@ async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfah
    mitnahmeWorksheet.getCell('E6').value = formatIBAN(userProfile.iban);
    mitnahmeWorksheet.getCell('B4').value = 'Mitfahrer:innen';
 
+   // Der Aufrufer chunkt bereits auf MAX_ROWS_PER_SHEET — hier wird genau
+   // geschrieben, was ankommt. Frueher wurde ab Zeile 30 still verworfen.
    mitfahrerData.forEach((mitfahrer, index) => {
-     if (index < MAX_ROWS_PER_SHEET) {
-       const row = mitnahmeWorksheet.getRow(index + 10);
-       row.getCell('A').value = mitfahrer.datum;
-       row.getCell('B').value = mitfahrer.anlass;
-       row.getCell('C').value = mitfahrer.hinweg;
-       row.getCell('D').value = mitfahrer.rueckweg;
-       row.getCell('E').value = mitfahrer.name;
-       row.getCell('F').value = mitfahrer.arbeitsstaette;
-       row.getCell('G').value = mitfahrer.kilometer;
-     }
+     const row = mitnahmeWorksheet.getRow(index + 10);
+     row.getCell('A').value = mitfahrer.datum;
+     row.getCell('B').value = mitfahrer.anlass;
+     row.getCell('C').value = mitfahrer.hinweg;
+     row.getCell('D').value = mitfahrer.rueckweg;
+     row.getCell('E').value = mitfahrer.name;
+     row.getCell('F').value = mitfahrer.arbeitsstaette;
+     row.getCell('G').value = mitfahrer.kilometer;
    });
 
    // Summen- und Erstattungszeile (Template: SUM-Formeln ohne Cache-Wert)
    const gesamtKm = mitfahrerData
-     .slice(0, MAX_ROWS_PER_SHEET)
      .reduce((sum, m) => sum + (typeof m.kilometer === 'number' && !isNaN(m.kilometer) ? m.kilometer : 0), 0);
    mitnahmeWorksheet.getCell('G39').value = gesamtKm;
    mitnahmeWorksheet.getCell('B42').value = new Date();
    mitnahmeWorksheet.getCell('B42').numFmt = 'DD.MM.YYYY';
    mitnahmeWorksheet.getCell('E42').value = gesamtKm;
-   mitnahmeWorksheet.getCell('G42').value = Math.round(gesamtKm * MITNAHME_SATZ * 100) / 100;
+   // Satz aus der DB statt hartkodiert — Nutzer koennen ihn konfigurieren.
+   // Das Template beschriftet die Zeile statisch mit "km x 0,05 €", daher bei
+   // abweichendem Satz die Beschriftung mitziehen.
+   if (Math.abs(satz - MITNAHME_SATZ) > 1e-9) {
+     mitnahmeWorksheet.getCell('F42').value = `km x ${satz.toFixed(2).replace('.', ',')} € =`;
+   }
+   mitnahmeWorksheet.getCell('G42').value = Math.round(gesamtKm * satz * 100) / 100;
  }
 
  return workbook;
 }
 
-async function baueQuartalWorkbooks({ chunkedData, jahr, quartalSheetName, zeitraumHeader, traegerName, kostenstelle, userProfile, satz }) {
+/**
+ * Baut die Mitfahrer-Mappen. Ab 30 Zeilen entstehen mehrere Formulare —
+ * wie bei den normalen Abrechnungen auch.
+ */
+async function baueMitfahrerWorkbooks({ jahr, zeitraumHeader, userProfile, mitfahrerData, satz }) {
+ const chunks = chunkFormattedData(mitfahrerData);
+ return Promise.all(
+   chunks.map((chunk) =>
+     baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfahrerData: chunk, satz })
+   )
+ );
+}
+
+async function baueQuartalWorkbooks({ chunkedData, jahr, quartalSheetName, zeitraumHeader, traegerName, kostenstelle, userProfile, satz, saetze }) {
  return Promise.all(chunkedData.map(async (chunk) => {
    const workbook = await ladeTemplate();
 
@@ -280,7 +340,7 @@ async function baueQuartalWorkbooks({ chunkedData, jahr, quartalSheetName, zeitr
    if (quartalWorksheet) {
      quartalWorksheet.getCell('D2').value = zeitraumHeader;
      fillQuartalHeader(quartalWorksheet, jahr, traegerName, kostenstelle, userProfile);
-     fillQuartalSheet(quartalWorksheet, chunk, jahr, satz);
+     fillQuartalSheet(quartalWorksheet, chunk, jahr, satz, saetze);
    }
 
    return workbook;
@@ -301,16 +361,27 @@ async function baueMonatsWorkbooks({ year, month, type, userId }) {
  if (type === 'mitfahrer') {
    const mitfahrerData = prepareMitfahrerData(fahrten);
 
-   const workbook = await baueMitfahrerWorkbook({
+   // Wie beim normalen Export: ohne Daten kein leeres Formular mit 0 km
+   if (mitfahrerData.length === 0) {
+     return { notFound: true };
+   }
+
+   const satz = await getMitnahmeSatz(userId);
+   const workbooks = await baueMitfahrerWorkbooks({
      jahr: year,
      zeitraumHeader: `${getMonthName(parseInt(correctedMonth))} ${year}`,
      userProfile,
-     mitfahrerData
+     mitfahrerData,
+     satz
    });
 
+   const basis = `mitfahrer_${year}_${correctedMonth}`;
    return {
-     dateien: [{ dateiname: `mitfahrer_${year}_${correctedMonth}`, workbook }],
-     zipName: `mitfahrer_${year}_${correctedMonth}`
+     dateien: workbooks.map((workbook, i) => ({
+       dateiname: workbooks.length > 1 ? `${basis}_teil${i + 1}` : basis,
+       workbook
+     })),
+     zipName: basis
    };
  }
 
@@ -333,6 +404,7 @@ async function baueMonatsWorkbooks({ year, month, type, userId }) {
  // Erstattungssatz zum Stichtag (letzter Tag des Exportmonats) aus der DB
  const stichtag = new Date(parseInt(year), parseInt(correctedMonth), 0);
  const satz = await getErstattungssatzFuerTraeger(type, userId, stichtag);
+ const saetze = await ladeSaetzeFuerTraeger(type, userId);
 
  const workbooks = await baueQuartalWorkbooks({
    chunkedData,
@@ -342,7 +414,8 @@ async function baueMonatsWorkbooks({ year, month, type, userId }) {
    traegerName,
    kostenstelle,
    userProfile,
-   satz
+   satz,
+   saetze
  });
 
  return {
@@ -372,17 +445,29 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
  if (type === 'mitfahrer') {
    const mitfahrerData = prepareMitfahrerData(fahrten);
 
-   const workbook = await baueMitfahrerWorkbook({
+   // Ohne Daten kein leeres Formular - und vor allem kein Statuswechsel auf
+   // "eingereicht" fuer Monate, in denen gar nichts abzurechnen war.
+   if (mitfahrerData.length === 0) {
+     return { notFound: true };
+   }
+
+   const satz = await getMitnahmeSatz(userId);
+   const workbooks = await baueMitfahrerWorkbooks({
      jahr: startYear,
      zeitraumHeader,
      userProfile,
-     mitfahrerData
+     mitfahrerData,
+     satz
    });
 
    await setzeZeitraumStatus({ startYear, startMonth, endYear, endMonth, type, userId });
 
+   const basis = `mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`;
    return {
-     dateien: [{ dateiname: `mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`, workbook }],
+     dateien: workbooks.map((workbook, i) => ({
+       dateiname: workbooks.length > 1 ? `${basis}_teil${i + 1}` : basis,
+       workbook
+     })),
      zipName: `mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`
    };
  }
@@ -394,6 +479,9 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
  }
 
  const chunkedData = chunkFormattedData(formattedData);
+ // Das Formular kennt nur feste Quartalsblaetter. Bei einem Zeitraum ueber
+ // Quartalsgrenzen passt keins exakt — die Kopfzeile D2 nennt aber den echten
+ // Zeitraum, deshalb bleibt das Startquartal als Traegerblatt.
  const quartalSheetName = getQuartalSheet(startMonth);
 
  const [abrechnungstraeger] = await db.execute(
@@ -406,6 +494,7 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
  // Erstattungssatz zum Stichtag (letzter Tag des Endmonats) aus der DB
  const stichtag = new Date(parseInt(endYear), parseInt(endMonth), 0);
  const satz = await getErstattungssatzFuerTraeger(type, userId, stichtag);
+ const saetze = await ladeSaetzeFuerTraeger(type, userId);
 
  const workbooks = await baueQuartalWorkbooks({
    chunkedData,
@@ -415,7 +504,8 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
    traegerName,
    kostenstelle,
    userProfile,
-   satz
+   satz,
+   saetze
  });
 
  await setzeZeitraumStatus({ startYear, startMonth, endYear, endMonth, type, userId });

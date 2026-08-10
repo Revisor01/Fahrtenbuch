@@ -469,7 +469,7 @@ exports.getMonthlySummary = async (req, res) => {
     f.kilometer,
     f.mitfahrer_count,
     f.datum,
-    at.id,
+    eb.id,
     eb.betrag
   FROM (
     SELECT 
@@ -624,19 +624,25 @@ exports.getYearSummary = async (req, res) => {
     const { year } = req.params;
     const userId = req.user.id;
     
-    // Hole zuerst alle Abrechnungsträger mit ihren Erstattungssätzen
+    // Alle Erstattungssätze inklusive Mitfahrer-Satz. Ohne den UNION lieferte
+    // getErstattungssatz('mitfahrer', …) immer 0 und die Jahresübersicht wies
+    // die Mitfahrer-Erstattung dauerhaft mit 0 € aus.
     const [erstattungssaetze] = await db.execute(`
-      SELECT 
+      SELECT 'mitfahrer' AS id, betrag, gueltig_ab
+      FROM mitfahrer_erstattung
+      WHERE user_id = ? AND gueltig_ab <= LAST_DAY(?)
+      UNION ALL
+      SELECT
         at.id,
         eb.betrag,
         eb.gueltig_ab
       FROM abrechnungstraeger at
       INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-      WHERE at.user_id = ? 
+      WHERE at.user_id = ?
         AND at.active = true
         AND eb.gueltig_ab <= LAST_DAY(?)
-      ORDER BY eb.gueltig_ab DESC
-    `, [userId, `${year}-12-31`]);
+      ORDER BY gueltig_ab DESC
+    `, [userId, `${year}-12-31`, userId, `${year}-12-31`]);
     
     // Hole alle Fahrten des Jahres
     const [fahrten] = await db.execute(`
@@ -660,16 +666,18 @@ exports.getYearSummary = async (req, res) => {
       saetzeProTraeger[satz.id].push(satz);
     });
     
-    // Finde den korrekten Erstattungssatz für ein bestimmtes Datum
+    // Finde den korrekten Erstattungssatz für ein bestimmtes Datum.
+    // Fallback auf den ältesten Satz wie im Monatsbericht — sonst erscheinen
+    // Fahrten vor dem ersten gueltig_ab mit 0 €.
     const getErstattungssatz = (abrechnung, datum) => {
-      if (!saetzeProTraeger[abrechnung]) return 0;
-      
       const saetze = saetzeProTraeger[abrechnung];
-      const passenderSatz = saetze.find(satz => 
+      if (!saetze || saetze.length === 0) return 0;
+
+      const passenderSatz = saetze.find(satz =>
         new Date(satz.gueltig_ab) <= new Date(datum)
       );
-      
-      return passenderSatz ? passenderSatz.betrag : 0;
+
+      return passenderSatz ? passenderSatz.betrag : saetze[saetze.length - 1].betrag;
     };
     
     // Berechne die Summen pro Abrechnungsträger

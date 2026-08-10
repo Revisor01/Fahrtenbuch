@@ -138,10 +138,13 @@ class AbrechnungsTraeger {
         }
     }
 
-    static async checkForFahrten(id) {
+    static async checkForFahrten(id, userId) {
+        // abrechnung ist VARCHAR, die id kommt als Zahl oder String - beide
+        // Seiten als CHAR vergleichen, sonst castet MySQL implizit und der
+        // Index bleibt ungenutzt.
         const [rows] = await db.execute(
-            'SELECT COUNT(*) as count FROM fahrten WHERE abrechnung = ?',
-            [id]
+            'SELECT COUNT(*) as count FROM fahrten WHERE abrechnung = CAST(? AS CHAR) AND user_id = ?',
+            [id, userId]
         );
         return rows[0].count > 0;
     }

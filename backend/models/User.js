@@ -25,8 +25,11 @@ class User {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(tempPassword, salt);
             
+            // Einladungslink 7 Tage gueltig - lang genug fuer Urlaub, aber nicht
+            // unbegrenzt (siehe setPassword).
             const [userResult] = await connection.execute(
-                'INSERT INTO users (username, password, role, verification_token) VALUES (?, ?, ?, ?)',
+                `INSERT INTO users (username, password, role, verification_token, verification_token_expires)
+                 VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))`,
                 [username, hashedPassword, role, verificationToken]
             );
             
@@ -74,14 +77,10 @@ class User {
     }
     
 
-    static async updateProfile(id, userData) {
-        const { username, email, full_name } = userData;
-        const [result] = await db.execute(
-            'UPDATE users SET username = ?, email = ?, full_name = ? WHERE id = ?',
-            [username, email, full_name, id]
-        );
-        return result.affectedRows > 0;
-    }
+    // Entfernt: updateProfile() schrieb auf users.email und users.full_name -
+    // beide Spalten liegen in user_profiles, nicht in users. Der Aufruf haette
+    // sofort ER_BAD_FIELD_ERROR geworfen. Ohne Aufrufer; das Aktualisieren
+    // laeuft ueber profileController.
 
     static async verifyEmail(token) {
         const connection = await db.getConnection();
@@ -164,12 +163,9 @@ class User {
         return result.affectedRows > 0;
     }
 
-    static async getAllUsers() {
-        const [rows] = await db.execute(
-            'SELECT id, username, email, role, email_verified, created_at, updated_at FROM users'
-        );
-        return rows;
-    }
+    // Entfernt: getAllUsers() selektierte users.email - diese Spalte liegt in
+    // user_profiles. Ohne Aufrufer; userController hat eine eigene Abfrage mit
+    // korrektem JOIN.
 
     static async setPassword(id, newPassword) {
         const salt = await bcrypt.genSalt(10);
