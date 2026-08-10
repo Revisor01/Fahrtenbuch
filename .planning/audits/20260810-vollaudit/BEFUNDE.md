@@ -278,3 +278,81 @@ sofort zuschlägt: `Fahrt.getMonthlySummary` (`models/Fahrt.js:136-154`, **ohne*
 (`:236-267`, gruppiert nach einer nicht selektierten Spalte) und zwei
 User-Methoden, die auf nicht existierende Spalten zugreifen
 (`models/User.js:77-84, 167-172`).
+
+---
+
+# NACHTRAG: Behebung (11.08.2026)
+
+Alle Befunde abgearbeitet, vier Commits, auf der Testumgebung deployed und
+verifiziert.
+
+## Kritisch — beide behoben und live nachgeprüft
+
+**Kontoübernahme.** `/api/users/set-password` prüft jetzt für beide Token-Arten
+das Ablaufdatum; `verification_token` bekam eins (7 Tage, Migration 0008),
+Bestandstokens wurden entwertet. Derselbe Angriff, der beim Audit erfolgreich
+war, liefert gegen die Testumgebung jetzt HTTP 400.
+
+**Falsche Beträge im Formular.** Jede Fahrt wird mit dem an ihrem Datum
+gültigen Satz gerechnet. An echten Daten geprüft (Satzwechsel im August):
+**40,42 € statt fälschlich 45,22 €** — 4,80 € Differenz in einem Monat.
+Bei gemischten Sätzen weist die Formularzeile den Mischsatz aus.
+
+## Weitere behobene Befunde
+
+- Fremde Orte per API abrufbar → jetzt 404 statt Adresse (live geprüft)
+- Mitfahrer mit Richtung „rueck" gingen beim Bearbeiten verloren; leeres
+  Mitfahrer-Array wurde ignoriert; beides jetzt transaktional
+- Mitnahmeentschädigung verlor Zeilen (Dedupe über Datum+Name, Abschneiden ab
+  Zeile 30). Test: 36 km statt 13 km. Satz kommt aus der DB statt hartkodiert
+- Kilometersummen waren Zeichenketten (`"012.5023.008.25"` statt `43.75`) —
+  `decimalNumbers` im Pool
+- Träger mit gebuchten Fahrten sind nicht mehr löschbar
+- Jahresübersicht wies Mitfahrer-Erstattung dauerhaft mit 0 € aus
+- `monthly-summary` lieferte HTTP 500 (SQL-Aliasfehler)
+- Sechs AppContext-Funktionen meldeten Erfolg trotz Fehlschlag
+- Doppel-Tap legte Datensätze doppelt an (vier Dialoge plus Erfassungsflow)
+- Undo-Knopf im Toast: Kontrast **1,38:1 → 15,19:1** (im Browser gemessen)
+- Modale Dialoge öffneten ohne Abdunklung (Tailwind erzeugte die Klassen nie)
+- Elf Stellen berechneten Datum/Monat nach UTC
+- Weiße Seite bei korruptem localStorage, Interceptor-Stapelung
+- Touch-Ziele mobil 36 → 44px, Toast überdeckte den Plus-Knopf
+- 72 verwaiste CSS-Blöcke entfernt (396 Zeilen)
+
+## Migrator — Folgefund
+
+Der Parser verwarf nach einem Single-Statement-Trigger den Rest der Datei und
+vermerkte die Migration trotzdem als erfolgreich. Migration 0002 lief dadurch
+**nie vollständig**; ihre beiden Trigger fehlten. Nach dem Fix trat der bis
+dahin verdeckte Fehler zutage (`Duplicate column name 'admin'`) — ebenfalls
+behoben, Migration jetzt idempotent.
+
+## Abhängigkeiten
+
+Backend von 5 auf 2 Meldungen: nodemailer 6.9 → 9.0.5, bcrypt 5.1 → 6.0
+(damit entfallen tar und node-pre-gyp). **Geprüft: mit bcrypt 5 erzeugte
+Hashes werden von 6 korrekt verifiziert** — die Passwörter der 29 Nutzenden
+funktionieren weiter.
+
+Verbleiben zwei moderate (uuid via exceljs) — nicht ausnutzbar, die Lücke
+betrifft `v3/v5/v6` mit `buf`-Parameter, exceljs nutzt `v4` ohne Puffer.
+
+Frontend bleibt bei 25 Meldungen, ausnahmslos Build-Kette von react-scripts
+5.0.1. Nichts davon landet im Bundle; react, axios, react-router-dom und jszip
+haben keine offenen Advisories. `npm audit fix --force` würde react-scripts auf
+0.0.0 setzen und den Build zerstören. Sauberer Weg wäre ein Wechsel auf Vite —
+eigenes Vorhaben.
+
+## CodeQL
+
+War nie eingerichtet, läuft jetzt (201 Regeln, 71 Befunde). Behoben: der
+Migrator loggte bei Fehlern das komplette SQL inklusive eingesetzter
+Umgebungsvariablen im Klartext. 49 der Befunde sind „missing rate limiting" auf
+Routen hinter `authMiddleware` — konservativ, nicht kritisch.
+
+## Offen
+
+- Produktion (kkd-fahrtenbuch.de) unverändert — alles liegt auf dem
+  Feature-Branch und der Testumgebung
+- Frontend-Build-Kette: Wechsel auf Vite als eigenes Vorhaben
+- Die sechs Fahrten mit gelöschtem Träger wurden auf Wunsch nicht angefasst
