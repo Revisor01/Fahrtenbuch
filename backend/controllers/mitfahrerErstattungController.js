@@ -37,7 +37,7 @@ exports.getHistorie = async (req, res) => {
 exports.setBetrag = async (req, res) => {
     const { betrag, gueltig_ab } = req.body;
     try {
-        const [result] = await db.execute(
+        await db.execute(
             'INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
             [req.user.id, betrag, gueltig_ab || new Date().toISOString().split('T')[0]]
         );

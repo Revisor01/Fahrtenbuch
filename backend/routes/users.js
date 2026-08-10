@@ -2,12 +2,10 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const userController = require('../controllers/userController');
-const User = require('../models/User');  // Wichtig: User-Model importieren
 const {
     authMiddleware,
     requireRole,
-    requireAdminOrSelf,
-    requireVerifiedEmail
+    requireAdminOrSelf
 } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
 const { createUserSchema, updateUserSchema, resetPasswordRequestSchema, resetPasswordSchema, setPasswordSchema, verifyEmailSchema, resendVerificationSchema, changePasswordSchema } = require('../schemas/userSchemas');

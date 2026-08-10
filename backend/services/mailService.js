@@ -58,7 +58,7 @@ class MailService {
         try {
             const resetLink = `${process.env.FRONTEND_URL}/set-password?token=${token}`;
             
-            const info = await this.transporter.sendMail({
+            await this.transporter.sendMail({
                 from: process.env.MAIL_FROM,
                 to: email,
                 subject: 'Passwort zurücksetzen',
