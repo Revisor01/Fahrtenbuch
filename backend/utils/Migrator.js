@@ -89,7 +89,11 @@ class Migrator {
             try {
                 await connection.query(statement);
             } catch (error) {
-                console.error('Error executing SQL statement:', statement, error);
+                // Nur die erste Zeile loggen: die Statements enthalten
+                // eingesetzte Umgebungsvariablen (Admin-Mail, Startpasswoerter),
+                // die sonst im Klartext im Log landen.
+                const kurz = statement.split('\n').find((z) => z.trim() && !z.trim().startsWith('--')) || '';
+                console.error(`Fehler beim Ausführen eines SQL-Statements (${kurz.trim().slice(0, 60)}…):`, error.sqlMessage || error.message);
                 throw error;
             }
         }
