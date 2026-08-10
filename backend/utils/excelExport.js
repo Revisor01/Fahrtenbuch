@@ -133,11 +133,11 @@ function fillQuartalSheet(worksheet, data, year, satz, saetze) {
  const { betrag, gemischt, effektivSatz } = berechneErstattung(data, saetze);
 
  worksheet.getCell('H40').value = gesamtKm;
+ // Bei Satzwechsel im Zeitraum passt keine einzelne "km x Satz"-Zeile; der
+ // Mischsatz macht den Betrag nachvollziehbar statt ihn zu verschleiern.
  worksheet.getCell('I40').value = gemischt
-   // Bei Satzwechsel im Zeitraum passt keine einzelne "km x Satz"-Zeile; der
-   // Mischsatz macht den Betrag nachvollziehbar statt ihn zu verschleiern.
    ? `km, Mischsatz ${effektivSatz.toFixed(4).replace('.', ',')} € =`
-   : `km x ${(gemischt ? effektivSatz : satz).toFixed(2).replace('.', ',')} € =`;
+   : `km x ${satz.toFixed(2).replace('.', ',')} € =`;
  worksheet.getCell('J40').value = betrag;
 }
 

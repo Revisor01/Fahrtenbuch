@@ -11,12 +11,14 @@ exports.createOrt = async (req, res) => {
       return res.status(400).json({ message: 'Name und Adresse sind erforderlich' });
     }
     
-    // Standardwerte für istWohnort und istDienstort setzen, falls nicht angegeben
+    // Standardwerte setzen, falls nicht angegeben. Die normalisierten Werte
+    // wurden bisher berechnet, aber nicht weitergereicht - Ort.create bekam
+    // die ungeprueften Originalwerte (undefined statt false).
     const wohnort = istWohnort === undefined ? false : !!istWohnort;
     const dienstort = istDienstort === undefined ? false : !!istDienstort;
     const kirchspiel = istKirchspiel === undefined ? false : !!istKirchspiel;
-    
-    const id = await Ort.create(name, adresse, istWohnort, istDienstort, istKirchspiel, userId);
+
+    const id = await Ort.create(name, adresse, wohnort, dienstort, kirchspiel, userId);
     res.status(201).json({ id, message: 'Ort erfolgreich erstellt' });
   } catch (error) {
     console.error('Fehler beim Erstellen des Ortes:', error);
