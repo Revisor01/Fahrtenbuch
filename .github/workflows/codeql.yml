@@ -1,0 +1,48 @@
+name: CodeQL
+
+# Statische Sicherheitsanalyse für Frontend und Backend.
+# Läuft bei Änderungen an master und am aktiven Feature-Branch, bei Pull
+# Requests dorthin, sowie einmal wöchentlich — so werden auch neu
+# veröffentlichte Regeln auf unverändertem Code angewendet.
+
+on:
+  push:
+    branches: [master, 'feature/**']
+  pull_request:
+    branches: [master]
+  schedule:
+    # Montags um 5:30 UTC
+    - cron: '30 5 * * 1'
+
+jobs:
+  analyze:
+    name: Analyse (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript-typescript']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: CodeQL initialisieren
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # security-and-quality findet zusätzlich Wartbarkeitsprobleme;
+          # die reine security-extended-Suite wäre die engere Alternative.
+          queries: security-and-quality
+
+      - name: Analyse
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{ matrix.language }}'

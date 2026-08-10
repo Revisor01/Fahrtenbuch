@@ -46,7 +46,14 @@ function LoginPage() {
   const appTitle = appConfigValue('appTitle', process.env.REACT_APP_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
   const allowRegistration = appConfigValue('allowRegistration', process.env.REACT_APP_ALLOW_REGISTRATION) === 'true';
   const allowedEmailDomains = appConfigValue('allowedEmailDomains', process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS);
-  const registrationCode = appConfigValue('registrationCode', process.env.REACT_APP_REGISTRATION_CODE);
+  // Nur die Information, OB ein Code verlangt wird. Der Wert selbst stand
+  // frueher im oeffentlich abrufbaren config.js und war damit fuer jeden
+  // Besucher lesbar; geprueft wird er ohnehin serverseitig.
+  const codeErforderlich =
+    appConfigValue('registrationCodeRequired', undefined) === true ||
+    appConfigValue('registrationCodeRequired', undefined) === 'true' ||
+    // Fallback fuer lokale Entwicklung ohne Container-Entrypoint
+    Boolean(process.env.REACT_APP_REGISTRATION_CODE);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -172,7 +179,7 @@ function LoginPage() {
               {allowedEmailDomains && (
                 <p className="auth-hinweis">Erlaubte Domains: {allowedEmailDomains}</p>
               )}
-              {registrationCode && (
+              {codeErforderlich && (
                 <>
                   <label className="form-label" htmlFor="reg-code">Registrierungscode</label>
                   <input

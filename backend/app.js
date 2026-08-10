@@ -19,9 +19,25 @@ const util = require('util');
 
 const app = express();
 
-const corsOrigin = process.env.NODE_ENV === 'production'
-? process.env.CORS_ORIGIN
-: 'https://kkd-fahrtenbuch.de';
+// Pflichtvariablen beim Start pruefen statt beim ersten Login zu scheitern.
+// Ohne JWT_SECRET laeuft die App an und wirft erst beim Anmelden einen 500er.
+const PFLICHT_VARIABLEN = ['JWT_SECRET', 'DB_HOST', 'DB_USER', 'DB_NAME'];
+const fehlend = PFLICHT_VARIABLEN.filter((v) => !process.env[v]);
+if (fehlend.length > 0) {
+    console.error(`FEHLER: Diese Umgebungsvariablen fehlen: ${fehlend.join(', ')}`);
+    console.error('Der Server wird nicht gestartet.');
+    process.exit(1);
+}
+
+// Hinter dem Reverse Proxy (Caddy) tragen alle Requests dieselbe Quell-IP.
+// Ohne trust proxy teilen sich alle Nutzenden einen Rate-Limit-Zaehler: 20
+// Fehlversuche eines Einzelnen sperren den Login fuer alle.
+app.set('trust proxy', 1);
+
+// CORS_ORIGIN gilt immer, wenn gesetzt - die frühere Logik hing an NODE_ENV
+// und nagelte die Testumgebung auf die Produktionsdomain fest. Ohne die
+// Variable bleibt es bei der Produktionsdomain (kein '*'-Fallback).
+const corsOrigin = process.env.CORS_ORIGIN || 'https://kkd-fahrtenbuch.de';
 
 app.use(cors({
     origin: corsOrigin,
@@ -56,9 +72,31 @@ app.use('/api/abrechnungstraeger', authMiddleware, abrechnungstraegerRoutes);
 app.use('/api/mitfahrer-erstattung', authMiddleware, mitfahrerErstattungRoutes);
 app.use('/api/favoriten', authMiddleware, favoritenRoutes);
 
-// Catch-all route for SPAs
+// Unbekannte API-Pfade als JSON beantworten, nicht mit der SPA
+app.use('/api', (req, res) => {
+    res.status(404).json({ message: 'Endpunkt nicht gefunden' });
+});
+
+// Catch-all route for SPAs. Im Container liegt kein Frontend-Build (nginx
+// liefert ihn aus), deshalb hier ein sauberer Fallback statt eines ENOENT,
+// das frueher im Express-Default-Handler als HTML-Stacktrace landete.
 app.get('*', (req, res) => {
-    res.sendFile(path.join(reactBuildPath, 'index.html'));
+    const indexPfad = path.join(reactBuildPath, 'index.html');
+    res.sendFile(indexPfad, (err) => {
+        if (err) {
+            res.status(404).send('Not found');
+        }
+    });
+});
+
+// Globaler Fehler-Handler: ohne ihn beantwortet Express Fehler mit einem
+// HTML-Stacktrace, solange NODE_ENV nicht 'production' ist - inklusive
+// Dateipfaden und interner Struktur.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    console.error('Unbehandelter Fehler:', err);
+    if (res.headersSent) return;
+    res.status(err.status || 500).json({ message: 'Interner Server-Fehler' });
 });
 
 const PORT = process.env.PORT || 5000;

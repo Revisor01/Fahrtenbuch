@@ -3,25 +3,42 @@ services:
     image: revisoren/fahrtenbuch-app:latest
     ports:
       - "9642:80"
+    environment:
+      # Laufzeit-Konfiguration (docker-entrypoint.sh schreibt config.js).
+      # REACT_APP_REGISTRATION_CODE steuert nur, OB das Codefeld erscheint —
+      # der Wert selbst wird nie ins Frontend geschrieben.
+      - REACT_APP_TITLE=${REACT_APP_TITLE}
+      - REACT_APP_ALLOW_REGISTRATION=${REACT_APP_ALLOW_REGISTRATION}
+      - REACT_APP_ALLOWED_EMAIL_DOMAINS=${REACT_APP_ALLOWED_EMAIL_DOMAINS}
+      - REACT_APP_REGISTRATION_CODE=${REACT_APP_REGISTRATION_CODE}
     depends_on:
       - backend
     restart: unless-stopped
 
   backend:
     image: revisoren/fahrtenbuch-server:latest
+    # Nur lokal veröffentlichen — der Reverse Proxy (Caddy) spricht das
+    # Backend über den Host an. Ohne Bindung an 127.0.0.1 wäre die API ohne
+    # TLS direkt aus dem Internet erreichbar.
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
+      # Ohne production liefert Express im Fehlerfall HTML-Stacktraces aus
+      - NODE_ENV=production
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_SECURE=${SMTP_SECURE}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
+      # SMTP_DEBUG=true schreibt den kompletten Mailverkehr inklusive
+      # Passwort-Reset-Links in die Container-Logs — nur zur Fehlersuche.
+      - SMTP_DEBUG=${SMTP_DEBUG}
       - MAIL_FROM=${MAIL_FROM}
       - FRONTEND_URL=${FRONTEND_URL}
       - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
@@ -31,29 +48,34 @@ services:
       - DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
       - DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
       # Serverseitige Registrierungs-Gates — Pendants zu den REACT_APP_-Frontend-Variablen
-      # (die Frontend-ARGs steuern nur die UI-Anzeige, die Durchsetzung passiert hier).
+      # (die Frontend-Variablen steuern nur die UI-Anzeige, die Durchsetzung passiert hier).
       # Unset = abwärtskompatibel: Registrierung offen, keine Domain-/Code-Pflicht.
       - ALLOW_REGISTRATION=${ALLOW_REGISTRATION}
       - ALLOWED_EMAIL_DOMAINS=${ALLOWED_EMAIL_DOMAINS}
       - REGISTRATION_CODE=${REGISTRATION_CODE}
     restart: unless-stopped
-    volumes:
-      - fahrtenbuch_data:/app/data
     depends_on:
-      - db
+      db:
+        # Ohne diese Bedingung startet das Backend vor MySQL, stürzt ab und
+        # wird nur durch die Restart-Policy wieder eingefangen.
+        condition: service_healthy
 
   db:
     image: mysql:8
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_INIT_COMMAND: "SET GLOBAL log_bin_trust_function_creators = 1;" # Hinzufügen
+      MYSQL_INIT_COMMAND: "SET GLOBAL log_bin_trust_function_creators = 1;"
     volumes:
-      - fahrtenbuch_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      # Eigenes Volume: früher teilten sich Backend und MySQL dasselbe
+      # (fahrtenbuch_data), das Backend hatte damit Rohzugriff auf die
+      # MySQL-Dateien.
+      - fahrtenbuch_db:/var/lib/mysql
+    # Kein Port-Mapping: MySQL ist nur im Compose-Netz erreichbar. Ein
+    # veröffentlichter Port 3306 umginge die Host-Firewall (Docker schreibt
+    # eigene iptables-Regeln).
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
@@ -62,6 +84,7 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
 volumes:
-  fahrtenbuch_data:
+  fahrtenbuch_db:
