@@ -133,26 +133,10 @@ class Fahrt {
     return result.affectedRows > 0;
   }
 
-  static async getMonthlySummary() {
-    try {
-      const [rows] = await db.execute(`
-      SELECT 
-        DATE_FORMAT(datum, '%Y-%m') as yearMonth,
-        abrechnung,
-        SUM(kilometer) as kilometer,
-        COUNT(DISTINCT m.id) as mitfahrer_count
-      FROM fahrten f
-      LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
-      GROUP BY yearMonth, abrechnung
-      ORDER BY yearMonth DESC
-    `);
-      return rows;
-    } catch (error) {
-      console.error('Fehler beim Abrufen der monatlichen Zusammenfassung:', error);
-      throw error;
-    }
-  }
-
+  // Entfernt: getMonthlySummary() aggregierte ohne user_id-Filter ueber ALLE
+  // Nutzer. Die Methode hatte keinen Aufrufer (der gleichnamige Controller
+  // bringt eine eigene, korrekt gescopte Query mit), waere bei Nutzung aber
+  // sofort ein Datenleck gewesen.
 
   static async getMonthlyReport(year, month, userId) {
     try {
@@ -218,93 +202,10 @@ class Fahrt {
     }
   }
 
-  static async getYearSummary(year, userId) {
-    try {
-      // Hole alle Fahrten des Jahres mit Mitfahrer-Count
-      const [fahrtenRows] = await db.execute(`
-      SELECT 
-        f.datum,
-        f.kilometer,
-        f.abrechnung,
-        COUNT(m.id) as mitfahrer_count
-      FROM fahrten f
-      LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
-      WHERE YEAR(f.datum) = ? AND f.user_id = ?
-      GROUP BY f.id, f.datum, f.kilometer, f.abrechnung
-    `, [year, userId]);
-      
-      // Hole die Erstattungssätze
-      const [erstattungssaetze] = await db.execute(`
-      SELECT 
-        eb.betrag,
-        eb.gueltig_ab
-      FROM abrechnungstraeger at
-      INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-      WHERE at.user_id = ? 
-        AND at.active = true
-        AND eb.gueltig_ab <= LAST_DAY(?)
-      ORDER BY eb.gueltig_ab DESC
-    `, [userId, `${year}-12-31`]);
-      
-      // Gruppiere die Sätze nach Kennzeichen
-      const saetzeProTraeger = {};
-      erstattungssaetze.forEach(satz => {
-        if (!saetzeProTraeger[satz.kennzeichen]) {
-          saetzeProTraeger[satz.kennzeichen] = [];
-        }
-        saetzeProTraeger[satz.kennzeichen].push(satz);
-      });
-      
-      // Hilfsfunktion zum Finden des korrekten Erstattungssatzes
-      const getErstattungssatz = (kennzeichen, datum) => {
-        if (!saetzeProTraeger[kennzeichen]) return 0;
-        
-        const saetze = saetzeProTraeger[kennzeichen];
-        const passenderSatz = saetze.find(satz => 
-          new Date(satz.gueltig_ab) <= new Date(datum)
-        );
-        
-        return passenderSatz ? passenderSatz.betrag : 0;
-      };
-      
-      // Verarbeite die Fahrten
-      const summary = fahrtenRows.reduce((acc, fahrt) => {
-        const erstattungssatz = getErstattungssatz(fahrt.abrechnung, fahrt.datum);
-        const erstattung = fahrt.kilometer * erstattungssatz;
-        
-        if (!acc[fahrt.abrechnung]) {
-          acc[fahrt.abrechnung] = {
-            kilometer: 0,
-            erstattung: 0
-          };
-        }
-        
-        acc[fahrt.abrechnung].kilometer += fahrt.kilometer;
-        acc[fahrt.abrechnung].erstattung += erstattung;
-        
-        if (fahrt.mitfahrer_count > 0) {
-          const mitfahrerSatz = getErstattungssatz('mitfahrer', fahrt.datum);
-          const mitfahrerErstattung = fahrt.mitfahrer_count * mitfahrerSatz * fahrt.kilometer;
-          
-          if (!acc.mitfahrer) {
-            acc.mitfahrer = {
-              kilometer: 0,
-              erstattung: 0
-            };
-          }
-          acc.mitfahrer.erstattung += mitfahrerErstattung;
-          acc.mitfahrer.kilometer += fahrt.kilometer;
-        }
-        
-        return acc;
-      }, {});
-      
-      return summary;
-    } catch (error) {
-      console.error('Fehler beim Abrufen der Jahreszusammenfassung:', error);
-      throw error;
-    }
-  }
+  // Entfernt: getYearSummary() gruppierte nach satz.kennzeichen, einer Spalte,
+  // die die Abfrage gar nicht selektiert - alle Saetze landeten unter
+  // undefined, das Ergebnis war immer 0. Ohne Aufrufer; der Controller hat
+  // eine eigene Implementierung.
 }
 
 module.exports = Fahrt;

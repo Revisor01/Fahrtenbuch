@@ -34,12 +34,20 @@ class Ort {
     }
   }
 
-  static async findById(id) {
+  static async findById(id, userId) {
     try {
       if (id === undefined || id === null) {
         throw new Error('Ungültige ID für findById');
       }
-      const [rows] = await db.execute('SELECT * FROM orte WHERE id = ?', [id]);
+      if (userId === undefined || userId === null) {
+        throw new Error('findById erfordert eine userId');
+      }
+      // Ohne user_id-Filter lieferte diese Abfrage jedem angemeldeten Nutzer
+      // Name und Adresse fremder Orte.
+      const [rows] = await db.execute(
+        'SELECT * FROM orte WHERE id = ? AND user_id = ?',
+        [id, userId]
+      );
       return rows[0];
     } catch (error) {
       console.error('Fehler in Ort.findById:', error);
@@ -58,9 +66,14 @@ class Ort {
   }
 
 
-  static async isUsedInFahrten(id) {
+  static async isUsedInFahrten(id, userId) {
     try {
-      const [rows] = await db.execute('SELECT COUNT(*) as count FROM fahrten WHERE von_ort_id = ? OR nach_ort_id = ?', [id, id]);
+      // Nur eigene Fahrten zaehlen - sonst haengt die Loeschentscheidung des
+      // Nutzers an Fahrten anderer Leute.
+      const [rows] = await db.execute(
+        'SELECT COUNT(*) as count FROM fahrten WHERE (von_ort_id = ? OR nach_ort_id = ?) AND user_id = ?',
+        [id, id, userId]
+      );
       return rows[0].count > 0;
     } catch (error) {
       console.error('Fehler beim Überprüfen der Ort-Verwendung:', error);

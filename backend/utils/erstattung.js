@@ -43,4 +43,71 @@ async function getErstattungssatzFuerTraeger(traegerId, userId, stichtag) {
   return Number.isFinite(betrag) ? betrag : FALLBACK_SATZ;
 }
 
-module.exports = { getErstattungssatzFuerTraeger, FALLBACK_SATZ };
+/**
+ * Lädt alle Erstattungssätze eines Trägers, absteigend nach Gültigkeitsdatum.
+ * Für die Abrechnung pro Fahrtdatum (statt einem Satz für den ganzen Zeitraum).
+ */
+async function ladeSaetzeFuerTraeger(traegerId, userId) {
+  const [rows] = await db.execute(
+    `SELECT eb.betrag, eb.gueltig_ab
+     FROM erstattungsbetraege eb
+     JOIN abrechnungstraeger at ON eb.abrechnungstraeger_id = at.id
+     WHERE at.id = ? AND at.user_id = ?
+     ORDER BY eb.gueltig_ab DESC`,
+    [traegerId, userId]
+  );
+  return rows;
+}
+
+/**
+ * Satz, der an einem bestimmten Fahrtdatum galt — gleiche Fallback-Kette wie
+ * getErstattungssatzFuerTraeger, nur ohne erneute DB-Abfrage pro Fahrt.
+ */
+function satzAmDatum(saetze, datum) {
+  if (!saetze || saetze.length === 0) return FALLBACK_SATZ;
+  const d = new Date(datum);
+  let treffer = saetze.find((s) => new Date(s.gueltig_ab) <= d);
+  if (!treffer) treffer = saetze[saetze.length - 1];
+  const betrag = parseFloat(treffer.betrag);
+  return Number.isFinite(betrag) ? betrag : FALLBACK_SATZ;
+}
+
+/**
+ * Erstattung über alle Fahrten, jede mit dem an ihrem Datum gültigen Satz.
+ * Gibt zusätzlich zurück, ob im Zeitraum überhaupt mehrere Sätze griffen —
+ * dann kann das Formular nicht mit einer einzigen "km x Satz"-Zeile auskommen.
+ *
+ * @returns {{betrag:number, saetze:number[], gemischt:boolean, effektivSatz:number}}
+ */
+function berechneErstattung(fahrten, saetze) {
+  let summe = 0;
+  let kmGesamt = 0;
+  const verwendet = new Set();
+
+  for (const f of fahrten) {
+    const km = typeof f.kilometer === 'number' ? f.kilometer : parseFloat(f.kilometer);
+    if (!Number.isFinite(km)) continue;
+    const satz = satzAmDatum(saetze, f.datum);
+    verwendet.add(satz);
+    summe += km * satz;
+    kmGesamt += km;
+  }
+
+  const betrag = Math.round(summe * 100) / 100;
+  const liste = [...verwendet].sort((a, b) => a - b);
+  return {
+    betrag,
+    saetze: liste,
+    gemischt: liste.length > 1,
+    // Rechnerischer Mischsatz, damit die Formularzeile zum Betrag passt
+    effektivSatz: kmGesamt > 0 ? betrag / kmGesamt : (liste[0] ?? FALLBACK_SATZ),
+  };
+}
+
+module.exports = {
+  getErstattungssatzFuerTraeger,
+  ladeSaetzeFuerTraeger,
+  satzAmDatum,
+  berechneErstattung,
+  FALLBACK_SATZ,
+};

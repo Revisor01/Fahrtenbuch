@@ -40,26 +40,50 @@ class Migrator {
         content = content.replace(/\${STANDARD_ORT_2_NAME}/g, process.env.STANDARD_ORT_2_NAME || '');
         content = content.replace(/\${STANDARD_ORT_2_ADRESSE}/g, process.env.STANDARD_ORT_2_ADRESSE || '');
         
-        // Split into statements, handling semicolons inside triggers
+        // Split into statements, handling semicolons inside triggers.
+        // Ein Trigger zaehlt nur dann als mehrzeilig, wenn er tatsaechlich einen
+        // BEGIN-Block oeffnet - sonst beendet ihn wie jedes andere Statement das
+        // erste Semikolon. Frueher blieb der Parser bei Single-Statement-Triggern
+        // bis zum Dateiende im Trigger-Modus und verwarf alles Folgende still.
         const statements = [];
         let buffer = '';
         let inTrigger = false;
-        
+        let triggerHatBegin = false;
+
         for (const line of content.split('\n')) {
-            if (line.trim().startsWith('CREATE TRIGGER')) {
+            const trimmed = line.trim();
+            if (!inTrigger && trimmed.startsWith('CREATE TRIGGER')) {
                 inTrigger = true;
+                triggerHatBegin = false;
+            }
+            if (inTrigger && /\bBEGIN\b/i.test(trimmed)) {
+                triggerHatBegin = true;
             }
             buffer += line + '\n';
-            if (inTrigger && line.trim().startsWith('END;')) {
-                inTrigger = false;
-                statements.push(buffer.trim());
-                buffer = '';
-            } else if (!inTrigger && line.trim().endsWith(';')) {
+
+            if (inTrigger) {
+                // Mit BEGIN-Block: erst END; schliesst ab. Ohne: normales Semikolon.
+                const endeErreicht = triggerHatBegin
+                    ? /^END\s*;/i.test(trimmed)
+                    : trimmed.endsWith(';');
+                if (endeErreicht) {
+                    inTrigger = false;
+                    triggerHatBegin = false;
+                    statements.push(buffer.trim());
+                    buffer = '';
+                }
+            } else if (trimmed.endsWith(';')) {
                 statements.push(buffer.trim());
                 buffer = '';
             }
         }
-        
+
+        // Rest nicht verwerfen: ein unvollstaendiges Statement muss auffallen,
+        // nicht stillschweigend verschwinden.
+        if (buffer.trim()) {
+            statements.push(buffer.trim());
+        }
+
         // Execute statements
         for (let statement of statements) {
             try {

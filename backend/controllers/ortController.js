@@ -28,7 +28,7 @@ exports.deleteOrt = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
-    const isUsed = await Ort.isUsedInFahrten(id);
+    const isUsed = await Ort.isUsedInFahrten(id, userId);
     if (isUsed) {
       return res.status(400).json({ message: 'Ort kann nicht gelöscht werden, da er in Fahrten verwendet wird' });
     }
@@ -39,6 +39,14 @@ exports.deleteOrt = async (req, res) => {
       res.status(404).json({ message: 'Ort nicht gefunden' });
     }
   } catch (error) {
+    // Haengt noch eine Distanz am Ort, blockiert der Fremdschluessel das DELETE.
+    // Das ist der Normalfall bei genutzten Orten und braucht eine Erklaerung
+    // statt eines nackten 500ers.
+    if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
+      return res.status(400).json({
+        message: 'Ort kann nicht gelöscht werden, da noch Distanzen zu ihm gepflegt sind. Bitte zuerst die Distanzen entfernen.'
+      });
+    }
     console.error('Fehler beim Löschen des Ortes:', error);
     res.status(500).json({ message: 'Fehler beim Löschen des Ortes' });
   }

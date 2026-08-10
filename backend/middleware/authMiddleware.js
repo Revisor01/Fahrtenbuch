@@ -44,8 +44,10 @@ const authMiddleware = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    // Details nur ins Log, nicht an den Client: "invalid signature" vs.
+    // "jwt expired" verraet Angreifern, woran ihr Token scheitert.
     console.error('Token verification failed:', error.message);
-    res.status(401).json({ message: 'Ungültige Authentifizierung', error: error.message });
+    res.status(401).json({ message: 'Ungültige Authentifizierung' });
   }
 };
 

@@ -299,7 +299,18 @@ exports.updateSortOrder = async (req, res) => {
 exports.deleteAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
+        // Der Guard existierte, wurde aber nie aufgerufen: geloeschte Traeger
+        // hinterliessen Fahrten mit toter Referenz, die in Auswertungen und im
+        // Export mit 0,00 EUR erscheinen. fahrten.abrechnung ist VARCHAR ohne
+        // Fremdschluessel, die DB bremst also auch nicht.
+        const inVerwendung = await AbrechnungsTraeger.checkForFahrten(id, req.user.id);
+        if (inVerwendung) {
+            return res.status(400).json({
+                message: 'Abrechnungsträger kann nicht gelöscht werden, da noch Fahrten darauf gebucht sind. Du kannst ihn stattdessen deaktivieren.'
+            });
+        }
+
         await AbrechnungsTraeger.delete(id, req.user.id);
         res.json({ message: 'Abrechnungsträger erfolgreich gelöscht' });
     } catch (error) {

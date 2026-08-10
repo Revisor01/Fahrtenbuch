@@ -192,10 +192,12 @@ exports.updateUser = async (req, res) => {
         try {
             await connection.beginTransaction();
             
-            // User-Basisdaten aktualisieren
+            // User-Basisdaten aktualisieren. role ist im Schema optional - ohne
+            // COALESCE haette ein Update ohne role-Feld die Rolle auf NULL
+            // gesetzt und den Nutzer entrechtet.
             await connection.execute(
-                'UPDATE users SET username = ?, role = ? WHERE id = ?',
-                [username, role, id]
+                'UPDATE users SET username = ?, role = COALESCE(?, role) WHERE id = ?',
+                [username, role ?? null, id]
             );
             
             // Profildaten prüfen
@@ -339,12 +341,16 @@ exports.setPassword = async (req, res) => {
             return res.status(400).json({ message: 'Token und neues Passwort sind erforderlich' });
         }
         
-        // Find User by token (egal ob Verification oder Reset token)
+        // Token akzeptieren, egal ob Verification oder Reset - aber jeweils nur,
+        // solange er gueltig ist. Ohne diese Pruefung liess sich ein beliebig
+        // alter Einladungslink zur Kontouebernahme nutzen.
         const [rows] = await db.execute(
-            'SELECT id FROM users WHERE verification_token = ? OR password_reset_token = ?',
+            `SELECT id FROM users
+             WHERE (verification_token = ? AND verification_token_expires > NOW())
+                OR (password_reset_token = ? AND password_reset_expires > NOW())`,
             [token, token]
         );
-        
+
         if (rows.length === 0) {
             return res.status(400).json({ message: 'Ungültiger oder abgelaufener Token' });
         }
@@ -357,11 +363,13 @@ exports.setPassword = async (req, res) => {
         
         // Update user: Setze Passwort, lösche Token und markiere Email als verifiziert
         await db.execute(
-            `UPDATE users 
-            SET password = ?, 
+            `UPDATE users
+            SET password = ?,
                 verification_token = NULL,
+                verification_token_expires = NULL,
                 password_reset_token = NULL,
-                email_verified = TRUE 
+                password_reset_expires = NULL,
+                email_verified = TRUE
             WHERE id = ?`,
             [hashedPassword, user.id]
         );

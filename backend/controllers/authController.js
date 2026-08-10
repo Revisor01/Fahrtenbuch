@@ -94,10 +94,13 @@ exports.register = async (req, res) => {
     try {
       await connection.beginTransaction();
       
-      // Erstelle User - hier setzen wir ein leeres gehashtes Passwort
+      // Passwort-Platzhalter: bcrypt.compare gegen '' schlaegt immer fehl, ein
+      // Login ist also erst nach dem Setzen per Token moeglich.
+      // Token 7 Tage gueltig (siehe setPassword).
       const [userResult] = await connection.execute(
-        'INSERT INTO users (username, verification_token, role, password) VALUES (?, ?, "user", ?)',
-        [username, verificationToken, '']  // Leeres Passwort als Platzhalter
+        `INSERT INTO users (username, verification_token, verification_token_expires, role, password)
+         VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY), "user", ?)`,
+        [username, verificationToken, '']
       );
       
       // Erstelle Profil
