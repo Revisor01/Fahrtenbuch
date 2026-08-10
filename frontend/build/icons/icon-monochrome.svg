@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <g transform="translate(256 256) scale(0.72) translate(-256 -256)">
-    <g transform="rotate(-45 256 256)">
-      <path d="M256 118a138 138 0 1 1 -97.6 40.4" fill="none" stroke="#000" stroke-width="46"></path>
-    </g>
-  </g>
-</svg>

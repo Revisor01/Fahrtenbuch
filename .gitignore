@@ -115,3 +115,26 @@ dist
 .yarn/install-state.gz
 .pnp.*
 /backend/templates/~$fahrtenabrechnung_vorlage.xlsx
+
+# Generierte Frontend-Builds gehoeren nicht ins Repository: der Dockerfile
+# baut selbst (RUN npm run build). Eingecheckt erzeugten sie nur Rauschen in
+# Diffs und in der statischen Analyse.
+frontend/build/
+backend/build/
+
+# Lokale Umgebungsdateien (ergaenzend zu .env / .env.test weiter oben)
+.env.local
+.env.production
+.env.*.local
+stack.env
+
+# Testartefakte
+.playwright-mcp/
+
+# Arbeitsdateien mit echten Personendaten (Namen, IBANs, Fahrten) — duerfen
+# nie ins Repository
+*.xlsx
+Dienstfahrtenabrechnung*.pdf
+*.png
+!frontend/public/**/*.png
+!frontend/src/**/*.png
