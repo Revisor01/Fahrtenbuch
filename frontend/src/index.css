@@ -39,7 +39,6 @@ code {
 }
 
 @layer components {
-  /* ---------- Karten / Container ---------- */
   .base-container {
     background-color: var(--surface);
     border: 1px solid var(--line);
@@ -48,6 +47,32 @@ code {
     overflow: hidden;
     transition: background-color 150ms ease, border-color 150ms ease;
   }
+
+  .btn-base {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--control-h);
+    min-height: var(--tap-min);
+    padding: 0 16px;
+    border-radius: var(--r-btn);
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 150ms ease, border-color 150ms ease,
+      color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .btn-base:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+  }
+
+  .btn-base:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
 
   .card-container {
     @apply base-container;
@@ -60,18 +85,12 @@ code {
     }
   }
 
-  .card-container-flush {
-    @apply base-container;
-  }
 
   /* ---------- Formular-Struktur ---------- */
   .form-row {
     @apply flex flex-wrap gap-4;
   }
 
-  .form-row-half {
-    @apply flex sm:flex-row gap-4 w-full sm:w-auto sm:min-w-[240px];
-  }
 
   .form-group {
     @apply w-full sm:flex-1 sm:min-w-[240px];
@@ -81,9 +100,6 @@ code {
     @apply w-full sm:w-32;
   }
 
-  .form-group-half {
-    @apply w-full sm:w-32;
-  }
 
   /* ---------- Labels ---------- */
   .form-label {
@@ -180,55 +196,6 @@ code {
     padding: 12px 16px;
   }
 
-  /* ---------- Karten-Raster ---------- */
-  .card-grid {
-    @apply grid grid-cols-1 gap-4
-           sm:grid-cols-2
-           lg:grid-cols-4;
-  }
-
-  /* ---------- Mobile Cards ---------- */
-  .mobile-card {
-    background-color: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--r-card);
-    box-shadow: var(--shadow);
-    padding: 16px;
-    transition: background-color 150ms ease, border-color 150ms ease;
-    @apply space-y-4;
-  }
-
-  .mobile-card-header {
-    @apply flex justify-between items-start;
-  }
-
-  .mobile-card-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .mobile-card-subtitle {
-    font-size: 13px;
-    color: var(--text-2);
-  }
-
-  .mobile-card-section {
-    @apply space-y-2;
-  }
-
-  .mobile-card-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-3);
-  }
-
-  .mobile-card-content {
-    font-size: 14px;
-    color: var(--text);
-  }
 
   /* ---------- Statussystem: drei Zustände, Form + Wort + Farbe ---------- */
   .status-badge {
@@ -449,57 +416,11 @@ code {
     color: var(--text-3);
   }
 
-  /* ---------- Action Button Group ---------- */
-  .action-button-group {
-    @apply flex flex-col sm:flex-row gap-2 w-full;
-  }
-
-  .action-button-group button {
-    @apply w-full;
-  }
-
-  /* ---------- Mobile Edit Container ---------- */
-  .mobile-edit-container {
-    @apply space-y-4 w-full;
-  }
 
   .mobile-edit-container .form-group {
     @apply space-y-2;
   }
 
-  .mobile-edit-actions {
-    @apply flex flex-row gap-2 mt-4;
-  }
-
-  .mobile-edit-actions button {
-    @apply w-full;
-  }
-
-  /* ---------- Buttons: 48 px, --r-btn, 16 px/600 ---------- */
-  .btn-base {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: var(--control-h);
-    min-height: var(--tap-min);
-    padding: 0 16px;
-    border-radius: var(--r-btn);
-    font-size: 16px;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: background-color 150ms ease, border-color 150ms ease,
-      color 150ms ease, box-shadow 150ms ease;
-  }
-
-  .btn-base:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
-  }
-
-  .btn-base:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 
   .btn-primary {
     @apply btn-base;
@@ -547,169 +468,25 @@ code {
 
   /* ---------- Icon-/Action-Buttons: 48×48 px (min. 44 px) ---------- */
   .table-action-button,
-  .mobile-icon-button {
-    height: 48px;
-    width: 48px;
-    min-height: var(--tap-min);
-    min-width: var(--tap-min);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--r-btn);
-    font-size: 17px;
-    transition: background-color 150ms ease, border-color 150ms ease,
-      color 150ms ease;
-  }
 
   .table-action-button:focus-visible,
-  .mobile-icon-button:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
-  }
 
   .table-action-button-primary,
-  .mobile-icon-button-primary {
-    @apply table-action-button;
-    background-color: var(--brand);
-    color: var(--on-brand);
-    border: none;
-  }
 
   .table-action-button-primary:hover,
-  .mobile-icon-button-primary:hover {
-    background-color: var(--brand-strong);
-  }
 
   .table-action-button-secondary,
-  .mobile-icon-button-secondary {
-    @apply table-action-button;
-    background-color: var(--surface-2);
-    color: var(--text-2);
-    border: 1px solid var(--line);
-  }
 
   .table-action-button-secondary:hover,
-  .mobile-icon-button-secondary:hover {
-    background-color: var(--surface-3);
-  }
 
-  .mobile-action-buttons {
-    @apply flex gap-1 items-center;
-  }
 
-  /* ---------- KPI Cards ---------- */
-  .kpi-card {
-    padding: 16px;
-    border-radius: var(--r-card);
-    border: 1px solid var(--line);
-    box-shadow: var(--shadow);
-    background-color: var(--surface);
-    transition: background-color 150ms ease, border-color 150ms ease;
-  }
-
-  /* ---------- Abschnittsköpfe ---------- */
-  .section-header {
-    @apply flex items-center gap-2 mb-3;
-  }
-
-  .section-header h2 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .section-header .section-count {
-    font-size: 14px;
-    color: var(--text-3);
-  }
-
-  /* ---------- Tabellen ---------- */
-  .table-container {
-    @apply base-container relative;
-  }
-
-  .table-header {
-    padding: 8px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-3);
-    cursor: pointer;
-    text-align: left;
-    transition: color 150ms ease;
-  }
-
-  .table-header-sm {
-    padding: 8px 16px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
-    cursor: pointer !important;
-    text-align: left !important;
-    color: var(--text-3);
-    transition: color 150ms ease;
-  }
-
-  @media (max-width: 640px) {
-    .table-header-sm {
-      display: none !important;
-    }
-  }
-
-  @media (min-width: 640px) {
-    .table-header-sm {
-      display: table-cell !important;
-    }
-  }
-
-  .table-cell {
-    padding: 12px 16px;
-    font-size: 15px;
-    color: var(--text);
-    transition: background-color 150ms ease;
-  }
-
-  .table-row {
-    transition: background-color 150ms ease;
-  }
-
-  .table-row:hover {
-    background-color: var(--surface-2);
-  }
-
-  .table-head-row {
-    background-color: var(--bg);
-    border-bottom: 1px solid var(--line);
-  }
+  
+  
 
   tbody {
     @apply divide-y divide-line;
   }
 
-  .table-detail-row {
-    background-color: var(--brand-soft);
-    border-left: 4px solid var(--brand);
-  }
-
-  .table-split-row {
-    background-color: var(--bg);
-  }
-
-  /* ---------- Adressen ---------- */
-  .table-address {
-    @apply flex flex-col;
-  }
-
-  .table-address-main {
-    color: var(--text);
-  }
-
-  .table-address-sub {
-    font-size: 13px;
-    color: var(--text-2);
-  }
 
   /* ---------- Leerer Zustand ---------- */
   .empty-state {
@@ -760,15 +537,28 @@ code {
     animation: toast-in 300ms ease;
   }
 
+  /* Der Toast ist invertiert (Flaeche = --text), deshalb gilt hier --bg als
+     Textfarbe. --brand-strong ergab auf dieser Flaeche nur 1,38:1 - der
+     „Rueckgaengig"-Knopf war praktisch unsichtbar. Mit --bg sind es 17:1
+     (hell) bzw. 15:1 (dunkel); die Unterstreichung macht ihn als Aktion
+     erkennbar, ohne auf Farbe allein zu setzen. */
   .toast-action {
     font-size: 16px;
-    font-weight: 600;
-    color: var(--brand-strong);
+    font-weight: 700;
+    color: var(--bg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
     background: none;
     border: none;
     cursor: pointer;
     min-height: var(--tap-min);
+    padding: 0 4px;
     flex-shrink: 0;
+  }
+
+  .toast-action:hover,
+  .toast-action:focus-visible {
+    opacity: 0.8;
   }
 
   /* Statuskreis links im Toast: 22px, --ok bzw. --danger */
@@ -798,14 +588,7 @@ code {
     min-width: 0;
   }
 
-  /* ---------- Utility ---------- */
-  .flex-col-mobile {
-    @apply flex-col sm:flex-row;
-  }
 
-  .w-full-mobile {
-    @apply w-full sm:w-auto;
-  }
 }
 
 /* ============================================================
@@ -1356,30 +1139,9 @@ code {
   }
 }
 
-/* Modal Content Fixes */
-.modal-content {
-  @apply flex flex-col max-h-[calc(100vh-6rem)];
-}
-
-.modal-header {
-  @apply sticky top-0 z-10;
-  background-color: var(--surface);
-}
-
-.modal-body {
-  @apply flex-1 overflow-y-auto pt-4;
-}
-
-/* Verify Badge im Input */
-.verify-badge {
-  @apply absolute right-2 top-[70%] -translate-y-1/2 flex items-center gap-2;
-}
 
 /* Mobile Anpassungen */
 @media (max-width: 640px) {
-  .modal-body {
-    @apply px-2; /* weniger Abstand zu den Rändern */
-  }
 
   .mobile-full {
     @apply w-full;
@@ -1387,48 +1149,12 @@ code {
 }
 
 /* Mobile Optimierungen */
-@media (max-width: 640px) {
-  .tab-nav {
-    @apply -mx-6 px-6;
-  }
-
-  .tab-content {
-    @apply -mx-6 px-6;
-  }
-}
 
 /* ============================================================
    Erfassungsflow (Sheet Schritt 1 „Wohin?" + Schritt 2 „Bestätigen")
    Maße/Farben exakt nach Design-Spec Screen 2
    ============================================================ */
 
-/* Zeile „Ab {Startort} · heute, {Wochentag} {Datum}" — antippbar */
-.erf-subline {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  font-size: 15px;
-  color: var(--text-2);
-  margin: -8px 0 16px;
-}
-
-.erf-subline-btn {
-  font-size: 15px;
-  color: var(--text-2);
-  background: none;
-  border: none;
-  padding: 8px 2px;
-  margin: -8px -2px;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 3px;
-}
-
-.erf-subline-btn:hover {
-  color: var(--text);
-}
 
 /* Suchfeld 52px, Fläche --bg, Rand --line, Placeholder 17px --text-3 */
 .erf-search {
@@ -2470,102 +2196,12 @@ code {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* Reihen: einspaltig 768–1023, Raster 1.55fr/1fr ab 1024 */
-.dash-d-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
-@media (min-width: 1024px) {
-  .dash-d-row {
-    grid-template-columns: 1.55fr 1fr;
-  }
-}
-
-/* Hero Desktop: --brand, 28px Padding, Betrag 52px */
-.dash-d-hero {
-  background: var(--brand);
-  border-radius: var(--r-card);
-  padding: 28px;
-  color: var(--on-brand);
-  display: flex;
-  flex-direction: column;
-}
-
-.dash-d-hero-betragzeile {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.dash-d-hero-betrag {
-  font-size: 52px;
-  font-weight: 500;
-  letter-spacing: -0.035em;
-  line-height: 1;
-}
-
-.dash-d-hero-aus {
-  font-size: 16px;
-  opacity: 0.75;
-}
-
-.dash-d-hero-unten {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  flex: 1;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.dash-d-hero-tile {
-  flex: 1;
-  min-width: 130px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: var(--r-btn);
-  padding: 14px 16px;
-}
-
-.dash-d-hero-tile-name {
-  font-size: 13px;
-  opacity: 0.75;
-  margin-bottom: 3px;
-}
-
-.dash-d-hero-tile-betrag {
-  font-size: 19px;
-  font-weight: 600;
-}
-
-.dash-d-hero-btn {
-  height: 48px;
-  padding: 0 22px;
-  border: none;
-  border-radius: var(--r-btn);
-  background: var(--on-brand);
-  color: var(--brand);
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
 
 /* Erfolgszustand im Desktop-Raster ohne Extra-Abstand */
 .dash-desktop .dash-hero-ok {
   margin-bottom: 0;
 }
 
-/* Rechte Spalte: zwei gestapelte Karten */
-.dash-d-stack {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 18px;
-}
 
 .dash-d-card {
   background: var(--surface);
@@ -2858,20 +2494,6 @@ code {
   justify-content: flex-end;
 }
 
-/* Chart „Kilometer {Jahr}": 8 Balken, max. 150px, Farbe = Monatsstatus */
-.dash-d-chartcard {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  padding: 22px 24px;
-}
-
-.dash-d-charttitel {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 20px;
-}
 
 /* Balkenhöhen kommen in px (max. 150) inline aus dem Monats-km-Anteil;
    die Monatsinitiale sitzt unterhalb, daher keine feste Container-Höhe */
@@ -4593,11 +4215,6 @@ code {
   white-space: nowrap;
 }
 
-.set-row-num {
-  font-size: 14px;
-  color: var(--text-2);
-  white-space: nowrap;
-}
 
 /* ---------- Aktions-Icons 36×36px, --r-btn, Rand --line ---------- */
 .set-action {
@@ -5472,4 +5089,100 @@ code {
   text-align: center;
   font-size: 13px;
   color: var(--text-3);
+}
+
+/* Mitfahrer-Name im Chip: antippbar zum Bearbeiten */
+.mitfahrer-name-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+/* --- Legacy-Modal (Mitfahrer, „Ort speichern") --------------------------- */
+
+/* Overlay: die Tailwind-Klasse bg-primary-950/30 wurde nie erzeugt, weil die
+   Farbtokens fertige Farbwerte ohne <alpha-value> sind — die Dialoge oeffneten
+   dadurch ohne jede Abdunklung. */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 32, 31, 0.38);
+  backdrop-filter: blur(3px);
+}
+
+:root[data-theme='dark'] .modal-backdrop,
+.dark .modal-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Kopf lag auf gray-800 statt auf der Kartenfarbe — im Dunkelmodus ein
+   sichtbarer blaugrauer Streifen beim Scrollen. */
+.modal-kopf {
+  background: var(--surface);
+}
+
+.modal-trennlinie {
+  height: 1px;
+  background: var(--line);
+}
+
+/* --- Touch-Ziele mobil ---------------------------------------------------- */
+/* Auf dem Desktop reichen 36px (Mauszeiger trifft genau). Mit dem Finger sind
+   44px der Richtwert — betrifft Bearbeiten/Loeschen in allen Einstellungslisten,
+   den Drag-Griff und das Schliesskreuz im Modal. */
+@media (max-width: 767px) {
+  .set-action {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+
+  .set-grip {
+    width: var(--tap-min);
+    height: var(--tap-min);
+  }
+
+  .dash-link {
+    min-height: var(--tap-min);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Schliesskreuz im Legacy-Modal: das SVG allein war ~24px */
+  .modal-kopf button {
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Toast lag mobil ueber der unteren Haelfte des Plus-Buttons (der reicht von
+   112px bis 174px) — jetzt darueber, mit demselben safe-area-Zuschlag */
+@media (max-width: 767px) {
+  .toast-viewport {
+    bottom: calc(186px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Fahrtenliste hatte als einzige View keinen mobilen Seitenrand — der Inhalt
+   sprang beim Tabwechsel um 4px */
+@media (max-width: 767px) {
+  .fahrtenliste {
+    padding: 0 4px;
+  }
+}
+
+/* Schreibgeschuetztes Feld (z. B. uebernommene Adresse im „Ort speichern"-
+   Dialog): die Tailwind-Dunkelvariante wurde nie erzeugt */
+.form-input-readonly {
+  background: var(--surface-2);
+  color: var(--text-2);
+  cursor: default;
 }

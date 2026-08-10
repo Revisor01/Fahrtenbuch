@@ -1,11 +1,12 @@
-// Gemeinsame Helfer der Abrechnung (Phase R6): Kategorien eines Monats,
+
+import { aktuellerMonat } from '../../utils/datum';// Gemeinsame Helfer der Abrechnung (Phase R6): Kategorien eines Monats,
 // Monatsstatus (Minimum der Trägerstatus), Fälligkeit, Formatierung.
 
 import { STATUS_ORDER, statusFromAbrechnung } from '../../utils/statusLabels';
 
 // Aktueller Monat als "YYYY-MM" (konsistent zur Fällig-Logik der Navigation)
 export function aktuellerYearMonth() {
-  return new Date().toISOString().slice(0, 7);
+  return aktuellerMonat();
 }
 
 // Kategorien eines Monats mit Erstattung > 0: konfigurierte Träger in

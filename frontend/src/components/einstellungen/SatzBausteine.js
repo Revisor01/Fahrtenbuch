@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { heuteISO, alsISODatum } from '../../utils/datum';
 import { Pencil, Trash2 } from 'lucide-react';
 import Sheet from '../ui/Sheet';
 
@@ -9,8 +10,8 @@ export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
   const [betrag, setBetrag] = useState(satz ? String(satz.betrag) : '');
   const [gueltigAb, setGueltigAb] = useState(
     satz
-      ? new Date(satz.gueltig_ab).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0]
+      ? alsISODatum(satz.gueltig_ab)
+      : heuteISO()
   );
 
   const handleSubmit = (e) => {

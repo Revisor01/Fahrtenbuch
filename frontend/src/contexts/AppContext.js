@@ -1,5 +1,6 @@
-import React, { useState, useEffect, createContext, useContext, useMemo, useRef } from 'react';
+import React, { useState, useEffect, createContext, useRef } from 'react';
 import axios from 'axios';
+import { aktuellerMonat } from '../utils/datum';
 import StatusDatumSheet from '../components/abrechnung/StatusDatumSheet';
 import { useToast } from '../components/ui/Toast';
 
@@ -11,17 +12,26 @@ function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    // Ein korrupter Eintrag darf den App-Start nicht verhindern: die Exception
+    // aus JSON.parse fuehrte hier zur weissen Seite, und weil der Wert liegen
+    // blieb, auch bei jedem weiteren Aufruf.
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      console.error('Gespeicherte Nutzerdaten unlesbar, werden verworfen:', error);
+      localStorage.removeItem('user');
+      return null;
+    }
   });
   const [orte, setOrte] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [distanzen, setDistanzen] = useState([]);
   const [fahrten, setFahrten] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(aktuellerMonat());
   const [selectedVonMonth, setSelectedVonMonth] = useState(''); // '' = Einzelmonat-Modus
-  const [gesamtKirchenkreis, setGesamtKirchenkreis] = useState(0);
-  const [gesamtGemeinde, setGesamtGemeinde] = useState(0);
+  // gesamtKirchenkreis/gesamtGemeinde entfernt: die Setter wurden nie
+  // aufgerufen, die Werte blieben immer 0 und niemand las sie aus.
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [summary, setSummary] = useState({});
   const isLoggingOut = useRef(false);
@@ -122,18 +132,6 @@ function AppProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setIsLoggedIn(true);
-      // User-Daten laden wenn noch nicht vorhanden
-      if (!user) {
-        fetchCurrentUser();
-      }
-    }
-    setupAxiosInterceptors();
-  }, [token]);
-
   const fetchCurrentUser = async () => {
     try {
       const response = await axios.get('/api/users/me');
@@ -146,8 +144,25 @@ function AppProvider({ children }) {
     }
   };
 
-  const setupAxiosInterceptors = () => {
-    axios.interceptors.response.use(
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setIsLoggedIn(true);
+      // User-Daten laden wenn noch nicht vorhanden
+      if (!user) {
+        fetchCurrentUser();
+      }
+    }
+    // fetchCurrentUser/user bewusst nicht in den Abhaengigkeiten: der Effekt
+    // soll nur auf einen Token-Wechsel reagieren, sonst laedt er sich im Kreis.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  // Interceptor genau einmal registrieren und beim Unmount wieder entfernen.
+  // Frueher lief das im token-Effekt: jeder Login stapelte einen weiteren
+  // Interceptor auf den vorigen, ohne den alten je zu entfernen.
+  useEffect(() => {
+    const id = axios.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response && error.response.status === 401) {
@@ -159,12 +174,17 @@ function AppProvider({ children }) {
         return Promise.reject(error);
       }
     );
-  };
+    return () => axios.interceptors.response.eject(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn) {
       refreshAllData();
     }
+    // refreshAllData wird bei jedem Render neu erzeugt - als Abhaengigkeit
+    // wuerde es eine Endlosschleife ausloesen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
   const login = async (username, password) => {
@@ -269,6 +289,7 @@ function AppProvider({ children }) {
       fetchOrte();
     } catch (error) {
       console.error('Fehler beim Hinzufügen des Ortes:', error);
+      throw error;
     }
   };
 
@@ -318,6 +339,7 @@ function AppProvider({ children }) {
       fetchDistanzen();
     } catch (error) {
       console.error('Fehler beim Hinzufügen der Distanz:', error);
+      throw error;
     }
   };
 
@@ -431,6 +453,7 @@ function AppProvider({ children }) {
       fetchOrte();
     } catch (error) {
       console.error('Fehler beim Aktualisieren des Ortes:', error);
+      throw error;
     }
   };
 
@@ -444,6 +467,7 @@ function AppProvider({ children }) {
       fetchDistanzen();
     } catch (error) {
       console.error('Fehler beim Aktualisieren der Distanz:', error);
+      throw error;
     }
   };
 
@@ -454,6 +478,7 @@ function AppProvider({ children }) {
       await refreshAllData(); // Hier hinzufügen
     } catch (error) {
       console.error('Fehler beim Löschen der Fahrt:', error);
+      throw error;
     }
   };
 
@@ -473,6 +498,7 @@ function AppProvider({ children }) {
       fetchDistanzen();
     } catch (error) {
       console.error('Fehler beim Löschen der Distanz:', error);
+      throw error;
     }
   };
 
@@ -489,8 +515,6 @@ function AppProvider({ children }) {
       distanzen,
       fahrten,
       selectedMonth,
-      gesamtKirchenkreis,
-      gesamtGemeinde,
       setSelectedMonth,
       addOrt,
       addFahrt,

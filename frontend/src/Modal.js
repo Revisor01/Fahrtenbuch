@@ -36,13 +36,17 @@ function Modal({ isOpen, onClose, title, children, size = 'compact', preventOuts
     
     return (
         <div className="fixed inset-0 z-50" onClick={handleBackdropClick}>
-            <div className="fixed inset-0 bg-primary-950/30 dark:bg-primary-950/40 backdrop-blur-sm" />
+            {/* Eigene Klasse statt bg-primary-950/30: die Farbtokens sind
+                fertige Farbwerte ohne <alpha-value>, deshalb erzeugte Tailwind
+                die Transparenz-Varianten gar nicht - das Overlay fehlte
+                komplett (im Build verifiziert: 0 Treffer). */}
+            <div className="modal-backdrop" />
             <div className="fixed inset-0 flex justify-center pt-20">
-                <div 
+                <div
                     ref={modalRef}
                     className={`${widthClass} card-container h-fit max-h-[calc(100vh-10rem)] overflow-hidden flex flex-col`}
                 >
-                    <div className="sticky top-0 z-20 bg-white dark:bg-gray-800">
+                    <div className="sticky top-0 z-20 modal-kopf">
                         <div className="flex justify-between items-center pb-4">
                             <h2 className="text-lg font-medium text-value">{title}</h2>
                             <button 
@@ -54,7 +58,7 @@ function Modal({ isOpen, onClose, title, children, size = 'compact', preventOuts
                                 </svg>
                             </button>
                         </div>
-                        <div className="h-px bg-gradient-to-b from-primary-100/50 to-transparent dark:from-primary-800/50"></div>
+                        <div className="modal-trennlinie"></div>
                     </div>
                     <div className="overflow-y-auto">
                         <div className="pt-4">

@@ -13,9 +13,18 @@ function TraegerSheet({ offen, traeger, onClose, onSave }) {
   const [name, setName] = useState(traeger?.name || '');
   const [kostenstelle, setKostenstelle] = useState(traeger?.kostenstelle || '');
 
-  const handleSubmit = (e) => {
+  const [laeuft, setLaeuft] = useState(false);
+
+  // Sperre gegen Doppel-Tap, sonst entstehen zwei Traeger
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({ name, kostenstelle });
+    if (laeuft) return;
+    setLaeuft(true);
+    try {
+      await onSave({ name, kostenstelle });
+    } finally {
+      setLaeuft(false);
+    }
   };
 
   return (
@@ -46,7 +55,9 @@ function TraegerSheet({ offen, traeger, onClose, onSave }) {
         </div>
         <div className="set-sheet-buttons">
           <button type="button" className="btn-secondary" onClick={onClose}>Abbrechen</button>
-          <button type="submit" className="btn-primary">Speichern</button>
+          <button type="submit" className="btn-primary" disabled={laeuft}>
+            {laeuft ? 'Speichert…' : 'Speichern'}
+          </button>
         </div>
       </form>
     </Sheet>

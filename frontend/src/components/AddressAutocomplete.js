@@ -16,7 +16,13 @@ function AddressAutocomplete({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   const listenId = useId();
-  const { vorschlaege, zuruecksetzen } = useAdressSuche(value);
+  // Nach einer Auswahl steht die gewaehlte Adresse im Feld und loest prompt
+  // eine neue Suche aus. Ohne diese Sperre klappte die Liste dadurch sofort
+  // wieder auf.
+  const gewaehlt = useRef(null);
+  const { vorschlaege, zuruecksetzen } = useAdressSuche(value, {
+    aktiv: value !== gewaehlt.current,
+  });
 
   // Vorschlaege oeffnen, sobald welche eintreffen
   useEffect(() => {
@@ -36,6 +42,7 @@ function AddressAutocomplete({
 
   const handleSelect = (vorschlag) => {
     zuruecksetzen();
+    gewaehlt.current = vorschlag.text;
     onChange(vorschlag.text);
     setIsOpen(false);
   };

@@ -83,13 +83,10 @@ exports.createFahrt = async (req, res) => {
       userId
     };
     
-    const id = await Fahrt.create(fahrtData, null, userId);
-    if (mitfahrer && mitfahrer.length > 0) {
-      for (const person of mitfahrer) {
-        await Mitfahrer.create(id, person.name, person.arbeitsstaette, person.richtung);
-      }
-    }
-    
+    // Mitfahrer laufen in derselben Transaktion wie die Fahrt
+    const id = await Fahrt.create(fahrtData, null, userId, Array.isArray(mitfahrer) ? mitfahrer : []);
+
+
     res.status(201).json({ id, message: 'Fahrt erfolgreich erstellt' });
   } catch (error) {
     console.error('Fehler beim Erstellen der Fahrt:', error);
@@ -136,15 +133,19 @@ exports.updateFahrt = async (req, res) => {
       einmaligerVonOrt: einmaligerVonOrt || null,
       einmaligerNachOrt: einmaligerNachOrt || null,
       anlass: anlass || null,
-      kilometer: kilometer.toString(), // Wichtige Änderung
+      // Fehlt kilometer, warf .toString() einen TypeError und damit einen 500er
+      kilometer: kilometer !== undefined && kilometer !== null ? kilometer.toString() : null,
       abrechnung: abrechnung || null,
       datum: datum || null
     };
-    
+
     const updated = await Fahrt.update(id, updateData, userId);
-    
+
     if (updated) {
-      if (mitfahrer?.length > 0) {
+      // Auch ein leeres Array verarbeiten: sonst liess sich der letzte
+      // Mitfahrer nie entfernen - die Oberflaeche meldete Erfolg, nach dem
+      // Neuladen war er wieder da (und wurde weiter erstattet).
+      if (Array.isArray(mitfahrer)) {
         await Mitfahrer.updateMitfahrerForFahrt(id, mitfahrer);
       }
       res.status(200).json({ message: 'Fahrt erfolgreich aktualisiert' });
