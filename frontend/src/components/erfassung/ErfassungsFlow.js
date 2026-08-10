@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../../contexts/AppContext';
 import Sheet from '../ui/Sheet';
@@ -81,6 +81,9 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   // Gewählte Live-Adresse als Ziel + ob sie dauerhaft gespeichert werden soll
   const [zielAdresse, setZielAdresse] = useState(null);
   const [zielMerken, setZielMerken] = useState(false);
+  // Doppel-Tap-Sperre beim Speichern (Ref, weil der State-Update zu spät kommt)
+  const [speichert, setSpeichert] = useState(false);
+  const speichertRef = useRef(false);
 
   // Verlauf (alle Fahrten) und Träger inkl. heute gültigem Erstattungssatz —
   // je ein GET beim Öffnen; Context-`fahrten` ist auf den gewählten Monat
@@ -315,6 +318,12 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   };
 
   const handleSpeichern = async () => {
+    // Der Ort-POST laeuft vor dem Schliessen des Sheets - ohne Sperre legt ein
+    // zweiter Tap Fahrt und Ort ein zweites Mal an.
+    if (speichertRef.current) return;
+    speichertRef.current = true;
+    setSpeichert(true);
+
     const anlassClean = anlass.trim();
 
     // „Ort dauerhaft speichern": Adresse vor der Fahrt als Ort anlegen, damit
@@ -328,8 +337,9 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         });
         gemerkteZielId = res.data?.id ?? null;
       } catch (err) {
-        // Nicht blockieren: die Fahrt wird trotzdem mit freiem Ziel gespeichert
+        // Fahrt trotzdem speichern, aber nicht so tun, als sei der Ort da
         console.error('Ort konnte nicht gespeichert werden:', err);
+        toast.error('Der Ort konnte nicht dauerhaft gespeichert werden — die Fahrt wird trotzdem angelegt.');
       }
     }
 
@@ -389,6 +399,15 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         for (const id of op.ids) {
           await axios.delete(`/api/fahrten/${id}`);
         }
+        // Auch den eigens angelegten Ort zuruecknehmen - sonst bleibt er nach
+        // "Rueckgaengig" als Waise in der Ortsliste stehen.
+        if (gemerkteZielId) {
+          try {
+            await axios.delete(`/api/orte/${gemerkteZielId}`);
+          } catch (ortErr) {
+            console.error('Gemerkter Ort konnte nicht entfernt werden:', ortErr);
+          }
+        }
         setFahrten((prev) => prev.filter((f) => !tempIds.includes(f.id)));
         await refreshAllData();
         toast.success(op.ids.length > 1 ? 'Fahrten wieder entfernt.' : 'Fahrt wieder entfernt.');
@@ -432,6 +451,11 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         if (!op.abgebrochen) {
           toast.error('Fahrt konnte nicht gespeichert werden.');
         }
+      } finally {
+        // Sperre loesen: das Sheet ist zwar schon zu, wird es aber erneut
+        // geoeffnet (Wiederholen), muss Speichern wieder moeglich sein.
+        speichertRef.current = false;
+        setSpeichert(false);
       }
     })();
   };
@@ -592,6 +616,9 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                   setZielOrtId(String(o.id));
                   setZielAdresse(null);
                   setZielMerken(false);
+                  // Manuelle km gehoeren zum alten Ziel - sonst gilt eine
+                  // eingetippte Zahl stillschweigend auch fuers neue Ziel
+                  setKmManuell('');
                 }}
               >
                 <span className="erf-ort-main">
@@ -621,6 +648,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                     onClick={() => {
                       setZielAdresse(a);
                       setZielOrtId(null);
+                      setKmManuell('');
                       adressenLeeren();
                     }}
                   >
@@ -685,7 +713,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
             onClick={() => setStep(1)}
             title="Ziel ändern"
           >
-            {ortName(startOrt)} → {zielLabel}
+            {startLabel} → {zielLabel}
           </button>
           <div className="erf-betrag num">
             {kmGueltig ? (
@@ -804,7 +832,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         type="button"
         className="btn-sheet-primary"
         onClick={handleSpeichern}
-        disabled={!kannSpeichern}
+        disabled={!kannSpeichern || speichert}
       >
         {fahrtenAnzahl === 1 ? '1 Fahrt speichern' : '2 Fahrten speichern'}
         {gesamtKm !== null && <span className="num"> · {formatKm(gesamtKm)} km</span>}

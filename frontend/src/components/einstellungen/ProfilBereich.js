@@ -7,7 +7,7 @@ import BereichKopf from './BereichKopf';
 // Profil & Passwort: persönliche Daten für die Abrechnung + Passwortwechsel.
 // Formulare bleiben Seiteninhalt (mehrfeldrig, kein Sheet).
 function ProfilBereich() {
-  const { user, setUser, refreshAllData } = useContext(AppContext);
+  const { setUser, refreshAllData } = useContext(AppContext);
   const toast = useToast();
   const [profile, setProfile] = useState({});
   const [oldPassword, setOldPassword] = useState('');

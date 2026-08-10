@@ -119,7 +119,11 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       anlass: formData.anlass,
       kilometer: parseFloat(formData.manuelleKilometer),
       abrechnung: parseInt(formData.abrechnung),
-      mitfahrer: mitfahrer.filter(m => m.richtung === 'hin' || m.richtung === 'hin_rueck')
+      // Alle Mitfahrer senden. Frueher filterte diese Zeile auf 'hin' und
+      // 'hin_rueck' - Mitfahrer mit Richtung 'rueck' wurden damit beim
+      // Bearbeiten der Fahrt aus der Datenbank geloescht, samt ihrem
+      // Erstattungsanspruch.
+      mitfahrer
     };
 
     // Nur noch Edit-Modus: bestehende Fahrt per PUT aktualisieren
@@ -365,13 +369,28 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       <div className="flex flex-wrap gap-2">
       {mitfahrer.map((person, index) => (
         <span key={index} className="status-badge-primary">
-        {person.name}
+        {/* Name antippen bearbeitet den Eintrag — die Bearbeitungslogik gab es
+            schon, nur den Ausloeser dafuer nicht (Mitfahrer liessen sich nur
+            loeschen und neu anlegen) */}
         <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          handleEditMitfahrer(index);
+        }}
+        className="mitfahrer-name-btn"
+        title={`${person.name} bearbeiten`}
+        >
+        {person.name}
+        </button>
+        <button
+        type="button"
         onClick={(e) => {
           e.preventDefault();
           handleDeleteMitfahrer(index);
         }}
         className="text-secondary-500 hover:text-secondary-600"
+        aria-label={`${person.name} entfernen`}
         >
         ×
         </button>
@@ -394,7 +413,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     type="text"
     value={ortSpeichernModal.adresse}
     readOnly
-    className="form-input bg-primary-25 dark:bg-primary-900/50"
+    className="form-input form-input-readonly"
     />
     </div>
     <div>

@@ -67,6 +67,10 @@ export function useAdressSuche(query, { minLaenge = 3, aktiv = true } = {}) {
 
     const q = (query || '').trim();
     if (!aktiv || q.length < minLaenge) {
+      // Zaehler mit hochziehen: sonst besteht eine noch laufende aeltere
+      // Anfrage den Guard unten und schreibt ihre Treffer zurueck, obwohl das
+      // Feld inzwischen geleert wurde.
+      requestId.current++;
       setVorschlaege([]);
       setLaedt(false);
       return undefined;

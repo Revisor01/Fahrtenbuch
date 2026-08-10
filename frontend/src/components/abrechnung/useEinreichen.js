@@ -3,6 +3,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import { useFahrtenExport } from '../fahrten/useFahrtenExport';
 import { monatLabel } from './abrechnungUtils';
+import { heuteISO } from '../../utils/datum';
 
 // Statusaktionen der Abrechnung (Phase R6) — alle ohne Bestätigungs-Modal:
 // direkt ausführen, Toast mit „Rückgängig" (Design-Spec).
@@ -29,7 +30,7 @@ export function useEinreichen() {
     await fetchFahrten();
   };
 
-  const heute = () => new Date().toISOString().split('T')[0];
+  const heute = () => heuteISO();
 
   // Datumsteil aus API-Werten ("YYYY-MM-DD" oder ISO-Datetime)
   const datumsTeil = (wert) => (wert ? String(wert).slice(0, 10) : null);

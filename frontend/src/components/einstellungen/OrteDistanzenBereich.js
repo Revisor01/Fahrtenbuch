@@ -5,6 +5,7 @@ import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
 import AddressAutocomplete from '../AddressAutocomplete';
 import BereichKopf from './BereichKopf';
+import fehlerText from '../../utils/fehlerText';
 
 const ORT_TYPEN = [
   { value: '', label: 'Sonstiger Ort' },
@@ -32,11 +33,21 @@ function OrtSheet({ offen, ort, orte, onClose, onSave }) {
   const [adresse, setAdresse] = useState(ort?.adresse || '');
   const [typ, setTyp] = useState(ort ? getOrtTyp(ort) : '');
 
+  const [laeuft, setLaeuft] = useState(false);
+
   const hatWohnort = orte.some((o) => o.ist_wohnort && o.id !== ort?.id);
 
-  const handleSubmit = (e) => {
+  // Sperre gegen Doppel-Tap: das Sheet bleibt waehrend des Requests offen,
+  // ein zweiter Klick legte sonst denselben Ort ein zweites Mal an.
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({ name, adresse, typ });
+    if (laeuft) return;
+    setLaeuft(true);
+    try {
+      await onSave({ name, adresse, typ });
+    } finally {
+      setLaeuft(false);
+    }
   };
 
   return (
@@ -78,7 +89,9 @@ function OrtSheet({ offen, ort, orte, onClose, onSave }) {
         </div>
         <div className="set-sheet-buttons">
           <button type="button" className="btn-secondary" onClick={onClose}>Abbrechen</button>
-          <button type="submit" className="btn-primary">Speichern</button>
+          <button type="submit" className="btn-primary" disabled={laeuft}>
+            {laeuft ? 'Speichert…' : 'Speichern'}
+          </button>
         </div>
       </form>
     </Sheet>
@@ -90,6 +103,7 @@ function DistanzSheet({ offen, distanz, orte, distanzen, onClose, onSave }) {
   const [vonOrtId, setVonOrtId] = useState(distanz ? String(distanz.von_ort_id) : '');
   const [nachOrtId, setNachOrtId] = useState(distanz ? String(distanz.nach_ort_id) : '');
   const [km, setKm] = useState(distanz ? String(distanz.distanz) : '');
+  const [laeuft, setLaeuft] = useState(false);
 
   const sortierteOrte = [...orte].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -110,9 +124,16 @@ function DistanzSheet({ offen, distanz, orte, distanzen, onClose, onSave }) {
 
   const kmWert = km === '' && bestehende ? String(bestehende.distanz) : km;
 
-  const handleSubmit = (e) => {
+  // Sperre gegen Doppel-Tap, sonst entstehen zwei Distanzen
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({ vonOrtId, nachOrtId, distanz: parseInt(kmWert, 10) });
+    if (laeuft) return;
+    setLaeuft(true);
+    try {
+      await onSave({ vonOrtId, nachOrtId, distanz: parseInt(kmWert, 10) });
+    } finally {
+      setLaeuft(false);
+    }
   };
 
   return (
@@ -176,7 +197,9 @@ function DistanzSheet({ offen, distanz, orte, distanzen, onClose, onSave }) {
         </div>
         <div className="set-sheet-buttons">
           <button type="button" className="btn-secondary" onClick={onClose}>Abbrechen</button>
-          <button type="submit" className="btn-primary">Speichern</button>
+          <button type="submit" className="btn-primary" disabled={laeuft}>
+            {laeuft ? 'Speichert…' : 'Speichern'}
+          </button>
         </div>
       </form>
     </Sheet>
@@ -240,20 +263,26 @@ function OrteDistanzenBereich() {
       istDienstort: typ === 'dienstort',
       istKirchspiel: typ === 'kirchspiel',
     };
-    if (ortSheet?.mode === 'edit') {
-      await updateOrt(ortSheet.ort.id, {
-        name,
-        adresse,
-        ist_wohnort: flags.istWohnort,
-        ist_dienstort: flags.istDienstort,
-        ist_kirchspiel: flags.istKirchspiel,
-      });
-      toast.success('Ort aktualisiert.');
-    } else {
-      await addOrt({ name, adresse, ...flags });
-      toast.success('Ort angelegt.');
+    try {
+      if (ortSheet?.mode === 'edit') {
+        await updateOrt(ortSheet.ort.id, {
+          name,
+          adresse,
+          ist_wohnort: flags.istWohnort,
+          ist_dienstort: flags.istDienstort,
+          ist_kirchspiel: flags.istKirchspiel,
+        });
+        toast.success('Ort aktualisiert.');
+      } else {
+        await addOrt({ name, adresse, ...flags });
+        toast.success('Ort angelegt.');
+      }
+      setOrtSheet(null);
+    } catch (error) {
+      // Sheet offen lassen, damit die Eingaben nicht verloren gehen
+      console.error('Ort konnte nicht gespeichert werden:', error);
+      toast.error(fehlerText(error, 'Ort konnte nicht gespeichert werden.'));
     }
-    setOrtSheet(null);
   };
 
   // Löschen ohne Rückfrage, mit Toast + „Rückgängig" (legt den Ort neu an)
@@ -279,23 +308,31 @@ function OrteDistanzenBereich() {
       });
     } catch (error) {
       console.error('Fehler beim Löschen des Ortes:', error);
-      toast.error('Dieser Ort kann nicht gelöscht werden — er wird in Fahrten oder Distanzen verwendet.');
+      // Das Backend unterscheidet inzwischen zwischen "in Fahrten verwendet"
+      // und "Distanzen gepflegt" - diese Meldung ist hilfreicher als eine
+      // pauschale.
+      toast.error(fehlerText(error, 'Dieser Ort kann nicht gelöscht werden — er wird noch verwendet.'));
     }
   };
 
   const handleDistanzSave = async ({ vonOrtId, nachOrtId, distanz }) => {
-    if (distSheet?.mode === 'edit') {
-      await updateDistanz(distSheet.distanz.id, {
-        von_ort_id: distSheet.distanz.von_ort_id,
-        nach_ort_id: distSheet.distanz.nach_ort_id,
-        distanz,
-      });
-      toast.success('Distanz aktualisiert.');
-    } else {
-      await addDistanz({ vonOrtId, nachOrtId, distanz });
-      toast.success('Distanz gespeichert.');
+    try {
+      if (distSheet?.mode === 'edit') {
+        await updateDistanz(distSheet.distanz.id, {
+          von_ort_id: distSheet.distanz.von_ort_id,
+          nach_ort_id: distSheet.distanz.nach_ort_id,
+          distanz,
+        });
+        toast.success('Distanz aktualisiert.');
+      } else {
+        await addDistanz({ vonOrtId, nachOrtId, distanz });
+        toast.success('Distanz gespeichert.');
+      }
+      setDistSheet(null);
+    } catch (error) {
+      console.error('Distanz konnte nicht gespeichert werden:', error);
+      toast.error(fehlerText(error, 'Distanz konnte nicht gespeichert werden.'));
     }
-    setDistSheet(null);
   };
 
   // Löschen ohne Rückfrage, mit Toast + „Rückgängig"

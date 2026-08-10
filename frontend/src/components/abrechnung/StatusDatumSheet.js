@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { heuteISO } from '../../utils/datum';
 import Sheet from '../ui/Sheet';
 import { statusLabel } from '../../utils/statusLabels';
 
@@ -19,12 +20,12 @@ function StatusDatumSheet({
   jahr,
   abrechnungstraeger,
 }) {
-  const heute = new Date().toISOString().split('T')[0];
+  const heute = heuteISO();
   const [selectedDate, setSelectedDate] = useState(heute);
 
   // Bei jedem Öffnen frisch mit heute starten
   useEffect(() => {
-    if (isOpen) setSelectedDate(new Date().toISOString().split('T')[0]);
+    if (isOpen) setSelectedDate(heuteISO());
   }, [isOpen]);
 
   if (!isOpen) return null;

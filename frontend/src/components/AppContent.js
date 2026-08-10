@@ -11,6 +11,7 @@ import MonthlyOverview from './MonthlyOverview';
 import Dashboard from './Dashboard';
 import LoginPage from './LoginPage';
 import { AppContext } from '../contexts/AppContext';
+import { aktuellerMonat } from '../utils/datum';
 
 // Das Zeichen: offener Ring (die gefahrene Strecke), um −45° gedreht.
 // Ab 32px Darstellungsgröße trägt der Ring allein (ohne Akzent-Punkt).
@@ -59,7 +60,7 @@ function AppContent() {
   // Fällige Monate: Vormonate, in denen mindestens ein Träger mit Erstattung
   // weder eingereicht noch erstattet ist
   const faelligeMonate = useMemo(() => {
-    const currentYearMonth = new Date().toISOString().slice(0, 7);
+    const currentYearMonth = aktuellerMonat();
     return monthlyData.filter((md) => {
       if (!md.yearMonth || md.yearMonth >= currentYearMonth) return false;
       return Object.entries(md.erstattungen || {}).some(([id, betrag]) => {
@@ -74,11 +75,18 @@ function AppContent() {
   useEffect(() => {
     const checkTokenExpiration = () => {
       const token = localStorage.getItem('token');
-      if (token) {
+      if (!token) return;
+      try {
         const tokenData = JSON.parse(atob(token.split('.')[1]));
         if (tokenData.exp * 1000 < Date.now()) {
           logout();
         }
+      } catch (error) {
+        // Ein defekter Token darf die App nicht zerlegen: die Exception lief
+        // bisher aus dem useEffect heraus, React warf den Baum weg (weisse
+        // Seite) und der kaputte Wert blieb liegen - jeder Reload crashte neu.
+        console.error('Token unlesbar, wird verworfen:', error);
+        logout();
       }
     };
 

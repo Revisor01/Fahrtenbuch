@@ -1,7 +1,10 @@
 const db = require('../config/database');
 
 class Fahrt {
-  static async create(fahrtData, details, userId) {
+  // mitfahrer wird in derselben Transaktion angelegt: zuvor lief das INSERT der
+  // Fahrt allein in einer Transaktion und die Mitfahrer danach ungeschuetzt -
+  // ein Fehler dort hinterliess eine Fahrt ohne (oder mit halben) Mitfahrern.
+  static async create(fahrtData, details, userId, mitfahrer = []) {
     const conn = await db.getConnection();
     try {
       await conn.beginTransaction();
@@ -32,7 +35,14 @@ class Fahrt {
       );
       
       const fahrtId = result.insertId;
-      
+
+      for (const person of mitfahrer) {
+        await conn.execute(
+          'INSERT INTO mitfahrer (fahrt_id, name, arbeitsstaette, richtung) VALUES (?, ?, ?, ?)',
+          [fahrtId, person.name, person.arbeitsstaette, person.richtung]
+        );
+      }
+
       await conn.commit();
       return fahrtId;
     } catch (error) {

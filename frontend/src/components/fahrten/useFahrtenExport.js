@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import axios from 'axios';
+import { heuteISO } from '../../utils/datum';
 import JSZip from 'jszip';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
@@ -132,7 +133,7 @@ export function useFahrtenExport() {
       actionLabel: 'Als eingereicht markieren',
       onAction: async () => {
         try {
-          const today = new Date().toISOString().split('T')[0];
+          const today = heuteISO();
           if (istZeitraum) {
             for (const mk of exportedMonths) {
               const [y, m] = mk.split('-');

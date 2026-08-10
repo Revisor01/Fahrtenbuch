@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
+import { aktuellerMonat as aktuellerMonatISO, heuteISO } from '../utils/datum';
 import { useErfassung } from '../contexts/ErfassungContext';
 import EmptyState from './ui/EmptyState';
 import Sheet from './ui/Sheet';
@@ -18,15 +19,6 @@ import { Star } from 'lucide-react';
 // die „Zuletzt"-Liste (liefert Erstattung + Mitfahrer je Fahrt).
 
 const API_BASE_URL = '/api';
-
-// Lokales Datum, nicht UTC: toISOString() liefert zwischen Mitternacht und
-// 2 Uhr (Sommerzeit) noch den Vortag und wuerde Fahrten falsch datieren.
-const heuteISO = () => {
-  const d = new Date();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${mm}-${dd}`;
-};
 
 const formatEuro = (betrag) => (Number(betrag) || 0).toFixed(2).replace('.', ',');
 
@@ -101,7 +93,7 @@ function Dashboard({ onNavigate }) {
   const toast = useToast();
   const erfassung = useErfassung();
 
-  const currentYM = new Date().toISOString().slice(0, 7);
+  const currentYM = aktuellerMonatISO();
 
   const byYM = useMemo(() => {
     const map = {};
@@ -191,7 +183,7 @@ function Dashboard({ onNavigate }) {
   // markieren — direkt mit Undo-Toast, ein Refresh (Muster aus useEinreichen)
   const monatErhalten = async (u) => {
     const [jahr, monat] = u.ym.split('-');
-    const heute = new Date().toISOString().split('T')[0];
+    const heute = heuteISO();
     const datumsTeil = (w) => (w ? String(w).slice(0, 10) : null);
     try {
       for (const e of u.eintraege) {
