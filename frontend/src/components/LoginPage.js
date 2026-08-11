@@ -43,9 +43,9 @@ function LoginPage() {
     registrationCode: '',
   });
 
-  const appTitle = appConfigValue('appTitle', process.env.REACT_APP_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
-  const allowRegistration = appConfigValue('allowRegistration', process.env.REACT_APP_ALLOW_REGISTRATION) === 'true';
-  const allowedEmailDomains = appConfigValue('allowedEmailDomains', process.env.REACT_APP_ALLOWED_EMAIL_DOMAINS);
+  const appTitle = appConfigValue('appTitle', import.meta.env.VITE_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
+  const allowRegistration = appConfigValue('allowRegistration', import.meta.env.VITE_ALLOW_REGISTRATION) === 'true';
+  const allowedEmailDomains = appConfigValue('allowedEmailDomains', import.meta.env.VITE_ALLOWED_EMAIL_DOMAINS);
   // Nur die Information, OB ein Code verlangt wird. Der Wert selbst stand
   // frueher im oeffentlich abrufbaren config.js und war damit fuer jeden
   // Besucher lesbar; geprueft wird er ohnehin serverseitig.
@@ -53,7 +53,7 @@ function LoginPage() {
     appConfigValue('registrationCodeRequired', undefined) === true ||
     appConfigValue('registrationCodeRequired', undefined) === 'true' ||
     // Fallback fuer lokale Entwicklung ohne Container-Entrypoint
-    Boolean(process.env.REACT_APP_REGISTRATION_CODE);
+    Boolean(import.meta.env.VITE_REGISTRATION_CODE);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

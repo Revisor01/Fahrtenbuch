@@ -78,7 +78,7 @@ export default function LandingPage() {
   const [offen, setOffen] = useState(null);
   const appTitle = appConfigValue(
     'appTitle',
-    process.env.REACT_APP_TITLE,
+    import.meta.env.VITE_TITLE,
     'Fahrtenbuch Kirchenkreis Dithmarschen'
   );
 

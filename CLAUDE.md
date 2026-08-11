@@ -32,13 +32,11 @@ Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung
 - Express.js 4.17.1 - Backend HTTP server and REST API
 - React 18.3.1 - Frontend UI framework with hooks and context API
 - React Router DOM 7.1.1 - Client-side routing
-- React Test Scripts (via react-scripts 5.0.1) - Jest-based testing framework
-- @testing-library/react 13.4.0 - React component testing utilities
-- @testing-library/jest-dom 5.17.0 - Jest DOM matchers
-- react-scripts 5.0.1 - Frontend build tooling (webpack, babel, dev server)
+- Vite 6 - Frontend build tooling (dev server, bundling); kein Frontend-Testframework vorhanden
+- @vitejs/plugin-react 4 - React-Unterstuetzung inkl. Fast Refresh
 - nodemon 2.0.12 - Backend auto-reload during development
-- Webpack (implicit via react-scripts) - Frontend bundling
-- Babel (implicit via react-scripts) - JavaScript transpilation
+- Rollup (implicit via Vite) - Frontend bundling
+- esbuild (implicit via Vite) - JSX-Transformation; JSX liegt in `.js`-Dateien, Loader-Hook in `vite.config.js`
 - Tailwind CSS 3.4.12 - Utility-first CSS framework
 - PostCSS 8.4.47 - CSS transformation pipeline
 - Autoprefixer 10.4.20 - Browser vendor prefix generation
@@ -57,8 +55,7 @@ Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung
 - exceljs 4.4.0 - Excel (.xlsx) file generation for exports
 - xlsx 0.18.5 - Excel file parsing and generation
 - jszip 3.10.1 - ZIP archive creation for bulk exports
-- @babel/plugin-proposal-private-property-in-object 7.21.11 - Babel support for private class fields
-- dotenv-webpack 8.1.0 - Webpack plugin for injecting env vars into frontend build
+- vite 6 - Frontend build tool; Laufzeit-Konfiguration laeuft ueber `public/config.js`, nicht ueber Build-Variablen
 ## Configuration
 - Database: `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 - Authentication: `JWT_SECRET`
@@ -66,12 +63,15 @@ Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung
 - URLs: `FRONTEND_URL`, `CORS_ORIGIN`
 - Initial Admin: `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD`, `INITIAL_ADMIN_EMAIL`
 - Defaults: `DEFAULT_ERSTATTUNG_TRAEGER`, `DEFAULT_ERSTATTUNG_MITFAHRER`, `DEFAULT_ERSTATTUNG_DATUM`
+Frontend-Variablen wirken zur **Laufzeit**: `docker-entrypoint.sh` schreibt daraus
+beim Containerstart `config.js`. Sie gehoeren ins `environment:` des Containers,
+nicht in Build-Argumente — dasselbe Image laeuft so bei mehreren Kirchenkreisen.
 - `REACT_APP_TITLE` - Application title displayed in UI
 - `REACT_APP_ALLOW_REGISTRATION` - Enable/disable user self-registration
 - `REACT_APP_ALLOWED_EMAIL_DOMAINS` - Comma-separated list of allowed email domains for registration
-- `REACT_APP_REGISTRATION_CODE` - Optional registration code requirement
+- `REACT_APP_REGISTRATION_CODE` - steuert nur, OB ein Code verlangt wird; der Wert selbst geht nie ins Frontend
 - Backend: `Dockerfile` at `backend/Dockerfile` - Multi-stage not used, Node 20 base image
-- Frontend: `backend/Dockerfile` - Multi-stage build: Node 20 → Nginx Alpine
+- Frontend: `frontend/Dockerfile` - Multi-stage build: Node 20 → Nginx Alpine
 - Frontend: `frontend/nginx.conf` - Nginx configuration for SPA routing (try_files fallback to index.html)
 - Compose: `docker-compose.yml` (development) and `docker-compose.example.yml` (production template)
 ## Platform Requirements
@@ -109,10 +109,8 @@ Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung
 - No dedicated formatter is configured (no `.prettierrc` or similar)
 - 2-space indentation observed in all files
 - Lines are generally kept reasonably short but no strict enforced limit
-- ESLint configured in frontend via `react-app` preset
-- Config location: `frontend/package.json` (eslintConfig section)
-- No explicit `.eslintrc` file - uses defaults from `react-scripts`
-- Backend has no linting configured (only `nodemon` for development)
+- Kein Linting konfiguriert — weder Frontend noch Backend (der `react-app`-Preset
+  entfiel mit react-scripts)
 ## Import Organization
 - No path aliases are used in this project
 - Relative paths with `../` are standard throughout

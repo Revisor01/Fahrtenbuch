@@ -125,11 +125,11 @@ const DatenschutzInhalt = () => (
   </>
 );
 
-// Version aus dem eigenen Build (package.json, via REACT_APP_VERSION zur
+// Version aus dem eigenen Build (package.json, via __APP_VERSION__ zur
 // Build-Zeit eingebacken). Der frühere Live-Abruf des letzten GitHub-Releases
 // zeigte den Stand des letzten *Releases* — und war offline/bei Ratelimit
 // schlicht falsch („v1.0.0"-Fallback).
-const APP_VERSION = process.env.REACT_APP_VERSION || null;
+const APP_VERSION = __APP_VERSION__ || null;
 
 const InfoModal = ({ isOpen, onClose }) => {
   // 'info' | 'impressum' | 'datenschutz'

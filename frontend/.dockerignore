@@ -1,3 +1,6 @@
 node_modules
 npm-debug.log
 .env
+# Lokale Build-Ergebnisse: das Image baut selbst (RUN npm run build)
+build
+dist
