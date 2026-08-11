@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const rateLimit = require('express-rate-limit');
 const userController = require('../controllers/userController');
 const {
     authMiddleware,
@@ -8,21 +7,17 @@ const {
     requireAdminOrSelf
 } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
+const { resetLimiter } = require('../middleware/rateLimiter');
 const { createUserSchema, updateUserSchema, resetPasswordRequestSchema, resetPasswordSchema, setPasswordSchema, verifyEmailSchema, resendVerificationSchema, changePasswordSchema } = require('../schemas/userSchemas');
 
-const resetLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 Minuten
-  max: 5, // max 5 Reset-Anfragen pro IP
-  message: { message: 'Zu viele Passwort-Reset-Anfragen. Bitte in 10 Minuten erneut versuchen.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
-// Public routes first
+// Public routes first — alle ohne Anmeldung erreichbar und deshalb begrenzt.
+// Das Einloesen eines Tokens war bisher unbegrenzt: genau der Weg, ueber den
+// sich Tokens haetten durchprobieren lassen.
 router.post('/reset-password/request', resetLimiter, validate(resetPasswordRequestSchema), userController.requestPasswordReset);
-router.post('/reset-password/verify', validate(resetPasswordSchema), userController.resetPassword);
-router.post('/set-password', validate(setPasswordSchema), userController.setPassword);
-router.post('/verify-email', validate(verifyEmailSchema), userController.verifyEmail);
+router.post('/reset-password/verify', resetLimiter, validate(resetPasswordSchema), userController.resetPassword);
+router.post('/set-password', resetLimiter, validate(setPasswordSchema), userController.setPassword);
+router.post('/verify-email', resetLimiter, validate(verifyEmailSchema), userController.verifyEmail);
 
 // Protected routes
 router.get('/me', authMiddleware, userController.getCurrentUser);
