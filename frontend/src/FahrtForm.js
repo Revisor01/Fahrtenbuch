@@ -1,10 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Plus, X } from 'lucide-react';
 import { AppContext } from './contexts/AppContext';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 import Modal from './Modal';
 import AddressAutocomplete from './components/AddressAutocomplete';
+
+// Klartext statt der internen Schluessel ('hin_rueck' sagt niemandem etwas)
+const RICHTUNG_TEXT = {
+  hin: 'Hinfahrt',
+  rueck: 'Rückfahrt',
+  hin_rueck: 'Hin- und Rückfahrt',
+};
 
 // Bearbeiten einer bestehenden Fahrt (Edit-Modal). Das Anlegen neuer Fahrten
 // läuft seit dem Redesign 2026 ausschließlich über den zweistufigen
@@ -194,7 +202,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     <div className="form-row">
     <div className="form-group">
     <div className="form-label-with-checkbox">
-    <label className="text-xs text-label">Startort</label>
+    <label className="form-label">Startort</label>
     <label className="checkbox-label">
     <input
     type="checkbox"
@@ -248,7 +256,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     
     <div className="form-group">
     <div className="form-label-with-checkbox">
-    <label className="text-xs text-label">Zielort</label>
+    <label className="form-label">Zielort</label>
     <label className="checkbox-label">
     <input
     type="checkbox"
@@ -341,17 +349,64 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     </div>
     </div>
     
+    {/* Mitfahrer:innen — eigenes Feld wie Anlass, Kilometer und Abrechnung.
+        Frueher stand der Knopf zwischen den Buttons und die Liste UNTER
+        „Fahrt speichern", wo sie niemand vermutete. */}
+    <div className="form-group">
+    <label className="form-label" id="mitfahrer-label">Mitfahrer:innen</label>
+    <div className="mitfahrer-feld" role="group" aria-labelledby="mitfahrer-label">
+    {mitfahrer.length > 0 && (
+      <ul className="mitfahrer-liste">
+      {mitfahrer.map((person, index) => (
+        <li key={index} className="mitfahrer-eintrag">
+        {/* Name antippen bearbeitet den Eintrag */}
+        <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          handleEditMitfahrer(index);
+        }}
+        className="mitfahrer-eintrag-haupt"
+        title={`${person.name} bearbeiten`}
+        >
+        <span className="mitfahrer-eintrag-name">{person.name}</span>
+        <span className="mitfahrer-eintrag-sub">
+        {[person.arbeitsstaette, RICHTUNG_TEXT[person.richtung] || RICHTUNG_TEXT.hin]
+          .filter(Boolean)
+          .join(' · ')}
+        </span>
+        </button>
+        <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          handleDeleteMitfahrer(index);
+        }}
+        className="mitfahrer-eintrag-weg"
+        aria-label={`${person.name} entfernen`}
+        title={`${person.name} entfernen`}
+        >
+        <X size={16} />
+        </button>
+        </li>
+      ))}
+      </ul>
+    )}
+    <button
+    type="button"
+    onClick={() => setShowMitfahrerModal(true)}
+    className="mitfahrer-add"
+    >
+    <Plus size={16} aria-hidden="true" />
+    <span>{mitfahrer.length > 0 ? 'Weitere:n hinzufügen' : 'Mitfahrer:in hinzufügen'}</span>
+    </button>
+    </div>
+    </div>
+
     {/* Buttons */}
     <div className="flex flex-wrap items-center justify-end gap-4">
     <div className="button-group">
     <div className="button-group-stack">
-    <button
-    type="button"
-    onClick={() => setShowMitfahrerModal(true)}
-    className="btn-secondary"
-    >
-    Mitfahrer:in
-    </button>
     {onCancel && (
       <button type="button" onClick={onCancel} className="btn-secondary">
       Abbrechen
@@ -363,41 +418,6 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     </div>
     </div>
     </div>
-    
-    {/* Mitfahrer Liste */}
-    {mitfahrer.length > 0 && (
-      <div className="flex flex-wrap gap-2">
-      {mitfahrer.map((person, index) => (
-        <span key={index} className="status-badge-primary">
-        {/* Name antippen bearbeitet den Eintrag — die Bearbeitungslogik gab es
-            schon, nur den Ausloeser dafuer nicht (Mitfahrer liessen sich nur
-            loeschen und neu anlegen) */}
-        <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          handleEditMitfahrer(index);
-        }}
-        className="mitfahrer-name-btn"
-        title={`${person.name} bearbeiten`}
-        >
-        {person.name}
-        </button>
-        <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          handleDeleteMitfahrer(index);
-        }}
-        className="text-secondary-500 hover:text-secondary-600"
-        aria-label={`${person.name} entfernen`}
-        >
-        ×
-        </button>
-        </span>
-      ))}
-      </div>
-    )}
     </form>
     
     {/* Modal für Ort speichern */}

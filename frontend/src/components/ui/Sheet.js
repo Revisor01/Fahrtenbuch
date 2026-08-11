@@ -68,7 +68,7 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   if (!isOpen) return null;
 
   return (
-    <div className="sheet-root">
+    <div className={`sheet-root${wide ? ' sheet-root-wide' : ''}`}>
       <div className="sheet-overlay" onClick={onClose} aria-hidden="true" />
       <div
         ref={panelRef}
