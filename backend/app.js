@@ -15,6 +15,7 @@ const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const { authMiddleware } = require('./middleware/authMiddleware');
+const { apiLimiter, schreibLimiter, exportLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
@@ -58,6 +59,21 @@ const reactBuildPath = path.join(__dirname, '../frontend/public');
 
 // Static files for React app
 app.use(express.static(reactBuildPath));
+
+// Rate-Limiting fuer die Datenrouten. Anmeldung und Passwort-Reset sind
+// ausgenommen: sie tragen eigene, engere Limits, und wer sich anmelden will,
+// darf nicht daran scheitern, dass jemand anderes die API ausgelastet hat.
+const OHNE_GLOBALES_LIMIT = ['/api/auth/', '/api/users/reset-password', '/api/users/set-password', '/api/users/verify-email'];
+const istAuthPfad = (req) => OHNE_GLOBALES_LIMIT.some((p) => req.originalUrl.startsWith(p));
+
+app.use('/api', (req, res, next) => (istAuthPfad(req) ? next() : apiLimiter(req, res, next)));
+app.use('/api', (req, res, next) => (istAuthPfad(req) ? next() : schreibLimiter(req, res, next)));
+
+// Exporte starten LibreOffice und sind entsprechend teuer
+app.use('/api/fahrten/export', exportLimiter);
+app.use('/api/fahrten/export-range', exportLimiter);
+app.use('/api/fahrten/export-pdf', exportLimiter);
+app.use('/api/fahrten/export-pdf-range', exportLimiter);
 
 // API routes
 app.use('/api/auth', authRoutes);
