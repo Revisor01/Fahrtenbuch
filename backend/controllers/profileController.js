@@ -75,14 +75,13 @@ exports.updateProfile = async (req, res) => {
              }
 
             // Profil aktualisieren/erstellen
-            let result;
             if (existingProfile.length > 0) {
-                result = await connection.execute(
+                await connection.execute(
                     'UPDATE user_profiles SET email = ?, full_name = ?, iban = ?, kirchengemeinde = ?, kirchspiel = ?, kirchenkreis = ? WHERE user_id = ?',
                     [email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis, userId]
                 );
             } else {
-                result = await connection.execute(
+                await connection.execute(
                     'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?)',
                     [userId, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
                 );

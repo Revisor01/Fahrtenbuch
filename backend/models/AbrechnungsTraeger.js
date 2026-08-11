@@ -68,7 +68,7 @@ class AbrechnungsTraeger {
             await connection.beginTransaction();
             
             if (!userData.name) {
-                throw new Error('Ein Name muss vorhanden sein!')
+                throw new Error('Ein Name muss vorhanden sein!');
             }
             
             const [result] = await connection.execute(
@@ -102,7 +102,9 @@ class AbrechnungsTraeger {
             if (updateData.betrag !== undefined) {
                 await connection.execute(
                     'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-                    [id, updateData.betrag, updateData.gueltig_ab || new Date().toISOString().split('T')[0]]
+                    // Lokales Datum statt toISOString(): letzteres rechnet nach UTC
+                    // und setzte einen neuen Satz nachts faelschlich auf den Vortag.
+                    [id, updateData.betrag, updateData.gueltig_ab || heuteISO()]
                 );
             }
 

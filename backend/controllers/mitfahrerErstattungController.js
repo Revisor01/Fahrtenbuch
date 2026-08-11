@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { heuteISO } = require('../utils/datum');
 
 exports.getCurrentBetrag = async (req, res) => {
     try {
@@ -39,7 +40,7 @@ exports.setBetrag = async (req, res) => {
     try {
         await db.execute(
             'INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-            [req.user.id, betrag, gueltig_ab || new Date().toISOString().split('T')[0]]
+            [req.user.id, betrag, gueltig_ab || heuteISO()]
         );
         res.json({ message: 'Erstattungssatz erfolgreich gesetzt' });
     } catch (error) {

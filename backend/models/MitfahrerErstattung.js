@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { heuteISO } = require('../utils/datum');
 
 class MitfahrerErstattung {
     static async getCurrentBetrag(userId) {
@@ -38,7 +39,7 @@ class MitfahrerErstattung {
     }
     
     static async setBetrag(userId, betrag, gueltig_ab = null) {
-        const datum = gueltig_ab || new Date().toISOString().split('T')[0];
+        const datum = gueltig_ab || heuteISO();
         const [result] = await db.execute(
             'INSERT INTO mitfahrer_erstattung (user_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
             [userId, betrag, datum]
