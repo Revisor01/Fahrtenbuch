@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { heuteISO } = require('../utils/datum');
 const AbrechnungsTraeger = require('../models/AbrechnungsTraeger');
 
 exports.getAllAbrechnungstraeger = async (req, res) => {
@@ -62,10 +63,9 @@ exports.updateErstattungssatz = async (req, res) => {
         const updates = [];
         const values = [];
         
-        if (betrag !== undefined) {
-            updates.push('betrag = ?');
-            values.push(parseFloat(betrag));
-        }
+        // betrag ist oben bereits validiert (sonst 400) - hier immer gesetzt
+        updates.push('betrag = ?');
+        values.push(parseFloat(betrag));
         if (gueltig_ab !== undefined) {
             updates.push('gueltig_ab = ?');
             values.push(gueltig_ab);
@@ -268,7 +268,7 @@ exports.addErstattungssatz = async (req, res) => {
 
         await db.execute(
             'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-            [id, parseFloat(betrag), gueltig_ab || new Date().toISOString().split('T')[0]]
+            [id, parseFloat(betrag), gueltig_ab || heuteISO()]
         );
         
         res.status(201).json({ message: 'Erstattungssatz erfolgreich hinzugefügt' });

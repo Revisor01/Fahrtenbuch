@@ -1,4 +1,5 @@
 const ExcelJS = require('exceljs');
+const { heuteISO } = require('./datum');
 const path = require('path');
 const JSZip = require('jszip');
 const Fahrt = require('../models/Fahrt');
@@ -524,7 +525,7 @@ async function setzeZeitraumStatus({ startYear, startMonth, endYear, endMonth, t
  let y = parseInt(startYear), m = parseInt(startMonth);
  const ey = parseInt(endYear), em = parseInt(endMonth);
  while (y < ey || (y === ey && m <= em)) {
-   await Abrechnung.updateStatus(userId, y, m, type, 'eingereicht', new Date().toISOString().slice(0, 10));
+   await Abrechnung.updateStatus(userId, y, m, type, 'eingereicht', heuteISO());
    m++;
    if (m > 12) { m = 1; y++; }
  }
