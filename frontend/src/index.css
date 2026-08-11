@@ -5710,3 +5710,13 @@ code {
   align-items: center;
   justify-content: flex-end;
 }
+
+/* Sieben Highlight-Karten untereinander wuerden den Dialog sehr lang machen -
+   ab 640px zweispaltig. */
+@media (min-width: 640px) {
+  .neu-highlights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}

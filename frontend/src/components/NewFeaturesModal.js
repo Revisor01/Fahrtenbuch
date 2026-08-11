@@ -1,5 +1,14 @@
 import React from 'react';
-import { Check, FileSpreadsheet, Tag, CalendarRange } from 'lucide-react';
+import {
+  Check,
+  FileSpreadsheet,
+  Tag,
+  CalendarRange,
+  Sparkles,
+  MapPin,
+  Star,
+  ShieldCheck,
+} from 'lucide-react';
 import Sheet from './ui/Sheet';
 
 // Neuigkeiten-Sheet nach Design-Spec (Redesign 2026): Abschnitts-Labels
@@ -10,6 +19,9 @@ import Sheet from './ui/Sheet';
 // Kirchenkreises, Kostenstellen) und stehen deshalb als hervorgehobene
 // Karten oben — nicht als Häkchen-Zeile zwischen allem anderen.
 
+// Fast alles hier stand auf einem Wunschzettel aus dem Kollegium. Deshalb
+// stehen die grossen Punkte als Karten oben statt als Haekchen-Zeile
+// irgendwo dazwischen.
 const HIGHLIGHTS = [
   {
     icon: FileSpreadsheet,
@@ -26,43 +38,61 @@ const HIGHLIGHTS = [
     titel: 'Mehrere Monate auf einmal',
     text: 'Der Export ist nicht mehr auf einen Monat beschränkt: Du wählst einen Zeitraum — etwa ein ganzes Quartal — und bekommst alles in einer Abrechnung. Bei mehreren Dateien kommt automatisch ein ZIP.',
   },
+  {
+    icon: Sparkles,
+    titel: 'Die App sieht neu aus',
+    text: 'Die gesamte Oberfläche wurde neu gestaltet — ruhiger, übersichtlicher und auf dem Handy genauso benutzbar wie am Rechner. Ein Tipp auf eine Zeile öffnet jetzt überall dieselbe Ansicht mit allen Angaben und Aktionen. Helles und dunkles Design inklusive.',
+  },
+  {
+    icon: MapPin,
+    titel: 'Adressen werden vorgeschlagen',
+    text: 'Beim Tippen einer Adresse erscheinen passende Vorschläge — für gespeicherte Orte ebenso wie für einmalige Ziele. Tippfehler sind kein Problem mehr, und eine mitgetippte Hausnummer wird übernommen, auch wenn die Karte sie nicht kennt.',
+  },
+  {
+    icon: Star,
+    titel: 'Favoriten für Strecken, die du oft fährst',
+    text: 'Wiederkehrende Strecken lassen sich als Favorit speichern (Einstellungen → Favoriten). Ein Tipp auf dem Start-Bildschirm trägt die Fahrt mit dem heutigen Datum ein — auf Wunsch gleich mit Rückfahrt.',
+  },
+  {
+    icon: ShieldCheck,
+    titel: 'Sicherheit und Aktualität',
+    text: 'Alle Bausteine der App sind auf dem aktuellen Stand, bekannte Sicherheitslücken in den verwendeten Bibliotheken sind geschlossen. Dazu kamen ein geprüfter Umgang mit Einladungs- und Zurücksetzen-Links sowie strengere Vorgaben, welche Inhalte der Browser überhaupt laden darf.',
+  },
 ];
 
+// Alles Weitere darunter — ohne die Punkte zu wiederholen, die oben schon
+// als Karte stehen.
 const FEATURES = [
-  {
-    titel: 'Neues Design',
-    punkte: [
-      'Die gesamte Oberfläche wurde neu gestaltet — ruhiger, übersichtlicher und auf dem Handy genauso benutzbar wie am Rechner',
-      'Helles und dunkles Design, umschaltbar über das Symbol in der Seitenleiste',
-    ],
-  },
   {
     titel: 'Startseite',
     punkte: [
-      'Neue Startseite mit Überblick über offene Erstattungen, Kilometer und Fahrten',
+      'Überblick über offene Erstattungen, Kilometer und Fahrten auf einen Blick',
       'Jahres-Statistik mit Balkendiagramm (km pro Monat) und Erstattungsübersicht',
+      'Die zuletzt erfassten Fahrten mit einem Tipp wiederholen oder um die Rückfahrt ergänzen',
     ],
   },
   {
-    titel: 'Schneller erfassen',
+    titel: 'Erfassen',
     punkte: [
-      'Wiederkehrende Fahrten als Favoriten speichern (Einstellungen → Favoriten) — ein Klick trägt sie mit heutigem Datum ein',
-      '„Nochmal"-Button bei den letzten Fahrten kopiert eine Fahrt für heute',
-      'Adressen werden beim Tippen vorgeschlagen, auch für einmalige Orte — eine mitgetippte Hausnummer wird übernommen, selbst wenn die Karte sie nicht kennt',
+      'Neue Fahrt in zwei Schritten: „Wohin?" und bestätigen — den Rest füllt die App aus deinen bisherigen Fahrten',
+      'Rückfahrt auf Wunsch direkt mit anlegen',
+      'Mitfahrer:innen werden an der Fahrt erfasst und getrennt vergütet',
     ],
   },
   {
-    titel: 'Export',
+    titel: 'Abrechnung & Export',
     punkte: [
       'Zusätzlich zu Excel gibt es den Export als PDF — oder beides zusammen als ZIP',
       'Beim Einreichen fragt die App, welches Format du brauchst',
+      'Monate lassen sich einreichen, als erstattet markieren und wieder zurücksetzen',
     ],
   },
   {
-    titel: 'Unter der Haube',
+    titel: 'Kleinigkeiten',
     punkte: [
-      'Hilfeseite mit Anleitung zu jedem Bereich der App',
-      'Verbesserte Sicherheit, Eingabeprüfung und mobile Darstellung',
+      'Hilfeseite mit einer Anleitung zu jedem Bereich der App',
+      'Die App lässt sich wie eine richtige App auf dem Startbildschirm ablegen',
+      'Dein Wohnort steht jetzt im Profil — er liefert die Anschrift auf der Abrechnung',
     ],
   },
 ];

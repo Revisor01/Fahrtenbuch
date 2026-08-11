@@ -7,11 +7,20 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Changed
+- Listen überall gleich bedienbar: Ein Tipp auf eine Zeile öffnet alle Angaben und die möglichen Aktionen — statt kleiner Symbole in der Zeile und einer Wischgeste bei den Fahrten. Gilt für Fahrten, Startseite, Abrechnungsträger, Orte, Distanzen, Favoriten, Erstattungssätze und API-Zugriff, auf dem Handy wie am Rechner
+- Einstellungen: „Profil & Passwort" steht jetzt an erster Stelle; auf dem Handy sind Neuigkeiten, Hilfe und Info beschriftet statt nur als Symbole
+
 ### Sonstiges
-- Das Frontend wird mit einem neuen Werkzeug gebaut. Für die Anwendung ändert sich nichts; im Hintergrund verschwinden damit 25 Sicherheitsmeldungen veralteter Build-Abhängigkeiten, und der Build dauert Sekunden statt einer Minute
+- Alle Bausteine der App sind auf dem aktuellen Stand; bekannte Sicherheitslücken in den verwendeten Bibliotheken sind geschlossen
 - Die Seite wird mit zusätzlichen Sicherheitsvorgaben ausgeliefert: Sie lässt sich nicht mehr in fremde Websites einbetten, erlaubt nur noch Inhalte aus bekannten Quellen und gibt beim Wechsel auf externe Seiten keine Adressdaten mehr weiter
+- Das Frontend wird mit einem neuen Werkzeug gebaut. Für die Anwendung ändert sich nichts; im Hintergrund verschwinden damit 25 Sicherheitsmeldungen veralteter Build-Abhängigkeiten, und der Build dauert Sekunden statt einer Minute
 
 ### Added
+- Abrechnung über mehrere Monate: Statt Monat für Monat lässt sich ein Zeitraum wählen — etwa ein Quartal — und alles landet in einer Abrechnung; bei mehreren Dateien automatisch als ZIP
+- Kostenstelle je Abrechnungsträger, die automatisch in den Export übernommen wird
+- „Rückfahrt hinzufügen": legt die Gegenrichtung einer Fahrt am selben Tag an — ein Tipp statt vollständiger Neuerfassung
+- Der Wohnort steht jetzt im Profil, mit Hinweis wenn keiner gesetzt ist: Er liefert die Anschrift auf dem Abrechnungsformular
 - Hilfeseite (/help) komplett neu: Inhaltsverzeichnis mit Sprungmarken und aufklappbare FAQ zu jedem Bereich der App (Start, Fahrt erfassen, Fahrten, Abrechnung, Statussystem, Mitfahrer:innen, Einstellungen, Verwaltung, Export & Formular, Installation auf dem Homescreen) — im Design des Redesigns 2026, hell wie dunkel
 - „+ Neue Fahrt" in der Fahrtenliste (Desktop) und FAB auf Mobilgeräten — gleicher Erfassungsflow wie auf dem Dashboard
 - Einreichen fragt nach dem Exportformat (Excel / PDF / Beides als ZIP), statt stillschweigend Excel zu laden
