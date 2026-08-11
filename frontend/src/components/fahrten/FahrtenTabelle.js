@@ -62,7 +62,7 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
                 >
                   {von} → {nach}
                   {mitfahrer.length > 0 && (
-                    <span className="fl-mf-hinweis">
+                    <span className="fl-mf-hinweis fl-mf-hinweis-leise">
                       <span className="fl-mf-punkt" aria-hidden="true" />
                       {mitfahrer.length} Mitfahrer:in{mitfahrer.length > 1 ? 'nen' : ''}
                     </span>

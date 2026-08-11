@@ -3107,8 +3107,11 @@ code {
 .fl-tablehead,
 .fl-tablerow {
   display: grid;
-  grid-template-columns: 96px 1fr 140px 64px 90px 116px 148px;
-  min-width: 820px;
+  /* Spaltenbreiten wie in der Dashboard-Tabelle, nur die Datumsspalte breiter
+     (dort ohne Jahr, hier mit). Die letzte Spalte trug frueher drei
+     Icon-Buttons - jetzt steht dort nur noch der Chevron. */
+  grid-template-columns: 92px 1fr 140px 52px 88px 106px 44px;
+  min-width: 620px;
   align-items: center;
   padding: 8px 22px;
 }
@@ -3168,13 +3171,14 @@ code {
   white-space: nowrap;
 }
 
+/* Traeger darf umbrechen statt abzuschneiden - wie in der Dashboard-Tabelle.
+   „Kirchenkreis Dithm…" half niemandem. */
 .fl-td-traeger {
   font-size: 13px;
+  line-height: 1.3;
   color: var(--text-2);
   padding-right: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .fl-td-zahl {
@@ -5861,9 +5865,7 @@ code {
    Betrag und Status aneinander (die Dashboard-Tabelle hatte ihn bereits). */
 .fl-tablehead,
 .fl-tablerow {
-  column-gap: 16px;
-  /* 820px + 6 Spaltenabstaende, damit die Spalten nicht schmaler werden */
-  min-width: 916px;
+  column-gap: 12px;
 }
 
 /* Betrag und Status brauchen etwas mehr Luft als der Rest - der Betrag fuellt
