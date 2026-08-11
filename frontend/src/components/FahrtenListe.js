@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Car, Pencil, Trash2, RotateCw } from 'lucide-react';
+import { Car, Pencil, Trash2, RotateCw, ArrowLeftRight } from 'lucide-react';
 import { AppContext } from '../contexts/AppContext';
 import { useToast } from './ui/Toast';
 import { useErfassung } from '../contexts/ErfassungContext';
@@ -117,8 +117,8 @@ function FahrtenListe() {
     setEditingFahrt(fahrt);
   };
 
-  // „Wiederholen" (Desktop-Tabelle): Erfassungsflow mit Prefill,
-  // startet dank nachOrtId direkt in Schritt 2 — Datum heute
+  // „Wiederholen": Erfassungsflow mit Prefill, startet dank nachOrtId direkt
+  // in Schritt 2 — Datum heute
   const handleWiederholen = (fahrt) => {
     erfassung.open({
       vonOrtId: fahrt.von_ort_id,
@@ -126,6 +126,29 @@ function FahrtenListe() {
       anlass: fahrt.anlass || '',
       abrechnung: fahrt.abrechnung,
     });
+  };
+
+  // Rückfahrt: dieselbe Strecke rückwärts, am selben Tag. Der häufigste Fall
+  // nach einer Hinfahrt — deshalb direkt anlegen statt über den Erfassungsflow.
+  const handleRueckfahrt = async (fahrt) => {
+    try {
+      await addFahrt({
+        datum: fahrt.datum?.slice(0, 10),
+        vonOrtId: fahrt.nach_ort_id || null,
+        nachOrtId: fahrt.von_ort_id || null,
+        einmaligerVonOrt: fahrt.einmaliger_nach_ort || null,
+        einmaligerNachOrt: fahrt.einmaliger_von_ort || null,
+        anlass: fahrt.anlass ? `Rückfahrt: ${fahrt.anlass}` : 'Rückfahrt',
+        kilometer: fahrt.kilometer,
+        abrechnung: fahrt.abrechnung,
+        mitfahrer: [],
+      });
+      fetchMonthlyData();
+      toast.success('Rückfahrt angelegt.');
+    } catch (error) {
+      console.error('Fehler beim Anlegen der Rückfahrt:', error);
+      toast.error('Rückfahrt konnte nicht angelegt werden.');
+    }
   };
 
   const monatLabel = (ym) => {
@@ -255,6 +278,13 @@ function FahrtenListe() {
               label: 'Bearbeiten',
               icon: Pencil,
               onClick: () => handleEdit(aktionsFahrt),
+            },
+            {
+              id: 'rueckfahrt',
+              label: 'Rückfahrt hinzufügen',
+              icon: ArrowLeftRight,
+              hinweis: 'Dieselbe Strecke zurück, am selben Tag',
+              onClick: () => handleRueckfahrt(aktionsFahrt),
             },
             {
               id: 'wiederholen',

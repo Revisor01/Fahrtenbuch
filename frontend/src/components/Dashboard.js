@@ -5,10 +5,11 @@ import { aktuellerMonat as aktuellerMonatISO, heuteISO } from '../utils/datum';
 import { useErfassung } from '../contexts/ErfassungContext';
 import EmptyState from './ui/EmptyState';
 import Sheet from './ui/Sheet';
+import AktionsSheet from './ui/AktionsSheet';
 import StatusBadge from './ui/StatusBadge';
 import { useToast } from './ui/Toast';
 import { statusFromAbrechnung } from '../utils/statusLabels';
-import { Star } from 'lucide-react';
+import { Star, Pencil, RotateCw, ArrowLeftRight, ChevronRight } from 'lucide-react';
 
 // Dashboard (Redesign 2026, Phase R4).
 //
@@ -312,6 +313,8 @@ function Dashboard({ onNavigate }) {
   // Favoriten-Tipp: kurze Rückfrage „mit Rückfahrt?" (User-Feedback 07.08.),
   // danach sofortige Anlage mit Undo-Toast.
   const [favFrage, setFavFrage] = useState(null);
+  // Angetippte Fahrt in „Zuletzt": zeigt Details + Aktionen
+  const [aktionsFahrt, setAktionsFahrt] = useState(null);
 
   const handleFavorit = (fav, mitRueckfahrt = false) => {
     const km = findDistanz(fav.von_ort_id, fav.nach_ort_id);
@@ -437,6 +440,47 @@ function Dashboard({ onNavigate }) {
         if (!op.abgebrochen) toast.error('Fahrt konnte nicht erstellt werden.');
       }
     })();
+  };
+
+  // Rückfahrt: dieselbe Strecke rückwärts, am Tag der Hinfahrt. Ohne
+  // optimistische Zeile — die Fahrt liegt in der Vergangenheit und muss nicht
+  // sofort oben in „Zuletzt" erscheinen.
+  const handleRueckfahrt = async (fahrt) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/fahrten`, {
+        datum: String(fahrt.datum).slice(0, 10),
+        vonOrtId: fahrt.nach_ort_id || null,
+        nachOrtId: fahrt.von_ort_id || null,
+        einmaligerVonOrt: fahrt.einmaliger_nach_ort || null,
+        einmaligerNachOrt: fahrt.einmaliger_von_ort || null,
+        anlass: fahrt.anlass ? `Rückfahrt: ${fahrt.anlass}` : 'Rückfahrt',
+        kilometer: parseFloat(fahrt.kilometer) || 0,
+        abrechnung: fahrt.abrechnung,
+        mitfahrer: [],
+      });
+      // Die Rückfahrt in „Zuletzt" nachziehen: von/nach getauscht, gleiches
+      // Datum wie die Hinfahrt.
+      setRecent((prev) => [
+        {
+          ...fahrt,
+          id: res.data?.id ?? `rueck-${fahrt.id}`,
+          von_ort_id: fahrt.nach_ort_id,
+          nach_ort_id: fahrt.von_ort_id,
+          von_ort_name: fahrt.nach_ort_name,
+          nach_ort_name: fahrt.von_ort_name,
+          einmaliger_von_ort: fahrt.einmaliger_nach_ort,
+          einmaliger_nach_ort: fahrt.einmaliger_von_ort,
+          anlass: fahrt.anlass ? `Rückfahrt: ${fahrt.anlass}` : 'Rückfahrt',
+          mitfahrer: [],
+        },
+        ...(prev || []),
+      ].slice(0, 5));
+      await refreshAllData();
+      toast.success('Rückfahrt angelegt.');
+    } catch (error) {
+      console.error('Fehler beim Anlegen der Rückfahrt:', error);
+      toast.error('Rückfahrt konnte nicht angelegt werden.');
+    }
   };
 
   // ---- Kopfdaten -----------------------------------------------------------
@@ -605,27 +649,22 @@ function Dashboard({ onNavigate }) {
               <div className="dash-zuletzt-laden">Fahrten werden geladen…</div>
             ) : (
               recent.map((fahrt) => (
-                <div
+                <button
                   key={fahrt.id}
-                  className={`dash-zuletzt-row${fahrt._optimistisch ? ' is-neu' : ''}`}
+                  type="button"
+                  className={`dash-zuletzt-row dash-zuletzt-tap${fahrt._optimistisch ? ' is-neu' : ''}`}
+                  onClick={() => setAktionsFahrt(fahrt)}
+                  disabled={!!fahrt._optimistisch}
+                  aria-label={`Fahrt nach ${zielName(fahrt)} — Aktionen öffnen`}
                 >
-                  <div className="dash-zuletzt-main">
-                    <div className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</div>
-                    <div className="dash-zuletzt-route">{routeText(fahrt)}</div>
-                    <div className="dash-zuletzt-sub">{zuletztSub(fahrt)}</div>
-                  </div>
-                  <div className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</div>
-                  <button
-                    type="button"
-                    className="dash-repeat-btn"
-                    onClick={() => handleWiederholen(fahrt)}
-                    disabled={!!fahrt._optimistisch}
-                    aria-label={`Fahrt nach ${zielName(fahrt)} für heute wiederholen`}
-                    title="Für heute wiederholen"
-                  >
-                    ↻
-                  </button>
-                </div>
+                  <span className="dash-zuletzt-main">
+                    <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
+                    <span className="dash-zuletzt-route">{routeText(fahrt)}</span>
+                    <span className="dash-zuletzt-sub">{zuletztSub(fahrt)}</span>
+                  </span>
+                  <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>
+                  <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
+                </button>
               ))
             )}
           </div>
@@ -834,13 +873,20 @@ function Dashboard({ onNavigate }) {
               <div className="dash-zuletzt-laden">Noch keine Fahrten erfasst.</div>
             ) : (
               recent.map((fahrt) => (
-                <div key={fahrt.id} className="dash-d-tablerow">
-                  <div className="dash-d-td-datum num">
+                <button
+                  key={fahrt.id}
+                  type="button"
+                  className="dash-d-tablerow dash-d-tablerow-tap"
+                  onClick={() => setAktionsFahrt(fahrt)}
+                  disabled={!!fahrt._optimistisch}
+                  aria-label={`Fahrt nach ${zielName(fahrt)} — Aktionen öffnen`}
+                >
+                  <span className="dash-d-td-datum num">
                     {new Date(fahrt.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
-                  </div>
-                  <div>
-                    <div className="dash-d-td-anlass">{fahrt.anlass || '—'}</div>
-                    <div className="dash-d-td-route">
+                  </span>
+                  <span>
+                    <span className="dash-d-td-anlass">{fahrt.anlass || '—'}</span>
+                    <span className="dash-d-td-route">
                       {fahrt.von_ort_name || fahrt.einmaliger_von_ort} → {zielName(fahrt)}
                       {fahrt.mitfahrer?.length > 0 && (
                         <span
@@ -851,42 +897,82 @@ function Dashboard({ onNavigate }) {
                           {fahrt.mitfahrer.length} Mitfahrer:in{fahrt.mitfahrer.length > 1 ? 'nen' : ''}
                         </span>
                       )}
-                    </div>
-                  </div>
-                  <div className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</div>
-                  <div className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</div>
-                  <div className="dash-d-td-zahl">
+                    </span>
+                  </span>
+                  <span className="dash-d-td-traeger">{getTraegerName(fahrt.abrechnung)}</span>
+                  <span className="dash-d-td-zahl num">{formatKm(fahrt.kilometer)}</span>
+                  <span className="dash-d-td-zahl">
                     <span className="num">
                       {fahrt.erstattung !== undefined ? `${formatEuro(fahrt.erstattung)} €` : '—'}
                     </span>
                     {fahrt.mitfahrerErstattung > 0 && (
-                      <div className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
+                      <span className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
                         +{formatEuro(fahrt.mitfahrerErstattung)} €
-                      </div>
+                      </span>
                     )}
-                  </div>
-                  <div className="dash-d-td-status">
+                  </span>
+                  <span className="dash-d-td-status">
                     <StatusBadge status={statusFuerFahrt(fahrt)} variant="dot" />
-                  </div>
-                  <div className="dash-d-td-aktion">
-                    {!fahrt._optimistisch && (
-                      <button
-                        type="button"
-                        className="dash-d-wdh-btn"
-                        title={`Fahrt nach ${zielName(fahrt)} für heute wiederholen`}
-                        aria-label={`Fahrt nach ${zielName(fahrt)} für heute wiederholen`}
-                        onClick={() => handleWiederholen(fahrt)}
-                      >
-                        ↻
-                      </button>
-                    )}
-                  </div>
-                </div>
+                  </span>
+                  <span className="dash-d-td-aktion">
+                    <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
+                  </span>
+                </button>
               ))
             )}
           </div>
         </section>
       </div>
+
+      {/* Angetippte Fahrt aus „Zuletzt": Details + Aktionen (gleiches Muster
+          wie in der Fahrtenliste und den Einstellungen) */}
+      {aktionsFahrt && (
+        <AktionsSheet
+          isOpen
+          onClose={() => setAktionsFahrt(null)}
+          titel={aktionsFahrt.anlass || zielName(aktionsFahrt)}
+          untertitel={new Date(aktionsFahrt.datum).toLocaleDateString('de-DE', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+          })}
+          zeilen={[
+            { label: 'Strecke', wert: routeText(aktionsFahrt) },
+            { label: 'Kilometer', wert: `${formatKm(aktionsFahrt.kilometer)} km` },
+            { label: 'Träger', wert: getTraegerName(aktionsFahrt.abrechnung) },
+            ...(aktionsFahrt.erstattung !== undefined
+              ? [{ label: 'Erstattung', wert: `${formatEuro(aktionsFahrt.erstattung)} €` }]
+              : []),
+            ...(aktionsFahrt.mitfahrer?.length
+              ? [{ label: 'Mitfahrer', wert: aktionsFahrt.mitfahrer.map((m) => m.name).join(', ') }]
+              : []),
+          ]}
+          aktionen={[
+            {
+              id: 'rueckfahrt',
+              label: 'Rückfahrt hinzufügen',
+              icon: ArrowLeftRight,
+              hinweis: 'Dieselbe Strecke zurück, am selben Tag',
+              onClick: () => handleRueckfahrt(aktionsFahrt),
+            },
+            {
+              id: 'wiederholen',
+              label: 'Für heute wiederholen',
+              icon: RotateCw,
+              hinweis: 'Legt dieselbe Fahrt mit heutigem Datum an',
+              onClick: () => handleWiederholen(aktionsFahrt),
+            },
+            {
+              id: 'bearbeiten',
+              label: 'In den Fahrten öffnen',
+              icon: Pencil,
+              hinweis: 'Dort lässt sie sich ändern oder löschen',
+              onClick: () => onNavigate?.('fahrten'),
+            },
+          ]}
+        />
+      )}
 
       {/* Rückfrage beim Favoriten-Tipp: Hinfahrt oder Hin- und Rückfahrt */}
       <Sheet
