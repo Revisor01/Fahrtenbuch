@@ -2,16 +2,16 @@
 <html lang="de">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0F5257" />
     <meta
       name="description"
       content="Dienstfahrten erfassen und monatlich abrechnen."
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/icon-192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link rel="stylesheet" href="%PUBLIC_URL%/fonts/fonts.css" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="/fonts/fonts.css" />
     <script defer data-domain="kkd-fahrtenbuch.de" src="https://plausible.godsapp.de/js/script.hash.outbound-links.pageview-props.tagged-events.js"></script>
     <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 
@@ -20,6 +20,10 @@
   <body>
     <noscript>Für diese App muss JavaScript aktiviert sein.</noscript>
     <div id="root"></div>
+    <!-- Laufzeit-Konfiguration: wird vom Container-Entrypoint ueberschrieben.
+         Muss vor dem App-Bundle laufen — klassisches Script ohne defer wird
+         ausgefuehrt, bevor das Modul-Bundle startet. -->
     <script src="/config.js"></script>
+    <script type="module" src="/src/index.js"></script>
   </body>
 </html>

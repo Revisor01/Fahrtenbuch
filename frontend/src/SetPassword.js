@@ -67,7 +67,7 @@ export default function SetPassword() {
   ];
 
   const appTitle =
-    appConfigValue('appTitle', process.env.REACT_APP_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
+    appConfigValue('appTitle', import.meta.env.VITE_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
 
   return (
     <div className="auth-page">
