@@ -5856,3 +5856,21 @@ code {
 .dash-d-tablerow-tap .fl-mf-betrag {
   display: block;
 }
+
+/* Abstand zwischen den Spalten der Fahrten-Tabelle: ohne column-gap klebten
+   Betrag und Status aneinander (die Dashboard-Tabelle hatte ihn bereits). */
+.fl-tablehead,
+.fl-tablerow {
+  column-gap: 16px;
+  /* 820px + 6 Spaltenabstaende, damit die Spalten nicht schmaler werden */
+  min-width: 916px;
+}
+
+/* Betrag und Status brauchen etwas mehr Luft als der Rest - der Betrag fuellt
+   seine Spalte fast aus, und darunter steht ggf. noch die Mitfahrer-Zeile. */
+.fl-tablehead > *:nth-child(5),
+.fl-tablerow > *:nth-child(5),
+.dash-d-tablehead > *:nth-child(5),
+.dash-d-tablerow > *:nth-child(5) {
+  padding-right: 8px;
+}
