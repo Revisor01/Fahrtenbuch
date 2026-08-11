@@ -37,6 +37,46 @@ function zuVorschlag(f) {
   };
 }
 
+// Hausnummer aus der Eingabe ziehen: "Süderstraße 18, 25779 Hennstedt" -> "18".
+// Nur eine Zahl, die direkt auf Buchstaben folgt (optional mit Buchstabenzusatz
+// wie "3A"); Postleitzahlen (fuenfstellig) bleiben aussen vor.
+function hausnummerAusEingabe(eingabe) {
+  const treffer = eingabe.match(/[a-zäöüß.]\s+(\d{1,4}[a-z]?)(?![\d])/i);
+  if (!treffer) return null;
+  const nummer = treffer[1];
+  return /^\d{5}$/.test(nummer) ? null : nummer;
+}
+
+// Vergleichsform fuer Strassennamen: Gross/Klein, Abkuerzungen und Bindestriche
+// vereinheitlichen, damit "Süderstr." und "Süderstraße" als gleich gelten.
+function strasseNormal(wert) {
+  return (wert || '')
+    .toLowerCase()
+    .replace(/str\.?\b/g, 'strasse')
+    .replace(/ß/g, 'ss')
+    .replace(/[\s-]/g, '');
+}
+
+// OpenStreetMap kennt nicht ueberall Hausnummern (z. B. Süderstraße in
+// Hennstedt). Photon liefert dann nur den Strassentreffer. Wenn die Eingabe
+// eine Hausnummer enthaelt und der Treffer dieselbe Strasse ohne Nummer ist,
+// wird sie uebernommen - die Koordinaten bleiben die der Strasse.
+function mitHausnummerAusEingabe(vorschlag, props, hausnummer) {
+  if (!hausnummer || props.housenumber) return vorschlag;
+
+  const strasseImTreffer = props.street || props.name;
+  if (!strasseImTreffer) return vorschlag;
+
+  // Nur ergaenzen, wenn die Strasse wirklich die getippte ist.
+  if (!strasseNormal(vorschlag.eingabeStrasse).includes(strasseNormal(strasseImTreffer))) {
+    return vorschlag;
+  }
+
+  const ort = [props.postcode, props.city].filter(Boolean).join(' ');
+  const text = [`${strasseImTreffer} ${hausnummer}`, ort].filter(Boolean).join(', ');
+  return { ...vorschlag, text, hausnummerErgaenzt: true };
+}
+
 // Reverse-Geocoding: Koordinaten -> exakte Adresse (fuer den Standort-Button)
 export async function adresseZuKoordinaten(lat, lon) {
   const url = `https://photon.komoot.io/reverse?lang=de&limit=1&lat=${lat}&lon=${lon}`;
@@ -92,10 +132,21 @@ export function useAdressSuche(query, { minLaenge = 3, aktiv = true } = {}) {
 
         if (aktuelleAnfrage !== requestId.current) return;
 
+        const hausnummer = hausnummerAusEingabe(q);
+
         const gesehen = new Set();
         const treffer = (data.features || [])
           .filter((f) => f.properties?.countrycode === 'DE')
-          .map(zuVorschlag)
+          .map((f) => {
+            const vorschlag = zuVorschlag(f);
+            // eingabeStrasse nur zum Abgleich in mitHausnummerAusEingabe
+            return mitHausnummerAusEingabe(
+              { ...vorschlag, eingabeStrasse: q },
+              f.properties || {},
+              hausnummer
+            );
+          })
+          .map(({ eingabeStrasse, ...rest }) => rest)
           .filter((t) => {
             if (!t.text || gesehen.has(t.text)) return false;
             gesehen.add(t.text);

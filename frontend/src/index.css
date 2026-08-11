@@ -2912,62 +2912,47 @@ code {
   }
 }
 
-.fl-swipe {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--r-card);
-}
-
-/* Aktionsfläche hinter der Karte: Bearbeiten/Löschen, Buttons ≥ 44px */
-.fl-swipe-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 112px;
-  display: flex;
-  gap: 8px;
-  align-items: stretch;
-}
-
-.fl-swipe-btn {
-  width: 52px;
-  min-height: var(--tap-min);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--r-btn);
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.fl-swipe-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
-}
-
-.fl-swipe-btn-edit {
-  background: var(--surface-2);
-  color: var(--text-2);
-  border: 1px solid var(--line);
-}
-
-.fl-swipe-btn-delete {
-  background: var(--danger-soft);
-  color: var(--danger);
-  border: 1px solid var(--danger);
-}
-
-/* Karte: --surface, --r-card, 14/16px Padding; touch-action pan-y,
-   damit vertikales Scrollen frei bleibt und nur der Swipe greift */
+/* Karte: --surface, --r-card, 14/16px Padding. Ein Tipp oeffnet das
+   Aktions-Sheet - die fruehere Swipe-Geste konkurrierte mit dem Scrollen
+   und war nicht auffindbar. */
 .fl-card {
   position: relative;
+  display: block;
+  width: 100%;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-card);
   padding: 14px 16px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
-  touch-action: pan-y;
+  transition: background-color 150ms ease;
+}
+
+.fl-card-tap:hover {
+  background: var(--surface-2);
+}
+
+/* Kinder sind jetzt spans im Button und brauchen Blockverhalten zurueck */
+.fl-card-tap > .fl-card-kopf,
+.fl-card-tap > .fl-card-zeile,
+.fl-card-tap > .fl-card-mitfahrer {
+  display: flex;
+}
+
+.fl-card-chevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+/* Platz fuer den Chevron, damit er keinen Text ueberdeckt */
+.fl-card-tap {
+  padding-right: 32px;
 }
 
 .fl-card:focus-visible {
@@ -5185,4 +5170,425 @@ code {
   background: var(--surface-2);
   color: var(--text-2);
   cursor: default;
+}
+
+/* ==========================================================================
+   Aktions-Sheet: ein Muster fuer alle Listen
+   Ein Tipp auf die Zeile oeffnet Details + Aktionen, statt Buttons in der
+   engen Zeile unterzubringen (auf dem Handy kaum lesbar und schwer zu treffen).
+   ========================================================================== */
+
+.aktions-kopf {
+  padding: 0 4px 4px;
+}
+
+.aktions-titel {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-1);
+}
+
+.aktions-untertitel {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+/* Detailangaben: auf dem Handy Label ueber Wert, ab 480px nebeneinander */
+.aktions-daten {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--r-card);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.aktions-daten-zeile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.aktions-daten-zeile dt {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.aktions-daten-zeile dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--text-1);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 480px) {
+  .aktions-daten-zeile {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .aktions-daten-zeile dt {
+    flex: 0 0 34%;
+    max-width: 34%;
+  }
+
+  .aktions-daten-zeile dd {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.aktions-liste {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 52px Trefferflaeche: auf dem Handy sicher zu treffen */
+.aktions-knopf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--r-btn);
+  background: transparent;
+  color: var(--text-1);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.aktions-knopf:hover {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.aktions-knopf:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.aktions-knopf svg {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+.aktions-knopf:hover svg {
+  color: var(--brand);
+}
+
+.aktions-knopf-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.aktions-knopf-label {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.aktions-knopf-hinweis {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--text-3);
+}
+
+/* Loeschen sitzt abgesetzt unten und ist als Gefahr erkennbar */
+.aktions-knopf.is-gefahr {
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--r-btn) var(--r-btn);
+  color: var(--danger);
+}
+
+.aktions-knopf.is-gefahr svg {
+  color: var(--danger);
+}
+
+.aktions-knopf.is-gefahr:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.aktions-knopf.is-gefahr:hover svg {
+  color: var(--danger);
+}
+
+.aktions-knopf.is-gefahr:focus-visible {
+  box-shadow: 0 0 0 0.5px var(--danger), 0 0 0 3px var(--danger-soft);
+}
+
+/* Listenzeile, die sich als Ganzes antippen laesst */
+.liste-zeile-knopf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.liste-zeile-knopf:hover {
+  background: var(--surface-2);
+}
+
+.liste-zeile-knopf:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+/* ==========================================================================
+   Neuigkeiten: hervorgehobene Karten fuer die wichtigsten Neuerungen
+   ========================================================================== */
+
+.neu-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.neu-highlight {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--brand-soft);
+  border-radius: var(--r-card);
+  background: var(--brand-soft);
+}
+
+.neu-highlight-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--brand);
+}
+
+.neu-highlight-text {
+  min-width: 0;
+}
+
+.neu-highlight-text h3 {
+  margin: 0 0 3px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-1);
+}
+
+.neu-highlight-text p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* ==========================================================================
+   Einstellungen (mobil): Fusszeile mit beschrifteten Eintraegen
+   Vorher drei unbeschriftete Icon-Buttons plus Spacer plus Abmelden in einer
+   Zeile - verschoben und nicht selbsterklaerend.
+   ========================================================================== */
+
+.set-nav-foot-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.set-nav-foot-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--r-btn);
+  background: transparent;
+  color: var(--text-1);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.set-nav-foot-link:hover {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.set-nav-foot-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+.set-nav-foot-link svg {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+.set-nav-foot-link:hover svg {
+  color: var(--brand);
+}
+
+.set-nav-foot-link.is-abmelden {
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--r-btn) var(--r-btn);
+  color: var(--danger);
+}
+
+.set-nav-foot-link.is-abmelden svg {
+  color: var(--danger);
+}
+
+.set-nav-foot-link.is-abmelden:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.set-nav-foot-link.is-abmelden:hover svg {
+  color: var(--danger);
+}
+
+/* Listenzeile in den Einstellungen: der Textbereich ist der Auslöser fuer das
+   Aktions-Sheet, der Sortiergriff bleibt daneben eigenstaendig bedienbar. */
+.set-row-tap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 2px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--r-btn);
+}
+
+.set-row-tap:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
+}
+
+/* Haken zeigt nur noch den Status an - geschaltet wird im Sheet */
+.set-check.is-anzeige {
+  cursor: default;
+  pointer-events: none;
+}
+
+.set-row-chevron {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+/* Desktop-Tabellenzeile als Ganzes antippbar (gleiches Muster wie mobil) */
+.set-tr-tap {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 150ms ease;
+}
+
+.set-tr-tap:hover {
+  background: var(--surface-2);
+}
+
+.set-tr-tap:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+/* set-td-haupt ist im Button ein span und braucht das Blockverhalten zurueck */
+.set-tr-tap .set-td-haupt,
+.set-tr-tap .set-td-text,
+.set-tr-tap .set-td-num {
+  display: block;
+  min-width: 0;
+}
+
+.set-tr-tap .set-td-aktionen {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Fahrten-Tabellenzeile (Desktop) als Ganzes antippbar — oeffnet dasselbe
+   Aktions-Sheet wie die Karte auf dem Handy. */
+.fl-tablerow-tap {
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.fl-tablerow-tap:hover {
+  background: var(--surface-2);
+}
+
+.fl-tablerow-tap:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+.fl-tablerow-tap .fl-td-haupt,
+.fl-tablerow-tap .fl-td-anlass,
+.fl-tablerow-tap .fl-td-route,
+.fl-tablerow-tap .fl-td-datum,
+.fl-tablerow-tap .fl-td-traeger,
+.fl-tablerow-tap .fl-td-zahl,
+.fl-tablerow-tap .fl-td-status {
+  display: block;
+  min-width: 0;
+}
+
+.fl-tablerow-tap .fl-td-aktionen {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.fl-tablerow-tap .fl-card-chevron {
+  position: static;
+  transform: none;
 }

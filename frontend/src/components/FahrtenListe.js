@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Car } from 'lucide-react';
+import { Car, Pencil, Trash2, RotateCw } from 'lucide-react';
 import { AppContext } from '../contexts/AppContext';
 import { useToast } from './ui/Toast';
 import { useErfassung } from '../contexts/ErfassungContext';
 import Sheet from './ui/Sheet';
+import AktionsSheet from './ui/AktionsSheet';
 import EmptyState from './ui/EmptyState';
 import FahrtForm from '../FahrtForm';
 import ZeitraumSegmente from './fahrten/ZeitraumSegmente';
@@ -39,7 +40,8 @@ function FahrtenListe() {
 
   const [editingFahrt, setEditingFahrt] = useState(null);
   const [exportOffen, setExportOffen] = useState(false);
-  const [swipeOffenId, setSwipeOffenId] = useState(null);
+  // Angetippte Fahrt: zeigt Details + Aktionen
+  const [aktionsFahrt, setAktionsFahrt] = useState(null);
 
   useEffect(() => {
     fetchFahrten();
@@ -75,12 +77,10 @@ function FahrtenListe() {
   const [loeschFrage, setLoeschFrage] = useState(null);
 
   const fragenObLoeschen = (fahrt) => {
-    setSwipeOffenId(null);
     setLoeschFrage(fahrt);
   };
 
   const handleDelete = async (fahrt) => {
-    setSwipeOffenId(null);
     setLoeschFrage(null);
     try {
       await deleteFahrt(fahrt.id);
@@ -114,7 +114,6 @@ function FahrtenListe() {
   };
 
   const handleEdit = (fahrt) => {
-    setSwipeOffenId(null);
     setEditingFahrt(fahrt);
   };
 
@@ -185,7 +184,7 @@ function FahrtenListe() {
         />
       ) : (
         <>
-          {/* < 768px: Karten mit Swipe */}
+          {/* < 768px: Karten — ein Tipp öffnet Details + Aktionen */}
           <div className="fl-cards">
             {sortierteFahrten.map((fahrt) => (
               <FahrtKarte
@@ -193,10 +192,7 @@ function FahrtenListe() {
                 fahrt={fahrt}
                 status={statusFuer(fahrt)}
                 traegerName={traegerNameFuer(fahrt)}
-                istOffen={swipeOffenId === fahrt.id}
-                onOeffnen={setSwipeOffenId}
-                onEdit={() => handleEdit(fahrt)}
-                onDelete={() => fragenObLoeschen(fahrt)}
+                onOeffnen={setAktionsFahrt}
               />
             ))}
           </div>
@@ -205,9 +201,7 @@ function FahrtenListe() {
             fahrten={sortierteFahrten}
             statusFuer={statusFuer}
             traegerNameFuer={traegerNameFuer}
-            onEdit={handleEdit}
-            onDelete={fragenObLoeschen}
-            onWiederholen={handleWiederholen}
+            onOeffnen={setAktionsFahrt}
           />
         </>
       )}
@@ -225,6 +219,61 @@ function FahrtenListe() {
       <ExportSheet isOpen={exportOffen} onClose={() => setExportOffen(false)} />
 
       {/* Rückfrage vor dem Löschen; danach bleibt der Undo-Toast als Netz */}
+      {aktionsFahrt && (
+        <AktionsSheet
+          isOpen
+          onClose={() => setAktionsFahrt(null)}
+          titel={
+            aktionsFahrt.anlass ||
+            aktionsFahrt.nach_ort_name ||
+            aktionsFahrt.einmaliger_nach_ort ||
+            'Fahrt'
+          }
+          untertitel={new Date(aktionsFahrt.datum).toLocaleDateString('de-DE', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+          })}
+          zeilen={[
+            {
+              label: 'Strecke',
+              wert: `${aktionsFahrt.von_ort_name || aktionsFahrt.einmaliger_von_ort || '—'} → ${
+                aktionsFahrt.nach_ort_name || aktionsFahrt.einmaliger_nach_ort || '—'
+              }`,
+            },
+            { label: 'Kilometer', wert: `${rundeKilometer(aktionsFahrt.kilometer)} km` },
+            { label: 'Träger', wert: traegerNameFuer(aktionsFahrt) },
+            { label: 'Erstattung', wert: `${formatBetrag(aktionsFahrt.erstattung)} €` },
+            ...(aktionsFahrt.mitfahrer?.length
+              ? [{ label: 'Mitfahrer', wert: aktionsFahrt.mitfahrer.map((m) => m.name).join(', ') }]
+              : []),
+          ]}
+          aktionen={[
+            {
+              id: 'bearbeiten',
+              label: 'Bearbeiten',
+              icon: Pencil,
+              onClick: () => handleEdit(aktionsFahrt),
+            },
+            {
+              id: 'wiederholen',
+              label: 'Für heute wiederholen',
+              icon: RotateCw,
+              hinweis: 'Legt dieselbe Fahrt mit heutigem Datum an',
+              onClick: () => handleWiederholen(aktionsFahrt),
+            },
+            {
+              id: 'loeschen',
+              label: 'Löschen',
+              icon: Trash2,
+              variant: 'gefahr',
+              onClick: () => fragenObLoeschen(aktionsFahrt),
+            },
+          ]}
+        />
+      )}
+
       <Sheet
         isOpen={!!loeschFrage}
         onClose={() => setLoeschFrage(null)}

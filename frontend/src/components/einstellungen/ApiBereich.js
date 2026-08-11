@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ChevronRight } from 'lucide-react';
 import { useToast } from '../ui/Toast';
+import AktionsSheet from '../ui/AktionsSheet';
 import Sheet from '../ui/Sheet';
 import BereichKopf from './BereichKopf';
 
@@ -84,6 +85,7 @@ function ApiBereich() {
   const toast = useToast();
   const [apiKeys, setApiKeys] = useState([]);
   const [sheetOffen, setSheetOffen] = useState(false);
+  const [aktionen, setAktionen] = useState(null);
 
   const fetchApiKeys = async () => {
     try {
@@ -125,9 +127,14 @@ function ApiBereich() {
       <div className="set-zeilen">
         {apiKeys.map((key) => (
           <div key={key.id} className="set-row">
-            <div className="set-row-main">
-              <div className="set-row-titel">{key.description || 'API-Key'}</div>
-              <div className="set-row-sub">
+            <button
+              type="button"
+              className="set-row-main set-row-tap"
+              onClick={() => setAktionen(key)}
+              aria-label={`API-Key ${key.description || ''} — Aktionen öffnen`}
+            >
+              <span className="set-row-titel">{key.description || 'API-Key'}</span>
+              <span className="set-row-sub">
                 {[
                   key.is_active ? 'Aktiv' : 'Inaktiv',
                   `Erstellt ${new Date(key.created_at).toLocaleDateString('de-DE')}`,
@@ -137,17 +144,9 @@ function ApiBereich() {
                 ]
                   .filter(Boolean)
                   .join(' · ')}
-              </div>
-            </div>
-            <button
-              type="button"
-              className="set-action set-action-danger"
-              title="Löschen"
-              aria-label={`API-Key ${key.description || ''} löschen`}
-              onClick={() => handleDelete(key)}
-            >
-              <Trash2 size={15} />
+              </span>
             </button>
+            <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
           </div>
         ))}
         {apiKeys.length === 0 && (
@@ -157,6 +156,34 @@ function ApiBereich() {
 
       {sheetOffen && (
         <ApiKeySheet offen onClose={() => setSheetOffen(false)} onCreated={fetchApiKeys} />
+      )}
+
+      {aktionen && (
+        <AktionsSheet
+          isOpen
+          onClose={() => setAktionen(null)}
+          titel={aktionen.description || 'API-Key'}
+          untertitel={aktionen.is_active ? 'Aktiv' : 'Inaktiv'}
+          zeilen={[
+            { label: 'Erstellt', wert: new Date(aktionen.created_at).toLocaleDateString('de-DE') },
+            {
+              label: 'Zuletzt genutzt',
+              wert: aktionen.last_used_at
+                ? new Date(aktionen.last_used_at).toLocaleDateString('de-DE')
+                : 'Noch nie',
+            },
+          ]}
+          aktionen={[
+            {
+              id: 'loeschen',
+              label: 'Key löschen',
+              icon: Trash2,
+              variant: 'gefahr',
+              hinweis: 'Programme mit diesem Key haben sofort keinen Zugriff mehr',
+              onClick: () => handleDelete(aktionen),
+            },
+          ]}
+        />
       )}
     </div>
   );
