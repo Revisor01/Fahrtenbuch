@@ -4,7 +4,7 @@ import { AppContext } from './contexts/AppContext';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
-import Modal from './Modal';
+import Sheet from './components/ui/Sheet';
 import AddressAutocomplete from './components/AddressAutocomplete';
 
 // Klartext statt der internen Schluessel ('hin_rueck' sagt niemandem etwas)
@@ -421,12 +421,12 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     </form>
     
     {/* Modal für Ort speichern */}
-    <Modal
+    <Sheet
     isOpen={ortSpeichernModal.isOpen}
     onClose={() => setOrtSpeichernModal({...ortSpeichernModal, isOpen: false})}
     title="Ort speichern"
     >
-    <div className="space-y-4">
+    <div className="set-sheet-form">
     <div>
     <label className="form-label">Adresse</label>
     <input
@@ -472,11 +472,11 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     </p>
     </div>
     
-    <div className="flex flex-col sm:flex-row gap-2">
+    <div className="set-sheet-buttons">
     <button
     type="button"
     onClick={() => setOrtSpeichernModal({...ortSpeichernModal, isOpen: false})}
-    className="btn-secondary w-full"
+    className="btn-secondary"
     >
     Abbrechen
     </button>
@@ -536,16 +536,16 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
         showNotification("Fehler", "Bitte geben Sie einen Namen für den Ort ein");
       }
     }}
-    className="btn-primary w-full"
+    className="btn-primary"
     disabled={!ortSpeichernModal.name}
     >
     Speichern
     </button>
     </div>
     </div>
-    </Modal>
-    
-    {/* Mitfahrer Modal */}
+    </Sheet>
+
+    {/* Mitfahrer-Dialog */}
     {showMitfahrerModal && (
       <MitfahrerModal
       isOpen={showMitfahrerModal}

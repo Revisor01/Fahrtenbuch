@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
+import Sheet from './components/ui/Sheet';
 
 function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false }) {
   const [name, setName] = useState(initialData?.name || '');
@@ -28,13 +28,12 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
   };
   
   return (
-    <Modal 
-    isOpen={isOpen} 
-    onClose={onClose} 
-    title={readOnly ? "Mitfahrer:in Details" : "Mitfahrer:in hinzufügen/bearbeiten"}
+    <Sheet
+    isOpen={isOpen}
+    onClose={onClose}
+    title={readOnly ? 'Mitfahrer:in' : (initialData ? 'Mitfahrer:in bearbeiten' : 'Mitfahrer:in hinzufügen')}
     >
-    <div className="card-container space-y-6">
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="set-sheet-form">
     <div>
     <label className="form-label">
     Name
@@ -81,25 +80,17 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     </div>
     
     {!readOnly && (
-      <div className="flex flex-row gap-2">
-      <button
-      type="button"
-      onClick={onClose}
-      className="btn-secondary w-full"
-      >
+      <div className="set-sheet-buttons">
+      <button type="button" onClick={onClose} className="btn-secondary">
       Abbrechen
       </button>
-      <button 
-      type="submit" 
-      className="btn-primary w-full"
-      >
+      <button type="submit" className="btn-primary">
       Speichern
       </button>
       </div>
     )}
     </form>
-    </div>
-    </Modal>
+    </Sheet>
   );
 }
 

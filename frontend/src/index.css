@@ -5848,3 +5848,11 @@ code {
   outline: none;
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
+
+/* Die Mitfahrer-Erstattung gehoert in eine eigene Zeile unter den Betrag.
+   Beim Umbau der Zeilen auf <button> wurden die inneren <div> zu <span> -
+   dadurch stand sie ploetzlich daneben statt darunter. */
+.fl-tablerow-tap .fl-mf-betrag,
+.dash-d-tablerow-tap .fl-mf-betrag {
+  display: block;
+}
