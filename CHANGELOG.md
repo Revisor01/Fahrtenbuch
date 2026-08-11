@@ -16,6 +16,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Einstellungen: „Profil & Passwort" steht jetzt an erster Stelle; auf dem Handy sind Neuigkeiten, Hilfe und Info beschriftet statt nur als Symbole
 
 ### Sonstiges
+- Die Mitfahrer-Erstattung wird überall nach derselben Regel berechnet: je Fahrt die Mitfahrenden dieser Fahrt mal deren Kilometer. In der Monats- und der Jahresübersicht wurde bisher die Zahl der Mitfahrenden eines ganzen Zeitraums mit dessen Kilometersumme multipliziert — dort standen zu hohe Beträge. Ausgezahlt wurde nie zu viel: Das Abrechnungsformular hat immer richtig gerechnet
 - Alle Bausteine der App sind auf dem aktuellen Stand; bekannte Sicherheitslücken in den verwendeten Bibliotheken sind geschlossen
 - Die Seite wird mit zusätzlichen Sicherheitsvorgaben ausgeliefert: Sie lässt sich nicht mehr in fremde Websites einbetten, erlaubt nur noch Inhalte aus bekannten Quellen und gibt beim Wechsel auf externe Seiten keine Adressdaten mehr weiter
 - Das Frontend wird mit einem neuen Werkzeug gebaut. Für die Anwendung ändert sich nichts; im Hintergrund verschwinden damit 25 Sicherheitsmeldungen veralteter Build-Abhängigkeiten, und der Build dauert Sekunden statt einer Minute

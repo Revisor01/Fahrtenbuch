@@ -104,10 +104,101 @@ function berechneErstattung(fahrten, saetze) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Gemeinsame Basis fuer die vier Report-Funktionen in fahrtController.
+//
+// Vorher rechnete jede von ihnen selbst, zwei davon falsch: Monats- und
+// Jahresuebersicht multiplizierten die Mitfahrer-Anzahl eines ganzen Zeitraums
+// mit dessen Kilometersumme. An echten Daten ergab das bis zum 40-fachen des
+// richtigen Betrags (ein Nutzer, 2025-04: 29,20 € statt 0,70 €).
+// Richtig ist immer: je Fahrt die Mitfahrer dieser Fahrt mal deren Kilometer.
+//
+// Anders als getErstattungssatzFuerTraeger (Export, ein Traeger je Aufruf)
+// laedt ladeErstattungssaetze alle Saetze eines Nutzers auf einmal — inklusive
+// des Mitfahrer-Satzes unter dem Schluessel 'mitfahrer'.
+// ---------------------------------------------------------------------------
+
+/**
+ * Alle Erstattungssaetze eines Nutzers, gruppiert nach Traeger-ID.
+ * Rueckgabe: { traegerId: [{ betrag, gueltig_ab }], mitfahrer: [...] },
+ * je Gruppe absteigend nach gueltig_ab.
+ */
+async function ladeErstattungssaetze(userId) {
+  const [saetze] = await db.execute(`
+    SELECT
+      at.id,
+      eb.betrag,
+      eb.gueltig_ab
+    FROM abrechnungstraeger at
+    INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
+    WHERE at.user_id = ?
+      AND at.active = true
+    UNION
+    SELECT
+      'mitfahrer' as id,
+      betrag,
+      gueltig_ab
+    FROM mitfahrer_erstattung
+    WHERE user_id = ?
+    ORDER BY gueltig_ab DESC
+  `, [userId, userId]);
+
+  const proTraeger = {};
+  saetze.forEach(satz => {
+    if (!proTraeger[satz.id]) {
+      proTraeger[satz.id] = [];
+    }
+    proTraeger[satz.id].push(satz);
+  });
+  return proTraeger;
+}
+
+/**
+ * Der zum Fahrtdatum passende Satz: der juengste, der am Datum schon galt.
+ * Fallback auf den aeltesten Satz, damit Fahrten vor dem ersten gueltig_ab
+ * nicht mit 0 € erscheinen. Kein Satz vorhanden -> 0 (nicht FALLBACK_SATZ:
+ * in den Reports ist "kein Traeger" ein echter Nullfall, kein fehlendes
+ * Formular).
+ */
+function findeSatz(saetzeProTraeger, id, datum) {
+  const saetze = saetzeProTraeger[id];
+  if (!saetze || saetze.length === 0) return 0;
+
+  const passend = saetze.find(satz => new Date(satz.gueltig_ab) <= new Date(datum));
+  const gewaehlt = passend || saetze[saetze.length - 1];
+  // DB liefert DECIMAL als String — ohne Number() verkettet += statt zu addieren
+  const betrag = parseFloat(gewaehlt?.betrag);
+  return Number.isFinite(betrag) ? betrag : 0;
+}
+
+/**
+ * Erstattung der Fahrt selbst (Traegersatz mal Kilometer).
+ */
+function berechneFahrtErstattung(saetzeProTraeger, abrechnung, kilometer, datum) {
+  const km = parseFloat(kilometer);
+  if (!Number.isFinite(km)) return 0;
+  return km * findeSatz(saetzeProTraeger, abrechnung, datum);
+}
+
+/**
+ * Mitfahrer-Erstattung einer EINZELNEN Fahrt.
+ * anzahl = Mitfahrer dieser Fahrt, kilometer = Kilometer dieser Fahrt.
+ */
+function berechneMitfahrerErstattung(saetzeProTraeger, anzahl, kilometer, datum) {
+  if (!anzahl || anzahl <= 0) return 0;
+  const km = parseFloat(kilometer);
+  if (!Number.isFinite(km)) return 0;
+  return anzahl * findeSatz(saetzeProTraeger, 'mitfahrer', datum) * km;
+}
+
 module.exports = {
   getErstattungssatzFuerTraeger,
   ladeSaetzeFuerTraeger,
   satzAmDatum,
   berechneErstattung,
   FALLBACK_SATZ,
+  ladeErstattungssaetze,
+  findeSatz,
+  berechneFahrtErstattung,
+  berechneMitfahrerErstattung,
 };
