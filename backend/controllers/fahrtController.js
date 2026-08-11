@@ -4,6 +4,12 @@ const Abrechnung = require('../models/Abrechnung');
 const { getDistance } = require('../utils/distanceCalculator');
 const { exportToExcel, exportToExcelRange } = require('../utils/excelExport');
 const { exportToPdf, exportToPdfRange } = require('../utils/pdfExport');
+const {
+  ladeErstattungssaetze,
+  findeSatz,
+  berechneFahrtErstattung,
+  berechneMitfahrerErstattung,
+} = require('../utils/erstattung');
 const db = require('../config/database');
 
 exports.exportToExcel = exportToExcel;
@@ -217,68 +223,29 @@ exports.getMonthlyReport = async (req, res) => {
       fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
     }
     
-    const [erstattungssaetze] = await db.execute(`
-  SELECT 
-    at.id,
-    eb.betrag,
-    eb.gueltig_ab
-  FROM abrechnungstraeger at
-  INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-  WHERE at.user_id = ? 
-    AND at.active = true
-  UNION
-  SELECT 
-    'mitfahrer' as id,
-    betrag,
-    gueltig_ab 
-  FROM mitfahrer_erstattung
-  WHERE user_id = ?
-  ORDER BY gueltig_ab DESC
-`, [userId, userId]);
-    // Gruppiere Erstattungssätze nach ID
-    const saetzeProTraeger = {};
-    erstattungssaetze.forEach(satz => {
-      if (!saetzeProTraeger[satz.id]) {
-        saetzeProTraeger[satz.id] = [];
-      }
-      saetzeProTraeger[satz.id].push(satz);
-    });
-    
-    // Finde den korrekten Erstattungssatz für ein bestimmtes Datum
-    const getErstattungssatz = (id, datum) => {
-      if (!saetzeProTraeger[id]) return 0;
-      
-      const saetze = saetzeProTraeger[id];
-      let passenderSatz = saetze.find(satz =>
-        new Date(satz.gueltig_ab) <= new Date(datum)
-      );
-      
-      if (!passenderSatz && saetze.length > 0) {
-        passenderSatz = saetze[saetze.length - 1];
-      }
-      
-      return passenderSatz ? passenderSatz.betrag : 0;
-    };
-    
+    const saetzeProTraeger = await ladeErstattungssaetze(userId);
+
     // Erstelle die Zusammenfassung
     const erstattungen = {};
-    
+
     const report = fahrten.map((fahrt) => {
       // Finde den passenden Erstattungssatz für das Fahrtdatum
-      const erstattungssatz = getErstattungssatz(fahrt.abrechnung, fahrt.datum);
-      const erstattung = fahrt.kilometer * erstattungssatz;
-      
+      const erstattungssatz = findeSatz(saetzeProTraeger, fahrt.abrechnung, fahrt.datum);
+      const erstattung = berechneFahrtErstattung(
+        saetzeProTraeger, fahrt.abrechnung, fahrt.kilometer, fahrt.datum
+      );
+
       // Summiere die Erstattung für diesen Träger
       if (!erstattungen[fahrt.abrechnung]) {
         erstattungen[fahrt.abrechnung] = 0;
       }
       erstattungen[fahrt.abrechnung] += erstattung;
-      
+
       // Berechne Mitfahrer-Erstattung (auch pro Fahrt ausweisen)
-      let mitfahrerErstattung = 0;
-      if (fahrt.mitfahrer?.length > 0) {
-        const mitfahrerSatz = getErstattungssatz('mitfahrer', fahrt.datum);
-        mitfahrerErstattung = fahrt.mitfahrer.length * mitfahrerSatz * fahrt.kilometer;
+      const mitfahrerErstattung = berechneMitfahrerErstattung(
+        saetzeProTraeger, fahrt.mitfahrer?.length, fahrt.kilometer, fahrt.datum
+      );
+      if (mitfahrerErstattung > 0) {
         if (!erstattungen.mitfahrer) {
           erstattungen.mitfahrer = 0;
         }
@@ -347,49 +314,7 @@ exports.getReportRange = async (req, res) => {
     }
 
     // Hole Erstattungssätze
-    const [erstattungssaetze] = await db.execute(`
-  SELECT
-    at.id,
-    eb.betrag,
-    eb.gueltig_ab
-  FROM abrechnungstraeger at
-  INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-  WHERE at.user_id = ?
-    AND at.active = true
-  UNION
-  SELECT
-    'mitfahrer' as id,
-    betrag,
-    gueltig_ab
-  FROM mitfahrer_erstattung
-  WHERE user_id = ?
-  ORDER BY gueltig_ab DESC
-`, [userId, userId]);
-
-    // Gruppiere Erstattungssätze nach ID
-    const saetzeProTraeger = {};
-    erstattungssaetze.forEach(satz => {
-      if (!saetzeProTraeger[satz.id]) {
-        saetzeProTraeger[satz.id] = [];
-      }
-      saetzeProTraeger[satz.id].push(satz);
-    });
-
-    // Finde den korrekten Erstattungssatz für ein bestimmtes Datum
-    const getErstattungssatz = (id, datum) => {
-      if (!saetzeProTraeger[id]) return 0;
-
-      const saetze = saetzeProTraeger[id];
-      let passenderSatz = saetze.find(satz =>
-        new Date(satz.gueltig_ab) <= new Date(datum)
-      );
-
-      if (!passenderSatz && saetze.length > 0) {
-        passenderSatz = saetze[saetze.length - 1];
-      }
-
-      return passenderSatz ? passenderSatz.betrag : 0;
-    };
+    const saetzeProTraeger = await ladeErstattungssaetze(userId);
 
     // Erstelle die Zusammenfassung
     const erstattungen = {};
@@ -406,8 +331,10 @@ exports.getReportRange = async (req, res) => {
       // „Wed Jan 01 ...“; lokal formatieren, damit „YYYY-MM“ herauskommt
       const fahrtDatum = new Date(fahrt.datum);
       const fahrtYM = `${fahrtDatum.getFullYear()}-${String(fahrtDatum.getMonth() + 1).padStart(2, '0')}`;
-      const erstattungssatz = getErstattungssatz(fahrt.abrechnung, fahrt.datum);
-      const erstattung = fahrt.kilometer * erstattungssatz;
+      const erstattungssatz = findeSatz(saetzeProTraeger, fahrt.abrechnung, fahrt.datum);
+      const erstattung = berechneFahrtErstattung(
+        saetzeProTraeger, fahrt.abrechnung, fahrt.kilometer, fahrt.datum
+      );
 
       if (!erstattungen[fahrt.abrechnung]) {
         erstattungen[fahrt.abrechnung] = 0;
@@ -416,10 +343,10 @@ exports.getReportRange = async (req, res) => {
       merkeMonat(String(fahrt.abrechnung), fahrtYM, erstattung);
 
       // Berechne Mitfahrer-Erstattung (auch pro Fahrt ausweisen)
-      let mitfahrerErstattung = 0;
-      if (fahrt.mitfahrer?.length > 0) {
-        const mitfahrerSatz = getErstattungssatz('mitfahrer', fahrt.datum);
-        mitfahrerErstattung = fahrt.mitfahrer.length * mitfahrerSatz * fahrt.kilometer;
+      const mitfahrerErstattung = berechneMitfahrerErstattung(
+        saetzeProTraeger, fahrt.mitfahrer?.length, fahrt.kilometer, fahrt.datum
+      );
+      if (mitfahrerErstattung > 0) {
         if (!erstattungen.mitfahrer) {
           erstattungen.mitfahrer = 0;
         }
@@ -459,102 +386,62 @@ exports.getMonthlySummary = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Hole aktive Abrechnungsträger und deren aktuelle Erstattungssätze
-    const [rows] = await db.execute(`
-  SELECT 
-    f.yearMonth,
-    f.abrechnung,
-    f.kilometer,
-    f.mitfahrer_count,
-    f.datum,
-    eb.id,
-    eb.betrag
-  FROM (
-    SELECT 
-      DATE_FORMAT(datum, '%Y-%m') as yearMonth,
-      abrechnung,
-      SUM(kilometer) as kilometer,
-      COUNT(DISTINCT m.id) as mitfahrer_count,
-      MIN(datum) as datum
-    FROM fahrten f
-    LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
-    WHERE f.user_id = ?
-    GROUP BY yearMonth, abrechnung
-  ) f
-  LEFT JOIN (
-    SELECT 'mitfahrer' as id, betrag, gueltig_ab
-    FROM mitfahrer_erstattung
-    WHERE user_id = ?
-    UNION 
-    SELECT at.id, eb.betrag, eb.gueltig_ab
-    FROM abrechnungstraeger at
-    INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-    WHERE at.user_id = ? AND at.active = true
-  ) as eb ON eb.gueltig_ab <= f.datum
-  WHERE NOT EXISTS (
-    SELECT 1 FROM (
-      SELECT 'mitfahrer' as id, gueltig_ab
-      FROM mitfahrer_erstattung
-      WHERE user_id = ?
-      UNION
-      SELECT at.id, eb.gueltig_ab
-      FROM abrechnungstraeger at
-      INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id 
-      WHERE at.user_id = ? AND at.active = true
-    ) as newer_rates
-    WHERE newer_rates.id = eb.id
-    AND newer_rates.gueltig_ab > eb.gueltig_ab
-    AND newer_rates.gueltig_ab <= f.datum
-  )
-  ORDER BY yearMonth DESC
-`, [userId, userId, userId, userId, userId]);
-    
-    if (!rows.length) {
+    // Je Fahrt eine Zeile — die Erstattung entsteht immer auf Fahrt-Ebene.
+    // Vorher aggregierte die Abfrage schon in SQL auf Monat/Traeger und
+    // multiplizierte dann die Mitfahrer-Anzahl des Monats mit dessen
+    // Kilometersumme: bis zum 40-fachen des richtigen Betrags.
+    const [fahrten] = await db.execute(`
+      SELECT
+        DATE_FORMAT(f.datum, '%Y-%m') as yearMonth,
+        f.datum,
+        f.abrechnung,
+        f.kilometer,
+        COUNT(m.id) as mitfahrer_count
+      FROM fahrten f
+      LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
+      WHERE f.user_id = ?
+      GROUP BY f.id
+      ORDER BY f.datum DESC
+    `, [userId]);
+
+    if (!fahrten.length) {
       return res.status(404).json({ message: 'Keine Daten für die monatliche Zusammenfassung gefunden' });
     }
 
-    // Mitfahrer-Erstattungssätze aus DB laden
-    const [mitfahrerSaetze] = await db.execute(
-      'SELECT betrag, gueltig_ab FROM mitfahrer_erstattung WHERE user_id = ? ORDER BY gueltig_ab DESC',
-      [userId]
-    );
-
-    const getMitfahrerSatz = (datum) => {
-      const passend = mitfahrerSaetze.find(s => new Date(s.gueltig_ab) <= new Date(datum));
-      if (!passend && mitfahrerSaetze.length > 0) return mitfahrerSaetze[mitfahrerSaetze.length - 1].betrag;
-      return passend ? passend.betrag : 0;
-    };
+    const saetzeProTraeger = await ladeErstattungssaetze(userId);
 
     // Gruppiere nach Monaten
-    const summary = rows.reduce((acc, row) => {
-      if (!acc[row.yearMonth]) {
-        acc[row.yearMonth] = {
-          yearMonth: row.yearMonth,
+    const summary = fahrten.reduce((acc, fahrt) => {
+      if (!acc[fahrt.yearMonth]) {
+        acc[fahrt.yearMonth] = {
+          yearMonth: fahrt.yearMonth,
           erstattungen: {}
         };
       }
-      
-      const erstattung = row.kilometer * row.betrag;
-      acc[row.yearMonth].erstattungen[row.abrechnung] = {
-        kilometer: row.kilometer,
-        erstattung: erstattung
-      };
-      
-      if (row.mitfahrer_count > 0) {
-        const mitfahrerErstattung = row.mitfahrer_count * getMitfahrerSatz(row.datum) * row.kilometer;
-        if (!acc[row.yearMonth].erstattungen.mitfahrer) {
-          acc[row.yearMonth].erstattungen.mitfahrer = {
-            kilometer: 0,
-            erstattung: 0
-          };
-        }
-        acc[row.yearMonth].erstattungen.mitfahrer.kilometer += row.kilometer;
-        acc[row.yearMonth].erstattungen.mitfahrer.erstattung += mitfahrerErstattung;
+      const monat = acc[fahrt.yearMonth].erstattungen;
+
+      if (!monat[fahrt.abrechnung]) {
+        monat[fahrt.abrechnung] = { kilometer: 0, erstattung: 0 };
       }
-      
+      monat[fahrt.abrechnung].kilometer += Number(fahrt.kilometer || 0);
+      monat[fahrt.abrechnung].erstattung += berechneFahrtErstattung(
+        saetzeProTraeger, fahrt.abrechnung, fahrt.kilometer, fahrt.datum
+      );
+
+      const mitfahrerErstattung = berechneMitfahrerErstattung(
+        saetzeProTraeger, fahrt.mitfahrer_count, fahrt.kilometer, fahrt.datum
+      );
+      if (mitfahrerErstattung > 0) {
+        if (!monat.mitfahrer) {
+          monat.mitfahrer = { kilometer: 0, erstattung: 0 };
+        }
+        monat.mitfahrer.kilometer += Number(fahrt.kilometer || 0);
+        monat.mitfahrer.erstattung += mitfahrerErstattung;
+      }
+
       return acc;
     }, {});
-    
+
     res.status(200).json(Object.values(summary));
   } catch (error) {
     console.error('Fehler beim Abrufen der monatlichen Zusammenfassung:', error);
@@ -622,83 +509,44 @@ exports.getYearSummary = async (req, res) => {
     const { year } = req.params;
     const userId = req.user.id;
     
-    // Alle Erstattungssätze inklusive Mitfahrer-Satz. Ohne den UNION lieferte
-    // getErstattungssatz('mitfahrer', …) immer 0 und die Jahresübersicht wies
-    // die Mitfahrer-Erstattung dauerhaft mit 0 € aus.
-    const [erstattungssaetze] = await db.execute(`
-      SELECT 'mitfahrer' AS id, betrag, gueltig_ab
-      FROM mitfahrer_erstattung
-      WHERE user_id = ? AND gueltig_ab <= LAST_DAY(?)
-      UNION ALL
-      SELECT
-        at.id,
-        eb.betrag,
-        eb.gueltig_ab
-      FROM abrechnungstraeger at
-      INNER JOIN erstattungsbetraege eb ON eb.abrechnungstraeger_id = at.id
-      WHERE at.user_id = ?
-        AND at.active = true
-        AND eb.gueltig_ab <= LAST_DAY(?)
-      ORDER BY gueltig_ab DESC
-    `, [userId, `${year}-12-31`, userId, `${year}-12-31`]);
-    
-    // Hole alle Fahrten des Jahres
+    // Hole alle Fahrten des Jahres — COUNT(DISTINCT m.id), damit ein zweiter
+    // JOIN-Treffer die Mitfahrer nicht doppelt zaehlt
     const [fahrten] = await db.execute(`
-      SELECT 
+      SELECT
         f.datum,
         f.kilometer,
         f.abrechnung,
-        COUNT(m.id) as mitfahrer_count
+        COUNT(DISTINCT m.id) as mitfahrer_count
       FROM fahrten f
       LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
       WHERE YEAR(f.datum) = ? AND f.user_id = ?
       GROUP BY f.id
     `, [year, userId]);
-    
-    // Gruppiere Erstattungssätze nach AbrechnungTraegerId
-    const saetzeProTraeger = {};
-    erstattungssaetze.forEach(satz => {
-      if (!saetzeProTraeger[satz.id]) {
-        saetzeProTraeger[satz.id] = [];
-      }
-      saetzeProTraeger[satz.id].push(satz);
-    });
-    
-    // Finde den korrekten Erstattungssatz für ein bestimmtes Datum.
-    // Fallback auf den ältesten Satz wie im Monatsbericht — sonst erscheinen
-    // Fahrten vor dem ersten gueltig_ab mit 0 €.
-    const getErstattungssatz = (abrechnung, datum) => {
-      const saetze = saetzeProTraeger[abrechnung];
-      if (!saetze || saetze.length === 0) return 0;
 
-      const passenderSatz = saetze.find(satz =>
-        new Date(satz.gueltig_ab) <= new Date(datum)
-      );
+    const saetzeProTraeger = await ladeErstattungssaetze(userId);
 
-      return passenderSatz ? passenderSatz.betrag : saetze[saetze.length - 1].betrag;
-    };
-    
     // Berechne die Summen pro Abrechnungsträger
     const summary = fahrten.reduce((acc, fahrt) => {
       // Erstattung für die Fahrt
-      const erstattungssatz = getErstattungssatz(fahrt.abrechnung, fahrt.datum);
-      const erstattung = fahrt.kilometer * erstattungssatz;
-      
+      const erstattung = berechneFahrtErstattung(
+        saetzeProTraeger, fahrt.abrechnung, fahrt.kilometer, fahrt.datum
+      );
+
       if (!acc[fahrt.abrechnung]) {
         acc[fahrt.abrechnung] = {
           kilometer: 0,
           erstattung: 0
         };
       }
-      
-      acc[fahrt.abrechnung].kilometer += fahrt.kilometer;
+
+      acc[fahrt.abrechnung].kilometer += Number(fahrt.kilometer || 0);
       acc[fahrt.abrechnung].erstattung += erstattung;
-      
+
       // Mitfahrer-Erstattung
-      if (fahrt.mitfahrer_count > 0) {
-        const mitfahrerSatz = getErstattungssatz('mitfahrer', fahrt.datum);
-        const mitfahrerErstattung = fahrt.mitfahrer_count * mitfahrerSatz * fahrt.kilometer;
-        
+      const mitfahrerErstattung = berechneMitfahrerErstattung(
+        saetzeProTraeger, fahrt.mitfahrer_count, fahrt.kilometer, fahrt.datum
+      );
+      if (mitfahrerErstattung > 0) {
         if (!acc.mitfahrer) {
           acc.mitfahrer = {
             kilometer: 0,
@@ -706,9 +554,9 @@ exports.getYearSummary = async (req, res) => {
           };
         }
         acc.mitfahrer.erstattung += mitfahrerErstattung;
-        acc.mitfahrer.kilometer += fahrt.kilometer;
+        acc.mitfahrer.kilometer += Number(fahrt.kilometer || 0);
       }
-      
+
       return acc;
     }, {});
     
