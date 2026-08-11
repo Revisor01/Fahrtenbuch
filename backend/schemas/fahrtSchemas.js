@@ -1,5 +1,16 @@
 const { z } = require('zod');
 
+// Spiegelt das DB-Enum mitfahrer.richtung ENUM('hin','rueck','hin_rueck').
+// Ohne diese Pruefung schlug ein ungueltiger Wert erst als DB-Fehler durch —
+// der Nutzer sah einen 500er statt einer Meldung. Leer/fehlend gilt als 'hin',
+// wie es das Formular vorbelegt.
+const richtungSchema = z
+  .enum(['hin', 'rueck', 'hin_rueck'], {
+    error: 'Richtung muss hin, rueck oder hin_rueck sein',
+  })
+  .nullish()
+  .transform((wert) => wert ?? 'hin');
+
 const createFahrtSchema = z.object({
   vonOrtId: z.coerce.number().int().positive().nullable().optional(),
   nachOrtId: z.coerce.number().int().positive().nullable().optional(),
@@ -12,7 +23,7 @@ const createFahrtSchema = z.object({
   mitfahrer: z.array(z.object({
     name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
     arbeitsstaette: z.string().optional().nullable(),
-    richtung: z.string().optional().nullable(),
+    richtung: richtungSchema,
   })).optional(),
 });
 
@@ -29,20 +40,20 @@ const updateFahrtSchema = z.object({
     id: z.coerce.number().int().positive().optional(),
     name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
     arbeitsstaette: z.string().optional().nullable(),
-    richtung: z.string().optional().nullable(),
+    richtung: richtungSchema,
   })).optional(),
 });
 
 const addMitfahrerSchema = z.object({
   name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
   arbeitsstaette: z.string().optional().nullable(),
-  richtung: z.string().optional().nullable(),
+  richtung: richtungSchema,
 });
 
 const updateMitfahrerSchema = z.object({
   name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
   arbeitsstaette: z.string().optional().nullable(),
-  richtung: z.string().optional().nullable(),
+  richtung: richtungSchema,
 });
 
 const abrechnungsStatusSchema = z.object({
