@@ -64,18 +64,19 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     </div>
     
     <div>
-    <label className="form-label">
-    Richtung
+    <label className="form-label" htmlFor="mitfahrer-richtung">
+    Mitgefahren
     </label>
     <select
+    id="mitfahrer-richtung"
     value={richtung}
     onChange={(e) => setRichtung(e.target.value)}
     className="form-select"
     disabled={readOnly}
     >
-    <option value="hin">Hin</option>
-    <option value="rueck">Rück</option>
-    <option value="hin_rueck">Hin & Rück</option>
+    <option value="hin">Nur die Hinfahrt</option>
+    <option value="rueck">Nur die Rückfahrt</option>
+    <option value="hin_rueck">Hin- und Rückfahrt</option>
     </select>
     </div>
     

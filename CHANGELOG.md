@@ -8,6 +8,10 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Changed
+- Mitfahrer:innen stehen im Fahrt-Formular jetzt an der richtigen Stelle — als eigenes Feld zwischen Abrechnung und den Schaltflächen statt unterhalb von „Fahrt speichern". Jeder Eintrag zeigt Name, Arbeitsstätte und ob die Person hin, zurück oder beides mitgefahren ist; Antippen bearbeitet ihn
+- Die Auswahl im Mitfahrer-Dialog heißt jetzt „Nur die Hinfahrt / Nur die Rückfahrt / Hin- und Rückfahrt" statt „Hin / Rück / Hin & Rück"
+- Feldbeschriftungen im Fahrt-Formular einheitlich: „Startort" und „Zielort" sehen aus wie „Anlass", „Kilometer" und „Abrechnung"
+- Lange Dialoge (Neuigkeiten, Info) öffnen auf dem Handy von oben — vorher begannen sie unterhalb des sichtbaren Bereichs und man landete mitten im Text
 - Listen überall gleich bedienbar: Ein Tipp auf eine Zeile öffnet alle Angaben und die möglichen Aktionen — statt kleiner Symbole in der Zeile und einer Wischgeste bei den Fahrten. Gilt für Fahrten, Startseite, Abrechnungsträger, Orte, Distanzen, Favoriten, Erstattungssätze und API-Zugriff, auf dem Handy wie am Rechner
 - Einstellungen: „Profil & Passwort" steht jetzt an erster Stelle; auf dem Handy sind Neuigkeiten, Hilfe und Info beschriftet statt nur als Symbole
 

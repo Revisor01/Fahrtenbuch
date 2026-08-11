@@ -5076,19 +5076,6 @@ code {
   color: var(--text-3);
 }
 
-/* Mitfahrer-Name im Chip: antippbar zum Bearbeiten */
-.mitfahrer-name-btn {
-  border: none;
-  background: none;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-}
-
 /* --- Legacy-Modal (Mitfahrer, „Ort speichern") --------------------------- */
 
 /* Overlay: die Tailwind-Klasse bg-primary-950/30 wurde nie erzeugt, weil die
@@ -5719,4 +5706,145 @@ code {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
+}
+
+/* Lange Sheets (Neuigkeiten, Info) fangen oben an.
+   Als Bottom-Sheet lag ihr Anfang unterhalb des Bildschirms - man landete
+   mitten im Text und musste erst nach oben scrollen. Kurze Sheets bleiben
+   unten, dort ist der Daumen. */
+@media (max-width: 767px) {
+  .sheet-root-wide {
+    align-items: flex-start;
+  }
+
+  .sheet-panel-wide {
+    margin-top: 48px;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -8px 40px -12px rgba(8, 32, 31, 0.4);
+  }
+}
+
+/* ==========================================================================
+   Mitfahrer:innen im Fahrt-Formular
+   Frueher Status-Chips (status-badge-primary) unterhalb von „Fahrt speichern" -
+   ein Statusabzeichen fuer etwas, das keinen Status hat, an einer Stelle, wo
+   es niemand vermutet. Jetzt ein Feld wie Anlass oder Kilometer.
+   ========================================================================== */
+
+.mitfahrer-feld {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mitfahrer-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mitfahrer-eintrag {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.mitfahrer-eintrag-haupt {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.mitfahrer-eintrag-haupt:hover {
+  background: var(--surface-2);
+}
+
+.mitfahrer-eintrag-haupt:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+.mitfahrer-eintrag-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-1);
+  overflow-wrap: anywhere;
+}
+
+.mitfahrer-eintrag-sub {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--text-3);
+  overflow-wrap: anywhere;
+}
+
+.mitfahrer-eintrag-weg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  border: none;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.mitfahrer-eintrag-weg:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.mitfahrer-eintrag-weg:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--danger);
+}
+
+/* Hinzufuegen: gestrichelt, damit es als „hier kommt noch was" lesbar ist
+   und sich von den bestehenden Eintraegen unterscheidet */
+.mitfahrer-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-btn);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.mitfahrer-add:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.mitfahrer-add:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
