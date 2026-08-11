@@ -5653,10 +5653,14 @@ code {
   color: var(--text-3) !important;
 }
 
-/* Dashboard: „Zuletzt"-Zeile und Tabellenzeile als Ganzes antippbar */
+/* Dashboard: „Zuletzt"-Zeile und Tabellenzeile als Ganzes antippbar.
+   Nur die seitlichen Raender entfernen - die Trennlinie zwischen den Fahrten
+   bleibt (wie in der Fahrtenliste). */
 .dash-zuletzt-tap,
 .dash-d-tablerow-tap {
-  border: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
   background: transparent;
   color: inherit;
   font: inherit;
