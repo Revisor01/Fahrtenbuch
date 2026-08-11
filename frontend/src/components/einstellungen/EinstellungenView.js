@@ -19,12 +19,15 @@ import ApiBereich from './ApiBereich';
 // Reihenfolge nach Nutzungshäufigkeit (Spec) — „API-Zugriff" als
 // zusätzlicher Punkt am Ende, „Verwaltung" (Admin) mobil in der Liste,
 // desktop über den Sidebar-Eintrag.
+// Reihenfolge nach dem, was zuerst gebraucht wird: Profil (dort stehen Name,
+// IBAN und der Wohnort — ohne die stimmt die Abrechnung nicht), dann die
+// Stammdaten, zuletzt Selteneres.
 const BEREICHE = [
+  { id: 'profil', label: 'Profil & Passwort', Icon: User, Component: ProfilBereich },
   { id: 'orte', label: 'Orte & Distanzen', Icon: MapPin, Component: OrteDistanzenBereich },
   { id: 'traeger', label: 'Abrechnungsträger', Icon: Building2, Component: TraegerBereich },
   { id: 'erstattung', label: 'Erstattungssätze', Icon: Coins, Component: ErstattungBereich },
   { id: 'favoriten', label: 'Favoriten', Icon: Star, Component: FavoritenBereich },
-  { id: 'profil', label: 'Profil & Passwort', Icon: User, Component: ProfilBereich },
   { id: 'darstellung', label: 'Darstellung', Icon: SunMoon, Component: DarstellungBereich },
   { id: 'api', label: 'API-Zugriff', Icon: Key, Component: ApiBereich },
   { id: 'verwaltung', label: 'Verwaltung', Icon: Users, Component: UserManagement, adminOnly: true, mobileOnly: true },

@@ -232,12 +232,6 @@ function TraegerBereich() {
                   .join(' · ') || 'Keine Kostenstelle'}
               </span>
             </button>
-            <span
-              className={`set-check is-anzeige${traeger.active ? ' is-on' : ''}`}
-              aria-hidden="true"
-            >
-              {traeger.active && <Check size={14} strokeWidth={3} />}
-            </span>
             <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
           </div>
         ))}

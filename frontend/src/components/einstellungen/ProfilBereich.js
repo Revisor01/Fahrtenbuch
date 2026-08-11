@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { Home, AlertTriangle } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import BereichKopf from './BereichKopf';
@@ -7,12 +8,50 @@ import BereichKopf from './BereichKopf';
 // Profil & Passwort: persönliche Daten für die Abrechnung + Passwortwechsel.
 // Formulare bleiben Seiteninhalt (mehrfeldrig, kein Sheet).
 function ProfilBereich() {
-  const { setUser, refreshAllData } = useContext(AppContext);
+  const { setUser, refreshAllData, orte, updateOrt } = useContext(AppContext);
   const toast = useToast();
   const [profile, setProfile] = useState({});
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [wohnortLaeuft, setWohnortLaeuft] = useState(false);
+
+  // Der als Wohnort markierte Ort liefert die Anschrift fürs Abrechnungsformular
+  const wohnort = (orte || []).find((o) => o.ist_wohnort);
+  const orteOhneWohnort = (orte || []).filter((o) => !o.ist_wohnort);
+
+  // Der Server erzwingt keinen einzelnen Wohnort — ohne das Zuruecksetzen des
+  // alten gaebe es zwei, und der Excel-Export nimmt dann einen beliebigen
+  // davon als Anschrift.
+  const handleWohnortSetzen = async (ortId) => {
+    const ort = (orte || []).find((o) => String(o.id) === String(ortId));
+    if (!ort) return;
+    setWohnortLaeuft(true);
+    try {
+      if (wohnort && wohnort.id !== ort.id) {
+        await updateOrt(wohnort.id, {
+          name: wohnort.name,
+          adresse: wohnort.adresse,
+          ist_wohnort: false,
+          ist_dienstort: !!wohnort.ist_dienstort,
+          ist_kirchspiel: !!wohnort.ist_kirchspiel,
+        });
+      }
+      await updateOrt(ort.id, {
+        name: ort.name,
+        adresse: ort.adresse,
+        ist_wohnort: true,
+        ist_dienstort: false,
+        ist_kirchspiel: false,
+      });
+      toast.success(`${ort.name} ist jetzt dein Wohnort.`);
+    } catch (error) {
+      console.error('Fehler beim Setzen des Wohnorts:', error);
+      toast.error('Wohnort konnte nicht gesetzt werden.');
+    } finally {
+      setWohnortLaeuft(false);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -96,6 +135,61 @@ function ProfilBereich() {
         titel="Profil & Passwort"
         satz="Deine Daten erscheinen auf den Abrechnungen — halte sie aktuell."
       />
+
+      {/* Wohnort: geht als Anschrift ins Abrechnungsformular. Fehlt er, bleibt
+          das Feld dort leer — deshalb steht der Hinweis ganz oben und nicht
+          versteckt unter „Orte". */}
+      <div className={`profil-wohnort${wohnort ? '' : ' is-fehlt'}`}>
+        <span className="profil-wohnort-icon" aria-hidden="true">
+          {wohnort ? <Home size={18} /> : <AlertTriangle size={18} />}
+        </span>
+        <div className="profil-wohnort-text">
+          <h3>{wohnort ? 'Dein Wohnort' : 'Kein Wohnort festgelegt'}</h3>
+          {wohnort ? (
+            <p>
+              <strong>{wohnort.name}</strong>
+              {wohnort.adresse ? ` · ${wohnort.adresse}` : ''}
+              <br />
+              Diese Anschrift steht auf deinen Abrechnungen.
+            </p>
+          ) : (
+            <p>
+              Für die Abrechnung braucht es deine Anschrift. Wähle einen deiner
+              gespeicherten Orte als Wohnort — er erscheint dann im
+              Abrechnungsformular.
+            </p>
+          )}
+
+          {orteOhneWohnort.length > 0 && (
+            <div className="profil-wohnort-wahl">
+              <label className="form-label" htmlFor="wohnort-wahl">
+                {wohnort ? 'Anderen Ort als Wohnort festlegen' : 'Ort als Wohnort festlegen'}
+              </label>
+              <select
+                id="wohnort-wahl"
+                className="form-select"
+                value=""
+                onChange={(e) => e.target.value && handleWohnortSetzen(e.target.value)}
+                disabled={wohnortLaeuft}
+              >
+                <option value="">Ort auswählen…</option>
+                {orteOhneWohnort.map((ort) => (
+                  <option key={ort.id} value={ort.id}>
+                    {ort.name}{ort.adresse ? ` — ${ort.adresse}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {orte?.length === 0 && (
+            <p className="profil-wohnort-leer">
+              Du hast noch keine Orte gespeichert. Lege deine Adresse unter
+              „Orte &amp; Distanzen" an und komm dann hierher zurück.
+            </p>
+          )}
+        </div>
+      </div>
 
       <form onSubmit={handleProfileUpdate} className="space-y-4">
         <div>
