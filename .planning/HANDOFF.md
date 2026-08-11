@@ -34,6 +34,19 @@ echten Produktionsdaten.
   Kollegium, plus Sicherheitshinweis
 - **Sicherheits-Header in Caddy** — HSTS, CSP, X-Frame-Options,
   Referrer-Policy, Permissions-Policy
+- **Fahrten- und Dashboard-Tabelle sehen gleich aus** — Träger bricht um
+  statt abzuschneiden, Mitfahrer-Hinweis gedeckt statt in Petrol, gleiche
+  Spaltenbreiten (nur die Datumsspalte bleibt breiter, dort steht das Jahr)
+
+### Zwei Fallen, die dabei zweimal zugeschlagen haben
+
+Beim Umbau der Listenzeilen auf `<button>`:
+1. `<div>` → `<span>` nimmt Blockelementen den Zeilenumbruch — die
+   Mitfahrer-Erstattung stand plötzlich neben statt unter dem Betrag
+2. `border: none` löscht auch die Trennlinie zwischen den Zeilen — auf dem
+   Dashboard verschwand sie unbemerkt
+
+Beides ist behoben; wer weitere Listen umbaut, sollte darauf achten.
 
 ---
 
@@ -167,9 +180,15 @@ Ziel: **eine** gemeinsame Funktion für alle vier Stellen.
 - Reverse Proxy: **Caddy**, `/etc/caddy/Caddyfile` (Sicherheits-Header als
   Snippet `sicherheits_header`)
 
-**Testumgebung**:
+**Testumgebung** — **steht bereit für den Mitfahrer-Umbau**:
 - `https://fahrtenbuch.godsapp.de`, Server `server.godsapp.de`
 - Stack `/opt/stacks/fahrtenbuch/`, Repo-Checkout in `repo/`, lokaler Build
+- **Enthält seit 12.08. 01:03 einen frischen Produktions-Dump**: 29 Nutzer,
+  2.462 Fahrten, 64 Mitfahrer (52 `hin_rueck`, 9 `hin`, 3 `rueck`), 159 Orte.
+  Damit lassen sich Migration und Erstattungsformeln an echten Daten prüfen
+- Der Stand davor liegt auf dem Server unter `/tmp/test-vorher.sql.gz`
+- **Achtung: echte Personendaten** (Namen, IBANs). Für Tests eigene
+  Wegwerf-Konten anlegen und hinterher entfernen; Bestandsdaten nicht anfassen
 - `docker-compose` v1 bricht beim Neuerstellen mit `KeyError: 'ContainerConfig'`
   ab. Workaround: Container per `docker rm -f` entfernen, dann `docker run`
   (Netz `fahrtenbuch_default`, Alias `frontend`, `--env-file .env`,
@@ -182,6 +201,15 @@ Ziel: **eine** gemeinsame Funktion für alle vier Stellen.
 ## Was offen bleibt
 
 - **Mitfahrer-Umbau + Erstattungsformeln** (siehe oben) — das nächste Vorhaben
+- **Fahrtenliste sortierbar machen** (Nutzerwunsch): Klick auf eine
+  Spaltenüberschrift sortiert danach — Datum, Anlass, Träger, km, Betrag,
+  Status. Zweiter Klick dreht die Richtung um. Betrifft
+  `frontend/src/components/fahrten/FahrtenTabelle.js` (Desktop-Kopfzeile) und
+  `frontend/src/components/FahrtenListe.js` (`sortierteFahrten` ist dort ein
+  `useMemo`, aktuell fest nach Datum absteigend). Auf dem Handy gibt es keine
+  Kopfzeile — dort bräuchte es einen eigenen Auslöser, etwa ein
+  Sortier-Sheet. Vorher klären, ob die Sortierung nur die Anzeige betrifft
+  oder auch den Export.
 - **Plausible liefert ein ungültiges Zertifikat**
   (`ERR_CERT_COMMON_NAME_INVALID` für `plausible.godsapp.de`) — die Statistik
   zählt nichts. Liegt auf dem godsapp-Server, nicht hier
