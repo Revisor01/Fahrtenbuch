@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { GripVertical, Check, Pencil, Trash2 } from 'lucide-react';
+import { GripVertical, Check, Pencil, Trash2, ChevronRight, Power } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
+import AktionsSheet from '../ui/AktionsSheet';
 import BereichKopf from './BereichKopf';
 
 // Formular im Sheet: Name + Kostenstelle (kleines Formular = Sheet).
@@ -70,6 +71,8 @@ function TraegerBereich() {
   const [traegerListe, setTraegerListe] = useState([]);
   // null | { mode: 'neu' } | { mode: 'edit', traeger }
   const [sheet, setSheet] = useState(null);
+  // Angetippte Zeile: zeigt Details + Aktionen (Bearbeiten/Aktivieren/Löschen)
+  const [aktionen, setAktionen] = useState(null);
 
   const sortiert = (liste) => [...liste].sort((a, b) => a.sort_order - b.sort_order);
 
@@ -212,44 +215,30 @@ function TraegerBereich() {
             >
               <GripVertical size={15} />
             </button>
-            <div className="set-row-main">
-              <div className="set-row-titel" style={traeger.active ? undefined : { opacity: 0.55 }}>
+            {/* Die ganze Zeile oeffnet das Aktions-Sheet: einzelne Icon-Buttons
+                waren auf dem Handy kaum zu lesen und schwer zu treffen. */}
+            <button
+              type="button"
+              className="set-row-main set-row-tap"
+              onClick={() => setAktionen(traeger)}
+              aria-label={`${traeger.name} — Aktionen öffnen`}
+            >
+              <span className="set-row-titel" style={traeger.active ? undefined : { opacity: 0.55 }}>
                 {traeger.name}
-              </div>
-              <div className="set-row-sub">
+              </span>
+              <span className="set-row-sub">
                 {[traeger.kostenstelle ? `Kst. ${traeger.kostenstelle}` : null, traeger.active ? null : 'Inaktiv']
                   .filter(Boolean)
                   .join(' · ') || 'Keine Kostenstelle'}
-              </div>
-            </div>
-            <button
-              type="button"
-              className={`set-check${traeger.active ? ' is-on' : ''}`}
-              onClick={() => handleToggleActive(traeger)}
-              title={traeger.active ? 'Aktiv — klicken zum Deaktivieren' : 'Inaktiv — klicken zum Aktivieren'}
-              aria-pressed={!!traeger.active}
-              aria-label={`${traeger.name} ${traeger.active ? 'deaktivieren' : 'aktivieren'}`}
+              </span>
+            </button>
+            <span
+              className={`set-check is-anzeige${traeger.active ? ' is-on' : ''}`}
+              aria-hidden="true"
             >
               {traeger.active && <Check size={14} strokeWidth={3} />}
-            </button>
-            <button
-              type="button"
-              className="set-action"
-              onClick={() => setSheet({ mode: 'edit', traeger })}
-              title="Bearbeiten"
-              aria-label={`${traeger.name} bearbeiten`}
-            >
-              <Pencil size={14} />
-            </button>
-            <button
-              type="button"
-              className="set-action set-action-danger"
-              onClick={() => handleDelete(traeger)}
-              title="Löschen"
-              aria-label={`${traeger.name} löschen`}
-            >
-              <Trash2 size={15} />
-            </button>
+            </span>
+            <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
           </div>
         ))}
         {traegerListe.length === 0 && (
@@ -263,6 +252,44 @@ function TraegerBereich() {
           traeger={sheet.mode === 'edit' ? sheet.traeger : null}
           onClose={() => setSheet(null)}
           onSave={handleSave}
+        />
+      )}
+
+      {aktionen && (
+        <AktionsSheet
+          isOpen
+          onClose={() => setAktionen(null)}
+          titel={aktionen.name}
+          untertitel={aktionen.active ? 'Wird zur Auswahl angeboten' : 'Inaktiv — erscheint nicht zur Auswahl'}
+          zeilen={[
+            { label: 'Kostenstelle', wert: aktionen.kostenstelle || '—' },
+            { label: 'Status', wert: aktionen.active ? 'Aktiv' : 'Inaktiv' },
+          ]}
+          aktionen={[
+            {
+              id: 'bearbeiten',
+              label: 'Bearbeiten',
+              icon: Pencil,
+              onClick: () => setSheet({ mode: 'edit', traeger: aktionen }),
+            },
+            {
+              id: 'aktiv',
+              label: aktionen.active ? 'Deaktivieren' : 'Aktivieren',
+              icon: Power,
+              hinweis: aktionen.active
+                ? 'Steht bei neuen Fahrten nicht mehr zur Auswahl'
+                : 'Steht bei neuen Fahrten wieder zur Auswahl',
+              onClick: () => handleToggleActive(aktionen),
+            },
+            {
+              id: 'loeschen',
+              label: 'Löschen',
+              icon: Trash2,
+              variant: 'gefahr',
+              hinweis: 'Lässt sich nicht rückgängig machen',
+              onClick: () => handleDelete(aktionen),
+            },
+          ]}
         />
       )}
     </div>

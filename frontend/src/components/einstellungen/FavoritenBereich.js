@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ChevronRight } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
+import AktionsSheet from '../ui/AktionsSheet';
 import Sheet from '../ui/Sheet';
 import BereichKopf from './BereichKopf';
 
@@ -88,6 +89,7 @@ function FavoritenBereich() {
     useContext(AppContext);
   const toast = useToast();
   const [sheetOffen, setSheetOffen] = useState(false);
+  const [aktionen, setAktionen] = useState(null);
 
   useEffect(() => {
     fetchFavoriten();
@@ -149,23 +151,20 @@ function FavoritenBereich() {
       <div className="set-zeilen">
         {favoriten.map((fav) => (
           <div key={fav.id} className="set-row">
-            <div className="set-row-main">
-              <div className="set-row-titel">
-                {fav.von_ort_name} → {fav.nach_ort_name}
-              </div>
-              <div className="set-row-sub">
-                {[fav.anlass, fav.traeger_name].filter(Boolean).join(' · ') || 'Ohne Anlass'}
-              </div>
-            </div>
             <button
               type="button"
-              className="set-action set-action-danger"
-              title="Löschen"
-              aria-label={`Favorit ${fav.von_ort_name} → ${fav.nach_ort_name} löschen`}
-              onClick={() => handleDelete(fav)}
+              className="set-row-main set-row-tap"
+              onClick={() => setAktionen(fav)}
+              aria-label={`Favorit ${fav.von_ort_name} nach ${fav.nach_ort_name} — Aktionen öffnen`}
             >
-              <Trash2 size={15} />
+              <span className="set-row-titel">
+                {fav.von_ort_name} → {fav.nach_ort_name}
+              </span>
+              <span className="set-row-sub">
+                {[fav.anlass, fav.traeger_name].filter(Boolean).join(' · ') || 'Ohne Anlass'}
+              </span>
             </button>
+            <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
           </div>
         ))}
         {favoriten.length === 0 && (
@@ -182,6 +181,29 @@ function FavoritenBereich() {
           abrechnungstraeger={abrechnungstraeger}
           onClose={() => setSheetOffen(false)}
           onSave={handleSave}
+        />
+      )}
+
+      {aktionen && (
+        <AktionsSheet
+          isOpen
+          onClose={() => setAktionen(null)}
+          titel={`${aktionen.von_ort_name} → ${aktionen.nach_ort_name}`}
+          untertitel="Favorit"
+          zeilen={[
+            { label: 'Anlass', wert: aktionen.anlass || '—' },
+            { label: 'Träger', wert: aktionen.traeger_name || '—' },
+          ]}
+          aktionen={[
+            {
+              id: 'loeschen',
+              label: 'Favorit löschen',
+              icon: Trash2,
+              variant: 'gefahr',
+              hinweis: 'Erfasste Fahrten bleiben erhalten',
+              onClick: () => handleDelete(aktionen),
+            },
+          ]}
         />
       )}
     </div>

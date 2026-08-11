@@ -88,43 +88,36 @@ function EinstellungenView({ initialTab, onShowInfo, onShowNewFeatures }) {
             </button>
           ))}
 
-          {/* Sekundäraktionen (ehemals Kopfzeile): Neuigkeiten, Info, Hilfe, Abmelden */}
+          {/* Sekundäraktionen (mobil): beschriftet statt nur Icons — drei
+              unbeschriftete Symbole nebeneinander waren nicht zu unterscheiden */}
           <div className="set-nav-foot">
-            <div className="set-nav-foot-icons">
+            <div className="set-nav-foot-links">
               <button
                 type="button"
                 onClick={onShowNewFeatures}
-                className="table-action-button-secondary"
-                title="Neue Funktionen"
-                aria-label="Neue Funktionen"
+                className="set-nav-foot-link"
               >
                 <Bell size={18} />
+                <span>Neuigkeiten</span>
               </button>
+              <Link to="/help" className="set-nav-foot-link">
+                <HelpCircle size={18} />
+                <span>Hilfe &amp; Anleitung</span>
+              </Link>
               <button
                 type="button"
                 onClick={onShowInfo}
-                className="table-action-button-secondary"
-                title="Info"
-                aria-label="Info"
+                className="set-nav-foot-link"
               >
                 <Info size={18} />
+                <span>Über die App</span>
               </button>
-              <Link
-                to="/help"
-                className="table-action-button-secondary"
-                title="Hilfe"
-                aria-label="Hilfe"
-              >
-                <HelpCircle size={18} />
-              </Link>
-              <div className="flex-1" />
               <button
                 type="button"
                 onClick={logout}
-                className="btn-ghost flex items-center gap-2"
-                title="Abmelden"
+                className="set-nav-foot-link is-abmelden"
               >
-                <LogOut size={17} />
+                <LogOut size={18} />
                 <span>Abmelden</span>
               </button>
             </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { heuteISO, alsISODatum } from '../../utils/datum';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, ChevronRight } from 'lucide-react';
 import Sheet from '../ui/Sheet';
+import AktionsSheet from '../ui/AktionsSheet';
 
 // Gemeinsame Bausteine für Erstattungssätze (Träger + Mitfahrer):
 // Sheet mit Betrag/Gültig-ab und die Historien-Zeilenliste.
@@ -60,38 +61,59 @@ export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
 }
 
 export function SatzListe({ saetze, onEdit, onDelete, leerText }) {
+  // Ein Tipp auf die Zeile oeffnet Details + Aktionen (gleiches Muster wie in
+  // den uebrigen Listen), statt zwei kleiner Icon-Buttons in der Zeile.
+  const [aktionen, setAktionen] = useState(null);
+
   return (
     <div className="set-zeilen">
       {saetze.map((satz) => (
         <div key={satz.id} className="set-row">
-          <div className="set-row-main">
-            <div className="set-row-titel num">{parseFloat(satz.betrag).toFixed(2)} €/km</div>
-            <div className="set-row-sub">
+          <button
+            type="button"
+            className="set-row-main set-row-tap"
+            onClick={() => setAktionen(satz)}
+            aria-label={`Erstattungssatz ${parseFloat(satz.betrag).toFixed(2)} € pro km — Aktionen öffnen`}
+          >
+            <span className="set-row-titel num">{parseFloat(satz.betrag).toFixed(2)} €/km</span>
+            <span className="set-row-sub">
               Gültig ab {new Date(satz.gueltig_ab).toLocaleDateString('de-DE')}
-            </div>
-          </div>
-          <button
-            type="button"
-            className="set-action"
-            title="Bearbeiten"
-            aria-label="Erstattungssatz bearbeiten"
-            onClick={() => onEdit(satz)}
-          >
-            <Pencil size={14} />
+            </span>
           </button>
-          <button
-            type="button"
-            className="set-action set-action-danger"
-            title="Löschen"
-            aria-label="Erstattungssatz löschen"
-            onClick={() => onDelete(satz)}
-          >
-            <Trash2 size={15} />
-          </button>
+          <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
         </div>
       ))}
       {saetze.length === 0 && (
         <div className="set-row"><div className="set-row-sub">{leerText}</div></div>
+      )}
+
+      {aktionen && (
+        <AktionsSheet
+          isOpen
+          onClose={() => setAktionen(null)}
+          titel={`${parseFloat(aktionen.betrag).toFixed(2)} € pro Kilometer`}
+          untertitel={`Gültig ab ${new Date(aktionen.gueltig_ab).toLocaleDateString('de-DE')}`}
+          zeilen={[
+            { label: 'Satz', wert: `${parseFloat(aktionen.betrag).toFixed(2)} €/km` },
+            { label: 'Gültig ab', wert: new Date(aktionen.gueltig_ab).toLocaleDateString('de-DE') },
+          ]}
+          aktionen={[
+            {
+              id: 'bearbeiten',
+              label: 'Bearbeiten',
+              icon: Pencil,
+              onClick: () => onEdit(aktionen),
+            },
+            {
+              id: 'loeschen',
+              label: 'Löschen',
+              icon: Trash2,
+              variant: 'gefahr',
+              hinweis: 'Bereits abgerechnete Fahrten bleiben unverändert',
+              onClick: () => onDelete(aktionen),
+            },
+          ]}
+        />
       )}
     </div>
   );

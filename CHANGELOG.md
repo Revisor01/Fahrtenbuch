@@ -9,6 +9,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ### Sonstiges
 - Das Frontend wird mit einem neuen Werkzeug gebaut. Für die Anwendung ändert sich nichts; im Hintergrund verschwinden damit 25 Sicherheitsmeldungen veralteter Build-Abhängigkeiten, und der Build dauert Sekunden statt einer Minute
+- Die Seite wird mit zusätzlichen Sicherheitsvorgaben ausgeliefert: Sie lässt sich nicht mehr in fremde Websites einbetten, erlaubt nur noch Inhalte aus bekannten Quellen und gibt beim Wechsel auf externe Seiten keine Adressdaten mehr weiter
 
 ### Added
 - Hilfeseite (/help) komplett neu: Inhaltsverzeichnis mit Sprungmarken und aufklappbare FAQ zu jedem Bereich der App (Start, Fahrt erfassen, Fahrten, Abrechnung, Statussystem, Mitfahrer:innen, Einstellungen, Verwaltung, Export & Formular, Installation auf dem Homescreen) — im Design des Redesigns 2026, hell wie dunkel

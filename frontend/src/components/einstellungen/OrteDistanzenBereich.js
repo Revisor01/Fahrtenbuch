@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useContext } from 'react';
-import { Search, Pencil, Trash2 } from 'lucide-react';
+import { Search, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
 import AddressAutocomplete from '../AddressAutocomplete';
+import AktionsSheet from '../ui/AktionsSheet';
 import BereichKopf from './BereichKopf';
 import fehlerText from '../../utils/fehlerText';
 
@@ -217,6 +218,8 @@ function OrteDistanzenBereich() {
   const [suche, setSuche] = useState('');
   // null | { mode: 'neu' } | { mode: 'edit', ort }
   const [ortSheet, setOrtSheet] = useState(null);
+  // Angetippte Zeile: Details + Aktionen
+  const [aktionsSheet, setAktionsSheet] = useState(null);
   const [distSheet, setDistSheet] = useState(null);
 
   const dienstort = orte.find((o) => o.ist_dienstort);
@@ -360,37 +363,47 @@ function OrteDistanzenBereich() {
     }
   };
 
-  const ortAktionen = (ort) => (
-    <>
-      <button
-        type="button"
-        className="set-action"
-        title="Bearbeiten"
-        aria-label={`${ort.name} bearbeiten`}
-        onClick={() => setOrtSheet({ mode: 'edit', ort })}
-      >
-        <Pencil size={14} />
-      </button>
-      <button
-        type="button"
-        className="set-action set-action-danger"
-        title="Löschen"
-        aria-label={`${ort.name} löschen`}
-        onClick={() => handleOrtDelete(ort)}
-      >
-        <Trash2 size={15} />
-      </button>
-    </>
-  );
+  // Ein Tipp auf die Zeile oeffnet Details + Aktionen — statt Icon-Buttons,
+  // die in der Zeile kaum zu lesen und schwer zu treffen waren.
+  const ortAktionsSheet = (ort) => ({
+    titel: ort.name,
+    untertitel: getOrtTypLabel(ort) || undefined,
+    zeilen: [
+      { label: 'Adresse', wert: ort.adresse || '—' },
+      { label: 'Art', wert: getOrtTypLabel(ort) || 'Normaler Ort' },
+    ],
+    aktionen: [
+      {
+        id: 'bearbeiten',
+        label: 'Bearbeiten',
+        icon: Pencil,
+        onClick: () => setOrtSheet({ mode: 'edit', ort }),
+      },
+      {
+        id: 'loeschen',
+        label: 'Löschen',
+        icon: Trash2,
+        variant: 'gefahr',
+        hinweis: 'Lässt sich nicht rückgängig machen',
+        onClick: () => handleOrtDelete(ort),
+      },
+    ],
+  });
 
-  const distanzAktionen = (distanz) => (
-    <>
-      <button
-        type="button"
-        className="set-action"
-        title="Bearbeiten"
-        aria-label="Distanz bearbeiten"
-        onClick={() =>
+  const distanzAktionsSheet = (distanz) => ({
+    titel: `${getOrtName(distanz.von_ort_id)} → ${getOrtName(distanz.nach_ort_id)}`,
+    untertitel: `${distanz.distanz} km`,
+    zeilen: [
+      { label: 'Von', wert: getOrtName(distanz.von_ort_id) },
+      { label: 'Nach', wert: getOrtName(distanz.nach_ort_id) },
+      { label: 'Entfernung', wert: `${distanz.distanz} km` },
+    ],
+    aktionen: [
+      {
+        id: 'bearbeiten',
+        label: 'Bearbeiten',
+        icon: Pencil,
+        onClick: () =>
           setDistSheet({
             mode: 'edit',
             distanz: {
@@ -398,22 +411,18 @@ function OrteDistanzenBereich() {
               vonName: getOrtName(distanz.von_ort_id),
               nachName: getOrtName(distanz.nach_ort_id),
             },
-          })
-        }
-      >
-        <Pencil size={14} />
-      </button>
-      <button
-        type="button"
-        className="set-action set-action-danger"
-        title="Löschen"
-        aria-label="Distanz löschen"
-        onClick={() => handleDistanzDelete(distanz)}
-      >
-        <Trash2 size={15} />
-      </button>
-    </>
-  );
+          }),
+      },
+      {
+        id: 'loeschen',
+        label: 'Löschen',
+        icon: Trash2,
+        variant: 'gefahr',
+        hinweis: 'Lässt sich nicht rückgängig machen',
+        onClick: () => handleDistanzDelete(distanz),
+      },
+    ],
+  });
 
   return (
     <div>
@@ -450,15 +459,23 @@ function OrteDistanzenBereich() {
           {gefilterteOrte.map((ort) => {
             const km = distanzAbDienstort(ort);
             return (
-              <div key={ort.id} className="set-tr set-grid-orte">
-                <div className="set-td-haupt">
+              <button
+                key={ort.id}
+                type="button"
+                className="set-tr set-grid-orte set-tr-tap"
+                onClick={() => setAktionsSheet(ortAktionsSheet(ort))}
+                aria-label={`${ort.name} — Aktionen öffnen`}
+              >
+                <span className="set-td-haupt">
                   {ort.name}
                   {getOrtTypLabel(ort) && <span className="set-td-sub">{getOrtTypLabel(ort)}</span>}
-                </div>
-                <div className="set-td-text">{ort.adresse}</div>
-                <div className="set-td-num num">{km != null ? `${km} km` : '—'}</div>
-                <div className="set-td-aktionen">{ortAktionen(ort)}</div>
-              </div>
+                </span>
+                <span className="set-td-text">{ort.adresse}</span>
+                <span className="set-td-num num">{km != null ? `${km} km` : '—'}</span>
+                <span className="set-td-aktionen">
+                  <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
+                </span>
+              </button>
             );
           })}
           {gefilterteOrte.length === 0 && (
@@ -472,13 +489,18 @@ function OrteDistanzenBereich() {
         <div className="set-liste-mobil">
           {gefilterteOrte.map((ort) => (
             <div key={ort.id} className="set-row">
-              <div className="set-row-main">
-                <div className="set-row-titel">{ort.name}</div>
-                <div className="set-row-sub">
+              <button
+                type="button"
+                className="set-row-main set-row-tap"
+                onClick={() => setAktionsSheet(ortAktionsSheet(ort))}
+                aria-label={`${ort.name} — Aktionen öffnen`}
+              >
+                <span className="set-row-titel">{ort.name}</span>
+                <span className="set-row-sub">
                   {[getOrtTypLabel(ort), ort.adresse].filter(Boolean).join(' · ')}
-                </div>
-              </div>
-              {ortAktionen(ort)}
+                </span>
+              </button>
+              <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
             </div>
           ))}
           {gefilterteOrte.length === 0 && (
@@ -504,12 +526,20 @@ function OrteDistanzenBereich() {
             <div />
           </div>
           {sortierteDistanzen.map((distanz) => (
-            <div key={distanz.id} className="set-tr set-grid-distanzen">
-              <div className="set-td-haupt">{getOrtName(distanz.von_ort_id)}</div>
-              <div className="set-td-text">{getOrtName(distanz.nach_ort_id)}</div>
-              <div className="set-td-num num">{distanz.distanz} km</div>
-              <div className="set-td-aktionen">{distanzAktionen(distanz)}</div>
-            </div>
+            <button
+              key={distanz.id}
+              type="button"
+              className="set-tr set-grid-distanzen set-tr-tap"
+              onClick={() => setAktionsSheet(distanzAktionsSheet(distanz))}
+              aria-label={`Distanz ${getOrtName(distanz.von_ort_id)} nach ${getOrtName(distanz.nach_ort_id)} — Aktionen öffnen`}
+            >
+              <span className="set-td-haupt">{getOrtName(distanz.von_ort_id)}</span>
+              <span className="set-td-text">{getOrtName(distanz.nach_ort_id)}</span>
+              <span className="set-td-num num">{distanz.distanz} km</span>
+              <span className="set-td-aktionen">
+                <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
+              </span>
+            </button>
           ))}
           {sortierteDistanzen.length === 0 && (
             <div className="set-tr" style={{ gridTemplateColumns: '1fr' }}>
@@ -521,13 +551,18 @@ function OrteDistanzenBereich() {
         <div className="set-liste-mobil">
           {sortierteDistanzen.map((distanz) => (
             <div key={distanz.id} className="set-row">
-              <div className="set-row-main">
-                <div className="set-row-titel">
+              <button
+                type="button"
+                className="set-row-main set-row-tap"
+                onClick={() => setAktionsSheet(distanzAktionsSheet(distanz))}
+                aria-label={`Distanz ${getOrtName(distanz.von_ort_id)} nach ${getOrtName(distanz.nach_ort_id)} — Aktionen öffnen`}
+              >
+                <span className="set-row-titel">
                   {getOrtName(distanz.von_ort_id)} → {getOrtName(distanz.nach_ort_id)}
-                </div>
-                <div className="set-row-sub num">{distanz.distanz} km</div>
-              </div>
-              {distanzAktionen(distanz)}
+                </span>
+                <span className="set-row-sub num">{distanz.distanz} km</span>
+              </button>
+              <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
             </div>
           ))}
           {sortierteDistanzen.length === 0 && (
@@ -535,6 +570,17 @@ function OrteDistanzenBereich() {
           )}
         </div>
       </div>
+
+      {aktionsSheet && (
+        <AktionsSheet
+          isOpen
+          onClose={() => setAktionsSheet(null)}
+          titel={aktionsSheet.titel}
+          untertitel={aktionsSheet.untertitel}
+          zeilen={aktionsSheet.zeilen}
+          aktionen={aktionsSheet.aktionen}
+        />
+      )}
 
       {ortSheet && (
         <OrtSheet
