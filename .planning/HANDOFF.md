@@ -1,160 +1,211 @@
-# Handoff — Stand 11.08.2026
+# Handoff — Stand 12.08.2026, 00:30
 
-Für die nächste Sitzung. Nächstes Vorhaben: **Wechsel von react-scripts auf Vite**.
+Für die nächste Sitzung. Nächstes Vorhaben: **Mitfahrer:innen und die
+Erstattungsformeln geradeziehen** — auf der Testumgebung, mit einem Dump der
+echten Produktionsdaten.
 
 ---
 
 ## Wo wir stehen
 
-Branch `feature/v1.3-dashboard`, 8 Commits über dem letzten Stand.
-Alles auf der Testumgebung deployed und verifiziert.
-**Produktion (kkd-fahrtenbuch.de) ist unangetastet** — dort läuft weiterhin der
-alte Stand von `master`.
-
-### Was zuletzt passiert ist
-
-Ein Vollaudit (8 parallele Prüfläufe) fand zwei kritische Lücken, beide behoben
-und am laufenden System nachgewiesen:
-
-- **Kontoübernahme**: `/api/users/set-password` prüfte kein Ablaufdatum. Ein
-  30 Tage alter Token wurde akzeptiert, danach war der Login möglich. Jetzt
-  HTTP 400.
-- **Falsche Abrechnungsbeträge**: Der Excel-Export rechnete den ganzen Zeitraum
-  mit einem Stichtagssatz. An echten Daten geprüft: 40,42 € statt fälschlich
-  45,22 €.
-
-Dazu ~30 weitere Befunde (Details in `.planning/audits/20260810-vollaudit/BEFUNDE.md`).
-
-### Zahlen
+`master`, 7 Commits über dem letzten Handoff, **alles auf Produktion
+(kkd-fahrtenbuch.de) ausgeliefert und im Browser geprüft**.
 
 | | vorher | jetzt |
 |---|---|---|
-| CodeQL | 71 (50 hoch) | **0** |
-| Dependabot Backend | 5 (1 kritisch, 2 hoch) | 2 moderate, nicht ausnutzbar |
-| Dependabot Frontend | 25 | 25 — **das ist das nächste Thema** |
-| CI-Build | schlug fehl | warnungsfrei |
+| Dependabot | 149 (5 kritisch, 74 hoch) | **1** |
+| npm audit Frontend | 25 | **0** |
+| Build | ~40 s | 1,8 s |
+
+### Was heute live ging
+
+- **Vite statt react-scripts** — Build-Werkzeug gewechselt, damit sind die 25
+  Frontend-Meldungen weg
+- **Ein Muster für alle Listen** — Tipp auf die Zeile öffnet ein Sheet mit
+  Details und Aktionen. Fahrten, Startseite, Träger, Orte, Distanzen,
+  Favoriten, Erstattungssätze, API-Zugriff. Swipe-Geste und Icon-Buttons in
+  den Zeilen sind weg
+- **Wohnort im Profil** — sichtbar, mit Warnung wenn keiner gesetzt ist,
+  direkt dort auswählbar. Er liefert die Anschrift im Abrechnungsformular
+- **„Rückfahrt hinzufügen"** — legt die Gegenrichtung am selben Tag an
+- **Mitfahrer:innen im Formular** — eigenes Feld statt Chips unter dem
+  Speichern-Button; alle Dialoge laufen jetzt über dieselbe Sheet-Komponente
+- **Neuigkeiten** — sieben Highlight-Karten mit den Wünschen aus dem
+  Kollegium, plus Sicherheitshinweis
+- **Sicherheits-Header in Caddy** — HSTS, CSP, X-Frame-Options,
+  Referrer-Policy, Permissions-Policy
 
 ---
 
-## Nächstes Vorhaben: Vite statt react-scripts
+## Nächstes Vorhaben: Mitfahrer:innen und Erstattung
 
-### Warum
+### Das Kernproblem
 
-Alle 25 Frontend-Meldungen hängen an `react-scripts 5.0.1` (letzte Version von
-2022, wird nicht mehr gepflegt): webpack, svgo, postcss, workbox, nth-check.
-**Nichts davon landet im ausgelieferten Bundle** — die tatsächlich
-ausgelieferten Bibliotheken (react, axios, react-router-dom, jszip) haben keine
-offenen Advisories. Es ist also kein akutes Risiko, aber die Meldungen
-verschwinden nur durch einen Wechsel des Build-Werkzeugs.
+Ein Mitfahrer hängt über `mitfahrer.fahrt_id` an **genau einer** Fahrt. Die
+Auswahl „Hin- und Rückfahrt" ist deshalb heute nur ein Etikett:
 
-`npm audit fix --force` ist **keine** Option: Es setzt react-scripts auf die
-Platzhalterversion 0.0.0 und zerstört den Build (geprüft).
+- **Unsichtbar bei der Gegenfahrt.** Wer bei der Hinfahrt mit „beide"
+  eingetragen ist, taucht beim Öffnen der Rückfahrt nicht auf
+- **Kein Zusammenhang beim Löschen.** Wird die Rückfahrt gelöscht, ändert sich
+  am Mitfahrer nichts — er hing nie daran
+- **Die Erstattung ignoriert die Richtung.** `mitfahrer.length × Satz × km`
+  zählt „beide" genauso wie eine einfache Strecke
+- **Der Export widerspricht dem.** `excelExport.js:203-206` füllt bei
+  „hin_rueck" *beide* Spalten des Mitnahmeblatts, rechnet die Kilometer aber
+  nur einmal
 
-Nebeneffekt: Der Build dauert derzeit ~40 s, mit Vite wären es wenige Sekunden.
+**Beschlossene Lösung:** Zusammengehörige Hin-/Rückfahrten über eine neue
+Spalte verknüpfen. Dann ist „beide" als zwei echte Einträge speicherbar,
+überall sichtbar, einzeln löschbar — und die Erstattung stimmt von selbst.
+Zusammengehörige Fahrten sollen in der Liste auch kenntlich sein.
 
-### Ausgangslage (geprüft, Stand 11.08.)
+### Die vier Erstattungsformeln (müssen angeglichen werden)
 
-- 59 Dateien, 10.733 Zeilen unter `frontend/src`
-- **57 Dateien enthalten JSX, alle mit Endung `.js`** — Vite braucht dafür
-  entweder Umbenennung auf `.jsx` oder eine esbuild-Konfiguration, die JSX in
-  `.js` erlaubt. Umbenennen ist sauberer, erzeugt aber einen großen Diff;
-  die Konfigurationsvariante ist in `vite.config.js` drei Zeilen.
-- **Nur 7 `process.env`-Stellen** in 4 Dateien (`LoginPage.js` 4x,
-  `LandingPage.js`, `SetPassword.js`, `InfoModal.js`). Vite nutzt
-  `import.meta.env` mit `VITE_`-Präfix statt `REACT_APP_`.
-- Keine absoluten Imports, kein `jsconfig.json` — nur relative Pfade, also
-  keine Alias-Konfiguration nötig.
-- Keine SVG-als-Komponente-Imports — das übliche Vite-Stolperfeld entfällt.
-- `public/index.html` nutzt `%PUBLIC_URL%` (3 Stellen) → wird bei Vite zu
-  relativen Pfaden, und die Datei wandert von `public/` nach `frontend/`.
-- `"proxy": "http://localhost:5000"` in `package.json` → wird
-  `server.proxy` in `vite.config.js`.
-- Ein Test: `src/App.test.js`. `react-scripts test` fällt weg; entweder auf
-  Vitest umstellen oder den Test streichen (er prüft nur, ob die App rendert).
+Alle in `backend/controllers/fahrtController.js`:
+
+| Zeile | Funktion | Formel | Bewertung |
+|---|---|---|---|
+| 281 | `getMonthlyReport` | `mitfahrer.length × Satz × km` | korrekt je Fahrt |
+| 422 | `getReportRange` | `mitfahrer.length × Satz × km` | korrekt je Fahrt |
+| 544 | `getMonthlySummary` | `COUNT(DISTINCT m.id) × Satz × SUM(km)` | **grob falsch** |
+| 700 | `getYearSummary` | `COUNT(m.id) × Satz × km` | falsch, ohne DISTINCT |
+
+**Zeile 544 multipliziert die Mitfahrer-Anzahl eines ganzen Monats mit der
+Kilometersumme dieses Monats.** An echten Produktionsdaten nachgerechnet:
+
+```
+Monat     km-Summe  Mitfahrer   laut Formel   korrekt
+2024-09     130,00      6          39,00 €     3,10 €   (12-fach)
+2024-11     338,00      4          67,60 €    14,10 €   ( 5-fach)
+2025-07      72,00      6          21,60 €     1,80 €   (12-fach)
+```
+
+**Entwarnung:** Die Endpunkte `/monthly-summary` und `/year-summary` werden
+vom Frontend **nirgends aufgerufen**, und der Excel-Export nutzt
+`getMonthlyReport` — also die korrekte Formel. Es wurde nie zu viel
+ausgezahlt. Aber der Fehler ist eine Zeitbombe: Wer die Endpunkte anschließt,
+bekommt falsche Beträge.
+
+Ziel: **eine** gemeinsame Funktion für alle vier Stellen.
 
 ### Was dabei nicht kaputtgehen darf
 
-1. **Die Laufzeit-Konfiguration.** `frontend/public/config.js` wird beim
-   Containerstart von `docker-entrypoint.sh` überschrieben — so lassen sich
-   Titel und Registrierungsregeln pro Instanz setzen, ohne neu zu bauen. Diese
-   Datei darf Vite **nicht** bundeln, sie muss als statische Datei erhalten
-   bleiben und weiter über `window.appConfig` gelesen werden.
-   Wichtig: Der Registrierungscode steht dort bewusst **nicht** mehr drin, nur
-   `registrationCodeRequired: true|false`.
-2. **Der Dockerfile** (`frontend/Dockerfile`) baut selbst (`RUN npm run build`)
-   und kopiert `/app/build` nach nginx. Vite schreibt standardmäßig nach
-   `dist/` — entweder `build.outDir: 'build'` setzen oder den Dockerfile
-   anpassen.
-3. **`REACT_APP_VERSION`** wird im Build-Skript aus `$npm_package_version`
-   gesetzt und im Info-Dialog angezeigt. Vite-Äquivalent nötig
-   (z. B. `define` in der Config).
-4. **Der CI-Workflow** `.github/workflows/docker-publish.yml` — prüfen, ob er
-   Build-Argumente übergibt, die sich ändern.
+1. **Der Excel-Export darf sich nicht verdoppeln.** Heute erzeugt ein
+   „hin_rueck"-Mitfahrer *eine* Zeile im Mitnahmeblatt mit *einfachen*
+   Kilometern (`excelExport.js:285-309`, Summe in `G39`, Betrag in `G42`).
+   Werden daraus zwei Einträge, sind es zwei Zeilen mit je vollen Kilometern —
+   und der Kirchenkreis zahlt doppelt. Die Logik in `:203-206` muss von „ein
+   Eintrag füllt zwei Spalten" auf „ein Eintrag füllt eine Spalte" umgestellt
+   werden.
+2. **`Mitfahrer.updateMitfahrerForFahrt`** (`backend/models/Mitfahrer.js:43-104`)
+   ist strikt auf **eine** `fahrt_id` gescoped. Die Hälfte an der Partnerfahrt
+   ist für den Diff unsichtbar; ein PUT auf die Hinfahrt kann sie nie pflegen.
+3. **Beim Löschen einer Fahrt** verschwinden ihre Mitfahrer per DB-CASCADE.
+   Die Hälfte an der Partnerfahrt bliebe zurück und würde weiter erstattet —
+   dafür gibt es heute keinerlei Aufräumcode.
+4. **Bestandsdaten bleiben unangetastet** (so entschieden): 52 der 64
+   Mitfahrer stehen auf `hin_rueck`, teils in eingereichten Monaten. Ein
+   Umschreiben würde 52 Abrechnungen rückwirkend verändern. Die neue Regel
+   gilt nur für neu angelegte und bearbeitete Einträge.
+5. **`richtung` ist in keinem Zod-Schema als Enum validiert**
+   (`backend/schemas/fahrtSchemas.js:15,32,39,45`) — ein ungültiger Wert
+   schlägt erst als DB-Fehler durch.
+
+### Ausgangslage (geprüft an Produktionsdaten, 12.08.)
+
+- **969 Fahrtpaare** bei 2.462 Fahrten — knapp 80 % sind Hin-und-Rück
+- **64 Mitfahrer** gesamt: 52 `hin_rueck`, 9 `hin`, 3 `rueck`
+- `fahrten` hat **keine** Verknüpfungsspalte (`0001_initial_schema.sql:112-133`,
+  seither unverändert)
+- `mitfahrer.richtung` ist `ENUM('hin','rueck','hin_rueck') NOT NULL`,
+  FK auf `fahrten(id) ON DELETE CASCADE`
+- Nächste freie Migrationsnummer ist **0009** (0007 ist doppelt vergeben)
+- **Keinerlei Tests im Projekt** — weder Backend noch Frontend. Die
+  Abrechnungslogik ist vollständig ungetestet
+
+### Fallstricke beim Migrieren
+
+- **DDL committet in MySQL implizit.** Die Transaktion des Migrators schützt
+  ein `ALTER TABLE` nicht: Schlägt ein nachfolgendes `UPDATE` fehl, bleibt die
+  Spalte bestehen, der `migrations`-Eintrag fehlt — beim nächsten Start
+  scheitert die Datei mit „Duplicate column name". Migration so schreiben,
+  dass sie das übersteht.
+- Der Migrator trennt Statements **zeilenweise am Semikolon**
+  (`Migrator.js:48-85`). Kein `;` in Strings oder am Ende mehrzeiliger
+  Kommentare; `/* */` wird nicht verstanden, nur `--`.
+- Für das einmalige Verknüpfen: gleicher `user_id`, gleiches `datum`,
+  `a.von_ort_id = b.nach_ort_id AND a.nach_ort_id = b.von_ort_id`. Achtung auf
+  `NULL`-Orte (einmalige Adressen) und auf Tage mit mehreren gleichen
+  Strecken — sonst entstehen n:m-Verknüpfungen.
 
 ### Vorgehensvorschlag
 
-1. Vite + `@vitejs/plugin-react` installieren, `vite.config.js` anlegen
-   (`outDir: 'build'`, Proxy auf :5000, JSX-in-.js erlauben)
-2. `index.html` von `public/` nach `frontend/` verschieben, `%PUBLIC_URL%`
-   entfernen, Skript-Tag auf `/src/index.js` setzen
-3. Die 7 `process.env.REACT_APP_*` auf `import.meta.env.VITE_*` umstellen;
-   `.env`-Beispiele und `docker-entrypoint.sh` mitziehen
-4. `react-scripts` entfernen, Skripte auf `vite` / `vite build` umstellen
-5. Bauen, im Browser durchklicken (Login, Dashboard, Erfassungsflow,
-   Excel-Export), dann auf die Testumgebung
-6. `npm audit` gegenprüfen — Erwartung: deutlich weniger Meldungen
-
-Realistischer Aufwand: eine Sitzung, wenn nichts Unerwartetes auftaucht.
+1. Testumgebung mit frischem Produktions-Dump aufsetzen
+2. Migration `0009` schreiben: Spalte + Verknüpfung der 969 Bestandspaare,
+   gegen den Dump testen
+3. Eine gemeinsame Erstattungsfunktion bauen, alle vier Stellen darauf
+   umstellen; Beträge vor/nach an echten Daten vergleichen
+4. Backend: Verknüpfung beim Anlegen setzen, beim Löschen auflösen,
+   Mitfahrer-Spiegelung bei „beide"
+5. Export: Mitnahmeblatt auf „ein Eintrag = eine Zeile" umstellen und
+   gegenrechnen, dass die Summen gleich bleiben
+6. Frontend: Rückfragen beim Ändern/Löschen, Kennzeichnung der Paare
+7. Erst nach Vergleich der Beträge auf Produktion
 
 ---
 
 ## Umgebung
 
-**Testumgebung** — hier wird deployed:
-- `https://fahrtenbuch.godsapp.de`, Server `server.godsapp.de`
-- Stack `/opt/stacks/fahrtenbuch/`, Repo-Checkout in `repo/`
-- Deployment: `git pull` im Checkout, dann
-  `docker-compose -f docker-compose.test.yml build backend frontend`
-- **Achtung:** `docker-compose` v1 bricht dort beim Neuerstellen mit
-  `KeyError: 'ContainerConfig'` ab. Workaround: Container per `docker rm -f`
-  entfernen und mit `docker run` neu starten (Netzwerk `fahrtenbuch_default`,
-  Alias `frontend`/`backend`, `--env-file .env`, Frontend zusätzlich
-  `-p 9642:80` und die `nginx-proxy.conf` als Volume).
-- **Die Testumgebung enthält eine Kopie der Produktionsdaten** — 29 echte
-  Konten mit Namen und IBANs. Für Tests eigene Wegwerf-Konten anlegen und
-  hinterher entfernen; Bestandsdaten nicht anfassen.
-
-**Produktion** — nicht anfassen ohne ausdrückliche Ansage:
+**Produktion** — hier läuft der aktuelle Stand:
 - `https://kkd-fahrtenbuch.de`, Server 185.248.143.234
-- Stack `/opt/fahrtenbuch/`, DB als Bind-Mount unter `/opt/fahrtenbuch/db/mysql`
+- Stack `/opt/fahrtenbuch/`, Images von Docker Hub (`revisoren/fahrtenbuch-*`)
+- **Auto-Deploy: jeder Push auf `master` baut und deployt.** Der
+  Portainer-Webhook ist unzuverlässig — nach dem CI-Build zur Sicherheit
+  `docker compose pull frontend && docker compose up -d frontend`
+- Backups: täglich 3:00 Uhr nach Hetzner. Manuelle vor Eingriffen unter
+  `/opt/backups/vor-*.sql.gz`
+- Reverse Proxy: **Caddy**, `/etc/caddy/Caddyfile` (Sicherheits-Header als
+  Snippet `sicherheits_header`)
 
-**Benachrichtigung:** ntfy-Topic `claude` auf `push.godsapp.de`. Anonym schlägt
-fehl (403); Token temporär per SSH erzeugen, siehe
-`~/.claude/projects/…/memory/reference_ntfy_push.md`.
+**Testumgebung**:
+- `https://fahrtenbuch.godsapp.de`, Server `server.godsapp.de`
+- Stack `/opt/stacks/fahrtenbuch/`, Repo-Checkout in `repo/`, lokaler Build
+- `docker-compose` v1 bricht beim Neuerstellen mit `KeyError: 'ContainerConfig'`
+  ab. Workaround: Container per `docker rm -f` entfernen, dann `docker run`
+  (Netz `fahrtenbuch_default`, Alias `frontend`, `--env-file .env`,
+  `-p 9642:80`, `nginx-proxy.conf` als Volume)
+- SMTP dort ist ungültig (`535 authentication failed`) — die Registrierung
+  legt den Nutzer an und scheitert danach am Mailversand mit HTTP 500
 
 ---
 
 ## Was offen bleibt
 
-- **Vite-Wechsel** (siehe oben) — das nächste Vorhaben
-- **Merge nach `master` und Release** — der Feature-Branch trägt inzwischen
-  erhebliche Änderungen
-- **Produktions-Update** samt Auto-Deploy
-- Sechs Fahrten von `Brinkmann` (Jan 2025, 42 km) verweisen auf einen
-  gelöschten Abrechnungsträger und werden mit 0,00 € geführt. Der Fehler ist
-  behoben, die Altdaten wurden auf Wunsch nicht korrigiert.
-- Zwei Dependabot-Meldungen im Backend (uuid via exceljs) — nicht ausnutzbar,
-  die Lücke betrifft `v3/v5/v6` mit `buf`-Parameter, exceljs nutzt `v4` ohne
-  Puffer. Ein Fix ginge nur per Downgrade auf exceljs 3.4.0.
-- Testdaten auf der Testumgebung aufräumen
+- **Mitfahrer-Umbau + Erstattungsformeln** (siehe oben) — das nächste Vorhaben
+- **Plausible liefert ein ungültiges Zertifikat**
+  (`ERR_CERT_COMMON_NAME_INVALID` für `plausible.godsapp.de`) — die Statistik
+  zählt nichts. Liegt auf dem godsapp-Server, nicht hier
+- **Wohnort-Eindeutigkeit im Backend absichern**: Zwei Orte können gleichzeitig
+  als Wohnort markiert sein, der Export nimmt per LEFT JOIN einen beliebigen.
+  Das Frontend räumt den alten beim Setzen ab — die API tut es nicht
+- **Langer Anlass wird in der Fahrten-Karte abgeschnitten**, weil die
+  km-Angabe daneben sitzt
+- **Registrierung antwortet mit 500**, wenn SMTP fehlschlägt — der Nutzer wird
+  vorher angelegt. Fehlerbehandlung läuft nach dem Schreiben
+- **`Modal.js` ist ungenutzt** und kann entfernt werden
+- Sechs Fahrten von `Brinkmann` (Jan 2025) mit gelöschtem Träger, 0,00 € —
+  bewusst nicht korrigiert
+- Zwei Dependabot-Meldungen im Backend (uuid via exceljs), nicht ausnutzbar
 
 ---
 
 ## Arbeitsweise, die sich bewährt hat
 
-- Vor dem Ändern am laufenden System prüfen, nicht nur im Code lesen — mehrere
-  Agenten-Befunde entpuppten sich als Fehlalarm (offener MySQL-Port, der real
-  dicht war), andere waren schlimmer als gemeldet.
-- Nach jedem Block: bauen, deployen, im Browser gegenprüfen.
-- Commit-Messages erklären das *Warum* und nennen die gemessenen Zahlen —
-  das hat beim Wiedereinstieg mehrfach geholfen.
+- Vor dem Ändern am laufenden System messen, nicht schätzen. Die
+  Formel-Abweichung oben ist erst durch Nachrechnen an echten Daten sichtbar
+  geworden
+- Nach jedem Block: bauen, deployen, im Browser gegenprüfen — Screenshots
+  zeigen Layoutfehler, die im Accessibility-Baum unsichtbar sind
+- Commit-Messages erklären das *Warum* und nennen die gemessenen Zahlen
+- Bei Umbauten an Listen: `<div>` → `<span>` in einem `<button>` nimmt
+  Blockelementen den Zeilenumbruch. Zweimal übersehen, zweimal nachgebessert
