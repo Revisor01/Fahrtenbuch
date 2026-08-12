@@ -1,8 +1,80 @@
-# Handoff — Stand 12.08.2026, 00:30
+# Handoff — Stand 13.08.2026, 02:00
 
-Für die nächste Sitzung. Nächstes Vorhaben: **Mitfahrer:innen und die
+Für die nächste Sitzung. Laufendes Vorhaben: **Mitfahrer:innen und die
 Erstattungsformeln geradeziehen** — auf der Testumgebung, mit einem Dump der
 echten Produktionsdaten.
+
+---
+
+## Erledigt in der Sitzung vom 13.08. (6 Commits, alle NICHT gepusht)
+
+Auf ausdrücklichen Wunsch bleibt alles lokal — ein Push auf `master` würde
+automatisch auf Produktion deployen.
+
+| Commit | Inhalt |
+|---|---|
+| `fceac98` | **Erstattungsformeln vereinheitlicht** — alle vier Stellen nutzen jetzt `utils/erstattung.js` |
+| `50a7be9` | `richtung` als Enum validiert (vorher beliebiger String → 500er) |
+| `7fdf833` | Wohnort bleibt pro Nutzer eindeutig (API konnte zwei setzen) |
+| `612d886` | Registrierung legt bei Mailfehler kein halbes Konto mehr an |
+| `650794f` | Ungenutzte `Modal.js` entfernt |
+| `5537c9b` | **Migration 0009** — Spalte `partner_fahrt_id` + Bestandspaare |
+
+### Die Erstattungsformeln — gemessen, nicht geschätzt
+
+An den echten Daten vorher/nachher verglichen (Monatsübersicht gesamt):
+
+```
+Nutzer   alt        neu       Jahr 2025
+9        843,35 €   33,00 €    4,90 €
+16       125,10 €   13,65 €   13,65 €
+17        52,80 €    3,10 €    3,10 €
+18       208,40 €    6,45 €    6,45 €
+30        46,80 €    1,20 €    0,60 €
+```
+
+Bei 16/17/18 stimmen Monats- und Jahresübersicht jetzt **exakt überein** —
+vorher wichen die zwei Endpunkte um das 9- bis 32-fache voneinander ab. Das
+ist der eigentliche Beleg: zwei getrennt implementierte Wege, dasselbe
+Ergebnis. Die Restdifferenz bei 9 und 30 ist erklärt (siehe Datum-Tippfehler).
+
+### Beinahe-Fehler, der auffiel
+
+`backend/utils/erstattung.js` **existierte bereits** mit vier Funktionen, die
+der Excel-Export nutzt. Ein Überschreiben hätte den Export zum Absturz
+gebracht. Die neuen Funktionen liegen jetzt *neben* den alten. Wer dort
+weiterarbeitet: erst lesen, dann schreiben.
+
+### Migration 0009 — geschrieben und geprüft, aber noch NICHT angewendet
+
+Gegen eine Kopie der Produktionsdaten getestet, Testdatenbank danach entfernt:
+
+- **769 Paare verknüpft**, alle wechselseitig, 0 Fehler in fünf Prüfungen
+- **924 unverknüpft**: 504 Freitext-Orte, 253 echte Einzelfahrten,
+  **167 mehrdeutig** — bewusst offen gelassen
+- Zweiter Durchlauf ändert nichts (wiederholbar)
+
+Der Anlass löst die Mehrdeutigkeit: „Beerdigung Thode" ↔ „Rückfahrt:
+Beerdigung Thode". Am Testtag 2024-08-14 mit zwei gleichen Strecken wurde
+korrekt 63↔64 und 65↔66 verknüpft, ohne Kreuzverbindung.
+
+Vier Fallstricke, die dabei wirklich zuschlugen (Details in der
+Commit-Message von `5537c9b`): DDL committet implizit; MySQL 8.4 kennt kein
+`ADD COLUMN IF NOT EXISTS`; der Migrator schickt Statements einzeln, weshalb
+auch spätere Statements `PREPARE` brauchen; eine `TEMPORARY TABLE` lässt sich
+nicht zweimal im selben Query öffnen.
+
+### Neuer Befund: Datum-Tippfehler in den Produktionsdaten
+
+Vier Fahrten haben ein vertipptes Jahr — sie fallen dadurch vor den ersten
+Erstattungssatz und laufen in den Fallback:
+
+| Fahrt | Datum | richtig wohl |
+|---|---|---|
+| 139, 140 (Nutzer 9) | `0024-09-18` | 2024-09-18 |
+| 984, 985 (Nutzer 30) | `0525-05-11` | 2025-05-11 |
+
+Nicht korrigiert — Bestandsdaten anzufassen ist deine Entscheidung.
 
 ---
 
@@ -153,17 +225,28 @@ Ziel: **eine** gemeinsame Funktion für alle vier Stellen.
 
 ### Vorgehensvorschlag
 
-1. Testumgebung mit frischem Produktions-Dump aufsetzen
-2. Migration `0009` schreiben: Spalte + Verknüpfung der 969 Bestandspaare,
-   gegen den Dump testen
-3. Eine gemeinsame Erstattungsfunktion bauen, alle vier Stellen darauf
-   umstellen; Beträge vor/nach an echten Daten vergleichen
-4. Backend: Verknüpfung beim Anlegen setzen, beim Löschen auflösen,
-   Mitfahrer-Spiegelung bei „beide"
+1. ~~Testumgebung mit frischem Produktions-Dump aufsetzen~~ **erledigt**
+2. ~~Migration `0009` schreiben und gegen den Dump testen~~ **erledigt**
+   (769 Paare, geprüft; noch nicht angewendet)
+3. ~~Eine gemeinsame Erstattungsfunktion, alle vier Stellen darauf umstellen~~
+   **erledigt** (Beträge an echten Daten verglichen)
+4. **Als Nächstes:** Backend — Verknüpfung beim Anlegen setzen, beim Löschen
+   auflösen, Mitfahrer-Spiegelung bei „beide"
 5. Export: Mitnahmeblatt auf „ein Eintrag = eine Zeile" umstellen und
-   gegenrechnen, dass die Summen gleich bleiben
+   gegenrechnen, dass die Summen gleich bleiben — **der riskante Schritt**
 6. Frontend: Rückfragen beim Ändern/Löschen, Kennzeichnung der Paare
 7. Erst nach Vergleich der Beträge auf Produktion
+
+### Konkret für Schritt 4
+
+- `Fahrt.create` setzt `partner_fahrt_id` wechselseitig, wenn die Rückfahrt
+  über „Rückfahrt hinzufügen" entsteht
+- `Fahrt.delete`: Der FK steht auf `ON DELETE SET NULL`, die Partnerfahrt
+  verliert also nur den Verweis. Die **Mitfahrer-Hälfte** an der Partnerfahrt
+  muss aber aktiv aufgeräumt werden — dafür gibt es weiter keinen Code
+- `Mitfahrer.updateMitfahrerForFahrt` ist weiterhin auf **eine** `fahrt_id`
+  gescoped (`models/Mitfahrer.js:43-104`) — für die Spiegelung muss die
+  Partnerfahrt einbezogen werden
 
 ---
 
@@ -210,17 +293,18 @@ Ziel: **eine** gemeinsame Funktion für alle vier Stellen.
   Kopfzeile — dort bräuchte es einen eigenen Auslöser, etwa ein
   Sortier-Sheet. Vorher klären, ob die Sortierung nur die Anzeige betrifft
   oder auch den Export.
+- **Datum-Tippfehler in vier Fahrten** (siehe oben) — Bestandsdaten, deine
+  Entscheidung
+- **167 mehrdeutige Fahrten** bleiben nach Migration 0009 unverknüpft. Falls
+  gewünscht, ließen sie sich in der Oberfläche von Hand verbinden
 - **Plausible liefert ein ungültiges Zertifikat**
   (`ERR_CERT_COMMON_NAME_INVALID` für `plausible.godsapp.de`) — die Statistik
   zählt nichts. Liegt auf dem godsapp-Server, nicht hier
-- **Wohnort-Eindeutigkeit im Backend absichern**: Zwei Orte können gleichzeitig
-  als Wohnort markiert sein, der Export nimmt per LEFT JOIN einen beliebigen.
-  Das Frontend räumt den alten beim Setzen ab — die API tut es nicht
+- ~~Wohnort-Eindeutigkeit im Backend absichern~~ **erledigt** (`7fdf833`)
 - **Langer Anlass wird in der Fahrten-Karte abgeschnitten**, weil die
   km-Angabe daneben sitzt
-- **Registrierung antwortet mit 500**, wenn SMTP fehlschlägt — der Nutzer wird
-  vorher angelegt. Fehlerbehandlung läuft nach dem Schreiben
-- **`Modal.js` ist ungenutzt** und kann entfernt werden
+- ~~Registrierung antwortet mit 500 bei SMTP-Fehler~~ **erledigt** (`612d886`)
+- ~~`Modal.js` ist ungenutzt~~ **erledigt** (`650794f`)
 - Sechs Fahrten von `Brinkmann` (Jan 2025) mit gelöschtem Träger, 0,00 € —
   bewusst nicht korrigiert
 - Zwei Dependabot-Meldungen im Backend (uuid via exceljs), nicht ausnutzbar
