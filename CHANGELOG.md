@@ -8,6 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Changed
+- Schlägt beim Registrieren der Mailversand fehl, wird kein halbes Konto mehr angelegt: Statt einer Fehlerseite erscheint der Hinweis, es später erneut zu versuchen — und der gewünschte Benutzername bleibt frei. Vorher existierte das Konto bereits ohne Passwort, und ein zweiter Versuch scheiterte an „Name bereits vergeben"
 - Mitfahrer:innen stehen im Fahrt-Formular jetzt an der richtigen Stelle — als eigenes Feld zwischen Abrechnung und den Schaltflächen statt unterhalb von „Fahrt speichern". Jeder Eintrag zeigt Name, Arbeitsstätte und ob die Person hin, zurück oder beides mitgefahren ist; Antippen bearbeitet ihn
 - Die Auswahl im Mitfahrer-Dialog heißt jetzt „Nur die Hinfahrt / Nur die Rückfahrt / Hin- und Rückfahrt" statt „Hin / Rück / Hin & Rück"
 - Feldbeschriftungen im Fahrt-Formular einheitlich: „Startort" und „Zielort" sehen aus wie „Anlass", „Kilometer" und „Abrechnung"
