@@ -4,6 +4,21 @@ const db = require('../config/database');
 const crypto = require('crypto');
 const mailService = require('../services/mailService');
 
+// Fehler aus dem Mailversand von echten Serverfehlern unterscheiden.
+// nodemailer setzt einen SMTP-Code (EAUTH bei falschen Zugangsdaten,
+// ECONNECTION/ETIMEDOUT wenn der Server nicht erreichbar ist) oder liefert
+// eine responseCode aus der SMTP-Antwort.
+const MAIL_FEHLERCODES = new Set([
+  'EAUTH', 'ECONNECTION', 'ETIMEDOUT', 'ESOCKET', 'EENVELOPE', 'EMESSAGE', 'EDNS',
+]);
+
+function istMailFehler(error) {
+  if (!error) return false;
+  if (MAIL_FEHLERCODES.has(error.code)) return true;
+  if (typeof error.responseCode === 'number') return true;
+  return /smtp|mail|greeting|authentication failed/i.test(error.message || '');
+}
+
 exports.login = async (req, res) => {
     const { username, password } = req.body;
 
@@ -109,24 +124,36 @@ exports.register = async (req, res) => {
         [userResult.insertId, email]
       );
       
-      await connection.commit();
-      
-      // E-Mail senden
+      // Erst senden, dann festschreiben. Vorher lief der Commit zuerst: Schlug
+      // der Versand fehl (z. B. SMTP nicht erreichbar), lief das rollback() ins
+      // Leere — der Nutzer war bereits dauerhaft angelegt, aber ohne Passwort
+      // und ohne Link. Ein zweiter Versuch scheiterte dann an „Name bereits
+      // vergeben", die Person kam nicht mehr weiter.
       await mailService.sendWelcomeEmail(email, username, verificationToken);
-      
-      res.status(201).json({ 
+
+      await connection.commit();
+
+      res.status(201).json({
         message: 'Registrierung erfolgreich. Bitte prüfen Sie Ihre E-Mails um Ihr Passwort zu setzen.'
       });
-      
+
     } catch (error) {
       await connection.rollback();
       throw error;
     } finally {
       connection.release();
     }
-    
+
   } catch (error) {
     console.error('Registration error:', error);
+    // Scheitert der Mailversand, wurde nichts angelegt — das ist kein
+    // Serverfehler im Sinne von „kaputt", sondern ein voruebergehendes
+    // Problem, das die Person durch einen neuen Versuch loesen kann.
+    if (istMailFehler(error)) {
+      return res.status(502).json({
+        message: 'Die Bestätigungsmail konnte nicht versendet werden. Bitte versuchen Sie es später erneut.'
+      });
+    }
     res.status(500).json({ message: 'Serverfehler bei der Registrierung' });
   }
 };
