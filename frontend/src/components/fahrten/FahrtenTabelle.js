@@ -61,6 +61,15 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
                   }
                 >
                   {von} → {nach}
+                  {fahrt.partner_fahrt_id && (
+                    <span
+                      className="fl-paar-hinweis"
+                      title="Gehört zu einer Hin- und Rückfahrt"
+                    >
+                      <span aria-hidden="true">⇄</span>
+                      <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+                    </span>
+                  )}
                   {mitfahrer.length > 0 && (
                     <span className="fl-mf-hinweis fl-mf-hinweis-leise">
                       <span className="fl-mf-punkt" aria-hidden="true" />

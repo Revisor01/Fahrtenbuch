@@ -49,6 +49,12 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
       </span>
       <span className="fl-card-zeile">
         <span className="fl-card-route">{route}</span>
+        {fahrt.partner_fahrt_id && (
+          <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
+            <span aria-hidden="true">⇄</span>
+            <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+          </span>
+        )}
       </span>
       <span className="fl-card-zeile">
         <span className="fl-card-sub">{traegerName}</span>

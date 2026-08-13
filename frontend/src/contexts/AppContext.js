@@ -304,7 +304,9 @@ function AppProvider({ children }) {
         anlass: fahrt.anlass || '',
         kilometer: parseFloat(fahrt.kilometer) || 0,
         abrechnung: parseInt(fahrt.abrechnung) || null,
-        mitfahrer: fahrt.mitfahrer || []
+        mitfahrer: fahrt.mitfahrer || [],
+        // Gegenfahrt eines Hin-und-Rueck-Paares (nur bei „Rückfahrt hinzufügen")
+        partnerFahrtId: fahrt.partnerFahrtId || null
       };
 
       const response = await axios.post(`${API_BASE_URL}/fahrten`, cleanedFahrt);

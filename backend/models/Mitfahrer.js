@@ -40,6 +40,57 @@ class Mitfahrer {
     );
     return result.affectedRows > 0;
   }
+  /**
+   * Haelt die "Hin- und Rueckfahrt"-Eintraege auf beiden Fahrten eines Paares
+   * gleich.
+   *
+   * Bisher hing ein Mitfahrer an genau EINER Fahrt: Wer bei der Hinfahrt mit
+   * "beide" eingetragen war, tauchte beim Oeffnen der Rueckfahrt nicht auf.
+   * Ist die Fahrt mit einer Gegenfahrt verknuepft, bekommt diese jetzt
+   * dieselben 'hin_rueck'-Eintraege — und verliert die, die hier weg sind.
+   *
+   * 'hin' und 'rueck' bleiben unberuehrt: Sie gelten ausdruecklich nur fuer
+   * eine Richtung und gehoeren genau zu der Fahrt, an der sie haengen.
+   *
+   * Bestandsdaten werden nicht angefasst — die Spiegelung entsteht erst, wenn
+   * eine Fahrt bearbeitet wird (so entschieden: 52 der 64 Mitfahrer stehen auf
+   * 'hin_rueck', teils in bereits eingereichten Monaten).
+   */
+  static async spiegleAufPartner(connection, fahrtId) {
+    const [rows] = await connection.execute(
+      'SELECT partner_fahrt_id FROM fahrten WHERE id = ?',
+      [fahrtId]
+    );
+    const partnerId = rows[0]?.partner_fahrt_id;
+    if (!partnerId) return false;
+
+    // Gegenhaelften entfernen, die es hier nicht mehr gibt
+    await connection.execute(
+      `DELETE p FROM mitfahrer p
+       WHERE p.fahrt_id = ?
+         AND p.richtung = 'hin_rueck'
+         AND NOT EXISTS (
+           SELECT 1 FROM (SELECT name, arbeitsstaette FROM mitfahrer WHERE fahrt_id = ? AND richtung = 'hin_rueck') e
+           WHERE e.name = p.name AND (e.arbeitsstaette <=> p.arbeitsstaette)
+         )`,
+      [partnerId, fahrtId]
+    );
+
+    // Fehlende Gegenhaelften anlegen
+    await connection.execute(
+      `INSERT INTO mitfahrer (fahrt_id, name, arbeitsstaette, richtung)
+       SELECT ?, e.name, e.arbeitsstaette, 'hin_rueck'
+       FROM (SELECT name, arbeitsstaette FROM mitfahrer WHERE fahrt_id = ? AND richtung = 'hin_rueck') e
+       WHERE NOT EXISTS (
+         SELECT 1 FROM (SELECT name, arbeitsstaette FROM mitfahrer WHERE fahrt_id = ? AND richtung = 'hin_rueck') p
+         WHERE p.name = e.name AND (p.arbeitsstaette <=> e.arbeitsstaette)
+       )`,
+      [partnerId, fahrtId, partnerId]
+    );
+
+    return true;
+  }
+
   static async updateMitfahrerForFahrt(fahrtId, neueMitfahrer) {
     // Alles in einer Transaktion: bisher liefen Loeschen, Aktualisieren und
     // Anlegen parallel auf dem Pool - ein Fehler mittendrin hinterliess einen
@@ -91,6 +142,8 @@ class Mitfahrer {
           [fahrtId, m.name, m.arbeitsstaette, m.richtung]
         );
       }
+
+      await Mitfahrer.spiegleAufPartner(connection, fahrtId);
 
       await connection.commit();
       return true;

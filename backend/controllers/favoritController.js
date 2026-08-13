@@ -112,7 +112,8 @@ exports.executeFavorit = async (req, res) => {
           einmaligerNachOrt: null,
           userId: req.user.id,
         };
-        await Fahrt.create(rueckfahrtData, null, req.user.id);
+        // Als Paar verknuepfen — beide Fahrten gehoeren zusammen
+        await Fahrt.create(rueckfahrtData, null, req.user.id, [], fahrtId);
       } catch (rueckError) {
         console.error('Fehler beim Erstellen der Rueckfahrt:', rueckError);
       }
