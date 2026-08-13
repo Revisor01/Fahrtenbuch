@@ -8,6 +8,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Changed
+- Mitfahrer:innen, die für „Hin- und Rückfahrt" eingetragen sind, erscheinen jetzt bei beiden Fahrten: Legt man über „Rückfahrt hinzufügen" die Gegenrichtung an, gehören die beiden Fahrten zusammen und die Eintragung gilt für beide. Wird eine der beiden gelöscht, verschwindet die zugehörige Hälfte mit — bisher blieb sie stehen und wurde weiter erstattet
+- Zusammengehörige Hin- und Rückfahrten sind in der Fahrtenliste an einem Doppelpfeil erkennbar; beim Löschen weist ein Hinweis auf die Gegenfahrt hin
 - Schlägt beim Registrieren der Mailversand fehl, wird kein halbes Konto mehr angelegt: Statt einer Fehlerseite erscheint der Hinweis, es später erneut zu versuchen — und der gewünschte Benutzername bleibt frei. Vorher existierte das Konto bereits ohne Passwort, und ein zweiter Versuch scheiterte an „Name bereits vergeben"
 - Mitfahrer:innen stehen im Fahrt-Formular jetzt an der richtigen Stelle — als eigenes Feld zwischen Abrechnung und den Schaltflächen statt unterhalb von „Fahrt speichern". Jeder Eintrag zeigt Name, Arbeitsstätte und ob die Person hin, zurück oder beides mitgefahren ist; Antippen bearbeitet ihn
 - Die Auswahl im Mitfahrer-Dialog heißt jetzt „Nur die Hinfahrt / Nur die Rückfahrt / Hin- und Rückfahrt" statt „Hin / Rück / Hin & Rück"

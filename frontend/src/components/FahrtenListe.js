@@ -142,6 +142,9 @@ function FahrtenListe() {
         kilometer: fahrt.kilometer,
         abrechnung: fahrt.abrechnung,
         mitfahrer: [],
+        // Beide Fahrten als Paar verknüpfen — Mitfahrer mit „Hin- und
+        // Rückfahrt" gelten dann für beide
+        partnerFahrtId: fahrt.id,
       });
       fetchMonthlyData();
       toast.success('Rückfahrt angelegt.');
@@ -317,6 +320,13 @@ function FahrtenListe() {
               {loeschFrage.anlass ? ` · ${loeschFrage.anlass}` : ''} ·{' '}
               {rundeKilometer(loeschFrage.kilometer)} km
             </p>
+            {loeschFrage.partner_fahrt_id && (
+              <p className="fav-frage-hinweis">
+                Diese Fahrt gehört zu einer Hin- und Rückfahrt. Die Gegenfahrt
+                bleibt bestehen — Mitfahrer:innen, die für beide Richtungen
+                eingetragen sind, werden dort mit entfernt.
+              </p>
+            )}
             <button
               type="button"
               className="btn-destructive w-full"

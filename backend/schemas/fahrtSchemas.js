@@ -20,6 +20,9 @@ const createFahrtSchema = z.object({
   abrechnung: z.coerce.number().int().positive('Abrechnungstraeger ist erforderlich'),
   einmaligerVonOrt: z.string().optional().nullable(),
   einmaligerNachOrt: z.string().optional().nullable(),
+  // Gegenfahrt desselben Hin-und-Rueck-Paares. Ohne Eintrag hier wuerde
+  // validate() das Feld aus dem Body entfernen, bevor der Controller es sieht.
+  partnerFahrtId: z.coerce.number().int().positive().nullable().optional(),
   mitfahrer: z.array(z.object({
     name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
     arbeitsstaette: z.string().optional().nullable(),

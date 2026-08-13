@@ -4,19 +4,22 @@ class Fahrt {
   // mitfahrer wird in derselben Transaktion angelegt: zuvor lief das INSERT der
   // Fahrt allein in einer Transaktion und die Mitfahrer danach ungeschuetzt -
   // ein Fehler dort hinterliess eine Fahrt ohne (oder mit halben) Mitfahrern.
-  static async create(fahrtData, details, userId, mitfahrer = []) {
+  // partnerFahrtId: Gegenfahrt desselben Hin-und-Rueck-Paares. Die Verknuepfung
+  // laeuft in derselben Transaktion — sonst entstuende bei einem Fehler eine
+  // Rueckfahrt ohne Verbindung zur Hinfahrt.
+  static async create(fahrtData, details, userId, mitfahrer = [], partnerFahrtId = null) {
     const conn = await db.getConnection();
     try {
       await conn.beginTransaction();
-      
-      const { 
-        datum, 
-        anlass, 
-        kilometer, 
-        abrechnung, 
-        vonOrtId, 
-        nachOrtId, 
-        einmaligerVonOrt, 
+
+      const {
+        datum,
+        anlass,
+        kilometer,
+        abrechnung,
+        vonOrtId,
+        nachOrtId,
+        einmaligerVonOrt,
         einmaligerNachOrt,
         userId
       } = fahrtData;
@@ -43,6 +46,10 @@ class Fahrt {
         );
       }
 
+      if (partnerFahrtId) {
+        await Fahrt.verknuepfePaar(conn, fahrtId, partnerFahrtId, userId);
+      }
+
       await conn.commit();
       return fahrtId;
     } catch (error) {
@@ -53,6 +60,65 @@ class Fahrt {
     }
   }
   
+  /**
+   * Verknuepft zwei Fahrten wechselseitig als Hin-und-Rueck-Paar.
+   * Beide Fahrten muessen dem Nutzer gehoeren — sonst liesse sich eine fremde
+   * Fahrt an die eigene haengen und waere ueber die Partnerabfrage sichtbar.
+   * Eine bestehende Verknuepfung der beiden wird dabei geloest.
+   *
+   * @param {object} conn - offene Verbindung (die Verknuepfung gehoert in
+   *                        dieselbe Transaktion wie das Anlegen der Fahrt)
+   */
+  static async verknuepfePaar(conn, fahrtId, partnerId, userId) {
+    if (!fahrtId || !partnerId || fahrtId === partnerId) return false;
+
+    const [beide] = await conn.execute(
+      'SELECT id FROM fahrten WHERE id IN (?, ?) AND user_id = ?',
+      [fahrtId, partnerId, userId]
+    );
+    if (beide.length !== 2) return false;
+
+    // Alte Partner beider Seiten loesen, sonst bleiben einseitige Verweise
+    await conn.execute(
+      'UPDATE fahrten SET partner_fahrt_id = NULL WHERE user_id = ? AND partner_fahrt_id IN (?, ?)',
+      [userId, fahrtId, partnerId]
+    );
+    await conn.execute(
+      'UPDATE fahrten SET partner_fahrt_id = ? WHERE id = ? AND user_id = ?',
+      [partnerId, fahrtId, userId]
+    );
+    await conn.execute(
+      'UPDATE fahrten SET partner_fahrt_id = ? WHERE id = ? AND user_id = ?',
+      [fahrtId, partnerId, userId]
+    );
+    return true;
+  }
+
+  /**
+   * Loest die Verknuepfung einer Fahrt — beidseitig.
+   * Der FK steht auf ON DELETE SET NULL, beim Loeschen raeumt die DB also
+   * selbst auf. Fuer alles andere (Fahrt bearbeiten, Paar trennen) braucht es
+   * diesen Weg.
+   */
+  static async loesePaar(conn, fahrtId, userId) {
+    const [rows] = await conn.execute(
+      'SELECT partner_fahrt_id FROM fahrten WHERE id = ? AND user_id = ?',
+      [fahrtId, userId]
+    );
+    const partnerId = rows[0]?.partner_fahrt_id;
+    await conn.execute(
+      'UPDATE fahrten SET partner_fahrt_id = NULL WHERE id = ? AND user_id = ?',
+      [fahrtId, userId]
+    );
+    if (partnerId) {
+      await conn.execute(
+        'UPDATE fahrten SET partner_fahrt_id = NULL WHERE id = ? AND user_id = ?',
+        [partnerId, userId]
+      );
+    }
+    return partnerId || null;
+  }
+
   static async findAll(userId) {
     const [rows] = await db.query(`
       SELECT 
@@ -135,12 +201,54 @@ class Fahrt {
     return result.affectedRows;
   }
   
+  // Loescht eine Fahrt und raeumt die gespiegelten Mitfahrer der Partnerfahrt
+  // mit ab. Ohne das blieben nach dem Loeschen der Rueckfahrt die dortigen
+  // "Hin- und Rueckfahrt"-Eintraege bestehen und wuerden weiter erstattet.
+  // Die Fahrt selbst bleibt erhalten — geloescht wird nur, was zum Paar gehoert.
   static async delete(id, userId) {
     if (id === undefined || id === null) {
       throw new Error('Ungültige ID für delete');
     }
-    const [result] = await db.execute('DELETE FROM fahrten WHERE id = ? AND user_id = ?', [id, userId]);
-    return result.affectedRows > 0;
+
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const [rows] = await conn.execute(
+        'SELECT partner_fahrt_id FROM fahrten WHERE id = ? AND user_id = ?',
+        [id, userId]
+      );
+      const partnerId = rows[0]?.partner_fahrt_id || null;
+
+      if (partnerId) {
+        // Nur die Spiegelungen entfernen: Wer bei BEIDEN Fahrten mit gleichem
+        // Namen und gleicher Arbeitsstaette auf 'hin_rueck' steht, ist die
+        // Gegenhaelfte. Eigenstaendige Mitfahrer der Partnerfahrt bleiben.
+        await conn.execute(
+          `DELETE p FROM mitfahrer p
+           JOIN mitfahrer e
+             ON e.fahrt_id = ?
+            AND e.name = p.name
+            AND (e.arbeitsstaette <=> p.arbeitsstaette)
+            AND e.richtung = 'hin_rueck'
+           WHERE p.fahrt_id = ? AND p.richtung = 'hin_rueck'`,
+          [id, partnerId]
+        );
+      }
+
+      const [result] = await conn.execute(
+        'DELETE FROM fahrten WHERE id = ? AND user_id = ?',
+        [id, userId]
+      );
+
+      await conn.commit();
+      return result.affectedRows > 0;
+    } catch (error) {
+      await conn.rollback();
+      throw error;
+    } finally {
+      conn.release();
+    }
   }
 
   // Entfernt: getMonthlySummary() aggregierte ohne user_id-Filter ueber ALLE

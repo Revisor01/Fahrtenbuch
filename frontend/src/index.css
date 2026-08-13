@@ -4695,6 +4695,14 @@ code {
   margin-bottom: 6px;
 }
 
+/* Zusatzhinweis im Bestaetigungsdialog (z. B. verknuepfte Hin-/Rueckfahrt) */
+.fav-frage-hinweis {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+
 /* Mitfahrer-Hinweis hinter der Strecke — farblich abgesetzt mit Punkt */
 .fl-mf-hinweis {
   display: inline-flex;
@@ -4723,6 +4731,18 @@ code {
 
 .fl-mf-hinweis-leise {
   background-color: transparent;
+}
+
+/* Hin-und-Rueck-Paar: dezenter Doppelpfeil neben der Route. Gleiche gedeckte
+   Farbe wie der Mitfahrer-Hinweis — die Kennzeichnung soll die Zeile nicht
+   dominieren, sondern beim Suchen helfen. */
+.fl-paar-hinweis {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.4rem;
+  color: var(--text-3);
+  font-weight: 400;
+  flex: none;
 }
 
 /* Monats-Chip ohne Vorgang: neutral, nicht klickbar */

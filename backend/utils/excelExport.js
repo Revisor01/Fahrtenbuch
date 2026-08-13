@@ -190,8 +190,50 @@ function prepareFormattedData(fahrten, type) {
 }
 
 function prepareMitfahrerData(fahrten) {
+ // Ein Eintrag fuellt GENAU EINE Spalte — die der Fahrt, an der er haengt.
+ //
+ // Frueher fuellte ein 'hin_rueck'-Eintrag beide Spalten und rechnete die
+ // Kilometer trotzdem nur einmal. Das war stimmig, solange so ein Eintrag an
+ // genau einer Fahrt hing. Seit die Haelften auf beide Fahrten eines Paares
+ // gespiegelt werden, gaebe es zwei Eintraege: zweimal beide Spalten und
+ // zweimal volle Kilometer — der Kirchenkreis zahlte doppelt.
+ //
+ // Jetzt liefert jede Fahrt ihre eigene Zeile mit ihren eigenen Kilometern.
+ // Bei einem verknuepften Paar ergibt das zwei Zeilen (Hinweg, Rueckweg) mit
+ // je einfacher Strecke — in der Summe unveraendert.
+ //
+ // Ist die Fahrt NICHT Teil eines Paares, bleibt es beim bisherigen Verhalten:
+ // ein 'hin_rueck'-Eintrag fuellt beide Spalten, damit Bestandsdaten und
+ // einzeln erfasste Fahrten weiter wie bisher im Formular erscheinen.
  const mitfahrerData = fahrten.map(fahrt => {
    if (fahrt.mitfahrer_id) {
+     const hin = `${fahrt.von_ort_name}-${fahrt.nach_ort_name}`;
+     const zurueck = `${fahrt.nach_ort_name}-${fahrt.von_ort_name}`;
+     const imPaar = !!fahrt.partner_fahrt_id;
+
+     let hinweg = '';
+     let rueckweg = '';
+     if (fahrt.richtung === 'hin') {
+       hinweg = hin;
+     } else if (fahrt.richtung === 'rueck') {
+       rueckweg = zurueck;
+     } else if (fahrt.richtung === 'hin_rueck') {
+       if (imPaar) {
+         // Die Gegenfahrt liefert die andere Spalte selbst. Welche der beiden
+         // die Hinfahrt ist, entscheidet die kleinere ID: Sie wurde zuerst
+         // erfasst, die Rueckfahrt entsteht immer danach.
+         const istHinfahrt = (fahrt.id ?? fahrt.fahrt_id) < fahrt.partner_fahrt_id;
+         if (istHinfahrt) {
+           hinweg = hin;
+         } else {
+           rueckweg = hin;
+         }
+       } else {
+         hinweg = hin;
+         rueckweg = zurueck;
+       }
+     }
+
      return {
        // fahrt_id/mitfahrer_id nur zum Entduplizieren, nicht fuers Formular
        _fahrtId: fahrt.id ?? fahrt.fahrt_id,
@@ -200,10 +242,8 @@ function prepareMitfahrerData(fahrten) {
        anlass: fahrt.anlass,
        name: fahrt.mitfahrer_name,
        arbeitsstaette: fahrt.arbeitsstaette,
-       hinweg: fahrt.richtung === 'hin' || fahrt.richtung === 'hin_rueck' ?
-         `${fahrt.von_ort_name}-${fahrt.nach_ort_name}` : '',
-       rueckweg: fahrt.richtung === 'rueck' || fahrt.richtung === 'hin_rueck' ?
-         `${fahrt.nach_ort_name}-${fahrt.von_ort_name}` : '',
+       hinweg,
+       rueckweg,
        kilometer: Math.round(parseFloat(fahrt.kilometer))
      };
    }

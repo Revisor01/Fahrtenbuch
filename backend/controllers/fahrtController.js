@@ -49,10 +49,11 @@ exports.createFahrt = async (req, res) => {
       abrechnung,
       einmaligerVonOrt,
       einmaligerNachOrt,
-      mitfahrer
+      mitfahrer,
+      partnerFahrtId
     } = req.body;
     const userId = req.user.id;
-    
+
     // Check abrechnung
     const [abrechnungCheck] = await db.execute('SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?', [abrechnung, userId]);
     
@@ -86,8 +87,16 @@ exports.createFahrt = async (req, res) => {
       userId
     };
     
-    // Mitfahrer laufen in derselben Transaktion wie die Fahrt
-    const id = await Fahrt.create(fahrtData, null, userId, Array.isArray(mitfahrer) ? mitfahrer : []);
+    // Mitfahrer und die Paar-Verknuepfung laufen in derselben Transaktion wie
+    // die Fahrt. verknuepfePaar prueft selbst, ob die Partnerfahrt dem Nutzer
+    // gehoert — eine fremde ID bleibt wirkungslos.
+    const id = await Fahrt.create(
+      fahrtData,
+      null,
+      userId,
+      Array.isArray(mitfahrer) ? mitfahrer : [],
+      partnerFahrtId || null
+    );
 
 
     res.status(201).json({ id, message: 'Fahrt erfolgreich erstellt' });

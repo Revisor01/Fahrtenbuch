@@ -457,6 +457,9 @@ function Dashboard({ onNavigate }) {
         kilometer: parseFloat(fahrt.kilometer) || 0,
         abrechnung: fahrt.abrechnung,
         mitfahrer: [],
+        // Beide Fahrten als Paar verknüpfen — Mitfahrer mit „Hin- und
+        // Rückfahrt" gelten dann für beide
+        partnerFahrtId: fahrt.id,
       });
       // Die Rückfahrt in „Zuletzt" nachziehen: von/nach getauscht, gleiches
       // Datum wie die Hinfahrt.
