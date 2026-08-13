@@ -325,13 +325,20 @@ function FahrtenListe() {
               icon: Pencil,
               onClick: () => handleEdit(aktionsFahrt),
             },
-            {
-              id: 'rueckfahrt',
-              label: 'Rückfahrt hinzufügen',
-              icon: ArrowLeftRight,
-              hinweis: 'Dieselbe Strecke zurück, am selben Tag',
-              onClick: () => handleRueckfahrt(aktionsFahrt),
-            },
+            // Nur anbieten, solange es keine Gegenfahrt gibt — sonst entstuenden
+            // Doppelungen. Wird die Gegenfahrt geloescht, faellt
+            // partner_fahrt_id auf NULL und die Aktion erscheint wieder.
+            ...(aktionsFahrt.partner_fahrt_id
+              ? []
+              : [
+                  {
+                    id: 'rueckfahrt',
+                    label: 'Rückfahrt hinzufügen',
+                    icon: ArrowLeftRight,
+                    hinweis: 'Dieselbe Strecke zurück, am selben Tag',
+                    onClick: () => handleRueckfahrt(aktionsFahrt),
+                  },
+                ]),
             {
               id: 'wiederholen',
               label: 'Für heute wiederholen',

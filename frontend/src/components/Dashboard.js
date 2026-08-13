@@ -960,13 +960,18 @@ function Dashboard({ onNavigate }) {
               : []),
           ]}
           aktionen={[
-            {
-              id: 'rueckfahrt',
-              label: 'Rückfahrt hinzufügen',
-              icon: ArrowLeftRight,
-              hinweis: 'Dieselbe Strecke zurück, am selben Tag',
-              onClick: () => handleRueckfahrt(aktionsFahrt),
-            },
+            // Nur anbieten, solange es keine Gegenfahrt gibt (siehe FahrtenListe)
+            ...(aktionsFahrt.partner_fahrt_id
+              ? []
+              : [
+                  {
+                    id: 'rueckfahrt',
+                    label: 'Rückfahrt hinzufügen',
+                    icon: ArrowLeftRight,
+                    hinweis: 'Dieselbe Strecke zurück, am selben Tag',
+                    onClick: () => handleRueckfahrt(aktionsFahrt),
+                  },
+                ]),
             {
               id: 'wiederholen',
               label: 'Für heute wiederholen',
