@@ -72,6 +72,19 @@ function FahrtenListe() {
   const traegerNameFuer = (fahrt) =>
     abrechnungstraeger?.find((t) => t.id === parseInt(fahrt.abrechnung))?.name || 'Unbekannt';
 
+  // Gegenfahrt eines Hin-und-Rueck-Paares. Sie liegt nur dann vor, wenn sie im
+  // geladenen Zeitraum enthalten ist — bei Monatswechseln (Hinfahrt 31.,
+  // Rueckfahrt 1.) kann sie fehlen, dann zeigen wir nur den Hinweis.
+  const partnerVon = (fahrt) =>
+    fahrt?.partner_fahrt_id
+      ? fahrten.find((f) => f.id === fahrt.partner_fahrt_id) || null
+      : null;
+
+  // Welche Richtung ist diese Fahrt im Paar? Die kleinere ID wurde zuerst
+  // erfasst — dieselbe Regel wie im Export.
+  const istHinfahrt = (fahrt) =>
+    fahrt?.partner_fahrt_id ? fahrt.id < fahrt.partner_fahrt_id : null;
+
   // Löschen mit Rückfrage (User-Feedback 07.08.) — Fahrten sind Belege,
   // das versehentliche Wegwischen soll nicht unbemerkt passieren.
   const [loeschFrage, setLoeschFrage] = useState(null);
@@ -80,11 +93,22 @@ function FahrtenListe() {
     setLoeschFrage(fahrt);
   };
 
-  const handleDelete = async (fahrt) => {
+  // auchPartner: bei verknuepften Fahrten beide Richtungen auf einmal loeschen.
+  // Die Gegenfahrt zuerst, damit die Spiegelung der Mitfahrer noch greift —
+  // beim Loeschen der zweiten gibt es keinen Partner mehr aufzuraeumen.
+  const handleDelete = async (fahrt, auchPartner = false) => {
     setLoeschFrage(null);
+    const partner = auchPartner ? partnerVon(fahrt) : null;
     try {
+      if (partner) {
+        await deleteFahrt(partner.id);
+      }
       await deleteFahrt(fahrt.id);
       fetchMonthlyData();
+      if (partner) {
+        toast.success('Hin- und Rückfahrt gelöscht.');
+        return;
+      }
       toast.success('Fahrt gelöscht.', {
         undo: async () => {
           try {
@@ -274,6 +298,25 @@ function FahrtenListe() {
             ...(aktionsFahrt.mitfahrer?.length
               ? [{ label: 'Mitfahrer', wert: aktionsFahrt.mitfahrer.map((m) => m.name).join(', ') }]
               : []),
+            // Gegenfahrt mit ihren Werten — sonst muesste man sie in der Liste
+            // suchen, um zu sehen, was dort steht
+            ...(aktionsFahrt.partner_fahrt_id
+              ? [
+                  {
+                    label: istHinfahrt(aktionsFahrt) ? 'Rückfahrt' : 'Hinfahrt',
+                    wert: (() => {
+                      const p = partnerVon(aktionsFahrt);
+                      if (!p) return 'außerhalb des gewählten Zeitraums';
+                      const strecke = `${p.von_ort_name || p.einmaliger_von_ort || '—'} → ${
+                        p.nach_ort_name || p.einmaliger_nach_ort || '—'
+                      }`;
+                      const betrag =
+                        p.erstattung != null ? `, ${formatBetrag(p.erstattung)} €` : '';
+                      return `${strecke} · ${rundeKilometer(p.kilometer)} km${betrag}`;
+                    })(),
+                  },
+                ]
+              : []),
           ]}
           aktionen={[
             {
@@ -322,9 +365,18 @@ function FahrtenListe() {
             </p>
             {loeschFrage.partner_fahrt_id && (
               <p className="fav-frage-hinweis">
-                Diese Fahrt gehört zu einer Hin- und Rückfahrt. Die Gegenfahrt
-                bleibt bestehen — Mitfahrer:innen, die für beide Richtungen
-                eingetragen sind, werden dort mit entfernt.
+                {(() => {
+                  const p = partnerVon(loeschFrage);
+                  const richtung = istHinfahrt(loeschFrage) ? 'Rückfahrt' : 'Hinfahrt';
+                  if (!p) {
+                    return `Diese Fahrt gehört zu einer Hin- und Rückfahrt. Die ${richtung} liegt außerhalb des gewählten Zeitraums und bleibt bestehen.`;
+                  }
+                  return `Dazu gehört die ${richtung} ${
+                    p.von_ort_name || p.einmaliger_von_ort || '—'
+                  } → ${p.nach_ort_name || p.einmaliger_nach_ort || '—'} · ${rundeKilometer(
+                    p.kilometer
+                  )} km. Mitfahrer:innen, die für beide Richtungen eingetragen sind, werden dort mit entfernt.`;
+                })()}
               </p>
             )}
             <button
@@ -332,8 +384,17 @@ function FahrtenListe() {
               className="btn-destructive w-full"
               onClick={() => handleDelete(loeschFrage)}
             >
-              Löschen
+              {loeschFrage.partner_fahrt_id ? 'Nur diese Fahrt löschen' : 'Löschen'}
             </button>
+            {loeschFrage.partner_fahrt_id && partnerVon(loeschFrage) && (
+              <button
+                type="button"
+                className="btn-destructive w-full"
+                onClick={() => handleDelete(loeschFrage, true)}
+              >
+                Beide Fahrten löschen
+              </button>
+            )}
             <button
               type="button"
               className="btn-secondary w-full"
