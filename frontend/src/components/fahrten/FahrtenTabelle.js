@@ -23,6 +23,14 @@ const datumLang = (datum) => {
 };
 
 function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
+  // Zeigt beim Überfahren einer verknüpften Fahrt auch die Gegenfahrt
+  // hervorgehoben — Hin und Rück sind so sofort als Paar erkennbar, auch
+  // wenn andere Fahrten dazwischen stehen.
+  const [paarId, setPaarId] = React.useState(null);
+
+  const merkePaar = (fahrt) => setPaarId(fahrt.partner_fahrt_id || null);
+  const vergissPaar = () => setPaarId(null);
+
   return (
     <div className="fl-tablecard">
       <div className="fl-tablescroll">
@@ -45,8 +53,14 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
             <button
               key={fahrt.id}
               type="button"
-              className="fl-tablerow fl-tablerow-tap"
+              className={`fl-tablerow fl-tablerow-tap${
+                paarId === fahrt.id ? ' fl-zeile-paar' : ''
+              }`}
               onClick={() => onOeffnen(fahrt)}
+              onMouseEnter={() => merkePaar(fahrt)}
+              onMouseLeave={vergissPaar}
+              onFocus={() => merkePaar(fahrt)}
+              onBlur={vergissPaar}
               aria-label={`Fahrt ${von} nach ${nach} am ${datumLang(fahrt.datum)} — Aktionen öffnen`}
             >
               <span className="fl-td-datum num">{datumLang(fahrt.datum)}</span>
