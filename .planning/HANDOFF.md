@@ -6,7 +6,43 @@ echten Produktionsdaten.
 
 ---
 
-## Erledigt in der Sitzung vom 13.08. (6 Commits, alle NICHT gepusht)
+## Abgleich gegen den Original-Dump (14.08.)
+
+Vor dem Produktions-Deploy geprüft: Der Dump von vor der Migration liegt als
+zweite Datenbank vor, verglichen wurde zeilenweise.
+
+| Prüfung | Abweichungen |
+|---|---|
+| Fahrten (Datum, Anlass, km, Träger, Orte, Nutzer) | **0** |
+| Fahrten verschwunden / neu | **0** |
+| Mitfahrer (Fahrt, Name, Arbeitsstätte, Richtung) | **0** |
+| Mitfahrer verschwunden / neu | **0** |
+| Orte, Erstattungssätze, Passwörter | **0** |
+
+**Alle 64 Mitfahrer sind zeilengleich**, Verteilung unverändert 52/9/3, keiner
+hängt an einer anderen Fahrt.
+
+**Berechnete Beträge**: 146 Nutzer-Monat-Kombinationen über alle 22 aktiven
+Nutzer — keine einzige Abweichung. JJ: 985 Fahrten, 14.560,90 km, 4.368,27 €.
+
+**Export-Beträge**: 23 Bestandsmonate mit Mitfahrern, alt gegen neu gerechnet —
+**kein Monat ändert seinen Auszahlungsbetrag.**
+
+Bei 7 Monaten verschiebt sich nur die *Spaltenbelegung* im Mitnahmeblatt.
+Betroffen sind **16 von 64** Einträgen (`hin_rueck` an verknüpfter Fahrt);
+48 bleiben unverändert. Beispiel Monika Schmudde, Juli 2025:
+
+```
+ALT:  Katja Hose | Hinweg "A-B" | Rückweg "B-A" | 16 km
+      Katja Hose | Hinweg "B-A" | Rückweg "A-B" | 16 km   -> wirkt wie 4 Strecken
+NEU:  Katja Hose | Hinweg "A-B" | Rückweg ""    | 16 km
+      Katja Hose | Hinweg ""    | Rückweg "B-A" | 16 km   -> die 2 echten Strecken
+Summe unverändert 64 km
+```
+
+---
+
+## Erledigt in der Sitzung vom 13./14.08. (8 Commits, alle NICHT gepusht)
 
 Auf ausdrücklichen Wunsch bleibt alles lokal — ein Push auf `master` würde
 automatisch auf Produktion deployen.
@@ -19,6 +55,10 @@ automatisch auf Produktion deployen.
 | `612d886` | Registrierung legt bei Mailfehler kein halbes Konto mehr an |
 | `650794f` | Ungenutzte `Modal.js` entfernt |
 | `5537c9b` | **Migration 0009** — Spalte `partner_fahrt_id` + Bestandspaare |
+| `7b22c4c` | **Schritte 4–6**: Verknüpfung, Spiegelung, Export, Frontend |
+| `71fe07c` | Spiegelung schon beim Anlegen der Rückfahrt |
+| `86061a6` | Gegenfahrt im Detail, Löschdialog mit beiden Optionen |
+| `80e5c31` | Keine weiße Seite mehr bei ungültiger Anmeldung |
 
 ### Die Erstattungsformeln — gemessen, nicht geschätzt
 
