@@ -101,13 +101,19 @@ function AppProvider({ children }) {
       // Favoriten separat laden (kein Fehler wenn Endpoint nicht verfügbar)
       fetchFavoriten().catch(() => {});
 
-      // Hier die tatsächlichen Daten setzen
-      if (fahrtenRes) setFahrten(fahrtenRes);
-      if (monthlyDataRes) setMonthlyData(monthlyDataRes);
-      if (orteRes) setOrte(orteRes);
-      if (distanzenRes) setDistanzen(distanzenRes);
+      // fetchFahrten/fetchOrte/fetchDistanzen setzen ihren State selbst und
+      // liefern nichts zurueck — die Zuweisungen hier greifen nur, wenn eine
+      // Funktion tatsaechlich Daten liefert (aktuell fetchMonthlyData).
+      if (Array.isArray(fahrtenRes)) setFahrten(fahrtenRes);
+      if (Array.isArray(monthlyDataRes)) setMonthlyData(monthlyDataRes);
+      if (Array.isArray(orteRes)) setOrte(orteRes);
+      if (Array.isArray(distanzenRes)) setDistanzen(distanzenRes);
       if (abrechnungstraegerRes?.data) {
-        setAbrechnungstraeger(abrechnungstraegerRes.data.data);
+        setAbrechnungstraeger(
+          Array.isArray(abrechnungstraegerRes.data.data)
+            ? abrechnungstraegerRes.data.data
+            : []
+        );
       }
 
       // Führe den optionalen Callback mit den vollständigen Daten aus
@@ -271,11 +277,16 @@ function AppProvider({ children }) {
         response = await axios.get(`${API_BASE_URL}/fahrten/report/${bisYear}/${bisMonth}`);
       }
 
-      setFahrten(response.data.fahrten.map(fahrt => ({
+      // Meldet der Endpunkt einen Fehler, fehlt fahrten/summary im Body —
+      // ohne Absicherung warf .map einen TypeError
+      const geladeneFahrten = Array.isArray(response?.data?.fahrten)
+        ? response.data.fahrten
+        : [];
+      setFahrten(geladeneFahrten.map(fahrt => ({
         ...fahrt,
         mitfahrer: fahrt.mitfahrer || []
       })));
-      setSummary(response.data.summary);
+      setSummary(response?.data?.summary || {});
     } catch (error) {
       console.error('Fehler beim Abrufen der Fahrten:', error);
       setFahrten([]);
@@ -411,14 +422,18 @@ function AppProvider({ children }) {
       const data = responses
       .map((response, index) => {
         const date = months[index];
+        // summary fehlt, wenn der Endpunkt einen Fehler meldet (etwa weil das
+        // Konto nicht mehr existiert). Ohne Absicherung warf der Zugriff hier
+        // einen TypeError und die ganze Oberflaeche blieb weiss.
+        const summary = response?.data?.summary || {};
         return {
           yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
           monthName: date.toLocaleString('default', { month: 'long' }),
           year: date.getFullYear(),
           monatNr: date.getMonth() + 1,
-          erstattungen: response.data.summary.erstattungen || {},
-          abrechnungsStatus: response.data.summary.abrechnungsStatus || {},
-          totalErstattung: response.data.summary.gesamtErstattung || 0,
+          erstattungen: summary.erstattungen || {},
+          abrechnungsStatus: summary.abrechnungsStatus || {},
+          totalErstattung: summary.gesamtErstattung || 0,
           totalKm: (response.data.fahrten || []).reduce((sum, f) => sum + (parseFloat(f.kilometer) || 0), 0),
           // km je Abrechnungsträger (für die Trägerzeilen der Abrechnung)
           kmProTraeger: (response.data.fahrten || []).reduce((acc, f) => {
@@ -444,8 +459,13 @@ function AppProvider({ children }) {
       });
 
       setMonthlyData(data);
+      return data;
     } catch (error) {
       console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
+      // Leere Liste statt des alten Standes: Komponenten iterieren darueber,
+      // ein undefined liesse die Oberflaeche beim naechsten Rendern abstuerzen
+      setMonthlyData([]);
+      return [];
     }
   };
 
