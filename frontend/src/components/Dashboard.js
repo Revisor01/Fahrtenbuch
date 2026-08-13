@@ -315,6 +315,8 @@ function Dashboard({ onNavigate }) {
   const [favFrage, setFavFrage] = useState(null);
   // Angetippte Fahrt in „Zuletzt": zeigt Details + Aktionen
   const [aktionsFahrt, setAktionsFahrt] = useState(null);
+  // Gegenfahrt mit hervorheben, solange die Maus auf der Partnerzeile steht
+  const [paarId, setPaarId] = useState(null);
 
   const handleFavorit = (fav, mitRueckfahrt = false) => {
     const km = findDistanz(fav.von_ort_id, fav.nach_ort_id);
@@ -879,8 +881,14 @@ function Dashboard({ onNavigate }) {
                 <button
                   key={fahrt.id}
                   type="button"
-                  className="dash-d-tablerow dash-d-tablerow-tap"
+                  className={`dash-d-tablerow dash-d-tablerow-tap${
+                    paarId === fahrt.id ? ' fl-zeile-paar' : ''
+                  }`}
                   onClick={() => setAktionsFahrt(fahrt)}
+                  onMouseEnter={() => setPaarId(fahrt.partner_fahrt_id || null)}
+                  onMouseLeave={() => setPaarId(null)}
+                  onFocus={() => setPaarId(fahrt.partner_fahrt_id || null)}
+                  onBlur={() => setPaarId(null)}
                   disabled={!!fahrt._optimistisch}
                   aria-label={`Fahrt nach ${zielName(fahrt)} — Aktionen öffnen`}
                 >
