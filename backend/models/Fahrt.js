@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const Mitfahrer = require('./Mitfahrer');
 
 class Fahrt {
   // mitfahrer wird in derselben Transaktion angelegt: zuvor lief das INSERT der
@@ -47,7 +48,13 @@ class Fahrt {
       }
 
       if (partnerFahrtId) {
-        await Fahrt.verknuepfePaar(conn, fahrtId, partnerFahrtId, userId);
+        const verknuepft = await Fahrt.verknuepfePaar(conn, fahrtId, partnerFahrtId, userId);
+        if (verknuepft) {
+          // Die Mitfahrer der Hinfahrt, die fuer beide Richtungen gelten, auf
+          // die neue Rueckfahrt uebernehmen. Sonst muesste man sie dort von
+          // Hand nachtragen, obwohl "Hin- und Rueckfahrt" schon dransteht.
+          await Mitfahrer.spiegleAufPartner(conn, partnerFahrtId);
+        }
       }
 
       await conn.commit();
