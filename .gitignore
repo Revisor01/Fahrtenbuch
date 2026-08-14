@@ -138,3 +138,39 @@ Dienstfahrtenabrechnung*.pdf
 *.png
 !frontend/public/**/*.png
 !frontend/src/**/*.png
+# App-Icons und Splash-Screens der nativen Projekte. Ohne diese Ausnahmen
+# verschluckt die *.png-Regel oben sie stillschweigend und der Build laesst
+# sich auf keiner anderen Maschine reproduzieren.
+!frontend/ios/**/*.png
+!frontend/android/**/*.png
+
+# --- Capacitor ---
+# Kopierte Web-Assets: Duplikat von frontend/build/, gehoert nicht ins Repo.
+frontend/ios/App/public/
+frontend/android/app/src/main/assets/public/
+frontend/ios/App/App/capacitor.config.json
+frontend/android/app/src/main/assets/capacitor.config.json
+frontend/android/app/src/main/assets/capacitor.plugins.json
+
+# iOS
+frontend/ios/App/Pods/
+frontend/ios/DerivedData/
+frontend/ios/App/output/
+frontend/ios/.sourcekit-lsp/
+xcuserdata/
+*.xcuserdatad/
+
+# Android
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+frontend/android/capacitor-cordova-android-plugins/
+frontend/android/local.properties
+frontend/android/.idea/
+
+# Signing-Material gehoert nie ins Repository
+*.keystore
+!frontend/android/app/debug.keystore
+*.p8
+*.p12
+*.mobileprovision
