@@ -4,7 +4,9 @@ import { AppContext } from '../../contexts/AppContext';
 import Sheet from '../ui/Sheet';
 import { useToast } from '../ui/Toast';
 import { useAdressSuche, adresseZuKoordinaten } from '../useAdressSuche';
-import { Pencil, Search, ChevronRight, MapPin, Crosshair, Check } from 'lucide-react';
+import { Pencil, Search, ChevronRight, ChevronLeft, MapPin, Crosshair, Check, Plus, X } from 'lucide-react';
+import MitfahrerModal from '../../MitfahrerModal';
+import { RICHTUNG_TEXT } from '../../FahrtForm';
 
 // Zweistufiger Erfassungsflow nach Design-Spec (Redesign 2026, Screen 2):
 // Schritt 1 „Wohin?" — Startort/Datum vorbelegt und antippbar, Ortsliste nach
@@ -68,6 +70,11 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     prefill?.abrechnung ? String(prefill.abrechnung) : null
   );
   const [traegerAuswahlOffen, setTraegerAuswahlOffen] = useState(false);
+  // Mitfahrer:innen direkt beim Erfassen — vorher liessen sie sich nur
+  // nachtraeglich ueber „Bearbeiten" eintragen
+  const [mitfahrer, setMitfahrer] = useState([]);
+  const [mitfahrerDialog, setMitfahrerDialog] = useState(false);
+  const [mitfahrerEditIndex, setMitfahrerEditIndex] = useState(null);
   const [kmManuell, setKmManuell] = useState(
     prefill?.kilometer !== undefined && prefill?.kilometer !== null ? String(prefill.kilometer) : ''
   );
@@ -317,6 +324,28 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     if (!kmGueltig) setKmEdit(true);
   };
 
+  // Mitfahrer:innen — gleiche Bedienung wie im vollen Formular
+  const handleMitfahrerSpeichern = (person) => {
+    if (mitfahrerEditIndex !== null) {
+      const naechste = [...mitfahrer];
+      naechste[mitfahrerEditIndex] = person;
+      setMitfahrer(naechste);
+    } else {
+      setMitfahrer([...mitfahrer, person]);
+    }
+    setMitfahrerDialog(false);
+    setMitfahrerEditIndex(null);
+  };
+
+  const handleMitfahrerBearbeiten = (index) => {
+    setMitfahrerEditIndex(index);
+    setMitfahrerDialog(true);
+  };
+
+  const handleMitfahrerEntfernen = (index) => {
+    setMitfahrer(mitfahrer.filter((_, i) => i !== index));
+  };
+
   const handleSpeichern = async () => {
     // Der Ort-POST laeuft vor dem Schliessen des Sheets - ohne Sperre legt ein
     // zweiter Tap Fahrt und Ort ein zweites Mal an.
@@ -353,18 +382,24 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       nachOrtId: zielId,
       einmaligerVonOrt: freierStart ? freierStart.text : null,
       einmaligerNachOrt: zielId ? null : zielAdresse?.text ?? null,
-      mitfahrer: [],
+      // Ohne Rückfahrt gehören alle an diese eine Fahrt. Mit Rückfahrt bleiben
+      // die reinen „nur zurück"-Einträge der Gegenfahrt vorbehalten.
+      mitfahrer: rueckfahrt ? mitfahrer.filter((m) => m.richtung !== 'rueck') : mitfahrer,
     };
     const trips = [hinfahrt];
     if (rueckfahrt) {
       // Rückfahrt = zweite, eigenständige Fahrt: vertauschte Orte,
-      // gleiches Datum, gleicher Träger
+      // gleiches Datum, gleicher Träger. Die Verknüpfung als Paar setzt der
+      // POST-Lauf unten, sobald die ID der Hinfahrt bekannt ist.
       trips.push({
         ...hinfahrt,
         vonOrtId: hinfahrt.nachOrtId,
         nachOrtId: hinfahrt.vonOrtId,
         einmaligerVonOrt: hinfahrt.einmaligerNachOrt,
         einmaligerNachOrt: hinfahrt.einmaligerVonOrt,
+        // Mitfahrer nicht doppelt anlegen: Wer für beide Richtungen gilt, wird
+        // vom Backend auf die Partnerfahrt gespiegelt
+        mitfahrer: mitfahrer.filter((m) => m.richtung === 'rueck'),
       });
     }
 
@@ -432,7 +467,11 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     (async () => {
       try {
         for (const t of trips) {
-          const res = await axios.post('/api/fahrten', t);
+          // Die zweite Fahrt ist die Rückfahrt zur ersten — als Paar anlegen,
+          // damit „Hin- und Rückfahrt"-Mitfahrer für beide gelten und beim
+          // Löschen aufgeräumt wird
+          const nutzlast = op.ids.length > 0 ? { ...t, partnerFahrtId: op.ids[0] } : t;
+          const res = await axios.post('/api/fahrten', nutzlast);
           op.ids.push(res.data.id);
         }
         if (op.abgebrochen) {
@@ -705,6 +744,12 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   // Schritt 2 — Bestätigen
   return (
     <Sheet isOpen={isOpen} onClose={onClose} ariaLabel="Fahrt bestätigen">
+      {/* Zurück zur Zielauswahl. Vorher war der Klick auf die Route der
+          einzige Weg — als Schaltfläche aber nicht erkennbar. */}
+      <button type="button" className="erf-zurueck" onClick={() => setStep(1)}>
+        <ChevronLeft size={16} aria-hidden="true" />
+        <span>Zurück</span>
+      </button>
       <div className="erf-kopf">
         <div className="erf-kopf-text">
           <button
@@ -828,6 +873,55 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         </button>
       </div>
 
+      {/* Mitfahrer:innen direkt hier — vorher liessen sie sich erst
+          nachtraeglich ueber „Bearbeiten" eintragen. Gleiche Bedienung wie im
+          vollen Formular: Name antippen bearbeitet, Kreuz entfernt. */}
+      <div className="erf-mitfahrer">
+        {mitfahrer.length > 0 && (
+          <ul className="mitfahrer-liste">
+            {mitfahrer.map((person, index) => (
+              <li key={index} className="mitfahrer-eintrag">
+                <button
+                  type="button"
+                  onClick={() => handleMitfahrerBearbeiten(index)}
+                  className="mitfahrer-eintrag-haupt"
+                  title={`${person.name} bearbeiten`}
+                >
+                  <span className="mitfahrer-eintrag-name">{person.name}</span>
+                  <span className="mitfahrer-eintrag-sub">
+                    {[person.arbeitsstaette, RICHTUNG_TEXT[person.richtung] || RICHTUNG_TEXT.hin]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleMitfahrerEntfernen(index)}
+                  className="mitfahrer-eintrag-weg"
+                  aria-label={`${person.name} entfernen`}
+                  title={`${person.name} entfernen`}
+                >
+                  <X size={16} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            setMitfahrerEditIndex(null);
+            setMitfahrerDialog(true);
+          }}
+          className="mitfahrer-add"
+        >
+          <Plus size={16} aria-hidden="true" />
+          <span>
+            {mitfahrer.length > 0 ? 'Weitere:n hinzufügen' : 'Mitfahrer:in hinzufügen'}
+          </span>
+        </button>
+      </div>
+
       <button
         type="button"
         className="btn-sheet-primary"
@@ -837,6 +931,18 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         {fahrtenAnzahl === 1 ? '1 Fahrt speichern' : '2 Fahrten speichern'}
         {gesamtKm !== null && <span className="num"> · {formatKm(gesamtKm)} km</span>}
       </button>
+
+      {mitfahrerDialog && (
+        <MitfahrerModal
+          isOpen
+          onClose={() => {
+            setMitfahrerDialog(false);
+            setMitfahrerEditIndex(null);
+          }}
+          onSave={handleMitfahrerSpeichern}
+          initialData={mitfahrerEditIndex !== null ? mitfahrer[mitfahrerEditIndex] : null}
+        />
+      )}
     </Sheet>
   );
 }

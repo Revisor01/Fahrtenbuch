@@ -8,7 +8,9 @@ import Sheet from './components/ui/Sheet';
 import AddressAutocomplete from './components/AddressAutocomplete';
 
 // Klartext statt der internen Schluessel ('hin_rueck' sagt niemandem etwas)
-const RICHTUNG_TEXT = {
+// Auch vom Erfassungsflow genutzt — eine Quelle, damit die Beschriftung der
+// Mitfahrer-Eintraege ueberall gleich lautet
+export const RICHTUNG_TEXT = {
   hin: 'Hinfahrt',
   rueck: 'Rückfahrt',
   hin_rueck: 'Hin- und Rückfahrt',
