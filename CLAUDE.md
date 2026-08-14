@@ -60,7 +60,8 @@ Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung
 - Database: `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 - Authentication: `JWT_SECRET`
 - Email (SMTP): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`
-- URLs: `FRONTEND_URL`, `CORS_ORIGIN`
+- URLs: `FRONTEND_URL`, `CORS_ORIGIN` (kommaseparierte Allowlist; Einzelwert bleibt gueltig. Die Origins der mobilen Apps — `capacitor://localhost` fuer iOS, `http://localhost` fuer Android — sind fest eingebaut und muessen nicht konfiguriert werden)
+- Mobile Apps: `INSTANZEN` - JSON-Array der auswaehlbaren Kirchenkreis-Instanzen, je Eintrag `id` (Slug), `name` (Anzeigename) und `apiUrl` (https). Wird ohne Anmeldung ueber `GET /api/instanzen` ausgeliefert. Unset oder ungueltig = Fallback auf Dithmarschen
 - Initial Admin: `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD`, `INITIAL_ADMIN_EMAIL`
 - Defaults: `DEFAULT_ERSTATTUNG_TRAEGER`, `DEFAULT_ERSTATTUNG_MITFAHRER`, `DEFAULT_ERSTATTUNG_DATUM`
 Frontend-Variablen wirken zur **Laufzeit**: `docker-entrypoint.sh` schreibt daraus
