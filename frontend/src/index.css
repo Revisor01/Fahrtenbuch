@@ -1517,11 +1517,38 @@ code {
 }
 
 /* Schritt 2: Kopf „{Start} → {Ziel}" + Mono-Zeile, rechts Stift 44×44px */
+/* Zurueck zur Zielauswahl. Bewusst schlicht und ueber dem Kopf: Der Weg
+   zurueck war vorher nur ueber einen Klick auf die Route erreichbar und damit
+   praktisch unsichtbar. */
+.erf-zurueck {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: -4px 0 10px -6px;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: var(--r-btn, 8px);
+}
+
+.erf-zurueck:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
 .erf-kopf {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 18px;
+}
+
+/* Mitfahrer-Block im Bestaetigen-Schritt */
+.erf-mitfahrer {
+  margin: 4px 0 16px;
 }
 
 .erf-kopf-text {
