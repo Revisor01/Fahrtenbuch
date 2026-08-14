@@ -1,4 +1,34 @@
-# Handoff — Stand 13.08.2026, 02:00
+# Handoff — Stand 14.08.2026, 10:10
+
+## AUF PRODUKTION AUSGELIEFERT (14.08., 10:00)
+
+18 Commits gepusht, CI-Build erfolgreich, Migration 0009 auf Produktion
+gelaufen. Vorher/nachher gegen ein Backup von 09:52 abgeglichen:
+
+| Prüfung | Ergebnis |
+|---|---|
+| Fahrten / Mitfahrer / Orte geändert | **0** |
+| **Passwörter geändert** | **0** — niemand wurde ausgeloggt |
+| Beträge (146 Nutzer-Monate) | **0 Abweichungen** |
+| Verknüpfte Paare | **771**, keine einseitigen |
+
+Live geprüft: Anmeldeseite, API-Monatsbericht, **Excel-Export Brinkmann
+09/2024 → 8 Zeilen, 74 km, 3,70 €** (identisch zum im April 2025
+ausgezahlten Betrag).
+
+Backup vor dem Eingriff: `/opt/backups/vor-mitfahrer-umbau-20260814-0952.sql.gz`
+
+Rollback bei Bedarf: Backup einspielen, dann
+`DELETE FROM migrations WHERE name='0009_fahrt_paare_verknuepfen.sql'`
+und `ALTER TABLE fahrten DROP FOREIGN KEY fk_fahrten_partner, DROP COLUMN partner_fahrt_id`.
+
+Beim Deployen zu beachten (beides hat auf Test zugeschlagen): `utils/erstattung.js`
+und die `nginx-proxy.conf` müssen mit — sonst bleibt die Fahrtenliste leer bzw.
+der Login antwortet mit 405.
+
+---
+
+# Vorheriger Stand — 13.08.2026, 02:00
 
 Für die nächste Sitzung. Laufendes Vorhaben: **Mitfahrer:innen und die
 Erstattungsformeln geradeziehen** — auf der Testumgebung, mit einem Dump der
