@@ -9,6 +9,7 @@ import {
   Star,
   ShieldCheck,
   ArrowLeftRight,
+  Smartphone,
 } from 'lucide-react';
 import Sheet from './ui/Sheet';
 
@@ -42,7 +43,7 @@ const HIGHLIGHTS = [
   {
     icon: ArrowLeftRight,
     titel: 'Mitfahrer:innen bei Hin- und Rückfahrt',
-    text: 'Wer für „Hin- und Rückfahrt" eingetragen ist, erscheint jetzt bei beiden Fahrten — vorher war die Person bei der Gegenfahrt unsichtbar. Legst du über „Rückfahrt hinzufügen" die Gegenrichtung an, gehören die beiden Fahrten zusammen: In der Liste erkennst du sie am Doppelpfeil, und beim Löschen einer der beiden verschwindet die zugehörige Hälfte mit. Mitfahrer:innen lassen sich außerdem direkt beim Erfassen eintragen, nicht erst nachträglich.',
+    text: 'Die Logik dahinter ist neu: Zugehörigkeiten sind jetzt klar, Hin- und Rückfahrt docken automatisch aneinander an — und alles lässt sich auch nachträglich noch bearbeiten.',
   },
   {
     icon: Sparkles,
@@ -106,6 +107,23 @@ const FEATURES = [
 const NewFeaturesModal = ({ isOpen, onClose }) => {
   return (
     <Sheet isOpen={isOpen} onClose={onClose} title="Neuigkeiten" wide>
+      {/* Breite Kachel oben: die App laesst sich installieren — das ist die
+          Neuerung, von der die meisten noch nichts wissen */}
+      <div className="neu-highlight neu-highlight-breit">
+        <span className="neu-highlight-icon" aria-hidden="true">
+          <Smartphone size={18} strokeWidth={2} />
+        </span>
+        <div className="neu-highlight-text">
+          <h3>Als App auf dem Homescreen</h3>
+          <p>
+            Das Fahrtenbuch lässt sich installieren und verhält sich dann wie eine
+            normale App — eigenes Symbol, kein Browser drumherum. Auf dem iPhone über
+            „Teilen → Zum Home-Bildschirm", auf Android über das Menü „Zum Startbildschirm
+            hinzufügen", am Rechner über das Installationssymbol in der Adressleiste.
+          </p>
+        </div>
+      </div>
+
       <div className="neu-highlights">
         {HIGHLIGHTS.map(({ icon: Icon, titel, text }) => (
           <div key={titel} className="neu-highlight">

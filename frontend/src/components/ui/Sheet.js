@@ -21,9 +21,13 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
     // Auslöser merken, um den Fokus beim Schließen zurückzugeben
     triggerRef.current = document.activeElement;
 
+    // Fokus auf das Panel selbst, nicht auf das erste bedienbare Element:
+    // Steht dort ein Button am Ende (wie in den Neuigkeiten), scrollte der
+    // Browser das Sheet beim Oeffnen sofort ganz nach unten. Tab springt von
+    // hier aus weiterhin ins erste Element, Esc schliesst.
     const panel = panelRef.current;
-    const firstFocusable = panel?.querySelector(FOCUSABLE_SELECTOR);
-    (firstFocusable || panel)?.focus();
+    panel?.focus();
+    panel?.scrollTo?.(0, 0);
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
