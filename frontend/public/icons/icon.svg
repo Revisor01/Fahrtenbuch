@@ -1,0 +1,13 @@
+<!-- App-Icon: offener Ring mit Punkt am unteren Bogenende.
+     Mittelpunkt 256/256, Ring-Mittelradius 137.5 (Aussenradius 160 bei
+     Strichstaerke 45), Luecke zwischen 180 und 225 Grad.
+     Der Punkt lag im alten Icon neben der Linie statt darauf — er wirkte
+     dadurch nach unten verrutscht. Jetzt sitzt seine Mitte exakt auf dem
+     Ringende bei 135 Grad (SVG-Zaehlung, y nach unten).
+     Die PNG-Dateien daneben werden aus derselben Geometrie erzeugt. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="115" fill="#0F5257"/>
+  <path d="M 158.8 353.2 A 137.5 137.5 0 1 1 118.5 256"
+        fill="none" stroke="#35B6AA" stroke-width="45" stroke-linecap="butt"/>
+  <circle cx="158.8" cy="353.2" r="26" fill="#E8B461"/>
+</svg>
