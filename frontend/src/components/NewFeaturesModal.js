@@ -8,6 +8,7 @@ import {
   MapPin,
   Star,
   ShieldCheck,
+  ArrowLeftRight,
 } from 'lucide-react';
 import Sheet from './ui/Sheet';
 
@@ -37,6 +38,11 @@ const HIGHLIGHTS = [
     icon: CalendarRange,
     titel: 'Mehrere Monate auf einmal',
     text: 'Der Export ist nicht mehr auf einen Monat beschränkt: Du wählst einen Zeitraum — etwa ein ganzes Quartal — und bekommst alles in einer Abrechnung. Bei mehreren Dateien kommt automatisch ein ZIP.',
+  },
+  {
+    icon: ArrowLeftRight,
+    titel: 'Mitfahrer:innen bei Hin- und Rückfahrt',
+    text: 'Wer für „Hin- und Rückfahrt" eingetragen ist, erscheint jetzt bei beiden Fahrten — vorher war die Person bei der Gegenfahrt unsichtbar. Legst du über „Rückfahrt hinzufügen" die Gegenrichtung an, gehören die beiden Fahrten zusammen: In der Liste erkennst du sie am Doppelpfeil, und beim Löschen einer der beiden verschwindet die zugehörige Hälfte mit. Mitfahrer:innen lassen sich außerdem direkt beim Erfassen eintragen, nicht erst nachträglich.',
   },
   {
     icon: Sparkles,
