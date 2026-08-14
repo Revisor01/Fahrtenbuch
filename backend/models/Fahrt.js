@@ -228,18 +228,15 @@ class Fahrt {
       const partnerId = rows[0]?.partner_fahrt_id || null;
 
       if (partnerId) {
-        // Nur die Spiegelungen entfernen: Wer bei BEIDEN Fahrten mit gleichem
-        // Namen und gleicher Arbeitsstaette auf 'hin_rueck' steht, ist die
-        // Gegenhaelfte. Eigenstaendige Mitfahrer der Partnerfahrt bleiben.
+        // Die Partnerfahrt bleibt bestehen — ihre Mitfahrer duerfen deshalb
+        // NICHT verschwinden. Wer dort auf 'hin_rueck' steht, ist ab jetzt nur
+        // noch fuer die verbleibende Richtung dabei: Ist die Partnerfahrt die
+        // Hinfahrt (kleinere ID), wird daraus 'hin', sonst 'rueck'.
+        const richtungDanach = partnerId < id ? 'hin' : 'rueck';
         await conn.execute(
-          `DELETE p FROM mitfahrer p
-           JOIN mitfahrer e
-             ON e.fahrt_id = ?
-            AND e.name = p.name
-            AND (e.arbeitsstaette <=> p.arbeitsstaette)
-            AND e.richtung = 'hin_rueck'
-           WHERE p.fahrt_id = ? AND p.richtung = 'hin_rueck'`,
-          [id, partnerId]
+          `UPDATE mitfahrer SET richtung = ?
+           WHERE fahrt_id = ? AND richtung = 'hin_rueck'`,
+          [richtungDanach, partnerId]
         );
       }
 
