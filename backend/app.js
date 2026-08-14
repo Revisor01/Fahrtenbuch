@@ -45,10 +45,16 @@ const konfigurierteOrigins = (process.env.CORS_ORIGIN || 'https://kkd-fahrtenbuc
     .filter(Boolean);
 
 // Die mobilen Apps laufen als WebView und schicken feste, herstellerseitig
-// vergebene Origins: iOS 'capacitor://localhost', Android 'http://localhost'.
-// Sie stehen fest in der Allowlist statt über eine Wildcard, damit die
-// Web-Absicherung unangetastet bleibt.
-const APP_ORIGINS = ['capacitor://localhost', 'http://localhost'];
+// vergebene Origins: iOS 'capacitor://localhost', Android je nach
+// androidScheme 'https://localhost' (Standard) oder 'http://localhost'.
+// Beide Android-Varianten stehen drin, damit ein Wechsel des Schemas die App
+// nicht aussperrt. Feste Eintraege statt Wildcard, damit die Web-Absicherung
+// unangetastet bleibt.
+//
+// Unbedenklich trotz 'localhost': Die API authentifiziert ueber den
+// Authorization-Header, nicht ueber Cookies. Eine boesartige lokale Seite
+// koennte zwar Anfragen senden, haette aber kein gueltiges Token.
+const APP_ORIGINS = ['capacitor://localhost', 'https://localhost', 'http://localhost'];
 
 const erlaubteOrigins = [...new Set([...konfigurierteOrigins, ...APP_ORIGINS])];
 
