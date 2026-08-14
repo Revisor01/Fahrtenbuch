@@ -901,10 +901,9 @@ code {
   background-color: rgba(8, 32, 31, 0.42);
 }
 
-/* Unten so viel Luft, dass der letzte Eintrag nicht hinter der mobilen
-   Navigationsleiste liegt (~80px inkl. safe-area). In der PWA war die
-   unterste Zeile des Export-Sheets sonst nicht anklickbar. Ab 768px wird der
-   Wert wieder auf 24px gesetzt, dort gibt es keine untere Leiste. */
+/* Etwas Luft nach unten fuer bequemes Tippen am unteren Rand. Das Sheet liegt
+   per Portal am body und damit ueber der Navigationsleiste — ein groesseres
+   Polster als Ausgleich ist nicht mehr noetig. */
 .sheet-panel {
   position: relative;
   width: 100%;
@@ -912,7 +911,7 @@ code {
   overflow-y: auto;
   background-color: var(--surface);
   border-radius: 28px 28px 0 0;
-  padding: 12px 20px calc(96px + env(safe-area-inset-bottom, 0px));
+  padding: 12px 20px calc(32px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -8px 40px -12px rgba(8, 32, 31, 0.4);
   animation: sheet-in 300ms ease;
   outline: none;
