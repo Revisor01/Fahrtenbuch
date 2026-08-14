@@ -3,8 +3,7 @@ import axios from 'axios';
 import { aktuellerMonat } from '../utils/datum';
 import StatusDatumSheet from '../components/abrechnung/StatusDatumSheet';
 import { useToast } from '../components/ui/Toast';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../api/client';
 
 export const AppContext = createContext();
 
