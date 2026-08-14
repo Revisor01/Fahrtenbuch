@@ -111,7 +111,12 @@ export function useFahrtenExport() {
     let exportedMonths = [];
     if (istZeitraum) {
       const traegerStatus = summary.abrechnungsStatus?.[type] || {};
+      const betraegeProMonat = summary.erstattungenProMonat?.[type] || {};
       exportedMonths = monateImZeitraum(selectedVonMonth, selectedMonth).filter((mk) => {
+        // Monate ohne Fahrten dieses Trägers überspringen: Sie standen sonst
+        // dauerhaft als „eingereicht" in der Übersicht, obwohl es dort nichts
+        // einzureichen gab — und liessen sich nie abschliessen.
+        if (!(betraegeProMonat[mk] > 0)) return false;
         const sd = traegerStatus[mk];
         return !sd?.eingereicht_am && !sd?.erhalten_am;
       });
