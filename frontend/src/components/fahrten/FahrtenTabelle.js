@@ -23,13 +23,20 @@ const datumLang = (datum) => {
 };
 
 function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
-  // Zeigt beim Überfahren einer verknüpften Fahrt auch die Gegenfahrt
-  // hervorgehoben — Hin und Rück sind so sofort als Paar erkennbar, auch
-  // wenn andere Fahrten dazwischen stehen.
+  // Der Strich markiert immer die Zeile, auf der man gerade ist — auch bei
+  // Fahrten ohne Gegenstück. Gehört eine Gegenfahrt dazu, wird die zusätzlich
+  // hinterlegt (ohne Strich), damit das Paar sofort ins Auge fällt.
+  const [aktiveId, setAktiveId] = React.useState(null);
   const [paarId, setPaarId] = React.useState(null);
 
-  const merkePaar = (fahrt) => setPaarId(fahrt.partner_fahrt_id || null);
-  const vergissPaar = () => setPaarId(null);
+  const merkeZeile = (fahrt) => {
+    setAktiveId(fahrt.id);
+    setPaarId(fahrt.partner_fahrt_id || null);
+  };
+  const vergissZeile = () => {
+    setAktiveId(null);
+    setPaarId(null);
+  };
 
   return (
     <div className="fl-tablecard">
@@ -54,13 +61,13 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
               key={fahrt.id}
               type="button"
               className={`fl-tablerow fl-tablerow-tap${
-                paarId === fahrt.id ? ' fl-zeile-paar' : ''
-              }`}
+                aktiveId === fahrt.id ? ' fl-zeile-aktiv' : ''
+              }${paarId === fahrt.id ? ' fl-zeile-paar' : ''}`}
               onClick={() => onOeffnen(fahrt)}
-              onMouseEnter={() => merkePaar(fahrt)}
-              onMouseLeave={vergissPaar}
-              onFocus={() => merkePaar(fahrt)}
-              onBlur={vergissPaar}
+              onMouseEnter={() => merkeZeile(fahrt)}
+              onMouseLeave={vergissZeile}
+              onFocus={() => merkeZeile(fahrt)}
+              onBlur={vergissZeile}
               aria-label={`Fahrt ${von} nach ${nach} am ${datumLang(fahrt.datum)} — Aktionen öffnen`}
             >
               <span className="fl-td-datum num">{datumLang(fahrt.datum)}</span>

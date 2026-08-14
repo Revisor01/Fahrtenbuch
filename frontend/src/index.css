@@ -4733,15 +4733,19 @@ code {
   background-color: transparent;
 }
 
-/* Gegenfahrt hervorheben, solange die Maus auf der Partnerzeile steht.
-   Derselbe Ton wie der normale Hover (--surface-2), zusaetzlich ein schmaler
-   Streifen in der Markenfarbe an der linken Kante: So ist erkennbar, welche
-   Zeile man selbst anfaehrt und welche nur dazugehoert. Nur am Rechner
-   wirksam — mit dem Finger gibt es kein Hover. */
+/* Der Strich sitzt auf der Zeile, auf der man gerade ist — bei jeder Fahrt,
+   nicht nur bei verknuepften. Gehoert eine Gegenfahrt dazu, wird die nur
+   hinterlegt (gleicher Ton wie der Hover, ohne Strich): Man sieht sofort, wo
+   man ist und was dazugehoert. Nur am Rechner wirksam — mit dem Finger gibt
+   es kein Hover. */
+.fl-tablerow-tap.fl-zeile-aktiv,
+.dash-d-tablerow-tap.fl-zeile-aktiv {
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+
 .fl-tablerow-tap.fl-zeile-paar,
 .dash-d-tablerow-tap.fl-zeile-paar {
   background: var(--surface-2);
-  box-shadow: inset 3px 0 0 var(--brand);
 }
 
 /* Hin-und-Rueck-Paar: dezenter Doppelpfeil neben der Route. Gleiche gedeckte
