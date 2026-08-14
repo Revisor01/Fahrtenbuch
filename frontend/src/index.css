@@ -5433,6 +5433,14 @@ code {
   background: var(--brand-soft);
 }
 
+/* Breite Kachel ueber den Highlights — liegt ausserhalb des Rasters und ist
+   dadurch auch auf dem Desktop volle Breite. Rahmen in der Markenfarbe, weil
+   sie die wichtigste Neuerung traegt. */
+.neu-highlight-breit {
+  margin-bottom: 10px;
+  border-color: var(--brand);
+}
+
 .neu-highlight-icon {
   display: inline-flex;
   align-items: center;

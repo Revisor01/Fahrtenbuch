@@ -466,10 +466,11 @@ function Dashboard({ onNavigate }) {
       });
       // Die Rückfahrt in „Zuletzt" nachziehen: von/nach getauscht, gleiches
       // Datum wie die Hinfahrt.
+      const neueId = res.data?.id ?? `rueck-${fahrt.id}`;
       setRecent((prev) => [
         {
           ...fahrt,
-          id: res.data?.id ?? `rueck-${fahrt.id}`,
+          id: neueId,
           von_ort_id: fahrt.nach_ort_id,
           nach_ort_id: fahrt.von_ort_id,
           von_ort_name: fahrt.nach_ort_name,
@@ -478,8 +479,13 @@ function Dashboard({ onNavigate }) {
           einmaliger_nach_ort: fahrt.einmaliger_von_ort,
           anlass: fahrt.anlass ? `Rückfahrt: ${fahrt.anlass}` : 'Rückfahrt',
           mitfahrer: [],
+          // Beide Seiten sofort als Paar kennzeichnen — sonst erscheint der
+          // Doppelpfeil erst nach dem nächsten Laden
+          partner_fahrt_id: fahrt.id,
         },
-        ...(prev || []),
+        ...(prev || []).map((f) =>
+          f.id === fahrt.id ? { ...f, partner_fahrt_id: neueId } : f
+        ),
       ].slice(0, 5));
       await refreshAllData();
       toast.success('Rückfahrt angelegt.');
@@ -912,6 +918,15 @@ function Dashboard({ onNavigate }) {
                     <span className="dash-d-td-anlass">{fahrt.anlass || '—'}</span>
                     <span className="dash-d-td-route">
                       {fahrt.von_ort_name || fahrt.einmaliger_von_ort} → {zielName(fahrt)}
+                      {fahrt.partner_fahrt_id && (
+                        <span
+                          className="fl-paar-hinweis"
+                          title="Gehört zu einer Hin- und Rückfahrt"
+                        >
+                          <span aria-hidden="true">⇄</span>
+                          <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+                        </span>
+                      )}
                       {fahrt.mitfahrer?.length > 0 && (
                         <span
                           className="fl-mf-hinweis fl-mf-hinweis-leise"
