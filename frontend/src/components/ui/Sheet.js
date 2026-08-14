@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 // Bottom-Sheet nach Design-Spec (Redesign 2026):
 // - mobil: --surface, border-radius 28px 28px 0 0, Griff 44×5px --line-strong,
@@ -71,7 +72,12 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
 
   if (!isOpen) return null;
 
-  return (
+  // Per Portal direkt an den <body>: Bisher rendete das Sheet dort, wo die
+  // aufrufende Komponente steht — also INNERHALB der App-Shell und damit im
+  // selben Stapelkontext wie die Navigationsleiste. Deren Flaeche lag dadurch
+  // mobil ueber dem unteren Rand des Sheets, der Inhalt war dort nicht
+  // erreichbar. Am body gibt es diesen Konflikt nicht.
+  return createPortal(
     <div className={`sheet-root${wide ? ' sheet-root-wide' : ''}`}>
       <div className="sheet-overlay" onClick={onClose} aria-hidden="true" />
       <div
@@ -86,7 +92,8 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
         {title && <h2 className="sheet-title">{title}</h2>}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
