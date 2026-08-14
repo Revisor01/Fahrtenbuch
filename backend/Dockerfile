@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:24
 
 # LibreOffice Calc (headless) für den PDF-Export: Die fertige Excel-Arbeitsmappe
 # wird nach PDF konvertiert, damit der Ausdruck 1:1 dem offiziellen Formular
