@@ -64,6 +64,16 @@ class Mitfahrer {
     const partnerId = rows[0]?.partner_fahrt_id;
     if (!partnerId) return false;
 
+    // Eintraege, die nur fuer die GEGENrichtung gelten, an die richtige Fahrt
+    // verschieben: Wer beim Bearbeiten der Hinfahrt "nur zurueck" waehlt, meint
+    // die Rueckfahrt — und umgekehrt. Die kleinere ID ist die Hinfahrt.
+    const istHinfahrt = fahrtId < partnerId;
+    const falscheRichtung = istHinfahrt ? 'rueck' : 'hin';
+    await connection.execute(
+      'UPDATE mitfahrer SET fahrt_id = ? WHERE fahrt_id = ? AND richtung = ?',
+      [partnerId, fahrtId, falscheRichtung]
+    );
+
     // Gegenhaelften entfernen, die es hier nicht mehr gibt
     await connection.execute(
       `DELETE p FROM mitfahrer p
