@@ -1,296 +1,224 @@
-# Digitales Fahrtenbuch
+<p align="center">
+  <img src="frontend/public/icons/icon-256.png" alt="Fahrtenbuch" width="128" height="128">
+</p>
 
-Ein modernes, webbasiertes System zur Verwaltung und Abrechnung von Dienstfahrten. Entwickelt für Organisationen jeder Art, die eine professionelle Verwaltung ihrer Fahrtkosten benötigen.
+<h1 align="center">Fahrtenbuch</h1>
 
-[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](https://github.com/Revisor01/Fahrtenbuch)
-[![Docker Image Frontend](https://img.shields.io/docker/v/revisoren/fahrtenbuch-app)](https://hub.docker.com/r/revisoren/fahrtenbuch-app)
-[![Docker Image Backend](https://img.shields.io/docker/v/revisoren/fahrtenbuch-server)](https://hub.docker.com/r/revisoren/fahrtenbuch-server)
-[![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
+<p align="center">
+  Dienstfahrten erfassen und monatlich abrechnen.<br>
+  Für Mitarbeitende, die dienstlich mit dem eigenen Auto unterwegs sind — und die Abrechnung ohne Nacharbeit einreichen wollen.
+</p>
 
-## 🚀 Funktionen
+<p align="center">
+  <img src="https://img.shields.io/badge/Node-24-brightgreen?logo=nodedotjs" alt="Node 24">
+  <img src="https://img.shields.io/badge/React-18-blue?logo=react" alt="React 18">
+  <img src="https://img.shields.io/badge/Vite-6-purple?logo=vite" alt="Vite 6">
+  <img src="https://img.shields.io/badge/MySQL-8.4_LTS-orange?logo=mysql" alt="MySQL 8.4">
+  <img src="https://img.shields.io/docker/v/revisoren/fahrtenbuch-app?label=Docker&logo=docker" alt="Docker">
+  <img src="https://img.shields.io/badge/License-Custom-lightgrey" alt="License">
+</p>
 
-### Fahrtenverwaltung
-- Intuitive Erfassung von Dienstfahrten
-- Automatische Distanzberechnung zwischen gespeicherten Orten
-- Flexible Eingabe einmaliger Adressen
-- Rückfahrten mit einem Klick anlegen
-- Mitfahrer:innen-Management mit unterschiedlichen Fahrtrichtungen
-- Umfangreiche Bearbeitungsmöglichkeiten
+---
 
-### Abrechnungssystem
-- Mehrere Abrechnungsträger parallel verwaltbar
-- Unterschiedliche Kilometersätze pro Träger
-- Zeitabhängige Erstattungssätze (gültig ab einem bestimmten Datum)
-- Separate Mitfahrer-Erstattungssätze
-- Automatische Berechnung aller Erstattungen
-- Excel-Export im Standard-Format
-- Status-Tracking (eingereicht/erhalten)
+## Worum es geht
 
-### Berichtswesen
-- Monats- und Jahresübersichten
-- Filterung nach offenen/abgeschlossenen Abrechnungen
-- Detaillierte Einzelfahrten-Auflistung
-- Verschiedene Exportformate
+Wer dienstlich mit dem privaten Auto fährt, muss die Fahrten belegen und monatlich abrechnen. Das passiert oft in Excel-Tabellen, die von Hand ins offizielle Formular übertragen werden — fehleranfällig und mühsam.
 
-## 💻 Technische Details
+Diese App übernimmt beides: erfassen und abrechnen. **Der Export ist das offizielle Abrechnungsformular** — vollständig ausgefüllt, mit Unterschriftsfeldern, Kostenstelle und IBAN. Was herauskommt, kann direkt eingereicht werden.
 
-### Architektur
-- Frontend: React mit TailwindCSS
-- Backend: Node.js mit Express
-- Datenbank: MySQL 8
-- Deployment: Docker & Docker Compose
-- Kommunikation über REST-API
+## Funktionen
 
-### Sicherheit
-- JWT-basierte Authentifizierung
-- Rollenbasierte Zugriffskontrolle (RBAC)
-- API-Key Management für externe Zugriffe
-- SSL/TLS-Verschlüsselung
-- Sichere Passwortspeicherung (bcrypt)
-- CSRF-Schutz
-- XSS-Prävention
+### Fahrten erfassen
+- **Zwei-Schritt-Erfassung** — Ziel wählen, bestätigen, fertig. Anlass-Vorschläge aus dem Verlauf
+- **Automatische Kilometer** — Distanzen zwischen gespeicherten Orten werden gepflegt und wiederverwendet
+- **Adress-Vorschläge** — beim Tippen, auch für einmalige Ziele; Hausnummern werden übernommen
+- **Rückfahrt mit einem Tipp** — legt die Gegenrichtung am selben Tag an, verknüpft als Paar
+- **Favoriten** — wiederkehrende Strecken auf einen Tipp, wahlweise mit Rückfahrt
+- **Wohnort im Profil** — liefert die Anschrift für das Abrechnungsformular
 
-### API Integration
-- RESTful API
-- Swagger/OpenAPI Dokumentation (In Planung)
-- API-Key Authentifizierung
-- Rate Limiting
-- Vorgefertigte iOS-Shortcuts (Download-Link folgt)
+### Mitfahrer:innen
+- Je Fahrt erfassbar, mit Arbeitsstätte und Richtung (hin / zurück / beides)
+- **„Hin- und Rückfahrt" gilt für beide Fahrten** eines verknüpften Paares — sichtbar auf beiden, beim Löschen wird die Gegenhälfte mit entfernt
+- Eigener Erstattungssatz, getrennt ausgewiesen
 
-## 🔐 Registrierung und Zugriffskontrolle
+### Abrechnung
+- Mehrere Abrechnungsträger parallel, je mit eigenem Kilometersatz und Kostenstelle
+- **Zeitabhängige Sätze** — jede Fahrt wird mit dem Satz gerechnet, der an ihrem Datum galt
+- **Einzel- und Mehrmonats-Export** — etwa ein ganzes Quartal in einer Abrechnung
+- **Excel und PDF**, bei mehreren Dateien automatisch als ZIP
+- Statusverfolgung je Träger und Monat: erfasst → eingereicht → erstattet
 
-Das System bietet flexible Möglichkeiten zur Steuerung der Benutzerregistrierung:
+### Übersicht
+- Startseite mit offenen Beträgen, Monatssummen und den letzten Fahrten
+- Kilometer-Verlauf über das Jahr, aufschlüsselbar je Monat
+- Helles und dunkles Design, auf dem Handy wie am Rechner bedienbar
+- Installierbar als App (PWA)
 
-### Registrierungsoptionen:
+## Technik
 
-1. **Offene Registrierung**
-- Aktivierung durch `REACT_APP_ALLOW_REGISTRATION=true`
-- Jeder kann sich mit beliebiger E-Mail registrieren
+| Bereich | Stack |
+|---|---|
+| Frontend | React 18, Vite 6, Tailwind CSS |
+| Backend | Node.js 24, Express 4 |
+| Datenbank | MySQL 8.4 LTS |
+| Export | ExcelJS, LibreOffice (PDF) |
+| Betrieb | Docker Compose, Reverse Proxy |
 
-2. **Domain-beschränkte Registrierung**
-- `REACT_APP_ALLOW_REGISTRATION=true`
-- `REACT_APP_ALLOWED_EMAIL_DOMAINS=domain1.de,domain2.de`
-- Nur E-Mails von spezifizierten Domains erlaubt
+**Sicherheit:** JWT-Authentifizierung mit Ablauf, bcrypt für Passwörter, rollenbasierte Rechte, API-Keys für externe Zugriffe, Zod-Validierung aller Eingaben, Rate Limiting, Helmet-Header. Alle Datenbankabfragen sind auf die eigene Nutzer-ID begrenzt.
 
-3. **Code-geschützte Registrierung**
-- `REACT_APP_ALLOW_REGISTRATION=true`
-- `REACT_APP_REGISTRATION_CODE=geheimer-code`
-- Registrierung nur mit korrektem Code möglich
+**Konfiguration zur Laufzeit:** Titel, Registrierungsregeln und erlaubte Domains kommen aus Umgebungsvariablen des Containers — dasselbe Image läuft damit bei mehreren Organisationen.
 
-4. **Geschlossenes System**
-- `REACT_APP_ALLOW_REGISTRATION=false`
-- Nur Administratoren können neue Benutzer anlegen
+## Registrierung steuern
 
-## 🛠 Installation
+Vier Betriebsarten über Umgebungsvariablen:
 
-### Voraussetzungen
-- Docker & Docker Compose
-- Reverse Proxy (Apache/Nginx)
-- SSL-Zertifikat
-- Mind. 2GB RAM
-- 10GB Speicherplatz
+| Modus | Einstellung |
+|---|---|
+| Offen | `REACT_APP_ALLOW_REGISTRATION=true` |
+| Nur bestimmte Domains | zusätzlich `REACT_APP_ALLOWED_EMAIL_DOMAINS=domain.de,weitere.de` |
+| Nur mit Code | zusätzlich `REGISTRATION_CODE=…` (der Wert bleibt im Backend) |
+| Geschlossen | `REACT_APP_ALLOW_REGISTRATION=false` — nur Admins legen Konten an |
 
-### Quick Start (Docker Compose)
+## Installation
 
-1. Erstelle eine `.env`-Datei mit den benötigten Umgebungsvariablen (siehe Beispiel unten)
-2. Erstelle eine `docker-compose.yml` mit folgendem Inhalt:
+**Voraussetzungen:** Docker & Docker Compose, Reverse Proxy mit SSL, ~2 GB RAM.
 
 ```yaml
 services:
-frontend:
-image: revisoren/fahrtenbuch-app:latest
-ports:
-- "9642:80"
-environment:
-- REACT_APP_TITLE=${REACT_APP_TITLE}
-- REACT_APP_ALLOW_REGISTRATION=${REACT_APP_ALLOW_REGISTRATION}
-- REACT_APP_ALLOWED_EMAIL_DOMAINS=${REACT_APP_ALLOWED_EMAIL_DOMAINS}
-- REACT_APP_REGISTRATION_CODE=${REACT_APP_REGISTRATION_CODE}
-- NODE_ENV=production
-depends_on:
-- backend
-restart: unless-stopped
-command: sh -c "sed -i 's|DEFAULT_TITLE|$REACT_APP_TITLE|g' /usr/share/nginx/html/config.js && \
-sed -i 's|DEFAULT_ALLOW_REGISTRATION|$REACT_APP_ALLOW_REGISTRATION|g' /usr/share/nginx/html/config.js && \
-sed -i 's|DEFAULT_ALLOWED_EMAIL_DOMAINS|$REACT_APP_ALLOWED_EMAIL_DOMAINS|g' /usr/share/nginx/html/config.js && \
-sed -i 's|DEFAULT_REGISTRATION_CODE|$REACT_APP_REGISTRATION_CODE|g' /usr/share/nginx/html/config.js && \
-nginx -g 'daemon off;'"
+  frontend:
+    image: revisoren/fahrtenbuch-app:latest
+    ports:
+      - "9642:80"
+    environment:
+      - REACT_APP_TITLE=${REACT_APP_TITLE}
+      - REACT_APP_ALLOW_REGISTRATION=${REACT_APP_ALLOW_REGISTRATION}
+      - REACT_APP_ALLOWED_EMAIL_DOMAINS=${REACT_APP_ALLOWED_EMAIL_DOMAINS}
+      - REACT_APP_REGISTRATION_CODE=${REACT_APP_REGISTRATION_CODE}
+    depends_on:
+      - backend
+    restart: unless-stopped
 
-backend:
-image: revisoren/fahrtenbuch-server:latest
-ports:
-- "5000:5000"
-environment:
-- DB_HOST=${DB_HOST}
-- DB_USER=${DB_USER}
-- DB_PASSWORD=${DB_PASSWORD}
-- DB_NAME=${DB_NAME}
-- JWT_SECRET=${JWT_SECRET}
-- SMTP_HOST=${SMTP_HOST}
-- SMTP_PORT=${SMTP_PORT}
-- SMTP_SECURE=${SMTP_SECURE}
-- SMTP_USER=${SMTP_USER}
-- SMTP_PASSWORD=${SMTP_PASSWORD}
-- MAIL_FROM=${MAIL_FROM}
-- FRONTEND_URL=${FRONTEND_URL}
-- CORS_ORIGIN=${CORS_ORIGIN}
-- INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
-- INITIAL_ADMIN_USERNAME=${INITIAL_ADMIN_USERNAME}
-- INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
-- DEFAULT_ERSTATTUNG_TRAEGER=${DEFAULT_ERSTATTUNG_TRAEGER}
-- DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
-- DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
-- INITIAL_TRAEGER_1_NAME=${INITIAL_TRAEGER_1_NAME}
-- INITIAL_TRAEGER_2_NAME=${INITIAL_TRAEGER_2_NAME}
-- STANDARD_ORT_1_NAME=${STANDARD_ORT_1_NAME}
-- STANDARD_ORT_1_ADRESSE=${STANDARD_ORT_1_ADRESSE}
-- STANDARD_ORT_2_NAME=${STANDARD_ORT_2_NAME}
-- STANDARD_ORT_2_ADRESSE=${STANDARD_ORT_2_ADRESSE}
-- NODE_ENV=production
-restart: unless-stopped
-volumes:
-- fahrtenbuch_data:/app/data
-depends_on:
-- db
+  backend:
+    image: revisoren/fahrtenbuch-server:latest
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - INITIAL_ADMIN_USERNAME=${INITIAL_ADMIN_USERNAME}
+      - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
+      - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
+      - DEFAULT_ERSTATTUNG_TRAEGER=${DEFAULT_ERSTATTUNG_TRAEGER}
+      - DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
+      - DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
+      - NODE_ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
-db:
-image: mysql:8
-environment:
-MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-MYSQL_DATABASE: ${DB_NAME}
-MYSQL_USER: ${DB_USER}
-MYSQL_PASSWORD: ${DB_PASSWORD}
-volumes:
-- /opt/fahrtenbuch/db/mysql:/var/lib/mysql
-command: 
-- --character-set-server=utf8mb4
-- --collation-server=utf8mb4_unicode_ci
-- --log_bin_trust_function_creators=1
-- --innodb-use-native-aio=0
-healthcheck:
-test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-timeout: 5s
-retries: 10
-
-volumes:
-fahrtenbuch_data:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db/mysql:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --log_bin_trust_function_creators=1
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 ```
-
-3. Starte die Anwendung:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-### Beispiel `.env` Datei
+Die Datenbank wird beim ersten Start angelegt, Migrationen laufen automatisch mit. Der Admin-Zugang entsteht aus `INITIAL_ADMIN_*`.
+
+<details>
+<summary><b>Beispiel-<code>.env</code></b></summary>
 
 ```env
 # Datenbank
 DB_HOST=db
 DB_USER=fahrtenbuch
-DB_PASSWORD=secure-password
+DB_PASSWORD=sicheres-passwort
 DB_NAME=fahrtenbuch
 
-# JWT
-JWT_SECRET=your-secure-random-string
+# Authentifizierung
+JWT_SECRET=lange-zufallszeichenfolge
 
-# SMTP
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-user
-SMTP_PASSWORD=your-password
-MAIL_FROM=fahrtenbuch@example.com
+# E-Mail (Registrierung, Passwort zurücksetzen)
+SMTP_HOST=mail.example.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=noreply@example.com
+SMTP_PASSWORD=passwort
+MAIL_FROM=noreply@example.com
 
-# Frontend Configuration
+# Adressen
 FRONTEND_URL=https://fahrtenbuch.example.com
 CORS_ORIGIN=https://fahrtenbuch.example.com
-REACT_APP_TITLE=Digitales Fahrtenbuch
+
+# Oberfläche
+REACT_APP_TITLE=Fahrtenbuch
 REACT_APP_ALLOW_REGISTRATION=false
-REACT_APP_ALLOWED_EMAIL_DOMAINS=example.com,example.org
-REACT_APP_REGISTRATION_CODE=secret-code
+REACT_APP_ALLOWED_EMAIL_DOMAINS=
+REACT_APP_REGISTRATION_CODE=
 
-# Admin Account
-INITIAL_ADMIN_EMAIL=admin@example.com
+# Erster Admin
 INITIAL_ADMIN_USERNAME=admin
-INITIAL_ADMIN_PASSWORD=change-me
+INITIAL_ADMIN_PASSWORD=bitte-aendern
+INITIAL_ADMIN_EMAIL=admin@example.com
 
-# Erstattungssätze
+# Erstattungssätze beim ersten Start
 DEFAULT_ERSTATTUNG_TRAEGER=0.30
 DEFAULT_ERSTATTUNG_MITFAHRER=0.05
 DEFAULT_ERSTATTUNG_DATUM=2025-01-01
-
-# Initial Setup (Optional)
-INITIAL_TRAEGER_1_NAME=Kirchenkreis
-INITIAL_TRAEGER_2_NAME=Kirchengemeinde
-STANDARD_ORT_1_NAME=Meldorf
-STANDARD_ORT_1_ADRESSE=Nordermarkt 8, 25704 Meldorf
-STANDARD_ORT_2_NAME=Heide
-STANDARD_ORT_2_ADRESSE=Markt 16, 25746 Heide
 ```
+</details>
 
-## 🔧 Wartung
+## Betrieb
 
-### Backup
-Tägliches Backup empfohlen:
-
-1.  MySQL Datenbank
-2.  Upload-Verzeichnis
-3.  Konfigurationsdateien
-
-Backup-Script:
+**Update:**
 ```bash
-#!/bin/bash
-BACKUP_DIR="/backup/fahrtenbuch"
-DATE=$(date +%Y-%m-%d)
-
-# Datenbank
-docker exec fahrtenbuch-db \
-  mysqldump -u root -p${DB_PASSWORD} ${DB_NAME} \
-  > $BACKUP_DIR/db_${DATE}.sql
-
-# Dateien
-tar -czf $BACKUP_DIR/files_${DATE}.tar.gz \
-  /home/users/revisor/www/fahrtenbuch/
-
-# Aufräumen (30 Tage)
-find $BACKUP_DIR -type f -mtime +30 -exec rm {} \;
+docker compose pull && docker compose up -d
 ```
+Schema-Änderungen laufen beim Start des Backends automatisch. Vor einem Update mit Migration empfiehlt sich ein Backup.
 
-### Updates
-
+**Backup** — die Datenbank enthält alles Wesentliche:
 ```bash
-# Images aktualisieren
-docker-compose pull
-
-# Neustart
-docker-compose down
-docker-compose up -d
+docker exec fahrtenbuch-db-1 sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction fahrtenbuch' | gzip > backup-$(date +%F).sql.gz
 ```
+`--single-transaction` funktioniert im laufenden Betrieb ohne Sperre.
 
-### Monitoring
-- Container-Logs: `docker-compose logs`
-- MySQL-Logs: `docker-compose logs db`
-- API-Logs: `docker-compose logs backend`
+**Logs:** `docker compose logs -f backend`
 
-## 📝 Lizenz
+## Lizenz
 
-Copyright (c) 2025 Simon Luthe
+Copyright © 2026 Simon Luthe. Alle Rechte vorbehalten.
 
-Alle Rechte vorbehalten.
+Einzelpersonen dürfen die Software für private Zwecke frei nutzen. Die Nutzung durch Organisationen, Institutionen, Vereine, Kirchen oder andere juristische Personen bedarf einer vorherigen Vereinbarung — Anfragen an [mail@simonluthe.de](mailto:mail@simonluthe.de).
 
-Diese Software darf von Einzelpersonen für private Zwecke frei genutzt werden.
+Die Software wird ohne jede Gewährleistung bereitgestellt; eine Haftung für Schäden aus ihrer Nutzung ist ausgeschlossen.
 
-Die Nutzung dieser Software durch Organisationen, Institutionen, Vereine, Kirchen oder andere juristische Personen ist nur nach vorheriger Vereinbarung mit dem Urheberrechtsinhaber gestattet.
+## Kontakt
 
-Für eine Nutzungsvereinbarung kontaktieren Sie bitte [mail@simonluthe.de](mailto:mail@simonluthe.de).
-
-## Haftungsausschluss
-
-DIESE SOFTWARE WIRD "WIE BESEHEN" OHNE JEGLICHE AUSDRÜCKLICHE ODER STILLSCHWEIGENDE GARANTIE ZUR VERFÜGUNG GESTELLT, EINSCHLIESSLICH, ABER NICHT BESCHRÄNKT AUF DIE GARANTIEN DER MARKTGÄNGIGKEIT, DER EIGNUNG FÜR EINEN BESTIMMTEN ZWECK UND DER NICHTVERLETZUNG VON RECHTEN DRITTER. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHT-INHABER HAFTBAR FÜR ANSPRÜCHE, SCHÄDEN ODER ANDERE VERPFLICHTUNGEN, SEI ES DURCH VERTRAG, UNERLAUBTE HANDLUNG ODER ANDERWEITIG, DIE SICH AUS, AUSSERHALB ODER IM ZUSAMMENHANG MIT DER SOFTWARE ODER DER NUTZUNG ODER ANDEREN GESCHÄFTEN MIT DER SOFTWARE ERGEBEN.
-
-## 📞 Support
-
-Bei Fragen oder Problemen:
-- GitHub Issues
-- E-Mail: [mail@simonluthe.de](mailto:mail@simonluthe.de)
+GitHub Issues · [mail@simonluthe.de](mailto:mail@simonluthe.de)
