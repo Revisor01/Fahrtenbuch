@@ -10,6 +10,7 @@ import StatusBadge from './ui/StatusBadge';
 import { useToast } from './ui/Toast';
 import { statusFromAbrechnung } from '../utils/statusLabels';
 import { Star, Pencil, RotateCw, ArrowLeftRight, ChevronRight } from 'lucide-react';
+import { API_BASE_URL } from '../api/client';
 
 // Dashboard (Redesign 2026, Phase R4).
 //
@@ -18,8 +19,6 @@ import { Star, Pencil, RotateCw, ArrowLeftRight, ChevronRight } from 'lucide-rea
 // bewusst nicht verwendet. Alle Daten kommen aus `monthlyData` (ungefilterte
 // Monats-Aggregate) plus einem eigenen Abruf der jüngsten Monatsreports für
 // die „Zuletzt"-Liste (liefert Erstattung + Mitfahrer je Fahrt).
-
-const API_BASE_URL = '/api';
 
 const formatEuro = (betrag) => (Number(betrag) || 0).toFixed(2).replace('.', ',');
 
