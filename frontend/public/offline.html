@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0F5257" />
+    <title>Offline · Fahrtenbuch</title>
+    <!-- Bewusst ohne externe Dateien und ohne Bundle: diese Seite muss auch
+         dann tragen, wenn sonst nichts aus dem Cache kommt. Die Farben sind
+         die Token-Werte aus tokens.css, hier fest hinterlegt. -->
+    <style>
+      :root {
+        --bg: #eff3f3;
+        --surface: #ffffff;
+        --line: #d2dede;
+        --text: #08201f;
+        --text-2: #47605f;
+        --brand: #0f5257;
+        --on-brand: #ffffff;
+        --shadow: 0 1px 2px rgba(8, 32, 31, 0.05), 0 8px 24px -12px rgba(8, 32, 31, 0.18);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #071214;
+          --surface: #0f2225;
+          --line: #22474a;
+          --text: #e4f0ef;
+          --text-2: #9cb5b4;
+          --brand: #35b6aa;
+          --on-brand: #032220;
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -14px rgba(0, 0, 0, 0.7);
+        }
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.5;
+      }
+
+      .karte {
+        width: 100%;
+        max-width: 420px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 32px 24px;
+        text-align: center;
+      }
+
+      .zeichen {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 20px;
+        border-radius: 999px;
+        background: var(--brand);
+        color: var(--on-brand);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      p {
+        margin: 0 0 24px;
+        color: var(--text-2);
+        font-size: 15px;
+      }
+
+      button {
+        width: 100%;
+        min-height: 48px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--brand);
+        color: var(--on-brand);
+        font: inherit;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="karte">
+      <div class="zeichen" aria-hidden="true">!</div>
+      <h1>Keine Verbindung</h1>
+      <p>
+        Das Fahrtenbuch braucht eine Internetverbindung, um Fahrten und
+        Abrechnungen zu laden. Sobald du wieder online bist, geht es weiter.
+      </p>
+      <button type="button" onclick="window.location.reload()">Erneut versuchen</button>
+    </div>
+  </body>
+</html>
