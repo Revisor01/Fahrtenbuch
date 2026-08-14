@@ -9,6 +9,7 @@ import { ToastProvider } from './components/ui/Toast';
 import AppProvider from './contexts/AppContext';
 import { ErfassungProvider } from './contexts/ErfassungContext';
 import AppContent from './components/AppContent';
+import PwaUpdater from './components/PwaUpdater';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
     <ThemeProvider>
     <BrowserRouter>
     <ToastProvider>
+    <PwaUpdater />
     <AppProvider>
     <ErfassungProvider>
     <Routes>

@@ -5,6 +5,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
+## [Unreleased] - 2.3.0
+
+### Hinzugefügt
+- Das Fahrtenbuch lässt sich als App auf Startbildschirm oder Desktop installieren und startet dann ohne Browser-Leiste
+- Beim ersten Start der App lässt sich der eigene Kirchenkreis aus einer Liste wählen; die Anmeldung läuft danach gegen dessen Fahrtenbuch. Kommt ein Kirchenkreis dazu, erscheint er ohne App-Update
+- Bei einer neuen Version erscheint ein Hinweis mit „Neu laden" — der Wechsel passiert erst nach Bestätigung, laufende Eingaben gehen nicht verloren
+- Ohne Internetverbindung öffnet die App weiterhin und meldet klar, dass gerade keine Verbindung besteht, statt eine leere Browser-Fehlerseite zu zeigen; sobald die Verbindung zurück ist, gibt es ebenfalls einen Hinweis
+
+### Sonstiges
+- Fahrten und Abrechnungen werden bewusst nicht offline zwischengespeichert: angezeigte Zahlen stammen immer vom Server
+- Die App darf auf iOS und Android auf die Schnittstelle zugreifen, ohne dass die Absicherung der Weboberfläche gelockert wird
+
 ## [2.2.0] - 2026-08-14
 
 ### Added
