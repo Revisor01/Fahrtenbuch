@@ -315,7 +315,8 @@ function Dashboard({ onNavigate }) {
   const [favFrage, setFavFrage] = useState(null);
   // Angetippte Fahrt in „Zuletzt": zeigt Details + Aktionen
   const [aktionsFahrt, setAktionsFahrt] = useState(null);
-  // Gegenfahrt mit hervorheben, solange die Maus auf der Partnerzeile steht
+  // Strich auf der Zeile unter der Maus, Gegenfahrt nur hinterlegt
+  const [aktiveId, setAktiveId] = useState(null);
   const [paarId, setPaarId] = useState(null);
 
   const handleFavorit = (fav, mitRueckfahrt = false) => {
@@ -882,13 +883,25 @@ function Dashboard({ onNavigate }) {
                   key={fahrt.id}
                   type="button"
                   className={`dash-d-tablerow dash-d-tablerow-tap${
-                    paarId === fahrt.id ? ' fl-zeile-paar' : ''
-                  }`}
+                    aktiveId === fahrt.id ? ' fl-zeile-aktiv' : ''
+                  }${paarId === fahrt.id ? ' fl-zeile-paar' : ''}`}
                   onClick={() => setAktionsFahrt(fahrt)}
-                  onMouseEnter={() => setPaarId(fahrt.partner_fahrt_id || null)}
-                  onMouseLeave={() => setPaarId(null)}
-                  onFocus={() => setPaarId(fahrt.partner_fahrt_id || null)}
-                  onBlur={() => setPaarId(null)}
+                  onMouseEnter={() => {
+                    setAktiveId(fahrt.id);
+                    setPaarId(fahrt.partner_fahrt_id || null);
+                  }}
+                  onMouseLeave={() => {
+                    setAktiveId(null);
+                    setPaarId(null);
+                  }}
+                  onFocus={() => {
+                    setAktiveId(fahrt.id);
+                    setPaarId(fahrt.partner_fahrt_id || null);
+                  }}
+                  onBlur={() => {
+                    setAktiveId(null);
+                    setPaarId(null);
+                  }}
                   disabled={!!fahrt._optimistisch}
                   aria-label={`Fahrt nach ${zielName(fahrt)} — Aktionen öffnen`}
                 >
