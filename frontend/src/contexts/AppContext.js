@@ -168,7 +168,17 @@ function AppProvider({ children }) {
   // fest, ob der Nutzer angemeldet ist — bis dahin rendert die App einen
   // Ladezustand statt der Anmeldemaske.
   useEffect(() => {
+    // Notbremse: Antwortet der Systemspeicher gar nicht — etwa weil das
+    // Geraet gesperrt ist oder das Plugin nicht laedt —, stuende die App
+    // sonst dauerhaft im Ladezustand und man kaeme nie zur Anmeldung.
+    // Lieber ohne gespeicherte Anmeldung weiter als gar nicht.
+    const notbremse = setTimeout(() => {
+      console.error('Anmeldedaten nicht rechtzeitig lesbar — weiter zur Anmeldung.');
+      setAnmeldungGeladen(true);
+    }, 5000);
+
     (async () => {
+      try {
       // Vor dem ersten Lesen: Bestand aus localStorage in den sicheren
       // Speicher uebernehmen (nur nativ, im Web ein No-Op).
       await migriereAusLocalStorage();
@@ -206,8 +216,18 @@ function AppProvider({ children }) {
         setIsLoggedIn(true);
       }
       if (userDaten) setUser(userDaten);
-      setAnmeldungGeladen(true);
+      } catch (error) {
+        // Ein Fehler beim Lesen darf nicht dazu fuehren, dass die App im
+        // Ladezustand stehen bleibt. Ohne gespeicherte Anmeldung landet man
+        // auf der Anmeldemaske — das ist der richtige Ausgang.
+        console.error('Anmeldedaten konnten nicht gelesen werden:', error);
+      } finally {
+        clearTimeout(notbremse);
+        setAnmeldungGeladen(true);
+      }
     })();
+
+    return () => clearTimeout(notbremse);
   }, []);
 
   useEffect(() => {

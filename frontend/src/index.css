@@ -6360,3 +6360,21 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .startbildschirm-inhalt { animation-duration: 1ms; }
 }
+
+/* Fehlermeldung auf dem Startbildschirm. Bewusst schmal und lesbar: In der
+   App gibt es keine Entwicklerkonsole, das ist die einzige Stelle, an der
+   ein Fehler ueberhaupt sichtbar wird. */
+.startbildschirm-fehler {
+  max-width: 320px;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--r-btn);
+  background: rgba(0, 0, 0, .18);
+  color: var(--on-brand);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+}
