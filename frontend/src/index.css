@@ -6,6 +6,13 @@
    Basis-Typografie & Grundfläche (Redesign 2026)
    ============================================================ */
 
+/* html braucht eine eigene Flaeche: Ohne sie faellt der Bereich ausserhalb
+   des body — sichtbar beim Ueberscrollen und unter der Home-Anzeige in der
+   App — auf das weisse Standard-Weiss zurueck, auch im dunklen Modus. */
+html {
+  background-color: var(--bg);
+}
+
 body {
   margin: 0;
   font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -6301,15 +6308,19 @@ code {
    In der App loest diese Flaeche zugleich den nativen Startbildschirm ab,
    der dieselbe Farbe traegt — der Wechsel ist dadurch unsichtbar. */
 .startbildschirm {
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* Fest ueber dem gesamten Viewport statt nur 100dvh hoch: Bei
+     ausgeblendeter Adressleiste und unter der Home-Anzeige blieb sonst ein
+     Streifen frei, durch den das weisse Standard-Dokument schien. Die
+     Markenflaeche muss bis in die Safe Areas reichen — der Abstand zum Rand
+     gehoert an den Inhalt, nicht an die Flaeche. */
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
   background: var(--brand);
+  z-index: 1;
 }
 
 .startbildschirm-inhalt {

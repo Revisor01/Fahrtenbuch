@@ -168,8 +168,6 @@ function AppProvider({ children }) {
   // fest, ob der Nutzer angemeldet ist — bis dahin rendert die App einen
   // Ladezustand statt der Anmeldemaske.
   useEffect(() => {
-    let abgebrochen = false;
-
     (async () => {
       // Vor dem ersten Lesen: Bestand aus localStorage in den sicheren
       // Speicher uebernehmen (nur nativ, im Web ein No-Op).
@@ -189,7 +187,13 @@ function AppProvider({ children }) {
         await loescheWert(SCHLUESSEL_USER);
       }
 
-      if (abgebrochen) return;
+      // Kein vorzeitiges return bei `abgebrochen`: React ruft den Effekt im
+      // Strict Mode zweimal auf und raeumt den ersten Durchlauf dazwischen ab.
+      // Kehrte der erste hier zurueck, bliebe `anmeldungGeladen` in genau dem
+      // Fall false, in dem der zweite Durchlauf noch laeuft — die App haenge
+      // dann dauerhaft im Ladezustand. Im Web fiel das nie auf, weil
+      // localStorage synchron antwortet; der Systemspeicher der App braucht
+      // dagegen einen Moment und trifft dieses Zeitfenster.
       if (gespeicherterToken) {
         // Header und isLoggedIn hier direkt mitsetzen statt sie dem
         // token-Effekt zu ueberlassen: der laeuft erst einen Render spaeter,
@@ -204,8 +208,6 @@ function AppProvider({ children }) {
       if (userDaten) setUser(userDaten);
       setAnmeldungGeladen(true);
     })();
-
-    return () => { abgebrochen = true; };
   }, []);
 
   useEffect(() => {
