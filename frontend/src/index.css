@@ -192,8 +192,15 @@ code {
     color: var(--danger);
   }
 
+  /* Auswahlfelder brauchen rechts Platz fuer den Pfeil, den das System selbst
+     zeichnet. Mit dem geerbten 16px-Padding lief der Text darunter — lange
+     Traegernamen im Fahrt-Dialog wirkten dadurch angeschnitten
+     (User-Feedback 14.08.). text-overflow greift bei <select> nicht auf allen
+     Systemen, deshalb loest hier allein der Platz das Problem. */
   .form-select {
     @apply form-input;
+    padding-right: 40px;
+    text-overflow: ellipsis;
   }
 
   /* Mehrzeilige Felder: Höhe frei, Padding aus der Skala */
@@ -2982,11 +2989,17 @@ code {
   color: var(--text);
 }
 
-/* ---------- Fahrt-Karten mit Swipe (< 768px) ---------- */
+/* ---------- Fahrten-Liste mobil (< 768px) ----------
+   Muster der Dashboard-Liste „Zuletzt": EINE Karte, darin Zeilen mit
+   Trennlinie statt einzeln schwebender Karten (User-Feedback 14.08.).
+   Die Einzelkarten kosteten Rahmen und Luecke je Fahrt und zerlegten die
+   Liste optisch — bei 30 Fahrten im Monat war kaum noch Uebersicht da. */
 .fl-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  margin-bottom: 22px;
 }
 
 @media (min-width: 768px) {
@@ -2995,17 +3008,16 @@ code {
   }
 }
 
-/* Karte: --surface, --r-card, 14/16px Padding. Ein Tipp oeffnet das
-   Aktions-Sheet - die fruehere Swipe-Geste konkurrierte mit dem Scrollen
-   und war nicht auffindbar. */
-.fl-card {
+/* Zeile: wie .dash-zuletzt-row, nur mit Platz fuer den Chevron rechts */
+.fl-zeile {
   position: relative;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  padding: 14px 16px;
+  padding: 14px 32px 14px 16px;
+  border: none;
+  background: transparent;
   font: inherit;
   color: inherit;
   text-align: left;
@@ -3013,18 +3025,101 @@ code {
   transition: background-color 150ms ease;
 }
 
-.fl-card-tap:hover {
+.fl-zeile + .fl-zeile {
+  border-top: 1px solid var(--line);
+}
+
+.fl-zeile-tap:hover:not(:disabled) {
   background: var(--surface-2);
 }
 
-/* Kinder sind jetzt spans im Button und brauchen Blockverhalten zurueck */
-.fl-card-tap > .fl-card-kopf,
-.fl-card-tap > .fl-card-zeile,
-.fl-card-tap > .fl-card-mitfahrer {
-  display: flex;
+.fl-zeile:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--brand);
 }
 
-.fl-card-chevron {
+.fl-zeile-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Anlass + Paar-Hinweis in einer Zeile, damit „⇄" am Titel klebt */
+.fl-zeile-titel {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fl-zeile-anlass {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-zeile-route {
+  display: block;
+  font-size: 13px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Leise Zeile: Datum · Traeger · Mitfahrer, rechts daneben der Statuspunkt */
+.fl-zeile-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-3, var(--text-2));
+}
+
+/* Nur der Text kuerzt; der Statuspunkt daneben behaelt seine Groesse */
+.fl-zeile-sub-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-zeile-status {
+  flex-shrink: 0;
+}
+
+/* Zahlen rechts: km fuehrend, Betrag leise darunter — beide nie umbrechend.
+   Feste Mindestbreite, damit die Spalte ueber alle Zeilen buendig steht;
+   ohne sie richtete sich jede Zeile nach ihrer eigenen Zahl aus. */
+.fl-zeile-werte {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  min-width: 84px;
+}
+
+.fl-zeile-km {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fl-zeile-betrag {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.fl-zeile-chevron {
   position: absolute;
   top: 50%;
   right: 10px;
@@ -3033,98 +3128,6 @@ code {
   pointer-events: none;
 }
 
-/* Platz fuer den Chevron, damit er keinen Text ueberdeckt */
-.fl-card-tap {
-  padding-right: 32px;
-}
-
-.fl-card:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
-}
-
-.fl-card-kopf {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 6px;
-}
-
-.fl-card-datum {
-  font-size: 13px;
-  color: var(--text-3);
-}
-
-.fl-card-zeile {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.fl-card-zeile + .fl-card-zeile {
-  margin-top: 3px;
-}
-
-.fl-card-ziel {
-  flex: 1;
-  min-width: 0;
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fl-card-km {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-}
-
-.fl-card-sub {
-  flex: 1;
-  min-width: 0;
-  font-size: 14px;
-  color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Route „von → nach" unter dem Anlass */
-.fl-card-route {
-  flex: 1;
-  min-width: 0;
-  font-size: 14px;
-  color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fl-card-betrag {
-  font-size: 14px;
-  color: var(--text-2);
-  white-space: nowrap;
-}
-
-.fl-card-mitfahrer {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--brand);
-}
-
-.fl-card-mitfahrer span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* ---------- Export-Sheet ---------- */
 .fl-export-sub {
@@ -5729,7 +5732,7 @@ code {
   justify-content: flex-end;
 }
 
-.fl-tablerow-tap .fl-card-chevron {
+.fl-tablerow-tap .fl-zeile-chevron {
   position: static;
   transform: none;
 }
@@ -6146,21 +6149,14 @@ code {
   );
 }
 
+/* In der nativen Huelle uebernimmt der prominente Knopf der Systemleiste das
+   Erfassen (NAV_ITEMS: role 'prominent'). Der schwebende Knopf entfaellt
+   deshalb dort ganz — zwei Einstiege nebeneinander waeren doppelt, und er sass
+   ohne Bezug zur Leiste ueber dem Inhalt (User-Feedback 14.08.).
+   Im Web bleibt er unveraendert der Einstieg. */
 [data-platform="ios"] .dash-fab,
 [data-platform="android"] .dash-fab {
-  bottom: calc(
-    var(--cap-native-tabbar-height, 64px) +
-      var(--cap-native-navigation-bottom, 0px) + 16px
-  );
-  /* 56 statt 62 Pixel: Das ist auf beiden Systemen das uebliche Mass fuer
-     diese Schaltflaeche. Mit 62 und dem kraeftigen Schatten sass sie zu
-     wuchtig auf dem Inhalt — neben der nativen Leiste faellt das zusaetzlich
-     auf. Der Schatten wird entsprechend zurueckgenommen. */
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  font-size: 26px;
-  box-shadow: 0 6px 16px -6px rgba(8, 32, 31, 0.45);
+  display: none;
 }
 
 /* ---------- entfernt: CSS-Nachbau der Leisten ----------

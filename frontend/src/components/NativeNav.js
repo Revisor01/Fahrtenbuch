@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../ThemeContext';
 import { overlayBeobachten } from '../utils/overlayStack';
 
@@ -55,6 +55,14 @@ const SYMBOLE = {
         '<path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>' +
         '<path d="M12 17.5v-11"/>'
     ),
+  },
+  // Prominenter Knopf: das Plus ist auf beiden Systemen das Zeichen fuer
+  // „neu anlegen". Kein gefuelltes Gegenstueck — der Knopf hat keinen
+  // ausgewaehlten Zustand, er loest nur aus.
+  erfassen: {
+    ios: { sfSymbol: 'plus' },
+    iosAktiv: { sfSymbol: 'plus' },
+    android: svg('<path d="M12 5v14"/><path d="M5 12h14"/>'),
   },
   einstellungen: {
     ios: { sfSymbol: 'gearshape' },
@@ -133,8 +141,15 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
   // Aktuelle Callbacks als Ref: Der Listener wird nur EINMAL angemeldet. Waere
   // onSelect eine Abhaengigkeit, meldete er sich bei jedem Render neu an — in
   // der Luecke dazwischen gingen Taps ins Leere.
-  const stand = useRef({ onSelect, aktivId });
-  stand.current = { onSelect, aktivId };
+  // Ids, die nur eine Aktion ausloesen und keinen Screen oeffnen (role
+  // 'prominent'/'search'). Sie duerfen in der Leiste nicht ausgewaehlt bleiben.
+  const aktionsIds = useMemo(
+    () => new Set(items.filter((i) => i.role && i.role !== 'normal').map((i) => i.id)),
+    [items]
+  );
+
+  const stand = useRef({ onSelect, aktivId, aktionsIds });
+  stand.current = { onSelect, aktivId, aktionsIds };
 
   // Was die native Leiste zuletzt SELBST gemeldet hat. Kommt ein Wechsel von
   // dort, hat sie ihre Auswahl bereits umgestellt; ein Rueckruf nach nativ
@@ -179,7 +194,21 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
         })
           .then(() =>
             NativeNavigation.addListener('tabSelect', (ereignis) => {
-              const { onSelect: waehle, aktivId: aktuell } = stand.current;
+              const { onSelect: waehle, aktivId: aktuell, aktionsIds: aktionen } =
+                stand.current;
+              // Aktions-Eintraege (der prominente Knopf) haben keinen Screen.
+              // Die Leiste hat ihn beim Tippen trotzdem als ausgewaehlt
+              // markiert — deshalb NICHT als bekannten Stand merken, sondern
+              // die Auswahl sofort auf den offenen Tab zuruecksetzen. Sonst
+              // bliebe der Knopf hervorgehoben, obwohl nur ein Sheet aufging.
+              if (aktionen?.has(ereignis.id)) {
+                nativBekannt.current = null;
+                pluginRef.current
+                  ?.setTabbar({ selectedId: aktuell, animated: false })
+                  .catch(() => {});
+                waehle(ereignis.id);
+                return;
+              }
               nativBekannt.current = ereignis.id;
               // Gleicher Tab: nichts zu tun. Sonst liefe bei jedem Tippen auf
               // den offenen Tab ein Zustandswechsel samt Haptik.
@@ -235,6 +264,9 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
       selectedIcon: plattform === 'ios' ? symbolFuer(item.id, plattform, true) : undefined,
       // Native Badges kuerzen selbst — der frueher noetige "9+"-Trick entfaellt.
       badge: item.id === badgeId && badgeAnzahl > 0 ? badgeAnzahl : undefined,
+      // 'prominent' loest den Eintrag aus der Kapsel und stellt ihn als runden
+      // Knopf daneben. Ohne role bleibt es beim normalen Tab.
+      role: item.role,
     }));
 
     plugin
