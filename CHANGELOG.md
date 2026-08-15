@@ -18,14 +18,19 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Ein Tabwechsel in der App gibt eine kurze, dezente Rückmeldung über die Vibration des Geräts
 - Die Zurück-Taste auf Android schließt zuerst ein offenes Fenster, geht dann eine Seite zurück, danach auf die Startseite — und beendet die App erst, wenn es nichts mehr zurückzugehen gibt
 - Beim Öffnen der App erscheint ein Startbildschirm mit Logo und Namen, bis die Anmeldung geladen ist
+- Von der Anmeldung der App führt ein Weg zurück zur Auswahl der Kirchenkreise, falls man sich vertan hat
 
 ### Geändert
 - In der App liegt die Anmeldung jetzt im gesicherten Bereich des Geräts statt im Browserspeicher, geschützt durch die Bildschirmsperre. Wer bereits angemeldet ist, bleibt es — die Übernahme passiert beim ersten Start von selbst. Im Browser ändert sich nichts
 - Beim Start der App erscheint kurz eine ruhige Fläche, bis die gespeicherte Anmeldung gelesen ist; die Anmeldemaske blitzt dadurch nicht mehr auf, wenn man bereits angemeldet ist
 - Die Anmeldung hält jetzt, solange man das Fahrtenbuch benutzt — das tägliche Neuanmelden entfällt. Wer es längere Zeit nicht öffnet, wird weiterhin abgemeldet; an geteilten Rechnern bleibt also niemand dauerhaft angemeldet
+- Das Logo auf der Anmeldeseite zeigt jetzt dasselbe Zeichen wie das App-Symbol, samt Punkt am offenen Ende des Rings
 
 ### Behoben
+- In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
 - In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler
+- In der App standen oben und unten helle bzw. schwarze Streifen an den Rändern des Bildschirms. Die Ränder tragen jetzt die Farbe des jeweiligen Bildschirms — Petrol auf Startbildschirm und Anmeldung, die normale Fläche in der angemeldeten Ansicht, hell wie dunkel. Auch die Uhrzeit und die Symbole der Statusleiste sind dadurch immer lesbar
+- Auf dem iPhone lag am oberen Rand dauerhaft ein weicher Schleier, auch wenn gar nichts gescrollt war. Er erscheint jetzt nur noch, wenn Inhalt unter den oberen Rand läuft
 
 ### Sonstiges
 - Fahrten und Abrechnungen werden bewusst nicht offline zwischengespeichert: angezeigte Zahlen stammen immer vom Server
