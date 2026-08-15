@@ -324,10 +324,7 @@ function AppContent() {
 
       <div className="app-main">
         {/* Inhaltsbereich: scrollt selbst, Nav bleibt stehen */}
-        <main
-          ref={inhaltRef}
-          className={`app-content${istGescrollt ? ' ist-gescrollt' : ''}`}
-        >
+        <main className="app-content">
           <div className="app-content-inner">
             {activeTab === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
             {activeTab === 'fahrten' && <FahrtenListe />}
