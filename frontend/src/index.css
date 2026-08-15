@@ -6293,3 +6293,59 @@ code {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
+/* ---------- Startbildschirm ----------
+   Erscheint, waehrend die gespeicherte Anmeldung gelesen wird. Bewusst
+   dieselbe Markenflaeche wie die Anmeldeseite: so springt der Uebergang
+   nicht, wenn danach die Anmeldung erscheint.
+   In der App loest diese Flaeche zugleich den nativen Startbildschirm ab,
+   der dieselbe Farbe traegt — der Wechsel ist dadurch unsichtbar. */
+.startbildschirm {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  background: var(--brand);
+}
+
+.startbildschirm-inhalt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  /* Ruhiges Erscheinen statt hartem Aufblitzen. Kurz genug, dass es bei
+     schnellem Start nicht als Verzoegerung wahrgenommen wird. */
+  animation: startbildschirm-auf 420ms ease-out both;
+}
+
+.startbildschirm-logo {
+  display: flex;
+  color: var(--on-brand);
+}
+
+.startbildschirm-name {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--on-brand);
+}
+
+.startbildschirm-text {
+  font-size: 14px;
+  font-weight: 500;
+  /* Gedaempft, damit der Name die Hauptsache bleibt. */
+  color: color-mix(in srgb, var(--on-brand) 72%, transparent);
+}
+
+@keyframes startbildschirm-auf {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startbildschirm-inhalt { animation-duration: 1ms; }
+}
