@@ -10,7 +10,7 @@ import { setServerKonfig } from '../utils/appConfig';
 // Ueberlegung wie beim sicheren Speicher (utils/tokenSpeicher.js): Ein Fehler
 // laesst sich fangen, ein Aufruf ohne Antwort nicht. Lieber mit den bisherigen
 // Werten weiter als eine App, die auf dem Startbildschirm stehen bleibt.
-const KONFIG_TIMEOUT_MS = 4000;
+const KONFIG_TIMEOUT_MS = 2500;
 
 // Die Werte muessen exakt so aussehen wie die aus config.js, weil sie an
 // denselben Stellen ausgewertet werden: dort steht 'true' als Zeichenkette.
