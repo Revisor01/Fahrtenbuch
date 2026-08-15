@@ -8,6 +8,12 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
         <string>Fahrtenbuch</string>
+	<!-- Ohne diesen Text fragt iOS gar nicht erst nach der Erlaubnis, und der
+	     Standort bleibt kommentarlos leer. Der Text erscheint im Dialog und
+	     muss erklaeren, wofuer der Standort gebraucht wird — sonst weist
+	     Apple die App zurueck. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Damit die App den aktuellen Standort als Startort einer Fahrt übernehmen kann.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

@@ -3,6 +3,7 @@ import { Building2, RefreshCw } from 'lucide-react';
 import { AuthLogo } from './LoginPage';
 import { ladeInstanzen } from '../api/instanzen';
 import { setApiBaseUrl } from '../api/client';
+import { splashAusblenden } from '../utils/splash';
 
 // Erster Start der App: Auswahl des Kirchenkreises, gegen dessen Server die
 // Anmeldung laeuft. Erscheint ausschliesslich in der nativen Huelle — im Web
@@ -11,6 +12,10 @@ import { setApiBaseUrl } from '../api/client';
 // Layout bewusst im bestehenden Auth-Look (Petrol-Vollflaeche + Karte), damit
 // der Uebergang zur direkt folgenden Anmeldung nicht springt.
 function InstanzAuswahl({ onGewaehlt, aktuelleUrl }) {
+  // Loest den nativen Startbildschirm ab: Beim allerersten Start ist dies der
+  // erste eigene Bildschirm, nicht der Startbildschirm.
+  useEffect(() => { splashAusblenden(); }, []);
+
   const [instanzen, setInstanzen] = useState([]);
   const [quelle, setQuelle] = useState(null);
   const [laedt, setLaedt] = useState(true);

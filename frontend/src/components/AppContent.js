@@ -175,15 +175,19 @@ function AppContent() {
   // kurz auf, weil der sichere Speicher erst asynchron antwortet. Dasselbe gilt
   // fuer die Instanz-Konfiguration: ohne sie fehlte auf der Anmeldung z. B. der
   // Weg zur Registrierung.
-  if (!anmeldungGeladen) {
-    return <Startbildschirm />;
-  }
+  // Ein einziger Ladezustand bis feststeht, was tatsaechlich zu zeigen ist.
+  //
+  // Zuvor gab es zwei aufeinanderfolgende Bedingungen: erst die gespeicherte
+  // Anmeldung, dann die Instanz-Konfiguration. Dazwischen lag ein Moment, in
+  // dem die Anmeldemaske schon gerendert wurde, obwohl gleich darauf das
+  // Dashboard kam — sie blitzte sichtbar auf.
+  //
+  // Auf die Konfiguration wird weiterhin nur gewartet, wenn die Anmeldemaske
+  // wirklich gebraucht wird: Wer angemeldet ist, sieht ihr Ergebnis nie.
+  const wartetNochAufAnmeldung = !anmeldungGeladen;
+  const wartetNochAufKonfig = !isLoggedIn && !konfigGeladen;
 
-  // Auf die Instanz-Konfiguration wird nur gewartet, wenn die Anmeldemaske
-  // tatsaechlich gezeigt wird — nur dort haengt etwas davon ab (der Weg zur
-  // Registrierung). Wer bereits angemeldet ist, wartete sonst beim Start auf
-  // eine Anfrage, deren Ergebnis er gar nicht sieht.
-  if (!isLoggedIn && !konfigGeladen) {
+  if (wartetNochAufAnmeldung || wartetNochAufKonfig) {
     return <Startbildschirm />;
   }
 
