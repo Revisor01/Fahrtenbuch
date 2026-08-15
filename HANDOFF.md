@@ -14,28 +14,18 @@ Die Web-App unter kkd-fahrtenbuch.de ist **produktiv und unverändert**
 
 Branch `master`, 26 Commits. Die Begründungen stehen in den Commit-Nachrichten.
 
-## LÄUFT GERADE — zuerst prüfen!
+## Erledigt seit dem Schreiben dieser Übergabe
 
-Ein Agent bearbeitet drei Punkte und hat **uncommittete Änderungen** im Baum:
-`AppContent.js`, `FahrtenListe.js`, `NativeNav.js`, `fahrten/FahrtKarte.js`,
-`fahrten/FahrtenTabelle.js`, `index.css`.
+Build 13 enthält zusätzlich (Commit `f69ae96`):
+- Fahrtenliste im Zeilenmuster der Startseite statt Einzelkarten
+- Auswahlfelder schneiden den Text nicht mehr ab (Pfeil-Platz gefehlt)
+- „Fahrt hinzufügen" ist ein hervorgehobener Eintrag der nativen Leiste
+  statt eines frei schwebenden Knopfs. Im Web unverändert.
 
-Seine Aufgaben (Simons Wortlaut):
-1. „Layout der Fahrten unter Dashboard ist 100% funktionaler und besser als die
-   Einzel Cards unter Fahrten. Abgleichen." — Dashboard-Muster (`Dashboard.js`,
-   Variable `recent`) auf die Fahrtenliste übertragen. **Achtung:** Die
-   Fahrtenliste kann mehr als das Dashboard (Wischen für Bearbeiten/Löschen,
-   Mitfahrer, Status) — das muss erhalten bleiben.
-2. „Im Fahrt Modal muss Rechnungsträger umrechnen nicht angeschnitten werden."
-   — Feld im Bearbeiten-Dialog (`FahrtForm.js`) wird abgeschnitten. Hängt
-   vermutlich mit dem Sheet-Umbau zusammen (fester Kopf, scrollender Körper).
-3. „Das Fahrt hinzufügen muss einfach ein ganz anders hin. Das hängt einfach
-   Random rum." — Der schwebende Knopf `.dash-fab` soll neu gedacht werden.
-   Aussichtsreich: ein hervorgehobener Eintrag in der nativen Leiste
-   (`NativeNavigationTabRole` mit `prominent`, siehe Plugin-Typdefinitionen).
-
-**Erster Schritt im neuen Gespräch:** `git status` und `git diff` ansehen,
-Ergebnis prüfen, bauen, committen. Nicht blind übernehmen.
+**Von Simon noch nicht bewertet.** Ungeprüft blieb: die Liste mit echten
+Daten in der angemeldeten App, und der Ablauf Tap auf „+" bis zum offenen
+Erfassungs-Dialog (der Plugin-Teil ist am Simulator verifiziert, die
+Verdrahtung nur im Code).
 
 ## Was noch offen ist
 
