@@ -17,6 +17,7 @@
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
+    "@capgo/capacitor-native-navigation": "^8.3.0",
     "@heroicons/react": "^2.2.0",
     "axios": "^1.7.7",
     "jszip": "^3.10.1",
