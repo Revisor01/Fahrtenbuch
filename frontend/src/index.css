@@ -5953,3 +5953,343 @@ code {
 .dash-d-tablerow > *:nth-child(5) {
   padding-right: 8px;
 }
+
+/* ============================================================
+   Plattform-Navigation (nur native Huelle)
+   ------------------------------------------------------------
+   Greift ausschliesslich unter [data-platform="ios"] bzw.
+   [data-platform="android"]. Das Attribut wird nur gesetzt, wenn die
+   Capacitor-Bruecke aktiv ist — im Browser und in der PWA bleibt jede Regel
+   hier wirkungslos, die Weboberflaeche veraendert sich nicht.
+
+   Safe-Area defensiv: aeltere Android-WebViews (vor Chromium 140) liefern
+   env(safe-area-inset-*) unzuverlaessig oder 0. max() gegen eine eigene
+   Variable laesst sich notfalls nativ befuellen, ohne das CSS anzufassen.
+   ============================================================ */
+:root {
+  --safe-area-inset-bottom: 0px;
+  --safe-area-inset-top: 0px;
+}
+
+/* ---------- iOS 26: schwebende Capsule ---------- */
+
+/* Der Balken schwebt UEBER dem Inhalt (position: fixed), nicht im Fluss —
+   das ist der sichtbarste Unterschied zu iOS 18. Der Abstand nach unten kommt
+   aus bottom:, nicht aus einem Innenabstand: nur so bleibt zwischen Capsule
+   und Home-Indicator echte Luft. */
+[data-platform="ios"] .ios-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom)) + 10px);
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+/* GLASFLAECHE 1 von maximal 2. Mehrere gleichzeitig sichtbare
+   backdrop-filter-Flaechen bringen Capacitor-iOS-Apps zum Absturz
+   (ionic-team/capacitor#7450). Deshalb: Glas ausschliesslich an der
+   Navigation, Sheets/Modals/Karten bleiben deckend. Das deckt sich mit Apples
+   eigener Regel "kein Glas auf Glas".
+   Beide Schreibweisen, weil -webkit- bis iOS 17.7 noetig ist. */
+[data-platform="ios"] .ios-tabbar-glas {
+  pointer-events: auto;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  max-width: 420px;
+  padding: 6px;
+  border-radius: var(--r-pill);
+  background-color: color-mix(in srgb, var(--surface) 76%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 8px 32px -10px rgba(8, 32, 31, 0.34);
+}
+
+/* Fallback ohne backdrop-filter: dann deckend, sonst steht Text auf Inhalt. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-platform="ios"] .ios-tabbar-glas {
+    background-color: var(--surface);
+  }
+}
+
+/* .dark und data-platform sitzen beide am <html> — daher am selben Element
+   verknuepfen, nicht als Nachfahre. */
+[data-platform="ios"].dark .ios-tabbar-glas {
+  background-color: color-mix(in srgb, var(--surface) 82%, transparent);
+  box-shadow: 0 8px 32px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* Konzentrisch: innerRadius = outerRadius − padding. Bei der Capsule laeuft
+   das auf eine Capsule hinaus. Mindestens 44pt Trefferflaeche (belegte
+   HIG-Zahl; Bar-Hoehen publiziert Apple seit iOS 26 nicht mehr, deshalb
+   ergibt sich die Hoehe hier aus Polster + Inhalt). */
+[data-platform="ios"] .ios-tab {
+  flex: 1 1 0;
+  min-height: var(--tap-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Crossfade beim Wechsel — kein horizontales Sliden: das ist ein
+     Android-Idiom und laesst iOS sofort falsch wirken. */
+  transition: color 180ms ease-out, opacity 180ms ease-out;
+}
+
+[data-platform="ios"] .ios-tab.is-active {
+  color: var(--brand);
+}
+
+[data-platform="ios"] .ios-tab:active {
+  opacity: 0.55;
+}
+
+[data-platform="ios"] .ios-tab-icon {
+  position: relative;
+  display: flex;
+}
+
+/* Gefuelltes Symbol fuer den aktiven Tab (SF-Idiom). lucide zeichnet Strokes;
+   ein Fill auf currentColor liefert die gefuellte Variante, ohne ein zweites
+   Icon-Set einzufuehren. */
+[data-platform="ios"] .ios-tab.is-active .ios-tab-icon svg {
+  fill: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+[data-platform="ios"] .ios-tab-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Faelligkeit auf iOS als Badge-Idiom (Zahl), nicht als blosser Punkt. */
+[data-platform="ios"] .ios-tab-badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--r-pill);
+  background-color: var(--accent);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Der Balken schwebt, liegt also nicht mehr im Fluss: der Inhalt braucht
+   unten eigenen Platz, sonst verschwindet die letzte Zeile darunter. */
+[data-platform="ios"] .app-content-inner {
+  padding-bottom: calc(96px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom)));
+}
+
+[data-platform="ios"] .dash-fab {
+  bottom: calc(96px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom)));
+}
+
+/* GLASFLAECHE 2 von maximal 2: Scroll Edge Effect am oberen Rand statt der
+   frueheren Haarlinie. Nur auf iOS, nur dieses eine Element — zusammen mit der
+   Tab-Bar sind das genau zwei, mehr darf nie gleichzeitig sichtbar sein. */
+[data-platform="ios"] .app-content::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top)) + 8px);
+  z-index: 45;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+/* ---------- Android: Material Design 3 (Expressive) ---------- */
+
+/* 64dp Inhaltshoehe plus Safe Area. Kein Schatten und keine Trennlinie: MD3
+   trennt die Bar ueber den Farbkontrast surface-container gegen surface. */
+[data-platform="android"] .md-navbar {
+  display: flex;
+  flex-shrink: 0;
+  height: calc(64px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom)));
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom));
+  background-color: var(--surface);
+}
+
+[data-platform="android"] .md-nav-item {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* State Layer statt Ripple: MD3 legt eine Deckfarbe des Vordergrunds mit
+   fester Deckkraft ueber die Flaeche (0.08 hover, 0.10 pressed). Ein
+   CSS-Ripple waere eine Nachahmung, die nie zum System passt. */
+[data-platform="android"] .md-nav-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--text);
+  opacity: 0;
+  transition: opacity 100ms linear;
+  pointer-events: none;
+}
+
+[data-platform="android"] .md-nav-item:active::after {
+  opacity: 0.1;
+}
+
+[data-platform="android"] .md-nav-icon-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 32px;
+}
+
+/* Active Indicator 56x32dp, radius 16px. Er GLEITET NICHT zwischen den Tabs:
+   jedes Item hat seinen eigenen, der am Ort von scaleX 0 auf 1 waechst und
+   am verlassenen Tab wieder zusammenfaellt. Eine wandernde Pille waere das
+   falsche Idiom.
+   Kurve: emphasized-decelerate. */
+[data-platform="android"] .md-nav-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background-color: var(--brand-soft);
+  opacity: 0;
+  transform: scaleX(0);
+  transition:
+    transform 300ms cubic-bezier(0.05, 0.7, 0.1, 1),
+    opacity 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+[data-platform="android"] .md-nav-item.is-active .md-nav-indicator {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+[data-platform="android"] .md-nav-icon {
+  position: relative;
+  display: flex;
+  color: var(--text-2);  /* on-surface-variant */
+  transition: color 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+/* Aktives Icon und aktives Label tragen bewusst UNTERSCHIEDLICHE Farbrollen —
+   Icon on-secondary-container, Label on-surface. Beide gleich einzufaerben ist
+   der haeufigste Fehler bei MD3-Navigationsleisten. */
+[data-platform="android"] .md-nav-item.is-active .md-nav-icon {
+  color: var(--brand);  /* on-secondary-container */
+}
+
+/* Label 12px statt der 14px aus der Spec: bei vier bis fuenf Eintraegen bricht
+   „Einstellungen" auf 360dp sonst um. */
+[data-platform="android"] .md-nav-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--text-2);  /* on-surface-variant */
+  transition: color 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+[data-platform="android"] .md-nav-item.is-active .md-nav-label {
+  font-weight: 600;
+  color: var(--text);  /* on-surface */
+}
+
+/* Faelligkeit auf Android als Punkt am Indicator. */
+[data-platform="android"] .md-nav-dot {
+  position: absolute;
+  top: -1px;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background-color: var(--accent);
+}
+
+[data-platform="android"] .md-nav-item:focus-visible {
+  outline: none;
+}
+
+[data-platform="android"] .md-nav-item:focus-visible .md-nav-indicator {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 0 2px var(--brand);
+}
+
+/* Die Bar liegt im Fluss — der zusaetzliche Sockel der Web-Nav entfaellt. */
+[data-platform="android"] .app-content-inner {
+  padding-bottom: 24px;
+}
+
+[data-platform="android"] .dash-fab {
+  bottom: calc(80px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom)));
+}
+
+/* ---------- Bewegungsreduktion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-platform="ios"] .ios-tab,
+  [data-platform="android"] .md-nav-indicator,
+  [data-platform="android"] .md-nav-icon,
+  [data-platform="android"] .md-nav-label,
+  [data-platform="android"] .md-nav-item::after {
+    transition-duration: 1ms;
+  }
+
+  /* Ohne Bewegung darf der Indicator nicht "aufploppen": er ist dann einfach
+     sofort da. */
+  [data-platform="android"] .md-nav-indicator {
+    transform: scaleX(1);
+  }
+
+  [data-platform="android"] .md-nav-item:not(.is-active) .md-nav-indicator {
+    opacity: 0;
+  }
+}
+
+/* ---------- Crash-Schutz: hoechstens zwei Glasflaechen ----------
+   In der nativen Huelle darf ausser Tab-Bar und Scroll-Edge KEIN weiteres
+   Element unscharf hinterlegt sein: mehrere gleichzeitige backdrop-filter
+   bringen Capacitor-iOS-Apps zum Absturz. Das Legacy-Modal-Overlay behaelt
+   seine Abdunklung, verliert aber die Unschaerfe — im Browser bleibt es
+   unveraendert. */
+[data-platform="ios"] .modal-backdrop,
+[data-platform="android"] .modal-backdrop {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
