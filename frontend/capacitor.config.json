@@ -1,0 +1,21 @@
+{
+  "appId": "de.godsapp.fahrtenbuch",
+  "appName": "Fahrtenbuch",
+  "webDir": "build",
+  "ios": {
+    "contentInset": "always"
+  },
+  "android": {
+    "backgroundColor": "#0F5257"
+  },
+  "plugins": {
+    "Keyboard": {
+      "resize": "body",
+      "resizeOnFullScreen": true
+    },
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#0F5257"
+    }
+  }
+}
