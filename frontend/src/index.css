@@ -4480,6 +4480,22 @@ code {
   margin-bottom: 24px;
 }
 
+/* Ring und Punkt wie im App-Icon. Der Punkt bleibt sandfarben, weil er das
+   Zeichen unverwechselbar macht; im dunklen Design steht das Logo auf hellem
+   Petrol, dort traegt nur der dunklere Sandton. */
+.auth-logo-ring {
+  stroke: var(--on-brand);
+}
+
+.auth-logo-punkt {
+  fill: #e8b461;
+}
+
+.dark .auth-logo-punkt,
+[data-theme="dark"] .auth-logo-punkt {
+  fill: #8a5a12;
+}
+
 .auth-titel {
   font-size: 26px;
   font-weight: 600;
@@ -4570,6 +4586,18 @@ code {
 
 .auth-foot:hover {
   opacity: 1;
+}
+
+/* .auth-foot als Schaltflaeche (Kirchenkreis wechseln in der App) */
+.auth-foot-btn {
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 12px;
 }
 
 .auth-hinweis {
@@ -5976,6 +6004,57 @@ code {
 :root {
   --safe-area-inset-bottom: 0px;
   --safe-area-inset-top: 0px;
+}
+
+/* ---------- Systemraender einfaerben (nur native Huelle) ----------
+   Die WebView zeichnet unter Statusleiste und Home-Anzeige. Sichtbar wird dort
+   die Flaeche des <html>-Elements — nicht die des vordersten Bildschirms.
+   Bisher stand dort immer --bg; auf der Anmeldung und dem Startbildschirm
+   (beide ganzflaechig Petrol) blieben deshalb oben und unten helle bzw. im
+   Dunkelmodus schwarze Streifen stehen.
+
+   Loesung: Der sichtbare Bildschirm meldet seine Flaeche als data-flaeche an
+   <html> (siehe utils/systemflaeche.js), und <html> uebernimmt sie. Beide
+   Attribute sitzen am selben Element, deshalb ohne Nachfahren-Kombinator.
+   Im Browser wird data-platform nie gesetzt — die Weboberflaeche bleibt
+   unveraendert. */
+[data-platform="ios"][data-flaeche="brand"],
+[data-platform="android"][data-flaeche="brand"] {
+  background-color: var(--brand);
+}
+
+[data-platform="ios"][data-flaeche="app"],
+[data-platform="android"][data-flaeche="app"] {
+  background-color: var(--bg);
+}
+
+/* Der body deckt html sonst wieder mit --bg zu: Er ist zwar nur so hoch wie
+   sein Inhalt, faerbt aber bei .auth-page (min-height 100dvh) genau den
+   Bereich, um den es geht. Auf der Markenflaeche muss er durchsichtig sein. */
+[data-platform="ios"][data-flaeche="brand"] body,
+[data-platform="android"][data-flaeche="brand"] body {
+  background-color: transparent;
+}
+
+/* Die App-Shell laesst oben Platz fuer die Statusleiste. Ohne diesen Abstand
+   liefe der Inhalt unter die Uhr — mit ihm scheint dort die Flaeche von <html>
+   durch, und die stimmt jetzt. 100dvh bleibt: die Shell fuellt den Bildschirm,
+   der Abstand geht innen ab. */
+[data-platform="ios"] .app-shell,
+[data-platform="android"] .app-shell {
+  padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top));
+  box-sizing: border-box;
+}
+
+/* Anmeldung und Startbildschirm reichen bewusst BIS in die Systemraender —
+   die Markenflaeche soll durchlaufen. Der Inhalt haelt trotzdem Abstand,
+   sonst klebt die Karte unter der Uhr. */
+[data-platform="ios"] .auth-page,
+[data-platform="android"] .auth-page,
+[data-platform="ios"] .startbildschirm,
+[data-platform="android"] .startbildschirm {
+  padding-top: calc(24px + max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top)));
+  padding-bottom: calc(24px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom)));
 }
 
 /* ---------- iOS 26: schwebende Capsule ---------- */

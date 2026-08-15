@@ -16,6 +16,7 @@ const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const instanzenRoutes = require('./routes/instanzen');
+const konfigRoutes = require('./routes/konfig');
 const { authMiddleware } = require('./middleware/authMiddleware');
 const { apiLimiter, schreibLimiter, exportLimiter } = require('./middleware/rateLimiter');
 
@@ -101,7 +102,7 @@ app.use(express.static(reactBuildPath));
 // Rate-Limiting fuer die Datenrouten. Anmeldung und Passwort-Reset sind
 // ausgenommen: sie tragen eigene, engere Limits, und wer sich anmelden will,
 // darf nicht daran scheitern, dass jemand anderes die API ausgelastet hat.
-const OHNE_GLOBALES_LIMIT = ['/api/auth/', '/api/users/reset-password', '/api/users/set-password', '/api/users/verify-email', '/api/instanzen'];
+const OHNE_GLOBALES_LIMIT = ['/api/auth/', '/api/users/reset-password', '/api/users/set-password', '/api/users/verify-email', '/api/instanzen', '/api/konfig'];
 const istAuthPfad = (req) => OHNE_GLOBALES_LIMIT.some((p) => req.originalUrl.startsWith(p));
 
 app.use('/api', (req, res, next) => (istAuthPfad(req) ? next() : apiLimiter(req, res, next)));
@@ -116,6 +117,7 @@ app.use('/api/fahrten/export-pdf-range', exportLimiter);
 // API routes
 // Instanz-Verzeichnis ohne authMiddleware: die App braucht es vor dem Login.
 app.use('/api/instanzen', instanzenRoutes);
+app.use('/api/konfig', konfigRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/keys', apiKeyRoutes);
 app.use('/api/users', userRoutes);

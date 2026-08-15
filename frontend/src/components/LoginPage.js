@@ -9,24 +9,29 @@ import { appConfigValue } from '../utils/appConfig';
 // rgba(255,255,255,.14), Titel 26px/600 --on-brand, Formularkarte
 // --surface/--r-card/24px. Registrierung und Passwort-vergessen laufen
 // im selben Layout (Kartentausch statt Modal).
+
+// Geometrie eins zu eins aus public/icons/icon.svg, damit Logo und App-Icon
+// dasselbe Zeichen zeigen: offener Ring plus Sand-Punkt am oberen Ende der
+// Luecke. Der Punkt misst 52 von 512 Einheiten — bei 26px Anzeige rund 2,6px
+// und damit sichtbar, solange er sich farblich vom Ring absetzt. Die Farben
+// kommen aus dem Stylesheet (.auth-logo), weil sie im dunklen Design kippen.
 export function AuthLogo() {
   return (
     <div className="auth-logo" aria-hidden="true">
       <svg viewBox="0 0 512 512" width="26" height="26">
-        <g transform="rotate(-45 256 256)">
-          <path
-            d="M256 118a138 138 0 1 1 -97.6 40.4"
-            fill="none"
-            stroke="var(--on-brand)"
-            strokeWidth="46"
-          />
-        </g>
+        <path
+          className="auth-logo-ring"
+          d="M159.2,158.3c54-53.4,141-53,194.5.9,53.4,54,53,141-.9,194.5-54,53.4-141,53-194.5-.9-25.7-25.9-40-61-39.8-97.4"
+          fill="none"
+          strokeWidth="45"
+        />
+        <circle className="auth-logo-punkt" cx="126.8" cy="202.2" r="26" />
       </svg>
     </div>
   );
 }
 
-function LoginPage() {
+function LoginPage({ onInstanzWechsel }) {
   const { login, showNotification } = useContext(AppContext);
   const toast = useToast();
 
@@ -234,6 +239,16 @@ function LoginPage() {
         </div>
 
         <Link to="/help" className="auth-foot">Hilfe & Tutorials</Link>
+
+        {/* Nur in der App: Der Wechsel des Kirchenkreises ist die Ausnahme,
+            deshalb unauffaellig unter der Hilfe statt als Knopf in der Karte.
+            Waehrend Registrierung oder Passwort-Reset wuerde er vom laufenden
+            Vorgang ablenken. */}
+        {onInstanzWechsel && view === 'login' && (
+          <button type="button" className="auth-foot auth-foot-btn" onClick={onInstanzWechsel}>
+            Kirchenkreis wechseln
+          </button>
+        )}
       </div>
     </div>
   );

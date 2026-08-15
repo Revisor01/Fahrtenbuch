@@ -16,9 +16,11 @@ import { AppContext } from '../contexts/AppContext';
 import { aktuellerMonat } from '../utils/datum';
 import { PLATTFORM, IST_NATIVE } from '../utils/plattform';
 import { auswahlHaptik } from '../utils/haptik';
+import { setzeSystemflaeche } from '../utils/systemflaeche';
 import NativeNav from './NativeNav';
 import useZurueckButton from './useZurueckButton';
-import { getApiBaseUrl } from '../api/client';
+import { getApiBaseUrl, setApiBaseUrl } from '../api/client';
+import { ladeServerKonfig } from '../api/konfig';
 
 // Das Zeichen: offener Ring (die gefahrene Strecke), um −45° gedreht.
 // Ab 32px Darstellungsgröße trägt der Ring allein (ohne Akzent-Punkt).
@@ -58,6 +60,32 @@ function AppContent() {
   const [instanzGewaehlt, setInstanzGewaehlt] = useState(
     () => !IST_NATIVE || Boolean(getApiBaseUrl())
   );
+
+  // Die App kennt ihre Instanz-Konfiguration (Titel, Registrierung, erlaubte
+  // Domains) erst, wenn der Server gefragt wurde — im Web liefert sie die
+  // config.js des Deployments, dort ist hier nichts zu tun.
+  const [konfigGeladen, setKonfigGeladen] = useState(!IST_NATIVE);
+
+  // Die aktuelle Basis-URL als Ausloeser: Sie aendert sich sowohl bei der
+  // ersten Wahl als auch beim spaeteren Wechsel in den Einstellungen (der nur
+  // abmeldet, ohne die Auswahl neu zu oeffnen). Sonst zeigte die Anmeldung
+  // nach einem Wechsel noch die Angaben des vorherigen Kirchenkreises.
+  const aktuelleApiUrl = getApiBaseUrl();
+
+  useEffect(() => {
+    if (!IST_NATIVE || !instanzGewaehlt) return undefined;
+    let abgemeldet = false;
+    setKonfigGeladen(false);
+    // Der Aufruf faengt seine Fehler selbst und hat eine eigene Zeitgrenze:
+    // ohne Antwort gelten die Werte aus dem Bundle, die Anmeldung erscheint
+    // trotzdem.
+    ladeServerKonfig().finally(() => {
+      if (!abgemeldet) setKonfigGeladen(true);
+    });
+    return () => {
+      abgemeldet = true;
+    };
+  }, [instanzGewaehlt, aktuelleApiUrl]);
 
   // Extended navigation: supports "einstellungen:favoriten" deeplinks
   const handleNavigate = (target) => {
@@ -120,19 +148,53 @@ function AppContent() {
     onNavigate: handleNavigate,
   });
 
+  // Welche Flaeche traegt der gerade sichtbare Bildschirm? Startbildschirm,
+  // Kirchenkreis-Wahl und Anmeldung sind ganzflaechig Petrol, die angemeldete
+  // Ansicht traegt die normale App-Flaeche. Davon haengen in der App die
+  // Farbe der Systemraender und die Symbolfarbe der Statusleiste ab.
+  // Muss vor den fruehen Returns stehen (Hook-Reihenfolge); im Web ist der
+  // Aufruf ein No-Op.
+  const markenflaeche =
+    !instanzGewaehlt || !anmeldungGeladen || !konfigGeladen || !isLoggedIn;
+
+  useEffect(() => {
+    setzeSystemflaeche(markenflaeche ? 'brand' : 'app', isDark);
+  }, [markenflaeche, isDark]);
+
   if (!instanzGewaehlt) {
-    return <InstanzAuswahl onGewaehlt={() => setInstanzGewaehlt(true)} />;
+    return (
+      <InstanzAuswahl
+        onGewaehlt={() => setInstanzGewaehlt(true)}
+        aktuelleUrl={aktuelleApiUrl}
+      />
+    );
   }
 
   // Erst wenn die gespeicherte Anmeldung gelesen ist, steht fest, ob die
   // Anmeldemaske gehoert wird. Ohne dieses Gate blitzte sie beim Start der App
-  // kurz auf, weil der sichere Speicher erst asynchron antwortet.
-  if (!anmeldungGeladen) {
+  // kurz auf, weil der sichere Speicher erst asynchron antwortet. Dasselbe gilt
+  // fuer die Instanz-Konfiguration: ohne sie fehlte auf der Anmeldung z. B. der
+  // Weg zur Registrierung.
+  if (!anmeldungGeladen || !konfigGeladen) {
     return <Startbildschirm />;
   }
 
   if (!isLoggedIn) {
-    return <LoginPage />;
+    return (
+      // Zurueck zur Kirchenkreis-Wahl nur in der App: Im Web gibt es keine
+      // Auswahl, dort steht der Server fest. Die gemerkte Instanz muss dabei
+      // weg, sonst startet die App gleich wieder mit derselben.
+      <LoginPage
+        onInstanzWechsel={
+          IST_NATIVE
+            ? () => {
+                setApiBaseUrl('');
+                setInstanzGewaehlt(false);
+              }
+            : undefined
+        }
+      />
+    );
   }
 
   const isAdmin = user?.role === 'admin';
@@ -262,7 +324,10 @@ function AppContent() {
 
       <div className="app-main">
         {/* Inhaltsbereich: scrollt selbst, Nav bleibt stehen */}
-        <main className="app-content">
+        <main
+          ref={inhaltRef}
+          className={`app-content${istGescrollt ? ' ist-gescrollt' : ''}`}
+        >
           <div className="app-content-inner">
             {activeTab === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
             {activeTab === 'fahrten' && <FahrtenListe />}
