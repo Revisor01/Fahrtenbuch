@@ -75,7 +75,11 @@ function AppContent() {
   useEffect(() => {
     if (!IST_NATIVE || !instanzGewaehlt) return undefined;
     let abgemeldet = false;
-    setKonfigGeladen(false);
+    // Bewusst KEIN Zuruecksetzen auf "laedt": Der Effekt laeuft auch beim
+    // Start erneut, sobald die Basis-URL feststeht. Wurde hier zurueckgesetzt,
+    // erschien der Startbildschirm ein zweites Mal — fuer die volle Dauer der
+    // Anfrage. Wer angemeldet ist, sieht das Ergebnis ohnehin nie; die
+    // Anmeldemaske ergaenzt sich, sobald die Werte eintreffen.
     // Der Aufruf faengt seine Fehler selbst und hat eine eigene Zeitgrenze:
     // ohne Antwort gelten die Werte aus dem Bundle, die Anmeldung erscheint
     // trotzdem.
@@ -155,7 +159,7 @@ function AppContent() {
   // Muss vor den fruehen Returns stehen (Hook-Reihenfolge); im Web ist der
   // Aufruf ein No-Op.
   const markenflaeche =
-    !instanzGewaehlt || !anmeldungGeladen || !konfigGeladen || !isLoggedIn;
+    !instanzGewaehlt || !anmeldungGeladen || !isLoggedIn;
 
   useEffect(() => {
     setzeSystemflaeche(markenflaeche ? 'brand' : 'app', isDark);
@@ -172,9 +176,6 @@ function AppContent() {
 
   // Erst wenn die gespeicherte Anmeldung gelesen ist, steht fest, ob die
   // Anmeldemaske gehoert wird. Ohne dieses Gate blitzte sie beim Start der App
-  // kurz auf, weil der sichere Speicher erst asynchron antwortet. Dasselbe gilt
-  // fuer die Instanz-Konfiguration: ohne sie fehlte auf der Anmeldung z. B. der
-  // Weg zur Registrierung.
   // Ein einziger Ladezustand bis feststeht, was tatsaechlich zu zeigen ist.
   //
   // Zuvor gab es zwei aufeinanderfolgende Bedingungen: erst die gespeicherte
@@ -184,10 +185,15 @@ function AppContent() {
   //
   // Auf die Konfiguration wird weiterhin nur gewartet, wenn die Anmeldemaske
   // wirklich gebraucht wird: Wer angemeldet ist, sieht ihr Ergebnis nie.
-  const wartetNochAufAnmeldung = !anmeldungGeladen;
-  const wartetNochAufKonfig = !isLoggedIn && !konfigGeladen;
-
-  if (wartetNochAufAnmeldung || wartetNochAufKonfig) {
+  // Es wird nur auf die gespeicherte Anmeldung gewartet — sie entscheidet, ob
+  // ueberhaupt die Anmeldemaske gebraucht wird.
+  //
+  // Auf die Instanz-Konfiguration wird bewusst NICHT gewartet: Sie steuert nur
+  // Feinheiten der Anmeldemaske (etwa ob eine Registrierung angeboten wird)
+  // und traf frueher hier ein zweites Mal den Startbildschirm — sichtbar als
+  // sekundenlange Verzoegerung. Sie laedt jetzt nebenher; die Anmeldemaske
+  // ergaenzt sich, sobald die Werte da sind.
+  if (!anmeldungGeladen) {
     return <Startbildschirm />;
   }
 

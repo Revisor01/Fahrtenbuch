@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 2732 2732">
-  <!-- Startbildschirm der nativen App. Quadratisch, weil das Bild auf jedem
-       Seitenverhaeltnis mittig beschnitten wird — das Motiv bleibt so immer
-       vollstaendig sichtbar. Bewusst nur Ring und Punkt ohne Schriftzug:
-       Text wuerde beim Beschneiden auf schmalen Geraeten anschneiden.
-       Den Namen zeigt der React-Startbildschirm, der dieses Bild abloest. -->
+  <!-- Nativer Startbildschirm. Traegt jetzt auch den Namen, damit er dem
+       Startbildschirm der App gleicht: Zeigten beide Unterschiedliches, sah
+       man beim Start zwei Bilder nacheinander.
+       Quadratisch und mittig beschnitten — Zeichen und Text liegen deshalb
+       nah an der Mitte, damit sie auf jedem Seitenverhaeltnis sichtbar
+       bleiben. -->
   <rect width="2732" height="2732" fill="#0f5257"/>
-  <g transform="translate(1366 1366) scale(2.2) translate(-256 -256)">
+  <g transform="translate(1366 1180) scale(2.0) translate(-256 -256)">
     <path d="M159.2,158.3c54-53.4,141-53,194.5.9,53.4,54,53,141-.9,194.5-54,53.4-141,53-194.5-.9-25.7-25.9-40-61-39.8-97.4"
           fill="none" stroke="#ffffff" stroke-width="45"/>
     <circle cx="126.8" cy="202.2" r="26" fill="#e8b461"/>
   </g>
+  <text x="1366" y="1700" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
+        font-size="130" font-weight="700" fill="#ffffff">Fahrtenbuch</text>
+  <text x="1366" y="1790" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
+        font-size="62" font-weight="500" fill="#b8d4d4">Dienstfahrten erfassen und abrechnen</text>
 </svg>
