@@ -6010,8 +6010,8 @@ code {
    Die WebView zeichnet unter Statusleiste und Home-Anzeige. Sichtbar wird dort
    die Flaeche des <html>-Elements — nicht die des vordersten Bildschirms.
    Bisher stand dort immer --bg; auf der Anmeldung und dem Startbildschirm
-   (beide ganzflaechig Petrol) blieben deshalb oben und unten helle bzw. im
-   Dunkelmodus schwarze Streifen stehen.
+   (beide ganzflaechig Petrol) blieben deshalb helle bzw. im Dunkelmodus
+   schwarze Streifen stehen.
 
    Loesung: Der sichtbare Bildschirm meldet seine Flaeche als data-flaeche an
    <html> (siehe utils/systemflaeche.js), und <html> uebernimmt sie. Beide
@@ -6039,22 +6039,29 @@ code {
 /* Die App-Shell laesst oben Platz fuer die Statusleiste. Ohne diesen Abstand
    liefe der Inhalt unter die Uhr — mit ihm scheint dort die Flaeche von <html>
    durch, und die stimmt jetzt. 100dvh bleibt: die Shell fuellt den Bildschirm,
-   der Abstand geht innen ab. */
+   der Abstand geht innen ab.
+   Nur oben und seitlich: Der untere Rand gehoert der Navigationsleiste. */
 [data-platform="ios"] .app-shell,
 [data-platform="android"] .app-shell {
   padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
   box-sizing: border-box;
 }
 
 /* Anmeldung und Startbildschirm reichen bewusst BIS in die Systemraender —
    die Markenflaeche soll durchlaufen. Der Inhalt haelt trotzdem Abstand,
-   sonst klebt die Karte unter der Uhr. */
+   sonst klebt die Karte unter der Uhr.
+   Hier auch unten: Diese Bildschirme erscheinen vor der Anmeldung, es gibt
+   also noch keine Navigationsleiste, die den unteren Rand abdeckt. */
 [data-platform="ios"] .auth-page,
 [data-platform="android"] .auth-page,
 [data-platform="ios"] .startbildschirm,
 [data-platform="android"] .startbildschirm {
   padding-top: calc(24px + max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top)));
   padding-bottom: calc(24px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom)));
+  padding-left: calc(24px + env(safe-area-inset-left, 0px));
+  padding-right: calc(24px + env(safe-area-inset-right, 0px));
 }
 
 /* ---------- iOS 26: schwebende Capsule ---------- */

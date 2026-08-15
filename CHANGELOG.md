@@ -29,8 +29,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Behoben
 - In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
 - In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler
-- In der App standen oben und unten helle bzw. schwarze Streifen an den Rändern des Bildschirms. Die Ränder tragen jetzt die Farbe des jeweiligen Bildschirms — Petrol auf Startbildschirm und Anmeldung, die normale Fläche in der angemeldeten Ansicht, hell wie dunkel. Auch die Uhrzeit und die Symbole der Statusleiste sind dadurch immer lesbar
-- Auf dem iPhone lag am oberen Rand dauerhaft ein weicher Schleier, auch wenn gar nichts gescrollt war. Er erscheint jetzt nur noch, wenn Inhalt unter den oberen Rand läuft
+- In der App standen an den Rändern des Bildschirms helle bzw. schwarze Streifen. Die Ränder tragen jetzt die Farbe des jeweiligen Bildschirms — Petrol auf Startbildschirm und Anmeldung, die normale Fläche in der angemeldeten Ansicht, hell wie dunkel. Auch die Uhrzeit und die Symbole der Statusleiste sind dadurch immer lesbar
 
 ### Sonstiges
 - Fahrten und Abrechnungen werden bewusst nicht offline zwischengespeichert: angezeigte Zahlen stammen immer vom Server
