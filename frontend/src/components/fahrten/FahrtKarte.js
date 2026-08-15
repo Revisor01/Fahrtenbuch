@@ -1,17 +1,23 @@
 import React from 'react';
-import { Users, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 import { formatBetrag, rundeKilometer } from './zeitraumUtils';
 
-// Fahrt-Karte mobil (< 768px):
-// Kopfzeile Datum Mono 13px + Status Punkt+Wort, dann Anlass 17px/600 + km Mono,
-// darunter die Route „von → nach", darunter Träger + Betrag Mono;
-// Mitfahrer als kompakte Zusatzzeile.
+// Fahrt-Zeile mobil (< 768px).
 //
-// Ein Tipp auf die Karte oeffnet das Aktions-Sheet (Details + Bearbeiten/
-// Loeschen). Frueher legte ein Wisch nach links die Aktionen frei - die Geste
-// konkurrierte mit dem Scrollen, war nicht auffindbar und sah zusammen mit den
-// halb hervorlugenden Buttons unruhig aus.
+// Layout nach dem Vorbild der Dashboard-Liste „Zuletzt" (User-Feedback 14.08.):
+// dort steht der Anlass zuoberst, darunter die Route, darunter eine leise
+// Zeile aus Datum und Traeger — km rechts, Chevron als Hinweis auf das
+// Aktions-Sheet. Die frueheren Einzelkarten wiederholten dieselben Angaben in
+// vier Zeilen mit eigenem Rahmen: mehr Flaeche, weniger Uebersicht.
+//
+// Anders als das Dashboard traegt die Fahrtenliste zusaetzlich Status, Betrag,
+// Mitfahrer und den Hin-/Rueckfahrt-Hinweis. Die kommen in dieselbe leise
+// Zeile bzw. rechts unter die Kilometer, statt eigene Zeilen zu belegen.
+//
+// Ein Tipp oeffnet das Aktions-Sheet (Details + Bearbeiten/Loeschen). Eine
+// Wischgeste gibt es hier bewusst nicht — sie konkurrierte mit dem Scrollen
+// und war nicht auffindbar.
 
 const WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
@@ -26,40 +32,51 @@ const datumKurz = (datum) => {
 function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
   const ziel = fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
   const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';
-  // Anlass führt, darunter die Route, darunter der Träger
+  // Anlass führt, darunter die Route, darunter Datum + Träger
   const titel = fahrt.anlass || ziel;
   const route = von ? `${von} → ${ziel}` : ziel;
   const mitfahrer = fahrt.mitfahrer || [];
 
+  // Leise Zeile: Datum · Träger · Mitfahrer — dieselbe Reihenfolge wie im
+  // Dashboard, nur um die Angaben ergänzt, die es dort nicht gibt.
+  const subTeile = [datumKurz(fahrt.datum), traegerName];
+  if (mitfahrer.length > 0) {
+    subTeile.push(
+      `${mitfahrer.length} Mitfahrer:in${mitfahrer.length > 1 ? 'nen' : ''}`
+    );
+  }
+
   return (
     <button
       type="button"
-      className="fl-card fl-card-tap"
+      className="fl-zeile fl-zeile-tap"
       onClick={() => onOeffnen(fahrt)}
       aria-label={`Fahrt ${von ? `${von} nach ` : 'nach '}${ziel}, ${datumKurz(fahrt.datum)} — Aktionen öffnen`}
-      title={von ? `${von} → ${ziel}` : ziel}
+      title={mitfahrer.length > 0 ? `Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}` : route}
     >
-      <span className="fl-card-kopf">
-        <span className="fl-card-datum num">{datumKurz(fahrt.datum)}</span>
-        <StatusBadge status={status} variant="dot" />
+      <span className="fl-zeile-main">
+        <span className="fl-zeile-titel">
+          <span className="fl-zeile-anlass">{titel}</span>
+          {fahrt.partner_fahrt_id && (
+            <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
+              <span aria-hidden="true">⇄</span>
+              <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+            </span>
+          )}
+        </span>
+        <span className="fl-zeile-route">{route}</span>
+        {/* Der Text braucht ein eigenes Span: Ein Flex-Container kuerzt nur
+            sich selbst, nicht eine lose Textnode darin — der Traegername lief
+            sonst unter die Kilometerspalte. */}
+        <span className="fl-zeile-sub">
+          <span className="fl-zeile-sub-text">{subTeile.join(' · ')}</span>
+          <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
+        </span>
       </span>
-      <span className="fl-card-zeile">
-        <span className="fl-card-ziel">{titel}</span>
-        <span className="fl-card-km num">{rundeKilometer(fahrt.kilometer)} km</span>
-      </span>
-      <span className="fl-card-zeile">
-        <span className="fl-card-route">{route}</span>
-        {fahrt.partner_fahrt_id && (
-          <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
-            <span aria-hidden="true">⇄</span>
-            <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
-          </span>
-        )}
-      </span>
-      <span className="fl-card-zeile">
-        <span className="fl-card-sub">{traegerName}</span>
-        <span className="fl-betrag-mit-mf">
-          <span className="fl-card-betrag num">{formatBetrag(fahrt.erstattung)} €</span>
+      <span className="fl-zeile-werte">
+        <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
+        <span className="fl-zeile-betrag num">
+          {formatBetrag(fahrt.erstattung)} €
           {fahrt.mitfahrerErstattung > 0 && (
             <span className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
               +{formatBetrag(fahrt.mitfahrerErstattung)} €
@@ -67,13 +84,7 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
           )}
         </span>
       </span>
-      {mitfahrer.length > 0 && (
-        <span className="fl-card-mitfahrer">
-          <Users size={12} aria-hidden="true" />
-          <span>{mitfahrer.map((m) => m.name).join(', ')}</span>
-        </span>
-      )}
-      <ChevronRight size={16} className="fl-card-chevron" aria-hidden="true" />
+      <ChevronRight size={16} className="fl-zeile-chevron" aria-hidden="true" />
     </button>
   );
 }

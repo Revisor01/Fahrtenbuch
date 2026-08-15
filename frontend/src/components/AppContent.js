@@ -13,6 +13,7 @@ import Dashboard from './Dashboard';
 import LoginPage from './LoginPage';
 import InstanzAuswahl from './InstanzAuswahl';
 import { AppContext } from '../contexts/AppContext';
+import { useErfassung } from '../contexts/ErfassungContext';
 import { aktuellerMonat } from '../utils/datum';
 import { PLATTFORM, IST_NATIVE } from '../utils/plattform';
 import { auswahlHaptik } from '../utils/haptik';
@@ -46,9 +47,23 @@ const NAV_ITEMS = [
   { id: 'einstellungen', label: 'Einstellungen', icon: Settings },
 ];
 
+// Erfassen ist in der nativen Huelle KEIN Tab mit eigenem Screen, sondern eine
+// Aktion: Das Plugin setzt `role: 'prominent'` als abgesetzten runden Knopf
+// neben der Kapsel der Floating-Tabbar. Damit sitzt der Einstieg dort, wo das
+// System ihn erwartet, statt als freischwebender Knopf ueber der Leiste zu
+// haengen (User-Feedback 14.08.: „haengt einfach random rum").
+// Im Web bleibt es beim bisherigen Weg — dort gibt es keine native Leiste.
+const ERFASSEN_ID = 'erfassen';
+
+const NATIVE_NAV_ITEMS = [
+  ...NAV_ITEMS,
+  { id: ERFASSEN_ID, label: 'Erfassen', icon: Car, role: 'prominent' },
+];
+
 function AppContent() {
   const { isLoggedIn, anmeldungGeladen, logout, user, token, monthlyData } = useContext(AppContext);
   const { isDark, toggleDarkMode } = useTheme();
+  const erfassung = useErfassung();
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -225,6 +240,15 @@ function AppContent() {
     activeTab === id || (mobil && id === 'einstellungen' && activeTab === 'verwaltung');
 
   const handleNavClick = (id) => {
+    // Der prominente Knopf ist eine Aktion, kein Ziel: Er oeffnet den
+    // Erfassungsflow und laesst den sichtbaren Tab stehen. Wuerde er activeTab
+    // setzen, staende die App nach dem Schliessen des Sheets auf einem Screen,
+    // den es nicht gibt.
+    if (id === ERFASSEN_ID) {
+      if (IST_NATIVE) auswahlHaptik();
+      erfassung.open();
+      return;
+    }
     // Haptik nur beim tatsaechlichen Wechsel: erneutes Tippen auf den offenen
     // Tab soll sich nicht nach einer Aktion anfuehlen. Im Web passiert nichts.
     if (IST_NATIVE && id !== activeTab) auswahlHaptik();
@@ -370,7 +394,7 @@ function AppContent() {
         {IST_NATIVE ? (
           <NativeNav
             plattform={PLATTFORM}
-            items={NAV_ITEMS}
+            items={NATIVE_NAV_ITEMS}
             aktivId={nativAktivId}
             onSelect={handleNavClick}
             badgeId="abrechnungen"

@@ -234,7 +234,8 @@ function FahrtenListe() {
         />
       ) : (
         <>
-          {/* < 768px: Karten — ein Tipp öffnet Details + Aktionen */}
+          {/* < 768px: Zeilenliste im Dashboard-Muster — eine Karte, getrennte
+              Zeilen; ein Tipp öffnet Details + Aktionen */}
           <div className="fl-cards">
             {sortierteFahrten.map((fahrt) => (
               <FahrtKarte

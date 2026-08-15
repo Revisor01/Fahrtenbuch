@@ -113,7 +113,7 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
                 <StatusBadge status={statusFuer(fahrt)} variant="dot" />
               </span>
               <span className="fl-td-aktionen">
-                <ChevronRight size={16} className="fl-card-chevron" aria-hidden="true" />
+                <ChevronRight size={16} className="fl-zeile-chevron" aria-hidden="true" />
               </span>
             </button>
           );

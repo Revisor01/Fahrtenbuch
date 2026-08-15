@@ -25,6 +25,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Beim Start der App erscheint kurz eine ruhige Fläche, bis die gespeicherte Anmeldung gelesen ist; die Anmeldemaske blitzt dadurch nicht mehr auf, wenn man bereits angemeldet ist
 - Die Anmeldung hält jetzt, solange man das Fahrtenbuch benutzt — das tägliche Neuanmelden entfällt. Wer es längere Zeit nicht öffnet, wird weiterhin abgemeldet; an geteilten Rechnern bleibt also niemand dauerhaft angemeldet
 - Das Logo auf der Anmeldeseite zeigt jetzt dasselbe Zeichen wie das App-Symbol, samt Punkt am offenen Ende des Rings
+- Die Fahrtenliste zeigt die Fahrten auf dem Handy jetzt im selben Layout wie das Dashboard: eine zusammenhängende Liste statt einzelner Kacheln, mit Anlass, Strecke, Datum, Träger und Status untereinander und Kilometern samt Erstattung rechts. Es passen dadurch spürbar mehr Fahrten auf den Bildschirm. Mitfahrer:innen, der Hinweis auf verknüpfte Hin- und Rückfahrten und alle Aktionen bleiben erhalten; am Rechner bleibt die Tabelle unverändert
+- In der App liegt „Fahrt hinzufügen" jetzt als eigener runder Knopf rechts in der Navigationsleiste des Systems statt als schwebender Knopf über dem Inhalt. Er ist von jeder Ansicht aus erreichbar und verdeckt keine Fahrten mehr. Im Browser bleibt der bisherige Weg unverändert
 
 ### Behoben
 - In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
@@ -34,6 +36,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Fenster, die sich von unten öffnen, lassen sich jetzt durch Wischen nach unten schließen — am Griff oder an der Titelzeile. Ein zu kurzer Zug federt zurück, und solange der Inhalt noch gescrollt wird, bleibt das Wischen beim Inhalt
 - Solche Fenster werden nie höher als der Bildschirm: Griff und Titel stehen fest, der Inhalt scrollt darunter. Vorher konnte bei langen Formularen der obere Rand mitsamt Griff wegscrollen
 - In der App machte das Datumsfeld unter „Fahrt bearbeiten" das Fenster so hoch, dass es sich nicht mehr schließen ließ. Es ist jetzt genauso hoch wie jedes andere Eingabefeld; die Datumsauswahl des Geräts öffnet sich weiterhin wie gewohnt
+- Unter „Fahrt bearbeiten" lief der Name des Abrechnungsträgers unter das Auswahlsymbol und wirkte dadurch angeschnitten. Längere Namen sind jetzt vollständig lesbar; das gilt für alle Auswahlfelder im Fahrtenbuch
 
 ### Sonstiges
 - Fahrten und Abrechnungen werden bewusst nicht offline zwischengespeichert: angezeigte Zahlen stammen immer vom Server
