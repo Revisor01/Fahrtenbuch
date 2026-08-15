@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { overlayAnmelden } from '../../utils/overlayStack';
 
@@ -13,9 +13,25 @@ import { overlayAnmelden } from '../../utils/overlayStack';
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+// Ab hier gilt ein Zug nach unten als Schliessen statt als Zurueckfedern.
+// 96px entspricht etwa der Griffzone plus Titelzeile — kurz genug, dass die
+// Geste nicht anstrengend wird, lang genug, dass ein Verrutschen beim Tippen
+// das Sheet nicht versehentlich schliesst.
+const SCHLIESS_SCHWELLE = 96;
+
+// Schneller Wisch schliesst auch bei kurzem Weg: unter dieser Geschwindigkeit
+// (Pixel pro Millisekunde) zaehlt allein die Strecke.
+const SCHLIESS_TEMPO = 0.5;
+
 function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   const panelRef = useRef(null);
+  const koerperRef = useRef(null);
   const triggerRef = useRef(null);
+
+  // Aktueller Zugweg in Pixeln. Nur waehrend der Geste gesetzt; null heisst
+  // "keine Geste aktiv" und laesst die CSS-Animation unangetastet.
+  const [zugY, setZugY] = useState(null);
+  const gesteRef = useRef(null);
 
   // Am globalen Overlay-Stapel anmelden, damit der Android-Zurueck-Button das
   // oberste offene Sheet schliesst statt die App zu verlassen. Eigener Effekt,
@@ -38,7 +54,9 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
     // hier aus weiterhin ins erste Element, Esc schliesst.
     const panel = panelRef.current;
     panel?.focus();
-    panel?.scrollTo?.(0, 0);
+    // Der Scrollbereich ist seit der Kopf/Koerper-Trennung der Koerper, nicht
+    // mehr das Panel selbst.
+    koerperRef.current?.scrollTo?.(0, 0);
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -80,6 +98,72 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
     };
   }, [isOpen, onClose]);
 
+  // ---------- Wischen zum Schliessen ----------
+  // Warum von Hand statt per Bibliothek: Es geht um genau eine Achse und eine
+  // einzige Bedingung (Inhalt steht oben). Touch-Events reichen dafuer, und
+  // das Sheet bleibt ohne zusaetzliche Abhaengigkeit.
+
+  // Ziehen darf nur schliessen, wenn der Inhalt bereits ganz oben steht —
+  // sonst kaempft die Geste mit dem Scrollen des Sheet-Inhalts. Am Griff und
+  // an der Titelzeile (ausserhalb des Scrollbereichs) gilt das immer.
+  const darfZiehen = (ziel) => {
+    const koerper = koerperRef.current;
+    if (!koerper) return true;
+    if (!koerper.contains(ziel)) return true;
+    return koerper.scrollTop <= 0;
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length !== 1) return;
+    const beruehrung = e.touches[0];
+    if (!darfZiehen(e.target)) return;
+    gesteRef.current = {
+      startY: beruehrung.clientY,
+      startZeit: Date.now(),
+      // Erst ab der ersten echten Bewegung nach unten uebernehmen — sonst
+      // verschluckt das Sheet Tipp-Ereignisse auf Schaltflaechen im Kopf.
+      aktiv: false,
+    };
+  };
+
+  const handleTouchMove = (e) => {
+    const geste = gesteRef.current;
+    if (!geste) return;
+    const abstand = e.touches[0].clientY - geste.startY;
+
+    if (!geste.aktiv) {
+      // Nach oben gewischt: Die Geste gehoert dem Inhalt, nicht dem Sheet.
+      if (abstand <= 0) {
+        gesteRef.current = null;
+        return;
+      }
+      if (abstand < 6) return;
+      geste.aktiv = true;
+    }
+
+    // Waehrend des Ziehens darf der Inhalt nicht mitscrollen.
+    if (e.cancelable) e.preventDefault();
+    // Nie nach oben ueber die Ruhelage hinaus.
+    setZugY(Math.max(0, abstand));
+  };
+
+  const handleTouchEnd = () => {
+    const geste = gesteRef.current;
+    gesteRef.current = null;
+    if (!geste || !geste.aktiv) {
+      setZugY(null);
+      return;
+    }
+    const weg = zugY || 0;
+    const tempo = weg / Math.max(1, Date.now() - geste.startZeit);
+    if (weg > SCHLIESS_SCHWELLE || tempo > SCHLIESS_TEMPO) {
+      onClose();
+    }
+    // Zurueck auf null: Das Sheet federt ueber die CSS-Transition in die
+    // Ruhelage. Beim Schliessen verschwindet es ohnehin.
+    setZugY(null);
+  };
+
   if (!isOpen) return null;
 
   // Per Portal direkt an den <body>: Bisher rendete das Sheet dort, wo die
@@ -92,15 +176,30 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
       <div className="sheet-overlay" onClick={onClose} aria-hidden="true" />
       <div
         ref={panelRef}
-        className={`sheet-panel${wide ? ' sheet-panel-wide' : ''}`}
+        className={`sheet-panel${wide ? ' sheet-panel-wide' : ''}${
+          zugY !== null ? ' sheet-panel-zieht' : ''
+        }`}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel || title}
         tabIndex={-1}
+        style={zugY ? { transform: `translateY(${zugY}px)` } : undefined}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
-        <div className="sheet-handle" aria-hidden="true" />
-        {title && <h2 className="sheet-title">{title}</h2>}
-        {children}
+        {/* Kopf bleibt stehen: Griff und Titel duerfen nie wegscrollen —
+            sonst ist bei langen Inhalten die Schliess-Geste nicht erreichbar. */}
+        <div className="sheet-kopf">
+          <div className="sheet-handle" aria-hidden="true" />
+          {title && <h2 className="sheet-title">{title}</h2>}
+        </div>
+        {/* Nur der Inhalt scrollt — dadurch bleibt das Sheet immer so hoch wie
+            der Bildschirm erlaubt, egal wie lang das Formular ist. */}
+        <div className="sheet-koerper" ref={koerperRef}>
+          {children}
+        </div>
       </div>
     </div>,
     document.body

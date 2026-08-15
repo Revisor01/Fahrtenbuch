@@ -31,6 +31,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler
 - In der App tritt die Navigationsleiste zurück, sobald sich ein Fenster von unten öffnet, und kommt beim Schließen wieder — der untere Rand eines solchen Fensters ist dadurch immer erreichbar
 - In der App standen an den Rändern des Bildschirms helle bzw. schwarze Streifen. Die Ränder tragen jetzt die Farbe des jeweiligen Bildschirms — Petrol auf Startbildschirm und Anmeldung, die normale Fläche in der angemeldeten Ansicht, hell wie dunkel. Auch die Uhrzeit und die Symbole der Statusleiste sind dadurch immer lesbar
+- Fenster, die sich von unten öffnen, lassen sich jetzt durch Wischen nach unten schließen — am Griff oder an der Titelzeile. Ein zu kurzer Zug federt zurück, und solange der Inhalt noch gescrollt wird, bleibt das Wischen beim Inhalt
+- Solche Fenster werden nie höher als der Bildschirm: Griff und Titel stehen fest, der Inhalt scrollt darunter. Vorher konnte bei langen Formularen der obere Rand mitsamt Griff wegscrollen
+- In der App machte das Datumsfeld unter „Fahrt bearbeiten" das Fenster so hoch, dass es sich nicht mehr schließen ließ. Es ist jetzt genauso hoch wie jedes andere Eingabefeld; die Datumsauswahl des Geräts öffnet sich weiterhin wie gewohnt
 
 ### Sonstiges
 - Fahrten und Abrechnungen werden bewusst nicht offline zwischengespeichert: angezeigte Zahlen stammen immer vom Server
