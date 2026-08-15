@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { overlayAnmelden } from '../../utils/overlayStack';
 
 // Bottom-Sheet nach Design-Spec (Redesign 2026):
 // - mobil: --surface, border-radius 28px 28px 0 0, Griff 44×5px --line-strong,
@@ -15,6 +16,15 @@ const FOCUSABLE_SELECTOR =
 function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   const panelRef = useRef(null);
   const triggerRef = useRef(null);
+
+  // Am globalen Overlay-Stapel anmelden, damit der Android-Zurueck-Button das
+  // oberste offene Sheet schliesst statt die App zu verlassen. Eigener Effekt,
+  // weil er nur von onClose abhaengt — der Fokus-Effekt unten laeuft sonst bei
+  // jedem neuen onClose-Callback erneut und scrollt das Sheet zurueck.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    return overlayAnmelden(onClose);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen) return undefined;

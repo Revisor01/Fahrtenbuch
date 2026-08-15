@@ -1,0 +1,82 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace = "de.godsapp.fahrtenbuch"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "de.godsapp.fahrtenbuch"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "2.3.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    // Signaturschluessel liegt ausserhalb des Repos: Wer ihn hat, kann
+    // Updates unter dieser App-Kennung veroeffentlichen. Geht er verloren,
+    // laesst sich die App nie wieder aktualisieren — deshalb gehoert er in
+    // die Passwortverwaltung und ins Backup, nicht in die Versionskontrolle.
+    // Pfad ueber die Datei keystore.properties oder Umgebungsvariablen.
+    signingConfigs {
+        release {
+            def propsDatei = rootProject.file('keystore.properties')
+            if (propsDatei.exists()) {
+                def props = new Properties()
+                propsDatei.withInputStream { props.load(it) }
+                storeFile file(props['storeFile'])
+                storePassword props['storePassword']
+                keyAlias props['keyAlias']
+                keyPassword props['keyPassword']
+            } else if (System.getenv('FAHRTENBUCH_KEYSTORE_PATH')) {
+                storeFile file(System.getenv('FAHRTENBUCH_KEYSTORE_PATH'))
+                storePassword System.getenv('FAHRTENBUCH_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('FAHRTENBUCH_KEY_ALIAS')
+                keyPassword System.getenv('FAHRTENBUCH_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Nur signieren, wenn Zugangsdaten vorliegen — sonst laesst sich
+            // das Projekt ohne Schluessel nicht einmal oeffnen.
+            if (rootProject.file('keystore.properties').exists() || System.getenv('FAHRTENBUCH_KEYSTORE_PATH')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

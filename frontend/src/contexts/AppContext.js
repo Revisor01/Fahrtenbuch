@@ -3,27 +3,31 @@ import axios from 'axios';
 import { aktuellerMonat } from '../utils/datum';
 import StatusDatumSheet from '../components/abrechnung/StatusDatumSheet';
 import { useToast } from '../components/ui/Toast';
+import { API_BASE_URL } from '../api/client';
+import {
+  SCHLUESSEL_TOKEN,
+  SCHLUESSEL_USER,
+  leseWert,
+  schreibeWert,
+  loescheWert,
+  migriereAusLocalStorage
+} from '../utils/tokenSpeicher';
 
-const API_BASE_URL = '/api';
+// Header, ueber den der Server ein erneuertes Token zurueckgibt. Axios
+// normalisiert Header-Namen auf Kleinbuchstaben.
+const ERNEUERUNGS_HEADER = 'x-token-erneuert';
 
 export const AppContext = createContext();
 
 function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [user, setUser] = useState(() => {
-    // Ein korrupter Eintrag darf den App-Start nicht verhindern: die Exception
-    // aus JSON.parse fuehrte hier zur weissen Seite, und weil der Wert liegen
-    // blieb, auch bei jedem weiteren Aufruf.
-    try {
-      const savedUser = localStorage.getItem('user');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch (error) {
-      console.error('Gespeicherte Nutzerdaten unlesbar, werden verworfen:', error);
-      localStorage.removeItem('user');
-      return null;
-    }
-  });
+  const [token, setToken] = useState(null);
+  const [user, setUser] = useState(null);
+  // Solange die gespeicherte Anmeldung noch nicht gelesen ist, darf die App
+  // nichts entscheiden: der sichere Speicher der App antwortet nur asynchron,
+  // und ohne diesen Zustand blitzte beim Start kurz die Anmeldung auf, obwohl
+  // der Nutzer angemeldet ist.
+  const [anmeldungGeladen, setAnmeldungGeladen] = useState(false);
   const [orte, setOrte] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [distanzen, setDistanzen] = useState([]);
@@ -35,6 +39,10 @@ function AppProvider({ children }) {
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [summary, setSummary] = useState({});
   const isLoggingOut = useRef(false);
+  // Zaehlt jede Abmeldung mit. Eine Antwort auf /users/me, die erst nach dem
+  // Abmelden eintrifft, darf die geloeschten Nutzerdaten nicht zurueckschreiben
+  // — beim Kirchenkreis-Wechsel waeren das sogar die Daten des alten Servers.
+  const sitzungsZaehler = useRef(0);
   const toast = useToast();
 
   const [favoriten, setFavoriten] = useState([]);
@@ -139,16 +147,68 @@ function AppProvider({ children }) {
   };
 
   const fetchCurrentUser = async () => {
+    const sitzung = sitzungsZaehler.current;
     try {
       const response = await axios.get('/api/users/me');
+      // Zwischenzeitlich abgemeldet: Antwort verwerfen, sonst kaeme der
+      // abgemeldete Nutzer ueber diesen Weg wieder in den Speicher zurueck.
+      if (sitzung !== sitzungsZaehler.current) return;
       const userData = response.data;
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      await schreibeWert(SCHLUESSEL_USER, JSON.stringify(userData));
     } catch (error) {
       console.error('Error fetching user data:', error);
-      logout();
+      // Nur abmelden, wenn die Sitzung noch dieselbe ist — sonst wuerde ein
+      // spaeter eintreffender Fehler eine frisch begonnene Sitzung beenden.
+      if (sitzung === sitzungsZaehler.current) logout();
     }
   };
+
+  // Gespeicherte Anmeldung einmalig beim Start einlesen. Erst danach steht
+  // fest, ob der Nutzer angemeldet ist — bis dahin rendert die App einen
+  // Ladezustand statt der Anmeldemaske.
+  useEffect(() => {
+    (async () => {
+      // Vor dem ersten Lesen: Bestand aus localStorage in den sicheren
+      // Speicher uebernehmen (nur nativ, im Web ein No-Op).
+      await migriereAusLocalStorage();
+
+      const gespeicherterToken = await leseWert(SCHLUESSEL_TOKEN);
+      const gespeicherterUser = await leseWert(SCHLUESSEL_USER);
+
+      let userDaten = null;
+      // Ein korrupter Eintrag darf den App-Start nicht verhindern: die
+      // Exception aus JSON.parse fuehrte hier zur weissen Seite, und weil der
+      // Wert liegen blieb, auch bei jedem weiteren Aufruf.
+      try {
+        userDaten = gespeicherterUser ? JSON.parse(gespeicherterUser) : null;
+      } catch (error) {
+        console.error('Gespeicherte Nutzerdaten unlesbar, werden verworfen:', error);
+        await loescheWert(SCHLUESSEL_USER);
+      }
+
+      // Kein vorzeitiges return bei `abgebrochen`: React ruft den Effekt im
+      // Strict Mode zweimal auf und raeumt den ersten Durchlauf dazwischen ab.
+      // Kehrte der erste hier zurueck, bliebe `anmeldungGeladen` in genau dem
+      // Fall false, in dem der zweite Durchlauf noch laeuft — die App haenge
+      // dann dauerhaft im Ladezustand. Im Web fiel das nie auf, weil
+      // localStorage synchron antwortet; der Systemspeicher der App braucht
+      // dagegen einen Moment und trifft dieses Zeitfenster.
+      if (gespeicherterToken) {
+        // Header und isLoggedIn hier direkt mitsetzen statt sie dem
+        // token-Effekt zu ueberlassen: der laeuft erst einen Render spaeter,
+        // und genau in diesem einen Render waere die Anmeldung schon "geladen",
+        // der Nutzer aber noch "nicht angemeldet" — die Anmeldemaske blitzte
+        // auf. Der token-Effekt bleibt fuer den Login-Weg zustaendig und setzt
+        // hier nur denselben Wert noch einmal.
+        axios.defaults.headers.common['Authorization'] = `Bearer ${gespeicherterToken}`;
+        setToken(gespeicherterToken);
+        setIsLoggedIn(true);
+      }
+      if (userDaten) setUser(userDaten);
+      setAnmeldungGeladen(true);
+    })();
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -169,7 +229,18 @@ function AppProvider({ children }) {
   // Interceptor auf den vorigen, ohne den alten je zu entfernen.
   useEffect(() => {
     const id = axios.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        // Gleitende Sitzung: Der Server schickt bei Nutzung ein frisches
+        // Token, sobald die halbe Laufzeit vorbei ist. Wer regelmaessig
+        // arbeitet, muss sich damit nie neu anmelden.
+        const erneuert = response.headers?.[ERNEUERUNGS_HEADER];
+        if (erneuert) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${erneuert}`;
+          setToken(erneuert);
+          schreibeWert(SCHLUESSEL_TOKEN, erneuert);
+        }
+        return response;
+      },
       (error) => {
         if (error.response && error.response.status === 401) {
           if (!isLoggingOut.current) {
@@ -197,7 +268,10 @@ function AppProvider({ children }) {
     try {
       const response = await axios.post('/api/auth/login', { username, password });
       const { token } = response.data;
-      localStorage.setItem('token', token);
+      // Neue Sitzung: noch laufende Aufrufe der vorigen Anmeldung duerfen
+      // weder ihre Nutzerdaten schreiben noch diese Anmeldung wieder beenden.
+      sitzungsZaehler.current += 1;
+      await schreibeWert(SCHLUESSEL_TOKEN, token);
       setToken(token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       await fetchCurrentUser(); // User-Daten direkt nach Login laden
@@ -208,13 +282,25 @@ function AppProvider({ children }) {
     }
   };
 
+  // Bleibt bewusst synchron in der Wirkung: der 401-Interceptor und der
+  // Kirchenkreis-Wechsel rufen logout() ohne await auf, deshalb muss der State
+  // sofort fallen. Das Loeschen im Speicher laeuft daneben — die App zeigt
+  // schon die Anmeldung, waehrend der Systemspeicher aufraeumt.
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    sitzungsZaehler.current += 1;
     setToken(null);
     setUser(null);
     setIsLoggedIn(false);
     isLoggingOut.current = false;
+    // Der Header muss mit fallen, sonst schickt der naechste Request noch den
+    // Token des abgemeldeten Kontos mit.
+    delete axios.defaults.headers.common['Authorization'];
+    Promise.all([
+      loescheWert(SCHLUESSEL_TOKEN),
+      loescheWert(SCHLUESSEL_USER)
+    ]).catch((error) => {
+      console.error('Abmeldedaten konnten nicht entfernt werden:', error);
+    });
   };
 
   const fetchOrte = async () => {
@@ -527,6 +613,7 @@ function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       isLoggedIn,
+      anmeldungGeladen,
       login,
       logout,
       token,

@@ -114,8 +114,11 @@ export default function UserManagement() {
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
   const confirmTimer = useRef(null);
 
-  const currentUserId = currentUser?.id
-    ?? JSON.parse(localStorage.getItem('user') || '{}').id;
+  // Nur noch aus dem Context: die Nutzerdaten liegen in der App im sicheren
+  // Systemspeicher und waeren hier nur asynchron erreichbar. Der Context haelt
+  // denselben Wert und ist bis hierher immer geladen — diese Ansicht ist erst
+  // nach der Anmeldung erreichbar.
+  const currentUserId = currentUser?.id;
 
   const requestDelete = (userId) => {
     if (confirmingDeleteId === userId) {
