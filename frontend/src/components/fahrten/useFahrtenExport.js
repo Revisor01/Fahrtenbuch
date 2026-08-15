@@ -5,6 +5,29 @@ import JSZip from 'jszip';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import { monateImZeitraum } from './zeitraumUtils';
+import { IST_NATIVE } from '../../utils/plattform';
+
+// Filesystem erwartet reines Base64 ohne den "data:...;base64,"-Kopf, den
+// readAsDataURL voranstellt.
+function blobZuBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error || new Error('Datei konnte nicht gelesen werden'));
+    reader.onload = () => {
+      const ergebnis = String(reader.result);
+      resolve(ergebnis.slice(ergebnis.indexOf(',') + 1));
+    };
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Das Teilen-Blatt meldet den Abbruch je nach Plattform unterschiedlich —
+// iOS/Android liefern hier keine einheitliche Fehlerklasse, deshalb der
+// Textvergleich.
+function istAbbruch(error) {
+  const text = String(error?.message || error || '').toLowerCase();
+  return text.includes('canceled') || text.includes('cancelled') || text.includes('abort');
+}
 
 // Export-Logik der Fahrtenliste (Excel / PDF / Beide als ZIP je Träger).
 // Verhalten unverändert aus dem Bestand: Einzelmonat- vs. Zeitraum-Routen,
@@ -75,15 +98,41 @@ export function useFahrtenExport() {
     markAlsEingereichtToast(type);
   };
 
-  const downloadBlob = (blob, filename) => {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
-    window.URL.revokeObjectURL(url);
+  // Web: unveraendert der bisherige <a download>-Klick.
+  //
+  // App: In WKWebView (iOS) tut derselbe Klick schlicht nichts — kein Fehler,
+  // keine Datei. Deshalb schreibt der native Zweig die Datei in den Cache und
+  // reicht sie ans System-Teilen-Blatt weiter. Directory.Cache braucht keine
+  // Berechtigung, und das System raeumt selbst auf.
+  const downloadBlob = async (blob, filename) => {
+    if (!IST_NATIVE) {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      return;
+    }
+
+    const { Filesystem, Directory } = await import('@capacitor/filesystem');
+    const { Share } = await import('@capacitor/share');
+
+    const base64 = await blobZuBase64(blob);
+    await Filesystem.writeFile({ path: filename, data: base64, directory: Directory.Cache });
+    const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache });
+
+    try {
+      await Share.share({ title: filename, files: [uri] });
+    } catch (error) {
+      // Abbruch des Teilen-Blatts ist eine normale Nutzerentscheidung und darf
+      // nicht als fehlgeschlagener Export gemeldet werden. Die Datei liegt
+      // geschrieben im Cache — der Export selbst hat funktioniert.
+      if (istAbbruch(error)) return;
+      throw error;
+    }
   };
 
   const dateinameAusHeader = (response, fallback) => {
@@ -179,7 +228,7 @@ export function useFahrtenExport() {
       if (blob.size === 22) {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
-      downloadBlob(blob, filename);
+      await downloadBlob(blob, filename);
       erfolgsToast(type, opts);
       return true;
     } catch (error) {
@@ -202,7 +251,7 @@ export function useFahrtenExport() {
       if (blob.size === 0) {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
-      downloadBlob(blob, filename);
+      await downloadBlob(blob, filename);
       erfolgsToast(type, opts);
       return true;
     } catch (error) {
@@ -228,7 +277,7 @@ export function useFahrtenExport() {
       zip.file(`${baseFilename}.xlsx`, excelRes.data);
       zip.file(`${baseFilename}.pdf`, pdfRes.data);
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      downloadBlob(zipBlob, `${baseFilename}.zip`);
+      await downloadBlob(zipBlob, `${baseFilename}.zip`);
       erfolgsToast(type, opts);
       return true;
     } catch (error) {

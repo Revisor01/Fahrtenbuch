@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  MapPin, Building2, Coins, Star, User, SunMoon, Key, Users,
+  MapPin, Building2, Coins, Star, User, SunMoon, Key, Users, Globe,
   ChevronRight, ArrowLeft, Bell, Info, HelpCircle, LogOut,
 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
@@ -13,6 +13,8 @@ import FavoritenBereich from './FavoritenBereich';
 import ProfilBereich from './ProfilBereich';
 import DarstellungBereich from './DarstellungBereich';
 import ApiBereich from './ApiBereich';
+import InstanzBereich from './InstanzBereich';
+import { IST_NATIVE } from '../../utils/plattform';
 
 // Einstellungen nach Spec Screen 7: Desktop Liste links (212px) + Inhalt
 // rechts in einer Karte; mobil Vollbild-Liste mit Drilldown.
@@ -30,6 +32,9 @@ const BEREICHE = [
   { id: 'favoriten', label: 'Favoriten', Icon: Star, Component: FavoritenBereich },
   { id: 'darstellung', label: 'Darstellung', Icon: SunMoon, Component: DarstellungBereich },
   { id: 'api', label: 'API-Zugriff', Icon: Key, Component: ApiBereich },
+  // Nur in der App: Im Web ist der Server durch die Adresse der Seite gesetzt
+  // und gar nicht wechselbar.
+  { id: 'instanz', label: 'Kirchenkreis', Icon: Globe, Component: InstanzBereich, nurNativ: true },
   { id: 'verwaltung', label: 'Verwaltung', Icon: Users, Component: UserManagement, adminOnly: true, mobileOnly: true },
 ];
 
@@ -47,7 +52,7 @@ function EinstellungenView({ initialTab, onShowInfo, onShowNewFeatures }) {
   const { user, logout } = useContext(AppContext);
   const isAdmin = user?.role === 'admin';
 
-  const bereiche = BEREICHE.filter((b) => !b.adminOnly || isAdmin);
+  const bereiche = BEREICHE.filter((b) => (!b.adminOnly || isAdmin) && (!b.nurNativ || IST_NATIVE));
 
   const [aktiv, setAktiv] = useState('orte');
   // Mobil: false = Bereichsliste, true = Bereich als eigene Seite
@@ -56,7 +61,9 @@ function EinstellungenView({ initialTab, onShowInfo, onShowNewFeatures }) {
   useEffect(() => {
     if (!initialTab) return;
     const ziel = LEGACY_MAP[initialTab] || initialTab;
-    if (BEREICHE.some((b) => b.id === ziel)) {
+    // Gegen die gefilterte Liste pruefen: ein Deeplink darf keinen Bereich
+    // oeffnen, den diese Plattform oder Rolle gar nicht anbietet.
+    if (bereiche.some((b) => b.id === ziel)) {
       setAktiv(ziel);
       setDrilldown(true);
     }
