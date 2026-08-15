@@ -16,10 +16,38 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Signaturschluessel liegt ausserhalb des Repos: Wer ihn hat, kann
+    // Updates unter dieser App-Kennung veroeffentlichen. Geht er verloren,
+    // laesst sich die App nie wieder aktualisieren — deshalb gehoert er in
+    // die Passwortverwaltung und ins Backup, nicht in die Versionskontrolle.
+    // Pfad ueber die Datei keystore.properties oder Umgebungsvariablen.
+    signingConfigs {
+        release {
+            def propsDatei = rootProject.file('keystore.properties')
+            if (propsDatei.exists()) {
+                def props = new Properties()
+                propsDatei.withInputStream { props.load(it) }
+                storeFile file(props['storeFile'])
+                storePassword props['storePassword']
+                keyAlias props['keyAlias']
+                keyPassword props['keyPassword']
+            } else if (System.getenv('FAHRTENBUCH_KEYSTORE_PATH')) {
+                storeFile file(System.getenv('FAHRTENBUCH_KEYSTORE_PATH'))
+                storePassword System.getenv('FAHRTENBUCH_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('FAHRTENBUCH_KEY_ALIAS')
+                keyPassword System.getenv('FAHRTENBUCH_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Nur signieren, wenn Zugangsdaten vorliegen — sonst laesst sich
+            // das Projekt ohne Schluessel nicht einmal oeffnen.
+            if (rootProject.file('keystore.properties').exists() || System.getenv('FAHRTENBUCH_KEYSTORE_PATH')) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
