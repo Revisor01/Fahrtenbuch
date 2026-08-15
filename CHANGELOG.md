@@ -17,6 +17,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die App bringt auf iPhone und Android jeweils die Navigation mit, die man dort gewohnt ist: auf dem iPhone eine schwebende Leiste mit gefülltem Symbol und Zahl am offenen Punkt der Abrechnung, auf Android eine flache Leiste mit farbig hinterlegtem aktivem Eintrag. Im Browser bleibt alles wie bisher
 - Ein Tabwechsel in der App gibt eine kurze, dezente Rückmeldung über die Vibration des Geräts
 - Die Zurück-Taste auf Android schließt zuerst ein offenes Fenster, geht dann eine Seite zurück, danach auf die Startseite — und beendet die App erst, wenn es nichts mehr zurückzugehen gibt
+- Beim Öffnen der App erscheint ein Startbildschirm mit Logo und Namen, bis die Anmeldung geladen ist
 
 ### Geändert
 - In der App liegt die Anmeldung jetzt im gesicherten Bereich des Geräts statt im Browserspeicher, geschützt durch die Bildschirmsperre. Wer bereits angemeldet ist, bleibt es — die Übernahme passiert beim ersten Start von selbst. Im Browser ändert sich nichts
