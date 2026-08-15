@@ -175,7 +175,15 @@ function AppContent() {
   // kurz auf, weil der sichere Speicher erst asynchron antwortet. Dasselbe gilt
   // fuer die Instanz-Konfiguration: ohne sie fehlte auf der Anmeldung z. B. der
   // Weg zur Registrierung.
-  if (!anmeldungGeladen || !konfigGeladen) {
+  if (!anmeldungGeladen) {
+    return <Startbildschirm />;
+  }
+
+  // Auf die Instanz-Konfiguration wird nur gewartet, wenn die Anmeldemaske
+  // tatsaechlich gezeigt wird — nur dort haengt etwas davon ab (der Weg zur
+  // Registrierung). Wer bereits angemeldet ist, wartete sonst beim Start auf
+  // eine Anfrage, deren Ergebnis er gar nicht sieht.
+  if (!isLoggedIn && !konfigGeladen) {
     return <Startbildschirm />;
   }
 

@@ -13,7 +13,7 @@ let bereitsAusgeblendet = false;
 // Notbremse: Sollte der Aufruf durch einen Fehler im Startpfad nie erfolgen,
 // waere die App unbedienbar. Nach dieser Frist verschwindet der
 // Startbildschirm in jedem Fall.
-const NOTBREMSE_MS = 4000;
+const NOTBREMSE_MS = 2000;
 
 async function ausblenden() {
   if (bereitsAusgeblendet || !IST_NATIVE) return;

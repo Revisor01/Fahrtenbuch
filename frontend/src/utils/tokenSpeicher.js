@@ -38,7 +38,10 @@ async function ladeSicherenSpeicher() {
 // `await schreibeWert(...)` stehen, ohne Fehlermeldung, und der Knopf tat
 // scheinbar nichts. Lieber ohne gespeicherte Anmeldung weiterarbeiten als
 // eine App, die stehenbleibt.
-const ZUGRIFF_TIMEOUT_MS = 3000;
+// Kurz gehalten: Der Schluesselbund antwortet normalerweise in Millisekunden.
+// Die Grenze ist nur eine Absicherung gegen ein blockierendes Plugin, kein
+// eingeplanter Wartewert — laenger hiesse, dass der Start sichtbar haengt.
+const ZUGRIFF_TIMEOUT_MS = 800;
 
 function mitZeitgrenze(promise, was) {
   return Promise.race([

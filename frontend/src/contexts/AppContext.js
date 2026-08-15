@@ -177,7 +177,7 @@ function AppProvider({ children }) {
     const notbremse = setTimeout(() => {
       console.error('Anmeldedaten nicht rechtzeitig lesbar — weiter zur Anmeldung.');
       setAnmeldungGeladen(true);
-    }, 5000);
+    }, 2500);
 
     (async () => {
       try {
@@ -300,7 +300,11 @@ function AppProvider({ children }) {
       // bereits gesetzt. Wartete die Anmeldung darauf, bliebe sie bei einem
       // stockenden Systemspeicher haengen und der Knopf taete scheinbar nichts.
       schreibeWert(SCHLUESSEL_TOKEN, token);
-      await fetchCurrentUser(); // User-Daten direkt nach Login laden
+      // Ohne await: Der Effekt auf `token` laedt die Nutzerdaten ohnehin.
+      // Wurde hier zusaetzlich gewartet, lief die Anfrage doppelt und die
+      // Anmeldung stand solange still — auf dem Geraet spuerbar als
+      // sekundenlange Verzoegerung nach dem Antippen.
+      fetchCurrentUser();
       setIsLoggedIn(true);
     } catch (error) {
       console.error('Login failed:', error);

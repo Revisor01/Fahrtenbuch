@@ -3,7 +3,9 @@
   "appName": "Fahrtenbuch",
   "webDir": "build",
   "ios": {
-    "contentInset": "always"
+    "contentInset": "never",
+    "backgroundColor": "#0F5257",
+    "scrollEnabled": false
   },
   "android": {
     "backgroundColor": "#0F5257"
