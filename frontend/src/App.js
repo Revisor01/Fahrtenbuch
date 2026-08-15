@@ -11,6 +11,7 @@ import { ErfassungProvider } from './contexts/ErfassungContext';
 import AppContent from './components/AppContent';
 import PwaUpdater from './components/PwaUpdater';
 import { splashAusblenden } from './utils/splash';
+import Fehlergrenze from './components/Fehlergrenze';
 
 
 function App() {
@@ -35,7 +36,7 @@ function App() {
     <Route path="/verify-email" element={<VerifyEmail />} />
     <Route path="/reset-password" element={<SetPassword />} />
     <Route path="/set-password" element={<SetPassword />} />
-    <Route path="/*" element={<AppContent />} />
+    <Route path="/*" element={<Fehlergrenze><AppContent /></Fehlergrenze>} />
     </Routes>
     </ErfassungProvider>
     </AppProvider>
