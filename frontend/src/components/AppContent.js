@@ -44,7 +44,7 @@ const NAV_ITEMS = [
 ];
 
 function AppContent() {
-  const { isLoggedIn, logout, user, monthlyData } = useContext(AppContext);
+  const { isLoggedIn, anmeldungGeladen, logout, user, token, monthlyData } = useContext(AppContext);
   const { isDark, toggleDarkMode } = useTheme();
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
@@ -85,9 +85,12 @@ function AppContent() {
   }, [monthlyData]);
 
   // Token Check Effect
+  //
+  // Quelle ist der Token aus dem Context statt localStorage: in der App liegt
+  // er im Systemspeicher und waere hier nur asynchron erreichbar. Der Context
+  // haelt ohnehin denselben Wert.
   useEffect(() => {
     const checkTokenExpiration = () => {
-      const token = localStorage.getItem('token');
       if (!token) return;
       try {
         const tokenData = JSON.parse(atob(token.split('.')[1]));
@@ -106,7 +109,7 @@ function AppContent() {
     checkTokenExpiration();
     const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
-  }, [logout]);
+  }, [logout, token]);
 
   // Muss vor den fruehen Returns stehen (Hook-Reihenfolge) und ist ausserhalb
   // von Android ohnehin ein No-Op.
@@ -118,6 +121,14 @@ function AppContent() {
 
   if (!instanzGewaehlt) {
     return <InstanzAuswahl onGewaehlt={() => setInstanzGewaehlt(true)} />;
+  }
+
+  // Erst wenn die gespeicherte Anmeldung gelesen ist, steht fest, ob die
+  // Anmeldemaske gehoert wird. Ohne dieses Gate blitzte sie beim Start der App
+  // kurz auf, weil der sichere Speicher erst asynchron antwortet. Bewusst
+  // dieselbe Flaeche wie die Anmeldung, damit der Uebergang nicht springt.
+  if (!anmeldungGeladen) {
+    return <div className="auth-page" aria-busy="true" />;
   }
 
   if (!isLoggedIn) {
