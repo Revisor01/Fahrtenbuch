@@ -155,7 +155,9 @@ function AppProvider({ children }) {
       if (sitzung !== sitzungsZaehler.current) return;
       const userData = response.data;
       setUser(userData);
-      await schreibeWert(SCHLUESSEL_USER, JSON.stringify(userData));
+      // Ohne await, aus demselben Grund wie beim Token: Das Merken fuer den
+      // naechsten Start darf die laufende Anmeldung nicht aufhalten.
+      schreibeWert(SCHLUESSEL_USER, JSON.stringify(userData));
     } catch (error) {
       console.error('Error fetching user data:', error);
       // Nur abmelden, wenn die Sitzung noch dieselbe ist — sonst wuerde ein
@@ -291,9 +293,13 @@ function AppProvider({ children }) {
       // Neue Sitzung: noch laufende Aufrufe der vorigen Anmeldung duerfen
       // weder ihre Nutzerdaten schreiben noch diese Anmeldung wieder beenden.
       sitzungsZaehler.current += 1;
-      await schreibeWert(SCHLUESSEL_TOKEN, token);
       setToken(token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Ohne await: Das Speichern entscheidet nur darueber, ob die Anmeldung
+      // den naechsten Start ueberdauert — fuer diese Sitzung ist der Token
+      // bereits gesetzt. Wartete die Anmeldung darauf, bliebe sie bei einem
+      // stockenden Systemspeicher haengen und der Knopf taete scheinbar nichts.
+      schreibeWert(SCHLUESSEL_TOKEN, token);
       await fetchCurrentUser(); // User-Daten direkt nach Login laden
       setIsLoggedIn(true);
     } catch (error) {

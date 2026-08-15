@@ -31,22 +31,40 @@ async function ladeSicherenSpeicher() {
   return sicherModulPromise;
 }
 
+// Zeitgrenze fuer jeden Zugriff auf den Systemspeicher.
+//
+// Ein Fehler laesst sich fangen — ein Aufruf, der gar nicht zurueckkehrt,
+// nicht. Genau das kam auf dem Geraet vor: Die Anmeldung blieb an
+// `await schreibeWert(...)` stehen, ohne Fehlermeldung, und der Knopf tat
+// scheinbar nichts. Lieber ohne gespeicherte Anmeldung weiterarbeiten als
+// eine App, die stehenbleibt.
+const ZUGRIFF_TIMEOUT_MS = 3000;
+
+function mitZeitgrenze(promise, was) {
+  return Promise.race([
+    promise,
+    new Promise((_, ablehnen) =>
+      setTimeout(() => ablehnen(new Error(`Systemspeicher antwortet nicht (${was})`)), ZUGRIFF_TIMEOUT_MS)
+    ),
+  ]);
+}
+
 // Bewusst getItem/setItem/removeItem statt get/set: diese Varianten arbeiten
 // mit reinen Strings, waehrend get()/set() zusaetzlich JSON serialisieren.
 // So bleibt der gespeicherte Wert Zeichen fuer Zeichen derselbe wie im Web.
 async function leseNativ(schluessel) {
-  const speicher = await ladeSicherenSpeicher();
-  return speicher.getItem(schluessel);
+  const speicher = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
+  return mitZeitgrenze(speicher.getItem(schluessel), 'lesen');
 }
 
 async function schreibeNativ(schluessel, wert) {
-  const speicher = await ladeSicherenSpeicher();
-  await speicher.setItem(schluessel, wert);
+  const speicher = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
+  await mitZeitgrenze(speicher.setItem(schluessel, wert), 'schreiben');
 }
 
 async function loescheNativ(schluessel) {
-  const speicher = await ladeSicherenSpeicher();
-  await speicher.removeItem(schluessel);
+  const speicher = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
+  await mitZeitgrenze(speicher.removeItem(schluessel), 'loeschen');
 }
 
 // Ein gesperrter Storage (privater Modus, Storage-Quota) darf den App-Start
@@ -79,13 +97,14 @@ function loescheWeb(schluessel) {
 export async function leseWert(schluessel) {
   if (!IST_NATIVE) return leseWeb(schluessel);
   try {
-    return await leseNativ(schluessel);
+    const wert = await leseNativ(schluessel);
+    // Nichts im Systemspeicher? Dann im Ausweichspeicher nachsehen: Dort
+    // liegt der Wert, wenn beim Anmelden der Systemspeicher nicht erreichbar
+    // war. Sonst muesste man sich bei jedem Start neu anmelden.
+    return wert !== null ? wert : leseWeb(schluessel);
   } catch (error) {
-    // Ein defekter Eintrag im Systemspeicher darf die App nicht blockieren:
-    // ohne Wert landet der Nutzer auf der Anmeldung statt auf einer weissen
-    // Seite.
     console.error('Anmeldedaten aus dem sicheren Speicher nicht lesbar:', error);
-    return null;
+    return leseWeb(schluessel);
   }
 }
 
@@ -96,8 +115,15 @@ export async function schreibeWert(schluessel, wert) {
   }
   try {
     await schreibeNativ(schluessel, wert);
+    // Nach erfolgreichem Schreiben in den Systemspeicher darf keine Kopie im
+    // unverschluesselten Ausweichspeicher zurueckbleiben.
+    loescheWeb(schluessel);
   } catch (error) {
-    console.error('Anmeldedaten konnten nicht sicher gespeichert werden:', error);
+    // Ist der Systemspeicher nicht erreichbar, ist der Ausweichspeicher die
+    // schlechtere, aber brauchbare Wahl: Eine App, die sich nicht anmelden
+    // laesst, ist unbrauchbar. Der Wert liegt dann wie in der Weboberflaeche.
+    console.error('Sicherer Speicher nicht erreichbar, weiche aus:', error);
+    schreibeWeb(schluessel, wert);
   }
 }
 
@@ -106,6 +132,10 @@ export async function loescheWert(schluessel) {
     loescheWeb(schluessel);
     return;
   }
+  // Immer beide Orte leeren: Beim Abmelden darf nirgends ein Token
+  // zurueckbleiben — auch nicht im Ausweichspeicher, falls dort zuletzt
+  // geschrieben wurde.
+  loescheWeb(schluessel);
   try {
     await loescheNativ(schluessel);
   } catch (error) {
