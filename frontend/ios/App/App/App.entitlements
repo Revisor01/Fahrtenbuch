@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Zugriff auf den Schluesselbund, in dem die Anmeldung liegt. Ohne
+	     diesen Eintrag verweigert iOS den Zugriff — und zwar ohne
+	     Fehlermeldung: der Aufruf kehrt schlicht nicht zurueck, die App
+	     bleibt beim Anmelden stehen. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)de.godsapp.fahrtenbuch</string>
+	</array>
+</dict>
+</plist>
