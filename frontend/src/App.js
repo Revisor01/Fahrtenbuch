@@ -10,18 +10,16 @@ import AppProvider from './contexts/AppContext';
 import { ErfassungProvider } from './contexts/ErfassungContext';
 import AppContent from './components/AppContent';
 import PwaUpdater from './components/PwaUpdater';
-import { splashAusblenden } from './utils/splash';
 import Fehlergrenze from './components/Fehlergrenze';
 
 
 function App() {
   React.useEffect(() => {
     document.title = "Fahrtenbuch";
-    // Der native Startbildschirm weicht, sobald der erste eigene Bildschirm
-    // steht — gleich welcher. Haenge er am Ladezustand der Anmeldung, bliebe
-    // er beim ersten Start hinter der Kirchenkreis-Auswahl liegen und man
-    // saehe zwei Startbildschirme nacheinander.
-    splashAusblenden();
+    // Der native Startbildschirm wird NICHT hier ausgeblendet: Er zeigt nur
+    // das Zeichen, der eigene zusaetzlich den Namen. Wer hier ausblendet,
+    // sieht beide nacheinander. Das Ausblenden passiert deshalb erst, wenn
+    // der erste eigene Bildschirm steht — siehe AppContent.
   }, []);
 
   return (
