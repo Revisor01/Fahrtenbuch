@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const ApiKey = require('../models/ApiKey');
+const { erneuereBeiBedarf } = require('../utils/tokenLaufzeit');
 
 const authMiddleware = async (req, res, next) => {
   // Erst prüfen ob API Key vorhanden
@@ -42,6 +43,12 @@ const authMiddleware = async (req, res, next) => {
     
     // Füge vollständige User-Informationen zum Request hinzu
     req.user = user;
+
+    // Gleitende Sitzung: Bei Nutzung laeuft die Anmeldung nicht ab. Ein neues
+    // Token geht ueber einen Antwort-Header zurueck, sobald die halbe Laufzeit
+    // vorbei ist. Nur fuer JWT — API-Schluessel haben eigene Gueltigkeit.
+    erneuereBeiBedarf(decoded, res);
+
     next();
   } catch (error) {
     // Details nur ins Log, nicht an den Client: "invalid signature" vs.

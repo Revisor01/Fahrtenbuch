@@ -13,6 +13,10 @@ import {
   migriereAusLocalStorage
 } from '../utils/tokenSpeicher';
 
+// Header, ueber den der Server ein erneuertes Token zurueckgibt. Axios
+// normalisiert Header-Namen auf Kleinbuchstaben.
+const ERNEUERUNGS_HEADER = 'x-token-erneuert';
+
 export const AppContext = createContext();
 
 function AppProvider({ children }) {
@@ -223,7 +227,18 @@ function AppProvider({ children }) {
   // Interceptor auf den vorigen, ohne den alten je zu entfernen.
   useEffect(() => {
     const id = axios.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        // Gleitende Sitzung: Der Server schickt bei Nutzung ein frisches
+        // Token, sobald die halbe Laufzeit vorbei ist. Wer regelmaessig
+        // arbeitet, muss sich damit nie neu anmelden.
+        const erneuert = response.headers?.[ERNEUERUNGS_HEADER];
+        if (erneuert) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${erneuert}`;
+          setToken(erneuert);
+          schreibeWert(SCHLUESSEL_TOKEN, erneuert);
+        }
+        return response;
+      },
       (error) => {
         if (error.response && error.response.status === 401) {
           if (!isLoggingOut.current) {
