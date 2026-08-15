@@ -113,17 +113,26 @@ export async function schreibeWert(schluessel, wert) {
     schreibeWeb(schluessel, wert);
     return;
   }
+  // Zuerst in den schnellen Speicher, dann in den Systemspeicher nachziehen.
+  //
+  // Der Systemspeicher antwortet asynchron und darf bis zu einigen Sekunden
+  // brauchen. Wurde erst dort geschrieben, war der Wert in dieser Zeit
+  // nirgends abgelegt — geht die App waehrenddessen in den Hintergrund oder
+  // wechselt die Ansicht, ging die Anmeldung verloren und man musste sich
+  // beim naechsten Start neu anmelden.
+  //
+  // Diese Reihenfolge macht den Wert sofort dauerhaft. Der unverschluesselte
+  // Zwischenstand besteht nur, bis der Systemspeicher bestaetigt — danach
+  // wird er geloescht.
+  schreibeWeb(schluessel, wert);
   try {
     await schreibeNativ(schluessel, wert);
-    // Nach erfolgreichem Schreiben in den Systemspeicher darf keine Kopie im
-    // unverschluesselten Ausweichspeicher zurueckbleiben.
     loescheWeb(schluessel);
   } catch (error) {
-    // Ist der Systemspeicher nicht erreichbar, ist der Ausweichspeicher die
-    // schlechtere, aber brauchbare Wahl: Eine App, die sich nicht anmelden
-    // laesst, ist unbrauchbar. Der Wert liegt dann wie in der Weboberflaeche.
-    console.error('Sicherer Speicher nicht erreichbar, weiche aus:', error);
-    schreibeWeb(schluessel, wert);
+    // Der Wert bleibt im Ausweichspeicher liegen: schlechter geschuetzt, aber
+    // vorhanden. Eine App, bei der man sich staendig neu anmelden muss, ist
+    // unbrauchbar.
+    console.error('Sicherer Speicher nicht erreichbar, Anmeldung bleibt im Ausweichspeicher:', error);
   }
 }
 

@@ -81,3 +81,16 @@ export function setzeSystemflaeche(flaeche, dunkelmodus) {
   const hellerText = wert === 'brand' ? !dunkelmodus : dunkelmodus;
   setzeStatusleistenStil(hellerText);
 }
+
+// Startflaeche schon beim Laden des Moduls setzen, nicht erst im Effekt.
+//
+// Der Effekt in AppContent laeuft erst NACH dem ersten Zeichnen. In diesem
+// einen Moment traegt das Dokument noch die App-Flaeche, waehrend darueber
+// bereits der Startbildschirm in Petrol liegt — oben und unten blitzen dann
+// helle bzw. schwarze Streifen auf.
+//
+// Die App beginnt immer auf der Markenflaeche: Startbildschirm,
+// Kirchenkreis-Wahl und Anmeldung liegen alle darauf.
+if (IST_NATIVE) {
+  document.documentElement.setAttribute('data-flaeche', 'brand');
+}
