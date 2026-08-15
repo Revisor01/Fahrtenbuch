@@ -12,6 +12,14 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Beim ersten Start der App lässt sich der eigene Kirchenkreis aus einer Liste wählen; die Anmeldung läuft danach gegen dessen Fahrtenbuch. Kommt ein Kirchenkreis dazu, erscheint er ohne App-Update
 - Bei einer neuen Version erscheint ein Hinweis mit „Neu laden" — der Wechsel passiert erst nach Bestätigung, laufende Eingaben gehen nicht verloren
 - Ohne Internetverbindung öffnet die App weiterhin und meldet klar, dass gerade keine Verbindung besteht, statt eine leere Browser-Fehlerseite zu zeigen; sobald die Verbindung zurück ist, gibt es ebenfalls einen Hinweis
+- Der Kirchenkreis lässt sich in den Einstellungen der App nachträglich wechseln; zur Sicherheit meldet der Wechsel ab, damit die Anmeldung immer zum gewählten Fahrtenbuch gehört
+- Ist die Liste der Kirchenkreise beim ersten Start nicht erreichbar, zeigt die App die ihr bekannten Kirchenkreise samt Hinweis und einer Möglichkeit, es erneut zu versuchen
+- Die App bringt auf iPhone und Android jeweils die Navigation mit, die man dort gewohnt ist: auf dem iPhone eine schwebende Leiste mit gefülltem Symbol und Zahl am offenen Punkt der Abrechnung, auf Android eine flache Leiste mit farbig hinterlegtem aktivem Eintrag. Im Browser bleibt alles wie bisher
+- Ein Tabwechsel in der App gibt eine kurze, dezente Rückmeldung über die Vibration des Geräts
+- Die Zurück-Taste auf Android schließt zuerst ein offenes Fenster, geht dann eine Seite zurück, danach auf die Startseite — und beendet die App erst, wenn es nichts mehr zurückzugehen gibt
+
+### Behoben
+- In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler
 
 ### Sonstiges
 - Fahrten und Abrechnungen werden bewusst nicht offline zwischengespeichert: angezeigte Zahlen stammen immer vom Server
