@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path'); // Import path
 const initializeDatabase = require('./initDb');
+const { ERNEUERUNGS_HEADER } = require('./utils/tokenLaufzeit');
 const orteRoutes = require('./routes/orte');
 const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
@@ -82,7 +83,11 @@ app.use(cors({
         'Accept',
         'Authorization',
         'X-API-Key'  // Hier den neuen Header hinzufügen
-    ]
+    ],
+    // Ohne exposedHeaders bleibt der Header fuer den Browser unsichtbar: er
+    // kaeme zwar an, waere aus JavaScript aber nicht lesbar — die gleitende
+    // Sitzung wuerde stillschweigend nicht funktionieren.
+    exposedHeaders: [ERNEUERUNGS_HEADER]
 }));
 app.use(helmet());
 app.use(express.json({ limit: '10mb' }));

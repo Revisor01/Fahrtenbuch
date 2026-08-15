@@ -21,6 +21,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Geändert
 - In der App liegt die Anmeldung jetzt im gesicherten Bereich des Geräts statt im Browserspeicher, geschützt durch die Bildschirmsperre. Wer bereits angemeldet ist, bleibt es — die Übernahme passiert beim ersten Start von selbst. Im Browser ändert sich nichts
 - Beim Start der App erscheint kurz eine ruhige Fläche, bis die gespeicherte Anmeldung gelesen ist; die Anmeldemaske blitzt dadurch nicht mehr auf, wenn man bereits angemeldet ist
+- Die Anmeldung hält jetzt, solange man das Fahrtenbuch benutzt — das tägliche Neuanmelden entfällt. Wer es längere Zeit nicht öffnet, wird weiterhin abgemeldet; an geteilten Rechnern bleibt also niemand dauerhaft angemeldet
 
 ### Behoben
 - In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler

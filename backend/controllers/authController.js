@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 const crypto = require('crypto');
 const mailService = require('../services/mailService');
+const { TOKEN_LAUFZEIT } = require('../utils/tokenLaufzeit');
 
 // Fehler aus dem Mailversand von echten Serverfehlern unterscheiden.
 // nodemailer setzt einen SMTP-Code (EAUTH bei falschen Zugangsdaten,
@@ -47,7 +48,7 @@ exports.login = async (req, res) => {
       const token = jwt.sign(
         { id: user.id, role: user.role, email_verified: user.email_verified },
         process.env.JWT_SECRET,
-        { expiresIn: '1d' }
+        { expiresIn: TOKEN_LAUFZEIT }
       );
         
       res.json({ token });
