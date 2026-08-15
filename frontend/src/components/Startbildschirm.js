@@ -1,16 +1,11 @@
-import React, { useEffect } from 'react';
-import { splashAusblenden } from '../utils/splash';
+import React from 'react';
 
 // Zeigt Logo und Namen, waehrend die gespeicherte Anmeldung gelesen wird.
 //
-// Der native Startbildschirm wird genau hier ausgeblendet: erst wenn diese
-// Flaeche steht. Dadurch gibt es keinen Moment mit weissem Bildschirm
-// dazwischen — beide sehen gleich aus, der Uebergang ist unsichtbar.
+// Sieht bewusst aus wie der native Startbildschirm, den App.js ausblendet,
+// sobald die Oberflaeche steht: So ist der Uebergang unsichtbar statt ein
+// Wechsel zwischen zwei verschiedenen Flaechen.
 function Startbildschirm() {
-  useEffect(() => {
-    splashAusblenden();
-  }, []);
-
   return (
     <div className="startbildschirm" role="status" aria-live="polite">
       <div className="startbildschirm-inhalt">

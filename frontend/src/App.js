@@ -10,11 +10,17 @@ import AppProvider from './contexts/AppContext';
 import { ErfassungProvider } from './contexts/ErfassungContext';
 import AppContent from './components/AppContent';
 import PwaUpdater from './components/PwaUpdater';
+import { splashAusblenden } from './utils/splash';
 
 
 function App() {
   React.useEffect(() => {
     document.title = "Fahrtenbuch";
+    // Der native Startbildschirm weicht, sobald der erste eigene Bildschirm
+    // steht — gleich welcher. Haenge er am Ladezustand der Anmeldung, bliebe
+    // er beim ersten Start hinter der Kirchenkreis-Auswahl liegen und man
+    // saehe zwei Startbildschirme nacheinander.
+    splashAusblenden();
   }, []);
 
   return (
