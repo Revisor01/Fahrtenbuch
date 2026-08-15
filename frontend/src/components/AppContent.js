@@ -5,6 +5,7 @@ import { useTheme } from '../ThemeContext';
 import EinstellungenView from './einstellungen/EinstellungenView';
 import FahrtenListe from './FahrtenListe';
 import InfoModal from './InfoModal';
+import Startbildschirm from './Startbildschirm';
 import UserManagement from '../UserManagement';
 import NewFeaturesModal from './NewFeaturesModal';
 import MonthlyOverview from './MonthlyOverview';
@@ -125,10 +126,9 @@ function AppContent() {
 
   // Erst wenn die gespeicherte Anmeldung gelesen ist, steht fest, ob die
   // Anmeldemaske gehoert wird. Ohne dieses Gate blitzte sie beim Start der App
-  // kurz auf, weil der sichere Speicher erst asynchron antwortet. Bewusst
-  // dieselbe Flaeche wie die Anmeldung, damit der Uebergang nicht springt.
+  // kurz auf, weil der sichere Speicher erst asynchron antwortet.
   if (!anmeldungGeladen) {
-    return <div className="auth-page" aria-busy="true" />;
+    return <Startbildschirm />;
   }
 
   if (!isLoggedIn) {
