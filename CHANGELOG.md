@@ -14,7 +14,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Ohne Internetverbindung öffnet die App weiterhin und meldet klar, dass gerade keine Verbindung besteht, statt eine leere Browser-Fehlerseite zu zeigen; sobald die Verbindung zurück ist, gibt es ebenfalls einen Hinweis
 - Der Kirchenkreis lässt sich in den Einstellungen der App nachträglich wechseln; zur Sicherheit meldet der Wechsel ab, damit die Anmeldung immer zum gewählten Fahrtenbuch gehört
 - Ist die Liste der Kirchenkreise beim ersten Start nicht erreichbar, zeigt die App die ihr bekannten Kirchenkreise samt Hinweis und einer Möglichkeit, es erneut zu versuchen
-- Die App bringt auf iPhone und Android jeweils die Navigation mit, die man dort gewohnt ist: auf dem iPhone eine schwebende Leiste mit gefülltem Symbol und Zahl am offenen Punkt der Abrechnung, auf Android eine flache Leiste mit farbig hinterlegtem aktivem Eintrag. Im Browser bleibt alles wie bisher
+- Die App nutzt auf iPhone und Android die Navigationsleiste des Betriebssystems selbst — auf dem iPhone die schwebende Glasleiste mit gefülltem Symbol, auf Android die gewohnte Leiste mit farbig hinterlegtem aktivem Eintrag. Sie sieht damit nicht nur so aus wie die des Systems, sie ist es, samt Bewegung, Anzeige der Zahl offener Abrechnungen und Bedienhilfen. Ihre Farben folgen weiterhin dem Fahrtenbuch und wechseln mit hellem und dunklem Design. Im Browser bleibt alles wie bisher
 - Ein Tabwechsel in der App gibt eine kurze, dezente Rückmeldung über die Vibration des Geräts
 - Die Zurück-Taste auf Android schließt zuerst ein offenes Fenster, geht dann eine Seite zurück, danach auf die Startseite — und beendet die App erst, wenn es nichts mehr zurückzugehen gibt
 - Beim Öffnen der App erscheint ein Startbildschirm mit Logo und Namen, bis die Anmeldung geladen ist
@@ -29,6 +29,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Behoben
 - In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
 - In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler
+- In der App tritt die Navigationsleiste zurück, sobald sich ein Fenster von unten öffnet, und kommt beim Schließen wieder — der untere Rand eines solchen Fensters ist dadurch immer erreichbar
 - In der App standen an den Rändern des Bildschirms helle bzw. schwarze Streifen. Die Ränder tragen jetzt die Farbe des jeweiligen Bildschirms — Petrol auf Startbildschirm und Anmeldung, die normale Fläche in der angemeldeten Ansicht, hell wie dunkel. Auch die Uhrzeit und die Symbole der Statusleiste sind dadurch immer lesbar
 
 ### Sonstiges
