@@ -34,6 +34,25 @@ Der Registrierungscode selbst landet nie im Frontend — ausgeliefert wird nur,
 Fuer die lokale Entwicklung ohne Container greifen ersatzweise
 `VITE_*`-Variablen aus einer `.env`-Datei.
 
+### Instanz-Verzeichnis der App (`VITE_INSTANZ_VERZEICHNIS`)
+
+Die native App (Capacitor) hat beim ersten Start noch keinen Server: Nutzende
+waehlen zuerst ihren Kirchenkreis. Die Adresse, unter der diese Liste liegt,
+kann deshalb nicht zur Laufzeit aus `config.js` kommen — sie muss **beim Bauen**
+im Bundle stehen.
+
+- Variable: `VITE_INSTANZ_VERZEICHNIS`
+- Default: `https://kkd-fahrtenbuch.de`
+- Abgefragt wird `<VITE_INSTANZ_VERZEICHNIS>/api/instanzen` (ohne Anmeldung)
+
+Die Liste selbst pflegt das Backend ueber `INSTANZEN` — ein neuer Kirchenkreis
+braucht also kein App-Update, nur einen Eintrag dort. Ist das Verzeichnis nicht
+erreichbar, faellt die App auf eine im Bundle hinterlegte Liste zurueck
+(`src/api/instanzen.js`), damit die Auswahl auch ohne Netz bedienbar bleibt.
+
+Die Auswahl greift ausschliesslich in der nativen App. Im Web bleibt es beim
+bisherigen Verhalten: relative Pfade gegen den eigenen Host, keine Auswahl.
+
 ## Hinweise zum Aufbau
 
 - JSX steht in `.js`-Dateien. Ein kleiner Plugin-Hook in `vite.config.js`

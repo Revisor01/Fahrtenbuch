@@ -69,6 +69,19 @@ const resetLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Instanz-Verzeichnis: ohne Anmeldung aus dem ganzen Internet erreichbar,
+// aber inhaltlich harmlos (statische Liste, keine Datenbank, keine Personen-
+// daten). Deshalb großzügig — die App fragt beim Start einmal, ein Wechsel des
+// Kirchenkreises kostet einen weiteren Abruf. Das Limit soll nur verhindern,
+// dass jemand den Endpunkt als Dauerlast benutzt.
+const instanzLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 120,
+  message: { message: 'Zu viele Anfragen. Bitte kurz warten und erneut versuchen.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   apiLimiter,
   schreibLimiter,
@@ -76,4 +89,5 @@ module.exports = {
   loginLimiter,
   registerLimiter,
   resetLimiter,
+  instanzLimiter,
 };

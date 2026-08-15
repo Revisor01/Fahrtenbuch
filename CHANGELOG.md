@@ -5,6 +5,32 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
+## [Unreleased] - 2.3.0
+
+### Hinzugefügt
+- Das Fahrtenbuch lässt sich als App auf Startbildschirm oder Desktop installieren und startet dann ohne Browser-Leiste
+- Beim ersten Start der App lässt sich der eigene Kirchenkreis aus einer Liste wählen; die Anmeldung läuft danach gegen dessen Fahrtenbuch. Kommt ein Kirchenkreis dazu, erscheint er ohne App-Update
+- Bei einer neuen Version erscheint ein Hinweis mit „Neu laden" — der Wechsel passiert erst nach Bestätigung, laufende Eingaben gehen nicht verloren
+- Ohne Internetverbindung öffnet die App weiterhin und meldet klar, dass gerade keine Verbindung besteht, statt eine leere Browser-Fehlerseite zu zeigen; sobald die Verbindung zurück ist, gibt es ebenfalls einen Hinweis
+- Der Kirchenkreis lässt sich in den Einstellungen der App nachträglich wechseln; zur Sicherheit meldet der Wechsel ab, damit die Anmeldung immer zum gewählten Fahrtenbuch gehört
+- Ist die Liste der Kirchenkreise beim ersten Start nicht erreichbar, zeigt die App die ihr bekannten Kirchenkreise samt Hinweis und einer Möglichkeit, es erneut zu versuchen
+- Die App bringt auf iPhone und Android jeweils die Navigation mit, die man dort gewohnt ist: auf dem iPhone eine schwebende Leiste mit gefülltem Symbol und Zahl am offenen Punkt der Abrechnung, auf Android eine flache Leiste mit farbig hinterlegtem aktivem Eintrag. Im Browser bleibt alles wie bisher
+- Ein Tabwechsel in der App gibt eine kurze, dezente Rückmeldung über die Vibration des Geräts
+- Die Zurück-Taste auf Android schließt zuerst ein offenes Fenster, geht dann eine Seite zurück, danach auf die Startseite — und beendet die App erst, wenn es nichts mehr zurückzugehen gibt
+- Beim Öffnen der App erscheint ein Startbildschirm mit Logo und Namen, bis die Anmeldung geladen ist
+
+### Geändert
+- In der App liegt die Anmeldung jetzt im gesicherten Bereich des Geräts statt im Browserspeicher, geschützt durch die Bildschirmsperre. Wer bereits angemeldet ist, bleibt es — die Übernahme passiert beim ersten Start von selbst. Im Browser ändert sich nichts
+- Beim Start der App erscheint kurz eine ruhige Fläche, bis die gespeicherte Anmeldung gelesen ist; die Anmeldemaske blitzt dadurch nicht mehr auf, wenn man bereits angemeldet ist
+- Die Anmeldung hält jetzt, solange man das Fahrtenbuch benutzt — das tägliche Neuanmelden entfällt. Wer es längere Zeit nicht öffnet, wird weiterhin abgemeldet; an geteilten Rechnern bleibt also niemand dauerhaft angemeldet
+
+### Behoben
+- In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler
+
+### Sonstiges
+- Fahrten und Abrechnungen werden bewusst nicht offline zwischengespeichert: angezeigte Zahlen stammen immer vom Server
+- Die App darf auf iOS und Android auf die Schnittstelle zugreifen, ohne dass die Absicherung der Weboberfläche gelockert wird
+
 ## [2.2.0] - 2026-08-14
 
 ### Added

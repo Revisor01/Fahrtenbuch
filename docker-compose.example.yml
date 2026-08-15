@@ -30,6 +30,13 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
+      # Gueltigkeit der Anmeldung; ohne Angabe 14 Tage. Wird bei Nutzung
+      # gleitend erneuert, laeuft also nur bei Inaktivitaet ab.
+      - TOKEN_LAUFZEIT=${TOKEN_LAUFZEIT:-14d}
+      # Kommaseparierte Allowlist erlaubter Web-Origins; ein Einzelwert
+      # funktioniert unverändert. Die Origins der mobilen Apps
+      # (capacitor://localhost sowie https://localhost und http://localhost)
+      # sind fest eingebaut.
       - CORS_ORIGIN=${CORS_ORIGIN}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
@@ -53,6 +60,12 @@ services:
       - ALLOW_REGISTRATION=${ALLOW_REGISTRATION}
       - ALLOWED_EMAIL_DOMAINS=${ALLOWED_EMAIL_DOMAINS}
       - REGISTRATION_CODE=${REGISTRATION_CODE}
+      # Instanz-Verzeichnis für die mobilen Apps: JSON-Array mit id, name und
+      # apiUrl je Kirchenkreis, ausgeliefert über GET /api/instanzen (ohne
+      # Anmeldung). Unset = nur Dithmarschen. apiUrl muss https sein.
+      # Beispiel:
+      # INSTANZEN='[{"id":"dithmarschen","name":"Kirchenkreis Dithmarschen","apiUrl":"https://kkd-fahrtenbuch.de"}]'
+      - INSTANZEN=${INSTANZEN}
     restart: unless-stopped
     depends_on:
       db:

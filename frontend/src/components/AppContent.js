@@ -5,13 +5,20 @@ import { useTheme } from '../ThemeContext';
 import EinstellungenView from './einstellungen/EinstellungenView';
 import FahrtenListe from './FahrtenListe';
 import InfoModal from './InfoModal';
+import Startbildschirm from './Startbildschirm';
 import UserManagement from '../UserManagement';
 import NewFeaturesModal from './NewFeaturesModal';
 import MonthlyOverview from './MonthlyOverview';
 import Dashboard from './Dashboard';
 import LoginPage from './LoginPage';
+import InstanzAuswahl from './InstanzAuswahl';
 import { AppContext } from '../contexts/AppContext';
 import { aktuellerMonat } from '../utils/datum';
+import { PLATTFORM, IST_NATIVE } from '../utils/plattform';
+import { auswahlHaptik } from '../utils/haptik';
+import NativeNav from './NativeNav';
+import useZurueckButton from './useZurueckButton';
+import { getApiBaseUrl } from '../api/client';
 
 // Das Zeichen: offener Ring (die gefahrene Strecke), um −45° gedreht.
 // Ab 32px Darstellungsgröße trägt der Ring allein (ohne Akzent-Punkt).
@@ -38,12 +45,19 @@ const NAV_ITEMS = [
 ];
 
 function AppContent() {
-  const { isLoggedIn, logout, user, monthlyData } = useContext(AppContext);
+  const { isLoggedIn, anmeldungGeladen, logout, user, token, monthlyData } = useContext(AppContext);
   const { isDark, toggleDarkMode } = useTheme();
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [settingsSubTab, setSettingsSubTab] = useState(null);
+
+  // Nur die native App braucht eine Instanz-Wahl: Sie laeuft von einem lokalen
+  // Bundle und kennt ohne Auswahl keinen Server. Im Web bleibt das Gate
+  // dauerhaft aus — dort loesen relative Pfade gegen den eigenen Host auf.
+  const [instanzGewaehlt, setInstanzGewaehlt] = useState(
+    () => !IST_NATIVE || Boolean(getApiBaseUrl())
+  );
 
   // Extended navigation: supports "einstellungen:favoriten" deeplinks
   const handleNavigate = (target) => {
@@ -72,9 +86,12 @@ function AppContent() {
   }, [monthlyData]);
 
   // Token Check Effect
+  //
+  // Quelle ist der Token aus dem Context statt localStorage: in der App liegt
+  // er im Systemspeicher und waere hier nur asynchron erreichbar. Der Context
+  // haelt ohnehin denselben Wert.
   useEffect(() => {
     const checkTokenExpiration = () => {
-      const token = localStorage.getItem('token');
       if (!token) return;
       try {
         const tokenData = JSON.parse(atob(token.split('.')[1]));
@@ -93,7 +110,26 @@ function AppContent() {
     checkTokenExpiration();
     const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
-  }, [logout]);
+  }, [logout, token]);
+
+  // Muss vor den fruehen Returns stehen (Hook-Reihenfolge) und ist ausserhalb
+  // von Android ohnehin ein No-Op.
+  useZurueckButton({
+    startTab: 'dashboard',
+    activeTab,
+    onNavigate: handleNavigate,
+  });
+
+  if (!instanzGewaehlt) {
+    return <InstanzAuswahl onGewaehlt={() => setInstanzGewaehlt(true)} />;
+  }
+
+  // Erst wenn die gespeicherte Anmeldung gelesen ist, steht fest, ob die
+  // Anmeldemaske gehoert wird. Ohne dieses Gate blitzte sie beim Start der App
+  // kurz auf, weil der sichere Speicher erst asynchron antwortet.
+  if (!anmeldungGeladen) {
+    return <Startbildschirm />;
+  }
 
   if (!isLoggedIn) {
     return <LoginPage />;
@@ -109,9 +145,16 @@ function AppContent() {
     activeTab === id || (mobil && id === 'einstellungen' && activeTab === 'verwaltung');
 
   const handleNavClick = (id) => {
+    // Haptik nur beim tatsaechlichen Wechsel: erneutes Tippen auf den offenen
+    // Tab soll sich nicht nach einer Aktion anfuehlen. Im Web passiert nichts.
+    if (IST_NATIVE && id !== activeTab) auswahlHaptik();
     setActiveTab(id);
     setSettingsSubTab(null);
   };
+
+  // Der native Nav-Balken kennt keinen Verwaltungs-Eintrag — wie mobil im Web
+  // markiert dort „Einstellungen" auch die Verwaltung.
+  const nativAktivId = activeTab === 'verwaltung' ? 'einstellungen' : activeTab;
 
   return (
     <div className="app-shell">
@@ -241,7 +284,19 @@ function AppContent() {
           </div>
         </main>
 
-        {/* Bottom-Nav (<768px) */}
+        {/* In der nativen Huelle uebernimmt die Plattform-Navigation. Die
+            Web-Bottom-Nav bleibt unveraendert der Fall fuer Browser und PWA —
+            deshalb ein Entweder-oder statt einer Erweiterung der bestehenden. */}
+        {IST_NATIVE ? (
+          <NativeNav
+            plattform={PLATTFORM}
+            items={NAV_ITEMS}
+            aktivId={nativAktivId}
+            onSelect={handleNavClick}
+            badgeId="abrechnungen"
+            badgeAnzahl={faelligeMonate}
+          />
+        ) : (
         <nav className="bottom-nav" aria-label="Hauptnavigation">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -264,6 +319,7 @@ function AppContent() {
             );
           })}
         </nav>
+        )}
       </div>
 
       {/* Modals */}

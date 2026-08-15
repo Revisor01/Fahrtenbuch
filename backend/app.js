@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path'); // Import path
 const initializeDatabase = require('./initDb');
+const { ERNEUERUNGS_HEADER } = require('./utils/tokenLaufzeit');
 const orteRoutes = require('./routes/orte');
 const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
@@ -14,6 +15,7 @@ const apiKeyRoutes = require('./routes/apiKeys');
 const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const instanzenRoutes = require('./routes/instanzen');
 const { authMiddleware } = require('./middleware/authMiddleware');
 const { apiLimiter, schreibLimiter, exportLimiter } = require('./middleware/rateLimiter');
 
@@ -37,19 +39,55 @@ app.set('trust proxy', 1);
 // CORS_ORIGIN gilt immer, wenn gesetzt - die frühere Logik hing an NODE_ENV
 // und nagelte die Testumgebung auf die Produktionsdomain fest. Ohne die
 // Variable bleibt es bei der Produktionsdomain (kein '*'-Fallback).
-const corsOrigin = process.env.CORS_ORIGIN || 'https://kkd-fahrtenbuch.de';
+// Kommaseparierte Liste möglich; ein Einzelwert funktioniert unverändert.
+const konfigurierteOrigins = (process.env.CORS_ORIGIN || 'https://kkd-fahrtenbuch.de')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+// Die mobilen Apps laufen als WebView und schicken feste, herstellerseitig
+// vergebene Origins: iOS 'capacitor://localhost', Android je nach
+// androidScheme 'https://localhost' (Standard) oder 'http://localhost'.
+// Beide Android-Varianten stehen drin, damit ein Wechsel des Schemas die App
+// nicht aussperrt. Feste Eintraege statt Wildcard, damit die Web-Absicherung
+// unangetastet bleibt.
+//
+// Unbedenklich trotz 'localhost': Die API authentifiziert ueber den
+// Authorization-Header, nicht ueber Cookies. Eine boesartige lokale Seite
+// koennte zwar Anfragen senden, haette aber kein gueltiges Token.
+const APP_ORIGINS = ['capacitor://localhost', 'https://localhost', 'http://localhost'];
+
+const erlaubteOrigins = [...new Set([...konfigurierteOrigins, ...APP_ORIGINS])];
 
 app.use(cors({
-    origin: corsOrigin,
+    // Funktion statt Array: Anfragen ohne Origin-Header (native HTTP-Clients,
+    // curl, Server-zu-Server, Health-Checks) sollen weiterhin durchgehen — sie
+    // unterliegen keiner Same-Origin-Policy, CORS schützt dort nichts.
+    // Fremde Origins werden abgelehnt: Der Callback liefert kein Fehlerobjekt,
+    // sondern `false`. Damit fehlt der Access-Control-Allow-Origin-Header und
+    // der Browser blockt — statt eines 500ers aus dem Fehler-Handler.
+    origin: (origin, callback) => {
+        if (!origin || erlaubteOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(null, false);
+    },
+    // Cookies werden nicht genutzt (Token steckt im Authorization-Header),
+    // aber explizit gesetzt, damit der Preflight konsistent beantwortet wird.
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
-        'Origin', 
-        'X-Requested-With', 
-        'Content-Type', 
-        'Accept', 
+        'Origin',
+        'X-Requested-With',
+        'Content-Type',
+        'Accept',
         'Authorization',
         'X-API-Key'  // Hier den neuen Header hinzufügen
-    ]
+    ],
+    // Ohne exposedHeaders bleibt der Header fuer den Browser unsichtbar: er
+    // kaeme zwar an, waere aus JavaScript aber nicht lesbar — die gleitende
+    // Sitzung wuerde stillschweigend nicht funktionieren.
+    exposedHeaders: [ERNEUERUNGS_HEADER]
 }));
 app.use(helmet());
 app.use(express.json({ limit: '10mb' }));
@@ -63,7 +101,7 @@ app.use(express.static(reactBuildPath));
 // Rate-Limiting fuer die Datenrouten. Anmeldung und Passwort-Reset sind
 // ausgenommen: sie tragen eigene, engere Limits, und wer sich anmelden will,
 // darf nicht daran scheitern, dass jemand anderes die API ausgelastet hat.
-const OHNE_GLOBALES_LIMIT = ['/api/auth/', '/api/users/reset-password', '/api/users/set-password', '/api/users/verify-email'];
+const OHNE_GLOBALES_LIMIT = ['/api/auth/', '/api/users/reset-password', '/api/users/set-password', '/api/users/verify-email', '/api/instanzen'];
 const istAuthPfad = (req) => OHNE_GLOBALES_LIMIT.some((p) => req.originalUrl.startsWith(p));
 
 app.use('/api', (req, res, next) => (istAuthPfad(req) ? next() : apiLimiter(req, res, next)));
@@ -76,6 +114,8 @@ app.use('/api/fahrten/export-pdf', exportLimiter);
 app.use('/api/fahrten/export-pdf-range', exportLimiter);
 
 // API routes
+// Instanz-Verzeichnis ohne authMiddleware: die App braucht es vor dem Login.
+app.use('/api/instanzen', instanzenRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/keys', apiKeyRoutes);
 app.use('/api/users', userRoutes);
