@@ -49,6 +49,31 @@
       </array>
     </dict>
 	</dict>
+	<!-- Kurzbefehle (langes Tippen auf das App-Symbol). Statisch, weil beide
+	     Aktionen immer sinnvoll sind: „Fahrt erfassen" braucht keinen Zustand,
+	     und „Letzte Fahrt wiederholen" fuehrt bei leerer Liste in den normalen
+	     Erfassungsflow. Dynamische Eintraege wuerden verlangen, Fahrtdaten in
+	     die Systemoberflaeche zu schreiben — dort haben Anlaesse mit Namen
+	     („Beerdigung Thode") nichts zu suchen. -->
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>de.godsapp.fahrtenbuch.erfassen</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Fahrt erfassen</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCompose</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>de.godsapp.fahrtenbuch.wiederholen</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Letzte Fahrt wiederholen</string>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeUpdate</string>
+		</dict>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

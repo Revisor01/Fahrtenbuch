@@ -8,6 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased] - 2.3.0
 
 ### Hinzugefügt
+- Langes Tippen auf das App-Symbol bietet „Fahrt erfassen" und „Letzte Fahrt wiederholen" an — beide öffnen die Erfassung direkt, ohne den Umweg über die Startseite
 - Das Fahrtenbuch lässt sich als App auf Startbildschirm oder Desktop installieren und startet dann ohne Browser-Leiste
 - Beim ersten Start der App lässt sich der eigene Kirchenkreis aus einer Liste wählen; die Anmeldung läuft danach gegen dessen Fahrtenbuch. Kommt ein Kirchenkreis dazu, erscheint er ohne App-Update
 - Bei einer neuen Version erscheint ein Hinweis mit „Neu laden" — der Wechsel passiert erst nach Bestätigung, laufende Eingaben gehen nicht verloren
