@@ -48,13 +48,9 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
       aria-label={`Fahrt ${von ? `${von} nach ` : 'nach '}${ziel}, ${datumKurz(fahrt.datum)} — Aktionen öffnen`}
       title={mitfahrer.length > 0 ? `Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}` : route}
     >
-      {/* Drei Spalten (Simon 16.08.): Datum — Text — Zahlen. Vorher stand
-          alles in einer Zeile und vom Anlass blieb „Die…". */}
-      <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
-
-      {/* Mitte: Anlass, darunter Start und Ziel auf je einer Zeile. Ueber die
-          volle Breite zwischen Datum und Zahlen — ohne „von"/„nach", weil der
-          Pfeil die Richtung zeigt und die Adressen den Platz brauchen. */}
+      {/* Links der Text in drei Zeilen — Anlass, Weg, Datum —, rechts die
+          Zahlen. Jede Zeile hat die volle Breite fuer sich; alles in einer
+          Zeile war nicht mehr zu lesen (Simon 16.08.). */}
       <span className="fl-zeile-main">
         <span className="fl-zeile-titel">
           <span className="fl-zeile-anlass">{titel}</span>
@@ -64,30 +60,33 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
               <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
             </span>
           )}
-          {/* „Erfasst" sagte an jeder Karte nichts — der Status haengt am
-              Traeger und Monat, nicht an der Fahrt. Sichtbar nur, wo er
-              abweicht (Zeitraum ueber mehrere Monate). */}
-          {status && status !== 'offen' && (
-            <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
-          )}
         </span>
         <span className="fl-zeile-route">
           {von && <span className="fl-zeile-ort">{von}</span>}
           <span className="fl-zeile-ort">
             {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
             {ziel}
-            {/* Die Mitfahrer-Marke haengt an der Zielzeile statt am Anlass:
-                In der Titelzeile kosteten ihre 11px genau den Platz, den
-                „Dienstbesprechung" zum Ausschreiben braucht (Simon 16.08.). */}
-            {mitfahrer.length > 0 && (
-              <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}`}>
-                <span aria-hidden="true">+{mitfahrer.length}</span>
-                <span className="sr-only">
-                  {mitfahrer.length} Mitfahrer:in{mitfahrer.length > 1 ? 'nen' : ''}
-                </span>
-              </span>
-            )}
           </span>
+        </span>
+        {/* Datum unten, in Lesegroesse. Mitfahrer und ein abweichender Status
+            stehen daneben — sie ordnen die Fahrt ein, ohne dem Anlass oder den
+            Adressen Platz zu nehmen. */}
+        <span className="fl-zeile-fuss">
+          <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
+          {mitfahrer.length > 0 && (
+            <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}`}>
+              <span aria-hidden="true">+{mitfahrer.length}</span>
+              <span className="sr-only">
+                {mitfahrer.length} Mitfahrer:in{mitfahrer.length > 1 ? 'nen' : ''}
+              </span>
+            </span>
+          )}
+          {/* „Erfasst" sagte an jeder Karte nichts — der Status haengt am
+              Traeger und Monat, nicht an der Fahrt. Sichtbar nur, wo er
+              abweicht (Zeitraum ueber mehrere Monate). */}
+          {status && status !== 'offen' && (
+            <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
+          )}
         </span>
       </span>
 

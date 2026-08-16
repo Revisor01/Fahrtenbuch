@@ -3153,16 +3153,23 @@ code {
   min-width: 0;
 }
 
-/* Eigene Spalte ganz links, wieder in Lesegroesse (Simon 16.08.): Klein
-   gesetzt verschwand das Datum, obwohl es beim Durchsehen die Ordnung gibt.
-   Feste Breite plus tabellarische Ziffern (.num) stellen die Daten ueber alle
-   Karten buendig untereinander; 68px fassen „Mo 16.08." in einer Zeile. */
+/* In Lesegroesse, unten in der Karte — keine eigene Spalte (Simon 16.08.):
+   Als feste Spalte links nahm das Datum dem Anlass die Breite, klein gesetzt
+   verschwand es. Hier hat es Platz, ohne etwas zu verdraengen. */
 .fl-zeile-datum {
   flex: 0 0 auto;
-  width: 68px;
   font-size: 14px;
   white-space: nowrap;
   color: var(--text-2);
+}
+
+/* Unterste Zeile: Datum, Mitfahrer, abweichender Status. */
+.fl-zeile-fuss {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 3px;
+  min-width: 0;
 }
 
 /* Traegt den Anlass und das Rueckfahrt-Zeichen. Der Titel darin kuerzt, das
@@ -3185,10 +3192,9 @@ code {
   white-space: nowrap;
 }
 
-/* Mitfahrer:innen als knappes „+2" statt ausgeschriebener Zeile. Haengt am
-   Ziel, mit etwas Luft davor. */
+/* Mitfahrer:innen als knappes „+2" statt ausgeschriebener Zeile */
 .fl-zeile-mf {
-  margin-left: 6px;
+  flex: 0 0 auto;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-3, var(--text-2));
