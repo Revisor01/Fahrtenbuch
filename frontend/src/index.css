@@ -3123,9 +3123,11 @@ code {
   /* Oben ausgerichtet, damit die Zahlen rechts auf Hoehe des Anlasses
      beginnen statt mittig zwischen den Zeilen zu haengen. */
   align-items: flex-start;
-  gap: 12px;
+  /* 10px: Bei drei Spalten (Datum — Text — Zahlen) kosteten 12px den Anlass
+     die letzten Pixel, sodass er kuerzte (Simon 16.08.). */
+  gap: 10px;
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-card);
@@ -3151,37 +3153,16 @@ code {
   min-width: 0;
 }
 
-/* Kopfzeile: Datum fuehrt, der Anlass steht daneben. Kilometer und Betrag
-   standen bis 16.08. ebenfalls hier und drueckten den Anlass auf „Die…" —
-   sie haben jetzt eine eigene Spalte rechts (Simon 16.08.). */
-.fl-zeile-kopf {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-}
-
-/* Feste Breite: Die Daten stehen damit ueber alle Karten buendig
-   untereinander — tabellarische Ziffern (.num) machen sie gleich breit.
-   62px statt 74px und 12px statt 13px: Bei 74px blieben dem Anlass auf einem
-   schmalen iPhone nur 95px, obwohl er 150px braucht — er kuerzte auf
-   „Dienstbes…" (Simon 16.08.). */
+/* Eigene Spalte ganz links, wieder in Lesegroesse (Simon 16.08.): Klein
+   gesetzt verschwand das Datum, obwohl es beim Durchsehen die Ordnung gibt.
+   Feste Breite plus tabellarische Ziffern (.num) stellen die Daten ueber alle
+   Karten buendig untereinander; 68px fassen „Mo 16.08." in einer Zeile. */
 .fl-zeile-datum {
   flex: 0 0 auto;
-  width: 62px;
-  font-size: 12px;
+  width: 68px;
+  font-size: 14px;
   white-space: nowrap;
-  color: var(--text-3, var(--text-2));
-}
-
-/* Leise Fusszeile unter der Route: Mitfahrer und ein abweichender Status.
-   Faellt weg, wenn es beides nicht gibt. */
-.fl-zeile-fuss {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-top: 4px;
-  min-width: 0;
+  color: var(--text-2);
 }
 
 /* Traegt den Anlass und das Rueckfahrt-Zeichen. Der Titel darin kuerzt, das
@@ -3204,9 +3185,10 @@ code {
   white-space: nowrap;
 }
 
-/* Mitfahrer:innen als knappes „+2" statt ausgeschriebener Zeile */
+/* Mitfahrer:innen als knappes „+2" statt ausgeschriebener Zeile. Haengt am
+   Ziel, mit etwas Luft davor. */
 .fl-zeile-mf {
-  flex: 0 0 auto;
+  margin-left: 6px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-3, var(--text-2));
@@ -3260,24 +3242,14 @@ code {
   align-self: flex-start;
 }
 
-/* Kilometer rechts in der Zielzeile — leise, weil der Betrag oben die Zahl
-   traegt, auf die es bei einer Abrechnung ankommt. */
+/* Kilometer als unterste Ebene der Zahlenspalte — leise, weil der Betrag
+   darueber die Zahl traegt, auf die es bei einer Abrechnung ankommt. */
 .fl-zeile-km {
-  flex-shrink: 0;
-  margin-left: 12px;
   font-size: 13px;
   color: var(--text-2);
   white-space: nowrap;
 }
 
-/* Ziel links, Kilometer rechts in einer Zeile. Das Ziel kuerzt, die Zahl
-   behaelt ihren Platz. */
-.fl-zeile-zielzeile {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  min-width: 0;
-}
 
 .fl-zeile-betrag {
   font-size: 15px;
