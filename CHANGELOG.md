@@ -27,6 +27,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Das Logo auf der Anmeldeseite zeigt jetzt dasselbe Zeichen wie das App-Symbol, samt Punkt am offenen Ende des Rings
 - Die Fahrtenliste zeigt die Fahrten auf dem Handy jetzt im selben Layout wie das Dashboard: eine zusammenhängende Liste statt einzelner Kacheln, mit Anlass, Strecke, Datum, Träger und Status untereinander und Kilometern samt Erstattung rechts. Es passen dadurch spürbar mehr Fahrten auf den Bildschirm. Mitfahrer:innen, der Hinweis auf verknüpfte Hin- und Rückfahrten und alle Aktionen bleiben erhalten; am Rechner bleibt die Tabelle unverändert
 - In der App liegt „Fahrt hinzufügen" jetzt als eigener runder Knopf rechts in der Navigationsleiste des Systems statt als schwebender Knopf über dem Inhalt. Er ist von jeder Ansicht aus erreichbar und verdeckt keine Fahrten mehr. Im Browser bleibt der bisherige Weg unverändert
+- In der Fahrtenliste stehen Start und Ziel jetzt untereinander statt nebeneinander. Adressen mit Straße und Postleitzahl sind damit vollständig zu lesen; vorher blieb vom Ziel oft nur ein abgeschnittener Anfang übrig
+- Der Abrechnungsträger hat in der Fahrtenliste eine eigene Zeile und wird nicht mehr mitten im Namen abgeschnitten
+- Der Pfeil am rechten Rand der Listen ist entfernt. Die Zeilen lassen sich weiterhin antippen, der gewonnene Platz gehört jetzt dem Text
 
 ### Behoben
 - In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
@@ -36,6 +39,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Fenster, die sich von unten öffnen, lassen sich jetzt durch Wischen nach unten schließen — am Griff oder an der Titelzeile. Ein zu kurzer Zug federt zurück, und solange der Inhalt noch gescrollt wird, bleibt das Wischen beim Inhalt
 - Solche Fenster werden nie höher als der Bildschirm: Griff und Titel stehen fest, der Inhalt scrollt darunter. Vorher konnte bei langen Formularen der obere Rand mitsamt Griff wegscrollen
 - In der App machte das Datumsfeld unter „Fahrt bearbeiten" das Fenster so hoch, dass es sich nicht mehr schließen ließ. Es ist jetzt genauso hoch wie jedes andere Eingabefeld; die Datumsauswahl des Geräts öffnet sich weiterhin wie gewohnt
+- In der App verschwand die letzte Fahrt einer Liste halb hinter der Navigationsleiste. Listen enden jetzt immer mit sichtbarem Abstand darüber
 - Unter „Fahrt bearbeiten" lief der Name des Abrechnungsträgers unter das Auswahlsymbol und wirkte dadurch angeschnitten. Längere Namen sind jetzt vollständig lesbar; das gilt für alle Auswahlfelder im Fahrtenbuch
 
 ### Sonstiges

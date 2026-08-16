@@ -1,5 +1,4 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 import { formatBetrag, rundeKilometer } from './zeitraumUtils';
 
@@ -48,9 +47,6 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
           <div className="fl-th-num">km</div>
           <div className="fl-th-num">Betrag</div>
           <div className="fl-th-num">Status</div>
-          <div className="fl-th-num">
-            <span className="sr-only">Aktionen</span>
-          </div>
         </div>
         {fahrten.map((fahrt) => {
           const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '—';
@@ -111,9 +107,6 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
               </span>
               <span className="fl-td-status">
                 <StatusBadge status={statusFuer(fahrt)} variant="dot" />
-              </span>
-              <span className="fl-td-aktionen">
-                <ChevronRight size={16} className="fl-zeile-chevron" aria-hidden="true" />
               </span>
             </button>
           );

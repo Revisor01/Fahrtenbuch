@@ -9,7 +9,7 @@ import AktionsSheet from './ui/AktionsSheet';
 import StatusBadge from './ui/StatusBadge';
 import { useToast } from './ui/Toast';
 import { statusFromAbrechnung } from '../utils/statusLabels';
-import { Star, Pencil, RotateCw, ArrowLeftRight, ChevronRight } from 'lucide-react';
+import { Star, Pencil, RotateCw, ArrowLeftRight } from 'lucide-react';
 import { API_BASE_URL } from '../api/client';
 
 // Dashboard (Redesign 2026, Phase R4).
@@ -674,7 +674,6 @@ function Dashboard({ onNavigate }) {
                     <span className="dash-zuletzt-sub">{zuletztSub(fahrt)}</span>
                   </span>
                   <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>
-                  <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
                 </button>
               ))
             )}
@@ -953,7 +952,6 @@ function Dashboard({ onNavigate }) {
                     <StatusBadge status={statusFuerFahrt(fahrt)} variant="dot" />
                   </span>
                   <span className="dash-d-td-aktion">
-                    <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
                   </span>
                 </button>
               ))

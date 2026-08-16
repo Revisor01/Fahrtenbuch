@@ -3015,7 +3015,9 @@ code {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 14px 32px 14px 16px;
+  /* Rechts fruehen 32px fuer den Chevron. Der ist raus (Simon 16.08.), der
+     Platz gehoert wieder dem Text. */
+  padding: 14px 16px;
   border: none;
   background: transparent;
   font: inherit;
@@ -3060,8 +3062,49 @@ code {
   white-space: nowrap;
 }
 
+/* Route auf zwei Zeilen: „von <Ort>" ueber „nach <Ort>". Nebeneinander
+   passten die Adressen mit Strasse und PLZ nicht in die rund 200px, die der
+   Textspalte mobil bleiben. Die Marken stehen in fester Breite links, damit
+   beide Ortsnamen an derselben Kante beginnen. */
 .fl-zeile-route {
   display: block;
+  font-size: 13px;
+  color: var(--text-2);
+  min-width: 0;
+}
+
+.fl-zeile-ort {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fl-zeile-ort-marke {
+  flex: 0 0 auto;
+  width: 26px;
+  font-size: 11px;
+  color: var(--text-3, var(--text-2));
+}
+
+/* Der Ortsname traegt oft die ganze Adresse („Suederstrasse, 25779
+   Hennstedt"). Die passt in keine Zeile, und gekuerzt blieb vom Ort nichts
+   uebrig. Er bricht deshalb um, statt zu kuerzen — hoechstens zwei Zeilen,
+   damit eine einzelne Fahrt die Liste nicht sprengt. */
+.fl-zeile-ort-name {
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+/* Der Traeger stand fruehen im zusammengefuegten Sub-Text und wurde mit ihm
+   gekuerzt („Kirchengeme…"). Eigene Zeile, eigene Kuerzung. */
+.fl-zeile-traeger {
+  display: block;
+  min-width: 0;
   font-size: 13px;
   color: var(--text-2);
   overflow: hidden;
@@ -3069,7 +3112,7 @@ code {
   white-space: nowrap;
 }
 
-/* Leise Zeile: Datum · Traeger · Mitfahrer, rechts daneben der Statuspunkt */
+/* Leise Zeile: Datum · Mitfahrer, rechts daneben der Statuspunkt */
 .fl-zeile-sub {
   display: flex;
   align-items: center;
@@ -3118,16 +3161,6 @@ code {
   color: var(--text-2);
   white-space: nowrap;
 }
-
-.fl-zeile-chevron {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  color: var(--text-3);
-  pointer-events: none;
-}
-
 
 /* ---------- Export-Sheet ---------- */
 .fl-export-sub {
@@ -3194,9 +3227,9 @@ code {
 .fl-tablerow {
   display: grid;
   /* Spaltenbreiten wie in der Dashboard-Tabelle, nur die Datumsspalte breiter
-     (dort ohne Jahr, hier mit). Die letzte Spalte trug frueher drei
-     Icon-Buttons - jetzt steht dort nur noch der Chevron. */
-  grid-template-columns: 92px 1fr 140px 52px 88px 106px 44px;
+     (dort ohne Jahr, hier mit). Die frueheren Icon-Buttons und der Chevron
+     danach sind entfallen (Simon 16.08.); die Zeile endet mit dem Status. */
+  grid-template-columns: 92px 1fr 140px 52px 88px 106px;
   min-width: 620px;
   align-items: center;
   padding: 8px 22px;
@@ -3276,12 +3309,6 @@ code {
 .fl-td-status {
   display: flex;
   justify-content: flex-end;
-}
-
-.fl-td-aktionen {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
 }
 
 /* Aktions-Icon-Buttons 36×36 (Spec: Tabellen-Aktionen in den
@@ -5652,11 +5679,6 @@ code {
   pointer-events: none;
 }
 
-.set-row-chevron {
-  flex-shrink: 0;
-  color: var(--text-3);
-}
-
 /* Desktop-Tabellenzeile als Ganzes antippbar (gleiches Muster wie mobil) */
 .set-tr-tap {
   border: none;
@@ -5724,17 +5746,6 @@ code {
 .fl-tablerow-tap .fl-td-status {
   display: block;
   min-width: 0;
-}
-
-.fl-tablerow-tap .fl-td-aktionen {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.fl-tablerow-tap .fl-zeile-chevron {
-  position: static;
-  transform: none;
 }
 
 /* ==========================================================================
@@ -6138,14 +6149,21 @@ code {
    Schaetzung und passten je nach Geraet nicht.
 
    Die Plattform meldet die tatsaechliche Hoehe stattdessen selbst als
-   --cap-native-tabbar-height bzw. --cap-native-navigation-bottom an <html>
-   (contentInsetMode: 'css'). Der Fallback greift nur in dem kurzen Moment vor
-   der ersten Meldung, damit der Inhalt nie ohne Sockel dasteht. */
+   --cap-native-tabbar-height an <html> (contentInsetMode: 'css'). Der Wert
+   enthaelt die Safe Area und den Abstand der schwebenden Leiste bereits.
+
+   Zwei Fallen, die je eine halb verdeckte letzte Zeile gekostet haben:
+
+   1. --cap-native-navigation-bottom traegt DIESELBE Zahl wie
+      --cap-native-tabbar-height. Beide zu addieren verdoppelte den Sockel.
+   2. Solange ein Dialog offen ist, meldet das Plugin die Hoehe als 0px
+      (NativeNav setzt 'hidden'). Ein Fallback im var() greift dann nicht —
+      die Variable ist ja gesetzt, nur eben null. Deshalb max(): der
+      Mindestsockel traegt den Inhalt auch in diesem Moment. */
 [data-platform="ios"] .app-content-inner,
 [data-platform="android"] .app-content-inner {
   padding-bottom: calc(
-    var(--cap-native-tabbar-height, 64px) +
-      var(--cap-native-navigation-bottom, 0px) + 16px
+    max(var(--cap-native-tabbar-height, 0px), 72px) + 16px
   );
 }
 

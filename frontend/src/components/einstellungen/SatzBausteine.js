@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { heuteISO, alsISODatum } from '../../utils/datum';
-import { Pencil, Trash2, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import Sheet from '../ui/Sheet';
 import AktionsSheet from '../ui/AktionsSheet';
 
@@ -80,7 +80,6 @@ export function SatzListe({ saetze, onEdit, onDelete, leerText }) {
               Gültig ab {new Date(satz.gueltig_ab).toLocaleDateString('de-DE')}
             </span>
           </button>
-          <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
         </div>
       ))}
       {saetze.length === 0 && (
