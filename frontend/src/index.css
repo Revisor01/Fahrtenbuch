@@ -2855,14 +2855,32 @@ code {
   margin-bottom: 16px;
 }
 
+/* Zwei Spalten mit eigener Beschriftung: Nebeneinander ohne Label klebten
+   „46 km" und „13,80 €" zusammen und lasen sich wie eine einzige Zahl
+   (Simon 16.08.). */
 .fl-summe-werte {
   display: flex;
-  align-items: baseline;
-  gap: 20px;
+  gap: 16px;
+}
+
+.fl-summe-spalte {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.fl-summe-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3, var(--text-2));
 }
 
 .fl-summe-sub {
-  margin-top: 2px;
+  margin-top: 12px;
   font-size: 13px;
   color: var(--text-2);
 }

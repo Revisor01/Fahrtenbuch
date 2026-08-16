@@ -220,8 +220,14 @@ function FahrtenListe() {
           Monatswahl und Liste standen sie verloren. */}
       <div className="fl-summe-karte">
         <div className="fl-summe-werte">
-          <span className="fl-summe-wert num">{kmGesamt} km</span>
-          <span className="fl-summe-wert num">{formatBetrag(summary?.gesamtErstattung)} €</span>
+          <div className="fl-summe-spalte">
+            <span className="fl-summe-label">Kilometer</span>
+            <span className="fl-summe-wert num">{kmGesamt} km</span>
+          </div>
+          <div className="fl-summe-spalte">
+            <span className="fl-summe-label">Erstattung</span>
+            <span className="fl-summe-wert num">{formatBetrag(summary?.gesamtErstattung)} €</span>
+          </div>
         </div>
         <div className="fl-summe-sub">
           {sortierteFahrten.length} {sortierteFahrten.length === 1 ? 'Fahrt' : 'Fahrten'}
