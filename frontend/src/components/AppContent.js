@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo, useRef } from 'react';
 import { Users, Home, Car, Receipt, Settings, Sun, Moon, Bell, Info, HelpCircle, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
@@ -22,6 +22,11 @@ import NativeNav from './NativeNav';
 import useZurueckButton from './useZurueckButton';
 import { getApiBaseUrl, setApiBaseUrl } from '../api/client';
 import { ladeServerKonfig } from '../api/konfig';
+import {
+  KURZBEFEHL_WIEDERHOLEN,
+  aufKurzbefehlHoeren,
+  offenenKurzbefehlAbholen,
+} from '../utils/kurzbefehle';
 
 // Das Zeichen: offener Ring (die gefahrene Strecke), um −45° gedreht.
 // Ab 32px Darstellungsgröße trägt der Ring allein (ohne Akzent-Punkt).
@@ -61,7 +66,8 @@ const NATIVE_NAV_ITEMS = [
 ];
 
 function AppContent() {
-  const { isLoggedIn, anmeldungGeladen, logout, user, token, monthlyData } = useContext(AppContext);
+  const { isLoggedIn, anmeldungGeladen, logout, user, token, monthlyData, fahrten } =
+    useContext(AppContext);
   const { isDark, toggleDarkMode } = useTheme();
   const erfassung = useErfassung();
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -166,6 +172,67 @@ function AppContent() {
     activeTab,
     onNavigate: handleNavigate,
   });
+
+  // Kurzbefehle (langes Tippen auf das App-Symbol).
+  //
+  // Der Effekt haengt an `isLoggedIn`: Ohne Anmeldung gibt es keinen
+  // Erfassungsflow, und den Kurzbefehl in die Anmeldemaske hinein zu oeffnen
+  // waere eine leere Geste. Er bleibt so lange gepuffert, bis die Anmeldung
+  // steht — genau das ist der Zweck des Puffers auf der nativen Seite.
+  //
+  // Bewusst ohne `fahrten` in den Abhaengigkeiten: Der Listener wuerde sonst
+  // bei jeder Datenaktualisierung neu anmelden, und der Griff auf die letzte
+  // Fahrt geschieht ohnehin erst im Moment des Tippens. Deshalb eine Ref.
+  const fahrtenRef = useRef(fahrten);
+  fahrtenRef.current = fahrten;
+
+  useEffect(() => {
+    if (!IST_NATIVE || !isLoggedIn) return undefined;
+
+    const ausfuehren = (typ) => {
+      if (typ === KURZBEFEHL_WIEDERHOLEN) {
+        // Jüngstes Datum, bei Gleichstand die zuletzt erfasste (hoechste ID):
+        // `findAll` sortiert nur nach Datum, mehrere Fahrten am selben Tag
+        // kaemen sonst in beliebiger Reihenfolge.
+        const letzte = (fahrtenRef.current || []).reduce((beste, f) => {
+          if (!beste) return f;
+          const a = (f.datum || '').slice(0, 10);
+          const b = (beste.datum || '').slice(0, 10);
+          if (a !== b) return a > b ? f : beste;
+          return Number(f.id) > Number(beste.id) ? f : beste;
+        }, null);
+
+        if (letzte) {
+          // Datum absichtlich NICHT vorbelegt: Wiederholen heisst „dieselbe
+          // Strecke, heute" — genau wie der Knopf in der Fahrtenliste.
+          erfassung.open({
+            vonOrtId: letzte.von_ort_id,
+            nachOrtId: letzte.nach_ort_id,
+            anlass: letzte.anlass || '',
+            abrechnung: letzte.abrechnung,
+          });
+          return;
+        }
+        // Keine Fahrt vorhanden (neues Konto): der leere Flow ist die
+        // ehrlichere Antwort als gar keine Reaktion auf den Kurzbefehl.
+      }
+      erfassung.open();
+    };
+
+    let abgebrochen = false;
+    const abmelden = aufKurzbefehlHoeren(ausfuehren);
+
+    // Beim Kaltstart wartet der Typ nativ gepuffert — der Listener oben kann
+    // ihn nicht mehr gesehen haben.
+    offenenKurzbefehlAbholen().then((typ) => {
+      if (!abgebrochen && typ) ausfuehren(typ);
+    });
+
+    return () => {
+      abgebrochen = true;
+      abmelden();
+    };
+  }, [isLoggedIn, erfassung]);
 
   // Welche Flaeche traegt der gerade sichtbare Bildschirm? Startbildschirm,
   // Kirchenkreis-Wahl und Anmeldung sind ganzflaechig Petrol, die angemeldete
