@@ -2161,15 +2161,25 @@ code {
   white-space: nowrap;
 }
 
-/* Route einzeilig darunter — wie .fl-zeile-route */
+/* Weg auf zwei Zeilen darunter — wie .fl-zeile-route */
 .dash-zuletzt-route {
   display: block;
   min-width: 0;
   font-size: 13px;
   color: var(--text-2);
+}
+
+.dash-zuletzt-ort {
+  display: block;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.dash-zuletzt-pfeil {
+  margin-right: 4px;
+  color: var(--text-3, var(--text-2));
 }
 
 .dash-zuletzt-km {
@@ -3101,16 +3111,29 @@ code {
   color: var(--text-3, var(--text-2));
 }
 
-/* Route einzeilig unter dem Kopf. Sie darf kuerzen: Der volle Wortlaut steht
-   im Aktions-Sheet, und zwei Zeilen je Fahrt machten die Liste zu lang. */
+/* Route auf zwei Zeilen unter dem Kopf — Start oben, Ziel darunter. Ohne
+   „von"/„nach": Der Pfeil vor der zweiten Zeile zeigt die Richtung, und die
+   26px der Marken gehoeren den Adressen (Simon 16.08.). */
 .fl-zeile-route {
   display: block;
   min-width: 0;
   font-size: 13px;
   color: var(--text-2);
+}
+
+/* Jede Zeile kuerzt fuer sich, statt dass eine lange Adresse die andere
+   verdraengt. */
+.fl-zeile-ort {
+  display: block;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.fl-zeile-pfeil {
+  margin-right: 4px;
+  color: var(--text-3, var(--text-2));
 }
 
 .fl-zeile-status {

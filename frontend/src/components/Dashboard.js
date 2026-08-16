@@ -674,13 +674,20 @@ function Dashboard({ onNavigate }) {
                 >
                   {/* Gleiche Struktur wie die Fahrtenliste — Simon legt Wert
                       darauf, dass beide Listen sich gleich lesen: Datum vorn,
-                      Anlass daneben, Route einzeilig darunter, kein Traeger. */}
+                      Anlass daneben, Weg auf zwei Zeilen darunter (ohne
+                      „von"/„nach"), kein Traeger. */}
                   <span className="dash-zuletzt-main">
                     <span className="dash-zuletzt-kopf">
                       <span className="dash-zuletzt-datum num">{zuletztSub(fahrt)}</span>
                       <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
                     </span>
-                    <span className="dash-zuletzt-route">{routeText(fahrt)}</span>
+                    <span className="dash-zuletzt-route">
+                      {vonName(fahrt) && <span className="dash-zuletzt-ort">{vonName(fahrt)}</span>}
+                      <span className="dash-zuletzt-ort">
+                        {vonName(fahrt) && <span className="dash-zuletzt-pfeil" aria-hidden="true">→</span>}
+                        {zielName(fahrt)}
+                      </span>
+                    </span>
                   </span>
                   <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>
                 </button>
