@@ -22,6 +22,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Von der Anmeldung der App führt ein Weg zurück zur Auswahl der Kirchenkreise, falls man sich vertan hat
 
 ### Geändert
+- Die Übersicht über der Fahrtenliste zeigt jetzt Anzahl der Fahrten, Kilometer und Erstattung nebeneinander und darunter jeden Abrechnungsträger mit seiner Summe. Damit steht der ganze Monat auf einen Blick da, ohne in die Abrechnung zu wechseln
 - In der App liegt die Anmeldung jetzt im gesicherten Bereich des Geräts statt im Browserspeicher, geschützt durch die Bildschirmsperre. Wer bereits angemeldet ist, bleibt es — die Übernahme passiert beim ersten Start von selbst. Im Browser ändert sich nichts
 - Beim Start der App erscheint kurz eine ruhige Fläche, bis die gespeicherte Anmeldung gelesen ist; die Anmeldemaske blitzt dadurch nicht mehr auf, wenn man bereits angemeldet ist
 - Die Anmeldung hält jetzt, solange man das Fahrtenbuch benutzt — das tägliche Neuanmelden entfällt. Wer es längere Zeit nicht öffnet, wird weiterhin abgemeldet; an geteilten Rechnern bleibt also niemand dauerhaft angemeldet

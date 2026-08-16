@@ -59,11 +59,11 @@ function FahrtenListe() {
     [fahrten]
   );
 
-  // Wie viele Traeger im Zeitraum tatsaechlich etwas bekommen — nicht wie
-  // viele konfiguriert sind. „Mitfahrer:innen" zaehlt als eigener Posten mit,
-  // weil er auch als eigene Erstattung ausgezahlt wird.
-  const traegerAnzahl = useMemo(
-    () => kategorienMitErstattung(summary, abrechnungstraeger).length,
+  // Die Traeger, die im Zeitraum tatsaechlich etwas erstatten — nicht die
+  // konfigurierten. „Mitfahrer:innen" steht als eigener Posten mit drin, weil
+  // der Betrag auch getrennt ausgezahlt wird.
+  const traegerBetraege = useMemo(
+    () => kategorienMitErstattung(summary, abrechnungstraeger),
     [summary, abrechnungstraeger]
   );
 
@@ -221,6 +221,10 @@ function FahrtenListe() {
       <div className="fl-summe-karte">
         <div className="fl-summe-werte">
           <div className="fl-summe-spalte">
+            <span className="fl-summe-label">Fahrten</span>
+            <span className="fl-summe-wert num">{sortierteFahrten.length}</span>
+          </div>
+          <div className="fl-summe-spalte">
             <span className="fl-summe-label">Kilometer</span>
             <span className="fl-summe-wert num">{kmGesamt} km</span>
           </div>
@@ -229,12 +233,20 @@ function FahrtenListe() {
             <span className="fl-summe-wert num">{formatBetrag(summary?.gesamtErstattung)} €</span>
           </div>
         </div>
-        <div className="fl-summe-sub">
-          {sortierteFahrten.length} {sortierteFahrten.length === 1 ? 'Fahrt' : 'Fahrten'}
-          {traegerAnzahl > 0 && (
-            <> · {traegerAnzahl} {traegerAnzahl === 1 ? 'Träger' : 'Träger'}</>
-          )}
-        </div>
+        {/* Statt der blossen Traeger-Anzahl jeder Traeger mit seinem Betrag:
+            Die Summe oben sagt, wie viel es insgesamt gibt — hier steht, von
+            wem. Damit ist der Monat auf einen Blick vollstaendig, ohne in die
+            Abrechnung zu wechseln (Simon 16.08.). */}
+        {traegerBetraege.length > 0 && (
+          <ul className="fl-summe-traeger">
+            {traegerBetraege.map((k) => (
+              <li key={k.key}>
+                <span className="fl-summe-traeger-name">{k.name}</span>
+                <span className="fl-summe-traeger-betrag num">{formatBetrag(k.betrag)} €</span>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="fl-summe-fuss">
           <button
             type="button"
