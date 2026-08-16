@@ -4,6 +4,19 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  // Klassennamen, die erst zur Laufzeit zusammengesetzt werden — der Scanner
+  // sieht im Quelltext nur `status-progress-${state}` und warf die Regeln
+  // heraus. Die Fortschrittsleiste zeigte dadurch nur ihre Beschriftung,
+  // Kreise und Verbindungslinien fehlten (gefunden 16.08., als sie dauerhaft
+  // sichtbar wurde — vorher lag sie hinter dem Aufklappen).
+  safelist: [
+    'status-progress-done',
+    'status-progress-current',
+    'status-progress-open',
+    'status-progress-line-done',
+    'status-progress-line-open',
+    'status-progress-label-open',
+  ],
   theme: {
     extend: {
       fontFamily: {

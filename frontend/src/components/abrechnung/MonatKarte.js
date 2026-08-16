@@ -43,7 +43,7 @@ function MonatKarte({ row, expanded, onToggle, aktionen, onExport }) {
   const istOffen = faellig || expanded;
   const erstattet = !laufend && status === 'erhalten';
 
-  // Kopfinhalt (Titel + Summe); bei aufgeklappter Karte mit Fortschrittsleiste
+  // Kopfinhalt: Titel, Summe und Fortschrittsleiste
   const kopfInhalt = (
     <>
       <div className="abr-karte-kopfzeile">
@@ -57,9 +57,10 @@ function MonatKarte({ row, expanded, onToggle, aktionen, onExport }) {
         </div>
         <div className="abr-karte-summe num">{formatBetrag(summe)} €</div>
       </div>
-      {istOffen && (
-        <StatusBadge status={status} variant="progress" className="abr-karte-progress" />
-      )}
+      {/* Immer sichtbar, nicht nur aufgeklappt (Simon 16.08.): Der Fortschritt
+          ist die Kernaussage der Karte — wer durch die Monate scrollt, will
+          ihn sehen, ohne jeden einzeln zu oeffnen. */}
+      <StatusBadge status={status} variant="progress" className="abr-karte-progress" />
     </>
   );
 
