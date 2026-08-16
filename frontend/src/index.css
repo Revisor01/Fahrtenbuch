@@ -2843,39 +2843,53 @@ code {
 }
 
 /* Summenzeile: Mono 15px/600 „km · €", rechts „Export" in --brand/600 */
-.fl-summe {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 2px;
+/* Zusammenfassung des Zeitraums als eigene Flaeche: Frei zwischen Monatswahl
+   und Liste standen die Zahlen verloren (Simon 16.08.). Der Fahrten-Tab
+   beantwortet damit „was steht hier drin", die Abrechnung „was ist damit zu
+   tun". */
+.fl-summe-karte {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
-/* Was der Zeitraum enthaelt — leise unter den Summen. Der Fahrten-Tab
-   beantwortet damit „was steht hier drin", die Abrechnung „was ist damit
-   zu tun" (Simon 16.08.). */
+.fl-summe-werte {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
 .fl-summe-sub {
-  margin-bottom: 16px;
+  margin-top: 2px;
   font-size: 13px;
   color: var(--text-2);
 }
 
 .fl-summe-wert {
-  font-size: 15px;
+  font-size: 22px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 
-.fl-summe-punkt {
-  color: var(--text-3);
+/* Export unten rechts, abgesetzt durch eine Linie — die Karte nennt erst die
+   Zahlen, dann was man damit tun kann. */
+.fl-summe-fuss {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
 }
 
 .fl-export-link {
-  margin-left: auto;
   background: none;
   border: none;
-  padding: 12px 0 12px 12px;
-  margin-top: -12px;
-  margin-bottom: -12px;
+  /* Tippziel ueber die Textzeile hinaus, ohne den Kartenfuss aufzublaehen */
+  padding: 6px 0 6px 16px;
+  margin: -6px 0;
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
