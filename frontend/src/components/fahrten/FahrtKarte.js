@@ -73,7 +73,17 @@ function FahrtKarte({ fahrt, status, onOeffnen }) {
             <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
           )}
         </span>
-        <span className="fl-zeile-route">{route}</span>
+        {/* Zwei Zeilen fuer den Weg, aber ohne „von"/„nach" (Simon 16.08.):
+            Einzeilig blieb vom Ziel nur ein Stummel, und die Marken kosteten
+            Platz, den die Adressen brauchen. Der Pfeil fuehrt die zweite
+            Zeile an — damit ist die Richtung ohne Wort klar. */}
+        <span className="fl-zeile-route">
+          {von && <span className="fl-zeile-ort">{von}</span>}
+          <span className="fl-zeile-ort">
+            {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
+            {ziel}
+          </span>
+        </span>
       </span>
       <span className="fl-zeile-werte">
         <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
