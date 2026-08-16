@@ -1160,35 +1160,18 @@ code {
   flex: 1;
 }
 
-/* Monatsstand auf dem Handy: km und Betrag fuehrend, dahinter leise, worauf
-   sie sich beziehen. Nur mobil — im Desktop-Raster gibt es dafuer die Kachel
-   „{Monat} bisher". */
-.dash-monat-zeile {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 4px 0 20px;
-}
-
-.dash-monat-wert {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.dash-monat-trenner {
-  color: var(--text-3, var(--text-2));
-}
-
-.dash-monat-label {
-  margin-left: 4px;
-  font-size: 13px;
-  color: var(--text-2);
+/* Kilometer-Diagramm auf dem Handy: dieselben Balken wie im Desktop-Raster,
+   in der Kartenfläche der uebrigen mobilen Abschnitte. */
+.dash-chart-karte {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l, 16px);
+  padding: 16px 12px 12px;
+  margin-bottom: 22px;
 }
 
 @media (min-width: 768px) {
-  .dash-monat-zeile {
+  .dash-chart-karte {
     display: none;
   }
 }
@@ -3081,11 +3064,13 @@ code {
    Trennlinie statt einzeln schwebender Karten (User-Feedback 14.08.).
    Die Einzelkarten kosteten Rahmen und Luecke je Fahrt und zerlegten die
    Liste optisch — bei 30 Fahrten im Monat war kaum noch Uebersicht da. */
+/* Jede Fahrt eine eigene Karte statt eines durchgehenden Blocks mit
+   Trennlinien: Der Block las sich wie eine Tabelle, nicht wie eine Liste von
+   Belegen (Simon 16.08.). */
 .fl-cards {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 22px;
 }
 
@@ -3095,36 +3080,32 @@ code {
   }
 }
 
-/* Zeile: wie .dash-zuletzt-row, nur mit Platz fuer den Chevron rechts */
+/* Eigenstaendige Karte je Fahrt */
 .fl-zeile {
   position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  /* Kompakt: zwei Textzeilen statt vier, entsprechend weniger Luft
-     (Simon 16.08.). Rechts kein Chevron-Platz mehr. */
-  padding: 10px 16px;
-  border: none;
-  background: transparent;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
   font: inherit;
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 150ms ease;
-}
-
-.fl-zeile + .fl-zeile {
-  border-top: 1px solid var(--line);
+  transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .fl-zeile-tap:hover:not(:disabled) {
   background: var(--surface-2);
+  border-color: var(--line-strong);
 }
 
 .fl-zeile:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px var(--brand);
+  box-shadow: 0 0 0 2px var(--brand);
 }
 
 .fl-zeile-main {
