@@ -634,6 +634,21 @@ function Dashboard({ onNavigate }) {
           </section>
         ) : heroErfolg}
 
+        {/* Kilometer des laufenden Monats — auf dem Handy gab es sie bisher
+            gar nicht, die Kachel lag nur im Desktop-Block (Simon 16.08.).
+            Eine Zeile statt einer Kachel: Der Monatsstand ist eine Zahl zum
+            Nachsehen, kein Ziel fuer sich. */}
+        {bisher.fahrten > 0 && (
+          <div className="dash-monat-zeile">
+            <span className="dash-monat-wert num">{formatKm(bisher.km)} km</span>
+            <span className="dash-monat-trenner" aria-hidden="true">·</span>
+            <span className="dash-monat-wert num">{formatEuro(bisher.betrag)} €</span>
+            <span className="dash-monat-label">
+              {monatName(currentYM)} · {bisher.fahrten} {bisher.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
+            </span>
+          </div>
+        )}
+
         <div className="dash-label-row">
           <span className="dash-label">Ein Tipp genügt</span>
           <button
