@@ -48,49 +48,37 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
       aria-label={`Fahrt ${von ? `${von} nach ` : 'nach '}${ziel}, ${datumKurz(fahrt.datum)} — Aktionen öffnen`}
       title={mitfahrer.length > 0 ? `Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}` : route}
     >
-      {/* Zwei Bereiche nebeneinander statt allem in einer Zeile (Simon 16.08.):
-          Links der Text, rechts die Zahlen. Vorher teilten sich Datum, Anlass,
-          ⇄, „+1", Kilometer und Betrag dieselbe Zeile — vom Anlass blieb
-          „Die…", und zu erkennen war nichts mehr. */}
+      {/* Drei Spalten (Simon 16.08.): Datum — Text — Zahlen. Vorher stand
+          alles in einer Zeile und vom Anlass blieb „Die…". */}
+      <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
+
+      {/* Mitte: Anlass, darunter Start und Ziel auf je einer Zeile. Ueber die
+          volle Breite zwischen Datum und Zahlen — ohne „von"/„nach", weil der
+          Pfeil die Richtung zeigt und die Adressen den Platz brauchen. */}
       <span className="fl-zeile-main">
-        {/* Datum fuehrt oben links, davor nichts — es gibt beim Durchsehen die
-            Ordnung (Simon 16.08.). Der Anlass steht daneben und hat die Zeile
-            sonst fuer sich; nur das Rueckfahrt-Zeichen klebt an ihm. Kilometer
-            und Betrag standen bis 16.08. ebenfalls hier und drueckten den
-            Anlass auf „Die…" — sie stehen jetzt rechts. */}
-        <span className="fl-zeile-kopf">
-          <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
-          <span className="fl-zeile-titel">
-            <span className="fl-zeile-anlass">{titel}</span>
-            {fahrt.partner_fahrt_id && (
-              <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
-                <span aria-hidden="true">⇄</span>
-                <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
-              </span>
-            )}
-          </span>
+        <span className="fl-zeile-titel">
+          <span className="fl-zeile-anlass">{titel}</span>
+          {fahrt.partner_fahrt_id && (
+            <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
+              <span aria-hidden="true">⇄</span>
+              <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+            </span>
+          )}
+          {/* „Erfasst" sagte an jeder Karte nichts — der Status haengt am
+              Traeger und Monat, nicht an der Fahrt. Sichtbar nur, wo er
+              abweicht (Zeitraum ueber mehrere Monate). */}
+          {status && status !== 'offen' && (
+            <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
+          )}
         </span>
-        {/* Der Weg auf zwei Zeilen, ohne „von"/„nach": Der Pfeil fuehrt die
-            zweite Zeile an, damit die Richtung ohne Wort klar ist und die
-            Adressen den Platz bekommen. Die Kilometer stehen rechts in der
-            Zielzeile — oben neben dem Anlass nahmen sie ihm die Breite, bis er
-            auf „Dienstbespr…" kuerzte (Simon 16.08.). */}
         <span className="fl-zeile-route">
           {von && <span className="fl-zeile-ort">{von}</span>}
-          <span className="fl-zeile-zielzeile">
-            <span className="fl-zeile-ort">
-              {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
-              {ziel}
-            </span>
-            <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
-          </span>
-        </span>
-        {/* Leise Fusszeile — nur wenn es etwas zu sagen gibt. „Erfasst" steht
-            hier bewusst nicht: Der Status haengt am Traeger und Monat, nicht
-            an der Fahrt, und erscheint nur, wo er abweicht (Zeitraum ueber
-            mehrere Monate). */}
-        {(mitfahrer.length > 0 || (status && status !== 'offen')) && (
-          <span className="fl-zeile-fuss">
+          <span className="fl-zeile-ort">
+            {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
+            {ziel}
+            {/* Die Mitfahrer-Marke haengt an der Zielzeile statt am Anlass:
+                In der Titelzeile kosteten ihre 11px genau den Platz, den
+                „Dienstbesprechung" zum Ausschreiben braucht (Simon 16.08.). */}
             {mitfahrer.length > 0 && (
               <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}`}>
                 <span aria-hidden="true">+{mitfahrer.length}</span>
@@ -99,16 +87,13 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
                 </span>
               </span>
             )}
-            {status && status !== 'offen' && (
-              <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
-            )}
           </span>
-        )}
+        </span>
       </span>
-      {/* Der Betrag rechts oben, auf Hoehe des Anlasses — die Zahl, auf die es
-          bei einer Abrechnung ankommt. Die Mitfahrer-Erstattung steht darunter
-          statt daneben: nebeneinander lasen sich beide wie eine Zahl
-          (Simon 16.08.). */}
+
+      {/* Rechts, rechtsbuendig untereinander: Summe zuerst — die Zahl, auf die
+          es bei einer Abrechnung ankommt —, darunter klein die
+          Mitfahrer-Erstattung (nur wenn es sie gibt), darunter die Kilometer. */}
       <span className="fl-zeile-werte">
         <span className="fl-zeile-betrag num">{formatBetrag(fahrt.erstattung)} €</span>
         {fahrt.mitfahrerErstattung > 0 && (
@@ -116,6 +101,7 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
             +{formatBetrag(fahrt.mitfahrerErstattung)} €
           </span>
         )}
+        <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
       </span>
     </button>
   );
