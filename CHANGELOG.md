@@ -32,7 +32,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Der Pfeil am rechten Rand der Listen ist entfernt. Die Zeilen lassen sich weiterhin antippen, der gewonnene Platz gehört jetzt dem Text
 - Die Liste auf der Startseite ist genauso aufgebaut wie die Fahrtenliste: Start und Ziel untereinander, der Abrechnungsträger auf eigener Zeile. Auch dort wird jetzt nichts mehr mitten im Wort abgeschnitten
 - „Erfasst" steht nicht mehr an jeder einzelnen Fahrt. Der Status gilt ohnehin für den ganzen Monat eines Abrechnungsträgers und steht weiter oben in der Übersicht. Bei einer Auswahl über mehrere Monate erscheint er weiterhin an den Fahrten, die bereits eingereicht oder erstattet sind
-- Die Fahrtenliste ist deutlich kompakter: Das Datum steht jetzt vorn in der ersten Zeile, der Anlass daneben, die Strecke darunter. Der Abrechnungsträger entfällt in der Liste — er steht in der Übersicht darüber. Es passen dadurch etwa dreimal so viele Fahrten auf den Bildschirm
+- Die Fahrtenliste ist deutlich kompakter: Das Datum steht jetzt vorn in der ersten Zeile, der Anlass daneben, Start und Ziel darunter. Der Abrechnungsträger entfällt in der Liste — er steht in der Übersicht darüber. Es passen dadurch spürbar mehr Fahrten auf den Bildschirm, und Adressen mit Straße und Postleitzahl bleiben vollständig lesbar
 - Die App startet spürbar schneller und zeigt beim Start keinen weißen Bildschirm mehr
 - Während des Starts dreht sich das Zeichen, solange geladen wird
 - Die Reichweitenmessung wurde ersatzlos entfernt
