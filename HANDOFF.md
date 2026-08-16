@@ -1,94 +1,74 @@
-# Übergabe — Mobile Apps (Stand 16.08.2026)
+# Übergabe — Mobile Apps (Stand 16.08.2026, abends)
 
-> Diese Datei ist eine Arbeitsübergabe, kein Projektdokument. Nach dem
-> Weiterarbeiten löschen.
+> Arbeitsübergabe, kein Projektdokument. Nach dem Weiterarbeiten löschen.
 
 ## Wo wir stehen
 
-Die iOS-App läuft auf dem Gerät und in TestFlight (**Build 12**). Sie hat echte
-native Navigationsleisten, Kirchenkreis-Auswahl, Registrierung, Export über das
-Teilen-Fenster und Anmeldung im Systemspeicher.
+**iOS: Build 16 in TestFlight** (`IN_BETA_TESTING`, App-ID `6801855861`).
+Native Navigationsleisten, Kirchenkreis-Auswahl, Registrierung, Export über
+das Teilen-Fenster, Anmeldung im Systemspeicher.
 
-Die Web-App unter kkd-fahrtenbuch.de ist **produktiv und unverändert**
-(~2470 echte Fahrten). Das Backend ist ausgerollt und nachgeprüft.
+**Web/Produktion wurde heute deployt** — siehe eigener Abschnitt unten.
+2.470 Fahrten, 31 Nutzer, nach dem Deploy nachgeprüft und unverändert.
 
-Branch `master`, 26 Commits. Die Begründungen stehen in den Commit-Nachrichten.
+Branch `master`, alles gepusht.
 
-## Erledigt seit dem Schreiben dieser Übergabe
+## Das Nächste
 
-Build 13 enthält zusätzlich (Commit `f69ae96`):
-- Fahrtenliste im Zeilenmuster der Startseite statt Einzelkarten
-- Auswahlfelder schneiden den Text nicht mehr ab (Pfeil-Platz gefehlt)
-- „Fahrt hinzufügen" ist ein hervorgehobener Eintrag der nativen Leiste
-  statt eines frei schwebenden Knopfs. Im Web unverändert.
+1. **Quick Actions** — von Simon als wichtig benannt, gibt es noch nicht.
+   Weder `UIApplicationShortcutItem` in der Info.plist noch etwas im
+   Frontend. Naheliegend: „Fahrt erfassen" und „Letzte Fahrt wiederholen".
+2. **Android**: nie gestartet. Keystore
+   (`~/.claude/secrets/keystores/fahrtenbuch-keystore.env`), Signierung in
+   `android/app/build.gradle` und ein gebautes Bundle liegen vor. Es fehlt
+   der erste Durchlauf auf Gerät/Emulator. Braucht **JDK 21**, nicht 17/25.
+3. **Offline-Erfassung**: Konzept unter
+   `/private/tmp/claude-501/.../scratchpad/offline-konzept.md` (falls weg:
+   neu erstellen lassen). Kern: nur Neuanlage offline, IndexedDB, Idempotenz
+   über `client_uuid` (neue Migration), `POST /api/fahrten/sync` mit
+   gruppenweiser Transaktion. Geschätzt 16–18 halbe Tage.
 
-**Alle drei ungeprüften Punkte sind inzwischen im Simulator verifiziert**
-(angemeldet gegen die echte Instanz):
-- Fahrtenliste mit echten Daten läuft, die Anzahl stimmt mit der DB überein
-- Tap auf „+" öffnet den Erfassungs-Dialog samt Vorschlägen
-- Die Wischgeste an Dialogen **funktioniert** — im Simulator lässt sich
-  entgegen der bisherigen Annahme sehr wohl wischen (`idb ui swipe`)
-
-Dabei fielen drei Mängel auf, behoben in Commit `2ef0806`: abgeschnittene
-Orte, abgeschnittener Träger, halb verdeckte letzte Zeile. Dazu auf Simons
-Ansage der Pfeil aus allen Listen.
-
-**Build 16 ist in TestFlight** (16.08., Status `IN_BETA_TESTING`). Enthält:
-- Fahrten-Tab: Übersichtskarte mit „KILOMETER" und „ERSTATTUNG" in zwei
-  beschrifteten Spalten, jede Fahrt als eigene Karte
-- Startseite: Kilometer-Balkendiagramm ganz unten
-- Abrechnung: Fortschrittsleiste immer sichtbar, „Nur als eingereicht
-  markieren" ohne Export
-- Start 5 s → 2 s, kein weisser Blitz, keine aufblitzende Anmeldemaske
-- Toasts wieder unten, Plausible entfernt
-
-**PRODUKTION WURDE DEPLOYT** (16.08., auf Simons ausdrückliche Ansage —
-die Regel „nie auf Produktion" gilt sonst weiter). Grund: `/api/konfig`
-fehlte dort, deshalb erschien in der App kein „Registrieren".
-- Images auf dem Server gebaut (kein Docker lokal), alte als `:vorher`
-  getaggt — Rückweg per `docker tag revisoren/fahrtenbuch-server:vorher
-  revisoren/fahrtenbuch-server:latest` + `docker compose up -d`
-- `TOKEN_LAUFZEIT=14d` in `stack.env` ergänzt; die Anmeldung hält damit
-  zwei Wochen statt einem Tag (Simons Entscheidung)
-- Geprüft nach dem Deploy: 2.470 Fahrten und 31 Nutzer unverändert,
-  `/api/konfig` liefert `allowRegistration: true`, Registrieren-Knopf in
-  der App sichtbar, keine Fehler in den Logs
-
-**Quick Actions gibt es noch nicht** — Simon hat sie als wichtig benannt.
-Weder `UIApplicationShortcutItem` in der Info.plist noch etwas im
-Frontend. Das ist der nächste Punkt.
-
-**Von Simon noch nicht bewertet.**
-
-## Was noch offen ist
-
-- **Android**: nie gestartet. Keystore (`~/.claude/secrets/keystores/
-  fahrtenbuch-keystore.env`), Signierung in `android/app/build.gradle` und ein
-  gebautes Bundle liegen vor. Es fehlt der erste Durchlauf auf Gerät/Emulator.
-- **Offline-Erfassung**: fertiges Konzept unter
-  `/private/tmp/claude-501/.../scratchpad/offline-konzept.md` (falls weg: neu
-  erstellen lassen). Kern: nur Neuanlage offline, IndexedDB, Idempotenz über
-  `client_uuid` (neue Migration), Endpunkt `POST /api/fahrten/sync` mit
-  gruppenweiser Transaktion. Geschätzt 16–18 halbe Tage.
+Kleinere offene Punkte:
 - **Symbol „Abrechnung"** in der Tab-Leiste ist ein Dokument (`doc.text`) —
-  für „Beleg" gibt es kein verlässliches Systemsymbol. Simon hat es noch nicht
-  bewertet.
+  für „Beleg" gibt es kein verlässliches Systemsymbol. Unbewertet.
+- **`StatusUebersicht.js`** liegt unbenutzt im Repo. Sie war die
+  Erstattungs-Karte im Fahrten-Tab; falls die Aufteilung doch nicht
+  gefällt, ist der Weg zurück kurz.
+- Zwei Fähigkeiten dieser Karte fehlen seitdem: Status über einen **freien
+  Zeitraum** in einem Rutsch setzen (Abrechnung kann nur monatsweise), und
+  die Monats-Chips je Träger.
 
-## Das Wichtigste für die Arbeitsweise
+## PRODUKTIONS-DEPLOY vom 16.08.
 
-**Es läuft ein iOS-Simulator** (UDID `E0A15BE2-C275-4A68-9E45-E67419D5749C`).
-Das ist der entscheidende Punkt dieser Sitzung: Drei Runden lang wurden Fehler
-auf Verdacht korrigiert, und Simon musste jeden davon selbst finden — einer der
-Builds war sogar ein Rückschritt. Erst als die App im Simulator lief und die
-Farben pixelgenau nachgemessen wurden, war die echte Ursache da (sie lag
-außerhalb der WebView, in der Capacitor-Konfiguration).
+Die Regel „nie auf Produktion" gilt weiter — dieser Deploy lief auf Simons
+ausdrückliche Ansage. Grund: `/api/konfig` fehlte auf dem Server, deshalb
+erschien in der App kein „Registrieren".
 
-Also: **bauen, installieren, ansehen, nachmessen** — nicht raten.
+- Images **auf dem Server gebaut** (lokal läuft kein Docker): Repo nach
+  `/opt/fahrtenbuch/build-src` geklont, `docker build`, danach gelöscht.
+- Alte Images als `:vorher` getaggt. **Rückweg:**
+  ```bash
+  docker tag revisoren/fahrtenbuch-server:vorher revisoren/fahrtenbuch-server:latest
+  docker tag revisoren/fahrtenbuch-app:vorher    revisoren/fahrtenbuch-app:latest
+  cd /opt/fahrtenbuch && docker compose up -d
+  ```
+- `TOKEN_LAUFZEIT=14d` in `stack.env` ergänzt (Simons Entscheidung): Die
+  Anmeldung hält zwei Wochen und verlängert sich bei Nutzung, statt täglich
+  abzulaufen. In geteilten Büros bleibt jemand damit länger angemeldet.
+- Migrationen waren auf beiden Seiten identisch (0009 zuletzt) — **keine
+  Schema-Änderung**.
+- Nach dem Deploy geprüft: 2.470 Fahrten, 31 Nutzer, `/api/konfig` liefert
+  `allowRegistration: true`, Registrieren-Knopf in der App sichtbar, keine
+  Fehler in den Logs.
 
-**Die App lässt sich im Simulator fernsteuern** (`idb`, liegt in
-`~/.local/bin`). Damit kommt man bis in die angemeldete App und durch jeden
-Ablauf — Anmelden, Tabs, Dialoge, Wischen. Das war die Lücke: vorher wurden
-Abläufe „nur im Code verdrahtet" abgehakt.
+## Arbeitsweise — das Wichtigste
+
+**Bauen, installieren, ansehen, nachmessen — nicht raten.** Mehrfach wurden
+Fehler auf Verdacht korrigiert, und Simon musste jeden selbst finden. Die
+echten Ursachen lagen fast nie dort, wo sie vermutet wurden.
+
+**Der Simulator lässt sich fernsteuern** (`idb`, in `~/.local/bin`). Damit
+kommt man bis in die angemeldete App und durch jeden Ablauf.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -98,26 +78,40 @@ idb ui text  --udid <UDID> "text"
 idb ui key   --udid <UDID> 42               # 42 = Backspace
 ```
 
-Zwei Fallen dabei: Die Tastatur des Simulators liegt auf **deutschem
-Layout** — `@` und `-` kommen als `"` und `ß` an; für Anmeldungen den
-Benutzernamen statt der E-Mail nehmen. Und nach `launch` **mindestens 8–10
-Sekunden warten**, bevor der erste Tap kommt, sonst landet er im
-Startbildschirm und läuft ins Leere.
+Zwei Fallen: Die Tastatur liegt auf **deutschem Layout** — `@` und `-`
+kommen als `"` und `ß` an; für Anmeldungen den Benutzernamen (`simon`)
+statt der E-Mail nehmen. Und nach `launch` **8–10 Sekunden warten**, sonst
+landet der erste Tap im Startbildschirm.
+
+Bauen und installieren:
 
 ```bash
 cd frontend && npm run build && npx cap sync ios
 cd ios/App && xcodebuild -project App.xcodeproj -scheme App -sdk iphonesimulator \
-  -configuration Debug -destination 'id=E0A15BE2-C275-4A68-9E45-E67419D5749C' \
-  -derivedDataPath /tmp/simbuild build CODE_SIGNING_ALLOWED=NO
-xcrun simctl install <UDID> /tmp/simbuild/Build/Products/Debug-iphonesimulator/App.app
+  -configuration Release -destination 'id=<UDID>' \
+  -derivedDataPath /tmp/simrel build CODE_SIGNING_ALLOWED=NO
+xcrun simctl install <UDID> /tmp/simrel/Build/Products/Release-iphonesimulator/App.app
 xcrun simctl launch <UDID> de.godsapp.fahrtenbuch
 xcrun simctl io <UDID> screenshot bild.png
 magick bild.png -format "%[pixel:p{600,2600}]" info:   # Farbe nachmessen
 ```
 
+**Release, nicht Debug** — nur der zählt für TestFlight, und der Debug-Build
+startet spürbar langsamer.
+
+Für Abläufe über die Zeit (Start, Übergänge) **filmen statt Einzelbilder**:
+
+```bash
+xcrun simctl io <UDID> recordVideo --codec h264 -f start.mp4 &
+# ... starten ...
+kill -INT <pid>
+ffmpeg -i start.mp4 -vf "fps=10,scale=200:-1" frames/f%03d.png
+magick montage frames/f0[2-6]?.png -tile 10x -geometry +2+2 kontakt.png
+```
+
 ## TestFlight-Build erzeugen
 
-Drei Fallstricke, die je einen Fehlversuch gekostet haben:
+Vier Fallstricke, die je einen Fehlversuch gekostet haben:
 
 1. **Build-Nummer erhöhen**, sonst weist Apple ab:
    `perl -pi -e 's/CURRENT_PROJECT_VERSION = N;/CURRENT_PROJECT_VERSION = N+1;/' App.xcodeproj/project.pbxproj`
@@ -126,51 +120,63 @@ Drei Fallstricke, die je einen Fehlversuch gekostet haben:
    CODE_SIGN_IDENTITY="Apple Distribution: Simon Luthe (J459G9CJT5)"`
 3. **Beim Export `PATH` auf Apples Werkzeuge setzen** —
    `PATH="/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Xcode.app/Contents/Developer/usr/bin"`.
-   Homebrew hat ein neueres `rsync`, das ein Apple-Flag nicht kennt; der Export
-   bricht sonst mit „Copy failed" ab.
-4. **Profil per UUID angeben, nicht per Name.** Xcodes Apple-ID-Sitzung läuft
-   ab („Your session has expired"); dann findet der Export das Profil über
-   seinen Namen nicht mehr und bricht ab mit „requires a provisioning
-   profile". Die UUID des lokal vorliegenden Profils funktioniert ohne
-   Anmeldung — `3a6d3cd4-3301-4640-baca-360e58acdab9` für „Fahrtenbuch
-   AppStore", zu finden mit:
-   ```bash
-   for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-     security cms -D -i "$f" | plutil -extract Name raw -
-   done
-   ```
+   Homebrew hat ein neueres `rsync`, das ein Apple-Flag nicht kennt.
+4. **Profil per UUID, nicht per Name.** Xcodes Apple-ID-Sitzung läuft ab
+   („Your session has expired"); dann findet der Export das Profil über den
+   Namen nicht und bricht mit „requires a provisioning profile" ab. UUID für
+   „Fahrtenbuch AppStore": `3a6d3cd4-3301-4640-baca-360e58acdab9`.
+   Export-Plist liegt unter `/tmp/ExportOptions15.plist`.
 
 Danach `xcrun altool --upload-app`, Verschlüsselungserklärung per API setzen
-(`usesNonExemptEncryption: false`), fertig. App-ID `6801855861`, Testgruppe
-`f3fa14fa-3c5c-4537-8044-bf130ce59957`.
+(`usesNonExemptEncryption: false`). Testgruppe ist intern — Builds landen
+automatisch dort, `betaGroups`-Zuordnung per API schlägt fehl (422) und ist
+nicht nötig. Status prüfen über `buildBetaDetail` → `internalBuildState`.
+
+ASC-API: `~/.claude/secrets/asc-jwt.sh`, Zugangsdaten in `~/.claude/secrets.env`.
+Eckige Klammern in Query-Parametern **URL-kodieren** (`filter%5Bapp%5D=...`),
+sonst bricht curl ab.
 
 ## Fallen, die schon zugeschnappt sind
 
 - **Die weißen Ränder lagen NICHT im CSS.** `contentInset: "always"` hielt die
   WebView aus den Systemrändern; dort war die native Fläche weiß. Jetzt
-  `"never"` plus `backgroundColor`. Kein Stylesheet erreicht diesen Bereich.
+  `"never"` plus `backgroundColor`.
 - **Dieselbe Falle beim Start:** Der weiße Bildschirm in Sekunde 2–3 kam aus
   `LaunchScreen.storyboard` — die imageView trug `systemBackgroundColor`, im
-  hellen Design reines Weiß, und lag unter der Splash-Grafik. Weder CSS noch
-  `capacitor.config.json` erreichen das. Jetzt Petrol als fester Farbwert.
-  Beim Prüfen **vorher deinstallieren**: iOS hält den Launch-Screen im Cache,
-  sonst misst man den alten Stand.
+  hellen Design reines Weiß. Weder CSS noch `capacitor.config.json`
+  erreichen das. Beim Prüfen **vorher deinstallieren**: iOS hält den
+  Launch-Screen im Cache.
+- **Tailwind wirft dynamisch gebaute Klassen aus dem Build.** Die
+  Fortschrittsleiste (`status-progress-${state}`) zeigte monatelang nur ihre
+  Beschriftung — Kreise und Linien fehlten, weil der Scanner die Namen nie
+  vollständig im Quelltext sieht. Jetzt in `tailwind.config.js` unter
+  `safelist`. **Bei jeder neuen `${}`-Klasse daran denken** und im Build
+  nachsehen: `grep <klasse> build/assets/*.css`.
+- **Der Startbildschirm blitzte auf, obwohl angemeldet:** Die Notbremse stand
+  auf 2500 ms, der Keychain-Zugriff hat aber drei Etappen à 800 ms. Jetzt
+  4000 ms plus ein Merker, der die Notbremse entschärft, sobald der Speicher
+  geantwortet hat.
 - **Fehler ohne Fehlermeldung:** Fehlte die Keychain-Berechtigung, kehrte der
-  Aufruf einfach nie zurück — kein `catch` griff. Deshalb haben alle
-  Speicherzugriffe jetzt eine Zeitgrenze.
-- **Doppelte Startbildschirme** entstehen, wenn nativer und eigener
-  Unterschiedliches zeigen. Beide tragen jetzt denselben Text.
-- **Ladezustände nicht zurücksetzen**, wenn ein Effekt beim Start erneut läuft
-  — sonst erscheint der Startbildschirm ein zweites Mal.
+  Aufruf nie zurück — kein `catch` griff. Alle Speicherzugriffe haben jetzt
+  eine Zeitgrenze.
+- **`--brand` und `--on-brand` kippen im dunklen Design.** Auf dem
+  Startbildschirm sind die Farben deshalb fest verdrahtet (`#0F5257`,
+  `#FFFFFF`, `#E8B461`) — die native Fläche darunter bleibt immer Petrol.
 - **ImageMagick zeichnet keine SVG-Konturen.** Icons mit `rsvg-convert`
   rendern, sonst fehlt der Ring im Logo.
-- **Android braucht JDK 21** (installiert), nicht 17 oder 25.
+- **Die Sandbox kann aussetzen** (`EPERM: uv_cwd` bei Node und git, obwohl
+  Dateien lesbar sind). Kein Projektfehler — Sitzung neu starten, dann läuft
+  es wieder.
 
 ## Simons Vorgaben
 
-- **Nativ ist gesetzt**, Aufwand ist kein Gegenargument (siehe Notiz
+- **Nativ ist gesetzt**, Aufwand ist kein Gegenargument (Notiz
   `feedback_native_ui_gesetzt.md`). Nicht abwägend zurückfragen.
-- **Web bleibt** wie es ist — außer er verlangt ausdrücklich eine Änderung
-  (wie beim Fahrten-Layout und beim Logo-Punkt).
+- **Web bleibt** wie es ist — außer er verlangt ausdrücklich eine Änderung.
 - **Aus einem Guss**: bestehendes Designsystem, Petrol `#0F5257`. Kein
   Material You, das würde die Markenfarbe überschreiben.
+- **Beide Listen gleich**: Dashboard „Zuletzt" und Fahrtenliste tragen
+  dieselbe Struktur. Darauf legt er Wert.
+- **Zahlen brauchen eine Fläche.** Frei stehende Werte zwischen Abschnitten
+  wirken verloren — Karten mit Beschriftung, keine nackten Zahlen.
+- **Vor größeren Umbauten committen**, damit ein Rückweg bleibt.
