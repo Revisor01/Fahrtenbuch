@@ -2132,103 +2132,12 @@ code {
   margin-top: 2px;
 }
 
-/* „Zuletzt": Karte mit Zeilen 14/16px */
-.dash-zuletzt-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  overflow: hidden;
-  margin-bottom: 22px;
-}
-
-.dash-zuletzt-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  /* Kompakt wie .fl-zeile (Simon 16.08.) */
-  padding: 10px 16px;
-}
-
-.dash-zuletzt-row + .dash-zuletzt-row {
-  border-top: 1px solid var(--line);
-}
-
-/* Frisch angelegte (optimistische) Einträge: 1,5px --brand-Rand */
-.dash-zuletzt-row.is-neu {
+/* Frisch angelegte (optimistische) Eintraege: 1,5px --brand-Rand. Steht seit
+   16.08. an .fl-zeile — „Zuletzt" und die Fahrtenliste teilen sich dieselbe
+   Karte (FahrtKarte), damit sie nicht wieder auseinanderlaufen. */
+.fl-zeile.is-neu {
   box-shadow: inset 0 0 0 1.5px var(--brand);
 }
-
-.dash-zuletzt-main {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Kopf: Datum fuehrt, Anlass daneben — spiegelt .fl-zeile-kopf */
-.dash-zuletzt-kopf {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-}
-
-.dash-zuletzt-datum {
-  flex: 0 0 auto;
-  /* Breit genug fuer „Mo 16.08." in einer Zeile — bei 52px brach der
-     Wochentag um und die Zeile wurde wieder hoch. */
-  width: 74px;
-  font-size: 13px;
-  white-space: nowrap;
-  color: var(--text-3, var(--text-2));
-}
-
-/* Traegt den flexiblen Platz, damit ⇄ am Titel klebt — wie .fl-zeile-titel */
-.dash-zuletzt-titel {
-  display: flex;
-  align-items: baseline;
-  flex: 1;
-  min-width: 0;
-}
-
-.dash-zuletzt-ziel {
-  min-width: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Weg auf zwei Zeilen darunter — wie .fl-zeile-route */
-.dash-zuletzt-route {
-  display: block;
-  min-width: 0;
-  font-size: 13px;
-  color: var(--text-2);
-}
-
-.dash-zuletzt-ort {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dash-zuletzt-pfeil {
-  margin-right: 4px;
-  color: var(--text-3, var(--text-2));
-}
-
-/* Steht jetzt in der Titelzeile statt rechts ueber die ganze Zeile */
-.dash-zuletzt-km {
-  flex-shrink: 0;
-  margin-left: auto;
-  font-size: 14px;
-  color: var(--text-2);
-  white-space: nowrap;
-}
-
 .dash-zuletzt-laden {
   padding: 14px 16px;
   font-size: 14px;
@@ -2865,12 +2774,19 @@ code {
    verschenkte. */
 /* Linksbuendig beieinander statt ueber die Kartenbreite verteilt: Die drei
    Zahlen gehoeren zusammen und sollen als eine Gruppe gelesen werden. Bis zum
-   rechten Rand auseinandergezogen standen sie ohne Bezug zueinander. */
+   rechten Rand auseinandergezogen standen sie ohne Bezug zueinander.
+   Die letzte Spalte (Erstattung) reicht bis zum rechten Rand und steht
+   rechtsbuendig — so sitzt die Summe sauber ueber den Traegerbetraegen
+   darunter, die ebenfalls rechts stehen (Simon 16.08.). */
 .fl-summe-werte {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto auto 1fr;
   justify-content: start;
   gap: 28px;
+}
+
+.fl-summe-spalte:last-child {
+  text-align: right;
 }
 
 @media (min-width: 768px) {
@@ -3204,7 +3120,9 @@ code {
 .fl-zeile {
   position: relative;
   display: flex;
-  align-items: center;
+  /* Oben ausgerichtet, damit die Zahlen rechts auf Hoehe des Anlasses
+     beginnen statt mittig zwischen den Zeilen zu haengen. */
+  align-items: flex-start;
   gap: 12px;
   width: 100%;
   padding: 14px 16px;
@@ -3233,9 +3151,9 @@ code {
   min-width: 0;
 }
 
-/* Kopfzeile: Datum fuehrt, dann Anlass, dann die Zeichen (Paar, Mitfahrer,
-   abweichender Status). Das Datum steht vorn, weil es beim Durchsehen die
-   Ordnung gibt — vorher lag es in der dritten Zeile (Simon 16.08.). */
+/* Kopfzeile: Datum fuehrt, der Anlass steht daneben. Kilometer und Betrag
+   standen bis 16.08. ebenfalls hier und drueckten den Anlass auf „Die…" —
+   sie haben jetzt eine eigene Spalte rechts (Simon 16.08.). */
 .fl-zeile-kopf {
   display: flex;
   align-items: baseline;
@@ -3243,32 +3161,42 @@ code {
   min-width: 0;
 }
 
-/* Feste Breite: Die Daten stehen damit ueber alle Zeilen buendig
-   untereinander — tabellarische Ziffern (.num) machen sie gleich breit. */
+/* Feste Breite: Die Daten stehen damit ueber alle Karten buendig
+   untereinander — tabellarische Ziffern (.num) machen sie gleich breit.
+   62px statt 74px und 12px statt 13px: Bei 74px blieben dem Anlass auf einem
+   schmalen iPhone nur 95px, obwohl er 150px braucht — er kuerzte auf
+   „Dienstbes…" (Simon 16.08.). */
 .fl-zeile-datum {
   flex: 0 0 auto;
-  /* Breit genug fuer „Mo 16.08." in einer Zeile — bei 52px brach der
-     Wochentag um und die Zeile wurde wieder hoch. */
-  width: 74px;
-  font-size: 13px;
+  width: 62px;
+  font-size: 12px;
   white-space: nowrap;
   color: var(--text-3, var(--text-2));
 }
 
-/* Traegt den flexiblen Platz, damit das ⇄ am Titel klebt statt am rechten
-   Rand zu stehen. Der Titel darin kuerzt, das Zeichen behaelt seine Groesse. */
+/* Leise Fusszeile unter der Route: Mitfahrer und ein abweichender Status.
+   Faellt weg, wenn es beides nicht gibt. */
+.fl-zeile-fuss {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+  min-width: 0;
+}
+
+/* Traegt den Anlass und das Rueckfahrt-Zeichen. Der Titel darin kuerzt, das
+   Zeichen behaelt seine Groesse und klebt am Titel. */
 .fl-zeile-titel {
   display: flex;
   align-items: baseline;
   /* Kein gap: .fl-paar-hinweis bringt seinen eigenen margin-left mit, sonst
      stuende der Abstand doppelt. */
-  flex: 1;
   min-width: 0;
 }
 
 .fl-zeile-anlass {
   min-width: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
   overflow: hidden;
@@ -3287,6 +3215,9 @@ code {
 /* Route auf zwei Zeilen unter dem Kopf — Start oben, Ziel darunter. Ohne
    „von"/„nach": Der Pfeil vor der zweiten Zeile zeigt die Richtung, und die
    26px der Marken gehoeren den Adressen (Simon 16.08.). */
+/* Ueber die volle Breite, buendig mit dem linken Kartenrand — nicht unter den
+   Anlass eingerueckt. Die Einrueckung verschenkte 70px, die den Adressen
+   fehlten (Simon 16.08.). */
 .fl-zeile-route {
   display: block;
   min-width: 0;
@@ -3313,23 +3244,26 @@ code {
   flex-shrink: 0;
 }
 
-/* Zahlen rechts: km fuehrend, Betrag leise darunter — beide nie umbrechend.
-   Feste Mindestbreite, damit die Spalte ueber alle Zeilen buendig steht;
-   ohne sie richtete sich jede Zeile nach ihrer eigenen Zahl aus. */
-/* Kilometer und Betrag stehen in der Titelzeile nebeneinander, rechts
-   ausgerichtet — vorher untereinander am rechten Rand ueber beide Zeilen. */
+/* Zahlen als eigene Spalte rechts: Kilometer oben, Betrag darunter, beide
+   rechtsbuendig und nie umbrechend. Nebeneinander in der Titelzeile nahmen
+   sie dem Anlass die Breite, bis von ihm „Die…" uebrig blieb (Simon 16.08.).
+   Die Mindestbreite haelt die Spalte ueber alle Karten hinweg buendig. */
 .fl-zeile-werte {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
   flex-shrink: 0;
-  margin-left: auto;
+  min-width: 72px;
+  align-self: flex-start;
 }
 
+/* Kilometer leise oben, Betrag kraeftig darunter: Der Betrag ist die Zahl,
+   auf die es bei einer Abrechnung ankommt — er trug bis 16.08. das schwaechere
+   Gewicht der beiden. */
 .fl-zeile-km {
-  font-size: 14px;
-  color: var(--text);
-  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-2);
   white-space: nowrap;
 }
 
@@ -3337,8 +3271,9 @@ code {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  font-size: 13px;
-  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
   white-space: nowrap;
 }
 
@@ -6003,10 +5938,10 @@ code {
   color: var(--text-3) !important;
 }
 
-/* Dashboard: „Zuletzt"-Zeile und Tabellenzeile als Ganzes antippbar.
-   Nur die seitlichen Raender entfernen - die Trennlinie zwischen den Fahrten
-   bleibt (wie in der Fahrtenliste). */
-.dash-zuletzt-tap,
+/* Dashboard: Tabellenzeile als Ganzes antippbar. Nur die seitlichen Raender
+   entfernen - die Trennlinie zwischen den Fahrten bleibt (wie in der
+   Fahrtenliste). Die Liste „Zuletzt" traegt seit 16.08. FahrtKarte und
+   braucht diese Regeln nicht mehr. */
 .dash-d-tablerow-tap {
   border-top: none;
   border-left: none;
@@ -6020,26 +5955,19 @@ code {
   transition: background-color 150ms ease;
 }
 
-.dash-zuletzt-tap:hover:not(:disabled),
 .dash-d-tablerow-tap:hover:not(:disabled) {
   background: var(--surface-2);
 }
 
-.dash-zuletzt-tap:focus-visible,
 .dash-d-tablerow-tap:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--brand);
 }
 
-.dash-zuletzt-tap:disabled,
 .dash-d-tablerow-tap:disabled {
   cursor: default;
 }
 
-.dash-zuletzt-tap .dash-zuletzt-main,
-.dash-zuletzt-tap .dash-zuletzt-ziel,
-.dash-zuletzt-tap .dash-zuletzt-route,
-.dash-zuletzt-tap .dash-zuletzt-sub,
 .dash-d-tablerow-tap .dash-d-td-anlass,
 .dash-d-tablerow-tap .dash-d-td-route,
 .dash-d-tablerow-tap .dash-d-td-datum,

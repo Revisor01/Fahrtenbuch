@@ -7,6 +7,7 @@ import EmptyState from './ui/EmptyState';
 import Sheet from './ui/Sheet';
 import AktionsSheet from './ui/AktionsSheet';
 import StatusBadge from './ui/StatusBadge';
+import FahrtKarte from './fahrten/FahrtKarte';
 import { useToast } from './ui/Toast';
 import { statusFromAbrechnung } from '../utils/statusLabels';
 import { Star, Pencil, RotateCw, ArrowLeftRight } from 'lucide-react';
@@ -71,10 +72,15 @@ function traegerKuerzel(name) {
   return String(name).slice(0, 2).toUpperCase();
 }
 
+// Dieselben Farben, die das Statussystem ueberall sonst traegt (StatusBadge,
+// Abrechnung): Sand fuer „Eingereicht", Gruen fuer „Erstattet", neutral fuer
+// „Erfasst". Der Balken stand fuer „Erfasst" bis 16.08. in Petrol — der
+// Markenfarbe — und behauptete damit im Diagramm eine andere Ordnung als die
+// Abrechnung zwei Tabs weiter (Simon 16.08.).
 const CHART_FARBEN = {
   erhalten: 'var(--ok)',
   eingereicht: 'var(--accent)',
-  offen: 'var(--brand)',
+  offen: 'var(--line-strong)',
 };
 
 function Dashboard({ onNavigate }) {
@@ -314,6 +320,9 @@ function Dashboard({ onNavigate }) {
   const [favFrage, setFavFrage] = useState(null);
   // Angetippte Fahrt in „Zuletzt": zeigt Details + Aktionen
   const [aktionsFahrt, setAktionsFahrt] = useState(null);
+  // Angetippter Balken im Kilometer-Diagramm (Monat als 'JJJJ-MM') — auf dem
+  // Handy der Ersatz fuer Hover.
+  const [chartTipp, setChartTipp] = useState(null);
   // Strich auf der Zeile unter der Maus, Gegenfahrt nur hinterlegt
   const [aktiveId, setAktiveId] = useState(null);
   const [paarId, setPaarId] = useState(null);
@@ -532,15 +541,6 @@ function Dashboard({ onNavigate }) {
     return von ? `${von} → ${nach}` : nach;
   };
 
-  // Zeile darunter: nur noch das Datum — der Traeger steht seit 16.08. auf
-  // einer eigenen Zeile, sonst wurde er mit dem Datum zusammen gekuerzt.
-  const zuletztSub = (fahrt) => {
-    const d = new Date(fahrt.datum);
-    const wt = d.toLocaleDateString('de-DE', { weekday: 'short' });
-    const dat = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-    return `${wt} ${dat}`;
-  };
-
   // ---- Wiederverwendete Teilstücke ----------------------------------------
 
   // Erfolgszustand: nichts fällig — aber eingereichte Monate, die noch auf
@@ -659,50 +659,23 @@ function Dashboard({ onNavigate }) {
             onAction={() => erfassung.open()}
           />
         ) : (
-          <div className="dash-zuletzt-card">
+          // Dieselbe Komponente wie die Fahrtenliste, nicht nur dasselbe
+          // Aussehen (Simon 16.08.): „Zuletzt" hatte die Struktur bis dahin
+          // nachgebaut, wodurch beide Listen bei jeder Aenderung wieder
+          // auseinanderliefen — zuletzt fehlten hier Betrag, Mitfahrer und
+          // Status. Eine Karte je Fahrt statt Zeilen in einer gemeinsamen Karte.
+          <div className="fl-cards">
             {recent === null ? (
               <div className="dash-zuletzt-laden">Fahrten werden geladen…</div>
             ) : (
               recent.map((fahrt) => (
-                <button
+                <FahrtKarte
                   key={fahrt.id}
-                  type="button"
-                  className={`dash-zuletzt-row dash-zuletzt-tap${fahrt._optimistisch ? ' is-neu' : ''}`}
-                  onClick={() => setAktionsFahrt(fahrt)}
-                  disabled={!!fahrt._optimistisch}
-                  aria-label={`Fahrt nach ${zielName(fahrt)} — Aktionen öffnen`}
-                >
-                  {/* Gleiche Struktur wie die Fahrtenliste — Simon legt Wert
-                      darauf, dass beide Listen sich gleich lesen: Datum vorn,
-                      Anlass daneben, Weg auf zwei Zeilen darunter (ohne
-                      „von"/„nach"), kein Traeger. */}
-                  <span className="dash-zuletzt-main">
-                    <span className="dash-zuletzt-kopf">
-                      <span className="dash-zuletzt-datum num">{zuletztSub(fahrt)}</span>
-                      {/* Wie in der Fahrtenliste: Titel und Rueckfahrt-Zeichen
-                          in einer Huelle, damit ⇄ am Titel klebt. Fehlte hier
-                          bisher ganz (Simon 16.08.). */}
-                      <span className="dash-zuletzt-titel">
-                        <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
-                        {fahrt.partner_fahrt_id && (
-                          <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
-                            <span aria-hidden="true">⇄</span>
-                            <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
-                          </span>
-                        )}
-                      </span>
-                      {/* km in der Titelzeile, wie in der Fahrtenliste */}
-                      <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>
-                    </span>
-                    <span className="dash-zuletzt-route">
-                      {vonName(fahrt) && <span className="dash-zuletzt-ort">{vonName(fahrt)}</span>}
-                      <span className="dash-zuletzt-ort">
-                        {vonName(fahrt) && <span className="dash-zuletzt-pfeil" aria-hidden="true">→</span>}
-                        {zielName(fahrt)}
-                      </span>
-                    </span>
-                  </span>
-                </button>
+                  fahrt={fahrt}
+                  status={statusFuerFahrt(fahrt)}
+                  onOeffnen={setAktionsFahrt}
+                  gesperrt={!!fahrt._optimistisch}
+                />
               ))
             )}
           </div>
@@ -718,29 +691,44 @@ function Dashboard({ onNavigate }) {
               <span className="dash-label">Kilometer {new Date().getFullYear()}</span>
             </div>
             <div className="dash-chart-karte">
+              {/* Auf dem Handy gibt es kein Hover: Ohne Tippen blieb der Balken
+                  eine Farbe ohne Zahl (Simon 16.08.). Ein Tipp zeigt Monat,
+                  Kilometer und Betrag ueber der Saeule; ein zweiter Tipp
+                  schliesst wieder. */}
               <div className="dash-chart-bars">
                 {chart.map((c) => (
-                  <div
+                  <button
                     key={c.ym}
-                    className="dash-chart-col"
-                    tabIndex={c.km > 0 ? 0 : -1}
+                    type="button"
+                    className={`dash-chart-col${chartTipp === c.ym ? ' is-aktiv' : ''}`}
+                    disabled={c.km === 0}
+                    onClick={() => setChartTipp((v) => (v === c.ym ? null : c.ym))}
                     aria-label={`${monatJahr(c.ym)}: ${formatKm(c.km)} km, ${formatEuro(c.betrag)} €`}
+                    aria-expanded={chartTipp === c.ym}
                   >
-                    <div
+                    {chartTipp === c.ym && (
+                      <span className="dash-chart-tipp" role="status">
+                        <span className="dash-chart-tipp-monat">{monatJahr(c.ym)}</span>
+                        <span className="dash-chart-tipp-werte num">
+                          {formatKm(c.km)} km · {formatEuro(c.betrag)} €
+                        </span>
+                      </span>
+                    )}
+                    <span
                       className="dash-chart-bar"
                       style={{
                         height: `${Math.max(Math.round((c.km / chartMax) * 88), c.km > 0 ? 4 : 2)}px`,
                         background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
                       }}
                     />
-                    <div className="dash-chart-monat num">{c.initiale}</div>
-                  </div>
+                    <span className="dash-chart-monat num">{c.initiale}</span>
+                  </button>
                 ))}
               </div>
               <div className="dash-chart-legende">
-                <span><span className="dash-chart-swatch" style={{ background: 'var(--ok)' }} />Erstattet</span>
-                <span><span className="dash-chart-swatch" style={{ background: 'var(--accent)' }} />Eingereicht</span>
-                <span><span className="dash-chart-swatch" style={{ background: 'var(--brand)' }} />Erfasst</span>
+                <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.erhalten }} />Erstattet</span>
+                <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.eingereicht }} />Eingereicht</span>
+                <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.offen }} />Erfasst</span>
               </div>
             </div>
           </>
@@ -898,9 +886,9 @@ function Dashboard({ onNavigate }) {
               ))}
             </div>
             <div className="dash-chart-legende">
-              <span><span className="dash-chart-swatch" style={{ background: 'var(--ok)' }} />Erstattet</span>
-              <span><span className="dash-chart-swatch" style={{ background: 'var(--accent)' }} />Eingereicht</span>
-              <span><span className="dash-chart-swatch" style={{ background: 'var(--brand)' }} />Erfasst</span>
+              <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.erhalten }} />Erstattet</span>
+              <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.eingereicht }} />Eingereicht</span>
+              <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.offen }} />Erfasst</span>
             </div>
           </section>
         </div>
