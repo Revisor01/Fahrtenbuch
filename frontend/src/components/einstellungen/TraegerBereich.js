@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { GripVertical, Check, Pencil, Trash2, ChevronRight, Power } from 'lucide-react';
+import { GripVertical, Check, Pencil, Trash2, Power } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
@@ -232,7 +232,6 @@ function TraegerBereich() {
                   .join(' · ') || 'Keine Kostenstelle'}
               </span>
             </button>
-            <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
           </div>
         ))}
         {traegerListe.length === 0 && (

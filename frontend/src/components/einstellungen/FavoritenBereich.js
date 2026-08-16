@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Trash2, ChevronRight } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import AktionsSheet from '../ui/AktionsSheet';
@@ -164,7 +164,6 @@ function FavoritenBereich() {
                 {[fav.anlass, fav.traeger_name].filter(Boolean).join(' · ') || 'Ohne Anlass'}
               </span>
             </button>
-            <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
           </div>
         ))}
         {favoriten.length === 0 && (

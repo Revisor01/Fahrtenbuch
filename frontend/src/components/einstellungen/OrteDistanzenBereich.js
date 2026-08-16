@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useContext } from 'react';
-import { Search, Pencil, Trash2, ChevronRight } from 'lucide-react';
+import { Search, Pencil, Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
@@ -473,7 +473,6 @@ function OrteDistanzenBereich() {
                 <span className="set-td-text">{ort.adresse}</span>
                 <span className="set-td-num num">{km != null ? `${km} km` : '—'}</span>
                 <span className="set-td-aktionen">
-                  <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
                 </span>
               </button>
             );
@@ -500,7 +499,6 @@ function OrteDistanzenBereich() {
                   {[getOrtTypLabel(ort), ort.adresse].filter(Boolean).join(' · ')}
                 </span>
               </button>
-              <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
             </div>
           ))}
           {gefilterteOrte.length === 0 && (
@@ -537,7 +535,6 @@ function OrteDistanzenBereich() {
               <span className="set-td-text">{getOrtName(distanz.nach_ort_id)}</span>
               <span className="set-td-num num">{distanz.distanz} km</span>
               <span className="set-td-aktionen">
-                <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
               </span>
             </button>
           ))}
@@ -562,7 +559,6 @@ function OrteDistanzenBereich() {
                 </span>
                 <span className="set-row-sub num">{distanz.distanz} km</span>
               </button>
-              <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
             </div>
           ))}
           {sortierteDistanzen.length === 0 && (

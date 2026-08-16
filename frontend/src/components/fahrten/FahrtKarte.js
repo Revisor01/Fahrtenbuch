@@ -1,5 +1,4 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 import { formatBetrag, rundeKilometer } from './zeitraumUtils';
 
@@ -7,9 +6,9 @@ import { formatBetrag, rundeKilometer } from './zeitraumUtils';
 //
 // Layout nach dem Vorbild der Dashboard-Liste „Zuletzt" (User-Feedback 14.08.):
 // dort steht der Anlass zuoberst, darunter die Route, darunter eine leise
-// Zeile aus Datum und Traeger — km rechts, Chevron als Hinweis auf das
-// Aktions-Sheet. Die frueheren Einzelkarten wiederholten dieselben Angaben in
-// vier Zeilen mit eigenem Rahmen: mehr Flaeche, weniger Uebersicht.
+// Zeile aus Datum und Traeger — km rechts. Die frueheren Einzelkarten
+// wiederholten dieselben Angaben in vier Zeilen mit eigenem Rahmen: mehr
+// Flaeche, weniger Uebersicht.
 //
 // Anders als das Dashboard traegt die Fahrtenliste zusaetzlich Status, Betrag,
 // Mitfahrer und den Hin-/Rueckfahrt-Hinweis. Die kommen in dieselbe leise
@@ -37,9 +36,11 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
   const route = von ? `${von} → ${ziel}` : ziel;
   const mitfahrer = fahrt.mitfahrer || [];
 
-  // Leise Zeile: Datum · Träger · Mitfahrer — dieselbe Reihenfolge wie im
-  // Dashboard, nur um die Angaben ergänzt, die es dort nicht gibt.
-  const subTeile = [datumKurz(fahrt.datum), traegerName];
+  // Leise Zeile: Datum · Mitfahrer. Der Traeger stand hier fruehen mit drin
+  // und wurde als Teil eines zusammengefuegten Strings gekuerzt — aus
+  // „Kirchengemeinde Wesselburen" wurde „Kirchengeme…". Er hat jetzt eine
+  // eigene Zeile (User-Feedback 16.08.).
+  const subTeile = [datumKurz(fahrt.datum)];
   if (mitfahrer.length > 0) {
     subTeile.push(
       `${mitfahrer.length} Mitfahrer:in${mitfahrer.length > 1 ? 'nen' : ''}`
@@ -64,7 +65,24 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
             </span>
           )}
         </span>
-        <span className="fl-zeile-route">{route}</span>
+        {/* Von und Nach untereinander statt „A → B" in einer Zeile: Die
+            Adressen tragen Strasse und PLZ, nebeneinander blieb vom Ziel
+            nichts uebrig („Suederstrasse, 25779 Hennstedt → H…"). Zwei Zeilen
+            kosten Hoehe, zeigen dafuer beide Orte vollstaendig
+            (Simons Entscheidung 16.08.). */}
+        <span className="fl-zeile-route">
+          {von && (
+            <span className="fl-zeile-ort">
+              <span className="fl-zeile-ort-marke" aria-hidden="true">von</span>
+              <span className="fl-zeile-ort-name">{von}</span>
+            </span>
+          )}
+          <span className="fl-zeile-ort">
+            <span className="fl-zeile-ort-marke" aria-hidden="true">nach</span>
+            <span className="fl-zeile-ort-name">{ziel}</span>
+          </span>
+        </span>
+        {traegerName && <span className="fl-zeile-traeger">{traegerName}</span>}
         {/* Der Text braucht ein eigenes Span: Ein Flex-Container kuerzt nur
             sich selbst, nicht eine lose Textnode darin — der Traegername lief
             sonst unter die Kilometerspalte. */}
@@ -84,7 +102,6 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
           )}
         </span>
       </span>
-      <ChevronRight size={16} className="fl-zeile-chevron" aria-hidden="true" />
     </button>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2, ChevronRight } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useToast } from '../ui/Toast';
 import AktionsSheet from '../ui/AktionsSheet';
 import Sheet from '../ui/Sheet';
@@ -146,7 +146,6 @@ function ApiBereich() {
                   .join(' · ')}
               </span>
             </button>
-            <ChevronRight size={16} className="set-row-chevron" aria-hidden="true" />
           </div>
         ))}
         {apiKeys.length === 0 && (
