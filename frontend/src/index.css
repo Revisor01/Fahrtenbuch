@@ -3163,12 +3163,13 @@ code {
   color: var(--text-2);
 }
 
-/* Unterste Zeile: Datum, Mitfahrer, abweichender Status. */
-.fl-zeile-fuss {
+/* Oberste Zeile: Datum, Mitfahrer, abweichender Status. Das Datum fuehrt die
+   Karte an — es ist beim Durchsehen der Orientierungsmarker (Simon 16.08.). */
+.fl-zeile-kopf {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-top: 3px;
+  margin-bottom: 2px;
   min-width: 0;
 }
 

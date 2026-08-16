@@ -52,26 +52,12 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
           Zahlen. Jede Zeile hat die volle Breite fuer sich; alles in einer
           Zeile war nicht mehr zu lesen (Simon 16.08.). */}
       <span className="fl-zeile-main">
-        <span className="fl-zeile-titel">
-          <span className="fl-zeile-anlass">{titel}</span>
-          {fahrt.partner_fahrt_id && (
-            <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
-              <span aria-hidden="true">⇄</span>
-              <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
-            </span>
-          )}
-        </span>
-        <span className="fl-zeile-route">
-          {von && <span className="fl-zeile-ort">{von}</span>}
-          <span className="fl-zeile-ort">
-            {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
-            {ziel}
-          </span>
-        </span>
-        {/* Datum unten, in Lesegroesse. Mitfahrer und ein abweichender Status
-            stehen daneben — sie ordnen die Fahrt ein, ohne dem Anlass oder den
-            Adressen Platz zu nehmen. */}
-        <span className="fl-zeile-fuss">
+        {/* Das Datum fuehrt die Karte an — es ist der Orientierungsmarker beim
+            Durchsehen (Simon 16.08.). Als eigene Zeile, nicht als Spalte
+            daneben: dort nahm es dem Anlass die Breite. Mitfahrer-Marke und
+            ein abweichender Status stehen daneben; in der Anlasszeile kosteten
+            sie genau den Platz, den lange Anlaesse brauchen. */}
+        <span className="fl-zeile-kopf">
           <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
           {mitfahrer.length > 0 && (
             <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}`}>
@@ -87,6 +73,22 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
           {status && status !== 'offen' && (
             <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
           )}
+        </span>
+        <span className="fl-zeile-titel">
+          <span className="fl-zeile-anlass">{titel}</span>
+          {fahrt.partner_fahrt_id && (
+            <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
+              <span aria-hidden="true">⇄</span>
+              <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+            </span>
+          )}
+        </span>
+        <span className="fl-zeile-route">
+          {von && <span className="fl-zeile-ort">{von}</span>}
+          <span className="fl-zeile-ort">
+            {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
+            {ziel}
+          </span>
         </span>
       </span>
 
