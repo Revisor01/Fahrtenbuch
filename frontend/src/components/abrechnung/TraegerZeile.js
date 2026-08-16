@@ -32,13 +32,26 @@ function TraegerZeile({ month, kategorie, aktionen }) {
         </div>
         <div className="abr-traeger-aktionen">
           {status === 'offen' && (
-            <button
-              type="button"
-              className="abr-link"
-              onClick={() => aktionen.einreichen(month, [kategorie])}
-            >
-              Einreichen
-            </button>
+            <>
+              <button
+                type="button"
+                className="abr-link"
+                onClick={() => aktionen.einreichen(month, [kategorie])}
+              >
+                Einreichen
+              </button>
+              {/* Ohne Export: Wer die Abrechnung schon auf anderem Weg
+                  abgegeben hat, soll den Status setzen koennen, ohne die
+                  Datei noch einmal herunterzuladen. Dieser Weg lag bis 16.08.
+                  in der Erstattungs-Karte des Fahrten-Tabs. */}
+              <button
+                type="button"
+                className="abr-link abr-link-leise"
+                onClick={() => aktionen.alsEingereichtMarkieren(month, kategorie)}
+              >
+                Nur als eingereicht markieren
+              </button>
+            </>
           )}
           {status === 'eingereicht' && (
             <button
