@@ -634,19 +634,42 @@ function Dashboard({ onNavigate }) {
           </section>
         ) : heroErfolg}
 
-        {/* Kilometer des laufenden Monats — auf dem Handy gab es sie bisher
-            gar nicht, die Kachel lag nur im Desktop-Block (Simon 16.08.).
-            Eine Zeile statt einer Kachel: Der Monatsstand ist eine Zahl zum
-            Nachsehen, kein Ziel fuer sich. */}
-        {bisher.fahrten > 0 && (
-          <div className="dash-monat-zeile">
-            <span className="dash-monat-wert num">{formatKm(bisher.km)} km</span>
-            <span className="dash-monat-trenner" aria-hidden="true">·</span>
-            <span className="dash-monat-wert num">{formatEuro(bisher.betrag)} €</span>
-            <span className="dash-monat-label">
-              {monatName(currentYM)} · {bisher.fahrten} {bisher.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
-            </span>
-          </div>
+        {/* Kilometer als Balken ueber die Monate — dasselbe Diagramm wie im
+            Desktop-Raster, nur ohne Kachelrahmen. Eine nackte Monatszahl
+            sagte nichts (Simon 16.08.); der Verlauf zeigt, wo man steht.
+            Die Balkenfarbe traegt den Abrechnungsstatus des Monats. */}
+        {chart.some((c) => c.km > 0) && (
+          <>
+            <div className="dash-label-row">
+              <span className="dash-label">Kilometer {new Date().getFullYear()}</span>
+            </div>
+            <div className="dash-chart-karte">
+              <div className="dash-chart-bars">
+                {chart.map((c) => (
+                  <div
+                    key={c.ym}
+                    className="dash-chart-col"
+                    tabIndex={c.km > 0 ? 0 : -1}
+                    aria-label={`${monatJahr(c.ym)}: ${formatKm(c.km)} km, ${formatEuro(c.betrag)} €`}
+                  >
+                    <div
+                      className="dash-chart-bar"
+                      style={{
+                        height: `${Math.max(Math.round((c.km / chartMax) * 88), c.km > 0 ? 4 : 2)}px`,
+                        background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
+                      }}
+                    />
+                    <div className="dash-chart-monat num">{c.initiale}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="dash-chart-legende">
+                <span><span className="dash-chart-swatch" style={{ background: 'var(--ok)' }} />Erstattet</span>
+                <span><span className="dash-chart-swatch" style={{ background: 'var(--accent)' }} />Eingereicht</span>
+                <span><span className="dash-chart-swatch" style={{ background: 'var(--brand)' }} />Erfasst</span>
+              </div>
+            </div>
+          </>
         )}
 
         <div className="dash-label-row">
