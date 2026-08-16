@@ -213,27 +213,31 @@ function FahrtenListe() {
       <ZeitraumSegmente />
 
       {/* Der Fahrten-Tab zeigt nur noch, was dieser Zeitraum enthaelt:
-          Anzahl, Kilometer, Traeger, Summe. Die Erstattungs-Karte mit Status
-          je Traeger stand hier und im Abrechnungs-Tab — doppelt und damit
-          unklar, wofuer welcher Tab da ist. Sie gehoert zur Abrechnung
-          (Simons Entscheidung 16.08.). */}
-      <div className="fl-summe">
-        <span className="fl-summe-wert num">{kmGesamt} km</span>
-        <span className="fl-summe-punkt" aria-hidden="true">·</span>
-        <span className="fl-summe-wert num">{formatBetrag(summary?.gesamtErstattung)} €</span>
-        <button
-          type="button"
-          className="fl-export-link"
-          onClick={() => setExportOffen(true)}
-        >
-          Export
-        </button>
-      </div>
-      <div className="fl-summe-sub">
-        {sortierteFahrten.length} {sortierteFahrten.length === 1 ? 'Fahrt' : 'Fahrten'}
-        {traegerAnzahl > 0 && (
-          <> · {traegerAnzahl} {traegerAnzahl === 1 ? 'Träger' : 'Träger'}</>
-        )}
+          Kilometer, Summe, Anzahl. Die Erstattungs-Karte mit Status je
+          Traeger stand hier und im Abrechnungs-Tab — doppelt und damit
+          unklar, wofuer welcher Tab da ist (Simons Entscheidung 16.08.).
+          Die Zahlen brauchen trotzdem eine Flaeche: frei zwischen
+          Monatswahl und Liste standen sie verloren. */}
+      <div className="fl-summe-karte">
+        <div className="fl-summe-werte">
+          <span className="fl-summe-wert num">{kmGesamt} km</span>
+          <span className="fl-summe-wert num">{formatBetrag(summary?.gesamtErstattung)} €</span>
+        </div>
+        <div className="fl-summe-sub">
+          {sortierteFahrten.length} {sortierteFahrten.length === 1 ? 'Fahrt' : 'Fahrten'}
+          {traegerAnzahl > 0 && (
+            <> · {traegerAnzahl} {traegerAnzahl === 1 ? 'Träger' : 'Träger'}</>
+          )}
+        </div>
+        <div className="fl-summe-fuss">
+          <button
+            type="button"
+            className="fl-export-link"
+            onClick={() => setExportOffen(true)}
+          >
+            Export
+          </button>
+        </div>
       </div>
 
       {sortierteFahrten.length === 0 ? (
