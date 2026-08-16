@@ -522,19 +522,23 @@ function Dashboard({ onNavigate }) {
   })();
 
   // Route unter dem Anlass: „von → nach"
+  const vonName = (fahrt) => fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';
+
+  // Einzeilig fuer das Aktions-Sheet: dort steht die Strecke als Wert neben
+  // einem Label, nicht als Listenzeile.
   const routeText = (fahrt) => {
-    const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';
+    const von = vonName(fahrt);
     const nach = zielName(fahrt);
     return von ? `${von} → ${nach}` : nach;
   };
 
-  // Zeile darunter: Datum und Abrechnungsträger
+  // Zeile darunter: nur noch das Datum — der Traeger steht seit 16.08. auf
+  // einer eigenen Zeile, sonst wurde er mit dem Datum zusammen gekuerzt.
   const zuletztSub = (fahrt) => {
     const d = new Date(fahrt.datum);
     const wt = d.toLocaleDateString('de-DE', { weekday: 'short' });
     const dat = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-    const traeger = getTraegerName(fahrt.abrechnung);
-    return [`${wt} ${dat}`, traeger].filter(Boolean).join(' · ');
+    return `${wt} ${dat}`;
   };
 
   // ---- Wiederverwendete Teilstücke ----------------------------------------
@@ -670,7 +674,24 @@ function Dashboard({ onNavigate }) {
                 >
                   <span className="dash-zuletzt-main">
                     <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
-                    <span className="dash-zuletzt-route">{routeText(fahrt)}</span>
+                    {/* Gleiche Struktur wie die Fahrtenliste — Simon legt Wert
+                        darauf, dass beide Listen sich gleich lesen. Orte
+                        untereinander, Traeger auf eigener Zeile. */}
+                    <span className="dash-zuletzt-route">
+                      {vonName(fahrt) && (
+                        <span className="dash-zuletzt-ort">
+                          <span className="dash-zuletzt-ort-marke" aria-hidden="true">von</span>
+                          <span className="dash-zuletzt-ort-name">{vonName(fahrt)}</span>
+                        </span>
+                      )}
+                      <span className="dash-zuletzt-ort">
+                        <span className="dash-zuletzt-ort-marke" aria-hidden="true">nach</span>
+                        <span className="dash-zuletzt-ort-name">{zielName(fahrt)}</span>
+                      </span>
+                    </span>
+                    {getTraegerName(fahrt.abrechnung) && (
+                      <span className="dash-zuletzt-traeger">{getTraegerName(fahrt.abrechnung)}</span>
+                    )}
                     <span className="dash-zuletzt-sub">{zuletztSub(fahrt)}</span>
                   </span>
                   <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>

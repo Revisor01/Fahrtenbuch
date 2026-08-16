@@ -86,9 +86,17 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
         {/* Der Text braucht ein eigenes Span: Ein Flex-Container kuerzt nur
             sich selbst, nicht eine lose Textnode darin — der Traegername lief
             sonst unter die Kilometerspalte. */}
+        {/* „Erfasst" stand frueher an jeder Zeile und sagte nichts: Der Status
+            haengt am Traeger und Monat, nicht an der einzelnen Fahrt — die
+            Erstattungs-Karte darueber zeigt ihn ohnehin schon (Simon 16.08.).
+            Sichtbar bleibt er nur, wenn er davon abweicht: Im Zeitraum ueber
+            mehrere Monate kann eine Fahrt eingereicht und die naechste noch
+            offen sein. Dann ist er die Ausnahme und faellt auf. */}
         <span className="fl-zeile-sub">
           <span className="fl-zeile-sub-text">{subTeile.join(' · ')}</span>
-          <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
+          {status && status !== 'offen' && (
+            <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
+          )}
         </span>
       </span>
       <span className="fl-zeile-werte">
