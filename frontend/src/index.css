@@ -350,6 +350,11 @@ code {
     line-height: 1;
   }
 
+  /* KEIN @apply, aber bewusst hier belassen: Diese Klassen entstehen erst zur
+     Laufzeit (`status-progress-${state}`), Tailwinds Scanner findet sie im
+     Quelltext nicht und warf sie aus dem Build — Kreise und Linien der
+     Fortschrittsleiste waren dadurch unsichtbar. Die Safelist in
+     tailwind.config.js haelt sie jetzt drin (gefunden 16.08.). */
   .status-progress-done {
     background-color: var(--ok);
     color: var(--ok-soft);
