@@ -33,13 +33,30 @@ Dabei fielen drei Mängel auf, behoben in Commit `2ef0806`: abgeschnittene
 Orte, abgeschnittener Träger, halb verdeckte letzte Zeile. Dazu auf Simons
 Ansage der Pfeil aus allen Listen.
 
-**Build 15 ist in TestFlight** (16.08., Status `IN_BETA_TESTING`). Enthält:
-- Listen kompakt: Datum vorn, Anlass daneben, km und Betrag in derselben
-  Zeile, Weg auf zwei Zeilen ohne „von"/„nach", kein Träger.
-  Rückfahrt-Zeichen klebt am Titel — auch im Dashboard.
-- **Start 5 s → 2 s**, kein weißer Blitz, keine aufblitzende Anmeldemaske
-- Nativer Splash ist reines Petrol, danach die eigene Ladeanzeige
-- Plausible ersatzlos entfernt
+**Build 16 ist in TestFlight** (16.08., Status `IN_BETA_TESTING`). Enthält:
+- Fahrten-Tab: Übersichtskarte mit „KILOMETER" und „ERSTATTUNG" in zwei
+  beschrifteten Spalten, jede Fahrt als eigene Karte
+- Startseite: Kilometer-Balkendiagramm ganz unten
+- Abrechnung: Fortschrittsleiste immer sichtbar, „Nur als eingereicht
+  markieren" ohne Export
+- Start 5 s → 2 s, kein weisser Blitz, keine aufblitzende Anmeldemaske
+- Toasts wieder unten, Plausible entfernt
+
+**PRODUKTION WURDE DEPLOYT** (16.08., auf Simons ausdrückliche Ansage —
+die Regel „nie auf Produktion" gilt sonst weiter). Grund: `/api/konfig`
+fehlte dort, deshalb erschien in der App kein „Registrieren".
+- Images auf dem Server gebaut (kein Docker lokal), alte als `:vorher`
+  getaggt — Rückweg per `docker tag revisoren/fahrtenbuch-server:vorher
+  revisoren/fahrtenbuch-server:latest` + `docker compose up -d`
+- `TOKEN_LAUFZEIT=14d` in `stack.env` ergänzt; die Anmeldung hält damit
+  zwei Wochen statt einem Tag (Simons Entscheidung)
+- Geprüft nach dem Deploy: 2.470 Fahrten und 31 Nutzer unverändert,
+  `/api/konfig` liefert `allowRegistration: true`, Registrieren-Knopf in
+  der App sichtbar, keine Fehler in den Logs
+
+**Quick Actions gibt es noch nicht** — Simon hat sie als wichtig benannt.
+Weder `UIApplicationShortcutItem` in der Info.plist noch etwas im
+Frontend. Das ist der nächste Punkt.
 
 **Von Simon noch nicht bewertet.**
 

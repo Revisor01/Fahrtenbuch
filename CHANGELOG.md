@@ -38,6 +38,11 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Der Hinweis auf verknüpfte Hin- und Rückfahrten erscheint jetzt auch auf der Startseite
 - Während des Starts dreht sich das Zeichen, solange geladen wird
 - Die Reichweitenmessung wurde ersatzlos entfernt
+- Die Kilometer der letzten Monate erscheinen jetzt auch in der App als Balkendiagramm am Ende der Startseite
+- Die Fahrtenliste zeigt Kilometer und Erstattung in einer eigenen Übersicht über der Liste; jede Fahrt steht auf einer eigenen Karte
+- Der Fortschritt einer Abrechnung (Erfasst → Eingereicht → Erstattet) ist in der Monatsübersicht immer sichtbar, ohne die Karte zu öffnen
+- In der Abrechnung lässt sich ein Träger auch ohne Export als eingereicht markieren — für alle, die die Abrechnung auf anderem Weg abgegeben haben
+- Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
 - In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
