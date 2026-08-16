@@ -13,6 +13,7 @@ import FahrtenTabelle from './fahrten/FahrtenTabelle';
 import ExportSheet from './fahrten/ExportSheet';
 import { statusFromAbrechnung } from '../utils/statusLabels';
 import { formatBetrag, rundeKilometer, kategorienMitErstattung } from './fahrten/zeitraumUtils';
+import usePassendeGroesse from './fahrten/usePassendeGroesse';
 
 // Fahrtenliste (Phase R5, Design-Spec Screen 3):
 // Titel + Segmented Control (aktueller Monat / Vormonat / Zeitraum) +
@@ -62,6 +63,11 @@ function FahrtenListe() {
   // Die Traeger, die im Zeitraum tatsaechlich etwas erstatten — nicht die
   // konfigurierten. „Mitfahrer:innen" steht als eigener Posten mit drin, weil
   // der Betrag auch getrennt ausgezahlt wird.
+  // Schrift der drei Werte: so gross wie moeglich, so klein wie noetig.
+  const { setzeRef: setzeWertRef, groesse: wertGroesse } = usePassendeGroesse(
+    [sortierteFahrten.length, kmGesamt, summary?.gesamtErstattung]
+  );
+
   const traegerBetraege = useMemo(
     () => kategorienMitErstattung(summary, abrechnungstraeger),
     [summary, abrechnungstraeger]
@@ -219,18 +225,23 @@ function FahrtenListe() {
           Die Zahlen brauchen trotzdem eine Flaeche: frei zwischen
           Monatswahl und Liste standen sie verloren. */}
       <div className="fl-summe-karte">
-        <div className="fl-summe-werte">
+        {/* Die Schriftgroesse richtet sich nach dem laengsten Wert: Ein
+            Monat mit „14,95 €" steht gross da, ein Jahreszeitraum mit
+            „4.368,00 €" so viel kleiner, wie er es braucht. Fest kleiner waere
+            fuer den Normalfall schade, Kuerzen bei Betraegen keine Option
+            (Simon 16.08.). */}
+        <div className="fl-summe-werte" style={{ fontSize: `${wertGroesse}px` }}>
           <div className="fl-summe-spalte">
             <span className="fl-summe-label">Fahrten</span>
-            <span className="fl-summe-wert num">{sortierteFahrten.length}</span>
+            <span className="fl-summe-wert num" ref={setzeWertRef(0)}>{sortierteFahrten.length}</span>
           </div>
           <div className="fl-summe-spalte">
             <span className="fl-summe-label">Kilometer</span>
-            <span className="fl-summe-wert num">{kmGesamt} km</span>
+            <span className="fl-summe-wert num" ref={setzeWertRef(1)}>{kmGesamt} km</span>
           </div>
           <div className="fl-summe-spalte">
             <span className="fl-summe-label">Erstattung</span>
-            <span className="fl-summe-wert num">{formatBetrag(summary?.gesamtErstattung)} €</span>
+            <span className="fl-summe-wert num" ref={setzeWertRef(2)}>{formatBetrag(summary?.gesamtErstattung)} €</span>
           </div>
         </div>
         {/* Statt der blossen Traeger-Anzahl jeder Traeger mit seinem Betrag:

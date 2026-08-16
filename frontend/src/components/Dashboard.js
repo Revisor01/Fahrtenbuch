@@ -8,6 +8,7 @@ import Sheet from './ui/Sheet';
 import AktionsSheet from './ui/AktionsSheet';
 import StatusBadge from './ui/StatusBadge';
 import FahrtKarte from './fahrten/FahrtKarte';
+import KilometerDiagramm from './dashboard/KilometerDiagramm';
 import { useToast } from './ui/Toast';
 import { statusFromAbrechnung } from '../utils/statusLabels';
 import { Star, Pencil, RotateCw, ArrowLeftRight } from 'lucide-react';
@@ -71,17 +72,6 @@ function traegerKuerzel(name) {
   }
   return String(name).slice(0, 2).toUpperCase();
 }
-
-// Dieselben Farben, die das Statussystem ueberall sonst traegt (StatusBadge,
-// Abrechnung): Sand fuer „Eingereicht", Gruen fuer „Erstattet", neutral fuer
-// „Erfasst". Der Balken stand fuer „Erfasst" bis 16.08. in Petrol — der
-// Markenfarbe — und behauptete damit im Diagramm eine andere Ordnung als die
-// Abrechnung zwei Tabs weiter (Simon 16.08.).
-const CHART_FARBEN = {
-  erhalten: 'var(--ok)',
-  eingereicht: 'var(--accent)',
-  offen: 'var(--line-strong)',
-};
 
 function Dashboard({ onNavigate }) {
   const {
@@ -320,9 +310,6 @@ function Dashboard({ onNavigate }) {
   const [favFrage, setFavFrage] = useState(null);
   // Angetippte Fahrt in „Zuletzt": zeigt Details + Aktionen
   const [aktionsFahrt, setAktionsFahrt] = useState(null);
-  // Angetippter Balken im Kilometer-Diagramm (Monat als 'JJJJ-MM') — auf dem
-  // Handy der Ersatz fuer Hover.
-  const [chartTipp, setChartTipp] = useState(null);
   // Strich auf der Zeile unter der Maus, Gegenfahrt nur hinterlegt
   const [aktiveId, setAktiveId] = useState(null);
   const [paarId, setPaarId] = useState(null);
@@ -691,45 +678,13 @@ function Dashboard({ onNavigate }) {
               <span className="dash-label">Kilometer {new Date().getFullYear()}</span>
             </div>
             <div className="dash-chart-karte">
-              {/* Auf dem Handy gibt es kein Hover: Ohne Tippen blieb der Balken
-                  eine Farbe ohne Zahl (Simon 16.08.). Ein Tipp zeigt Monat,
-                  Kilometer und Betrag ueber der Saeule; ein zweiter Tipp
-                  schliesst wieder. */}
-              <div className="dash-chart-bars">
-                {chart.map((c) => (
-                  <button
-                    key={c.ym}
-                    type="button"
-                    className={`dash-chart-col${chartTipp === c.ym ? ' is-aktiv' : ''}`}
-                    disabled={c.km === 0}
-                    onClick={() => setChartTipp((v) => (v === c.ym ? null : c.ym))}
-                    aria-label={`${monatJahr(c.ym)}: ${formatKm(c.km)} km, ${formatEuro(c.betrag)} €`}
-                    aria-expanded={chartTipp === c.ym}
-                  >
-                    {chartTipp === c.ym && (
-                      <span className="dash-chart-tipp" role="status">
-                        <span className="dash-chart-tipp-monat">{monatJahr(c.ym)}</span>
-                        <span className="dash-chart-tipp-werte num">
-                          {formatKm(c.km)} km · {formatEuro(c.betrag)} €
-                        </span>
-                      </span>
-                    )}
-                    <span
-                      className="dash-chart-bar"
-                      style={{
-                        height: `${Math.max(Math.round((c.km / chartMax) * 88), c.km > 0 ? 4 : 2)}px`,
-                        background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
-                      }}
-                    />
-                    <span className="dash-chart-monat num">{c.initiale}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="dash-chart-legende">
-                <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.erhalten }} />Erstattet</span>
-                <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.eingereicht }} />Eingereicht</span>
-                <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.offen }} />Erfasst</span>
-              </div>
+              <KilometerDiagramm
+                chart={chart}
+                chartMax={chartMax}
+                formatKm={formatKm}
+                formatEuro={formatEuro}
+                monatJahr={monatJahr}
+              />
             </div>
           </>
         )}
@@ -845,51 +800,14 @@ function Dashboard({ onNavigate }) {
 
           <section className="dash-d-tile">
             <div className="dash-label dash-d-card-label">Kilometer {new Date().getFullYear()}</div>
-            <div className="dash-chart-bars dash-chart-bars-tile">
-              {chart.map((c) => (
-                <div
-                  key={c.ym}
-                  className="dash-chart-col"
-                  tabIndex={c.km > 0 ? 0 : -1}
-                  aria-label={`${monatJahr(c.ym)}: ${formatKm(c.km)} km, ${formatEuro(c.betrag)} €`}
-                >
-                  <div
-                    className="dash-chart-bar"
-                    style={{
-                      height: `${Math.max(Math.round((c.km / chartMax) * 88), c.km > 0 ? 4 : 2)}px`,
-                      background: c.status ? CHART_FARBEN[c.status] : 'var(--line-strong)',
-                    }}
-                  />
-                  <div className="dash-chart-monat num">{c.initiale}</div>
-                  {c.km > 0 && (
-                    <div className="dash-chart-pop" role="tooltip">
-                      <div className="dash-chart-pop-titel">{monatJahr(c.ym)}</div>
-                      <div className="dash-chart-pop-zeile">
-                        <span className="num">{formatKm(c.km)}</span> km · {c.fahrten} {c.fahrten === 1 ? 'Fahrt' : 'Fahrten'}
-                      </div>
-                      <div className="dash-chart-pop-zeile">
-                        Erstattung <span className="num">{formatEuro(c.betrag - c.mitfahrer)} €</span>
-                      </div>
-                      {c.mitfahrer > 0 && (
-                        <div className="dash-chart-pop-zeile">
-                          Mitfahrer <span className="num">+{formatEuro(c.mitfahrer)} €</span>
-                        </div>
-                      )}
-                      {c.status && (
-                        <div className="dash-chart-pop-status">
-                          <StatusBadge status={c.status} variant="dot" />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="dash-chart-legende">
-              <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.erhalten }} />Erstattet</span>
-              <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.eingereicht }} />Eingereicht</span>
-              <span><span className="dash-chart-swatch" style={{ background: CHART_FARBEN.offen }} />Erfasst</span>
-            </div>
+            <KilometerDiagramm
+              chart={chart}
+              chartMax={chartMax}
+              formatKm={formatKm}
+              formatEuro={formatEuro}
+              monatJahr={monatJahr}
+              alsKachel
+            />
           </section>
         </div>
 
