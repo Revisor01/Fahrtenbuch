@@ -51,13 +51,19 @@ function FahrtKarte({ fahrt, status, onOeffnen }) {
       <span className="fl-zeile-main">
         <span className="fl-zeile-kopf">
           <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
-          <span className="fl-zeile-anlass">{titel}</span>
-          {fahrt.partner_fahrt_id && (
-            <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
-              <span aria-hidden="true">⇄</span>
-              <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
-            </span>
-          )}
+          {/* Titel und Rueckfahrt-Zeichen in einer eigenen Huelle: Der Anlass
+              nimmt als flex:1 sonst die ganze Breite und schiebt das Zeichen
+              an den rechten Rand — es soll aber direkt am Titel kleben
+              (Simon 16.08.). */}
+          <span className="fl-zeile-titel">
+            <span className="fl-zeile-anlass">{titel}</span>
+            {fahrt.partner_fahrt_id && (
+              <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
+                <span aria-hidden="true">⇄</span>
+                <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+              </span>
+            )}
+          </span>
           {mitfahrer.length > 0 && (
             <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}`}>
               <span aria-hidden="true">+{mitfahrer.length}</span>
