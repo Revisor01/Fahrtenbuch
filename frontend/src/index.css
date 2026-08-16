@@ -2855,19 +2855,40 @@ code {
   margin-bottom: 16px;
 }
 
-/* Zwei Spalten mit eigener Beschriftung: Nebeneinander ohne Label klebten
+/* Drei Spalten mit eigener Beschriftung: Nebeneinander ohne Label klebten
    „46 km" und „13,80 €" zusammen und lasen sich wie eine einzige Zahl
    (Simon 16.08.). */
+/* Grid statt Flex: Die Spalten sollen sich am laengsten Wert bemessen, den sie
+   tatsaechlich tragen — „Fahrten" braucht zwei Stellen, die Erstattung im
+   Jahreszeitraum bis zu „4.368,00 €". Flex verteilte den Platz starr und liess
+   den Betrag aus seiner Spalte laufen, waehrend die Fahrten-Spalte Platz
+   verschenkte. */
+/* Linksbuendig beieinander statt ueber die Kartenbreite verteilt: Die drei
+   Zahlen gehoeren zusammen und sollen als eine Gruppe gelesen werden. Bis zum
+   rechten Rand auseinandergezogen standen sie ohne Bezug zueinander. */
 .fl-summe-werte {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  justify-content: start;
+  gap: 28px;
+}
+
+@media (min-width: 768px) {
+  .fl-summe-werte {
+    gap: 48px;
+  }
 }
 
 .fl-summe-spalte {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  flex: 1;
+  /* Nach Inhalt verteilen statt zu Dritteln: „Fahrten" braucht zwei Stellen,
+     die Erstattung im Jahreszeitraum bis zu „4.368,00 €". Bei gleichen
+     Dritteln lief der Betrag aus seiner Spalte heraus, waehrend die
+     Fahrten-Spalte Platz verschenkte. `flex-basis: content` laesst jede Spalte
+     ihren eigenen Text bemessen; der Rest wird gleichmaessig verteilt. */
+  flex: 1 1 content;
   min-width: 0;
 }
 
@@ -2877,19 +2898,81 @@ code {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-3, var(--text-2));
+  /* Die Beschriftung darf die Spaltenbreite nicht bestimmen: „ERSTATTUNG" ist
+     breiter als „14,95 €" und zwang die Spalte auf Labelbreite — der Platz
+     fehlte dann dem laengsten Wert nebenan. Notfalls kuerzt das Label,
+     die Zahl darunter bleibt vollstaendig. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.fl-summe-sub {
-  margin-top: 12px;
+/* Traeger je Zeile, Name links, Betrag rechts — klein gesetzt, weil die
+   Gesamtsumme oben die Hauptaussage bleibt und diese Zeilen sie nur
+   aufschluesseln. */
+.fl-summe-traeger {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   font-size: 13px;
   color: var(--text-2);
 }
 
+.fl-summe-traeger li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Lange Traegernamen kuerzen statt umbrechen: Der Betrag rechts muss auf
+   jeder Zeile an derselben Stelle stehen. */
+.fl-summe-traeger-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-summe-traeger-betrag {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* 20px statt 22px, seit die Karte drei statt zwei Spalten traegt: zusammen mit
+   der Gewichtung der Spalten oben passt damit auch ein Jahreszeitraum
+   („4.368,00 €", „12.480 km") auf einem schmalen iPhone in eine Zeile. */
 .fl-summe-wert {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text);
+  white-space: nowrap;
+}
+
+/* Sehr schmale Geraete (iPhone SE, 320px): Bei drei Spalten und einem
+   Jahreszeitraum („12.480 km", „4.368,00 €") fehlen genau die 24px der beiden
+   Luecken — der Text selbst passt. Deshalb die Luecken kuerzen und eine Stufe
+   kleiner setzen, statt die Zahlen auf allen Geraeten zu verkleinern. */
+@media (max-width: 360px) {
+  .fl-summe-werte {
+    gap: 6px;
+  }
+
+  .fl-summe-wert {
+    font-size: 16px;
+  }
+
+  /* Der weite Buchstabenabstand macht „ERSTATTUNG" breiter als den Betrag
+     darunter und nahm der Spalte die letzten Pixel. */
+  .fl-summe-label {
+    letter-spacing: 0.02em;
+  }
 }
 
 /* Export unten rechts, abgesetzt durch eine Linie — die Karte nennt erst die
