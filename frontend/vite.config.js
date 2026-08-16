@@ -123,7 +123,7 @@ export default defineConfig({
   server: {
     port: 9642,
     proxy: {
-      '/api': 'http://localhost:5000',
+      '/api': { target: 'https://fahrtenbuch.godsapp.de', changeOrigin: true, secure: true },
     },
   },
 });
