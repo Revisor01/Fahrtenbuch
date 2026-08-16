@@ -2150,8 +2150,15 @@ code {
   color: var(--text-3, var(--text-2));
 }
 
-.dash-zuletzt-ziel {
+/* Traegt den flexiblen Platz, damit ⇄ am Titel klebt — wie .fl-zeile-titel */
+.dash-zuletzt-titel {
+  display: flex;
+  align-items: baseline;
   flex: 1;
+  min-width: 0;
+}
+
+.dash-zuletzt-ziel {
   min-width: 0;
   font-size: 15px;
   font-weight: 600;
@@ -2182,7 +2189,10 @@ code {
   color: var(--text-3, var(--text-2));
 }
 
+/* Steht jetzt in der Titelzeile statt rechts ueber die ganze Zeile */
 .dash-zuletzt-km {
+  flex-shrink: 0;
+  margin-left: auto;
   font-size: 14px;
   color: var(--text-2);
   white-space: nowrap;
@@ -3153,13 +3163,14 @@ code {
 /* Zahlen rechts: km fuehrend, Betrag leise darunter — beide nie umbrechend.
    Feste Mindestbreite, damit die Spalte ueber alle Zeilen buendig steht;
    ohne sie richtete sich jede Zeile nach ihrer eigenen Zahl aus. */
+/* Kilometer und Betrag stehen in der Titelzeile nebeneinander, rechts
+   ausgerichtet — vorher untereinander am rechten Rand ueber beide Zeilen. */
 .fl-zeile-werte {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0;
+  align-items: baseline;
+  gap: 8px;
   flex-shrink: 0;
-  min-width: 76px;
+  margin-left: auto;
 }
 
 .fl-zeile-km {
@@ -6330,6 +6341,13 @@ code {
 [data-platform="ios"] body,
 [data-platform="android"] body {
   overscroll-behavior: none;
+  /* Petrol statt --bg: Zwischen dem geladenen Stylesheet und dem ersten
+     Rendern von React liegt ein Moment, in dem nur die Dokumentflaeche zu
+     sehen ist. Mit --bg blitzte dort Helles auf, direkt nach der nativen
+     Startflaeche (gemessen 16.08.). Der Startbildschirm liegt ohnehin fest
+     ueber allem, die angemeldete Ansicht bringt ihre eigene Flaeche mit —
+     diese Farbe sieht man nur in genau dieser Luecke. */
+  background-color: #0F5257;
 }
 
 /* ---------- Datumsfeld in der App ----------
