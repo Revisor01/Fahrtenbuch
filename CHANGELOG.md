@@ -30,6 +30,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - In der Fahrtenliste stehen Start und Ziel jetzt untereinander statt nebeneinander. Adressen mit Straße und Postleitzahl sind damit vollständig zu lesen; vorher blieb vom Ziel oft nur ein abgeschnittener Anfang übrig
 - Der Abrechnungsträger hat in der Fahrtenliste eine eigene Zeile und wird nicht mehr mitten im Namen abgeschnitten
 - Der Pfeil am rechten Rand der Listen ist entfernt. Die Zeilen lassen sich weiterhin antippen, der gewonnene Platz gehört jetzt dem Text
+- Die Liste auf der Startseite ist genauso aufgebaut wie die Fahrtenliste: Start und Ziel untereinander, der Abrechnungsträger auf eigener Zeile. Auch dort wird jetzt nichts mehr mitten im Wort abgeschnitten
+- „Erfasst" steht nicht mehr an jeder einzelnen Fahrt. Der Status gilt ohnehin für den ganzen Monat eines Abrechnungsträgers und steht weiter oben in der Übersicht. Bei einer Auswahl über mehrere Monate erscheint er weiterhin an den Fahrten, die bereits eingereicht oder erstattet sind
 
 ### Behoben
 - In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
