@@ -2780,31 +2780,28 @@ code {
    darunter, die ebenfalls rechts stehen (Simon 16.08.). */
 .fl-summe-werte {
   display: grid;
-  grid-template-columns: auto auto 1fr;
-  justify-content: start;
-  gap: 28px;
+  /* Drei gleich breite Spalten: Nur so steht die mittlere („Kilometer")
+     tatsaechlich in der Mitte der Karte — nach Inhalt bemessen sass sie 37px
+     links davon (Simon 16.08.). Gleiche Breiten fangen ausserdem dreistellige
+     Werte ab, ohne dass die Spalten springen. */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Mitte zentriert, aussen die Raender: Alle drei linksbuendig wirkten wie
+   drei einzelne Angaben; so bilden sie eine Zeile mit Achse (Simon 16.08.). */
+.fl-summe-spalte:nth-child(2) {
+  text-align: center;
 }
 
 .fl-summe-spalte:last-child {
   text-align: right;
 }
 
-@media (min-width: 768px) {
-  .fl-summe-werte {
-    gap: 48px;
-  }
-}
-
 .fl-summe-spalte {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* Nach Inhalt verteilen statt zu Dritteln: „Fahrten" braucht zwei Stellen,
-     die Erstattung im Jahreszeitraum bis zu „4.368,00 €". Bei gleichen
-     Dritteln lief der Betrag aus seiner Spalte heraus, waehrend die
-     Fahrten-Spalte Platz verschenkte. `flex-basis: content` laesst jede Spalte
-     ihren eigenen Text bemessen; der Rest wird gleichmaessig verteilt. */
-  flex: 1 1 content;
   min-width: 0;
 }
 
@@ -2863,8 +2860,12 @@ code {
 /* 20px statt 22px, seit die Karte drei statt zwei Spalten traegt: zusammen mit
    der Gewichtung der Spalten oben passt damit auch ein Jahreszeitraum
    („4.368,00 €", „12.480 km") auf einem schmalen iPhone in eine Zeile. */
+/* Groesse kommt von usePassendeGroesse: 20px, solange die Werte passen, sonst
+   genau so viel kleiner, wie der laengste es verlangt (Simon 16.08.). Fest
+   klein waere fuer den Normalfall schade, Kuerzen bei Betraegen keine Option
+   — deshalb erbt der Wert die gemessene Groesse von `.fl-summe-werte`. */
 .fl-summe-wert {
-  font-size: 20px;
+  font-size: inherit;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text);
@@ -2877,11 +2878,7 @@ code {
    kleiner setzen, statt die Zahlen auf allen Geraeten zu verkleinern. */
 @media (max-width: 360px) {
   .fl-summe-werte {
-    gap: 6px;
-  }
-
-  .fl-summe-wert {
-    font-size: 16px;
+    gap: 8px;
   }
 
   /* Der weite Buchstabenabstand macht „ERSTATTUNG" breiter als den Betrag
@@ -4832,13 +4829,65 @@ code {
   text-align: left;
 }
 
+/* Auf dem Rechner reicht Hover; auf dem Handy gibt es das nicht — dort setzt
+   ein Tipp `.is-offen` und oeffnet damit dasselbe Popover (Simon 16.08.).
+   Ohne das blieb der Balken mobil eine Farbe ohne Zahl. */
 .dash-chart-col:hover .dash-chart-pop,
 .dash-chart-col:focus-within .dash-chart-pop,
-.dash-chart-col:focus .dash-chart-pop {
-  display: block;
+.dash-chart-col:focus .dash-chart-pop,
+.dash-chart-col.is-offen .dash-chart-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
+/* Die letzten beiden Saeulen: Ihr Popover ragte mittig ausgerichtet ueber den
+   rechten Bildrand (34px bei 390px Breite). Es haengt dort deshalb am rechten
+   Rand der Saeule statt an ihrer Mitte — dasselbe spiegelbildlich links. */
+.dash-chart-col:nth-last-child(-n + 2) .dash-chart-pop {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.dash-chart-col:nth-child(-n + 2) .dash-chart-pop {
+  left: 0;
+  right: auto;
+  transform: none;
+}
+
+/* Die Saeule ist jetzt ein Knopf — Systemstil abstreifen. */
+/* Die Saeule ist seit 16.08. ein <button> (Tippen oeffnet die Werte) —
+   Systemstil abstreifen. `flex-basis: 0` ist dabei entscheidend: Buttons
+   bekommen mit `flex: 1` allein keine Breite und blieben samt Popover auf
+   0px. */
+.dash-chart-col {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.dash-chart-col:disabled {
+  cursor: default;
+}
+
+/* Der offene Balken bleibt sichtbar hervorgehoben, solange sein Popover
+   steht. */
+.dash-chart-col.is-offen .dash-chart-bar {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+/* display:block, weil die Zeilen seit 16.08. <span> sind (das Popover steckt
+   in einem <button>, und der darf keine <div> enthalten). Ohne das hatte das
+   Popover keine Hoehe. */
 .dash-chart-pop-titel {
+  display: block;
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
@@ -4846,6 +4895,7 @@ code {
 }
 
 .dash-chart-pop-zeile {
+  display: block;
   font-size: 13px;
   color: var(--text-2);
   line-height: 1.5;
@@ -4853,6 +4903,7 @@ code {
 }
 
 .dash-chart-pop-status {
+  display: block;
   margin-top: 6px;
 }
 
