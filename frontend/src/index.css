@@ -2140,8 +2140,43 @@ code {
   white-space: nowrap;
 }
 
-/* Route „von → nach" zwischen Anlass und Datum/Träger */
+/* Route: „von" ueber „nach", gleiche Struktur wie die Fahrtenliste
+   (.fl-zeile-ort*) — beide Listen sollen sich gleich lesen. */
 .dash-zuletzt-route {
+  display: block;
+  font-size: 13px;
+  color: var(--text-2);
+  min-width: 0;
+}
+
+.dash-zuletzt-ort {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dash-zuletzt-ort-marke {
+  flex: 0 0 auto;
+  width: 26px;
+  font-size: 11px;
+  color: var(--text-3, var(--text-2));
+}
+
+.dash-zuletzt-ort-name {
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+/* Traeger auf eigener Zeile — stand frueher mit dem Datum zusammen im
+   Sub-Text und wurde mit ihm gekuerzt. */
+.dash-zuletzt-traeger {
+  display: block;
+  min-width: 0;
   font-size: 13px;
   color: var(--text-2);
   overflow: hidden;

@@ -105,8 +105,13 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
                   </span>
                 )}
               </span>
+              {/* Spalte bleibt (sonst verrutscht das Raster), zeigt aber nur
+                  den abweichenden Status — „Erfasst" ist der Normalfall und
+                  steht schon im Monatskopf (Simon 16.08.). */}
               <span className="fl-td-status">
-                <StatusBadge status={statusFuer(fahrt)} variant="dot" />
+                {statusFuer(fahrt) !== 'offen' && (
+                  <StatusBadge status={statusFuer(fahrt)} variant="dot" />
+                )}
               </span>
             </button>
           );
