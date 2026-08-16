@@ -1160,20 +1160,63 @@ code {
   flex: 1;
 }
 
-/* Toast-Viewport: mobil 16px über der Bottom-Nav, Desktop unten rechts */
-/* Mobil oben: unten lagen die Meldungen direkt ueber der Navigationsleiste,
-   in der PWA teils dahinter — und der Daumen verdeckte sie beim Tippen.
-   Ab 768px bleibt es unten rechts (siehe unten). */
+/* Monatsstand auf dem Handy: km und Betrag fuehrend, dahinter leise, worauf
+   sie sich beziehen. Nur mobil — im Desktop-Raster gibt es dafuer die Kachel
+   „{Monat} bisher". */
+.dash-monat-zeile {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 20px;
+}
+
+.dash-monat-wert {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dash-monat-trenner {
+  color: var(--text-3, var(--text-2));
+}
+
+.dash-monat-label {
+  margin-left: 4px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+@media (min-width: 768px) {
+  .dash-monat-zeile {
+    display: none;
+  }
+}
+
+/* Toast-Viewport: unten, über der Navigationsleiste. Desktop unten rechts.
+   Sie standen zwischenzeitlich oben, weil sie unten hinter der Leiste
+   verschwanden — deren Höhe war im Web nur geschätzt. In der App meldet die
+   Plattform sie jetzt selbst (--cap-native-tabbar-height), im Web deckt der
+   Sockel unten die Bottom-Nav. Damit ist der alte Grund weg, und die
+   Meldungen stehen wieder dort, wo die Hand ohnehin ist (Simon 16.08.). */
 .toast-viewport {
   position: fixed;
   left: 16px;
   right: 16px;
-  top: calc(12px + env(safe-area-inset-top, 0px));
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   z-index: 80;
   display: flex;
   flex-direction: column;
   gap: 8px;
   pointer-events: none;
+}
+
+/* In der App die tatsaechlich gemeldete Leistenhoehe. max() faengt den
+   Moment ab, in dem das Plugin sie als 0px meldet (offener Dialog) — sonst
+   saesse die Meldung genau dann auf der Leiste. */
+[data-platform="ios"] .toast-viewport,
+[data-platform="android"] .toast-viewport {
+  bottom: calc(max(var(--cap-native-tabbar-height, 0px), 72px) + 12px);
 }
 
 .toast-viewport .toast {
