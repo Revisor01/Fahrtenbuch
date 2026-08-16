@@ -22,10 +22,19 @@ Build 13 enthält zusätzlich (Commit `f69ae96`):
 - „Fahrt hinzufügen" ist ein hervorgehobener Eintrag der nativen Leiste
   statt eines frei schwebenden Knopfs. Im Web unverändert.
 
-**Von Simon noch nicht bewertet.** Ungeprüft blieb: die Liste mit echten
-Daten in der angemeldeten App, und der Ablauf Tap auf „+" bis zum offenen
-Erfassungs-Dialog (der Plugin-Teil ist am Simulator verifiziert, die
-Verdrahtung nur im Code).
+**Alle drei ungeprüften Punkte sind inzwischen im Simulator verifiziert**
+(angemeldet gegen die echte Instanz):
+- Fahrtenliste mit echten Daten läuft, die Anzahl stimmt mit der DB überein
+- Tap auf „+" öffnet den Erfassungs-Dialog samt Vorschlägen
+- Die Wischgeste an Dialogen **funktioniert** — im Simulator lässt sich
+  entgegen der bisherigen Annahme sehr wohl wischen (`idb ui swipe`)
+
+Dabei fielen drei Mängel auf, behoben in Commit `2ef0806`: abgeschnittene
+Orte, abgeschnittener Träger, halb verdeckte letzte Zeile. Dazu auf Simons
+Ansage der Pfeil aus allen Listen.
+
+**Noch nicht in TestFlight** — der Stand läuft nur im Simulator. Für einen
+neuen Build die Nummer auf 14 erhöhen (siehe unten).
 
 ## Was noch offen ist
 
@@ -40,8 +49,6 @@ Verdrahtung nur im Code).
 - **Symbol „Abrechnung"** in der Tab-Leiste ist ein Dokument (`doc.text`) —
   für „Beleg" gibt es kein verlässliches Systemsymbol. Simon hat es noch nicht
   bewertet.
-- **Wischgeste an Dialogen** ist gebaut, aber nie erprobt: Im Simulator lässt
-  sich nicht wischen. Schwellwerte 96px bzw. 0,5px/ms in `ui/Sheet.js`.
 
 ## Das Wichtigste für die Arbeitsweise
 
@@ -53,6 +60,25 @@ Farben pixelgenau nachgemessen wurden, war die echte Ursache da (sie lag
 außerhalb der WebView, in der Capacitor-Konfiguration).
 
 Also: **bauen, installieren, ansehen, nachmessen** — nicht raten.
+
+**Die App lässt sich im Simulator fernsteuern** (`idb`, liegt in
+`~/.local/bin`). Damit kommt man bis in die angemeldete App und durch jeden
+Ablauf — Anmelden, Tabs, Dialoge, Wischen. Das war die Lücke: vorher wurden
+Abläufe „nur im Code verdrahtet" abgehakt.
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+idb ui tap   --udid <UDID> <x> <y>          # Punkte, nicht Pixel: px/3
+idb ui swipe --udid <UDID> <x1> <y1> <x2> <y2> --duration 0.3
+idb ui text  --udid <UDID> "text"
+idb ui key   --udid <UDID> 42               # 42 = Backspace
+```
+
+Zwei Fallen dabei: Die Tastatur des Simulators liegt auf **deutschem
+Layout** — `@` und `-` kommen als `"` und `ß` an; für Anmeldungen den
+Benutzernamen statt der E-Mail nehmen. Und nach `launch` **mindestens 8–10
+Sekunden warten**, bevor der erste Tap kommt, sonst landet er im
+Startbildschirm und läuft ins Leere.
 
 ```bash
 cd frontend && npm run build && npx cap sync ios
