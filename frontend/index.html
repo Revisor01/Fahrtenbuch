@@ -12,10 +12,15 @@
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
-    <script defer data-domain="kkd-fahrtenbuch.de" src="https://plausible.godsapp.de/js/script.hash.outbound-links.pageview-props.tagged-events.js"></script>
-    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
-
     <title>Fahrtenbuch</title>
+    <!-- Grundfarbe direkt im Dokument, nicht erst im Stylesheet: Die WebView
+         zeigt das leere Dokument, sobald es geparst ist — bis das externe CSS
+         geladen war, blitzte dort zwei Sekunden lang Weiss auf, mitten im
+         Start (gemessen 16.08.). Petrol wie die native Startflaeche, damit
+         der Uebergang nicht auffaellt. -->
+    <style>
+      html, body { margin: 0; background: #0F5257; }
+    </style>
   </head>
   <body>
     <noscript>Für diese App muss JavaScript aktiviert sein.</noscript>

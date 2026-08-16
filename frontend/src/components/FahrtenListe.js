@@ -242,7 +242,6 @@ function FahrtenListe() {
                 key={fahrt.id}
                 fahrt={fahrt}
                 status={statusFuer(fahrt)}
-                traegerName={traegerNameFuer(fahrt)}
                 onOeffnen={setAktionsFahrt}
               />
             ))}

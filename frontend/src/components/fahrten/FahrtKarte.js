@@ -28,24 +28,12 @@ const datumKurz = (datum) => {
   return `${WOCHENTAGE[d.getDay()]} ${dd}.${mm}.`;
 };
 
-function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
+function FahrtKarte({ fahrt, status, onOeffnen }) {
   const ziel = fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
   const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';
-  // Anlass führt, darunter die Route, darunter Datum + Träger
   const titel = fahrt.anlass || ziel;
   const route = von ? `${von} → ${ziel}` : ziel;
   const mitfahrer = fahrt.mitfahrer || [];
-
-  // Leise Zeile: Datum · Mitfahrer. Der Traeger stand hier fruehen mit drin
-  // und wurde als Teil eines zusammengefuegten Strings gekuerzt — aus
-  // „Kirchengemeinde Wesselburen" wurde „Kirchengeme…". Er hat jetzt eine
-  // eigene Zeile (User-Feedback 16.08.).
-  const subTeile = [datumKurz(fahrt.datum)];
-  if (mitfahrer.length > 0) {
-    subTeile.push(
-      `${mitfahrer.length} Mitfahrer:in${mitfahrer.length > 1 ? 'nen' : ''}`
-    );
-  }
 
   return (
     <button
@@ -55,8 +43,14 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
       aria-label={`Fahrt ${von ? `${von} nach ` : 'nach '}${ziel}, ${datumKurz(fahrt.datum)} — Aktionen öffnen`}
       title={mitfahrer.length > 0 ? `Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}` : route}
     >
+      {/* Zwei Zeilen statt vier (Simon 16.08.): Das Datum fuehrt oben links,
+          weil es beim Durchsehen die Ordnung gibt; der Anlass steht daneben.
+          Darunter die Route einzeilig. Der Traeger ist raus — er steht in der
+          Erstattungs-Karte darueber, und im Monat hat er ohnehin fast jede
+          Fahrt gleich. Alles Weitere zeigt das Aktions-Sheet. */}
       <span className="fl-zeile-main">
-        <span className="fl-zeile-titel">
+        <span className="fl-zeile-kopf">
+          <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
           <span className="fl-zeile-anlass">{titel}</span>
           {fahrt.partner_fahrt_id && (
             <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
@@ -64,40 +58,22 @@ function FahrtKarte({ fahrt, status, traegerName, onOeffnen }) {
               <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
             </span>
           )}
-        </span>
-        {/* Von und Nach untereinander statt „A → B" in einer Zeile: Die
-            Adressen tragen Strasse und PLZ, nebeneinander blieb vom Ziel
-            nichts uebrig („Suederstrasse, 25779 Hennstedt → H…"). Zwei Zeilen
-            kosten Hoehe, zeigen dafuer beide Orte vollstaendig
-            (Simons Entscheidung 16.08.). */}
-        <span className="fl-zeile-route">
-          {von && (
-            <span className="fl-zeile-ort">
-              <span className="fl-zeile-ort-marke" aria-hidden="true">von</span>
-              <span className="fl-zeile-ort-name">{von}</span>
+          {mitfahrer.length > 0 && (
+            <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}`}>
+              <span aria-hidden="true">+{mitfahrer.length}</span>
+              <span className="sr-only">
+                {mitfahrer.length} Mitfahrer:in{mitfahrer.length > 1 ? 'nen' : ''}
+              </span>
             </span>
           )}
-          <span className="fl-zeile-ort">
-            <span className="fl-zeile-ort-marke" aria-hidden="true">nach</span>
-            <span className="fl-zeile-ort-name">{ziel}</span>
-          </span>
-        </span>
-        {traegerName && <span className="fl-zeile-traeger">{traegerName}</span>}
-        {/* Der Text braucht ein eigenes Span: Ein Flex-Container kuerzt nur
-            sich selbst, nicht eine lose Textnode darin — der Traegername lief
-            sonst unter die Kilometerspalte. */}
-        {/* „Erfasst" stand frueher an jeder Zeile und sagte nichts: Der Status
-            haengt am Traeger und Monat, nicht an der einzelnen Fahrt — die
-            Erstattungs-Karte darueber zeigt ihn ohnehin schon (Simon 16.08.).
-            Sichtbar bleibt er nur, wenn er davon abweicht: Im Zeitraum ueber
-            mehrere Monate kann eine Fahrt eingereicht und die naechste noch
-            offen sein. Dann ist er die Ausnahme und faellt auf. */}
-        <span className="fl-zeile-sub">
-          <span className="fl-zeile-sub-text">{subTeile.join(' · ')}</span>
+          {/* „Erfasst" sagte an jeder Zeile nichts — der Status haengt am
+              Traeger und Monat, nicht an der Fahrt. Sichtbar nur, wo er
+              abweicht (Zeitraum ueber mehrere Monate). */}
           {status && status !== 'offen' && (
             <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
           )}
         </span>
+        <span className="fl-zeile-route">{route}</span>
       </span>
       <span className="fl-zeile-werte">
         <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>

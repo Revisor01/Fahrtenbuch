@@ -96,6 +96,28 @@ export default defineConfig({
     // Der Dockerfile kopiert /app/build nach nginx — Vite schreibt sonst nach dist/.
     outDir: 'build',
     sourcemap: false,
+
+    rollupOptions: {
+      output: {
+        // Ein einziges 584-KB-Buendel hiess: Die WebView muss alles geladen
+        // und geparst haben, bevor das erste Pixel erscheint — auf dem Geraet
+        // mehrere Sekunden schwarz (Simon 16.08.: „schneller starten").
+        //
+        // Aufgeteilt laedt der Browser die Teile parallel und beginnt frueher
+        // zu rendern. Die Grenzen sind nach Aenderungshaeufigkeit gezogen:
+        // React aendert sich fast nie und bleibt so ueber Deploys hinweg im
+        // Cache, waehrend der App-Code neu geladen wird.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('react-dom') || /node_modules\/react\//.test(id)) {
+            return 'react';
+          }
+          if (id.includes('react-router')) return 'router';
+          if (id.includes('lucide-react') || id.includes('@heroicons')) return 'icons';
+          return 'vendor';
+        },
+      },
+    },
   },
 
   server: {

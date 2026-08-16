@@ -1,7 +1,6 @@
 import { useContext } from 'react';
 import axios from 'axios';
 import { heuteISO } from '../../utils/datum';
-import JSZip from 'jszip';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import { monateImZeitraum } from './zeitraumUtils';
@@ -273,6 +272,10 @@ export function useFahrtenExport() {
         axios.get(pdfUrl, { responseType: 'blob' }),
       ]);
 
+      // Erst hier laden statt beim Start: JSZip wird nur fuer „Beides" als
+      // ZIP gebraucht und lag sonst im Startbuendel, das die App vor dem
+      // ersten Bild komplett parsen muss (Simon 16.08.: schneller starten).
+      const { default: JSZip } = await import('jszip');
       const zip = new JSZip();
       zip.file(`${baseFilename}.xlsx`, excelRes.data);
       zip.file(`${baseFilename}.pdf`, pdfRes.data);
