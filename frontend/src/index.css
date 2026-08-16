@@ -3092,8 +3092,18 @@ code {
   color: var(--text-3, var(--text-2));
 }
 
-.fl-zeile-anlass {
+/* Traegt den flexiblen Platz, damit das ⇄ am Titel klebt statt am rechten
+   Rand zu stehen. Der Titel darin kuerzt, das Zeichen behaelt seine Groesse. */
+.fl-zeile-titel {
+  display: flex;
+  align-items: baseline;
+  /* Kein gap: .fl-paar-hinweis bringt seinen eigenen margin-left mit, sonst
+     stuende der Abstand doppelt. */
   flex: 1;
+  min-width: 0;
+}
+
+.fl-zeile-anlass {
   min-width: 0;
   font-size: 15px;
   font-weight: 600;
