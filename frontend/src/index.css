@@ -2114,7 +2114,8 @@ code {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  /* Kompakt wie .fl-zeile (Simon 16.08.) */
+  padding: 10px 16px;
 }
 
 .dash-zuletzt-row + .dash-zuletzt-row {
@@ -2131,8 +2132,28 @@ code {
   min-width: 0;
 }
 
+/* Kopf: Datum fuehrt, Anlass daneben — spiegelt .fl-zeile-kopf */
+.dash-zuletzt-kopf {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dash-zuletzt-datum {
+  flex: 0 0 auto;
+  /* Breit genug fuer „Mo 16.08." in einer Zeile — bei 52px brach der
+     Wochentag um und die Zeile wurde wieder hoch. */
+  width: 74px;
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--text-3, var(--text-2));
+}
+
 .dash-zuletzt-ziel {
-  font-size: 16px;
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
   overflow: hidden;
@@ -2140,53 +2161,12 @@ code {
   white-space: nowrap;
 }
 
-/* Route: „von" ueber „nach", gleiche Struktur wie die Fahrtenliste
-   (.fl-zeile-ort*) — beide Listen sollen sich gleich lesen. */
+/* Route einzeilig darunter — wie .fl-zeile-route */
 .dash-zuletzt-route {
   display: block;
-  font-size: 13px;
-  color: var(--text-2);
-  min-width: 0;
-}
-
-.dash-zuletzt-ort {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-}
-
-.dash-zuletzt-ort-marke {
-  flex: 0 0 auto;
-  width: 26px;
-  font-size: 11px;
-  color: var(--text-3, var(--text-2));
-}
-
-.dash-zuletzt-ort-name {
-  min-width: 0;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow-wrap: anywhere;
-}
-
-/* Traeger auf eigener Zeile — stand frueher mit dem Datum zusammen im
-   Sub-Text und wurde mit ihm gekuerzt. */
-.dash-zuletzt-traeger {
-  display: block;
   min-width: 0;
   font-size: 13px;
   color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dash-zuletzt-sub {
-  font-size: 13px;
-  color: var(--text-3, var(--text-2));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3050,9 +3030,9 @@ code {
   align-items: center;
   gap: 12px;
   width: 100%;
-  /* Rechts fruehen 32px fuer den Chevron. Der ist raus (Simon 16.08.), der
-     Platz gehoert wieder dem Text. */
-  padding: 14px 16px;
+  /* Kompakt: zwei Textzeilen statt vier, entsprechend weniger Luft
+     (Simon 16.08.). Rechts kein Chevron-Platz mehr. */
+  padding: 10px 16px;
   border: none;
   background: transparent;
   font: inherit;
@@ -3080,16 +3060,32 @@ code {
   min-width: 0;
 }
 
-/* Anlass + Paar-Hinweis in einer Zeile, damit „⇄" am Titel klebt */
-.fl-zeile-titel {
+/* Kopfzeile: Datum fuehrt, dann Anlass, dann die Zeichen (Paar, Mitfahrer,
+   abweichender Status). Das Datum steht vorn, weil es beim Durchsehen die
+   Ordnung gibt — vorher lag es in der dritten Zeile (Simon 16.08.). */
+.fl-zeile-kopf {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
+/* Feste Breite: Die Daten stehen damit ueber alle Zeilen buendig
+   untereinander — tabellarische Ziffern (.num) machen sie gleich breit. */
+.fl-zeile-datum {
+  flex: 0 0 auto;
+  /* Breit genug fuer „Mo 16.08." in einer Zeile — bei 52px brach der
+     Wochentag um und die Zeile wurde wieder hoch. */
+  width: 74px;
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--text-3, var(--text-2));
+}
+
 .fl-zeile-anlass {
-  font-size: 16px;
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
   overflow: hidden;
@@ -3097,69 +3093,21 @@ code {
   white-space: nowrap;
 }
 
-/* Route auf zwei Zeilen: „von <Ort>" ueber „nach <Ort>". Nebeneinander
-   passten die Adressen mit Strasse und PLZ nicht in die rund 200px, die der
-   Textspalte mobil bleiben. Die Marken stehen in fester Breite links, damit
-   beide Ortsnamen an derselben Kante beginnen. */
+/* Mitfahrer:innen als knappes „+2" statt ausgeschriebener Zeile */
+.fl-zeile-mf {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3, var(--text-2));
+}
+
+/* Route einzeilig unter dem Kopf. Sie darf kuerzen: Der volle Wortlaut steht
+   im Aktions-Sheet, und zwei Zeilen je Fahrt machten die Liste zu lang. */
 .fl-zeile-route {
   display: block;
-  font-size: 13px;
-  color: var(--text-2);
-  min-width: 0;
-}
-
-.fl-zeile-ort {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-}
-
-.fl-zeile-ort-marke {
-  flex: 0 0 auto;
-  width: 26px;
-  font-size: 11px;
-  color: var(--text-3, var(--text-2));
-}
-
-/* Der Ortsname traegt oft die ganze Adresse („Suederstrasse, 25779
-   Hennstedt"). Die passt in keine Zeile, und gekuerzt blieb vom Ort nichts
-   uebrig. Er bricht deshalb um, statt zu kuerzen — hoechstens zwei Zeilen,
-   damit eine einzelne Fahrt die Liste nicht sprengt. */
-.fl-zeile-ort-name {
-  min-width: 0;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow-wrap: anywhere;
-}
-
-/* Der Traeger stand fruehen im zusammengefuegten Sub-Text und wurde mit ihm
-   gekuerzt („Kirchengeme…"). Eigene Zeile, eigene Kuerzung. */
-.fl-zeile-traeger {
-  display: block;
   min-width: 0;
   font-size: 13px;
   color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Leise Zeile: Datum · Mitfahrer, rechts daneben der Statuspunkt */
-.fl-zeile-sub {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  font-size: 13px;
-  color: var(--text-3, var(--text-2));
-}
-
-/* Nur der Text kuerzt; der Statuspunkt daneben behaelt seine Groesse */
-.fl-zeile-sub-text {
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3176,9 +3124,9 @@ code {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 0;
   flex-shrink: 0;
-  min-width: 84px;
+  min-width: 76px;
 }
 
 .fl-zeile-km {
@@ -6249,7 +6197,12 @@ code {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--brand);
+  /* Fest #0F5257 statt var(--brand): Die Marke kippt im dunklen Design ins
+     Helle, die native Startflaeche darunter bleibt aber immer Petrol. Beide
+     muessen dieselbe Farbe tragen, sonst sieht man den Uebergang als
+     Farbsprung. Der Startbildschirm ist ein Markenmoment, keine
+     Themenflaeche (Simon 16.08.). */
+  background: #0F5257;
   z-index: 1;
 }
 
@@ -6263,28 +6216,51 @@ code {
   animation: startbildschirm-auf 420ms ease-out both;
 }
 
+/* Weiss fest verdrahtet, nicht var(--on-brand): Die Variable kippt im dunklen
+   Design auf dunkles Gruen — gedacht fuer die helle Markenflaeche dort. Der
+   Startbildschirm bleibt aber in beiden Designs Petrol, dunkler Text waere
+   darauf kaum lesbar. */
 .startbildschirm-logo {
   display: flex;
-  color: var(--on-brand);
+  color: #FFFFFF;
 }
 
 .startbildschirm-name {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--on-brand);
+  color: #FFFFFF;
 }
 
 .startbildschirm-text {
   font-size: 14px;
   font-weight: 500;
   /* Gedaempft, damit der Name die Hauptsache bleibt. */
-  color: color-mix(in srgb, var(--on-brand) 72%, transparent);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 @keyframes startbildschirm-auf {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: none; }
+}
+
+/* Ladeanzeige: Das Zeichen selbst dreht sich, solange gewartet wird — der
+   offene Ring mit dem Punkt zeigt die Drehung deutlich (Simon 16.08.).
+   Erst nach kurzer Verzoegerung, damit ein schneller Start ruhig bleibt und
+   die Drehung nicht bloss aufblitzt. */
+.startbildschirm-laedt svg {
+  animation: startbildschirm-dreht 1100ms linear 400ms infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes startbildschirm-dreht {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startbildschirm-laedt svg {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -672,27 +672,15 @@ function Dashboard({ onNavigate }) {
                   disabled={!!fahrt._optimistisch}
                   aria-label={`Fahrt nach ${zielName(fahrt)} — Aktionen öffnen`}
                 >
+                  {/* Gleiche Struktur wie die Fahrtenliste — Simon legt Wert
+                      darauf, dass beide Listen sich gleich lesen: Datum vorn,
+                      Anlass daneben, Route einzeilig darunter, kein Traeger. */}
                   <span className="dash-zuletzt-main">
-                    <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
-                    {/* Gleiche Struktur wie die Fahrtenliste — Simon legt Wert
-                        darauf, dass beide Listen sich gleich lesen. Orte
-                        untereinander, Traeger auf eigener Zeile. */}
-                    <span className="dash-zuletzt-route">
-                      {vonName(fahrt) && (
-                        <span className="dash-zuletzt-ort">
-                          <span className="dash-zuletzt-ort-marke" aria-hidden="true">von</span>
-                          <span className="dash-zuletzt-ort-name">{vonName(fahrt)}</span>
-                        </span>
-                      )}
-                      <span className="dash-zuletzt-ort">
-                        <span className="dash-zuletzt-ort-marke" aria-hidden="true">nach</span>
-                        <span className="dash-zuletzt-ort-name">{zielName(fahrt)}</span>
-                      </span>
+                    <span className="dash-zuletzt-kopf">
+                      <span className="dash-zuletzt-datum num">{zuletztSub(fahrt)}</span>
+                      <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
                     </span>
-                    {getTraegerName(fahrt.abrechnung) && (
-                      <span className="dash-zuletzt-traeger">{getTraegerName(fahrt.abrechnung)}</span>
-                    )}
-                    <span className="dash-zuletzt-sub">{zuletztSub(fahrt)}</span>
+                    <span className="dash-zuletzt-route">{routeText(fahrt)}</span>
                   </span>
                   <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>
                 </button>
