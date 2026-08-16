@@ -33,13 +33,13 @@ Dabei fielen drei Mängel auf, behoben in Commit `2ef0806`: abgeschnittene
 Orte, abgeschnittener Träger, halb verdeckte letzte Zeile. Dazu auf Simons
 Ansage der Pfeil aus allen Listen.
 
-**Build 14 ist in TestFlight** (16.08., Status `IN_BETA_TESTING`). Er enthält
-zusätzlich:
-- Listen kompakt: Datum vorn, Anlass daneben, Weg auf zwei Zeilen ohne
-  „von"/„nach", kein Träger. Rückfahrt-Zeichen klebt am Titel.
-- Start von 5 auf 3 Sekunden, kein weißer Bildschirm mehr
+**Build 15 ist in TestFlight** (16.08., Status `IN_BETA_TESTING`). Enthält:
+- Listen kompakt: Datum vorn, Anlass daneben, km und Betrag in derselben
+  Zeile, Weg auf zwei Zeilen ohne „von"/„nach", kein Träger.
+  Rückfahrt-Zeichen klebt am Titel — auch im Dashboard.
+- **Start 5 s → 2 s**, kein weißer Blitz, keine aufblitzende Anmeldemaske
+- Nativer Splash ist reines Petrol, danach die eigene Ladeanzeige
 - Plausible ersatzlos entfernt
-- Ladeanzeige: das Zeichen dreht sich beim Start
 
 **Von Simon noch nicht bewertet.**
 
@@ -111,6 +111,17 @@ Drei Fallstricke, die je einen Fehlversuch gekostet haben:
    `PATH="/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Xcode.app/Contents/Developer/usr/bin"`.
    Homebrew hat ein neueres `rsync`, das ein Apple-Flag nicht kennt; der Export
    bricht sonst mit „Copy failed" ab.
+4. **Profil per UUID angeben, nicht per Name.** Xcodes Apple-ID-Sitzung läuft
+   ab („Your session has expired"); dann findet der Export das Profil über
+   seinen Namen nicht mehr und bricht ab mit „requires a provisioning
+   profile". Die UUID des lokal vorliegenden Profils funktioniert ohne
+   Anmeldung — `3a6d3cd4-3301-4640-baca-360e58acdab9` für „Fahrtenbuch
+   AppStore", zu finden mit:
+   ```bash
+   for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+     security cms -D -i "$f" | plutil -extract Name raw -
+   done
+   ```
 
 Danach `xcrun altool --upload-app`, Verschlüsselungserklärung per API setzen
 (`usesNonExemptEncryption: false`), fertig. App-ID `6801855861`, Testgruppe
