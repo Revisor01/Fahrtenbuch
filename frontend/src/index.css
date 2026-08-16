@@ -3633,7 +3633,10 @@ code {
 .abr-traeger-aktionen {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 20px;
+  /* Kein Zeilenabstand: Jeder Knopf traegt schon min-height 44px als
+     Tippziel — zusaetzliche 4px rissen die Aktionen bei Umbruch weit
+     auseinander. */
+  gap: 0 20px;
 }
 
 .abr-link {
@@ -3661,8 +3664,11 @@ code {
   border-radius: 4px;
 }
 
+/* Nebenweg: gleiche Groesse, aber weder Markenfarbe noch Fettung — sonst
+   stehen Haupt- und Nebenaktion gleichrangig nebeneinander. */
 .abr-link-leise {
   color: var(--text-2);
+  font-weight: 500;
 }
 
 .abr-link-leise:hover {
