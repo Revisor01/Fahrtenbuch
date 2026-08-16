@@ -33,8 +33,15 @@ Dabei fielen drei Mängel auf, behoben in Commit `2ef0806`: abgeschnittene
 Orte, abgeschnittener Träger, halb verdeckte letzte Zeile. Dazu auf Simons
 Ansage der Pfeil aus allen Listen.
 
-**Noch nicht in TestFlight** — der Stand läuft nur im Simulator. Für einen
-neuen Build die Nummer auf 14 erhöhen (siehe unten).
+**Build 14 ist in TestFlight** (16.08., Status `IN_BETA_TESTING`). Er enthält
+zusätzlich:
+- Listen kompakt: Datum vorn, Anlass daneben, Weg auf zwei Zeilen ohne
+  „von"/„nach", kein Träger. Rückfahrt-Zeichen klebt am Titel.
+- Start von 5 auf 3 Sekunden, kein weißer Bildschirm mehr
+- Plausible ersatzlos entfernt
+- Ladeanzeige: das Zeichen dreht sich beim Start
+
+**Von Simon noch nicht bewertet.**
 
 ## Was noch offen ist
 
@@ -114,6 +121,12 @@ Danach `xcrun altool --upload-app`, Verschlüsselungserklärung per API setzen
 - **Die weißen Ränder lagen NICHT im CSS.** `contentInset: "always"` hielt die
   WebView aus den Systemrändern; dort war die native Fläche weiß. Jetzt
   `"never"` plus `backgroundColor`. Kein Stylesheet erreicht diesen Bereich.
+- **Dieselbe Falle beim Start:** Der weiße Bildschirm in Sekunde 2–3 kam aus
+  `LaunchScreen.storyboard` — die imageView trug `systemBackgroundColor`, im
+  hellen Design reines Weiß, und lag unter der Splash-Grafik. Weder CSS noch
+  `capacitor.config.json` erreichen das. Jetzt Petrol als fester Farbwert.
+  Beim Prüfen **vorher deinstallieren**: iOS hält den Launch-Screen im Cache,
+  sonst misst man den alten Stand.
 - **Fehler ohne Fehlermeldung:** Fehlte die Keychain-Berechtigung, kehrte der
   Aufruf einfach nie zurück — kein `catch` griff. Deshalb haben alle
   Speicherzugriffe jetzt eine Zeitgrenze.
