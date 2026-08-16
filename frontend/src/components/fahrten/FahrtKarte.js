@@ -72,12 +72,17 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
         </span>
         {/* Der Weg auf zwei Zeilen, ohne „von"/„nach": Der Pfeil fuehrt die
             zweite Zeile an, damit die Richtung ohne Wort klar ist und die
-            Adressen den Platz bekommen. */}
+            Adressen den Platz bekommen. Die Kilometer stehen rechts in der
+            Zielzeile — oben neben dem Anlass nahmen sie ihm die Breite, bis er
+            auf „Dienstbespr…" kuerzte (Simon 16.08.). */}
         <span className="fl-zeile-route">
           {von && <span className="fl-zeile-ort">{von}</span>}
-          <span className="fl-zeile-ort">
-            {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
-            {ziel}
+          <span className="fl-zeile-zielzeile">
+            <span className="fl-zeile-ort">
+              {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
+              {ziel}
+            </span>
+            <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
           </span>
         </span>
         {/* Leise Fusszeile — nur wenn es etwas zu sagen gibt. „Erfasst" steht
@@ -100,19 +105,17 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
           </span>
         )}
       </span>
-      {/* Zahlen als eigene Spalte rechts: Kilometer oben, Betrag darunter.
-          So stehen sie ueber alle Karten hinweg untereinander und lassen sich
-          vergleichen, ohne dem Anlass die Breite zu nehmen. */}
+      {/* Der Betrag rechts oben, auf Hoehe des Anlasses — die Zahl, auf die es
+          bei einer Abrechnung ankommt. Die Mitfahrer-Erstattung steht darunter
+          statt daneben: nebeneinander lasen sich beide wie eine Zahl
+          (Simon 16.08.). */}
       <span className="fl-zeile-werte">
-        <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
-        <span className="fl-zeile-betrag num">
-          {formatBetrag(fahrt.erstattung)} €
-          {fahrt.mitfahrerErstattung > 0 && (
-            <span className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
-              +{formatBetrag(fahrt.mitfahrerErstattung)} €
-            </span>
-          )}
-        </span>
+        <span className="fl-zeile-betrag num">{formatBetrag(fahrt.erstattung)} €</span>
+        {fahrt.mitfahrerErstattung > 0 && (
+          <span className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
+            +{formatBetrag(fahrt.mitfahrerErstattung)} €
+          </span>
+        )}
       </span>
     </button>
   );
