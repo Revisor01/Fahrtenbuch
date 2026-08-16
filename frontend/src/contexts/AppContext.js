@@ -174,10 +174,22 @@ function AppProvider({ children }) {
     // Geraet gesperrt ist oder das Plugin nicht laedt —, stuende die App
     // sonst dauerhaft im Ladezustand und man kaeme nie zur Anmeldung.
     // Lieber ohne gespeicherte Anmeldung weiter als gar nicht.
+    // Sie darf erst greifen, wenn der Speicher seine eigenen Zeitgrenzen
+    // ausgeschoepft hat (3 Zugriffe à 800ms = 2400ms), sonst feuert sie in
+    // einen Start hinein, der gleich mit gueltigem Token zurueckkehrt: Die
+    // Anmeldemaske erschien dann kurz und wurde sofort vom Dashboard
+    // abgeloest — sichtbar als Blitzen (Simon 16.08.). Grosszuegiger Abstand
+    // darauf; wer wirklich keinen Speicher hat, wartet lieber einen Moment
+    // laenger als jemand angemeldetes die Maske zu sehen bekommt.
+    let speicherHatGeantwortet = false;
     const notbremse = setTimeout(() => {
+      // Nicht hineinfeuern, wenn der Speicher gerade zurueckkehrt: Sonst
+      // stuende einen Moment „geladen, nicht angemeldet" — die Anmeldemaske
+      // erschien kurz und wurde sofort vom Dashboard abgeloest.
+      if (speicherHatGeantwortet) return;
       console.error('Anmeldedaten nicht rechtzeitig lesbar — weiter zur Anmeldung.');
       setAnmeldungGeladen(true);
-    }, 2500);
+    }, 4000);
 
     (async () => {
       try {
@@ -187,6 +199,9 @@ function AppProvider({ children }) {
 
       const gespeicherterToken = await leseWert(SCHLUESSEL_TOKEN);
       const gespeicherterUser = await leseWert(SCHLUESSEL_USER);
+      // Ab hier steht die Antwort fest — die Notbremse darf nicht mehr
+      // dazwischenfunken.
+      speicherHatGeantwortet = true;
 
       let userDaten = null;
       // Ein korrupter Eintrag darf den App-Start nicht verhindern: die

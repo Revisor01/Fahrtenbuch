@@ -78,6 +78,20 @@ function FahrtKarte({ fahrt, status, onOeffnen }) {
           {status && status !== 'offen' && (
             <StatusBadge status={status} variant="dot" className="fl-zeile-status" />
           )}
+          {/* Kilometer und Betrag in der Titelzeile, nicht rechts ueber beide
+              Zeilen (Simon 16.08.): So steht die Summe jeder Fahrt immer oben
+              auf gleicher Hoehe, statt je nach Zeilenhoehe zu wandern. */}
+          <span className="fl-zeile-werte">
+            <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
+            <span className="fl-zeile-betrag num">
+              {formatBetrag(fahrt.erstattung)} €
+              {fahrt.mitfahrerErstattung > 0 && (
+                <span className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
+                  +{formatBetrag(fahrt.mitfahrerErstattung)} €
+                </span>
+              )}
+            </span>
+          </span>
         </span>
         {/* Zwei Zeilen fuer den Weg, aber ohne „von"/„nach" (Simon 16.08.):
             Einzeilig blieb vom Ziel nur ein Stummel, und die Marken kosteten
@@ -89,17 +103,6 @@ function FahrtKarte({ fahrt, status, onOeffnen }) {
             {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
             {ziel}
           </span>
-        </span>
-      </span>
-      <span className="fl-zeile-werte">
-        <span className="fl-zeile-km num">{rundeKilometer(fahrt.kilometer)} km</span>
-        <span className="fl-zeile-betrag num">
-          {formatBetrag(fahrt.erstattung)} €
-          {fahrt.mitfahrerErstattung > 0 && (
-            <span className="fl-mf-betrag num" title="Mitfahrer-Erstattung">
-              +{formatBetrag(fahrt.mitfahrerErstattung)} €
-            </span>
-          )}
         </span>
       </span>
     </button>

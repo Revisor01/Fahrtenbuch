@@ -679,7 +679,20 @@ function Dashboard({ onNavigate }) {
                   <span className="dash-zuletzt-main">
                     <span className="dash-zuletzt-kopf">
                       <span className="dash-zuletzt-datum num">{zuletztSub(fahrt)}</span>
-                      <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
+                      {/* Wie in der Fahrtenliste: Titel und Rueckfahrt-Zeichen
+                          in einer Huelle, damit ⇄ am Titel klebt. Fehlte hier
+                          bisher ganz (Simon 16.08.). */}
+                      <span className="dash-zuletzt-titel">
+                        <span className="dash-zuletzt-ziel">{fahrt.anlass || zielName(fahrt)}</span>
+                        {fahrt.partner_fahrt_id && (
+                          <span className="fl-paar-hinweis" title="Gehört zu einer Hin- und Rückfahrt">
+                            <span aria-hidden="true">⇄</span>
+                            <span className="sr-only">Teil einer Hin- und Rückfahrt</span>
+                          </span>
+                        )}
+                      </span>
+                      {/* km in der Titelzeile, wie in der Fahrtenliste */}
+                      <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>
                     </span>
                     <span className="dash-zuletzt-route">
                       {vonName(fahrt) && <span className="dash-zuletzt-ort">{vonName(fahrt)}</span>}
@@ -689,7 +702,6 @@ function Dashboard({ onNavigate }) {
                       </span>
                     </span>
                   </span>
-                  <span className="dash-zuletzt-km num">{formatKm(fahrt.kilometer)} km</span>
                 </button>
               ))
             )}
