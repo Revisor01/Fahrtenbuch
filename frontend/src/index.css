@@ -3254,23 +3254,32 @@ code {
   align-items: flex-end;
   gap: 2px;
   flex-shrink: 0;
-  min-width: 72px;
+  /* Keine Mindestbreite: Sie kostete den Anlass die letzten Pixel, obwohl
+     „6,90 €" schmaler ist. Buendig stehen die Betraege ueber die Karten
+     hinweg trotzdem, weil sie rechtsbuendig an derselben Kante enden. */
   align-self: flex-start;
 }
 
-/* Kilometer leise oben, Betrag kraeftig darunter: Der Betrag ist die Zahl,
-   auf die es bei einer Abrechnung ankommt — er trug bis 16.08. das schwaechere
-   Gewicht der beiden. */
+/* Kilometer rechts in der Zielzeile — leise, weil der Betrag oben die Zahl
+   traegt, auf die es bei einer Abrechnung ankommt. */
 .fl-zeile-km {
+  flex-shrink: 0;
+  margin-left: 12px;
   font-size: 13px;
   color: var(--text-2);
   white-space: nowrap;
 }
 
-.fl-zeile-betrag {
+/* Ziel links, Kilometer rechts in einer Zeile. Das Ziel kuerzt, die Zahl
+   behaelt ihren Platz. */
+.fl-zeile-zielzeile {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.fl-zeile-betrag {
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
