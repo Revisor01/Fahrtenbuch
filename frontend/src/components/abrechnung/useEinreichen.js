@@ -95,6 +95,34 @@ export function useEinreichen() {
     }
   };
 
+  // Erfasst → Eingereicht OHNE Export. „Einreichen" oben koppelt den
+  // Statuswechsel bewusst an einen Export — wer die Abrechnung schon auf
+  // anderem Weg abgegeben hat, braucht sie aber nicht noch einmal
+  // herunterzuladen. Diesen Weg gab es bis 16.08. nur in der Erstattungs-Karte
+  // des Fahrten-Tabs; mit ihrem Wegfall gehoert er hierher (Simon 16.08.).
+  const alsEingereichtMarkieren = async (month, kategorie) => {
+    const [jahr, monat] = jahrMonat(month);
+    try {
+      await updateAbrechnungsStatus(jahr, monat, kategorie.key, 'eingereicht', heute(), true, false);
+      await refresh();
+      toast.success(`${kategorie.name} als eingereicht markiert.`, {
+        undo: async () => {
+          try {
+            await updateAbrechnungsStatus(jahr, monat, kategorie.key, 'reset', null, true, false);
+            await refresh();
+            toast.success('Rückgängig gemacht.');
+          } catch (error) {
+            console.error('Fehler beim Zurücknehmen:', error);
+            toast.error('Status konnte nicht zurückgesetzt werden.');
+          }
+        },
+      });
+    } catch (error) {
+      console.error('Fehler beim Markieren als eingereicht:', error);
+      toast.error('Status konnte nicht aktualisiert werden.');
+    }
+  };
+
   // Eingereicht → Erstattet (heute). Undo stellt „Eingereicht" mit dem
   // alten Datum wieder her (erhalten_am lässt sich nur per Reset löschen).
   const alsErstattetMarkieren = async (month, kategorie) => {
@@ -191,6 +219,7 @@ export function useEinreichen() {
     formatFrage,
     einreichenBestaetigen,
     formatFrageSchliessen: () => setFormatFrage(null),
+    alsEingereichtMarkieren,
     alsErstattetMarkieren,
     zuruecksetzen,
     datumAendern,

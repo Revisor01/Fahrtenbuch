@@ -8,12 +8,11 @@ import AktionsSheet from './ui/AktionsSheet';
 import EmptyState from './ui/EmptyState';
 import FahrtForm from '../FahrtForm';
 import ZeitraumSegmente from './fahrten/ZeitraumSegmente';
-import StatusUebersicht from './fahrten/StatusUebersicht';
 import FahrtKarte from './fahrten/FahrtKarte';
 import FahrtenTabelle from './fahrten/FahrtenTabelle';
 import ExportSheet from './fahrten/ExportSheet';
 import { statusFromAbrechnung } from '../utils/statusLabels';
-import { formatBetrag, rundeKilometer } from './fahrten/zeitraumUtils';
+import { formatBetrag, rundeKilometer, kategorienMitErstattung } from './fahrten/zeitraumUtils';
 
 // Fahrtenliste (Phase R5, Design-Spec Screen 3):
 // Titel + Segmented Control (aktueller Monat / Vormonat / Zeitraum) +
@@ -58,6 +57,14 @@ function FahrtenListe() {
   const kmGesamt = useMemo(
     () => rundeKilometer(fahrten.reduce((sum, f) => sum + (parseFloat(f.kilometer) || 0), 0)),
     [fahrten]
+  );
+
+  // Wie viele Traeger im Zeitraum tatsaechlich etwas bekommen — nicht wie
+  // viele konfiguriert sind. „Mitfahrer:innen" zaehlt als eigener Posten mit,
+  // weil er auch als eigene Erstattung ausgezahlt wird.
+  const traegerAnzahl = useMemo(
+    () => kategorienMitErstattung(summary, abrechnungstraeger).length,
+    [summary, abrechnungstraeger]
   );
 
   // Status je Fahrt: Monatsstatus ihres Trägers (im Zeitraum-Modus liegt
@@ -205,6 +212,11 @@ function FahrtenListe() {
 
       <ZeitraumSegmente />
 
+      {/* Der Fahrten-Tab zeigt nur noch, was dieser Zeitraum enthaelt:
+          Anzahl, Kilometer, Traeger, Summe. Die Erstattungs-Karte mit Status
+          je Traeger stand hier und im Abrechnungs-Tab — doppelt und damit
+          unklar, wofuer welcher Tab da ist. Sie gehoert zur Abrechnung
+          (Simons Entscheidung 16.08.). */}
       <div className="fl-summe">
         <span className="fl-summe-wert num">{kmGesamt} km</span>
         <span className="fl-summe-punkt" aria-hidden="true">·</span>
@@ -217,8 +229,12 @@ function FahrtenListe() {
           Export
         </button>
       </div>
-
-      <StatusUebersicht />
+      <div className="fl-summe-sub">
+        {sortierteFahrten.length} {sortierteFahrten.length === 1 ? 'Fahrt' : 'Fahrten'}
+        {traegerAnzahl > 0 && (
+          <> · {traegerAnzahl} {traegerAnzahl === 1 ? 'Träger' : 'Träger'}</>
+        )}
+      </div>
 
       {sortierteFahrten.length === 0 ? (
         <EmptyState

@@ -2859,7 +2859,16 @@ code {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  margin-bottom: 2px;
+}
+
+/* Was der Zeitraum enthaelt — leise unter den Summen. Der Fahrten-Tab
+   beantwortet damit „was steht hier drin", die Abrechnung „was ist damit
+   zu tun" (Simon 16.08.). */
+.fl-summe-sub {
   margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-2);
 }
 
 .fl-summe-wert {
