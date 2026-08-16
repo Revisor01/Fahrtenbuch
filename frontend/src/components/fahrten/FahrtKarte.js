@@ -38,6 +38,7 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
   const titel = fahrt.anlass || ziel;
   const route = von ? `${von} → ${ziel}` : ziel;
   const mitfahrer = fahrt.mitfahrer || [];
+  const mitfahrerNamen = mitfahrer.map((m) => m.name).join(', ');
 
   return (
     <button
@@ -46,7 +47,7 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
       onClick={() => onOeffnen(fahrt)}
       disabled={gesperrt}
       aria-label={`Fahrt ${von ? `${von} nach ` : 'nach '}${ziel}, ${datumKurz(fahrt.datum)} — Aktionen öffnen`}
-      title={mitfahrer.length > 0 ? `Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}` : route}
+      title={mitfahrer.length > 0 ? `Mitfahrer:innen: ${mitfahrerNamen}` : route}
     >
       {/* Links der Text in drei Zeilen — Anlass, Weg, Datum —, rechts die
           Zahlen. Jede Zeile hat die volle Breite fuer sich; alles in einer
@@ -59,11 +60,15 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
             sie genau den Platz, den lange Anlaesse brauchen. */}
         <span className="fl-zeile-kopf">
           <span className="fl-zeile-datum num">{datumKurz(fahrt.datum)}</span>
+          {/* Die Namen statt nur „+2": Seit das Datum eine eigene Zeile hat,
+              ist der Platz da — und wer mitfuhr, ist die eigentliche Angabe
+              (Simon 16.08.). Bei vielen Namen kuerzt die Zeile, der
+              vollstaendige Stand steht im Titel und im Aktions-Sheet. */}
           {mitfahrer.length > 0 && (
-            <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrer.map((m) => m.name).join(', ')}`}>
-              <span aria-hidden="true">+{mitfahrer.length}</span>
+            <span className="fl-zeile-mf" title={`Mitfahrer:innen: ${mitfahrerNamen}`}>
+              <span aria-hidden="true">mit {mitfahrerNamen}</span>
               <span className="sr-only">
-                {mitfahrer.length} Mitfahrer:in{mitfahrer.length > 1 ? 'nen' : ''}
+                Mit {mitfahrerNamen}
               </span>
             </span>
           )}
@@ -83,12 +88,17 @@ function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
             </span>
           )}
         </span>
+        {/* Der Weg einzeilig: „Hennstedt → Wesselburen" braucht 160 von 256px,
+            zwei Zeilen waren dafuer Verschwendung (Simon 16.08.). Nur volle
+            Adressen kuerzen — dort steht das Wesentliche vorn. */}
         <span className="fl-zeile-route">
-          {von && <span className="fl-zeile-ort">{von}</span>}
-          <span className="fl-zeile-ort">
-            {von && <span className="fl-zeile-pfeil" aria-hidden="true">→</span>}
-            {ziel}
-          </span>
+          {von && (
+            <>
+              {von}
+              <span className="fl-zeile-pfeil" aria-hidden="true"> → </span>
+            </>
+          )}
+          {ziel}
         </span>
       </span>
 

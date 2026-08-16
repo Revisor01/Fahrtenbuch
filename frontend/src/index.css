@@ -3193,32 +3193,29 @@ code {
   white-space: nowrap;
 }
 
-/* Mitfahrer:innen als knappes „+2" statt ausgeschriebener Zeile */
+/* Mitfahrer:innen mit Namen statt als blosse Zahl. Sie duerfen kuerzen —
+   die Datumszeile darf daran nicht wachsen. */
 .fl-zeile-mf {
-  flex: 0 0 auto;
+  min-width: 0;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-3, var(--text-2));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Route auf zwei Zeilen unter dem Kopf — Start oben, Ziel darunter. Ohne
    „von"/„nach": Der Pfeil vor der zweiten Zeile zeigt die Richtung, und die
    26px der Marken gehoeren den Adressen (Simon 16.08.). */
-/* Ueber die volle Breite, buendig mit dem linken Kartenrand — nicht unter den
-   Anlass eingerueckt. Die Einrueckung verschenkte 70px, die den Adressen
-   fehlten (Simon 16.08.). */
+/* Der Weg in einer Zeile: „Hennstedt → Wesselburen" braucht 160 von 256px,
+   zwei Zeilen waren dafuer Verschwendung (Simon 16.08.). Nur volle Adressen
+   kuerzen mit „…" — dort steht das Wesentliche vorn. */
 .fl-zeile-route {
   display: block;
   min-width: 0;
   font-size: 13px;
   color: var(--text-2);
-}
-
-/* Jede Zeile kuerzt fuer sich, statt dass eine lange Adresse die andere
-   verdraengt. */
-.fl-zeile-ort {
-  display: block;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
