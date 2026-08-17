@@ -156,26 +156,20 @@ ausrollen() {
     " || abbruch "Images ziehen fehlgeschlagen"
   fi
 
-  # --force-recreate ist hier keine Vorsicht, sondern noetig: Compose v1 meldete
-  # bei einem frisch gebauten Image „is up-to-date" und liess die Container mit
-  # dem alten Stand weiterlaufen (beobachtet 17.08.2026 auf der Testinstanz —
-  # Image von 07:22, Container von 05:23). Der Deploy haette Erfolg gemeldet,
-  # ohne etwas auszurollen.
+  # --force-recreate ist hier keine Vorsicht, sondern noetig: Compose meldete
+  # bei einem frisch gebauten Image sonst „is up-to-date" und liess die
+  # Container mit dem alten Stand weiterlaufen (beobachtet 17.08.2026 auf der
+  # Testinstanz — Image von 07:22, Container von 05:23). Der Deploy haette
+  # Erfolg gemeldet, ohne etwas auszurollen.
+  #
+  # Beide Server fahren seit 17.08.2026 Compose v2; der frueher noetige
+  # Sonderweg fuer das alte Python-Compose (down/up statt up -d, wegen
+  # „KeyError: ContainerConfig") ist damit entfallen.
   schritt "Container neu erstellen"
   fern "$HOST" "
     set -e
     cd $PFAD
-    # Compose v1 (Testinstanz) wirft bei --force-recreate auf frisch gebauten
-    # Images 'KeyError: ContainerConfig' — eine bekannte Macke. Dort erst
-    # herunterfahren, dann hochfahren; die Datenbank haengt an einem Volume und
-    # ueberlebt das. Compose v5 (Produktion) kann --force-recreate direkt und
-    # bleibt damit ohne Ausfallfenster.
-    if [ \"$COMPOSE_BEFEHL\" = 'docker-compose' ]; then
-      $COMPOSE_BEFEHL -f $COMPOSE_DATEI down 2>&1 | tail -3
-      $COMPOSE_BEFEHL -f $COMPOSE_DATEI up -d 2>&1 | tail -4
-    else
-      $COMPOSE_BEFEHL -f $COMPOSE_DATEI up -d --force-recreate 2>&1 | tail -6
-    fi
+    $COMPOSE_BEFEHL -f $COMPOSE_DATEI up -d --force-recreate 2>&1 | tail -6
   " || abbruch "Neustart fehlgeschlagen"
 
   # Warten, bis die Instanz antwortet. Ohne diese Pruefung meldet ein Deploy
