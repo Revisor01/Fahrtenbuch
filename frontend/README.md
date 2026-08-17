@@ -42,13 +42,23 @@ kann deshalb nicht zur Laufzeit aus `config.js` kommen — sie muss **beim Bauen
 im Bundle stehen.
 
 - Variable: `VITE_INSTANZ_VERZEICHNIS`
-- Default: `https://kkd-fahrtenbuch.de`
+- Default: `https://verzeichnis.kkd-fahrtenbuch.de`
 - Abgefragt wird `<VITE_INSTANZ_VERZEICHNIS>/api/instanzen` (ohne Anmeldung)
 
-Die Liste selbst pflegt das Backend ueber `INSTANZEN` — ein neuer Kirchenkreis
-braucht also kein App-Update, nur einen Eintrag dort. Ist das Verzeichnis nicht
-erreichbar, faellt die App auf eine im Bundle hinterlegte Liste zurueck
-(`src/api/instanzen.js`), damit die Auswahl auch ohne Netz bedienbar bleibt.
+Das Verzeichnis ist seit 18.08.2026 eine **statische Datei hinter Caddy**
+(`/opt/verzeichnis/instanzen.json` auf dem KKD-Server), kein Backend-Endpunkt.
+Vorher zeigte die Adresse auf `kkd-fahrtenbuch.de` — also auf die Instanz eines
+einzelnen Kirchenkreises. War deren Backend aus, fand die App gar keinen
+Kirchenkreis mehr, auch nicht die anderen.
+
+Ein neuer Kirchenkreis braucht kein App-Update, nur einen Eintrag in dieser
+Datei. Ist das Verzeichnis nicht erreichbar, faellt die App auf eine im Bundle
+hinterlegte Liste zurueck (`src/api/instanzen.js`), damit die Auswahl auch ohne
+Netz bedienbar bleibt.
+
+Der Endpunkt `/api/instanzen` der Backends (Variable `INSTANZEN`) existiert
+weiter und liefert dieselbe Struktur — er wird von der App aber nicht mehr
+gefragt.
 
 Die Auswahl greift ausschliesslich in der nativen App. Im Web bleibt es beim
 bisherigen Verhalten: relative Pfade gegen den eigenen Host, keine Auswahl.

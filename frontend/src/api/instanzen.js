@@ -5,8 +5,18 @@
 // holen. Die Adresse des Verzeichnisses muss deshalb fest im Bundle stehen.
 // Sie ist ueber VITE_INSTANZ_VERZEICHNIS beim Bauen setzbar (siehe README),
 // damit ein anderer Traeger sein eigenes Verzeichnis hinterlegen kann.
+//
+// Eigene Subdomain mit statischer Datei, kein Backend (seit 18.08.2026): Bis
+// dahin zeigte die Adresse auf kkd-fahrtenbuch.de, also auf die Instanz eines
+// einzelnen Kirchenkreises. War dessen Backend aus, fand die App gar keinen
+// Kirchenkreis mehr — auch nicht die anderen. Fuer eine Liste von 110 Byte
+// muss keine Anwendung laufen.
+//
+// Ein spaeterer Wechsel dieser Adresse braucht ein App-Update, weil sie im
+// Bundle liegt. Deshalb bewusst neutral gewaehlt und nicht an eine Instanz
+// gebunden.
 const VERZEICHNIS_URL = (
-  import.meta.env.VITE_INSTANZ_VERZEICHNIS || 'https://kkd-fahrtenbuch.de'
+  import.meta.env.VITE_INSTANZ_VERZEICHNIS || 'https://verzeichnis.kkd-fahrtenbuch.de'
 ).replace(/\/+$/, '');
 
 // Notfall-Liste, falls das Verzeichnis nicht erreichbar ist (kein Netz beim
