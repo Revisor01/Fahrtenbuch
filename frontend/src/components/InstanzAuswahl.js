@@ -89,11 +89,11 @@ function InstanzAuswahl({ onGewaehlt, aktuelleUrl }) {
                       <span className="set-option-icon" aria-hidden="true">
                         <Building2 size={19} />
                       </span>
+                      {/* Nur der Name des Kirchenkreises — die Adresse des
+                          Servers stand darunter und sagt niemandem etwas, der
+                          seinen Kirchenkreis waehlen will (Simon 17.08.). */}
                       <span className="set-option-main">
                         <span className="set-option-titel">{instanz.name}</span>
-                        <span className="set-option-text" style={{ display: 'block' }}>
-                          {instanz.apiUrl.replace(/^https?:\/\//, '')}
-                        </span>
                       </span>
                       <span className="set-option-radio" aria-hidden="true">
                         {aktiv && <span className="set-option-radio-dot" />}

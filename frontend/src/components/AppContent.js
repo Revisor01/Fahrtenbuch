@@ -18,6 +18,7 @@ import { aktuellerMonat } from '../utils/datum';
 import { PLATTFORM, IST_NATIVE } from '../utils/plattform';
 import { auswahlHaptik } from '../utils/haptik';
 import { setzeSystemflaeche } from '../utils/systemflaeche';
+import { tastaturBeobachten } from '../utils/tastatur';
 import NativeNav from './NativeNav';
 import useZurueckButton from './useZurueckButton';
 import { getApiBaseUrl, setApiBaseUrl } from '../api/client';
@@ -173,6 +174,10 @@ function AppContent() {
     onNavigate: handleNavigate,
   });
 
+  // Tastaturhoehe als CSS-Variable bereitstellen: Sheets richten ihre Hoehe
+  // daran aus, sonst liegen ihre Eingabefelder unter der Tastatur.
+  useEffect(() => tastaturBeobachten(), []);
+
   // Kurzbefehle (langes Tippen auf das App-Symbol).
   //
   // Der Effekt haengt an `isLoggedIn`: Ohne Anmeldung gibt es keinen
@@ -219,19 +224,14 @@ function AppContent() {
       erfassung.open();
     };
 
-    let abgebrochen = false;
     const abmelden = aufKurzbefehlHoeren(ausfuehren);
 
-    // Beim Kaltstart wartet der Typ nativ gepuffert — der Listener oben kann
-    // ihn nicht mehr gesehen haben.
-    offenenKurzbefehlAbholen().then((typ) => {
-      if (!abgebrochen && typ) ausfuehren(typ);
-    });
+    // Beim Kaltstart hat die native Seite den Typ hinterlegt, bevor dieser
+    // Listener stand — der Wert liegt dann bereit und wird hier abgeholt.
+    const offener = offenenKurzbefehlAbholen();
+    if (offener) ausfuehren(offener);
 
-    return () => {
-      abgebrochen = true;
-      abmelden();
-    };
+    return abmelden;
   }, [isLoggedIn, erfassung]);
 
   // Welche Flaeche traegt der gerade sichtbare Bildschirm? Startbildschirm,

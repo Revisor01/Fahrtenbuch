@@ -279,6 +279,19 @@ function MonthlyOverview() {
       >
         {aktionen.formatFrage && (
           <div className="fav-frage">
+            {/* Welcher Traeger eingereicht wird, stand nirgends — der Titel
+                nannte nur den Monat, und bei mehreren Traegern war nicht zu
+                erkennen, welche Abrechnung gerade gemeint ist (Simon 17.08.). */}
+            <p className="fav-frage-text">
+              {(() => {
+                const offene = (aktionen.formatFrage.kategorien || [])
+                  .filter((k) => k.status === 'offen');
+                if (offene.length === 0) return null;
+                return offene.length === 1
+                  ? `Abrechnung für ${offene[0].name}.`
+                  : `Abrechnung für ${offene.length} Träger: ${offene.map((k) => k.name).join(', ')}.`;
+              })()}
+            </p>
             <p className="fav-frage-text">
               Beim Einreichen wird die Abrechnung heruntergeladen — in welchem Format?
             </p>

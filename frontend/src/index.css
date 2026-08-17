@@ -933,7 +933,11 @@ code {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: calc(100dvh - 48px);
+  /* --tastatur kommt aus utils/tastatur.js (App) und ist im Browser 0px:
+     iOS meldet in der WebView weiter die volle Viewport-Hoehe, waehrend die
+     Tastatur davor liegt — die Eingabefelder rutschten darunter
+     (Simon 17.08.). */
+  max-height: calc(100dvh - 48px - var(--tastatur, 0px));
   /* Nicht nur max-height: iOS meldet in der WebView zeitweise groessere
      Viewport-Hoehen, waehrend das native Tastatur- oder Datumsrad schon Platz
      wegnimmt. min-height 0 laesst die Spalte in jedem Fall schrumpfen. */
@@ -941,6 +945,8 @@ code {
   overflow: hidden;
   background-color: var(--surface);
   border-radius: 28px 28px 0 0;
+  /* Bei offener Tastatur traegt sie den unteren Rand — der Sicherheitsabstand
+     des Geraets liegt dann ohnehin hinter ihr. */
   padding: 12px 20px calc(32px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -8px 40px -12px rgba(8, 32, 31, 0.4);
   animation: sheet-in 300ms ease;
@@ -1027,7 +1033,11 @@ code {
     max-width: 480px;
     /* Der Rand des Roots (24px oben und unten) geht ab, sonst stoesst das
        Panel auf hohen Formularen unten an. */
-    max-height: calc(100dvh - 48px);
+    /* --tastatur kommt aus utils/tastatur.js (App) und ist im Browser 0px:
+     iOS meldet in der WebView weiter die volle Viewport-Hoehe, waehrend die
+     Tastatur davor liegt — die Eingabefelder rutschten darunter
+     (Simon 17.08.). */
+  max-height: calc(100dvh - 48px - var(--tastatur, 0px));
     border-radius: var(--r-card);
     padding: 24px;
     box-shadow: var(--shadow);

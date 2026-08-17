@@ -7,26 +7,39 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
+        let bridgeController = CAPBridgeViewController()
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        window?.rootViewController = bridgeController
         window?.makeKeyAndVisible()
 
-        // Kaltstart ueber einen Kurzbefehl: Der Typ wird nur gepuffert, nicht
-        // gesendet — die WebView existiert hier erst seit einem Augenblick und
-        // hoert noch nicht zu. Die JS-Seite holt ihn ab, sobald sie bereit ist.
+        // Kaltstart ueber einen Kurzbefehl: Der Typ wird gepuffert, die WebView
+        // hat hier noch keinen Inhalt. Gesendet wird, sobald sie steht.
         if let kurzbefehl = connectionOptions.shortcutItem {
-            KurzbefehlePlugin.melde(kurzbefehl.type)
+            Kurzbefehle.melde(kurzbefehl.type)
+        }
+
+        // Die WebView entsteht erst mit der View des Controllers — `loadView`
+        // anstossen, sonst ist `webView` hier noch nil.
+        bridgeController.loadViewIfNeeded()
+        Kurzbefehle.verbinde(bridgeController.webView)
+
+        // Beim Kaltstart braucht die React-Seite nach dem Laden einen Moment,
+        // bis ihr Listener steht. Ein zweiter Versuch nach kurzer Zeit kostet
+        // nichts und deckt genau dieses Fenster ab; der Wert wird nur einmal
+        // zugestellt.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            Kurzbefehle.erneutVersuchen()
         }
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
     }
 
-    // Die App lief bereits (Vorder- oder Hintergrund) — hier greift der
-    // Listener direkt.
+    // Die App lief bereits (Vorder- oder Hintergrund) — die WebView steht, das
+    // Ereignis geht sofort raus.
     func windowScene(_ windowScene: UIWindowScene,
                      performActionFor shortcutItem: UIApplicationShortcutItem,
                      completionHandler: @escaping (Bool) -> Void) {
-        KurzbefehlePlugin.melde(shortcutItem.type)
+        Kurzbefehle.melde(shortcutItem.type)
         completionHandler(true)
     }
 
