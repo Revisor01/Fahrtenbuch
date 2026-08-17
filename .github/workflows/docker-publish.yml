@@ -68,6 +68,17 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to Portainer
+      # Kein automatischer Deploy mehr an dieser Stelle: Hier stand ein Aufruf
+      # eines Portainer-Webhooks, aber auf dem Zielserver laeuft kein
+      # Portainer. Der Aufruf lief ohne Fehler ins Leere — die CI meldete
+      # Erfolg, waehrend auf dem Server tagealte Images liefen.
+      #
+      # Ausgerollt wird jetzt bewusst von Hand, in dieser Reihenfolge:
+      #   ./deploy/deploy.sh test           immer zuerst
+      #   ./deploy/deploy.sh dithmarschen   Referenzinstanz
+      #   ./deploy/deploy.sh alle           uebrige Kirchenkreise
+      # Das Skript sichert vorher die Datenbank und prueft hinterher, ob der
+      # neue Stand wirklich laeuft.
+      - name: Hinweis zum Ausrollen
         if: github.event_name != 'pull_request'
-        run: curl -s -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
+        run: echo "Images gebaut. Ausrollen mit ./deploy/deploy.sh <instanz>"
