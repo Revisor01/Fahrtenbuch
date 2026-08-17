@@ -9,6 +9,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ### Hinzugefügt
 - Langes Tippen auf das App-Symbol bietet „Fahrt erfassen" und „Letzte Fahrt wiederholen" an — beide öffnen die Erfassung direkt, ohne den Umweg über die Startseite
+- Ein Tipp auf einen Balken im Kilometer-Diagramm zeigt die Werte des Monats: Kilometer, Anzahl der Fahrten, Erstattung und Status. Am Rechner genügt weiterhin der Mauszeiger
 - Das Fahrtenbuch lässt sich als App auf Startbildschirm oder Desktop installieren und startet dann ohne Browser-Leiste
 - Beim ersten Start der App lässt sich der eigene Kirchenkreis aus einer Liste wählen; die Anmeldung läuft danach gegen dessen Fahrtenbuch. Kommt ein Kirchenkreis dazu, erscheint er ohne App-Update
 - Bei einer neuen Version erscheint ein Hinweis mit „Neu laden" — der Wechsel passiert erst nach Bestätigung, laufende Eingaben gehen nicht verloren
@@ -23,6 +24,10 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ### Geändert
 - Die Übersicht über der Fahrtenliste zeigt jetzt Anzahl der Fahrten, Kilometer und Erstattung nebeneinander und darunter jeden Abrechnungsträger mit seiner Summe. Damit steht der ganze Monat auf einen Blick da, ohne in die Abrechnung zu wechseln
+- Jede Fahrt steht jetzt in einer eigenen Karte: oben das Datum, darunter der Anlass und der Weg in einer Zeile, rechts Erstattung und Kilometer. Lange Anlässe werden nicht mehr abgeschnitten
+- Statt „+1" stehen bei einer Fahrt jetzt die Namen der Mitfahrer:innen
+- Startseite und Fahrtenliste zeigen die Fahrten in derselben Darstellung
+- Die Farben im Kilometer-Diagramm entsprechen jetzt denen der Abrechnung — erfasst, eingereicht und erstattet sehen überall gleich aus
 - In der App liegt die Anmeldung jetzt im gesicherten Bereich des Geräts statt im Browserspeicher, geschützt durch die Bildschirmsperre. Wer bereits angemeldet ist, bleibt es — die Übernahme passiert beim ersten Start von selbst. Im Browser ändert sich nichts
 - Beim Start der App erscheint kurz eine ruhige Fläche, bis die gespeicherte Anmeldung gelesen ist; die Anmeldemaske blitzt dadurch nicht mehr auf, wenn man bereits angemeldet ist
 - Die Anmeldung hält jetzt, solange man das Fahrtenbuch benutzt — das tägliche Neuanmelden entfällt. Wer es längere Zeit nicht öffnet, wird weiterhin abgemeldet; an geteilten Rechnern bleibt also niemand dauerhaft angemeldet
