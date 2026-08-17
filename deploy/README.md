@@ -46,3 +46,39 @@ gunzip -c /opt/backups/vor-deploy/<datei>.sql.gz \
 
 Am 17.08.2026 einmal vollstaendig durchgespielt: 14 Tabellen, keine verwaisten
 Verweise. Sollte nach groesseren Aenderungen am Schema wiederholt werden.
+
+## Sicherung
+
+`backup.sh` laeuft per Cron auf dem jeweiligen Server (KKD: taeglich 3:00,
+`/opt/backups/backup.sh`). Es sichert alle Datenbanken, die in der Liste am
+Anfang des Skripts stehen, plus die Mailserver-Konfiguration, und schiebt alles
+zur Hetzner-Box.
+
+**Einen Kirchenkreis aufnehmen** — Zeile in `INSTANZEN` ergaenzen:
+
+```
+"rantzau|/opt/fahrtenbuch-rantzau|fahrtenbuch-rantzau-db-1|fahrtenbuch_rantzau"
+```
+
+Danach das Skript auf den Server kopieren:
+
+```bash
+scp deploy/backup.sh root@<server>:/opt/backups/backup.sh
+```
+
+**Wer nicht in der Liste steht, wird nicht gesichert** — und das faellt erst im
+Ernstfall auf. Deshalb gehoert der Eintrag zum Aufsetzen einer Instanz dazu.
+
+### Was das Skript prueft
+
+- Laeuft der Datenbank-Container ueberhaupt?
+- Sind Zugangsdaten in der `stack.env` zu finden?
+- Ist der Dump nicht leer und enthaelt mindestens fuenf Tabellen? Ein leerer
+  Dump ist schlimmer als keiner — er sieht aus wie eine Sicherung.
+- Kam die Uebertragung zur Hetzner-Box durch?
+
+Bei jedem Fehler: Eintrag im Log, Push an `push.godsapp.de/fahrtenbuch` und
+Rueckgabewert 1. Laeuft alles, meldet sich nichts.
+
+Das Token dafuer liegt auf dem Server unter `/opt/backups/.ntfy-token`
+(nur root lesbar), nicht im Repo.
