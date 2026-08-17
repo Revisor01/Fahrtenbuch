@@ -96,12 +96,17 @@ function MonatKarte({ row, expanded, onToggle, aktionen, onExport }) {
           </div>
           {faellig ? (
             <div className="abr-karte-fuss">
+              {/* „Alle einreichen", sobald mehr als ein Traeger offen ist: Der
+                  Knopf hiess wie der in jeder Traegerzeile darueber, obwohl er
+                  den ganzen Monat einreicht (Simon 17.08.). */}
               <button
                 type="button"
                 className="btn-primary flex-1"
                 onClick={() => aktionen.einreichen(month, kategorien)}
               >
-                Einreichen
+                {kategorien.filter((k) => k.status === 'offen').length > 1
+                  ? 'Alle einreichen'
+                  : 'Einreichen'}
               </button>
               <button
                 type="button"
