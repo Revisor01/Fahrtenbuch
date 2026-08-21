@@ -53,7 +53,9 @@ class Fahrt {
           // Die Mitfahrer der Hinfahrt, die fuer beide Richtungen gelten, auf
           // die neue Rueckfahrt uebernehmen. Sonst muesste man sie dort von
           // Hand nachtragen, obwohl "Hin- und Rueckfahrt" schon dransteht.
-          await Mitfahrer.spiegleAufPartner(conn, partnerFahrtId);
+          // Ohne geloeschte Eintraege (leere Liste): Beim Anlegen wird nur
+          // ergaenzt, hier darf am Partner nichts verschwinden.
+          await Mitfahrer.spiegleAufPartner(conn, partnerFahrtId, []);
         }
       }
 

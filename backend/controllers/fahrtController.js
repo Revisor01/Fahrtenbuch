@@ -458,6 +458,14 @@ exports.getMonthlySummary = async (req, res) => {
   }
 };
 
+// Die drei Einzel-Endpunkte schreiben NICHT mehr direkt in die Tabelle,
+// sondern bauen aus dem aktuellen Stand plus ihrer einen Aenderung die
+// vollstaendige Liste und geben sie an updateMitfahrerForFahrt. Nur dieser Weg
+// haelt die Gegenfahrt eines Paares mit (Transaktion inklusive). Direkt
+// geschrieben entstanden einseitige Zustaende: Ein 'hin_rueck' -> 'hin' an der
+// Hinfahrt liess die Spiegelkopie an der Rueckfahrt stehen, die Person wurde
+// fuer beide Strecken erstattet (UEBERZAHLUNG). Das Frontend nutzt diese
+// Endpunkte nicht, API-Key-Clients schon.
 exports.addMitfahrer = async (req, res) => {
   try {
     const { fahrtId } = req.params;
@@ -466,8 +474,17 @@ exports.addMitfahrer = async (req, res) => {
     if (!fahrt) {
       return res.status(404).json({ message: 'Fahrt nicht gefunden' });
     }
-    const mitfahrerId = await Mitfahrer.create(fahrtId, name, arbeitsstaette, richtung);
-    res.status(201).json({ id: mitfahrerId, message: 'Mitfahrer erfolgreich hinzugefügt' });
+    const vorhandene = await Mitfahrer.findByFahrtId(fahrtId);
+    await Mitfahrer.updateMitfahrerForFahrt(fahrtId, [
+      ...vorhandene,
+      { name, arbeitsstaette, richtung },
+    ]);
+    // Die id entsteht erst im INSERT: den neuen Eintrag danach heraussuchen,
+    // damit die Antwort wie bisher eine id mitgibt.
+    const danach = await Mitfahrer.findByFahrtId(fahrtId);
+    const bekannt = new Set(vorhandene.map(m => String(m.id)));
+    const neuer = danach.find(m => !bekannt.has(String(m.id)));
+    res.status(201).json({ id: neuer?.id, message: 'Mitfahrer erfolgreich hinzugefügt' });
   } catch (error) {
     console.error('Fehler beim Hinzufügen des Mitfahrers:', error);
     res.status(500).json({ message: 'Fehler beim Hinzufügen des Mitfahrers' });
@@ -482,12 +499,17 @@ exports.updateMitfahrer = async (req, res) => {
     if (!fahrt) {
       return res.status(404).json({ message: 'Fahrt nicht gefunden' });
     }
-    const updated = await Mitfahrer.update(mitfahrerId, fahrtId, name, arbeitsstaette, richtung);
-    if (updated) {
-      res.status(200).json({ message: 'Mitfahrer erfolgreich aktualisiert' });
-    } else {
-      res.status(404).json({ message: 'Mitfahrer nicht gefunden' });
+    const vorhandene = await Mitfahrer.findByFahrtId(fahrtId);
+    if (!vorhandene.some(m => String(m.id) === String(mitfahrerId))) {
+      return res.status(404).json({ message: 'Mitfahrer nicht gefunden' });
     }
+    const neueListe = vorhandene.map(m =>
+      String(m.id) === String(mitfahrerId)
+        ? { ...m, name, arbeitsstaette, richtung }
+        : m
+    );
+    await Mitfahrer.updateMitfahrerForFahrt(fahrtId, neueListe);
+    res.status(200).json({ message: 'Mitfahrer erfolgreich aktualisiert' });
   } catch (error) {
     console.error('Fehler beim Aktualisieren des Mitfahrers:', error);
     res.status(500).json({ message: 'Fehler beim Aktualisieren des Mitfahrers' });
@@ -501,12 +523,15 @@ exports.deleteMitfahrer = async (req, res) => {
     if (!fahrt) {
       return res.status(404).json({ message: 'Fahrt nicht gefunden' });
     }
-    const deleted = await Mitfahrer.delete(mitfahrerId, fahrtId);
-    if (deleted) {
-      res.status(200).json({ message: 'Mitfahrer erfolgreich gelöscht' });
-    } else {
-      res.status(404).json({ message: 'Mitfahrer nicht gefunden' });
+    const vorhandene = await Mitfahrer.findByFahrtId(fahrtId);
+    if (!vorhandene.some(m => String(m.id) === String(mitfahrerId))) {
+      return res.status(404).json({ message: 'Mitfahrer nicht gefunden' });
     }
+    await Mitfahrer.updateMitfahrerForFahrt(
+      fahrtId,
+      vorhandene.filter(m => String(m.id) !== String(mitfahrerId))
+    );
+    res.status(200).json({ message: 'Mitfahrer erfolgreich gelöscht' });
   } catch (error) {
     console.error('Fehler beim Löschen des Mitfahrers:', error);
     res.status(500).json({ message: 'Fehler beim Löschen des Mitfahrers' });
