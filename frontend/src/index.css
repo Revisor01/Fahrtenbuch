@@ -905,18 +905,50 @@ code {
 /* ============================================================
    Sheet: mobil Bottom-Sheet, ab 768px zentriertes Modal-Panel
    ============================================================ */
+/* Der Rahmen endet dort, wo die Tastatur anfaengt.
+ *
+ * Das war der eigentliche Fehler (nachgemessen im Simulator, iPhone 17):
+ * Frueher schrumpfte nur das Panel per max-height, der Rahmen blieb aber
+ * `inset: 0`. Weil das Panel unten ausgerichtet ist, klebte seine Unterkante
+ * damit weiter am unteren BILDSCHIRMrand — es wurde von OBEN kuerzer statt
+ * nach oben zu ruecken. Gemessen bei 335px Tastatur: Panel t=383 b=874,
+ * Koerper t=461 b=808 — von 347px Koerper waren nur 78px zu sehen, der Rest
+ * lag hinter der Tastatur. Genau das meldete Simon: "das Feld, in das ich
+ * tippe, ist verdeckt".
+ *
+ * `bottom` statt `inset: 0` loest es an der Wurzel: Der Rahmen hoert an der
+ * Tastaturkante auf, das unten ausgerichtete Panel sitzt darauf. Das Panel
+ * braucht seine Tastatur-Rechnung dann nicht mehr — eine Instanz regelt die
+ * Hoehe, nicht zwei gegeneinander.
+ *
+ * Warum nicht `resize: "native"` in capacitor.config.json: Das verkleinert
+ * die WebView selbst und damit auch die App-Shell mit der nativen
+ * Navigationsleiste. Hier soll sich nur das Sheet bewegen. `resize: "body"`
+ * setzt ausserdem nur `document.body.style.height` (nachgelesen in
+ * Keyboard.m) — auf `position: fixed`-Ebenen wie diese wirkt das gar nicht,
+ * deshalb greift die Variable und nicht das Plugin. */
 .sheet-root {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--tastatur, 0px);
   z-index: 70;
   display: flex;
   align-items: flex-end;
   justify-content: center;
 }
 
+/* Der Ueberzug deckt weiter den ganzen Bildschirm ab: Er darf nicht an der
+   Tastaturkante aufhoeren, sonst entstuende beim Schliessen der Tastatur
+   kurz ein heller Streifen. Negativer Versatz nach unten gleicht die
+   verkuerzte Hoehe des Rahmens wieder aus. */
 .sheet-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--tastatur, 0px));
   background-color: rgba(8, 32, 31, 0.42);
 }
 
@@ -933,11 +965,12 @@ code {
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* --tastatur kommt aus utils/tastatur.js (App) und ist im Browser 0px:
-     iOS meldet in der WebView weiter die volle Viewport-Hoehe, waehrend die
-     Tastatur davor liegt — die Eingabefelder rutschten darunter
-     (Simon 17.08.). */
-  max-height: calc(100dvh - 48px - var(--tastatur, 0px));
+  /* Bezugsgroesse ist der Rahmen, nicht der Bildschirm: `.sheet-root` endet
+     bereits an der Tastaturkante. `100%` zieht die Tastatur damit genau
+     einmal ab — `100dvh` haette sie ein zweites Mal abgezogen, weil iOS in
+     der WebView weiterhin die volle Viewport-Hoehe meldet (gemessen: 874px
+     bei 335px Tastatur, `visualViewport` meldet die Tastatur gar nicht). */
+  max-height: calc(100% - 48px);
   /* Nicht nur max-height: iOS meldet in der WebView zeitweise groessere
      Viewport-Hoehen, waehrend das native Tastatur- oder Datumsrad schon Platz
      wegnimmt. min-height 0 laesst die Spalte in jedem Fall schrumpfen. */
@@ -1032,12 +1065,11 @@ code {
   .sheet-panel {
     max-width: 480px;
     /* Der Rand des Roots (24px oben und unten) geht ab, sonst stoesst das
-       Panel auf hohen Formularen unten an. */
-    /* --tastatur kommt aus utils/tastatur.js (App) und ist im Browser 0px:
-     iOS meldet in der WebView weiter die volle Viewport-Hoehe, waehrend die
-     Tastatur davor liegt — die Eingabefelder rutschten darunter
-     (Simon 17.08.). */
-  max-height: calc(100dvh - 48px - var(--tastatur, 0px));
+       Panel auf hohen Formularen unten an. Wie mobil bezieht sich `100%` auf
+       den Rahmen, der bereits an der Tastaturkante endet — die Tastatur geht
+       also genau einmal ab. Ab dieser Breite ist das Panel zentriert, es
+       rueckt damit von selbst mit nach oben. */
+    max-height: calc(100% - 48px);
     border-radius: var(--r-card);
     padding: 24px;
     box-shadow: var(--shadow);
@@ -4654,9 +4686,14 @@ code {
 /* ============================================================
    Anmeldung (Phase R7) — Screen 8: zentrierte Karte auf --brand
    ============================================================ */
+/* Die Anmeldung ist kein Sheet, hatte aber denselben Fehler: Die Box sitzt
+   mittig in der vollen Bildschirmhoehe, waehrend die Tastatur davor liegt —
+   Benutzername und Passwort rutschten dahinter. Die Tastaturhoehe geht
+   deshalb auch hier ab, damit die Mitte die Mitte des freien Bereichs ist.
+   Im Browser ist --tastatur 0px, dort aendert sich nichts. */
 .auth-page {
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--tastatur, 0px));
   display: flex;
   align-items: center;
   justify-content: center;
