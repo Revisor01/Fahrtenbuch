@@ -52,6 +52,13 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- Beim Anlegen einer Fahrt wurde der Abrechnungsträger mitten im Namen abgeschnitten, während das Wort „Abrechnungsträger" groß daneben stand. Jetzt steht der Name groß und vollständig da, notfalls über zwei Zeilen, und die Bezeichnung klein darüber
+- Beim Bearbeiten einer Fahrt wurden von Hand eingetragene Kilometer beim Öffnen stillschweigend durch die hinterlegte Entfernung ersetzt — ein eingetragener Umweg ging beim nächsten Speichern verloren. Die eingetragenen Kilometer bleiben jetzt stehen; die hinterlegte Entfernung lässt sich auf Wunsch übernehmen
+- Die Esc-Taste schloss zwei übereinanderliegende Fenster gleichzeitig — wer aus der Erfassung heraus Mitfahrer:innen eintrug, verlor damit die halb erfasste Fahrt. Sie schließt jetzt immer nur das oberste Fenster
+- Frisch gespeicherte Fahrten ließen sich in der Fahrtenliste antippen, bevor sie gesichert waren; Bearbeiten oder Löschen schlug dann fehl. Sie sind jetzt bis zur Sicherung gesperrt
+- Beim Wechsel des Startorts blieb eine von Hand eingetragene Kilometerzahl stehen und galt stillschweigend für die neue Strecke
+- Im Kilometerfeld erschien nach dem Leeren sofort wieder die alte Entfernung, sodass sich kaum ein neuer Wert eintippen ließ
+- Beim Tippen in einem Fenster sprang der Inhalt gelegentlich an den Anfang zurück
 - In der App fehlte auf der Anmeldung der Knopf „Registrieren", ebenso der Name des Kirchenkreises und der Hinweis auf zugelassene E-Mail-Domains. Die App holt diese Angaben jetzt vom gewählten Fahrtenbuch; ist es nicht erreichbar, öffnet die Anmeldung trotzdem
 - In der App führten „Excel", „PDF" und „Beides" zu keiner Datei — der Export öffnet jetzt das Teilen-Fenster, aus dem sich die Abrechnung sichern oder direkt versenden lässt. Ein Abbruch dort gilt nicht mehr als Fehler
 - In der App tritt die Navigationsleiste zurück, sobald sich ein Fenster von unten öffnet, und kommt beim Schließen wieder — der untere Rand eines solchen Fensters ist dadurch immer erreichbar

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { overlayAnmelden } from '../../utils/overlayStack';
 
@@ -23,6 +23,46 @@ const SCHLIESS_SCHWELLE = 96;
 // (Pixel pro Millisekunde) zaehlt allein die Strecke.
 const SCHLIESS_TEMPO = 0.5;
 
+// Eigener Stapel der offenen Sheets fuer die Esc-Taste.
+//
+// Warum nicht ein Listener je Sheet: Jeder Sheet haengte frueher seinen
+// eigenen keydown-Listener an document. e.stopPropagation() bremst aber nur
+// die Weitergabe an ANDERE Knoten — Listener auf demselben Ziel (document)
+// laufen trotzdem alle. Esc schloss dadurch gestapelte Sheets gleichzeitig:
+// Wer aus dem Erfassungsflow heraus den Mitfahrer-Dialog offen hatte, verlor
+// mit einem Tastendruck auch die halb erfasste Fahrt.
+//
+// Jetzt gibt es genau EINEN globalen Esc-Handler. Er schliesst nur den
+// obersten Eintrag — dieselbe LIFO-Regel, die der Android-Zurueck-Button
+// ueber utils/overlayStack schon nutzt.
+const escStapel = [];
+
+const escBehandeln = (e) => {
+  if (e.key !== 'Escape') return;
+  const oben = escStapel[escStapel.length - 1];
+  if (!oben) return;
+  e.stopPropagation();
+  oben.schliessen();
+};
+
+// Meldet ein Sheet am Esc-Stapel an und gibt die Abmeldefunktion zurueck.
+// `schliessen` ist ein Ref-Halter, damit ein neuer onClose-Callback den
+// Eintrag nicht austauschen muss.
+function escAnmelden(refHalter) {
+  const eintrag = { schliessen: () => refHalter.current?.() };
+  escStapel.push(eintrag);
+  if (escStapel.length === 1) {
+    document.addEventListener('keydown', escBehandeln);
+  }
+  return () => {
+    const index = escStapel.indexOf(eintrag);
+    if (index !== -1) escStapel.splice(index, 1);
+    if (escStapel.length === 0) {
+      document.removeEventListener('keydown', escBehandeln);
+    }
+  };
+}
+
 function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   const panelRef = useRef(null);
   const koerperRef = useRef(null);
@@ -33,14 +73,26 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   const [zugY, setZugY] = useState(null);
   const gesteRef = useRef(null);
 
+  // onClose ueber ein Ref halten: Viele Aufrufer geben den Callback inline mit
+  // ({() => setX(null)}) und erzeugen bei jedem Render eine neue Funktion.
+  // Haengt ein Effekt daran, laeuft er staendig neu. Genau das setzte den
+  // Fokus zurueck aufs Panel und scrollte den Inhalt mitten im Tippen auf 0.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const schliessen = useCallback(() => onCloseRef.current?.(), []);
+
   // Am globalen Overlay-Stapel anmelden, damit der Android-Zurueck-Button das
-  // oberste offene Sheet schliesst statt die App zu verlassen. Eigener Effekt,
-  // weil er nur von onClose abhaengt — der Fokus-Effekt unten laeuft sonst bei
-  // jedem neuen onClose-Callback erneut und scrollt das Sheet zurueck.
+  // oberste offene Sheet schliesst statt die App zu verlassen. Zusammen mit
+  // dem Esc-Stapel: beide gelten LIFO und schliessen nur das oberste Overlay.
   useEffect(() => {
     if (!isOpen) return undefined;
-    return overlayAnmelden(onClose);
-  }, [isOpen, onClose]);
+    const abOverlay = overlayAnmelden(schliessen);
+    const abEsc = escAnmelden(onCloseRef);
+    return () => {
+      abEsc();
+      abOverlay();
+    };
+  }, [isOpen, schliessen]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -58,12 +110,9 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
     // mehr das Panel selbst.
     koerperRef.current?.scrollTo?.(0, 0);
 
+    // Nur noch Tab: Esc laeuft ueber den Stapel oben, damit ein Tastendruck
+    // genau ein Sheet schliesst.
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onClose();
-        return;
-      }
       if (e.key !== 'Tab' || !panel) return;
 
       // Fokus im Sheet fangen
@@ -96,7 +145,9 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
         triggerRef.current.focus();
       }
     };
-  }, [isOpen, onClose]);
+    // Bewusst nur [isOpen]: Fokus setzen und nach oben scrollen darf genau
+    // einmal beim Oeffnen passieren, nicht bei jedem neuen onClose-Callback.
+  }, [isOpen]);
 
   // ---------- Wischen zum Schliessen ----------
   // Warum von Hand statt per Bibliothek: Es geht um genau eine Achse und eine
@@ -157,7 +208,7 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
     const weg = zugY || 0;
     const tempo = weg / Math.max(1, Date.now() - geste.startZeit);
     if (weg > SCHLIESS_SCHWELLE || tempo > SCHLIESS_TEMPO) {
-      onClose();
+      schliessen();
     }
     // Zurueck auf null: Das Sheet federt ueber die CSS-Transition in die
     // Ruhelage. Beim Schliessen verschwindet es ohnehin.
@@ -173,7 +224,7 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   // erreichbar. Am body gibt es diesen Konflikt nicht.
   return createPortal(
     <div className={`sheet-root${wide ? ' sheet-root-wide' : ''}`}>
-      <div className="sheet-overlay" onClick={onClose} aria-hidden="true" />
+      <div className="sheet-overlay" onClick={schliessen} aria-hidden="true" />
       <div
         ref={panelRef}
         className={`sheet-panel${wide ? ' sheet-panel-wide' : ''}${

@@ -52,14 +52,20 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
           const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '—';
           const nach = fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
           const mitfahrer = fahrt.mitfahrer || [];
+          // Eine gerade angelegte Fahrt steht nur optimistisch in der Liste
+          // und hat noch keine Server-ID. Bearbeiten, Löschen und Rückfahrt
+          // liefen mit der Temp-ID gegen die API und schlugen fehl — bis die
+          // Antwort da ist, bleibt die Zeile deshalb nicht antippbar.
+          const gesperrt = !!fahrt._optimistisch;
           return (
             <button
               key={fahrt.id}
               type="button"
-              className={`fl-tablerow fl-tablerow-tap${
+              className={`fl-tablerow${gesperrt ? '' : ' fl-tablerow-tap'}${
                 aktiveId === fahrt.id ? ' fl-zeile-aktiv' : ''
               }${paarId === fahrt.id ? ' fl-zeile-paar' : ''}`}
               onClick={() => onOeffnen(fahrt)}
+              disabled={gesperrt}
               onMouseEnter={() => merkeZeile(fahrt)}
               onMouseLeave={vergissZeile}
               onFocus={() => merkeZeile(fahrt)}
