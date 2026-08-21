@@ -40,35 +40,15 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- 3. Bestehende Anlaesse einmalig uebernehmen.
+-- 3. Bewusst KEINE Uebernahme der bisherigen Anlaesse.
 --
--- Je Nutzer die verschiedenen Anlaesse aus fahrten, dabei das Praefix
--- "Rueckfahrt: " abschneiden - Hin- und Rueckfahrt sind derselbe Anlass, sonst
--- staende jeder Eintrag doppelt in der Liste. Der Umlaut wird wie in 0009 als
--- Platzhalter geschrieben, damit die Datei unabhaengig von der Verbindungs-
--- Kodierung greift.
+-- Naheliegend waere, die Anlaesse aus fahrten einmalig einzuspielen. Auf den
+-- echten Daten waeren das fuer den aktivsten Nutzer 262 Eintraege, davon 76
+-- genau einmal benutzt - dazu Tippfehler ("BEerdigung") und Varianten, die
+-- sich nur in einem Komma unterscheiden. Genau die unbedienbar lange Liste
+-- also, die diese Funktion vermeiden soll.
 --
--- sort_order = Haeufigkeit absteigend, der meistgenutzte Anlass bekommt die 0.
--- Leere Namen fallen raus. INSERT IGNORE, damit ein Wiederholungslauf die
--- bereits vorhandenen Zeilen nicht anfasst und vom Nutzer geloeschte Anlaesse
--- nicht zurueckkehren, solange gleichnamige Eintraege noch existieren.
-DROP TEMPORARY TABLE IF EXISTS tmp_anlaesse;
-CREATE TEMPORARY TABLE tmp_anlaesse (user_id INT NOT NULL, name VARCHAR(255) NOT NULL, anzahl INT NOT NULL);
-
-SET @sql := 'INSERT INTO tmp_anlaesse (user_id, name, anzahl) SELECT f.user_id, TRIM(REGEXP_REPLACE(f.anlass, ''^R.ckfahrt:[[:space:]]*'', '''')) AS name, COUNT(*) AS anzahl FROM fahrten f WHERE f.anlass IS NOT NULL AND f.user_id IS NOT NULL GROUP BY f.user_id, name HAVING name <> ''''';
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Rang je Nutzer bilden: haeufigster Anlass zuerst. Ein einfaches
--- Zaehler-Konstrukt statt Fensterfunktion, damit die Datei auch auf
--- aelteren Servern laeuft.
-SET @rang := 0;
-SET @letzter_user := NULL;
-
-SET @sql := 'INSERT IGNORE INTO anlaesse (user_id, name, sort_order, aktiv) SELECT s.user_id, s.name, s.rang, 1 FROM (SELECT t.user_id, t.name, @rang := IF(@letzter_user = t.user_id, @rang + 1, 0) AS rang, @letzter_user := t.user_id AS dummy FROM (SELECT user_id, name, anzahl FROM tmp_anlaesse ORDER BY user_id ASC, anzahl DESC, name ASC) t) s';
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
-DROP TEMPORARY TABLE IF EXISTS tmp_anlaesse;
+-- Die Liste gehoert deshalb dem Nutzer: Er legt seine Standard-Anlaesse
+-- selbst an, im Modal oder in den Einstellungen. Verloren geht dabei nichts -
+-- fahrten.anlass bleibt unangetastet, und das Modal schlaegt weiterhin die
+-- haeufigsten Anlaesse aus dem Verlauf des jeweiligen Ziels vor.

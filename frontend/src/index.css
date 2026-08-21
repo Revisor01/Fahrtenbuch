@@ -6598,3 +6598,38 @@ code {
   cursor: default;
   overflow-wrap: anywhere;
 }
+
+/* ========================================================================
+   Anlässe (Einstellungen) — Schnelleingabe und Sortier-Knöpfe
+   ======================================================================== */
+
+/* Feld + Knopf in einer Zeile; auf schmalen Displays untereinander, damit
+   das Eingabefeld nicht auf Briefmarkengröße schrumpft. */
+.set-anlass-neu {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.set-anlass-neu .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.set-anlass-neu .btn-primary {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .set-anlass-neu {
+    flex-direction: column;
+  }
+}
+
+/* Hoch/Runter je Zeile — Drag & Drop wäre für diese kurze Liste zu viel */
+.set-anlass-sortier {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
