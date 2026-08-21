@@ -238,6 +238,9 @@ function prepareMitfahrerData(fahrten) {
        // fahrt_id/mitfahrer_id nur zum Entduplizieren, nicht fuers Formular
        _fahrtId: fahrt.id ?? fahrt.fahrt_id,
        _mitfahrerId: fahrt.mitfahrer_id,
+       // Rohdatum fuer die Satzermittlung: `datum` ist fuer das Formular schon
+       // auf dd.mm.yyyy formatiert und taugt nicht mehr zum Vergleichen.
+       _datum: fahrt.datum,
        datum: formatDate(fahrt.datum),
        anlass: fahrt.anlass,
        name: fahrt.mitfahrer_name,
@@ -264,22 +267,70 @@ function prepareMitfahrerData(fahrten) {
 }
 
 /**
- * Konfigurierter Mitnahmesatz des Nutzers. Der Export rechnete bisher immer mit
- * 0,05 €, obwohl der Satz in den Einstellungen aenderbar ist — Anzeige und
- * Formular wichen dadurch voneinander ab.
+ * Alle Mitnahmesaetze des Nutzers, juengster zuerst.
+ *
+ * Frueher holte diese Funktion per "ORDER BY gueltig_ab DESC LIMIT 1" nur den
+ * neuesten Satz — ohne Bezug zum Fahrtdatum und ohne "gueltig_ab <= Stichtag".
+ * Steigt der Satz zum 01.07., rechnete ein Export ueber Mai bis Juli auch die
+ * Mai- und Juni-Fahrten mit dem neuen Wert, und ein erst kuenftig gueltiger
+ * Satz schlug schon heute durch. Das Formular wich damit von der Anzeige in
+ * der App ab, die je Fahrtdatum rechnet — und wies zu hohe Betraege aus.
  */
-async function getMitnahmeSatz(userId) {
+async function ladeMitnahmeSaetze(userId) {
  try {
    const [rows] = await db.execute(
-     'SELECT betrag FROM mitfahrer_erstattung WHERE user_id = ? ORDER BY gueltig_ab DESC LIMIT 1',
+     'SELECT betrag, gueltig_ab FROM mitfahrer_erstattung WHERE user_id = ? ORDER BY gueltig_ab DESC',
      [userId]
    );
-   const betrag = parseFloat(rows[0]?.betrag);
-   return Number.isFinite(betrag) ? betrag : MITNAHME_SATZ;
+   return rows;
  } catch (error) {
-   console.error('Mitnahmesatz konnte nicht geladen werden, nutze Standard:', error);
-   return MITNAHME_SATZ;
+   console.error('Mitnahmesaetze konnten nicht geladen werden, nutze Standard:', error);
+   return [];
  }
+}
+
+/**
+ * Satz, der an einem Fahrtdatum galt: der juengste, dessen gueltig_ab nicht in
+ * der Zukunft liegt. Faellt eine Fahrt vor den ersten gepflegten Satz, gilt der
+ * aelteste — wie in erstattung.js, damit Formular und App dieselbe Kette haben.
+ */
+function mitnahmeSatzAmDatum(saetze, datum) {
+ if (!saetze || saetze.length === 0) return MITNAHME_SATZ;
+ const d = new Date(datum);
+ const treffer = saetze.find((s) => new Date(s.gueltig_ab) <= d) || saetze[saetze.length - 1];
+ const betrag = parseFloat(treffer?.betrag);
+ return Number.isFinite(betrag) ? betrag : MITNAHME_SATZ;
+}
+
+/**
+ * Mitnahmeentschaedigung ueber alle Zeilen, jede mit dem an ihrem Datum
+ * gueltigen Satz. Meldet mit, ob im Zeitraum mehrere Saetze griffen: dann
+ * passt die statische Formularzeile "km x 0,05 €" rechnerisch nicht mehr und
+ * die Beschriftung muss den tatsaechlich erreichten Mischsatz nennen.
+ */
+function berechneMitnahme(mitfahrerData, saetze) {
+ let summe = 0;
+ let kmGesamt = 0;
+ const verwendet = new Set();
+
+ for (const m of mitfahrerData) {
+   const km = typeof m.kilometer === 'number' ? m.kilometer : parseFloat(m.kilometer);
+   if (!Number.isFinite(km)) continue;
+   const satz = mitnahmeSatzAmDatum(saetze, m._datum);
+   verwendet.add(satz);
+   summe += km * satz;
+   kmGesamt += km;
+ }
+
+ const betrag = Math.round(summe * 100) / 100;
+ const liste = [...verwendet];
+ return {
+   betrag,
+   kmGesamt,
+   gemischt: liste.length > 1,
+   // Mischsatz, damit "km x Satz = Betrag" im Formular aufgeht
+   effektivSatz: kmGesamt > 0 ? betrag / kmGesamt : (liste[0] ?? MITNAHME_SATZ),
+ };
 }
 
 function chunkFormattedData(formattedData) {
@@ -290,7 +341,7 @@ function chunkFormattedData(formattedData) {
  return chunkedData;
 }
 
-async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfahrerData, satz = MITNAHME_SATZ }) {
+async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfahrerData, saetze = [] }) {
  const workbook = await ladeTemplate();
 
  const vorlageWorksheet = workbook.getWorksheet('Vorlage');
@@ -333,20 +384,26 @@ async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfah
      row.getCell('G').value = mitfahrer.kilometer;
    });
 
-   // Summen- und Erstattungszeile (Template: SUM-Formeln ohne Cache-Wert)
-   const gesamtKm = mitfahrerData
-     .reduce((sum, m) => sum + (typeof m.kilometer === 'number' && !isNaN(m.kilometer) ? m.kilometer : 0), 0);
-   mitnahmeWorksheet.getCell('G39').value = gesamtKm;
+   // Summen- und Erstattungszeile (Template: SUM-Formeln ohne Cache-Wert).
+   // Jede Zeile mit dem Satz ihres eigenen Datums — bei einem Satzwechsel
+   // mitten im Zeitraum waere "Gesamt-km x neuester Satz" zu hoch.
+   const { betrag, kmGesamt, gemischt, effektivSatz } = berechneMitnahme(mitfahrerData, saetze);
+   mitnahmeWorksheet.getCell('G39').value = kmGesamt;
    mitnahmeWorksheet.getCell('B42').value = new Date();
    mitnahmeWorksheet.getCell('B42').numFmt = 'DD.MM.YYYY';
-   mitnahmeWorksheet.getCell('E42').value = gesamtKm;
-   // Satz aus der DB statt hartkodiert — Nutzer koennen ihn konfigurieren.
-   // Das Template beschriftet die Zeile statisch mit "km x 0,05 €", daher bei
-   // abweichendem Satz die Beschriftung mitziehen.
-   if (Math.abs(satz - MITNAHME_SATZ) > 1e-9) {
-     mitnahmeWorksheet.getCell('F42').value = `km x ${satz.toFixed(2).replace('.', ',')} € =`;
+   mitnahmeWorksheet.getCell('E42').value = kmGesamt;
+   // Das Template beschriftet die Zeile statisch mit "km x 0,05 €". Weicht der
+   // Satz ab, muss die Beschriftung mitziehen, sonst passt sie nicht zum
+   // Betrag daneben. Bei mehreren Saetzen im Zeitraum steht dort der
+   // rechnerische Mischsatz plus Hinweis — eine einzelne Zahl kann den
+   // Zeitraum sonst nicht ehrlich abbilden.
+   if (gemischt) {
+     mitnahmeWorksheet.getCell('F42').value =
+       `km x ${effektivSatz.toFixed(4).replace('.', ',')} € (gemischte Saetze) =`;
+   } else if (Math.abs(effektivSatz - MITNAHME_SATZ) > 1e-9) {
+     mitnahmeWorksheet.getCell('F42').value = `km x ${effektivSatz.toFixed(2).replace('.', ',')} € =`;
    }
-   mitnahmeWorksheet.getCell('G42').value = Math.round(gesamtKm * satz * 100) / 100;
+   mitnahmeWorksheet.getCell('G42').value = betrag;
  }
 
  return workbook;
@@ -356,11 +413,11 @@ async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfah
  * Baut die Mitfahrer-Mappen. Ab 30 Zeilen entstehen mehrere Formulare —
  * wie bei den normalen Abrechnungen auch.
  */
-async function baueMitfahrerWorkbooks({ jahr, zeitraumHeader, userProfile, mitfahrerData, satz }) {
+async function baueMitfahrerWorkbooks({ jahr, zeitraumHeader, userProfile, mitfahrerData, saetze }) {
  const chunks = chunkFormattedData(mitfahrerData);
  return Promise.all(
    chunks.map((chunk) =>
-     baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfahrerData: chunk, satz })
+     baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfahrerData: chunk, saetze })
    )
  );
 }
@@ -407,13 +464,13 @@ async function baueMonatsWorkbooks({ year, month, type, userId }) {
      return { notFound: true };
    }
 
-   const satz = await getMitnahmeSatz(userId);
+   const saetze = await ladeMitnahmeSaetze(userId);
    const workbooks = await baueMitfahrerWorkbooks({
      jahr: year,
      zeitraumHeader: `${getMonthName(parseInt(correctedMonth))} ${year}`,
      userProfile,
      mitfahrerData,
-     satz
+     saetze
    });
 
    const basis = `mitfahrer_${year}_${correctedMonth}`;
@@ -492,13 +549,13 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
      return { notFound: true };
    }
 
-   const satz = await getMitnahmeSatz(userId);
+   const saetze = await ladeMitnahmeSaetze(userId);
    const workbooks = await baueMitfahrerWorkbooks({
      jahr: startYear,
      zeitraumHeader,
      userProfile,
      mitfahrerData,
-     satz
+     saetze
    });
 
    await setzeZeitraumStatus({ startYear, startMonth, endYear, endMonth, type, userId });

@@ -603,11 +603,30 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     setFahrten((prev) => [...optimistisch, ...prev]);
 
     // Undo funktioniert auch, wenn die POSTs noch laufen: Flag + spätere Löschung
-    const op = { abgebrochen: false, ids: [] };
+    const op = { abgebrochen: false, ids: [], laeuft: null };
     const entferneAngelegte = async () => {
+      // Laeuft schon ein Aufraeumen, auf dieses warten statt ein zweites zu
+      // starten. Frueher lief "Rückgängig" mitten in den POSTs und der
+      // Abschluss der Schleife gleichzeitig: der zweite Lauf traf auf bereits
+      // geloeschte IDs, brach am 404 ab, und was danach kam blieb stehen.
+      if (op.laeuft) return op.laeuft;
+      op.laeuft = (async () => {
       try {
-        for (const id of op.ids) {
-          await axios.delete(`/api/fahrten/${id}`);
+        // So lange loeschen, bis nichts mehr nachkommt: Ein POST, der waehrend
+        // des Aufraeumens noch durchlaeuft, haengt seine ID an die geleerte
+        // Liste. Genau die Fahrt sollte der Abbruch verhindern - ohne diese
+        // Schleife bliebe sie unverknuepft stehen und liefe in die Abrechnung.
+        while (op.ids.length > 0) {
+          const zuLoeschen = [...op.ids];
+          op.ids.length = 0;
+          for (const id of zuLoeschen) {
+            try {
+              await axios.delete(`/api/fahrten/${id}`);
+            } catch (delErr) {
+              // 404 heisst: schon weg. Kein Grund, den Rest stehen zu lassen.
+              if (delErr?.response?.status !== 404) throw delErr;
+            }
+          }
         }
         // Auch den eigens angelegten Ort zuruecknehmen - sonst bleibt er nach
         // "Rueckgaengig" als Waise in der Ortsliste stehen.
@@ -620,11 +639,13 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         }
         setFahrten((prev) => prev.filter((f) => !tempIds.includes(f.id)));
         await refreshAllData();
-        toast.success(op.ids.length > 1 ? 'Fahrten wieder entfernt.' : 'Fahrt wieder entfernt.');
+        toast.success(trips.length > 1 ? 'Fahrten wieder entfernt.' : 'Fahrt wieder entfernt.');
       } catch (error) {
         console.error('Fehler beim Rückgängigmachen:', error);
         toast.error('Rückgängig machen fehlgeschlagen.');
       }
+      })();
+      return op.laeuft;
     };
 
     toast.success(trips.length > 1 ? 'Fahrt und Rückfahrt gespeichert' : 'Fahrt gespeichert', {
@@ -642,6 +663,11 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     (async () => {
       try {
         for (const t of trips) {
+          // Vor JEDEM POST pruefen, nicht erst nach allen: Wer waehrend des
+          // Speicherns "Rückgängig" tippt, bekam sonst die Rueckfahrt noch
+          // angelegt, nachdem die Hinfahrt bereits geloescht war — sie blieb
+          // unverknuepft zurueck und lief in die Abrechnung.
+          if (op.abgebrochen) break;
           // Die zweite Fahrt ist die Rückfahrt zur ersten — als Paar anlegen,
           // damit „Hin- und Rückfahrt"-Mitfahrer für beide gelten und beim
           // Löschen aufgeräumt wird
@@ -650,7 +676,14 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           op.ids.push(res.data.id);
         }
         if (op.abgebrochen) {
+          // Erst ein laufendes Aufraeumen abwarten, dann pruefen, ob dieser
+          // Lauf noch eine ID nachgereicht hat. Die Sperre gibt sonst sofort
+          // zurueck, und die zuletzt angelegte Fahrt bliebe stehen.
           await entferneAngelegte();
+          if (op.ids.length > 0) {
+            op.laeuft = null;
+            await entferneAngelegte();
+          }
           return;
         }
         // Ein Refresh für alles — ersetzt auch die optimistischen Einträge
