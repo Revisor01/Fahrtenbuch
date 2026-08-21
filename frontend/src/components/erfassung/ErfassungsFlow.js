@@ -50,7 +50,7 @@ function formatEuro(betrag) {
 }
 
 function ErfassungsFlow({ isOpen, onClose, prefill }) {
-  const { orte, distanzen, abrechnungstraeger, setFahrten, refreshAllData } =
+  const { orte, distanzen, abrechnungstraeger, anlaesse, addAnlass, setFahrten, refreshAllData } =
     useContext(AppContext);
   const toast = useToast();
 
@@ -61,7 +61,17 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   const [zielOrtId, setZielOrtId] = useState(prefill?.nachOrtId ? String(prefill.nachOrtId) : null);
   const [suche, setSuche] = useState('');
   const [anlass, setAnlass] = useState(prefill?.anlass || '');
+  // Anlass-Auswahl klappt wie die Trägerliste in der Zeile auf
+  const [anlassAuswahlOffen, setAnlassAuswahlOffen] = useState(false);
+  const [anlassSuche, setAnlassSuche] = useState('');
+  // Freitext: bewusst getrennt von der Liste, damit der Unterschied zwischen
+  // „einmalig eintippen" und „dauerhaft merken" sichtbar bleibt
   const [freiAnlassAktiv, setFreiAnlassAktiv] = useState(false);
+  const [anlassMerken, setAnlassMerken] = useState(false);
+  const [anlassSpeichert, setAnlassSpeichert] = useState(false);
+  // Frisch angelegte Anlässe sofort in der Liste zeigen, auch bevor der
+  // Context-Refresh durch ist
+  const [neueAnlaesse, setNeueAnlaesse] = useState([]);
   // null = automatisch (Heuristik/Verlauf), Nutzerwahl überschreibt
   const [rueckfahrtWahl, setRueckfahrtWahl] = useState(
     prefill?.mitRueckfahrt !== undefined ? !!prefill.mitRueckfahrt : null
@@ -230,6 +240,64 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       .map(([a]) => a);
   }, [historie, zielOrtId]);
 
+  // Gespeicherte Anlässe: häufig genutzte oben, dann alphabetisch. Frisch
+  // angelegte kommen dazu, solange der Context-Refresh noch läuft.
+  const alleAnlaesse = useMemo(() => {
+    const nachName = new Map();
+    [...(anlaesse || []), ...neueAnlaesse].forEach((a) => {
+      const name = (a?.name || '').trim();
+      if (!name) return;
+      const vorhanden = nachName.get(name.toLowerCase());
+      // Der Context-Eintrag gewinnt: er trägt die echte Nutzungshäufigkeit
+      if (!vorhanden || (a.nutzung_anzahl ?? 0) >= (vorhanden.nutzung_anzahl ?? 0)) {
+        nachName.set(name.toLowerCase(), { ...a, name });
+      }
+    });
+    // Gepflegte Reihenfolge zuerst: die Migration belegt sort_order mit dem
+    // Haeufigkeitsrang, spaeter darf der Nutzer sie umsortieren — dann muss
+    // seine Reihenfolge die Nutzungszahl schlagen. Bei gleichem Rang (etwa
+    // frisch angelegte Anlaesse) entscheidet weiter die Haeufigkeit.
+    return [...nachName.values()].sort((a, b) => {
+      const rang = (a.sort_order ?? 0) - (b.sort_order ?? 0);
+      if (rang !== 0) return rang;
+      const diff = (b.nutzung_anzahl || 0) - (a.nutzung_anzahl || 0);
+      return diff !== 0 ? diff : a.name.localeCompare(b.name, 'de');
+    });
+  }, [anlaesse, neueAnlaesse]);
+
+  // Ziel-Vorschläge stehen abgesetzt oben — sie dürfen in der Hauptliste
+  // nicht ein zweites Mal auftauchen.
+  const vorschlagSet = useMemo(
+    () => new Set(anlassVorschlaege.map((a) => a.toLowerCase())),
+    [anlassVorschlaege]
+  );
+
+  const anlassSucheClean = anlassSuche.trim();
+
+  const gefilterteAnlaesse = useMemo(() => {
+    const q = anlassSucheClean.toLowerCase();
+    const ohneVorschlaege = alleAnlaesse.filter((a) => !vorschlagSet.has(a.name.toLowerCase()));
+    if (!q) return ohneVorschlaege;
+    return ohneVorschlaege.filter((a) => a.name.toLowerCase().includes(q));
+  }, [alleAnlaesse, vorschlagSet, anlassSucheClean]);
+
+  const gefilterteVorschlaege = useMemo(() => {
+    const q = anlassSucheClean.toLowerCase();
+    if (!q) return anlassVorschlaege;
+    return anlassVorschlaege.filter((a) => a.toLowerCase().includes(q));
+  }, [anlassVorschlaege, anlassSucheClean]);
+
+  // Suchfeld erst ab genug Einträgen — bei wenigen stört es nur
+  const anlassSucheZeigen = alleAnlaesse.length + anlassVorschlaege.length >= 8;
+
+  // „… als neuen Anlass anlegen": nur, wenn die Eingabe noch nicht existiert
+  const anlassExistiert = useMemo(
+    () =>
+      alleAnlaesse.some((a) => a.name.toLowerCase() === anlassSucheClean.toLowerCase()) ||
+      vorschlagSet.has(anlassSucheClean.toLowerCase()),
+    [alleAnlaesse, vorschlagSet, anlassSucheClean]
+  );
+
   // Rückfahrt-Default: an, wenn das Ziel bisher überwiegend mit gleichtägiger
   // Gegenrichtung erfasst wurde; ohne Verlauf: an.
   const rueckfahrtDefault = useMemo(() => {
@@ -374,6 +442,46 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     setKmEdit(true);
   };
 
+  // Neuen Anlass aus der aufgeklappten Liste heraus anlegen: optimistisch
+  // auswählen und zuklappen, bei Fehler den Eintrag wieder zurücknehmen.
+  const handleAnlassAnlegen = async (name) => {
+    const sauber = name.trim();
+    if (!sauber || anlassSpeichert) return;
+    setAnlassSpeichert(true);
+    // sort_order bewusst hoch: das Backend haengt neue Anlaesse ans Ende der
+    // Liste. Ohne den Wert stuende der Eintrag bis zum Refresh ganz oben und
+    // sprungt danach nach unten.
+    const platzhalter = {
+      id: `neu-${Date.now()}`,
+      name: sauber,
+      nutzung_anzahl: 0,
+      sort_order: Number.MAX_SAFE_INTEGER,
+    };
+    setNeueAnlaesse((prev) => [...prev, platzhalter]);
+    setAnlass(sauber);
+    setFreiAnlassAktiv(false);
+    setAnlassMerken(false);
+    setAnlassAuswahlOffen(false);
+    setAnlassSuche('');
+    try {
+      const angelegt = await addAnlass(sauber);
+      // Der Server kann den Namen normalisiert haben (idempotenter POST)
+      const echterName = (angelegt?.name || '').trim();
+      if (echterName) {
+        setAnlass(echterName);
+        setNeueAnlaesse((prev) =>
+          prev.map((a) => (a.id === platzhalter.id ? { ...angelegt, name: echterName } : a))
+        );
+      }
+    } catch (error) {
+      console.error('Anlass konnte nicht gespeichert werden:', error);
+      setNeueAnlaesse((prev) => prev.filter((a) => a.id !== platzhalter.id));
+      toast.error('Der Anlass konnte nicht gespeichert werden — er gilt nur für diese Fahrt.');
+    } finally {
+      setAnlassSpeichert(false);
+    }
+  };
+
   const handleWeiter = () => {
     setStep(2);
     // Ohne bekannte Distanz (freies Ziel oder ungepflegtes Paar) km direkt editierbar
@@ -410,6 +518,17 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     setSpeichert(true);
 
     const anlassClean = anlass.trim();
+
+    // „Anlass merken": Freitext dauerhaft in die Liste übernehmen. Die Fahrt
+    // hängt nicht daran — schlägt es fehl, wird nur der Merker verworfen.
+    if (freiAnlassAktiv && anlassMerken && anlassClean) {
+      try {
+        await addAnlass(anlassClean);
+      } catch (err) {
+        console.error('Anlass konnte nicht gemerkt werden:', err);
+        toast.error('Der Anlass konnte nicht gemerkt werden — die Fahrt wird trotzdem angelegt.');
+      }
+    }
 
     // „Ort dauerhaft speichern": Adresse vor der Fahrt als Ort anlegen, damit
     // sie beim nächsten Mal in der eigenen Liste steht (inkl. Distanz).
@@ -824,42 +943,178 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         </div>
       )}
 
-      <div className="erf-label">Anlass</div>
-      <div className="erf-chips">
-        {anlassVorschlaege.map((a) => (
+      {/* Anlass wie der Abrechnungsträger: kleine Beschriftung, gewählter Wert
+          groß darunter, Auswahl klappt in der Zeile auf. Als Chip-Reihe wurde
+          die Liste mit jedem weiteren Anlass unübersichtlicher. */}
+      <button
+        type="button"
+        className="erf-traeger-zeile"
+        onClick={() => setAnlassAuswahlOffen((v) => !v)}
+        aria-expanded={anlassAuswahlOffen}
+      >
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="erf-feld-label" style={{ display: 'block' }}>
+            Anlass
+          </span>
+          <span className="erf-traeger-name" style={{ display: 'block' }}>
+            {anlass.trim() || 'Wählen'}
+          </span>
+          {!anlass.trim() && (
+            <span className="erf-row-hinweis" style={{ display: 'block' }}>
+              Pflichtangabe
+            </span>
+          )}
+        </span>
+        <ChevronRight size={16} aria-hidden="true" style={{ flexShrink: 0 }} />
+      </button>
+
+      {anlassAuswahlOffen && (
+        <>
+          {anlassSucheZeigen && (
+            <div className="erf-search">
+              <Search size={17} aria-hidden="true" />
+              <input
+                type="text"
+                value={anlassSuche}
+                onChange={(e) => setAnlassSuche(e.target.value)}
+                placeholder="Anlass suchen"
+                aria-label="Anlass suchen"
+              />
+            </div>
+          )}
+
+          <div className="erf-ort-liste">
+            {/* Die ziel-bezogenen Vorschläge sind der schnellste Weg — sie
+                stehen abgesetzt oben, nicht irgendwo in der Gesamtliste. */}
+            {gefilterteVorschlaege.length > 0 && (
+              <>
+                <span className="erf-liste-trenner">Häufig für dieses Ziel</span>
+                {gefilterteVorschlaege.map((a) => (
+                  <button
+                    key={`vorschlag-${a}`}
+                    type="button"
+                    className={`erf-ort-row${!freiAnlassAktiv && anlass === a ? ' is-selected' : ''}`}
+                    onClick={() => {
+                      setAnlass(a);
+                      setFreiAnlassAktiv(false);
+                      setAnlassMerken(false);
+                      setAnlassAuswahlOffen(false);
+                      setAnlassSuche('');
+                    }}
+                  >
+                    <span className="erf-ort-main">
+                      <span className="erf-ort-name">{a}</span>
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {gefilterteAnlaesse.length > 0 && (
+              <>
+                {gefilterteVorschlaege.length > 0 && (
+                  <span className="erf-liste-trenner">Alle Anlässe</span>
+                )}
+                {gefilterteAnlaesse.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    className={`erf-ort-row${
+                      !freiAnlassAktiv && anlass === a.name ? ' is-selected' : ''
+                    }`}
+                    onClick={() => {
+                      setAnlass(a.name);
+                      setFreiAnlassAktiv(false);
+                      setAnlassMerken(false);
+                      setAnlassAuswahlOffen(false);
+                      setAnlassSuche('');
+                    }}
+                  >
+                    <span className="erf-ort-main">
+                      <span className="erf-ort-name">{a.name}</span>
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* Direkt aus der Suche heraus anlegen — spart den Umweg über die
+                Stammdaten. Der POST ist idempotent, doppelt geht nicht. */}
+            {anlassSucheClean.length > 0 && !anlassExistiert && (
+              <button
+                type="button"
+                className="erf-ort-row erf-ort-row-adresse"
+                onClick={() => handleAnlassAnlegen(anlassSucheClean)}
+                disabled={anlassSpeichert}
+              >
+                <Plus size={16} aria-hidden="true" className="erf-adresse-icon" />
+                <span className="erf-ort-main">
+                  <span className="erf-ort-name">
+                    „{anlassSucheClean}" als neuen Anlass anlegen
+                  </span>
+                </span>
+              </button>
+            )}
+
+            {gefilterteVorschlaege.length === 0 &&
+              gefilterteAnlaesse.length === 0 &&
+              anlassSucheClean.length === 0 && (
+                <span className="erf-liste-hinweis">
+                  Noch keine Anlässe gespeichert — unten frei eingeben.
+                </span>
+              )}
+
+            {/* Nicht jeder einmalige Anlass gehört in die Liste */}
+            <button
+              type="button"
+              className={`erf-ort-row erf-ort-row-frei${freiAnlassAktiv ? ' is-selected' : ''}`}
+              onClick={() => {
+                setFreiAnlassAktiv(true);
+                setAnlassAuswahlOffen(false);
+                setAnlassSuche('');
+                if (
+                  anlassVorschlaege.includes(anlass) ||
+                  alleAnlaesse.some((a) => a.name === anlass)
+                ) {
+                  setAnlass('');
+                }
+              }}
+            >
+              <Pencil size={16} aria-hidden="true" className="erf-adresse-icon" />
+              <span className="erf-ort-main">
+                <span className="erf-ort-name">Einmaligen Anlass frei eingeben…</span>
+              </span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Freitext bleibt möglich, ohne dass der Anlass gespeichert wird —
+          der Schalter darunter macht den Unterschied sichtbar. */}
+      {freiAnlassAktiv && (
+        <>
+          <input
+            type="text"
+            ref={anlassInputRef}
+            className="form-input erf-anlass-input"
+            value={anlass}
+            onChange={(e) => setAnlass(e.target.value)}
+            placeholder="z. B. Dienstbesprechung, Hausbesuch…"
+            aria-label="Anlass frei eingeben"
+          />
           <button
-            key={a}
             type="button"
-            className={`erf-chip${!freiAnlassAktiv && anlass === a ? ' is-active' : ''}`}
-            onClick={() => {
-              setAnlass(a);
-              setFreiAnlassAktiv(false);
-            }}
+            className={`erf-merken${anlassMerken ? ' is-active' : ''}`}
+            onClick={() => setAnlassMerken((v) => !v)}
+            aria-pressed={anlassMerken}
+            disabled={!anlass.trim()}
           >
-            {a}
+            <span className="erf-merken-box" aria-hidden="true">
+              {anlassMerken && <Check size={13} strokeWidth={3} />}
+            </span>
+            <span>Anlass dauerhaft speichern</span>
           </button>
-        ))}
-        <button
-          type="button"
-          className={`erf-chip erf-chip-dashed${freiAnlassAktiv ? ' is-active' : ''}`}
-          onClick={() => {
-            setFreiAnlassAktiv(true);
-            if (anlassVorschlaege.includes(anlass)) setAnlass('');
-          }}
-        >
-          Frei eingeben…
-        </button>
-      </div>
-      {(freiAnlassAktiv || anlassVorschlaege.length === 0) && (
-        <input
-          type="text"
-          ref={anlassInputRef}
-          className="form-input erf-anlass-input"
-          value={anlass}
-          onChange={(e) => setAnlass(e.target.value)}
-          placeholder="z. B. Dienstbesprechung, Hausbesuch…"
-          aria-label="Anlass frei eingeben"
-        />
+        </>
       )}
 
       <div className="erf-row">

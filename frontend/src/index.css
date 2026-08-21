@@ -6538,3 +6538,63 @@ code {
 [data-platform="ios"] input[type="date"].form-input::-webkit-datetime-edit {
   padding: 0;
 }
+
+/* ============================================================
+   Anlass-Auswahl im Erfassungsflow (aufklappende Liste statt Chips)
+   ============================================================ */
+
+/* „Einmaligen Anlass frei eingeben…" und „… als neuen Anlass anlegen" sind
+   keine bestehenden Einträge, sondern Aktionen — gestrichelt wie die
+   Live-Adressen in der Zielauswahl. */
+.erf-ort-row-frei {
+  border-style: dashed;
+}
+
+.erf-ort-row-frei.is-selected .erf-adresse-icon {
+  color: var(--brand);
+}
+
+/* Läuft die Anlage noch, darf die Zeile nicht ein zweites Mal auslösen. */
+.erf-ort-row:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Der Merken-Schalter gehört sichtbar zum Freitextfeld darüber. */
+.erf-anlass-input + .erf-merken {
+  margin-top: -6px;
+}
+
+/* ============================================================
+   Fahrt bearbeiten (FahrtForm) — gleiche Bausteine wie der
+   Erfassungsflow, nur im Formular-Kontext
+   ============================================================ */
+
+/* Der Merken-Knopf ist hier eine sofortige Aktion („anlegen"), kein
+   Vorher-Nachher-Schalter — das Plus-Zeichen muss deshalb auch auf der
+   neutralen Fläche lesbar sein. */
+.fahrtform .erf-merken .erf-merken-box {
+  color: var(--text-2);
+}
+
+.fahrtform .erf-merken:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Kein space-y mehr am Formular: die erf-Bausteine bringen ihre Abstände
+   selbst mit, nur die beiden Rest-Blöcke brauchen noch welche. */
+.fahrtform > .form-group {
+  margin-bottom: 20px;
+}
+
+.fahrtform .fahrtform-buttons {
+  margin-top: 24px;
+}
+
+/* Die Route ist hier reine Anzeige — der Wechsel läuft über die Zeilen
+   darunter, nicht über einen Klick auf die Überschrift. */
+.fahrtform .erf-route-btn {
+  cursor: default;
+  overflow-wrap: anywhere;
+}

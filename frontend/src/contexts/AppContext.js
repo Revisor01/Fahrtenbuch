@@ -4,6 +4,7 @@ import { aktuellerMonat } from '../utils/datum';
 import StatusDatumSheet from '../components/abrechnung/StatusDatumSheet';
 import { useToast } from '../components/ui/Toast';
 import { API_BASE_URL } from '../api/client';
+import { ladeAnlaesse, legeAnlassAn } from '../api/anlaesse';
 import {
   SCHLUESSEL_TOKEN,
   SCHLUESSEL_USER,
@@ -46,6 +47,9 @@ function AppProvider({ children }) {
   const toast = useToast();
 
   const [favoriten, setFavoriten] = useState([]);
+  // Gespeicherte Anlaesse (Stammdaten wie Orte/Traeger). Leer, solange die
+  // Instanz den Endpunkt noch nicht kennt — Freitext bleibt davon unberuehrt.
+  const [anlaesse, setAnlaesse] = useState([]);
 
   const [abrechnungsStatusModal, setAbrechnungsStatusModal] = useState({
     open: false,
@@ -96,6 +100,21 @@ function AppProvider({ children }) {
     }
   };
 
+  const fetchAnlaesse = async () => {
+    const daten = await ladeAnlaesse();
+    setAnlaesse(daten);
+    return daten;
+  };
+
+  // Legt einen Anlass an und gibt ihn zurueck. Der POST ist idempotent — ein
+  // bekannter Name liefert den vorhandenen Eintrag. Fehler werden nach oben
+  // gereicht, damit der Aufrufer seine optimistische Anzeige zuruecknehmen kann.
+  const addAnlass = async (name) => {
+    const angelegt = await legeAnlassAn(name);
+    await fetchAnlaesse();
+    return angelegt;
+  };
+
   const refreshAllData = async (callback) => {
     try {
       const [fahrtenRes, monthlyDataRes, orteRes, distanzenRes, abrechnungstraegerRes, abrechnungstraegerFullRes] = await Promise.all([
@@ -108,6 +127,8 @@ function AppProvider({ children }) {
       ]);
       // Favoriten separat laden (kein Fehler wenn Endpoint nicht verfügbar)
       fetchFavoriten().catch(() => {});
+      // Anlässe ebenso: fehlt der Endpunkt, bleibt die Liste leer
+      fetchAnlaesse().catch(() => {});
 
       // fetchFahrten/fetchOrte/fetchDistanzen setzen ihren State selbst und
       // liefern nichts zurueck — die Zuweisungen hier greifen nur, wenn eine
@@ -698,6 +719,9 @@ function AppProvider({ children }) {
       setAbrechnungstraeger,
       selectedVonMonth,
       setSelectedVonMonth,
+      anlaesse,
+      fetchAnlaesse,
+      addAnlass,
       favoriten,
       fetchFavoriten,
       addFavorit,
