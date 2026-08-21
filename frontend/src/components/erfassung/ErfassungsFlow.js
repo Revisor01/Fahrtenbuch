@@ -80,7 +80,6 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   );
   const [kmEdit, setKmEdit] = useState(false);
   const [editStart, setEditStart] = useState(false);
-  const [editDatum, setEditDatum] = useState(false);
   // Freier Startort (per Standort ermittelt oder aus der Adresssuche gewählt)
   const [freierStart, setFreierStart] = useState(null);
   const [startSuche, setStartSuche] = useState('');
@@ -91,6 +90,9 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   // Doppel-Tap-Sperre beim Speichern (Ref, weil der State-Update zu spät kommt)
   const [speichert, setSpeichert] = useState(false);
   const speichertRef = useRef(false);
+  // Autofokus: Ziel-Suchfeld beim Öffnen, Freitext-Anlass beim Aufklappen
+  const zielSucheRef = useRef(null);
+  const anlassInputRef = useRef(null);
 
   // Verlauf (alle Fahrten) und Träger inkl. heute gültigem Erstattungssatz —
   // je ein GET beim Öffnen; Context-`fahrten` ist auf den gewählten Monat
@@ -113,6 +115,18 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       aktiv = false;
     };
   }, [isOpen]);
+
+  // Ziel-Suchfeld direkt bereit — spart einen Tap vor dem Tippen
+  useEffect(() => {
+    if (!isOpen || step !== 1 || editStart) return;
+    const id = window.setTimeout(() => zielSucheRef.current?.focus(), 120);
+    return () => window.clearTimeout(id);
+  }, [isOpen, step, editStart]);
+
+  // Freitext-Anlass fokussieren, sobald „Frei eingeben…" gewählt wurde
+  useEffect(() => {
+    if (freiAnlassAktiv) anlassInputRef.current?.focus();
+  }, [freiAnlassAktiv]);
 
   // ---- Abgeleitete Werte ------------------------------------------------
 
@@ -164,6 +178,16 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       return diff !== 0 ? diff : a.name.localeCompare(b.name, 'de');
     });
   }, [orte, historie, effStartOrtId]);
+
+  // Startorte: Wohnort, dann Dienstort, dann alphabetisch — die beiden sind
+  // in der Praxis fast immer der Ausgangspunkt
+  const sortierteStartorte = useMemo(() => {
+    const rang = (o) => (o.ist_wohnort ? 0 : o.ist_dienstort ? 1 : 2);
+    return [...orte].sort((a, b) => {
+      const diff = rang(a) - rang(b);
+      return diff !== 0 ? diff : a.name.localeCompare(b.name, 'de');
+    });
+  }, [orte]);
 
   const gefilterteZiele = useMemo(() => {
     const q = suche.trim().toLowerCase();
@@ -276,6 +300,30 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     (!!effStartOrtId || !!freierStart) &&
     !!datum;
 
+  // Warum ist der Button aus? Ohne Begründung bleibt nur Raten.
+  const fehltWeiter = kannWeiter ? null : 'Ziel fehlt';
+  const fehltSpeichern = useMemo(() => {
+    if (kannSpeichern) return null;
+    const fehlt = [];
+    if (!kannWeiter) fehlt.push('Ziel');
+    if (!effStartOrtId && !freierStart) fehlt.push('Startort');
+    if (!datum) fehlt.push('Datum');
+    if (!kmGueltig) fehlt.push('Kilometer');
+    if (!anlass.trim()) fehlt.push('Anlass');
+    if (!effTraegerId) fehlt.push('Abrechnungsträger');
+    if (fehlt.length === 0) return null;
+    return `Noch offen: ${fehlt.join(', ')}`;
+  }, [
+    kannSpeichern,
+    kannWeiter,
+    effStartOrtId,
+    freierStart,
+    datum,
+    kmGueltig,
+    anlass,
+    effTraegerId,
+  ]);
+
   // ---- Aktionen ----------------------------------------------------------
 
   // Standort -> exakte Adresse (Reverse-Geocoding). Ein gespeicherter Ort wird
@@ -318,10 +366,18 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     );
   };
 
+  // km-Feld haengt allein an kmManuell. Beim Oeffnen einmalig mit der
+  // bekannten Distanz vorbelegen - sonst schnappt das Feld beim Leeren
+  // sofort wieder auf die Distanz zurueck.
+  const oeffneKmEdit = () => {
+    setKmManuell((v) => (v !== '' ? v : distanzKm !== null && distanzKm !== undefined ? String(distanzKm) : ''));
+    setKmEdit(true);
+  };
+
   const handleWeiter = () => {
     setStep(2);
     // Ohne bekannte Distanz (freies Ziel oder ungepflegtes Paar) km direkt editierbar
-    if (!kmGueltig) setKmEdit(true);
+    if (!kmGueltig) oeffneKmEdit();
   };
 
   // Mitfahrer:innen — gleiche Bedienung wie im vollen Formular
@@ -503,35 +559,6 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
   if (!isOpen) return null;
 
-  // Träger-Auswahl als eigene Sheet-Ansicht
-  if (traegerAuswahlOffen) {
-    return (
-      <Sheet isOpen={isOpen} onClose={() => setTraegerAuswahlOffen(false)} title="Abrechnungsträger">
-        <div className="erf-ort-liste">
-          {aktiveTraeger.map((t) => {
-            const gewaehlt = String(t.id) === String(effTraegerId);
-            return (
-              <button
-                key={t.id}
-                type="button"
-                className={`erf-ort-row${gewaehlt ? ' is-selected' : ''}`}
-                onClick={() => {
-                  setTraegerWahl(String(t.id));
-                  setTraegerAuswahlOffen(false);
-                }}
-              >
-                <span className="erf-ort-main">
-                  <span className="erf-ort-name">{t.name}</span>
-                  {t.kostenstelle && <span className="erf-ort-sub">{t.kostenstelle}</span>}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </Sheet>
-    );
-  }
-
   if (step === 1) {
     return (
       <Sheet isOpen={isOpen} onClose={onClose} title="Wohin?">
@@ -564,27 +591,33 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           )}
         </div>
 
+        {/* Ein Tap auf „Von" zeigt die Orte direkt — kein Zwischenmenü */}
         {editStart && (
           <div className="erf-start-auswahl">
-            <select
-              className="form-select"
-              value={effStartOrtId || ''}
-              onChange={(e) => {
-                setStartOrtId(e.target.value);
-                setFreierStart(null);
-                setEditStart(false);
-              }}
-              aria-label="Startort ändern"
-            >
-              <option value="" disabled>
-                Ort wählen…
-              </option>
-              {orte.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
+            <div className="erf-ort-liste">
+              {sortierteStartorte.map((o) => {
+                const gewaehlt = !freierStart && String(o.id) === String(effStartOrtId);
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    className={`erf-ort-row${gewaehlt ? ' is-selected' : ''}`}
+                    onClick={() => {
+                      setStartOrtId(String(o.id));
+                      setFreierStart(null);
+                      // Manuelle km gehoeren zur alten Strecke
+                      setKmManuell('');
+                      setEditStart(false);
+                    }}
+                  >
+                    <span className="erf-ort-main">
+                      <span className="erf-ort-name">{o.name}</span>
+                      {o.adresse && <span className="erf-ort-sub">{o.adresse}</span>}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
             <StartAdressSuche
               wert={startSuche}
               setWert={setStartSuche}
@@ -592,6 +625,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                 setFreierStart(v);
                 setStartOrtId(null);
                 setStartSuche('');
+                setKmManuell('');
                 setEditStart(false);
               }}
             />
@@ -600,28 +634,8 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
         <div className="erf-feld">
           <span className="erf-feld-label">Wann</span>
-          <button
-            type="button"
-            className="erf-von-btn"
-            onClick={() => setEditDatum((v) => !v)}
-            aria-expanded={editDatum}
-          >
-            {formatDatumZeile(datum)}
-          </button>
+          <DatumsFeld datum={datum} setDatum={setDatum} />
         </div>
-
-        {editDatum && (
-          <input
-            type="date"
-            className="form-input mb-3"
-            value={datum}
-            onChange={(e) => {
-              if (e.target.value) setDatum(e.target.value);
-            }}
-            onBlur={() => setEditDatum(false)}
-            aria-label="Datum ändern"
-          />
-        )}
 
         {/* Eine Suche für beides: eigene Orte und Live-Adressen */}
         <span className="erf-feld-label">Nach</span>
@@ -629,6 +643,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           <Search size={17} aria-hidden="true" />
           <input
             type="text"
+            ref={zielSucheRef}
             value={zielAdresse ? zielAdresse.text : suche}
             onChange={(e) => {
               setSuche(e.target.value);
@@ -737,6 +752,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         >
           Weiter
         </button>
+        {fehltWeiter && <FehltHinweis text={fehltWeiter} />}
       </Sheet>
     );
   }
@@ -774,12 +790,19 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         <button
           type="button"
           className="erf-edit-btn"
-          onClick={() => setKmEdit((v) => !v)}
+          onClick={() => (kmEdit ? setKmEdit(false) : oeffneKmEdit())}
           aria-label="Kilometer korrigieren"
           title="Kilometer korrigieren"
         >
           <Pencil size={16} />
         </button>
+      </div>
+
+      {/* Für welchen Tag wird gespeichert? Bei „Wiederholen" startet der Flow
+          direkt hier — ohne diese Zeile bliebe das Datum ungesehen. */}
+      <div className="erf-feld">
+        <span className="erf-feld-label">Wann</span>
+        <DatumsFeld datum={datum} setDatum={setDatum} />
       </div>
 
       {kmEdit && (
@@ -794,7 +817,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
             min="0"
             step="0.1"
             className="form-input"
-            value={kmManuell !== '' ? kmManuell : distanzKm ?? ''}
+            value={kmManuell}
             onChange={(e) => setKmManuell(e.target.value)}
             placeholder="km"
           />
@@ -830,6 +853,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       {(freiAnlassAktiv || anlassVorschlaege.length === 0) && (
         <input
           type="text"
+          ref={anlassInputRef}
           className="form-input erf-anlass-input"
           value={anlass}
           onChange={(e) => setAnlass(e.target.value)}
@@ -855,23 +879,53 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         </button>
       </div>
 
-      <div className="erf-row erf-row-letzte">
-        <div className="erf-row-text">
-          <div className="erf-row-titel">Abrechnungsträger</div>
-          <div className="erf-row-hinweis">
+      {/* Der Trägername ist die Information, nicht das Wort „Abrechnungsträger" —
+          deshalb Label klein, Name groß und mehrzeilig. */}
+      <button
+        type="button"
+        className="erf-traeger-zeile"
+        onClick={() => setTraegerAuswahlOffen((v) => !v)}
+        aria-expanded={traegerAuswahlOffen}
+      >
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="erf-feld-label" style={{ display: 'block' }}>
+            Abrechnungsträger
+          </span>
+          <span className="erf-traeger-name" style={{ display: 'block' }}>
+            {effTraeger ? effTraeger.name : 'Wählen'}
+          </span>
+          <span className="erf-row-hinweis" style={{ display: 'block' }}>
             {defaultTraegerId && traegerWahl === null ? 'Zuletzt für dieses Ziel' : 'Ausgewählt'}
-          </div>
+          </span>
+        </span>
+        <ChevronRight size={16} aria-hidden="true" style={{ flexShrink: 0 }} />
+      </button>
+
+      {/* Auswahl klappt in der Zeile auf, statt Schritt 2 zu ersetzen —
+          sonst geht Scrollposition und Rückweg verloren. */}
+      {traegerAuswahlOffen && (
+        <div className="erf-ort-liste">
+          {aktiveTraeger.map((t) => {
+            const gewaehlt = String(t.id) === String(effTraegerId);
+            return (
+              <button
+                key={t.id}
+                type="button"
+                className={`erf-ort-row${gewaehlt ? ' is-selected' : ''}`}
+                onClick={() => {
+                  setTraegerWahl(String(t.id));
+                  setTraegerAuswahlOffen(false);
+                }}
+              >
+                <span className="erf-ort-main">
+                  <span className="erf-ort-name">{t.name}</span>
+                  {t.kostenstelle && <span className="erf-ort-sub">{t.kostenstelle}</span>}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <button
-          type="button"
-          className="erf-traeger-btn"
-          onClick={() => setTraegerAuswahlOffen(true)}
-          title={effTraeger ? effTraeger.name : 'Wählen'}
-        >
-          <span>{effTraeger ? effTraeger.name : 'Wählen'}</span>
-          <ChevronRight size={16} aria-hidden="true" />
-        </button>
-      </div>
+      )}
 
       {/* Mitfahrer:innen direkt hier — vorher liessen sie sich erst
           nachtraeglich ueber „Bearbeiten" eintragen. Gleiche Bedienung wie im
@@ -931,6 +985,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         {fahrtenAnzahl === 1 ? '1 Fahrt speichern' : '2 Fahrten speichern'}
         {gesamtKm !== null && <span className="num"> · {formatKm(gesamtKm)} km</span>}
       </button>
+      {fehltSpeichern && <FehltHinweis text={fehltSpeichern} />}
 
       {mitfahrerDialog && (
         <MitfahrerModal
@@ -944,6 +999,48 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         />
       )}
     </Sheet>
+  );
+}
+
+// Ein-Tap-Datumswahl: das native Datumsfeld liegt unsichtbar über dem Button.
+// Vorher brauchte es zwei Taps — einen zum Einblenden, einen zum Öffnen.
+function DatumsFeld({ datum, setDatum }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <button type="button" className="erf-von-btn" tabIndex={-1} aria-hidden="true">
+        {formatDatumZeile(datum)}
+      </button>
+      <input
+        type="date"
+        value={datum}
+        onChange={(e) => {
+          if (e.target.value) setDatum(e.target.value);
+        }}
+        aria-label="Datum ändern"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0,
+          border: 0,
+          padding: 0,
+          margin: 0,
+          background: 'transparent',
+          cursor: 'pointer',
+          zIndex: 1,
+        }}
+      />
+    </div>
+  );
+}
+
+// Begründung unter einem ausgegrauten Button
+function FehltHinweis({ text }) {
+  return (
+    <div className="erf-fehlt-hinweis" role="status">
+      {text}
+    </div>
   );
 }
 

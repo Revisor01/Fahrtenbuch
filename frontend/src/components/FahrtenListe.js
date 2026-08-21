@@ -11,7 +11,7 @@ import ZeitraumSegmente from './fahrten/ZeitraumSegmente';
 import FahrtKarte from './fahrten/FahrtKarte';
 import FahrtenTabelle from './fahrten/FahrtenTabelle';
 import ExportSheet from './fahrten/ExportSheet';
-import { statusFromAbrechnung } from '../utils/statusLabels';
+import { statusFromAbrechnung, statusLabel } from '../utils/statusLabels';
 import { formatBetrag, rundeKilometer, kategorienMitErstattung } from './fahrten/zeitraumUtils';
 import usePassendeGroesse from './fahrten/usePassendeGroesse';
 
@@ -292,6 +292,10 @@ function FahrtenListe() {
                 fahrt={fahrt}
                 status={statusFuer(fahrt)}
                 onOeffnen={setAktionsFahrt}
+                // Frisch angelegte Fahrten haben noch keine Server-ID.
+                // Bearbeiten, Löschen und Rückfahrt liefen sonst mit der
+                // Temp-ID gegen die API und schlugen fehl.
+                gesperrt={!!fahrt._optimistisch}
               />
             ))}
           </div>
@@ -335,6 +339,10 @@ function FahrtenListe() {
             year: 'numeric',
           })}
           zeilen={[
+            // Der Anlass steht zwar im Titel — dort aber nur, WENN es einen
+            // gibt; sonst rutscht das Ziel in den Titel. Als eigene Zeile ist
+            // die Angabe eindeutig.
+            { label: 'Anlass', wert: aktionsFahrt.anlass || '—' },
             {
               label: 'Strecke',
               wert: `${aktionsFahrt.von_ort_name || aktionsFahrt.einmaliger_von_ort || '—'} → ${
@@ -343,6 +351,7 @@ function FahrtenListe() {
             },
             { label: 'Kilometer', wert: `${rundeKilometer(aktionsFahrt.kilometer)} km` },
             { label: 'Träger', wert: traegerNameFuer(aktionsFahrt) },
+            { label: 'Status', wert: statusLabel(statusFuer(aktionsFahrt)) },
             { label: 'Erstattung', wert: `${formatBetrag(aktionsFahrt.erstattung)} €` },
             ...(aktionsFahrt.mitfahrer?.length
               ? [{ label: 'Mitfahrer', wert: aktionsFahrt.mitfahrer.map((m) => m.name).join(', ') }]
@@ -388,13 +397,20 @@ function FahrtenListe() {
                     onClick: () => handleRueckfahrt(aktionsFahrt),
                   },
                 ]),
-            {
-              id: 'wiederholen',
-              label: 'Für heute wiederholen',
-              icon: RotateCw,
-              hinweis: 'Legt dieselbe Fahrt mit heutigem Datum an',
-              onClick: () => handleWiederholen(aktionsFahrt),
-            },
+            // Nur bei gespeicherten Orten: Der Erfassungsflow kennt keine
+            // einmaligen Adressen als Prefill — man landete sonst in einem
+            // fast leeren Schritt 1.
+            ...(aktionsFahrt.nach_ort_id
+              ? [
+                  {
+                    id: 'wiederholen',
+                    label: 'Für heute wiederholen',
+                    icon: RotateCw,
+                    hinweis: 'Legt dieselbe Fahrt mit heutigem Datum an',
+                    onClick: () => handleWiederholen(aktionsFahrt),
+                  },
+                ]
+              : []),
             {
               id: 'loeschen',
               label: 'Löschen',

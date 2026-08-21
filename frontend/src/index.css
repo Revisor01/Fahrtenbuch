@@ -1301,9 +1301,18 @@ code {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 44vh;
-  overflow-y: auto;
   margin-bottom: 20px;
+}
+
+/* Mobil laeuft die Liste im Sheet-Fluss mit: eine eigene Scrollflaeche im
+   ohnehin scrollenden .sheet-koerper fing Wischgesten ab und fuehlte sich
+   hakelig an. Nur auf dem Desktop, wo das Sheet nicht die volle Hoehe hat,
+   bleibt die Liste gedeckelt, damit die Knoepfe darunter sichtbar bleiben. */
+@media (min-width: 768px) {
+  .erf-ort-liste {
+    max-height: 44vh;
+    overflow-y: auto;
+  }
 }
 
 .erf-ort-row {
@@ -1543,17 +1552,6 @@ code {
   position: relative;
 }
 
-.erf-row-text {
-  min-width: 0;
-  flex-shrink: 0;
-}
-
-/* Träger darf höchstens die Hälfte der Zeile beanspruchen, damit das Label
-   daneben lesbar bleibt */
-.erf-row-letzte .erf-traeger-btn {
-  max-width: 52%;
-}
-
 /* „Ort dauerhaft speichern" */
 .erf-merken {
   display: flex;
@@ -1767,10 +1765,6 @@ code {
   margin-bottom: 10px;
 }
 
-.erf-row-letzte {
-  margin-bottom: 20px;
-}
-
 .erf-row-titel {
   font-size: 16px;
   font-weight: 600;
@@ -1815,35 +1809,56 @@ code {
   transform: translateX(21px);
 }
 
-/* Trägerwert rechts: --brand/600 + › */
-.erf-traeger-btn {
+/* Abrechnungsträger als eigene Zeile: Optik wie .erf-row, aber antippbar.
+   Der Trägername ist die Information — er darf umbrechen statt zu kürzen,
+   sonst bleibt von „Ev.-Luth. Kirchenkreis Dithmarschen" nichts übrig. */
+.erf-traeger-zeile {
   display: flex;
   align-items: center;
-  gap: 2px;
-  /* Darf schrumpfen: lange Trägernamen liefen sonst aus dem Sheet heraus */
-  min-width: 0;
-  flex-shrink: 1;
-  border: none;
-  background: none;
-  padding: 8px 0;
-  margin: -8px 0;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--bg);
+  margin-bottom: 20px;
   font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--brand);
+  color: var(--text);
   cursor: pointer;
-  text-align: right;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
 
-/* Name kürzen statt überlaufen, Chevron bleibt immer sichtbar */
-.erf-traeger-btn > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.erf-traeger-zeile:hover {
+  border-color: var(--line-strong);
 }
 
-.erf-traeger-btn > svg {
+.erf-traeger-zeile:active {
+  background: var(--surface-3);
+}
+
+/* Chevron bleibt immer sichtbar, auch wenn der Name mehrzeilig wird */
+.erf-traeger-zeile > svg {
   flex-shrink: 0;
+  color: var(--text-2);
+}
+
+/* Kein ellipsis, kein max-width: der Name soll vollständig lesbar sein */
+.erf-traeger-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* Sagt unter einem ausgegrauten Knopf, was noch fehlt — leise, aber lesbar
+   (Textfarbe statt opacity, damit der Kontrast auch dunkel stimmt) */
+.erf-fehlt-hinweis {
+  margin-top: 8px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--text-2);
 }
 
 /* ============================================================

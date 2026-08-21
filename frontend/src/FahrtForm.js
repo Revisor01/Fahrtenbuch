@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Plus, X } from 'lucide-react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { Plus, X, Pencil } from 'lucide-react';
 import { AppContext } from './contexts/AppContext';
 import { renderOrteOptions } from './utils';
 import MitfahrerModal from './MitfahrerModal';
@@ -25,6 +25,10 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
   const [showMitfahrerModal, setShowMitfahrerModal] = useState(false);
   const [editingMitfahrerIndex, setEditingMitfahrerIndex] = useState(null);
   const [isKilometerLocked, setIsKilometerLocked] = useState(false);
+  // Der Nutzer hat die gepflegte Distanz bewusst uebersteuert („Aendern")
+  const [kmEntsperrt, setKmEntsperrt] = useState(false);
+  // Fehlermarkierung am Kilometerfeld statt eines nativen alert()
+  const [kmFehler, setKmFehler] = useState(false);
   const [ortSpeichernModal, setOrtSpeichernModal] = useState({
     isOpen: false,
     adresse: '',
@@ -64,7 +68,23 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     }
   }, [editData]);
 
+  // Die Strecke, mit der die Fahrt geladen wurde. Solange von- und Zielort
+  // unveraendert sind, bleiben die gespeicherten Kilometer stehen.
+  const ausgangsStrecke = useMemo(
+    () => ({
+      von: editData?.von_ort_id ? String(editData.von_ort_id) : '',
+      nach: editData?.nach_ort_id ? String(editData.nach_ort_id) : '',
+    }),
+    [editData]
+  );
+
+  // Zuletzt gepflegte Distanz der aktuellen Strecke — fuer „Distanz übernehmen"
+  const [gepflegteDistanz, setGepflegteDistanz] = useState(null);
+
   useEffect(() => {
+    const unveraendert =
+      formData.vonOrtId === ausgangsStrecke.von && formData.nachOrtId === ausgangsStrecke.nach;
+
     const fetchDistanz = async () => {
       if (formData.vonOrtId && formData.nachOrtId && !useEinmaligenVonOrt && !useEinmaligenNachOrt) {
         try {
@@ -75,29 +95,79 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
             }
           });
           if (response.data.distanz) {
-            setFormData(prev => ({ 
-              ...prev, 
-              manuelleKilometer: response.data.distanz.toString() 
-            }));
+            setGepflegteDistanz(response.data.distanz.toString());
+            // Bugfix: Beim Oeffnen einer bestehenden Fahrt duerfen die
+            // gespeicherten Kilometer NICHT durch die gepflegte Distanz
+            // ersetzt werden. Wer einen Umweg von Hand eingetragen hat,
+            // verlor ihn sonst durch blosses Oeffnen und Speichern. Erst
+            // wenn Start- oder Zielort tatsaechlich gewechselt haben, zieht
+            // die gepflegte Distanz.
+            if (!unveraendert) {
+              setFormData(prev => ({
+                ...prev,
+                manuelleKilometer: response.data.distanz.toString()
+              }));
+              setKmEntsperrt(false);
+            }
             setIsKilometerLocked(true);
           } else {
+            setGepflegteDistanz(null);
             setIsKilometerLocked(false);
           }
         } catch (error) {
           console.error('Fehler beim Abrufen der Distanz:', error);
+          setGepflegteDistanz(null);
           setIsKilometerLocked(false);
         }
       } else {
+        setGepflegteDistanz(null);
         setIsKilometerLocked(false);
       }
     };
+
     fetchDistanz();
-  }, [formData.vonOrtId, formData.nachOrtId, useEinmaligenVonOrt, useEinmaligenNachOrt]);
+  }, [
+    formData.vonOrtId,
+    formData.nachOrtId,
+    useEinmaligenVonOrt,
+    useEinmaligenNachOrt,
+    ausgangsStrecke,
+  ]);
+
+  useEffect(() => {
+    setKmFehler(false);
+  }, [formData.manuelleKilometer]);
+
+  // Der Wert im Feld weicht von der gepflegten Distanz ab — typisch fuer eine
+  // Fahrt mit Umweg, die von Hand korrigiert wurde. Der Hinweis muss das
+  // sagen, sonst behauptet er etwas Falsches.
+  const kmWeichtAb =
+    isKilometerLocked &&
+    gepflegteDistanz !== null &&
+    String(formData.manuelleKilometer) !== String(gepflegteDistanz);
 
   // Bugfix Redesign R3: Der frühere Mount-Effect setzte den Abrechnungsträger
   // asynchron auf den Default und überschrieb damit im Edit-Modus den
   // bestehenden Wert der Fahrt. Die Trägerliste kommt aus dem AppContext
   // (refreshAllData) — hier wird kein Default mehr gesetzt.
+
+  // Nur aktive Traeger zur Auswahl — wie im Erfassungsflow. Der aktuell an
+  // der Fahrt haengende Traeger bleibt aber drin, auch wenn er inzwischen
+  // stillgelegt wurde: Sonst stuende das Feld beim Oeffnen leer da und die
+  // Fahrt liesse sich nicht mehr unveraendert speichern.
+  const waehlbareTraeger = useMemo(() => {
+    const liste = (abrechnungstraeger || []).filter(
+      (t) => t.active !== 0 && t.active !== false
+    );
+    const aktuell = formData.abrechnung;
+    if (aktuell && !liste.some((t) => String(t.id) === String(aktuell))) {
+      const inaktiv = (abrechnungstraeger || []).find(
+        (t) => String(t.id) === String(aktuell)
+      );
+      if (inaktiv) return [...liste, inaktiv];
+    }
+    return liste;
+  }, [abrechnungstraeger, formData.abrechnung]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -111,7 +181,11 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     e.preventDefault();
     
     if ((useEinmaligenVonOrt || useEinmaligenNachOrt) && !formData.manuelleKilometer) {
-      alert('Bitte geben Sie die Kilometer manuell ein, wenn Sie einen einmaligen Ort verwenden.');
+      setKmFehler(true);
+      showNotification(
+        'Fehler',
+        'Bitte die Kilometer eintragen, wenn ein einmaliger Ort verwendet wird.'
+      );
       return;
     }
     
@@ -310,11 +384,39 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     )}
     </div>
     
+    </div>
+
     {/* Kilometer und Abrechnung */}
     <div className="form-row">
     <div className="form-group-fixed">
-    <label className="form-label">Kilometer</label>
+    <div className="form-label-with-checkbox">
+    <label className="form-label" htmlFor="fahrt-km-input">Kilometer</label>
+    {/* Statt das Feld stumm zu sperren: Es steht dran, woher der Wert kommt,
+        und ein Tipp gibt ihn frei. Eine Fahrt mit Umweg liess sich vorher
+        nicht mehr korrigieren. */}
+    {isKilometerLocked && (
+      <button
+      type="button"
+      onClick={() => {
+        // „Distanz übernehmen": gepflegten Wert wieder eintragen.
+        // „Ändern": Feld freigeben, Wert bleibt stehen.
+        if ((kmEntsperrt || kmWeichtAb) && gepflegteDistanz) {
+          setFormData(prev => ({ ...prev, manuelleKilometer: gepflegteDistanz }));
+          setKmEntsperrt(false);
+          return;
+        }
+        setKmEntsperrt(true);
+      }}
+      className="text-xs text-primary-500 hover:text-primary-600"
+      title="Kilometer von Hand korrigieren"
+      >
+      <Pencil size={12} aria-hidden="true" className="inline-block mr-1" />
+      {kmEntsperrt || kmWeichtAb ? 'Distanz übernehmen' : 'Ändern'}
+      </button>
+    )}
+    </div>
     <input
+    id="fahrt-km-input"
     type="number"
     name="manuelleKilometer"
     value={formData.manuelleKilometer}
@@ -322,14 +424,25 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     placeholder="km"
     className="form-input"
     required
-    disabled={isKilometerLocked}
+    readOnly={isKilometerLocked && !kmEntsperrt && !kmWeichtAb}
+    aria-invalid={kmFehler ? 'true' : undefined}
+    aria-describedby={isKilometerLocked ? 'fahrt-km-hinweis' : undefined}
     step="1"
     />
+    {isKilometerLocked && (
+      <p id="fahrt-km-hinweis" className="text-xs text-muted mt-1">
+      {kmWeichtAb
+        ? `Eigener Wert. Gepflegte Distanz: ${gepflegteDistanz} km.`
+        : kmEntsperrt
+        ? 'Kann jetzt von Hand geändert werden.'
+        : 'Aus der gepflegten Distanz. Über „Ändern" von Hand korrigieren.'}
+      </p>
+    )}
     </div>
     
     <div className="form-group">
-    <label className="form-label">Abrechnung</label>
-    {abrechnungstraeger.length > 0 ? (
+    <label className="form-label">Abrechnungsträger</label>
+    {waehlbareTraeger.length > 0 ? (
       <select
       name="abrechnung"
       value={formData.abrechnung}
@@ -338,7 +451,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       required
       >
       <option value="">Bitte wählen</option>
-      {abrechnungstraeger.map(traeger => (
+      {waehlbareTraeger.map(traeger => (
         <option key={traeger.id} value={traeger.id}>{traeger.name}</option>
       ))}
       </select>
@@ -347,7 +460,6 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       Keine Abrechnungsträger verfügbar
       </div>
     )}
-    </div>
     </div>
     </div>
     
