@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  MapPin, Building2, Coins, Star, User, SunMoon, Key, Users, Globe,
+  MapPin, Building2, Coins, Star, User, SunMoon, Key, Users, Globe, Tag,
   ChevronRight, ArrowLeft, Bell, Info, HelpCircle, LogOut,
 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import UserManagement from '../../UserManagement';
 import OrteDistanzenBereich from './OrteDistanzenBereich';
+import AnlassBereich from './AnlassBereich';
 import TraegerBereich from './TraegerBereich';
 import ErstattungBereich from './ErstattungBereich';
 import FavoritenBereich from './FavoritenBereich';
@@ -27,6 +28,7 @@ import { IST_NATIVE } from '../../utils/plattform';
 const BEREICHE = [
   { id: 'profil', label: 'Profil & Passwort', Icon: User, Component: ProfilBereich },
   { id: 'orte', label: 'Orte & Distanzen', Icon: MapPin, Component: OrteDistanzenBereich },
+  { id: 'anlaesse', label: 'Anlässe', Icon: Tag, Component: AnlassBereich },
   { id: 'traeger', label: 'Abrechnungsträger', Icon: Building2, Component: TraegerBereich },
   { id: 'erstattung', label: 'Erstattungssätze', Icon: Coins, Component: ErstattungBereich },
   { id: 'favoriten', label: 'Favoriten', Icon: Star, Component: FavoritenBereich },
@@ -46,6 +48,8 @@ const LEGACY_MAP = {
   erstattungssaetze: 'erstattung',
   distanzen: 'orte',
   mitfahrer: 'erstattung',
+  // Singular-Schreibweise abfangen, damit ein Deeplink nicht ins Leere läuft
+  anlass: 'anlaesse',
 };
 
 function EinstellungenView({ initialTab, onShowInfo, onShowNewFeatures }) {
