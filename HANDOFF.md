@@ -4,9 +4,15 @@
 
 ## Wo wir stehen
 
-**iOS: Build 16 in TestFlight** (`IN_BETA_TESTING`, App-ID `6801855861`).
-Native Navigationsleisten, Kirchenkreis-Auswahl, Registrierung, Export über
-das Teilen-Fenster, Anmeldung im Systemspeicher.
+**iOS: Build 18 in TestFlight** (`IN_BETA_TESTING`, App-ID `6801855861`,
+Version 2.3.0, hochgeladen 21.08.2026). Enthält den Umbau des
+Erfassungs-Modals: Startort, Datum und Abrechnungsträger ohne
+Zwischenschritt, Trägername vollständig lesbar. Dazu die Fixes aus dem
+Usability-Audit — Esc schließt nur noch das oberste Fenster, und das
+Bearbeiten-Formular überschreibt manuell gesetzte Kilometer nicht mehr.
+
+Davor: Build 16 mit nativen Navigationsleisten, Kirchenkreis-Auswahl,
+Registrierung, Export über das Teilen-Fenster, Anmeldung im Systemspeicher.
 
 **Web/Produktion wurde heute deployt** — siehe eigener Abschnitt unten.
 2.470 Fahrten, 31 Nutzer, nach dem Deploy nachgeprüft und unverändert.
@@ -125,7 +131,13 @@ Vier Fallstricke, die je einen Fehlversuch gekostet haben:
    („Your session has expired"); dann findet der Export das Profil über den
    Namen nicht und bricht mit „requires a provisioning profile" ab. UUID für
    „Fahrtenbuch AppStore": `3a6d3cd4-3301-4640-baca-360e58acdab9`.
-   Export-Plist liegt unter `/tmp/ExportOptions15.plist`.
+   Export-Plist unter `/tmp/ExportOptions<Build>.plist` — **`/tmp` wird
+   geleert**, die Datei ist beim nächsten Mal weg und muss neu geschrieben
+   werden (`method: app-store-connect`, `signingStyle: manual`, Profil per
+   UUID unter `provisioningProfiles` → `de.godsapp.fahrtenbuch`).
+   Die abgelaufene Sitzung meldet sich beim Export weiterhin als
+   „Your session has expired" — mit der UUID läuft er trotzdem durch,
+   maßgeblich ist `** EXPORT SUCCEEDED **`.
 
 Danach `xcrun altool --upload-app`, Verschlüsselungserklärung per API setzen
 (`usesNonExemptEncryption: false`). Testgruppe ist intern — Builds landen
