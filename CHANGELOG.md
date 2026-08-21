@@ -56,6 +56,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- In der App verdeckte die Tastatur das Eingabefeld, in das man gerade schreibt — etwa beim Anlegen in den Einstellungen. Das Feld wird jetzt in jedem Fenster mit hochgeschoben und bleibt sichtbar, auch beim Wechsel ins nächste Feld
 - Die Mitnahmeentschädigung im Abrechnungsformular rechnete alle Fahrten mit dem zuletzt eingetragenen Satz, auch ältere. Wurde der Satz zum Beispiel zum 1. Juli erhöht, wies eine Abrechnung über Mai bis Juli auch für Mai und Juni zu hohe Beträge aus, und ein erst künftig gültiger Satz wirkte bereits. Jede Fahrt wird jetzt mit dem Satz gerechnet, der an ihrem Datum galt; wechselt der Satz innerhalb des Zeitraums, weist das Formular den sich ergebenden Mischsatz aus
 - Wurde direkt nach dem Speichern „Rückgängig" getippt, während die Fahrt noch gesichert wurde, konnte die Rückfahrt trotzdem angelegt werden und blieb ohne Verbindung zur Hinfahrt stehen — sie wäre unbemerkt mit abgerechnet worden. „Rückgängig" nimmt jetzt in jedem Fall beide Fahrten zurück
 - Wurde bei einer Mitfahrerin die Richtung geändert oder ein Tippfehler im Namen korrigiert, verschwand sie beim Speichern ganz aus der Fahrt — bei verknüpften Hin- und Rückfahrten sogar aus beiden. Die Erstattung fehlte damit unbemerkt in der Abrechnung. Änderungen werden jetzt übernommen, ohne den Eintrag zu entfernen

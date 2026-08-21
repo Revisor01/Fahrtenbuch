@@ -16,12 +16,49 @@ import { IST_NATIVE } from './plattform';
 
 let abmelden = null;
 
+// Zuletzt gemeldete Hoehe. Ein Sheet, das mitten in offener Tastatur geoeffnet
+// wird, kann so sofort erkennen, dass Platz fehlt — ohne auf ein weiteres
+// Ereignis warten zu muessen, das nie kommt.
+let aktuelleHoehe = 0;
+
+// Wer auf Hoehenaenderungen reagieren muss (Sheets scrollen das fokussierte
+// Feld in den sichtbaren Bereich), meldet sich hier an. Bewusst ein eigener
+// Verteiler statt eines DOM-Ereignisses: So bleibt der Vertrag im Modul
+// sichtbar, und die Abmeldung ist an den Aufrufer gebunden.
+const zuhoerer = new Set();
+
+function melden(hoehe) {
+  aktuelleHoehe = hoehe;
+  zuhoerer.forEach((fn) => {
+    try {
+      fn(hoehe);
+    } catch {
+      // Ein fehlerhafter Zuhoerer darf die anderen nicht mitreissen.
+    }
+  });
+}
+
+// Aktuelle Tastaturhoehe in Pixeln (0, wenn zu oder im Browser).
+export function tastaturHoehe() {
+  return aktuelleHoehe;
+}
+
+// Meldet einen Rueckruf an, der bei jeder Hoehenaenderung laeuft — inklusive
+// des Schliessens (dann mit 0). Gibt die Abmeldefunktion zurueck.
+export function tastaturAbonnieren(rueckruf) {
+  if (typeof rueckruf !== 'function') return () => {};
+  zuhoerer.add(rueckruf);
+  return () => zuhoerer.delete(rueckruf);
+}
+
 export function tastaturBeobachten() {
   if (!IST_NATIVE || typeof window === 'undefined') return () => {};
   if (abmelden) return abmelden;
 
   const setze = (hoehe) => {
-    document.documentElement.style.setProperty('--tastatur', `${Math.round(hoehe)}px`);
+    const gerundet = Math.round(hoehe);
+    document.documentElement.style.setProperty('--tastatur', `${gerundet}px`);
+    melden(gerundet);
   };
 
   const handles = [];
