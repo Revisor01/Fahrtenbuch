@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { overlayAnmelden } from '../../utils/overlayStack';
+import { tastaturAbonnieren, tastaturHoehe } from '../../utils/tastatur';
 
 // Bottom-Sheet nach Design-Spec (Redesign 2026):
 // - mobil: --surface, border-radius 28px 28px 0 0, Griff 44×5px --line-strong,
@@ -12,6 +13,12 @@ import { overlayAnmelden } from '../../utils/overlayStack';
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+// Luft zwischen dem fokussierten Feld und dem Rand des Scrollbereichs, wenn
+// das Feld in den sichtbaren Ausschnitt geholt wird. Ohne diesen Abstand
+// klebt das Feld exakt an der Tastaturkante — ein darunter liegender
+// Fehlertext oder Autocomplete-Vorschlag bliebe verdeckt.
+const FOKUS_ABSTAND = 12;
 
 // Ab hier gilt ein Zug nach unten als Schliessen statt als Zurueckfedern.
 // 96px entspricht etwa der Griffzone plus Titelzeile — kurz genug, dass die
@@ -147,6 +154,122 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
     };
     // Bewusst nur [isOpen]: Fokus setzen und nach oben scrollen darf genau
     // einmal beim Oeffnen passieren, nicht bei jedem neuen onClose-Callback.
+  }, [isOpen]);
+
+  // ---------- Fokussiertes Feld sichtbar halten ----------
+  // Die Tastaturhoehe schrumpft das Sheet zwar (--tastatur in index.css), aber
+  // niemand holte das Feld in den verbleibenden Ausschnitt: Steht es weiter
+  // unten im Formular, liegt es nach dem Schrumpfen ausserhalb von
+  // .sheet-koerper — der Nutzer sah seine eigene Eingabe nicht (TestFlight 19).
+  //
+  // Zwei Ausloeser, weil es zwei Faelle gibt:
+  //   1. Tastatur faehrt hoch -> Geometrie aendert sich, Fokus steht schon.
+  //   2. Tastatur ist offen, der Nutzer springt ins naechste Feld -> Geometrie
+  //      bleibt, der Fokus wandert.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const panel = panelRef.current;
+    if (!panel) return undefined;
+
+    let frame = null;
+
+    const sichtbarMachen = () => {
+      const koerper = koerperRef.current;
+      const ziel = document.activeElement;
+      if (!koerper || !ziel || !koerper.contains(ziel)) return;
+
+      const rahmen = koerper.getBoundingClientRect();
+      const feld = ziel.getBoundingClientRect();
+
+      // scrollIntoView haetten wir auch nehmen koennen, aber es scrollt in
+      // WKWebView zusaetzlich den aeusseren Viewport mit und schiebt dabei das
+      // ganze Sheet aus dem Bild. Deshalb von Hand und ausschliesslich auf dem
+      // Koerper: Nur was wirklich ueber- oder untersteht, wird ausgeglichen.
+      const untenDrueber = feld.bottom - (rahmen.bottom - FOKUS_ABSTAND);
+      const obenDrueber = rahmen.top + FOKUS_ABSTAND - feld.top;
+
+      if (untenDrueber > 0) {
+        koerper.scrollTop += untenDrueber;
+      } else if (obenDrueber > 0) {
+        koerper.scrollTop -= obenDrueber;
+      }
+    };
+
+    // Erst nach dem naechsten Bild rechnen: Beim Hochfahren der Tastatur ist
+    // --tastatur zwar gesetzt, die neue max-height des Panels aber noch nicht
+    // umgebrochen. Ohne die Verzoegerung scrollt es gegen die alte Geometrie.
+    // Der zweite Anlauf per Timeout faengt die Animation der Tastatur ab, die
+    // laenger laeuft als ein Frame.
+    // Nicht auf feste Zeitpunkte verlassen: Wann keyboardWillShow feuert und
+    // wie lange iOS die Tastatur einblendet, ist nicht zugesichert. Statt
+    // einmal nach einem Frame und einmal nach 320ms zu rechnen, wird so lange
+    // nachgefuehrt, wie sich die Geometrie noch bewegt — und danach noch kurz
+    // weiter, damit auch ein spaeter Nachschlag von iOS aufgefangen wird.
+    // Ausgleich nach jeder Hoehenaenderung — ereignisgesteuert statt nach
+    // festen Zeitpunkten.
+    //
+    // Zeitsteuerung war hier zweimal falsch: Ein fester Zeitpunkt (320ms)
+    // verfehlt eine langsamer einfahrende Tastatur, und "warten, bis die
+    // Hoehe still steht" bricht sofort ab, weil beim Aufruf noch gar nichts
+    // in Bewegung ist. Der ResizeObserver meldet dagegen genau dann, wenn
+    // sich die Hoehe des Koerpers tatsaechlich geaendert hat — egal wie
+    // lange iOS dafuer braucht.
+    const nachrechnen = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        sichtbarMachen();
+      });
+    };
+
+    const beiFokus = (e) => {
+      // Nur Eingaben: Ein fokussierter Knopf (etwa nach dem Oeffnen das Panel
+      // selbst) soll den Inhalt nicht verschieben.
+      const ziel = e.target;
+      if (!ziel || !ziel.matches?.('input, textarea, select, [contenteditable="true"]')) return;
+      nachrechnen();
+    };
+
+    panel.addEventListener('focusin', beiFokus);
+    // Auch waehrend des Tippens nachfuehren: Die Tastatur aendert ihre Hoehe,
+    // wenn die Vorschlagsleiste erscheint oder auf Emoji umgeschaltet wird.
+    // Ohne das rutscht das Feld mitten im Schreiben wieder darunter.
+    panel.addEventListener('input', beiFokus);
+
+    // Der eigentliche Ausloeser: Sobald die Tastatur die Hoehe des
+    // Scrollbereichs veraendert, wird nachgerechnet. Das greift bei jeder
+    // Einblendgeschwindigkeit und auch dann, wenn iOS die Hoehe in mehreren
+    // Stufen meldet.
+    let beobachter = null;
+    if (typeof ResizeObserver !== 'undefined' && koerperRef.current) {
+      beobachter = new ResizeObserver(() => {
+        // Nur nachfuehren, solange wirklich in einem Feld getippt wird.
+        const ziel = document.activeElement;
+        if (ziel && koerperRef.current?.contains(ziel)) nachrechnen();
+      });
+      beobachter.observe(koerperRef.current);
+    }
+
+    // Hoehenaenderung der Tastatur. Im Browser meldet sich hier nie jemand —
+    // dort bleibt --tastatur 0px und der visuelle Viewport regelt es selbst.
+    const abTastatur = tastaturAbonnieren((hoehe) => {
+      if (hoehe > 0) nachrechnen();
+    });
+
+    // Sheet wurde bei bereits offener Tastatur geoeffnet (etwa ein gestapeltes
+    // Sheet aus einem Formular heraus): Dann kommt kein keyboardWillShow mehr.
+    if (tastaturHoehe() > 0) nachrechnen();
+
+    return () => {
+      panel.removeEventListener('focusin', beiFokus);
+      panel.removeEventListener('input', beiFokus);
+      beobachter?.disconnect();
+      abTastatur();
+      if (frame) cancelAnimationFrame(frame);
+
+    };
+    // Wie beim Effekt darueber bewusst nur [isOpen]: Der Handler greift ueber
+    // Refs auf Panel und Koerper zu und muss nicht bei jedem Render neu haengen.
   }, [isOpen]);
 
   // ---------- Wischen zum Schliessen ----------
