@@ -11,6 +11,7 @@ const distanzenRoutes = require('./routes/distanzen');
 const abrechnungstraegerRoutes = require('./routes/abrechnungstraeger');
 const mitfahrerErstattungRoutes = require('./routes/mitfahrerErstattung');
 const favoritenRoutes = require('./routes/favoriten');
+const anlaesseRoutes = require('./routes/anlaesse');
 const apiKeyRoutes = require('./routes/apiKeys');
 const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
@@ -128,6 +129,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/abrechnungstraeger', authMiddleware, abrechnungstraegerRoutes);
 app.use('/api/mitfahrer-erstattung', authMiddleware, mitfahrerErstattungRoutes);
 app.use('/api/favoriten', authMiddleware, favoritenRoutes);
+app.use('/api/anlaesse', anlaesseRoutes);
 
 // Unbekannte API-Pfade als JSON beantworten, nicht mit der SPA
 app.use('/api', (req, res) => {

@@ -8,6 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased] - 2.3.0
 
 ### Hinzugefügt
+- Anlässe lassen sich als eigene Liste pflegen und beim Erfassen einer Fahrt direkt auswählen; neue Anlässe können dabei ohne Umweg angelegt werden. Häufig genutzte stehen oben. Die bisher genutzten Anlässe werden einmalig übernommen, und das Löschen eines Anlasses lässt bereits erfasste Fahrten unverändert
 - Langes Tippen auf das App-Symbol bietet „Fahrt erfassen" und „Letzte Fahrt wiederholen" an — beide öffnen die Erfassung direkt, ohne den Umweg über die Startseite
 - Ein Tipp auf einen Balken im Kilometer-Diagramm zeigt die Werte des Monats: Kilometer, Anzahl der Fahrten, Erstattung und Status. Am Rechner genügt weiterhin der Mauszeiger
 - Das Fahrtenbuch lässt sich als App auf Startbildschirm oder Desktop installieren und startet dann ohne Browser-Leiste
@@ -23,6 +24,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Von der Anmeldung der App führt ein Weg zurück zur Auswahl der Kirchenkreise, falls man sich vertan hat
 
 ### Geändert
+- Startort, Datum, Anlass und Abrechnungsträger klappen ihre Auswahl jetzt mit einem Tipp direkt auf, statt erst ein Zwischenmenü zu zeigen. Beim Datum öffnet sich die Auswahl des Geräts sofort
+- „Fahrt bearbeiten" ist genauso aufgebaut wie das Erfassen einer Fahrt: dieselbe Auswahl für Orte, Datum, Anlass und Abrechnungsträger. Die Angabe „Einmaliger Ort" entfällt — eine einmalige Adresse steht jetzt als letzter Eintrag in der Ortsliste
+- Ist für eine Strecke bereits eine Entfernung hinterlegt, zeigt das Bearbeiten-Fenster kein Kilometerfeld mehr, sondern die Kilometer samt Stift zum Korrigieren — wie beim Erfassen
 - Die Übersicht über der Fahrtenliste zeigt jetzt Anzahl der Fahrten, Kilometer und Erstattung nebeneinander und darunter jeden Abrechnungsträger mit seiner Summe. Damit steht der ganze Monat auf einen Blick da, ohne in die Abrechnung zu wechseln
 - Jede Fahrt steht jetzt in einer eigenen Karte: oben das Datum, darunter der Anlass und der Weg in einer Zeile, rechts Erstattung und Kilometer. Lange Anlässe werden nicht mehr abgeschnitten
 - Statt „+1" stehen bei einer Fahrt jetzt die Namen der Mitfahrer:innen
@@ -52,6 +56,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- Wurde bei einer Mitfahrerin die Richtung geändert oder ein Tippfehler im Namen korrigiert, verschwand sie beim Speichern ganz aus der Fahrt — bei verknüpften Hin- und Rückfahrten sogar aus beiden. Die Erstattung fehlte damit unbemerkt in der Abrechnung. Änderungen werden jetzt übernommen, ohne den Eintrag zu entfernen
+- Beim Bearbeiten einer Fahrt, die mit einer Gegenfahrt verknüpft ist, konnten Mitfahrer:innen der anderen Fahrt verloren gehen, obwohl sie gar nicht angefasst wurden — etwa beim bloßen Korrigieren der Kilometer. Es verschwindet jetzt nur noch, was tatsächlich entfernt wurde
+- Wurde eine Mitfahrerin von „Hin- und Rückfahrt" auf eine einzelne Richtung umgestellt, blieb sie an der Gegenfahrt weiterhin für beide Strecken eingetragen und wurde doppelt erstattet. Beide Fahrten bleiben jetzt stimmig
 - Beim Anlegen einer Fahrt wurde der Abrechnungsträger mitten im Namen abgeschnitten, während das Wort „Abrechnungsträger" groß daneben stand. Jetzt steht der Name groß und vollständig da, notfalls über zwei Zeilen, und die Bezeichnung klein darüber
 - Beim Bearbeiten einer Fahrt wurden von Hand eingetragene Kilometer beim Öffnen stillschweigend durch die hinterlegte Entfernung ersetzt — ein eingetragener Umweg ging beim nächsten Speichern verloren. Die eingetragenen Kilometer bleiben jetzt stehen; die hinterlegte Entfernung lässt sich auf Wunsch übernehmen
 - Die Esc-Taste schloss zwei übereinanderliegende Fenster gleichzeitig — wer aus der Erfassung heraus Mitfahrer:innen eintrug, verlor damit die halb erfasste Fahrt. Sie schließt jetzt immer nur das oberste Fenster
