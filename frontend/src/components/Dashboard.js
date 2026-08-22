@@ -576,15 +576,13 @@ function Dashboard({ onNavigate }) {
   });
 
   const favoritenLeer = (
-    <div className="dash-block">
-      <EmptyState
-        icon={<Star size={20} />}
-        title="Noch keine Favoriten"
-        text="Lege häufige Strecken als Favorit an — ein Tipp genügt dann zum Erfassen."
-        actionLabel="Favorit anlegen"
-        onAction={() => onNavigate && onNavigate('einstellungen:favoriten')}
-      />
-    </div>
+    <EmptyState
+      icon={<Star size={20} />}
+      title="Noch keine Favoriten"
+      text="Lege häufige Strecken als Favorit an — ein Tipp genügt dann zum Erfassen."
+      actionLabel="Favorit anlegen"
+      onAction={() => onNavigate && onNavigate('einstellungen:favoriten')}
+    />
   );
 
   return (
@@ -621,19 +619,25 @@ function Dashboard({ onNavigate }) {
           </section>
         ) : heroErfolg}
 
-        <div className="dash-label-row">
-          <span className="dash-label">Ein Tipp genügt</span>
-          <button
-            type="button"
-            className="dash-link"
-            onClick={() => onNavigate && onNavigate('einstellungen:favoriten')}
-          >
-            Alle
-          </button>
-        </div>
-        {favoriten.length === 0 ? favoritenLeer : (
-          <div className="dash-fav-grid">{favTiles}</div>
-        )}
+        {/* Favoriten stehen als eigene Flaeche zwischen Status und „Zuletzt".
+            Sie gingen zwischen den weissen Karten unter (Simon 21.08.) —
+            der Schnellzugriff muss auf einen Blick als solcher erkennbar
+            sein, ohne laut zu werden. */}
+        <section className="dash-favsektion" aria-label="Favoriten">
+          <div className="dash-label-row dash-favsektion-kopf">
+            <span className="dash-label dash-favsektion-label">Ein Tipp genügt</span>
+            <button
+              type="button"
+              className="dash-link"
+              onClick={() => onNavigate && onNavigate('einstellungen:favoriten')}
+            >
+              Alle
+            </button>
+          </div>
+          {favoriten.length === 0 ? favoritenLeer : (
+            <div className="dash-fav-grid">{favTiles}</div>
+          )}
+        </section>
 
         <div className="dash-label-row">
           <span className="dash-label">Zuletzt</span>
@@ -813,9 +817,9 @@ function Dashboard({ onNavigate }) {
 
         {/* Favoriten auch auf dem Desktop (User-Feedback 07.08.) */}
         {favoriten.length > 0 && (
-          <section className="dash-d-favsektion">
-            <div className="dash-label-row">
-              <span className="dash-label">Ein Tipp genügt</span>
+          <section className="dash-favsektion dash-d-favsektion" aria-label="Favoriten">
+            <div className="dash-label-row dash-favsektion-kopf">
+              <span className="dash-label dash-favsektion-label">Ein Tipp genügt</span>
               <button
                 type="button"
                 className="dash-link"

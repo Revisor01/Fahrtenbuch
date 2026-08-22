@@ -199,15 +199,31 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     });
   }, [orte]);
 
+  // Die Ortsliste erscheint erst beim Tippen — eine Vorabliste aller Orte
+  // stand nur im Weg und schob Datum/Startort aus dem Bild.
+  const zielSucheClean = suche.trim();
+
   const gefilterteZiele = useMemo(() => {
-    const q = suche.trim().toLowerCase();
-    if (!q) return sortierteZiele;
+    const q = zielSucheClean.toLowerCase();
+    if (!q) return [];
     return sortierteZiele.filter(
       (o) =>
         o.name.toLowerCase().includes(q) ||
         (o.adresse && o.adresse.toLowerCase().includes(q))
     );
-  }, [sortierteZiele, suche]);
+  }, [sortierteZiele, zielSucheClean]);
+
+  // Startorte werden ebenfalls erst getippt gesucht; ohne Eingabe bleibt die
+  // Liste leer, damit das Suchfeld nicht in einer Wand aus Orten untergeht.
+  const gefilterteStartorte = useMemo(() => {
+    const q = startSuche.trim().toLowerCase();
+    if (!q) return [];
+    return sortierteStartorte.filter(
+      (o) =>
+        o.name.toLowerCase().includes(q) ||
+        (o.adresse && o.adresse.toLowerCase().includes(q))
+    );
+  }, [sortierteStartorte, startSuche]);
 
   // Live-Adressen zusätzlich zur eigenen Ortsliste — kein Chip-Klick nötig.
   // Erst ab 3 Zeichen und nur, wenn die eigenen Orte wenig hergeben.
@@ -714,6 +730,12 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   if (step === 1) {
     return (
       <Sheet isOpen={isOpen} onClose={onClose} title="Wohin?">
+        {/* Datum zuerst — gleiche Reihenfolge wie im Bearbeiten-Formular */}
+        <div className="erf-feld">
+          <span className="erf-feld-label">Wann</span>
+          <DatumsFeld datum={datum} setDatum={setDatum} />
+        </div>
+
         {/* Ab-Ort dauerhaft sichtbar: es muss immer klar sein, von wo es losgeht */}
         <div className="erf-feld">
           <span className="erf-feld-label">Von</span>
@@ -743,37 +765,24 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           )}
         </div>
 
-        {/* Ein Tap auf „Von" zeigt die Orte direkt — kein Zwischenmenü */}
+        {/* Ein Tap auf „Von" öffnet ein echtes Suchfeld — Treffer ab dem
+            ersten Buchstaben, eigene Orte und Live-Adressen in einer Liste. */}
         {editStart && (
           <div className="erf-start-auswahl">
-            <div className="erf-ort-liste">
-              {sortierteStartorte.map((o) => {
-                const gewaehlt = !freierStart && String(o.id) === String(effStartOrtId);
-                return (
-                  <button
-                    key={o.id}
-                    type="button"
-                    className={`erf-ort-row${gewaehlt ? ' is-selected' : ''}`}
-                    onClick={() => {
-                      setStartOrtId(String(o.id));
-                      setFreierStart(null);
-                      // Manuelle km gehoeren zur alten Strecke
-                      setKmManuell('');
-                      setEditStart(false);
-                    }}
-                  >
-                    <span className="erf-ort-main">
-                      <span className="erf-ort-name">{o.name}</span>
-                      {o.adresse && <span className="erf-ort-sub">{o.adresse}</span>}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <StartAdressSuche
+            <StartSuche
               wert={startSuche}
               setWert={setStartSuche}
-              onWahl={(v) => {
+              orte={gefilterteStartorte}
+              aktiveId={freierStart ? null : effStartOrtId}
+              onOrt={(o) => {
+                setStartOrtId(String(o.id));
+                setFreierStart(null);
+                // Manuelle km gehoeren zur alten Strecke
+                setKmManuell('');
+                setStartSuche('');
+                setEditStart(false);
+              }}
+              onAdresse={(v) => {
                 setFreierStart(v);
                 setStartOrtId(null);
                 setStartSuche('');
@@ -783,11 +792,6 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
             />
           </div>
         )}
-
-        <div className="erf-feld">
-          <span className="erf-feld-label">Wann</span>
-          <DatumsFeld datum={datum} setDatum={setDatum} />
-        </div>
 
         {/* Eine Suche für beides: eigene Orte und Live-Adressen */}
         <span className="erf-feld-label">Nach</span>
@@ -809,6 +813,15 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           />
         </div>
 
+        {/* Ohne Eingabe steht hier bewusst nur ein Hinweis statt einer Wand
+            aus Orten — der Nutzer soll direkt lostippen. */}
+        {zielSucheClean.length === 0 && !zielAdresse ? (
+          <div className="erf-ort-liste">
+            <span className="erf-liste-hinweis">
+              Tippen, um einen Ort oder eine Adresse zu suchen.
+            </span>
+          </div>
+        ) : (
         <div className="erf-ort-liste">
           {gefilterteZiele.map((o) => {
             const gewaehlt = !zielAdresse && String(o.id) === String(zielOrtId);
@@ -873,13 +886,14 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           )}
 
           {!adressenLaden &&
-            suche.trim().length >= 3 &&
+            zielSucheClean.length >= 3 &&
             gefilterteZiele.length === 0 &&
             neueAdressen.length === 0 &&
             !zielAdresse && (
               <span className="erf-liste-hinweis">Nichts gefunden — Schreibweise prüfen.</span>
             )}
         </div>
+        )}
 
         {/* Nur bei frisch gewählter Adresse: dauerhaft in die eigene Liste */}
         {zielAdresse && (
@@ -1332,36 +1346,83 @@ function FehltHinweis({ text }) {
   );
 }
 
-// Adresssuche für den Startort — nur nötig, wenn der Ab-Ort nicht in der
-// eigenen Ortsliste steht (z. B. unterwegs gestartet).
-function StartAdressSuche({ wert, setWert, onWahl }) {
+// Startort-Suche: ein Feld für beides — eigene Orte und Live-Adressen. Die
+// Liste erscheint erst beim Tippen; ohne Eingabe steht nur der Hinweis da,
+// damit kein leerer Block entsteht. Autofokus, weil das Feld erst auf einen
+// Tap auf „Von" erscheint — der zweite Tap ins Feld wäre überflüssig.
+function StartSuche({ wert, setWert, orte, aktiveId, onOrt, onAdresse }) {
   const { vorschlaege, laedt } = useAdressSuche(wert);
+  const feldRef = useRef(null);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => feldRef.current?.focus(), 60);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  // Adressen ausblenden, die bereits als eigener Ort getroffen wurden
+  const bekannt = new Set(orte.map((o) => o.name.toLowerCase()));
+  const neueAdressen = vorschlaege.filter((v) => !bekannt.has(v.text.toLowerCase()));
+  const q = wert.trim();
+
   return (
     <div className="erf-start-suche">
       <div className="erf-search">
         <Search size={17} aria-hidden="true" />
         <input
           type="text"
+          ref={feldRef}
           value={wert}
           onChange={(e) => setWert(e.target.value)}
-          placeholder="oder Adresse suchen"
-          aria-label="Startadresse suchen"
+          placeholder="Ort oder Adresse suchen"
+          aria-label="Startort suchen"
         />
       </div>
-      {vorschlaege.length > 0 && (
-        <ul className="adr-liste adr-liste-inline" role="listbox">
-          {vorschlaege.map((v) => (
-            <li key={v.id} role="option" aria-selected="false">
-              <button type="button" className="adr-option" onClick={() => onWahl(v)}>
-                <MapPin size={15} aria-hidden="true" />
-                <span>{v.text}</span>
-              </button>
-            </li>
+
+      {q.length === 0 ? (
+        <span className="erf-liste-hinweis">Tippen, um einen Ort oder eine Adresse zu suchen.</span>
+      ) : (
+        <div className="erf-ort-liste">
+          {orte.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              className={`erf-ort-row${String(o.id) === String(aktiveId) ? ' is-selected' : ''}`}
+              onClick={() => onOrt(o)}
+            >
+              <span className="erf-ort-main">
+                <span className="erf-ort-name">{o.name}</span>
+                {o.adresse && <span className="erf-ort-sub">{o.adresse}</span>}
+              </span>
+            </button>
           ))}
-        </ul>
-      )}
-      {laedt && vorschlaege.length === 0 && (
-        <span className="erf-liste-hinweis">Adressen werden gesucht…</span>
+
+          {neueAdressen.length > 0 && (
+            <>
+              <span className="erf-liste-trenner">Adressen aus der Karte</span>
+              {neueAdressen.map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  className="erf-ort-row erf-ort-row-adresse"
+                  onClick={() => onAdresse(v)}
+                >
+                  <MapPin size={16} aria-hidden="true" className="erf-adresse-icon" />
+                  <span className="erf-ort-main">
+                    <span className="erf-ort-name">{v.text}</span>
+                  </span>
+                </button>
+              ))}
+            </>
+          )}
+
+          {laedt && neueAdressen.length === 0 && (
+            <span className="erf-liste-hinweis">Adressen werden gesucht…</span>
+          )}
+
+          {!laedt && orte.length === 0 && neueAdressen.length === 0 && q.length >= 3 && (
+            <span className="erf-liste-hinweis">Nichts gefunden — Schreibweise prüfen.</span>
+          )}
+        </div>
       )}
     </div>
   );
