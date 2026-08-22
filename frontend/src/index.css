@@ -6728,32 +6728,8 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
 }
 
 /* ========================================================================
-   Anlässe (Einstellungen) — Schnelleingabe und Sortier-Knöpfe
+   Anlässe (Einstellungen)
    ======================================================================== */
-
-/* Feld + Knopf in einer Zeile; auf schmalen Displays untereinander, damit
-   das Eingabefeld nicht auf Briefmarkengröße schrumpft. */
-.set-anlass-neu {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.set-anlass-neu .form-input {
-  flex: 1;
-  min-width: 0;
-}
-
-.set-anlass-neu .btn-primary {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-@media (max-width: 480px) {
-  .set-anlass-neu {
-    flex-direction: column;
-  }
-}
 
 /* Frueher Hoch/Runter je Zeile — inzwischen wird per Griff gezogen.
    Die Klasse bleibt fuer den Fall, dass wieder Aktionen rechts stehen. */

@@ -69,8 +69,6 @@ function AnlassBereich() {
   const { anlaesse, fetchAnlaesse, addAnlass } = useContext(AppContext);
   const toast = useToast();
 
-  const [neuerName, setNeuerName] = useState('');
-  const [legtAn, setLegtAn] = useState(false);
   // null | { mode: 'neu' } | { mode: 'edit', anlass }
   const [sheet, setSheet] = useState(null);
   // Angetippte Zeile: Details + Aktionen (Umbenennen/Löschen)
@@ -99,18 +97,6 @@ function AnlassBereich() {
       console.error('Anlass konnte nicht angelegt werden:', error);
       toast.error(fehlerText(error, 'Anlass konnte nicht angelegt werden.'));
       return false;
-    }
-  };
-
-  const handleSchnellAnlegen = async (e) => {
-    e.preventDefault();
-    if (legtAn || !neuerName.trim()) return;
-    setLegtAn(true);
-    try {
-      const ok = await anlegen(neuerName);
-      if (ok) setNeuerName('');
-    } finally {
-      setLegtAn(false);
     }
   };
 
@@ -205,21 +191,6 @@ function AnlassBereich() {
         />
       ) : (
         <>
-          {/* Schnelleingabe: der häufigste Fall ist „noch einen dazu" */}
-          <form onSubmit={handleSchnellAnlegen} className="set-anlass-neu">
-            <input
-              type="text"
-              value={neuerName}
-              onChange={(e) => setNeuerName(e.target.value)}
-              className="form-input"
-              placeholder="Neuen Anlass eintragen"
-              aria-label="Neuen Anlass eintragen"
-            />
-            <button type="submit" className="btn-primary" disabled={legtAn || !neuerName.trim()}>
-              {legtAn ? 'Legt an…' : 'Hinzufügen'}
-            </button>
-          </form>
-
           <div className="set-zeilen">
             {liste.map((anlass, index) => (
               <div
