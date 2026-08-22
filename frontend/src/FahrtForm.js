@@ -275,18 +275,18 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     });
   }, [orte]);
 
+  // Treffer ab dem ersten Buchstaben; ohne Eingabe bleibt die Liste leer —
+  // wie im Erfassungsflow. Die Vorabliste aller Orte schob die restlichen
+  // Felder aus dem Bild, ohne beim Finden zu helfen.
   const filterOrte = (suche) => {
     const q = suche.trim().toLowerCase();
-    if (!q) return sortierteOrte;
+    if (!q) return [];
     return sortierteOrte.filter(
       (o) =>
         o.name.toLowerCase().includes(q) ||
         (o.adresse && o.adresse.toLowerCase().includes(q))
     );
   };
-
-  // Suchfeld erst ab genug Eintraegen — bei wenigen stoert es nur
-  const ortSucheZeigen = sortierteOrte.length >= 8;
 
   const vonOrt = orte.find((o) => String(o.id) === String(formData.vonOrtId));
   const nachOrt = orte.find((o) => String(o.id) === String(formData.nachOrtId));
@@ -521,20 +521,26 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
 
       {offen && (
         <>
-          {ortSucheZeigen && (
-            <div className="erf-search">
-              <Search size={17} aria-hidden="true" />
-              <input
-                type="text"
-                value={suche}
-                onChange={(e) => setSuche(e.target.value)}
-                placeholder="Ort suchen"
-                aria-label={`${label} suchen`}
-              />
-            </div>
-          )}
+          {/* Direkte Suche statt Vorabliste: sofort tippen, sofort finden */}
+          <div className="erf-search">
+            <Search size={17} aria-hidden="true" />
+            <input
+              type="text"
+              value={suche}
+              onChange={(e) => setSuche(e.target.value)}
+              placeholder="Ort suchen"
+              aria-label={`${label} suchen`}
+              autoFocus
+            />
+          </div>
 
           <div className="erf-ort-liste">
+            {suche.trim().length === 0 && (
+              <span className="erf-liste-hinweis">
+                Tippen, um einen Ort zu suchen — oder unten eine einmalige Adresse eingeben.
+              </span>
+            )}
+
             {filterOrte(suche).map((o) => {
               const gewaehlt = !einmaligAktiv && String(o.id) === String(ortId);
               return (
@@ -557,7 +563,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
               );
             })}
 
-            {filterOrte(suche).length === 0 && (
+            {suche.trim().length > 0 && filterOrte(suche).length === 0 && (
               <span className="erf-liste-hinweis">
                 Kein passender Ort — unten eine Adresse eingeben.
               </span>

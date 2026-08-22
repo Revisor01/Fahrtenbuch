@@ -2091,26 +2091,58 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--brand-strong);
 }
 
-.dash-block {
-  margin-bottom: 22px;
+/* „Ein Tipp genügt" als eigene Flaeche.
+   Die Kacheln standen als weisse Kaesten zwischen weissen Karten und waren
+   als Schnellzugriff nicht zu erkennen (Simon 21.08.). Ein ruhiger
+   --brand-soft-Grund fasst den Abschnitt zusammen und hebt ihn von Status-
+   Karte und „Zuletzt" ab, ohne die Seite laut zu machen. Groesserer Abstand
+   nach oben und unten setzt ihn zusaetzlich frei. */
+.dash-favsektion {
+  margin: 26px 0;
+  padding: 16px 14px;
+  border-radius: var(--r-card);
+  background: var(--brand-soft);
+  border: 1px solid var(--line);
 }
 
-/* „Ein Tipp genügt": Grid 2 Spalten, Kacheln min. 88px */
+.dash-favsektion-kopf {
+  margin-bottom: 12px;
+}
+
+/* Abschnittstitel kraeftiger als die uebrigen Labels: Markenfarbe statt
+   --text-3, damit der Abschnitt eine eigene Ueberschrift hat. */
+.dash-favsektion-label {
+  color: var(--brand);
+}
+
+/* Auf der getoenten Flaeche traegt der leere Zustand keinen zweiten Rahmen —
+   die Sektion selbst ist schon die Umrandung. */
+.dash-favsektion .empty-state {
+  border: none;
+  padding: 4px 4px 8px;
+}
+
+/* Die Icon-Flaeche ist sonst ebenfalls --brand-soft und verschwaende im
+   Untergrund; auf der Sektion steht sie hell wie die Kacheln. */
+.dash-favsektion .empty-state-icon {
+  background-color: var(--surface);
+}
+
+/* Grid 2 Spalten, Kacheln min. 88px */
 .dash-fav-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-bottom: 22px;
 }
 
 /* Desktop-Favoriten: eine luftige Kachelreihe zwischen den Karten-Reihen */
 .dash-d-favsektion {
-  margin-bottom: 18px;
+  margin: 22px 0 18px;
+  padding: 18px;
 }
 
 .dash-fav-grid-desktop {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  margin-bottom: 0;
 }
 
 /* „Unterwegs"-Zeilen mit Schnellaktion „erhalten" */
@@ -2157,9 +2189,11 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
+/* Kacheln auf der getoenten Flaeche: weisse Karte mit --line-strong-Rand —
+   sie lesen sich dadurch als antippbare Flaechen, nicht als Textbloecke. */
 .dash-fav-tile {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--r-btn);
   padding: 14px;
   min-height: 88px;
@@ -2175,6 +2209,11 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 
 .dash-fav-tile:hover {
   background: var(--surface-2);
+  border-color: var(--brand);
+}
+
+.dash-fav-tile:active {
+  background: var(--surface-3);
 }
 
 .dash-fav-tile:focus-visible {
