@@ -1249,6 +1249,13 @@ code {
   bottom: calc(max(var(--cap-native-tabbar-height, 0px), 72px) + 12px);
 }
 
+/* Bei offener Tastatur sitzt die Meldung ueber der Tastatur statt ueber der
+   Stelle, an der die Leiste waere — der Mindestsockel gilt hier nicht. */
+html[data-platform="ios"][data-tastatur] .toast-viewport,
+html[data-platform="android"][data-tastatur] .toast-viewport {
+  bottom: calc(var(--tastatur, 0px) + 12px);
+}
+
 .toast-viewport .toast {
   pointer-events: auto;
 }
@@ -6377,6 +6384,15 @@ code {
   padding-bottom: calc(
     max(var(--cap-native-tabbar-height, 0px), 72px) + 16px
   );
+}
+
+/* 3. Bei offener Tastatur gilt der Mindestsockel NICHT. Die Leiste ist dann
+   ebenfalls versteckt, aber anders als beim Dialog kommt nichts nach: Die
+   72px staenden als leerer Streifen zwischen Eingabefeld und Tastatur
+   (Simon, Build 22). Das Kennzeichen setzt utils/tastatur.js. */
+html[data-platform="ios"][data-tastatur] .app-content-inner,
+html[data-platform="android"][data-tastatur] .app-content-inner {
+  padding-bottom: calc(var(--cap-native-tabbar-height, 0px) + 16px);
 }
 
 /* In der nativen Huelle uebernimmt der prominente Knopf der Systemleiste das

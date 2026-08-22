@@ -58,6 +58,13 @@ export function tastaturBeobachten() {
   const setze = (hoehe) => {
     const gerundet = Math.round(hoehe);
     document.documentElement.style.setProperty('--tastatur', `${gerundet}px`);
+    // Zusaetzlich ein Kennzeichen am <html>: Mehrere Stellen halten einen
+    // Mindestsockel frei, damit der Inhalt bei einem offenen Dialog nicht
+    // unter der Leiste sitzt (dann meldet das Plugin ihre Hoehe als 0px).
+    // Bei offener Tastatur ist die Leiste ebenfalls weg, der Sockel aber
+    // schlicht falsch — er stuende als leerer Streifen zwischen Eingabefeld
+    // und Tastatur. Ueber das Kennzeichen laesst sich beides unterscheiden.
+    document.documentElement.toggleAttribute('data-tastatur', gerundet > 0);
     melden(gerundet);
   };
 
