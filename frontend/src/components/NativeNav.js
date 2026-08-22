@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../ThemeContext';
 import { overlayBeobachten } from '../utils/overlayStack';
+import { tastaturAbonnieren, tastaturHoehe } from '../utils/tastatur';
 
 // Plattform-Navigation fuer die native Huelle: eine ECHTE Systemleiste, kein
 // Nachbau in der WebView. Auf iOS 26 rendert UIKit die systemeigene
@@ -171,6 +172,23 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
 
   useEffect(() => overlayBeobachten(setOverlayOffen), []);
 
+  // Dasselbe bei offener Tastatur: Sie liegt ebenfalls ueber der WebView, und
+  // die Leiste bliebe sonst zwischen Tastatur und Inhalt haengen — sie schwebt
+  // dann mitten im Bild oder wird von der Tastatur angeschnitten. Wer tippt,
+  // braucht sie ohnehin nicht.
+  // Startwert direkt abfragen: Das Abo meldet erst bei der naechsten
+  // Aenderung. Baut sich die Leiste bei schon offener Tastatur neu auf, bliebe
+  // sie sonst stehen, bis die Tastatur das naechste Mal faehrt.
+  const [tastaturOffen, setTastaturOffen] = useState(() => tastaturHoehe() > 0);
+
+  useEffect(() => {
+    setTastaturOffen(tastaturHoehe() > 0);
+    return tastaturAbonnieren((hoehe) => setTastaturOffen(hoehe > 0));
+  }, []);
+
+  // Beide Gruende fuehren zum selben Ergebnis: Leiste weg.
+  const leisteVerbergen = overlayOffen || tastaturOffen;
+
   // Plugin einmalig laden und den Listener anmelden.
   useEffect(() => {
     let abgebrochen = false;
@@ -271,7 +289,7 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
 
     plugin
       .setTabbar({
-        hidden: overlayOffen,
+        hidden: leisteVerbergen,
         tabs,
         selectedId: vonNativ ? undefined : aktivId,
         labels: true,
@@ -291,7 +309,7 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
     badgeAnzahl,
     plattform,
     isDark,
-    overlayOffen,
+    leisteVerbergen,
     pluginBereit,
   ]);
 
