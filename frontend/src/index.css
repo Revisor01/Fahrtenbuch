@@ -978,12 +978,18 @@ code {
   overflow: hidden;
   background-color: var(--surface);
   border-radius: 28px 28px 0 0;
-  /* Bei offener Tastatur traegt sie den unteren Rand — der Sicherheitsabstand
-     des Geraets liegt dann ohnehin hinter ihr. */
   padding: 12px 20px calc(32px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -8px 40px -12px rgba(8, 32, 31, 0.4);
   animation: sheet-in 300ms ease;
   outline: none;
+}
+
+/* Bei offener Tastatur sitzt die Unterkante des Fensters auf der Tastatur.
+   Der Sicherheitsabstand des Geraets liegt dann dahinter und wuerde als
+   zusaetzlicher Leerraum unter dem letzten Feld stehen — auf dem iPhone gut
+   34px. Nur der eigene Innenabstand bleibt. */
+html[data-tastatur] .sheet-panel {
+  padding-bottom: 20px;
 }
 
 /* Zurueckfedern nach einem zu kurzen Zug. Waehrend der Geste sitzt das
