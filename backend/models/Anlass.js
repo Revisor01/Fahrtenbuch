@@ -130,6 +130,32 @@ class Anlass {
   }
 
   /**
+   * Schreibt die Reihenfolge mehrerer Anlaesse in einem Rutsch.
+   * Bisher schickte das Frontend fuer jede Verschiebung einzelne PUTs - bei
+   * einer laengeren Liste ein Schwall Anfragen, bei dem eine fehlgeschlagene
+   * eine luekenhafte Reihenfolge hinterliess. Die Transaktion macht daraus
+   * ein Alles-oder-nichts.
+   */
+  static async updateSortOrder(userId, sortOrder) {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      for (const eintrag of sortOrder) {
+        await connection.execute(
+          'UPDATE anlaesse SET sort_order = ? WHERE id = ? AND user_id = ?',
+          [eintrag.sort_order, eintrag.id, userId]
+        );
+      }
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
    * Loescht einen Anlass. Bestehende Fahrten behalten ihren Text:
    * fahrten.anlass ist ein VARCHAR ohne Fremdschluessel auf diese Tabelle,
    * hier kaskadiert bewusst nichts.

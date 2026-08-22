@@ -16,7 +16,17 @@ const updateOrtSchema = z.object({
   ist_kirchspiel: z.boolean().optional().default(false),
 });
 
+// Bulk-Umsortierung per Drag & Drop. Gleiche Form wie bei den
+// Abrechnungstraegern, damit sich das Frontend nicht umgewoehnen muss.
+const updateSortOrderSchema = z.object({
+  sortOrder: z.array(z.object({
+    id: z.coerce.number().int().positive(),
+    sort_order: z.coerce.number().int().min(0),
+  })),
+});
+
 module.exports = {
   createOrtSchema,
   updateOrtSchema,
+  updateSortOrderSchema,
 };

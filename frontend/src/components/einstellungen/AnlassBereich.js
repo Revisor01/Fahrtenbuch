@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { Tag, Pencil, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Tag, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { API_BASE_URL } from '../../api/client';
 import { useToast } from '../ui/Toast';
@@ -8,12 +8,13 @@ import Sheet from '../ui/Sheet';
 import AktionsSheet from '../ui/AktionsSheet';
 import EmptyState from '../ui/EmptyState';
 import BereichKopf from './BereichKopf';
+import useSortierbareListe from './useSortierbareListe';
 import fehlerText from '../../utils/fehlerText';
 
 // Standard-Anlässe der eigenen Person. Muster wie bei Orten und Trägern:
 // Liste + Sheet zum Anlegen/Umbenennen, Tipp auf die Zeile öffnet die
 // Aktionen. Die Reihenfolge steuert, was im Erfassungs-Modal oben steht —
-// dafür reichen Hoch/Runter-Knöpfe, Drag & Drop wäre hier Overkill.
+// sortiert wird per Drag & Drop am Griff, wie bei den Abrechnungsträgern.
 
 // Umbenennen und Anlegen teilen sich dasselbe Formular.
 function AnlassSheet({ offen, anlass, onClose, onSave }) {
@@ -142,33 +143,42 @@ function AnlassBereich() {
     }
   };
 
-  // Verschieben nummeriert alle Einträge neu durch: sonst driften die
-  // sort_order-Werte auseinander (Lücken, Dubletten) und die Liste springt.
-  const verschiebe = async (index, richtung) => {
-    const ziel = index + richtung;
-    if (sortiert || ziel < 0 || ziel >= anlaesse.length) return;
-    const neu = [...anlaesse];
-    const [bewegt] = neu.splice(index, 1);
-    neu.splice(ziel, 0, bewegt);
+  // Reihenfolge: Ziehen am Griff, Muster wie beim Abrechnungsträger.
+  // Die Liste liegt im AppContext, deshalb hält `reihenfolge` waehrend des
+  // Requests eine optimistische Kopie — sonst springt die Zeile zurueck,
+  // bis fetchAnlaesse geantwortet hat.
+  const [reihenfolge, setReihenfolge] = useState(null);
+  const liste = reihenfolge || anlaesse;
+
+  const handleReorder = async (von, nach) => {
+    if (sortiert || von === null || nach === null || von === nach) return;
+    if (von < 0 || nach < 0 || von >= liste.length || nach >= liste.length) return;
+    const neu = [...liste];
+    const [bewegt] = neu.splice(von, 1);
+    neu.splice(nach, 0, bewegt);
+    setReihenfolge(neu); // optimistisch
     setSortiert(true);
+    const sortOrder = neu.map((item, idx) => ({ id: item.id, sort_order: idx + 1 }));
     try {
-      // Nur die Einträge schreiben, deren Position sich tatsächlich ändert.
-      const betroffen = neu
-        .map((a, idx) => ({ a, sortOrder: idx + 1 }))
-        .filter(({ a, sortOrder }) => a.sort_order !== sortOrder);
-      for (const { a, sortOrder } of betroffen) {
-        // eslint-disable-next-line no-await-in-loop
-        await axios.put(`${API_BASE_URL}/anlaesse/${a.id}`, { sortOrder });
-      }
+      await axios.put(`${API_BASE_URL}/anlaesse/sort`, { sortOrder });
       await fetchAnlaesse();
+      setReihenfolge(null);
     } catch (error) {
       console.error('Reihenfolge konnte nicht gespeichert werden:', error);
       toast.error(fehlerText(error, 'Reihenfolge konnte nicht gespeichert werden.'));
+      setReihenfolge(null); // zurueck auf den Stand aus dem Context
       await fetchAnlaesse();
     } finally {
       setSortiert(false);
     }
   };
+
+  // Ziehen (Maus, Finger, Stift) und Tastatur (Pfeil hoch/runter auf dem
+  // fokussierten Griff) kommen aus dem gemeinsamen Hook.
+  const sortierenHook = useSortierbareListe({
+    anzahl: liste.length,
+    onReorder: handleReorder,
+  });
 
   const nutzungText = (anlass) => {
     const anzahl = Number(anlass.nutzung_anzahl) || 0;
@@ -211,8 +221,19 @@ function AnlassBereich() {
           </form>
 
           <div className="set-zeilen">
-            {anlaesse.map((anlass, index) => (
-              <div key={anlass.id} className="set-row">
+            {liste.map((anlass, index) => (
+              <div
+                key={anlass.id}
+                className={`set-row${sortierenHook.zeilenKlasse(index)}`}
+                {...sortierenHook.zeilenProps(index)}
+              >
+                <button
+                  type="button"
+                  className="set-grip"
+                  {...sortierenHook.griffProps(index, `${anlass.name} verschieben — ziehen oder Pfeiltasten nutzen`)}
+                >
+                  <GripVertical size={15} aria-hidden="true" />
+                </button>
                 <button
                   type="button"
                   className="set-row-main set-row-tap"
@@ -222,28 +243,6 @@ function AnlassBereich() {
                   <span className="set-row-titel">{anlass.name}</span>
                   <span className="set-row-sub">{nutzungText(anlass)}</span>
                 </button>
-                <div className="set-anlass-sortier">
-                  <button
-                    type="button"
-                    className="set-action"
-                    onClick={() => verschiebe(index, -1)}
-                    disabled={index === 0 || sortiert}
-                    aria-label={`${anlass.name} nach oben verschieben`}
-                    title="Nach oben"
-                  >
-                    <ChevronUp size={17} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    className="set-action"
-                    onClick={() => verschiebe(index, 1)}
-                    disabled={index === anlaesse.length - 1 || sortiert}
-                    aria-label={`${anlass.name} nach unten verschieben`}
-                    title="Nach unten"
-                  >
-                    <ChevronDown size={17} aria-hidden="true" />
-                  </button>
-                </div>
               </div>
             ))}
           </div>
@@ -267,7 +266,7 @@ function AnlassBereich() {
           untertitel="Steht beim Erfassen zur Auswahl"
           zeilen={[
             { label: 'Verwendet in', wert: nutzungText(aktionen) },
-            { label: 'Position', wert: `${anlaesse.findIndex((a) => a.id === aktionen.id) + 1} von ${anlaesse.length}` },
+            { label: 'Position', wert: `${liste.findIndex((a) => a.id === aktionen.id) + 1} von ${liste.length}` },
           ]}
           aktionen={[
             {

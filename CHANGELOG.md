@@ -24,6 +24,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Von der Anmeldung der App führt ein Weg zurück zur Auswahl der Kirchenkreise, falls man sich vertan hat
 
 ### Geändert
+- Die Reihenfolge von Abrechnungsträgern, Anlässen und Orten lässt sich jetzt auch auf dem Handy per Ziehen am Griff ändern — bisher tat sich dort beim Wischen nichts. Während des Ziehens ist zu sehen, wo die Zeile landet. Die Pfeiltasten auf dem Griff verschieben sie weiterhin
 - Startort, Datum, Anlass und Abrechnungsträger klappen ihre Auswahl jetzt mit einem Tipp direkt auf, statt erst ein Zwischenmenü zu zeigen. Beim Datum öffnet sich die Auswahl des Geräts sofort
 - „Fahrt bearbeiten" ist genauso aufgebaut wie das Erfassen einer Fahrt: dieselbe Auswahl für Orte, Datum, Anlass und Abrechnungsträger. Die Angabe „Einmaliger Ort" entfällt — eine einmalige Adresse steht jetzt als letzter Eintrag in der Ortsliste
 - Ist für eine Strecke bereits eine Entfernung hinterlegt, zeigt das Bearbeiten-Fenster kein Kilometerfeld mehr, sondern die Kilometer samt Stift zum Korrigieren — wie beim Erfassen

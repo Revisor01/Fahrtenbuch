@@ -3,7 +3,7 @@ const router = express.Router();
 const ortController = require('../controllers/ortController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
-const { createOrtSchema, updateOrtSchema } = require('../schemas/ortSchemas');
+const { createOrtSchema, updateOrtSchema, updateSortOrderSchema } = require('../schemas/ortSchemas');
 
 // Alle Routen mit authMiddleware
 router.use(authMiddleware);
@@ -11,6 +11,7 @@ router.use(authMiddleware);
 router.post('/', validate(createOrtSchema), ortController.createOrt);
 router.get('/', ortController.getAllOrte);
 router.get('/simple', ortController.getSimpleList);  // VOR /:id
+router.put('/sort', validate(updateSortOrderSchema), ortController.updateSortOrder);  // Diese Route muss vor /:id Routes stehen
 router.get('/:id', ortController.getOrtById);
 router.put('/:id', validate(updateOrtSchema), ortController.updateOrt);
 router.delete('/:id', ortController.deleteOrt);

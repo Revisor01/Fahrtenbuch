@@ -16,7 +16,17 @@ const updateAnlassSchema = z.object({
   { message: 'Es wurde kein Feld zum Aktualisieren uebergeben' }
 );
 
+// Bulk-Umsortierung per Drag & Drop. Ersetzt die bisherigen Einzel-PUTs je
+// verschobenem Eintrag. Gleiche Form wie bei den Abrechnungstraegern.
+const updateSortOrderSchema = z.object({
+  sortOrder: z.array(z.object({
+    id: z.coerce.number().int().positive(),
+    sort_order: z.coerce.number().int().min(0),
+  })),
+});
+
 module.exports = {
   createAnlassSchema,
   updateAnlassSchema,
+  updateSortOrderSchema,
 };

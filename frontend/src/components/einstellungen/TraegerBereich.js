@@ -6,6 +6,7 @@ import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
 import AktionsSheet from '../ui/AktionsSheet';
 import BereichKopf from './BereichKopf';
+import useSortierbareListe from './useSortierbareListe';
 
 // Formular im Sheet: Name + Kostenstelle (kleines Formular = Sheet).
 // Die alte Farbwahl entfällt — die Träger-Farbe wird seit dem Redesign
@@ -116,11 +117,9 @@ function TraegerBereich() {
     }
   };
 
-  // Reihenfolge: Drag & Drop über den Griff (User-Feedback 07.08. — die
-  // Pfeil-Buttons entfallen); Tastatur: Pfeil hoch/runter auf dem Griff.
-  const [dragIndex, setDragIndex] = useState(null);
-  const [overIndex, setOverIndex] = useState(null);
-
+  // Reihenfolge: Ziehen am Griff (User-Feedback 07.08. — die Pfeil-Buttons
+  // entfallen); Tastatur: Pfeil hoch/runter auf dem Griff. Beides kommt aus
+  // dem gemeinsamen Hook, damit sich alle Listen gleich anfuehlen.
   const handleReorder = async (von, nach) => {
     if (von === null || nach === null || von === nach) return;
     const neu = [...traegerListe];
@@ -138,15 +137,10 @@ function TraegerBereich() {
     }
   };
 
-  const handleGripKeyDown = (e, index) => {
-    if (e.key === 'ArrowUp' && index > 0) {
-      e.preventDefault();
-      handleReorder(index, index - 1);
-    } else if (e.key === 'ArrowDown' && index < traegerListe.length - 1) {
-      e.preventDefault();
-      handleReorder(index, index + 1);
-    }
-  };
+  const sortieren = useSortierbareListe({
+    anzahl: traegerListe.length,
+    onReorder: handleReorder,
+  });
 
   const handleToggleActive = async (traeger) => {
     try {
@@ -185,35 +179,15 @@ function TraegerBereich() {
         {traegerListe.map((traeger, index) => (
           <div
             key={traeger.id}
-            className={`set-row${dragIndex === index ? ' is-dragging' : ''}${overIndex === index && dragIndex !== null && dragIndex !== index ? ' is-dragover' : ''}`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (overIndex !== index) setOverIndex(index);
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              handleReorder(dragIndex, index);
-              setDragIndex(null);
-              setOverIndex(null);
-            }}
+            className={`set-row${sortieren.zeilenKlasse(index)}`}
+            {...sortieren.zeilenProps(index)}
           >
             <button
               type="button"
               className="set-grip"
-              draggable
-              onDragStart={(e) => {
-                setDragIndex(index);
-                e.dataTransfer.effectAllowed = 'move';
-              }}
-              onDragEnd={() => {
-                setDragIndex(null);
-                setOverIndex(null);
-              }}
-              onKeyDown={(e) => handleGripKeyDown(e, index)}
-              title="Ziehen zum Sortieren (Pfeiltasten: verschieben)"
-              aria-label={`${traeger.name} verschieben — Pfeiltasten nutzen`}
+              {...sortieren.griffProps(index, `${traeger.name} verschieben — ziehen oder Pfeiltasten nutzen`)}
             >
-              <GripVertical size={15} />
+              <GripVertical size={15} aria-hidden="true" />
             </button>
             {/* Die ganze Zeile oeffnet das Aktions-Sheet: einzelne Icon-Buttons
                 waren auf dem Handy kaum zu lesen und schwer zu treffen. */}
