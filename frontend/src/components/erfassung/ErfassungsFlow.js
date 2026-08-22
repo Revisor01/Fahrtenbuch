@@ -59,7 +59,13 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   const [startOrtId, setStartOrtId] = useState(prefill?.vonOrtId ? String(prefill.vonOrtId) : null);
   const [datum, setDatum] = useState(prefill?.datum || heute());
   const [zielOrtId, setZielOrtId] = useState(prefill?.nachOrtId ? String(prefill.nachOrtId) : null);
-  const [suche, setSuche] = useState('');
+  // Bei „Wiederholen" ist ein Ziel vorbelegt - dann gehoert sein Name auch
+  // ins Suchfeld, sonst stuende dort nichts, obwohl ein Ziel gewaehlt ist.
+  const [suche, setSuche] = useState(() => {
+    if (!prefill?.nachOrtId) return '';
+    const treffer = orte?.find?.((o) => String(o.id) === String(prefill.nachOrtId));
+    return treffer?.name || '';
+  });
   const [anlass, setAnlass] = useState(prefill?.anlass || '');
   // Anlass-Auswahl klappt wie die Trägerliste in der Zeile auf
   const [anlassAuswahlOffen, setAnlassAuswahlOffen] = useState(false);
@@ -807,6 +813,12 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                 setZielAdresse(null);
                 setZielMerken(false);
               }
+              // Tippen hebt eine getroffene Wahl auf - sonst bliebe die
+              // Trefferliste zu und man kaeme an kein anderes Ziel.
+              if (zielOrtId) {
+                setZielOrtId(null);
+                setKmManuell('');
+              }
             }}
             placeholder="Ort oder Adresse suchen"
             aria-label="Ziel suchen"
@@ -815,10 +827,12 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
         {/* Ohne Eingabe steht hier bewusst nur ein Hinweis statt einer Wand
             aus Orten — der Nutzer soll direkt lostippen. */}
-        {zielSucheClean.length === 0 && !zielAdresse ? (
+        {(zielSucheClean.length === 0 && !zielAdresse) || zielOrtId ? (
           <div className="erf-ort-liste">
             <span className="erf-liste-hinweis">
-              Tippen, um einen Ort oder eine Adresse zu suchen.
+              {zielOrtId
+                ? 'Ziel gewählt — zum Ändern einfach neu tippen.'
+                : 'Tippen, um einen Ort oder eine Adresse zu suchen.'}
             </span>
           </div>
         ) : (
@@ -838,6 +852,10 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                   // Manuelle km gehoeren zum alten Ziel - sonst gilt eine
                   // eingetippte Zahl stillschweigend auch fuers neue Ziel
                   setKmManuell('');
+                  // Wie beim Startort: der gewaehlte Name steht im Feld und
+                  // die Trefferliste geht zu. Vorher blieb die Liste offen
+                  // und das Feld leer - man sah nicht, was gewaehlt war.
+                  setSuche(o.name);
                 }}
               >
                 <span className="erf-ort-main">
