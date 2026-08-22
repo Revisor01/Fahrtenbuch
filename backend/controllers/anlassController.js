@@ -66,6 +66,21 @@ exports.updateAnlass = async (req, res) => {
   }
 };
 
+/**
+ * Bulk-Umsortierung. Ersetzt die bisherigen Einzel-PUTs je verschobenem
+ * Anlass - das Frontend schickt jetzt die komplette neue Reihenfolge.
+ */
+exports.updateSortOrder = async (req, res) => {
+  try {
+    const { sortOrder } = req.body;
+    await Anlass.updateSortOrder(req.user.id, sortOrder);
+    res.json({ message: 'Sortierung aktualisiert' });
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren der Sortierung:', error);
+    res.status(500).json({ message: 'Sortierung konnte nicht aktualisiert werden' });
+  }
+};
+
 exports.deleteAnlass = async (req, res) => {
   try {
     // Bewusst ohne Verwendungspruefung: bestehende Fahrten behalten ihren

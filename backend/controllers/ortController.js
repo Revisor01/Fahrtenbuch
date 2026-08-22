@@ -54,6 +54,20 @@ exports.deleteOrt = async (req, res) => {
   }
 };
 
+/**
+ * Bulk-Umsortierung per Drag & Drop, analog zu den Abrechnungstraegern.
+ */
+exports.updateSortOrder = async (req, res) => {
+  try {
+    const { sortOrder } = req.body;
+    await Ort.updateSortOrder(req.user.id, sortOrder);
+    res.json({ message: 'Sortierung aktualisiert' });
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren der Sortierung:', error);
+    res.status(500).json({ message: 'Sortierung konnte nicht aktualisiert werden' });
+  }
+};
+
 exports.getAllOrte = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -100,6 +114,7 @@ exports.getSimpleList = async (req, res) => {
           WHEN ist_kirchspiel = 1 THEN 3
           ELSE 4
         END,
+        sort_order ASC,
         name
     `, [userId]);
     

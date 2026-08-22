@@ -1,11 +1,14 @@
 import React, { useMemo, useState, useContext } from 'react';
-import { Search, Pencil, Trash2 } from 'lucide-react';
+import axios from 'axios';
+import { Search, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
+import { API_BASE_URL } from '../../api/client';
 import { useToast } from '../ui/Toast';
 import Sheet from '../ui/Sheet';
 import AddressAutocomplete from '../AddressAutocomplete';
 import AktionsSheet from '../ui/AktionsSheet';
 import BereichKopf from './BereichKopf';
+import useSortierbareListe from './useSortierbareListe';
 import fehlerText from '../../utils/fehlerText';
 
 const ORT_TYPEN = [
@@ -212,6 +215,7 @@ function OrteDistanzenBereich() {
     orte, distanzen,
     addOrt, updateOrt, deleteOrt,
     addDistanz, updateDistanz, deleteDistanz,
+    refreshAllData,
   } = useContext(AppContext);
   const toast = useToast();
 
@@ -237,14 +241,76 @@ function OrteDistanzenBereich() {
     return d ? d.distanz : null;
   };
 
+  // Reihenfolge der Orte: manuell per Ziehen am Griff, wie bei den
+  // Abrechnungstraegern. Ohne gepflegte sort_order (Altbestand) faellt die
+  // Sortierung auf den Namen zurueck, damit die Liste nie willkuerlich wirkt.
+  const nachReihenfolge = (liste) =>
+    [...liste].sort((a, b) => {
+      const av = a.sort_order ?? null;
+      const bv = b.sort_order ?? null;
+      if (av === null && bv === null) return a.name.localeCompare(b.name);
+      if (av === null) return 1;
+      if (bv === null) return -1;
+      if (av !== bv) return av - bv;
+      return a.name.localeCompare(b.name);
+    });
+
+  // Waehrend der PUT laeuft, haelt `reihenfolge` die optimistische Kopie —
+  // die Liste selbst liegt im AppContext und antwortet erst spaeter.
+  const [reihenfolge, setReihenfolge] = useState(null);
+  const [sortiertLaeuft, setSortiertLaeuft] = useState(false);
+
+  const orteSortiert = useMemo(
+    () => reihenfolge || nachReihenfolge(orte),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [orte, reihenfolge]
+  );
+
+  const sucheAktiv = suche.trim().length > 0;
+
   const gefilterteOrte = useMemo(() => {
-    const sortiert = [...orte].sort((a, b) => a.name.localeCompare(b.name));
-    if (!suche.trim()) return sortiert;
+    if (!sucheAktiv) return orteSortiert;
     const q = suche.trim().toLowerCase();
-    return sortiert.filter(
+    return orteSortiert.filter(
       (o) => o.name.toLowerCase().includes(q) || (o.adresse || '').toLowerCase().includes(q)
     );
-  }, [orte, suche]);
+  }, [orteSortiert, suche, sucheAktiv]);
+
+  const handleReorder = async (von, nach) => {
+    // Bei aktiver Suche zeigt die Liste nur einen Ausschnitt — die Indizes
+    // passen dann nicht zur Gesamtreihenfolge, also gar nicht erst sortieren.
+    if (sucheAktiv || sortiertLaeuft) return;
+    if (von === null || nach === null || von === nach) return;
+    if (von < 0 || nach < 0 || von >= orteSortiert.length || nach >= orteSortiert.length) return;
+    const neu = [...orteSortiert];
+    const [bewegt] = neu.splice(von, 1);
+    neu.splice(nach, 0, bewegt);
+    setReihenfolge(neu); // optimistisch
+    setSortiertLaeuft(true);
+    const sortOrder = neu.map((item, idx) => ({ id: item.id, sort_order: idx + 1 }));
+    try {
+      await axios.put(`${API_BASE_URL}/orte/sort`, { sortOrder });
+      await refreshAllData();
+      setReihenfolge(null);
+    } catch (error) {
+      console.error('Reihenfolge der Orte konnte nicht gespeichert werden:', error);
+      toast.error(fehlerText(error, 'Reihenfolge konnte nicht gespeichert werden.'));
+      setReihenfolge(null); // zurueck auf den Stand aus dem Context
+    } finally {
+      setSortiertLaeuft(false);
+    }
+  };
+
+  // Ziehen (Maus, Finger, Stift) und Tastatur kommen aus dem gemeinsamen
+  // Hook. Desktop-Tabelle und mobile Liste zeigen dieselbe Reihenfolge und
+  // teilen sich denselben Ziehzustand — sichtbar ist immer nur eine der
+  // beiden. Bei aktiver Suche ist der Griff gesperrt, weil die Indizes des
+  // Ausschnitts nicht zur Gesamtliste passen.
+  const sortieren = useSortierbareListe({
+    anzahl: orteSortiert.length,
+    onReorder: handleReorder,
+    deaktiviert: sucheAktiv,
+  });
 
   const sortierteDistanzen = useMemo(() => {
     const q = suche.trim().toLowerCase();
@@ -430,7 +496,7 @@ function OrteDistanzenBereich() {
       <div className="set-block">
         <BereichKopf
           titel="Orte"
-          satz="Orte, die du regelmäßig als Start oder Ziel nutzt."
+          satz="Orte, die du regelmäßig als Start oder Ziel nutzt — die Reihenfolge bestimmt, was beim Erfassen oben steht."
           aktion="+ Ort"
           onAktion={() => setOrtSheet({ mode: 'neu' })}
         />
@@ -451,30 +517,42 @@ function OrteDistanzenBereich() {
         {/* Desktop: Tabelle nach Spec (1fr 1.4fr 96px 96px) */}
         <div className="set-table set-table-desktop">
           <div className="set-th-row set-grid-orte">
+            <div />
             <div>Ort</div>
             <div>Adresse</div>
             <div style={{ textAlign: 'right' }}>{dienstort ? `ab ${dienstort.name}` : 'Distanz'}</div>
-            <div />
           </div>
-          {gefilterteOrte.map((ort) => {
+          {gefilterteOrte.map((ort, index) => {
             const km = distanzAbDienstort(ort);
             return (
-              <button
+              // Der Griff ist ein eigener Button — deshalb traegt die Zeile
+              // hier einen Wrapper statt selbst ein Button zu sein.
+              <div
                 key={ort.id}
-                type="button"
-                className="set-tr set-grid-orte set-tr-tap"
-                onClick={() => setAktionsSheet(ortAktionsSheet(ort))}
-                aria-label={`${ort.name} — Aktionen öffnen`}
+                className={`set-tr-drag${sortieren.zeilenKlasse(index)}`}
+                {...sortieren.zeilenProps(index)}
               >
-                <span className="set-td-haupt">
-                  {ort.name}
-                  {getOrtTypLabel(ort) && <span className="set-td-sub">{getOrtTypLabel(ort)}</span>}
-                </span>
-                <span className="set-td-text">{ort.adresse}</span>
-                <span className="set-td-num num">{km != null ? `${km} km` : '—'}</span>
-                <span className="set-td-aktionen">
-                </span>
-              </button>
+                <button
+                  type="button"
+                  className="set-grip"
+                  {...sortieren.griffProps(index, `${ort.name} verschieben — ziehen oder Pfeiltasten nutzen`)}
+                >
+                  <GripVertical size={15} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="set-tr set-grid-orte-inhalt set-tr-tap"
+                  onClick={() => setAktionsSheet(ortAktionsSheet(ort))}
+                  aria-label={`${ort.name} — Aktionen öffnen`}
+                >
+                  <span className="set-td-haupt">
+                    {ort.name}
+                    {getOrtTypLabel(ort) && <span className="set-td-sub">{getOrtTypLabel(ort)}</span>}
+                  </span>
+                  <span className="set-td-text">{ort.adresse}</span>
+                  <span className="set-td-num num">{km != null ? `${km} km` : '—'}</span>
+                </button>
+              </div>
             );
           })}
           {gefilterteOrte.length === 0 && (
@@ -486,21 +564,34 @@ function OrteDistanzenBereich() {
 
         {/* Mobil: Zeilenliste */}
         <div className="set-liste-mobil">
-          {gefilterteOrte.map((ort) => (
-            <div key={ort.id} className="set-row">
-              <button
-                type="button"
-                className="set-row-main set-row-tap"
-                onClick={() => setAktionsSheet(ortAktionsSheet(ort))}
-                aria-label={`${ort.name} — Aktionen öffnen`}
+          {gefilterteOrte.map((ort, index) => {
+            return (
+              <div
+                key={ort.id}
+                className={`set-row${sortieren.zeilenKlasse(index)}`}
+                {...sortieren.zeilenProps(index)}
               >
-                <span className="set-row-titel">{ort.name}</span>
-                <span className="set-row-sub">
-                  {[getOrtTypLabel(ort), ort.adresse].filter(Boolean).join(' · ')}
-                </span>
-              </button>
-            </div>
-          ))}
+                <button
+                  type="button"
+                  className="set-grip"
+                  {...sortieren.griffProps(index, `${ort.name} verschieben — ziehen oder Pfeiltasten nutzen`)}
+                >
+                  <GripVertical size={15} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="set-row-main set-row-tap"
+                  onClick={() => setAktionsSheet(ortAktionsSheet(ort))}
+                  aria-label={`${ort.name} — Aktionen öffnen`}
+                >
+                  <span className="set-row-titel">{ort.name}</span>
+                  <span className="set-row-sub">
+                    {[getOrtTypLabel(ort), ort.adresse].filter(Boolean).join(' · ')}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
           {gefilterteOrte.length === 0 && (
             <div className="set-row"><div className="set-row-sub">Kein Ort gefunden.</div></div>
           )}

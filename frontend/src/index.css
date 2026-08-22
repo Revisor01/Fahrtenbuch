@@ -4345,8 +4345,50 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 }
 
 /* Spaltenraster nach Spec („Orte": 1fr 1.4fr 96px 96px) */
+/* Kopfzeile der Orte-Tabelle: leere Spalte fuer den Griff (32px + 12px gap),
+   danach dieselben Spalten wie der Zeileninhalt. */
 .set-grid-orte {
-  grid-template-columns: 1fr 1.4fr 96px 96px;
+  grid-template-columns: 32px 1fr 1.4fr 96px;
+}
+
+/* Zeileninhalt ohne die Griff-Spalte: der Griff sitzt daneben im Wrapper */
+.set-grid-orte-inhalt {
+  grid-template-columns: 1fr 1.4fr 96px;
+}
+
+/* Desktop-Ortszeile: Griff links, antippbarer Inhalt rechts daneben.
+   Die Griff-Spalte ist 18px Rand + 32px Griff breit; der Inhalts-Button
+   bringt seine eigenen 18px Padding mit, deshalb startet er 6px frueher
+   als die Kopfzeile es sonst taete — das gleicht der negative Versatz aus,
+   damit "Ort" in Kopf und Zeile buendig steht. */
+.set-tr-drag {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+}
+
+.set-tr-drag + .set-tr-drag,
+.set-tr-drag + .set-tr,
+.set-tr + .set-tr-drag {
+  border-top: 1px solid var(--line);
+}
+
+/* Zeile hat kein eigenes Padding — der Inhalts-Button bringt seins mit.
+   Der Griff sitzt links davon und uebernimmt den linken Zeilenrand. */
+.set-tr-drag .set-grip {
+  margin-left: 12px;
+}
+
+.set-tr-drag.is-dragging {
+  opacity: 0.45;
+}
+
+.set-tr-drag.is-dragover {
+  box-shadow: inset 0 2px 0 var(--brand);
+}
+
+.set-tr-drag.is-dragover.is-dragover-unten {
+  box-shadow: inset 0 -2px 0 var(--brand);
 }
 
 .set-grid-distanzen {
@@ -5001,6 +5043,21 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   cursor: grabbing;
 }
 
+/* Der Griff gehoert der Zieh-Geste, nicht dem Scroll. Ohne das scrollt
+   Mobile Safari beim Wisch die Seite und der Zug kommt nie an. Der Rest
+   der Zeile bleibt unangetastet — dort scrollt die Liste wie immer. */
+.set-grip {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.set-grip:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .set-grip:focus-visible {
   outline: none;
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
@@ -5012,6 +5069,18 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 
 .set-row.is-dragover {
   box-shadow: inset 0 2px 0 var(--brand);
+}
+
+.set-row.is-dragover.is-dragover-unten {
+  box-shadow: inset 0 -2px 0 var(--brand);
+}
+
+/* Die gezogene Zeile bleibt sichtbar, hebt sich aber ab — so ist waehrend
+   des Zugs klar, welche Zeile am Haken haengt. */
+.set-row.is-dragging,
+.set-tr-drag.is-dragging {
+  background: var(--brand-soft);
+  opacity: 1;
 }
 
 /* Aktiv-Haken (Checkbox-Optik) statt des uneindeutigen Punkts */
@@ -6686,7 +6755,8 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   }
 }
 
-/* Hoch/Runter je Zeile — Drag & Drop wäre für diese kurze Liste zu viel */
+/* Frueher Hoch/Runter je Zeile — inzwischen wird per Griff gezogen.
+   Die Klasse bleibt fuer den Fall, dass wieder Aktionen rechts stehen. */
 .set-anlass-sortier {
   display: flex;
   gap: 6px;

@@ -18,9 +18,19 @@ class Ort {
       // beliebigen. Das Frontend raeumt den alten ab — die API tat es nicht,
       // ueber sie liess sich ein zweiter Wohnort setzen.
       return await Ort.mitWohnortSperre(userId, istWohnort, async (connection) => {
+        // Neue Orte ans Ende der Liste - eine feste 0 haette sie ueber alle
+        // bestehenden gehoben und die vom Nutzer gezogene Reihenfolge
+        // durcheinandergebracht. Innerhalb derselben Transaktion gelesen,
+        // damit zwei parallele Anlagen nicht denselben Rang bekommen.
+        const [zeilen] = await connection.execute(
+          'SELECT COALESCE(MAX(sort_order), 0) + 1 AS naechster FROM orte WHERE user_id = ?',
+          [userId]
+        );
+        const rang = zeilen[0]?.naechster ?? 1;
+
         const [result] = await connection.execute(
-          'INSERT INTO orte (name, adresse, ist_wohnort, ist_dienstort, ist_kirchspiel, user_id) VALUES (?, ?, ?, ?, ?, ?)',
-          [name, adresse, istWohnort ? 1 : 0, istDienstort ? 1 : 0, istKirchspiel ? 1 : 0, userId]
+          'INSERT INTO orte (name, adresse, ist_wohnort, ist_dienstort, ist_kirchspiel, user_id, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [name, adresse, istWohnort ? 1 : 0, istDienstort ? 1 : 0, istKirchspiel ? 1 : 0, userId, rang]
         );
         return result.insertId;
       });
@@ -72,9 +82,24 @@ class Ort {
     }
   }
 
+  /**
+   * Alle Orte des Nutzers in seiner selbst gewaehlten Reihenfolge.
+   *
+   * Bisher stand hier gar kein ORDER BY - die Reihenfolge war das, was die DB
+   * gerade hergab, und jede Ansicht sortierte im Frontend neu. Der Name als
+   * Zweitkriterium haelt frisch angelegte Orte mit gleicher sort_order
+   * beieinander.
+   *
+   * Wohnort und Dienstort werden hier bewusst NICHT vorgezogen: der
+   * Erfassungs-Flow sortiert sie im Frontend ohnehin selbst nach vorn, und in
+   * der Verwaltungsliste soll die vom Nutzer gezogene Reihenfolge gelten.
+   */
   static async findAll(userId) {
     try {
-      const [rows] = await db.query('SELECT * FROM orte WHERE user_id = ?', [userId]);
+      const [rows] = await db.query(
+        'SELECT * FROM orte WHERE user_id = ? ORDER BY sort_order ASC, name ASC',
+        [userId]
+      );
       return rows;
     } catch (error) {
       console.error('Fehler in Ort.findAll:', error);
@@ -115,6 +140,30 @@ class Ort {
     }, id);
   }
 
+
+  /**
+   * Schreibt die Reihenfolge mehrerer Orte in einem Rutsch (Drag & Drop).
+   * Transaktion: eine halb geschriebene Reihenfolge waere schlimmer als eine
+   * gar nicht geschriebene.
+   */
+  static async updateSortOrder(userId, sortOrder) {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      for (const eintrag of sortOrder) {
+        await connection.execute(
+          'UPDATE orte SET sort_order = ? WHERE id = ? AND user_id = ?',
+          [eintrag.sort_order, eintrag.id, userId]
+        );
+      }
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
 
   static async isUsedInFahrten(id, userId) {
     try {
