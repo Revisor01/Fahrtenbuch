@@ -395,10 +395,18 @@ exports.changePassword = async (req, res) => {
         if (req.user.role === 'admin') {
             await User.setPassword(id, newPassword);
         } else {
-            // User muss aktuelles Passwort angeben
-            const user = await User.findById(id);
+            // User muss aktuelles Passwort angeben.
+            // findById liefert den Hash bewusst NICHT (er steckt sonst in
+            // req.user). Hier stand frueher trotzdem findById: bcrypt.compare
+            // bekam undefined, warf "data and hash arguments required" und der
+            // Nutzer sah einen 500er — das Aendern des eigenen Passworts war
+            // ueber diesen Weg gar nicht moeglich (24.08.).
+            const user = await User.findByIdMitPasswort(id);
+            if (!user) {
+                return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+            }
             const isMatch = await bcrypt.compare(currentPassword, user.password);
-            
+
             if (!isMatch) {
                 return res.status(400).json({ message: 'Aktuelles Passwort ist falsch' });
             }

@@ -64,6 +64,18 @@ class User {
         return rows[0];
     }
 
+    // Wie findById, liefert aber zusaetzlich den Passwort-Hash. Bewusst eine
+    // eigene Methode: findById wird an vielen Stellen benutzt (u. a. in der
+    // Auth-Middleware fuer req.user) und darf den Hash NICHT mitschleppen.
+    // Wer das Passwort pruefen muss, holt ihn hier gezielt.
+    static async findByIdMitPasswort(id) {
+        const [rows] = await db.execute(
+            'SELECT id, username, role, password FROM users WHERE id = ?',
+            [id]
+        );
+        return rows[0];
+    }
+
     static async findByEmail(email) {
         // Hier wird der JOIN angepasst, damit die E-Mail aus `user_profiles` geholt wird
         const [rows] = await db.execute(`

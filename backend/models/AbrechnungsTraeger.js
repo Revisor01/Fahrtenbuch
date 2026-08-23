@@ -1,4 +1,7 @@
 const db = require('../config/database');
+// heuteISO wurde unten benutzt, aber nie importiert — der Zweig haette einen
+// ReferenceError geworfen, sobald ein Betrag mitgegeben wird (24.08.).
+const { heuteISO } = require('../utils/datum');
 
 class AbrechnungsTraeger {
     static async findAllForUser(userId) {
