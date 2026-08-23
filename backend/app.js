@@ -6,6 +6,7 @@ const path = require('path'); // Import path
 const initializeDatabase = require('./initDb');
 const { ERNEUERUNGS_HEADER } = require('./utils/tokenLaufzeit');
 const orteRoutes = require('./routes/orte');
+const { dokuEinhaengen } = require('./docs/dokuRoute');
 const fahrtenRoutes = require('./routes/fahrten');
 const distanzenRoutes = require('./routes/distanzen');
 const abrechnungstraegerRoutes = require('./routes/abrechnungstraeger');
@@ -91,6 +92,30 @@ app.use(cors({
     // Sitzung wuerde stillschweigend nicht funktionieren.
     exposedHeaders: [ERNEUERUNGS_HEADER]
 }));
+// API-Dokumentation vor helmet: Swagger braucht eigene Inline-Styles und
+// -Skripte, die die strenge Standard-CSP unten blockieren wuerde. Die Route
+// bringt ihre eigene, passend enge CSP mit und liegt hinter Basic-Auth.
+// Ausserdem vor den /api-Limitern — sonst zaehlt jeder Doku-Aufruf gegen das
+// Kontingent der eigentlichen Schnittstelle (/api-docs beginnt mit /api).
+app.use(['/api-docs', '/api-docs.json'], helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      // Swagger UI setzt Styles und Initialisierungs-Skript inline
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:'],
+      // "Try it out" spricht diese Instanz an
+      connectSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  // Die Doku wird nicht eingebettet und laedt nichts von fremden Hosts
+  crossOriginEmbedderPolicy: false,
+}));
+dokuEinhaengen(app);
+
 app.use(helmet());
 app.use(express.json({ limit: '10mb' }));
 

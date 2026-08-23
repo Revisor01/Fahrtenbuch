@@ -63,6 +63,11 @@ Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung
   Token aus und gibt es ueber den Header `X-Token-Erneuert` zurueck. Wer
   regelmaessig arbeitet, bleibt angemeldet; ein liegengelassener Browser
   laeuft nach Inaktivitaet ab.
+- API-Dokumentation: `DOKU_USER`, `DOKU_PASSWORT` — schalten die Swagger-Oberflaeche
+  unter `/api-docs` frei (Basic-Auth), die Beschreibung selbst liegt unter
+  `/api-docs.json`. Fehlt einer der beiden Werte, ist die Doku komplett aus.
+  Gepflegt wird sie in `backend/docs/openapi.js` — neue Route, neuer Eintrag,
+  im selben Commit.
 - Email (SMTP): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`
 - URLs: `FRONTEND_URL`, `CORS_ORIGIN` (kommaseparierte Allowlist; Einzelwert bleibt gueltig. Die Origins der mobilen Apps — `capacitor://localhost` fuer iOS, `http://localhost` fuer Android — sind fest eingebaut und muessen nicht konfiguriert werden)
 - Mobile Apps: `INSTANZEN` - JSON-Array der auswaehlbaren Kirchenkreis-Instanzen, je Eintrag `id` (Slug), `name` (Anzeigename) und `apiUrl` (https). Wird ohne Anmeldung ueber `GET /api/instanzen` ausgeliefert. Unset oder ungueltig = Fallback auf Dithmarschen
