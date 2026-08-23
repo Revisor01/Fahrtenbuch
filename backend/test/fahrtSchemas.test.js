@@ -101,4 +101,71 @@ for (const [name, schema] of [['createFahrtSchema', createFahrtSchema], ['update
   });
 }
 
+// --- Ort-IDs: dieselbe Falle wie bei den Kilometern (24.08.) -------------
+// Der Kurzbefehl sendet vonOrtId/nachOrtId immer mit; bei manuell
+// eingegebenem Ort als leeren Text. Vorher: 400 "vonOrtId too small".
+console.log('\nOrt-IDs und Partnerverweis:');
+
+function parseMitOrten(schema, felder) {
+  return schema.safeParse({
+    datum: '2026-08-23',
+    anlass: 'Konzert',
+    abrechnung: 1,
+    ...felder,
+  });
+}
+
+for (const [name, schema] of [['createFahrtSchema', createFahrtSchema], ['updateFahrtSchema', updateFahrtSchema]]) {
+  pruefe(name + ': leerer Von-Ort mit Freitext wird zu null', () => {
+    const r = parseMitOrten(schema, { vonOrtId: '', nachOrtId: '8', einmaligerVonOrt: 'Heide' });
+    assert.strictEqual(r.success, true, 'leerer Text muss durchgehen');
+    assert.strictEqual(r.data.vonOrtId, null);
+    assert.strictEqual(r.data.nachOrtId, 8);
+  });
+
+  pruefe(name + ': beide Orte als Freitext ergeben null', () => {
+    const r = parseMitOrten(schema, { vonOrtId: '', nachOrtId: '', einmaligerVonOrt: 'A', einmaligerNachOrt: 'B' });
+    assert.strictEqual(r.success, true);
+    assert.strictEqual(r.data.vonOrtId, null);
+    assert.strictEqual(r.data.nachOrtId, null);
+  });
+
+  pruefe(name + ': echte Ort-IDs bleiben erhalten', () => {
+    const r = parseMitOrten(schema, { vonOrtId: '7', nachOrtId: 8 });
+    assert.strictEqual(r.success, true);
+    assert.strictEqual(r.data.vonOrtId, 7);
+    assert.strictEqual(r.data.nachOrtId, 8);
+  });
+
+  pruefe(name + ': negative Ort-ID wird abgewiesen', () => {
+    const r = parseMitOrten(schema, { vonOrtId: -3 });
+    assert.strictEqual(r.success, false);
+  });
+
+  pruefe(name + ': nicht-ganzzahlige Ort-ID wird abgewiesen', () => {
+    const r = parseMitOrten(schema, { vonOrtId: '7.5' });
+    assert.strictEqual(r.success, false);
+  });
+}
+
+// partnerFahrtId gibt es nur beim Anlegen — der Kurzbefehl verknuepft damit
+// Hin- und Rueckfahrt. Leer bedeutet: keine Gegenfahrt.
+pruefe('createFahrtSchema: leere partnerFahrtId wird zu null', () => {
+  const r = parseMitOrten(createFahrtSchema, { vonOrtId: 7, nachOrtId: 8, partnerFahrtId: '' });
+  assert.strictEqual(r.success, true);
+  assert.strictEqual(r.data.partnerFahrtId, null);
+});
+
+pruefe('createFahrtSchema: echte partnerFahrtId bleibt erhalten', () => {
+  const r = parseMitOrten(createFahrtSchema, { vonOrtId: 8, nachOrtId: 7, partnerFahrtId: '2830' });
+  assert.strictEqual(r.success, true);
+  assert.strictEqual(r.data.partnerFahrtId, 2830);
+});
+
+// Der Abrechnungstraeger bleibt Pflicht — hier darf 0/leer NICHT durchgehen.
+pruefe('createFahrtSchema: leerer Abrechnungstraeger wird abgewiesen', () => {
+  const r = createFahrtSchema.safeParse({ datum: '2026-08-23', anlass: 'X', abrechnung: '' });
+  assert.strictEqual(r.success, false, 'Abrechnungstraeger muss Pflicht bleiben');
+});
+
 console.log('\n' + geprueft + ' Pruefungen bestanden.');
