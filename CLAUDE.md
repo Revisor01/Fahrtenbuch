@@ -64,7 +64,7 @@ Eine browserbasierte Fahrtenbuch-App für kirchliche Mitarbeitende zur Erfassung
   regelmaessig arbeitet, bleibt angemeldet; ein liegengelassener Browser
   laeuft nach Inaktivitaet ab.
 - API-Dokumentation: `DOKU_USER`, `DOKU_PASSWORT` — schalten die Swagger-Oberflaeche
-  unter `/api-docs` frei (Basic-Auth), die Beschreibung selbst liegt unter
+  unter `/api-docs` frei (eigene Anmeldeseite, Cookie-Sitzung 8 h), die Beschreibung liegt unter
   `/api-docs.json`. Fehlt einer der beiden Werte, ist die Doku komplett aus.
   Gepflegt wird sie in `backend/docs/openapi.js` — neue Route, neuer Eintrag,
   im selben Commit.
