@@ -92,11 +92,22 @@ const server = app.listen(0, async () => {
   pruefe('abgelaufenes Cookie wird abgewiesen', abgelaufen.status === 401, 'war ' + abgelaufen.status);
 
   console.log('\nSpezifikation als JSON:');
-  const jsonOhne = await hole('/api-docs.json');
+  // Die Adresse muss UNTERHALB von /api-docs liegen: Das Cookie ist auf diesen
+  // Pfad begrenzt, ein Browser schickt es an /api-docs.json nicht mit. Genau
+  // daran scheiterte die Datei zuerst auf Produktion.
+  const spezPfad = '/api-docs/spezifikation.json';
+  pruefe('Adresse liegt unter /api-docs (Cookie-Pfad)', spezPfad.startsWith('/api-docs/'), spezPfad);
+
+  const jsonOhne = await hole(spezPfad);
   pruefe('ohne Anmeldung: 401', jsonOhne.status === 401, 'war ' + jsonOhne.status);
   pruefe('antwortet JSON, nicht HTML', jsonOhne.text.trim().startsWith('{'), jsonOhne.text.slice(0, 40));
-  const jsonMit = await hole('/api-docs.json', { headers: { Cookie: keks } });
+  const jsonMit = await hole(spezPfad, { headers: { Cookie: keks } });
   pruefe('mit Anmeldung: 200', jsonMit.status === 200, 'war ' + jsonMit.status);
+
+  // Alte Adresse bleibt nutzbar
+  const altOhne = await hole('/api-docs.json');
+  pruefe('alte Adresse leitet weiter', altOhne.status === 307, 'war ' + altOhne.status);
+  pruefe('leitet auf die neue Adresse', altOhne.ort === spezPfad, String(altOhne.ort));
   let spec = null;
   try { spec = JSON.parse(jsonMit.text); } catch (e) {}
   pruefe('ist gueltiges JSON', !!spec, '');

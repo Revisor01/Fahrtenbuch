@@ -233,11 +233,25 @@ function dokuEinhaengen(app) {
 
   // Die reine Beschreibung — fuer Postman, Insomnia oder Client-Generatoren.
   // Hier antwortet JSON statt einer Anmeldeseite, sonst bekaeme ein Skript HTML.
-  app.get('/api-docs.json', (req, res) => {
+  //
+  // Sie liegt UNTERHALB von /api-docs, nicht daneben: Das Sitzungs-Cookie gilt
+  // fuer den Pfad /api-docs, und ein Browser schickt es an /api-docs.json nicht
+  // mit — die Datei blieb damit auch nach der Anmeldung unerreichbar
+  // (gemessen auf Produktion, 24.08.).
+  const spezifikationSenden = (req, res) => {
     if (!angemeldet(req)) {
       return res.status(401).json({ message: 'Bitte zuerst unter /api-docs anmelden.' });
     }
     res.type('application/json; charset=utf-8').send(JSON.stringify(spezifikation, null, 2));
+  };
+
+  app.get('/api-docs/spezifikation.json', spezifikationSenden);
+
+  // Alte Adresse: fuer angemeldete Aufrufe weiterleiten, fuer Skripte mit
+  // eigenem Cookie-Umgang direkt ausliefern.
+  app.get('/api-docs.json', (req, res) => {
+    if (angemeldet(req)) return spezifikationSenden(req, res);
+    res.redirect(307, '/api-docs/spezifikation.json');
   });
 
   app.use(
