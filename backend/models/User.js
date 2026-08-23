@@ -53,7 +53,10 @@ class User {
     
     static async findById(id) {
         const [rows] = await db.execute(
-            `SELECT u.id, u.username, u.role, u.email_verified, 
+            // passwort_geaendert_am fuer die Token-Pruefung in der
+            // Auth-Middleware: Anmeldungen von vor dem letzten
+            // Passwortwechsel sollen nicht weitergelten.
+            `SELECT u.id, u.username, u.role, u.email_verified, u.passwort_geaendert_am,
                 p.email, p.full_name, p.iban, 
                 p.kirchengemeinde, p.kirchspiel, p.kirchenkreis
         FROM users u
@@ -168,7 +171,7 @@ class User {
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
         const [result] = await db.execute(
-            'UPDATE users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE password_reset_token = ? AND password_reset_expires > NOW()',
+            'UPDATE users SET password = ?, passwort_geaendert_am = NOW(), password_reset_token = NULL, password_reset_expires = NULL WHERE password_reset_token = ? AND password_reset_expires > NOW()',
             [hashedPassword, token]
         );
 
@@ -184,7 +187,7 @@ class User {
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
         const [result] = await db.execute(
-            'UPDATE users SET password = ? WHERE id = ?',
+            'UPDATE users SET password = ?, passwort_geaendert_am = NOW() WHERE id = ?',
             [hashedPassword, id]
         );
 
