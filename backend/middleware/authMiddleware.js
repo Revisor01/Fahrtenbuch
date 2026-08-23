@@ -14,6 +14,10 @@ const authMiddleware = async (req, res, next) => {
         const user = await User.findById(keyData.user_id);
         if (user) {
           req.user = user;
+          // Kennzeichnen, welcher Weg die Anmeldung getragen hat: Ein
+          // API-Schluessel hat kein Ausstellungsdatum, fuer ihn gibt es also
+          // weder eine gleitende Sitzung noch ein Erneuerungs-Token.
+          req.mitApiSchluessel = true;
           await ApiKey.updateLastUsed(keyData.api_key_id);
           return next();
         }
@@ -40,7 +44,23 @@ const authMiddleware = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: 'Benutzer nicht gefunden' });
     }
-    
+
+    // Wurde das Passwort geaendert, nachdem dieses Token ausgestellt wurde?
+    // Dann gilt es nicht mehr. Vorher blieben alte Anmeldungen bestehen: Wer
+    // ein Token abgegriffen hatte, behielt den Zugang trotz neuem Passwort —
+    // und genau davor soll ein Passwortwechsel schuetzen (24.08.).
+    //
+    // decoded.iat ist die Ausstellungszeit in Sekunden. Eine Sekunde Toleranz,
+    // weil iat abgerundet wird: Ohne sie flog ein Token, das im selben Moment
+    // wie die Aenderung entstand, sofort wieder raus — etwa das frische Token
+    // direkt nach dem Setzen eines neuen Passworts.
+    if (user.passwort_geaendert_am && decoded.iat) {
+      const geaendert = Math.floor(new Date(user.passwort_geaendert_am).getTime() / 1000);
+      if (Number.isFinite(geaendert) && decoded.iat < geaendert - 1) {
+        return res.status(401).json({ message: 'Anmeldung abgelaufen, bitte neu anmelden' });
+      }
+    }
+
     // Füge vollständige User-Informationen zum Request hinzu
     req.user = user;
 

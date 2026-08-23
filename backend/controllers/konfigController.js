@@ -1,3 +1,4 @@
+const { registrierungErlaubt } = require('../utils/registrierung');
 // Oeffentliche Konfiguration dieser Instanz.
 //
 // Die Weboberflaeche bekommt diese Werte ueber config.js, das der
@@ -17,7 +18,7 @@ exports.getKonfig = async (req, res) => {
       appTitle: process.env.REACT_APP_TITLE || 'Fahrtenbuch',
       // Registrierung gilt als erlaubt, solange sie nicht ausdruecklich
       // abgeschaltet ist — dieselbe Regel wie im Backend-Gate.
-      allowRegistration: process.env.ALLOW_REGISTRATION !== 'false',
+      allowRegistration: registrierungErlaubt(),
       allowedEmailDomains: process.env.ALLOWED_EMAIL_DOMAINS || '',
       registrationCodeRequired: Boolean(process.env.REGISTRATION_CODE),
     });

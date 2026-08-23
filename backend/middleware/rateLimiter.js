@@ -1,4 +1,7 @@
 const rateLimit = require('express-rate-limit');
+// ipKeyGenerator normalisiert IPv6 korrekt — selbst zusammengebaute Schluessel
+// aus req.ip sind bei IPv6 unzuverlaessig.
+const { ipKeyGenerator } = require('express-rate-limit');
 
 // Rate-Limiting an einer Stelle.
 //
@@ -82,8 +85,29 @@ const instanzLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Passwortwechsel: Hier wird das ALTE Passwort geprueft — also dieselbe Art
+// Rateversuch wie beim Login, nur hinter einer bestehenden Anmeldung. Vorher
+// galt nur das allgemeine Schreiblimit (200 in 5 Minuten), waehrend der Login
+// bei 20 in 10 Minuten bremst. Wer ein fremdes Token in die Finger bekam,
+// konnte damit bequem das Passwort durchprobieren.
+//
+// Gezaehlt wird pro Konto, nicht pro IP: Die Anfragen kommen von angemeldeten
+// Nutzer:innen, und mehrere hinter demselben Anschluss sollen sich nicht
+// gegenseitig aussperren. Fehlt die Anmeldung wider Erwarten, faellt der
+// Schluessel auf die IP zurueck.
+const passwortLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 10,
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => (req.user?.id ? 'nutzer:' + req.user.id : ipKeyGenerator(req)),
+  message: { message: 'Zu viele Versuche, das Passwort zu ändern. Bitte in 10 Minuten erneut versuchen.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   apiLimiter,
+  passwortLimiter,
   schreibLimiter,
   exportLimiter,
   loginLimiter,

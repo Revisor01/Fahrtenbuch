@@ -154,6 +154,18 @@ exports.resendVerification = async (req, res) => {
             return res.status(404).json({ message: 'Benutzer nicht gefunden' });
         }
         
+        // Gehoert die Adresse schon jemand anderem? Ohne diese Pruefung liess
+        // sich die eigene Profil-E-Mail auf eine fremde, bereits vergebene
+        // Adresse umziehen — die andere Person haette ihren Zugang ueber
+        // "Passwort vergessen" verloren (24.08.).
+        const [belegt] = await db.execute(
+            'SELECT user_id FROM user_profiles WHERE email = ? AND user_id != ?',
+            [email, userId]
+        );
+        if (belegt.length > 0) {
+            return res.status(400).json({ message: 'Diese E-Mail-Adresse wird bereits verwendet' });
+        }
+
         // Generiere neuen Verifikationstoken
         const verificationToken = crypto.randomBytes(32).toString('hex');
         

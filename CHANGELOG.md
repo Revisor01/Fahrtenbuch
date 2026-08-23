@@ -25,6 +25,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Von der Anmeldung der App führt ein Weg zurück zur Auswahl der Kirchenkreise, falls man sich vertan hat
 
 ### Geändert
+- Nach einer Passwortänderung gelten bestehende Anmeldungen auf anderen Geräten nicht mehr — wer das Passwort wechselt, sperrt damit auch fremde Zugriffe aus. Das eigene Gerät bleibt angemeldet
+- Das Ändern eines Passworts ist auf zehn Versuche in zehn Minuten begrenzt
 - Beim Erfassen einer Fahrt wird das Datum nur noch einmal abgefragt. Auf der Bestätigungsseite steht es nur dann, wenn die Fahrt über „Wiederholen" begonnen wurde — dort wird der erste Schritt übersprungen
 - In der Abrechnung steht „Alle einreichen" jetzt bei jedem Monat, in dem noch etwas offen ist — bisher nur bei fälligen. Wer den laufenden oder einen teilweise eingereichten Monat abschließen wollte, musste vorher jeden Träger einzeln antippen
 - Der Knopf zu den Einstellungen oben rechts auf der Startseite hebt sich jetzt farblich ab, statt im Hintergrund zu verschwinden
@@ -64,6 +66,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- Eine E-Mail-Adresse, die bereits zu einem anderen Konto gehört, lässt sich nicht mehr für das eigene Profil eintragen
+- Die Registrierung wird jetzt einheitlich beurteilt: Bisher konnte das Anmeldeformular erscheinen, obwohl der Server die Registrierung ablehnte
+- Abrechnungsträgern lässt sich wieder eine Farbe geben — die Angabe wurde bisher stillschweigend verworfen
 - Das eigene Passwort ließ sich über die Benutzerverwaltung nicht ändern — der Versuch endete mit einem Serverfehler statt mit einer Rückmeldung. Der Weg über das eigene Profil war davon nicht betroffen
 - Beim Anlegen eines Favoriten mit unvollständigen Angaben erschien ein Serverfehler statt der Meldung, welches Feld fehlt
 - Fahrten mit einer von Hand eingetragenen Adresse ließen sich über den Kurzbefehl nicht speichern — die Meldung nannte den Startort. Ein leer gelassener Ort gilt jetzt wieder als „nicht ausgewählt", die eingetragene Adresse wird verwendet

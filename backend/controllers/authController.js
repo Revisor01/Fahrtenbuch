@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { registrierungErlaubt } = require('../utils/registrierung');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 const crypto = require('crypto');
@@ -72,7 +73,7 @@ exports.register = async (req, res) => {
   try {
     // Serverseitige Registrierungs-Gates (abwärtskompatibel: greifen nur bei gesetzter,
     // nicht-leerer Env-Variable — Docker-Compose liefert für unset Variablen Leerstrings)
-    if (process.env.ALLOW_REGISTRATION && process.env.ALLOW_REGISTRATION !== 'true') {
+    if (!registrierungErlaubt()) {
       return res.status(403).json({ message: 'Registrierung ist deaktiviert' });
     }
 

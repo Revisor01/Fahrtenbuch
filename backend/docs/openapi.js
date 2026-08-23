@@ -414,7 +414,7 @@ const paths = {
     get: { tags: ['Orte'], summary: 'Alle Orte abrufen', responses: liste('Ort', 'Liste der Orte, sortiert nach eigener Reihenfolge') },
     post: {
       tags: ['Orte'], summary: 'Ort anlegen',
-      description: 'Achtung: Beim Anlegen heißen die Kennzeichen `istWohnort` (camelCase), beim Ändern dagegen `ist_wohnort`.',
+      description: 'Die Kennzeichen werden in beiden Schreibweisen angenommen — `istWohnort` wie `ist_wohnort`.',
       requestBody: { required: true, content: { 'application/json': { schema: {
         type: 'object', required: ['name', 'adresse'],
         properties: {
@@ -442,7 +442,7 @@ const paths = {
     get: { tags: ['Orte'], summary: 'Einzelnen Ort abrufen', parameters: [pfadId('ID des Ortes')], responses: { 200: { description: 'Der Ort', content: { 'application/json': { schema: { $ref: '#/components/schemas/Ort' } } } }, 401: FEHLER[401], 404: MELDUNG('Ort nicht gefunden'), 500: FEHLER[500] } },
     put: {
       tags: ['Orte'], summary: 'Ort ändern', parameters: [pfadId('ID des Ortes')],
-      description: 'Kein Teil-Update: Nicht mitgeschickte Kennzeichen werden auf `false` gesetzt. Hier snake_case, anders als beim Anlegen.',
+      description: 'Kein Teil-Update: Nicht mitgeschickte Kennzeichen werden auf `false` gesetzt. Beide Schreibweisen werden angenommen.',
       requestBody: { required: true, content: { 'application/json': { schema: {
         type: 'object', required: ['name', 'adresse'],
         properties: {
@@ -497,7 +497,7 @@ const paths = {
     get: { tags: ['Abrechnungsträger'], summary: 'Alle Träger abrufen', description: 'Inklusive aktuell gültigem Erstattungsbetrag.', responses: liste('Abrechnungstraeger', 'Liste der Abrechnungsträger') },
     post: {
       tags: ['Abrechnungsträger'], summary: 'Träger anlegen',
-      requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['name'], properties: { name: { type: 'string', maxLength: 200, example: 'Kirchenkreis' }, kostenstelle: { type: ['string', 'null'], example: '1234' } } } } } },
+      requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['name'], properties: { name: { type: 'string', maxLength: 200, example: 'Kirchenkreis' }, kostenstelle: { type: ['string', 'null'], example: '1234' }, farbe: { type: ['string', 'null'], pattern: '^#[0-9a-fA-F]{6}$', example: '#0F5257', description: 'Farbe im Format #RRGGBB.' } } } } } },
       responses: { 201: ANTWORT('Angelegt', { id: 7, message: 'Abrechnungsträger erfolgreich erstellt' }), 400: VALIDIERUNG, 401: FEHLER[401], 500: FEHLER[500] },
     },
   },
@@ -512,7 +512,7 @@ const paths = {
     put: {
       tags: ['Abrechnungsträger'], summary: 'Träger ändern oder aktiv schalten', parameters: [pfadId('ID des Trägers')],
       description: 'Zwei Wege: Nur `active` schicken schaltet den Träger an oder aus. Mit `name` wird der Datensatz vollständig geschrieben.',
-      requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string', maxLength: 200 }, kostenstelle: { type: ['string', 'null'] }, active: { type: 'boolean' } } } } } },
+      requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string', maxLength: 200 }, kostenstelle: { type: ['string', 'null'] }, active: { type: 'boolean' }, farbe: { type: ['string', 'null'], pattern: '^#[0-9a-fA-F]{6}$', example: '#0F5257' } } } } } },
       responses: { 200: MELDUNG('Abrechnungsträger erfolgreich aktualisiert'), 400: ANTWORT('Validierungsfehler oder unbrauchbare Anfrage', { message: 'Ungültige Aktualisierungsanfrage' }), 401: FEHLER[401], 404: MELDUNG('Abrechnungsträger nicht gefunden'), 500: FEHLER[500] },
     },
     delete: {
@@ -642,6 +642,7 @@ const paths = {
   '/api/profile/change-password': {
     put: {
       tags: ['Profil'], summary: 'Eigenes Passwort ändern',
+      description: 'Höchstens 10 Versuche in 10 Minuten je Konto. Nach dem Wechsel verlieren alle bestehenden Anmeldungen ihre Gültigkeit — die eigene ausgenommen, sie bekommt über den Header `X-Token-Erneuert` ein frisches Token.',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['oldPassword', 'newPassword', 'confirmPassword'], properties: { oldPassword: { type: 'string', format: 'password' }, newPassword: { type: 'string', format: 'password', minLength: 6 }, confirmPassword: { type: 'string', format: 'password' } } } } } },
       responses: { 200: MELDUNG('Passwort erfolgreich geändert.'), 400: ANTWORT('Altes Passwort falsch oder Wiederholung stimmt nicht', { message: 'Altes Passwort ist falsch' }), 401: FEHLER[401], 404: MELDUNG('Benutzer nicht gefunden'), 500: FEHLER[500] },
     },
@@ -678,7 +679,7 @@ const paths = {
   '/api/users/{id}/password': {
     put: {
       tags: ['Benutzer'], summary: 'Passwort eines Kontos ändern', parameters: [pfadId('ID des Kontos')],
-      description: 'Für Administratoren oder das eigene Konto. Administratoren brauchen das alte Passwort nicht zu kennen, müssen `currentPassword` aber trotzdem mitschicken.',
+      description: 'Für Administratoren oder das eigene Konto. Administratoren brauchen das alte Passwort nicht zu kennen, müssen `currentPassword` aber trotzdem mitschicken. Höchstens 10 Versuche in 10 Minuten je Konto. Nach dem Wechsel verlieren alle bestehenden Anmeldungen ihre Gültigkeit.',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['currentPassword', 'newPassword'], properties: { currentPassword: { type: 'string', format: 'password' }, newPassword: { type: 'string', format: 'password', minLength: 6 } } } } } },
       responses: { 200: MELDUNG('Passwort erfolgreich geändert'), 400: ANTWORT('Validierungsfehler oder falsches Passwort', { message: 'Aktuelles Passwort ist falsch' }), 401: FEHLER[401], 403: FEHLER[403], 404: MELDUNG('Benutzer nicht gefunden'), 500: FEHLER[500] },
     },
@@ -686,6 +687,7 @@ const paths = {
   '/api/users/resend-verification': {
     post: {
       tags: ['Benutzer'], summary: 'Bestätigungsmail erneut senden',
+      description: 'Gehört die Adresse bereits einem anderen Konto, wird die Anfrage abgewiesen.',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['email'], properties: { email: { type: 'string', format: 'email' } } } } } },
       responses: { 200: MELDUNG('Verifizierungs-E-Mail wurde erneut gesendet'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Benutzer nicht gefunden'), 500: FEHLER[500] },
     },

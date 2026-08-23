@@ -7,7 +7,7 @@ const {
     requireAdminOrSelf
 } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
-const { resetLimiter } = require('../middleware/rateLimiter');
+const { resetLimiter, passwortLimiter } = require('../middleware/rateLimiter');
 const { createUserSchema, updateUserSchema, resetPasswordRequestSchema, resetPasswordSchema, setPasswordSchema, verifyEmailSchema, resendVerificationSchema, changePasswordSchema } = require('../schemas/userSchemas');
 
 
@@ -24,7 +24,9 @@ router.get('/me', authMiddleware, userController.getCurrentUser);
 router.post('/resend-verification', authMiddleware, validate(resendVerificationSchema), userController.resendVerification);
 
 // Admin or self routes
-router.put('/:id/password', authMiddleware, requireAdminOrSelf('id'), validate(changePasswordSchema), userController.changePassword);
+// passwortLimiter NACH authMiddleware: Er zaehlt pro Konto, und dafuer muss
+// req.user schon stehen — davor faellt er auf die IP zurueck.
+router.put('/:id/password', authMiddleware, passwortLimiter, requireAdminOrSelf('id'), validate(changePasswordSchema), userController.changePassword);
 router.put('/:id', authMiddleware, requireAdminOrSelf('id'), validate(updateUserSchema), userController.updateUser);
 
 // Admin-only routes
