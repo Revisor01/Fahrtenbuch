@@ -94,7 +94,7 @@ app.use(cors({
 }));
 // API-Dokumentation vor helmet: Swagger braucht eigene Inline-Styles und
 // -Skripte, die die strenge Standard-CSP unten blockieren wuerde. Die Route
-// bringt ihre eigene, passend enge CSP mit und liegt hinter Basic-Auth.
+// bringt ihre eigene, passend enge CSP mit und liegt hinter einer Anmeldung.
 // Ausserdem vor den /api-Limitern — sonst zaehlt jeder Doku-Aufruf gegen das
 // Kontingent der eigentlichen Schnittstelle (/api-docs beginnt mit /api).
 app.use(['/api-docs', '/api-docs.json'], helmet({

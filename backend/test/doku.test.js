@@ -1,6 +1,11 @@
 // Testet die Doku-Route ohne Datenbank: eine Mini-App mit derselben Route.
+//
+// Geprueft wird der Weg, den ein Mensch im Browser geht: Anmeldeseite sehen,
+// Formular abschicken, Cookie bekommen, Swagger sehen, abmelden.
+
 process.env.DOKU_USER = 'testnutzer';
 process.env.DOKU_PASSWORT = 'testpasswort';
+process.env.JWT_SECRET = 'test-geheimnis-nur-fuer-diesen-lauf';
 
 const express = require('express');
 const helmet = require('helmet');
@@ -20,14 +25,6 @@ dokuEinhaengen(app);
 const server = app.listen(0, async () => {
   const port = server.address().port;
   const basis = `http://127.0.0.1:${port}`;
-  const gut = Buffer.from('testnutzer:testpasswort').toString('base64');
-  const schlecht = Buffer.from('testnutzer:falsch').toString('base64');
-
-  async function hole(pfad, kopf) {
-    const r = await fetch(basis + pfad, kopf ? { headers: { Authorization: kopf } } : undefined);
-    const text = await r.text();
-    return { status: r.status, auth: r.headers.get('www-authenticate'), csp: r.headers.get('content-security-policy'), text };
-  }
 
   let fehler = 0;
   function pruefe(name, bedingung, zusatz = '') {
@@ -35,29 +32,70 @@ const server = app.listen(0, async () => {
     if (!bedingung) fehler++;
   }
 
-  console.log('\nZugriffsschutz:');
+  async function hole(pfad, optionen = {}) {
+    const r = await fetch(basis + pfad, { redirect: 'manual', ...optionen });
+    return {
+      status: r.status,
+      auth: r.headers.get('www-authenticate'),
+      cookie: r.headers.get('set-cookie'),
+      ort: r.headers.get('location'),
+      text: await r.text(),
+    };
+  }
+
+  async function anmelden(benutzer, passwort) {
+    return hole('/api-docs/anmelden', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ benutzer, passwort }).toString(),
+    });
+  }
+
+  console.log('\nAnmeldeseite statt Browser-Dialog:');
   const ohne = await hole('/api-docs/');
   pruefe('ohne Anmeldung: 401', ohne.status === 401, 'war ' + ohne.status);
-  pruefe('fordert Basic-Auth an', /^Basic realm=/.test(ohne.auth || ''), ohne.auth);
+  pruefe('KEIN WWW-Authenticate (sonst oeffnet der Browser-Dialog)', !ohne.auth, String(ohne.auth));
+  pruefe('zeigt die eigene Anmeldeseite', ohne.text.includes('<form method="post"'), '');
+  pruefe('Seite nennt den Zweck', ohne.text.includes('API-Dokumentation'), '');
+  pruefe('Seite laedt nichts von aussen', !/https?:\/\/(?!127\.0\.0\.1)/.test(ohne.text.replace(/<svg[\s\S]*?<\/svg>/g, '')), '');
 
-  const falsch = await hole('/api-docs/', 'Basic ' + schlecht);
+  console.log('\nAnmeldung:');
+  const falsch = await anmelden('testnutzer', 'falsch');
   pruefe('falsches Passwort: 401', falsch.status === 401, 'war ' + falsch.status);
+  pruefe('falsches Passwort: kein Cookie', !falsch.cookie, String(falsch.cookie));
+  pruefe('falsches Passwort: Hinweis auf der Seite', falsch.text.includes('stimmt nicht'), '');
 
-  const richtig = await hole('/api-docs/', 'Basic ' + gut);
-  pruefe('richtiges Passwort: 200', richtig.status === 200, 'war ' + richtig.status);
-  pruefe('liefert die Swagger-Oberflaeche', richtig.text.includes('swagger-ui'), '');
-  pruefe('eigenes CSS ist drin', richtig.text.includes('--doku-brand'), '');
-  pruefe('Seitentitel gesetzt', /API-Dokumentation/.test(richtig.text), '');
+  const falscherNutzer = await anmelden('jemand', 'testpasswort');
+  pruefe('falscher Benutzer: 401', falscherNutzer.status === 401, 'war ' + falscherNutzer.status);
 
-  console.log('\nSicherheitskopf:');
-  pruefe('CSP gesetzt', !!richtig.csp, '');
-  pruefe('CSP erlaubt Inline-Styles', /style-src[^;]*unsafe-inline/.test(richtig.csp || ''), richtig.csp);
-  pruefe('CSP verbietet Einbettung', /frame-ancestors 'none'/.test(richtig.csp || ''), '');
+  const richtig = await anmelden('testnutzer', 'testpasswort');
+  pruefe('richtige Daten: Weiterleitung', richtig.status === 303, 'war ' + richtig.status);
+  pruefe('leitet auf die Doku', richtig.ort === '/api-docs/', String(richtig.ort));
+  pruefe('setzt ein Cookie', !!richtig.cookie, '');
+  pruefe('Cookie ist httpOnly', /httponly/i.test(richtig.cookie || ''), richtig.cookie);
+  pruefe('Cookie ist SameSite=Lax', /samesite=lax/i.test(richtig.cookie || ''), richtig.cookie);
+  pruefe('Cookie gilt nur fuer /api-docs', /path=\/api-docs/i.test(richtig.cookie || ''), richtig.cookie);
+
+  const keks = (richtig.cookie || '').split(';')[0];
+
+  console.log('\nMit Anmeldung:');
+  const drin = await hole('/api-docs/', { headers: { Cookie: keks } });
+  pruefe('Doku erreichbar: 200', drin.status === 200, 'war ' + drin.status);
+  pruefe('liefert die Swagger-Oberflaeche', drin.text.includes('swagger-ui'), '');
+  pruefe('Seitentitel gesetzt', /API-Dokumentation/.test(drin.text), '');
+  pruefe('KEIN eigenes Swagger-CSS (Standard-Look)', !drin.text.includes('--doku-brand'), '');
+
+  console.log('\nGefaelschtes Cookie:');
+  const gefaelscht = await hole('/api-docs/', { headers: { Cookie: 'fb_doku=9999999999.abc123' } });
+  pruefe('falsche Signatur wird abgewiesen', gefaelscht.status === 401, 'war ' + gefaelscht.status);
+  const abgelaufen = await hole('/api-docs/', { headers: { Cookie: 'fb_doku=1.abc' } });
+  pruefe('abgelaufenes Cookie wird abgewiesen', abgelaufen.status === 401, 'war ' + abgelaufen.status);
 
   console.log('\nSpezifikation als JSON:');
   const jsonOhne = await hole('/api-docs.json');
   pruefe('ohne Anmeldung: 401', jsonOhne.status === 401, 'war ' + jsonOhne.status);
-  const jsonMit = await hole('/api-docs.json', 'Basic ' + gut);
+  pruefe('antwortet JSON, nicht HTML', jsonOhne.text.trim().startsWith('{'), jsonOhne.text.slice(0, 40));
+  const jsonMit = await hole('/api-docs.json', { headers: { Cookie: keks } });
   pruefe('mit Anmeldung: 200', jsonMit.status === 200, 'war ' + jsonMit.status);
   let spec = null;
   try { spec = JSON.parse(jsonMit.text); } catch (e) {}
@@ -70,15 +108,18 @@ const server = app.listen(0, async () => {
     pruefe('beide Anmeldewege beschrieben',
       !!spec.components.securitySchemes.Token && !!spec.components.securitySchemes.ApiSchluessel, '');
     pruefe('keine Secrets in der Spezifikation',
-      !/DOKU_PASSWORT|testpasswort|asjoi3j|4kkhXU/.test(jsonMit.text), '');
+      !/testpasswort|test-geheimnis|asjoi3j|4kkhXU/.test(jsonMit.text), '');
   }
+
+  console.log('\nAbmelden:');
+  const raus = await hole('/api-docs/abmelden', { method: 'POST', headers: { Cookie: keks } });
+  pruefe('leitet zurueck', raus.status === 303, 'war ' + raus.status);
+  pruefe('loescht das Cookie', /fb_doku=;/.test(raus.cookie || ''), String(raus.cookie));
 
   console.log('\nAbschaltung ohne Zugangsdaten:');
   delete process.env.DOKU_USER;
   delete process.env.DOKU_PASSWORT;
-  const app2 = express();
-  const eingehaengt = dokuEinhaengen(app2);
-  pruefe('Doku bleibt aus, wenn Zugangsdaten fehlen', eingehaengt === false, '');
+  pruefe('Doku bleibt aus, wenn Zugangsdaten fehlen', dokuEinhaengen(express()) === false, '');
 
   console.log(fehler === 0 ? '\nAlle Pruefungen bestanden.' : '\n' + fehler + ' FEHLER');
   server.close();
