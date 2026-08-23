@@ -11,6 +11,28 @@ const richtungSchema = z
   .nullish()
   .transform((wert) => wert ?? 'hin');
 
+// Optionale Verweise auf andere Datensaetze (Orte, Partnerfahrt). Dieselbe
+// Falle wie bei den Kilometern: Der iOS-Kurzbefehl sendet diese Felder immer
+// mit — bei einem manuell eingegebenen Ort steht dort leerer Text. `z.coerce`
+// machte daraus die Zahl 0, `positive()` wies sie ab, und die Fahrt scheiterte
+// mit „vonOrtId too small" (Simon 24.08.). Leer/0 heisst hier „nicht gesetzt"
+// und wird zu null — der Controller nutzt dann den Freitext-Ort.
+// `abrechnung` bleibt bewusst streng: ein Abrechnungstraeger ist Pflicht.
+const optionaleIdSchema = z
+  .union([z.string(), z.number(), z.null(), z.undefined()])
+  .optional()
+  .nullable()
+  .transform((wert) => {
+    if (wert === null || wert === undefined) return null;
+    if (typeof wert === 'string' && wert.trim() === '') return null;
+    const zahl = Number(wert);
+    if (!Number.isInteger(zahl)) return NaN; // faellt unten durch die Pruefung
+    return zahl === 0 ? null : zahl;
+  })
+  .refine((wert) => wert === null || (Number.isInteger(wert) && wert > 0), {
+    error: 'Muss eine positive ganze Zahl sein',
+  });
+
 // Kilometer sind optional: Wer zwei gespeicherte Orte waehlt, ueberlaesst die
 // Strecke der hinterlegten Distanz — der Controller rechnet sie dann selbst
 // aus. Frueher stand hier `z.coerce.number().positive()`, und das wies genau
@@ -37,8 +59,8 @@ const kilometerSchema = z
   });
 
 const createFahrtSchema = z.object({
-  vonOrtId: z.coerce.number().int().positive().nullable().optional(),
-  nachOrtId: z.coerce.number().int().positive().nullable().optional(),
+  vonOrtId: optionaleIdSchema,
+  nachOrtId: optionaleIdSchema,
   datum: z.string().min(1, 'Datum ist erforderlich'),
   anlass: z.string().min(1, 'Anlass ist erforderlich'),
   kilometer: kilometerSchema,
@@ -47,7 +69,7 @@ const createFahrtSchema = z.object({
   einmaligerNachOrt: z.string().optional().nullable(),
   // Gegenfahrt desselben Hin-und-Rueck-Paares. Ohne Eintrag hier wuerde
   // validate() das Feld aus dem Body entfernen, bevor der Controller es sieht.
-  partnerFahrtId: z.coerce.number().int().positive().nullable().optional(),
+  partnerFahrtId: optionaleIdSchema,
   mitfahrer: z.array(z.object({
     name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
     arbeitsstaette: z.string().optional().nullable(),
@@ -56,8 +78,8 @@ const createFahrtSchema = z.object({
 });
 
 const updateFahrtSchema = z.object({
-  vonOrtId: z.coerce.number().int().positive().nullable().optional(),
-  nachOrtId: z.coerce.number().int().positive().nullable().optional(),
+  vonOrtId: optionaleIdSchema,
+  nachOrtId: optionaleIdSchema,
   datum: z.string().min(1, 'Datum ist erforderlich'),
   anlass: z.string().min(1, 'Anlass ist erforderlich'),
   kilometer: kilometerSchema,
