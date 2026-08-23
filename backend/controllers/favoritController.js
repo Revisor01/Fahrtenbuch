@@ -41,10 +41,15 @@ exports.createFavorit = async (req, res) => {
     res.status(201).json(favorit);
   } catch (error) {
     if (error.name === 'ZodError') {
+      // Zod 4 liefert die Liste als `issues`; `errors` gibt es dort nicht mehr.
+      // Ohne den Fallback warf dieser Handler selbst (`.map` auf undefined) und
+      // der Nutzer sah einen 500er statt der Meldung, welches Feld fehlt —
+      // dieselbe Falle, die middleware/validate.js schon abfaengt.
+      const issues = error.issues || error.errors || [];
       return res.status(400).json({
         message: 'Validierungsfehler',
-        errors: error.errors.map((err) => ({
-          field: err.path.join('.'),
+        errors: issues.map((err) => ({
+          field: Array.isArray(err.path) ? err.path.join('.') : String(err.path ?? ''),
           message: err.message,
         })),
       });

@@ -82,6 +82,11 @@ exports.deleteErstattungssatz = async (req, res) => {
         );
         
         if (saetze[0].count <= 1) {
+            // Ohne rollback ging die Verbindung mit offener Transaktion zurueck
+            // in den Pool — der naechste Nutzer der Verbindung haette darin
+            // weitergearbeitet. In der Abrechnungstraeger-Variante steht das
+            // rollback bereits, hier fehlte es (24.08.).
+            await connection.rollback();
             return res.status(400).json({ message: 'Der letzte Erstattungssatz kann nicht gelöscht werden' });
         }
         

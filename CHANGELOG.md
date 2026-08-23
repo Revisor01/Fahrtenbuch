@@ -63,6 +63,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- Das eigene Passwort ließ sich über die Benutzerverwaltung nicht ändern — der Versuch endete mit einem Serverfehler statt mit einer Rückmeldung. Der Weg über das eigene Profil war davon nicht betroffen
+- Beim Anlegen eines Favoriten mit unvollständigen Angaben erschien ein Serverfehler statt der Meldung, welches Feld fehlt
 - Fahrten mit einer von Hand eingetragenen Adresse ließen sich über den Kurzbefehl nicht speichern — die Meldung nannte den Startort. Ein leer gelassener Ort gilt jetzt wieder als „nicht ausgewählt", die eingetragene Adresse wird verwendet
 - Wurde eine Fahrt über den Kurzbefehl mit zwei gespeicherten Orten eingetragen, brach das Speichern mit einer Meldung zur Kilometerzahl ab, obwohl für die Strecke eine Entfernung hinterlegt war. Ohne eigene Kilometerangabe wird jetzt wieder die hinterlegte Entfernung genommen — beim Anlegen wie beim Bearbeiten
 - In der App verdeckte die Tastatur das Eingabefeld, in das man gerade schreibt — in jedem Fenster mit Eingabefeldern: Anlässe, Orte, Träger, Profil, Fahrt erfassen und bearbeiten, Mitfahrer. Das Fenster rückt jetzt über die Tastatur, ohne leeren Streifen dazwischen, und das Feld bleibt sichtbar, auch beim Wechsel ins nächste. Ebenso auf der Anmeldeseite, wo Benutzername und Passwort hinter der Tastatur liegen konnten
