@@ -1020,6 +1020,25 @@ html[data-tastatur] .sheet-panel {
   overscroll-behavior: contain;
 }
 
+/* Keine sichtbare Scrollleiste in Fenstern. Auf dem Rand des Sheets sass
+   rechts ein grauer Balken, der dort nichts zu suchen hat — gescrollt wird
+   mit dem Finger, die Leiste ist nur Ballast. Gilt fuer den Koerper selbst
+   und fuer die Listen, die darin eine eigene Scrollflaeche haben.
+   Das Scrollen bleibt unveraendert, nur die Anzeige verschwindet. */
+.sheet-koerper,
+.sheet-koerper .erf-ort-liste,
+.sheet-koerper .adr-liste {
+  scrollbar-width: none;          /* Firefox, moderne Engines */
+  -ms-overflow-style: none;       /* aeltere Edge-Versionen */
+}
+
+.sheet-koerper::-webkit-scrollbar,
+.sheet-koerper .erf-ort-liste::-webkit-scrollbar,
+.sheet-koerper .adr-liste::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .sheet-handle {
   width: 44px;
   height: 5px;
@@ -1957,14 +1976,18 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   width: 40px;
   height: 40px;
   border-radius: var(--r-pill);
-  background: var(--surface-2);
-  color: var(--text-2);
+  /* Kraeftiger als das fruehere --surface-2/--text-2: Der Knopf verschwand
+     oben rechts fast im Hintergrund (Simon 23.08.). Markenton statt Grau,
+     dazu ein Rand — sichtbar, aber leiser als die Hero-Karte darunter, die
+     die volle Markenflaeche traegt. */
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: 1px solid var(--brand);
   font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -3608,6 +3631,13 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   width: auto;
   min-width: 96px;
   flex-shrink: 0;
+  /* Enger als ein normales Auswahlfeld: Die 40px, die `.form-select` rechts
+     fuer den Systempfeil freihaelt, sind bei einer vierstelligen Jahreszahl zu
+     viel — der Pfeil stand sichtbar zu weit vom rechten Rand weg
+     (Simon 23.08.). 28px reichen fuer das Dreieck, ohne dass der Text
+     darunter laeuft. */
+  padding-left: 12px;
+  padding-right: 28px;
 }
 
 /* ---------- Monatskarten ---------- */

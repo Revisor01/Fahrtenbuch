@@ -24,6 +24,10 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Von der Anmeldung der App führt ein Weg zurück zur Auswahl der Kirchenkreise, falls man sich vertan hat
 
 ### Geändert
+- In der Abrechnung steht „Alle einreichen" jetzt bei jedem Monat, in dem noch etwas offen ist — bisher nur bei fälligen. Wer den laufenden oder einen teilweise eingereichten Monat abschließen wollte, musste vorher jeden Träger einzeln antippen
+- Der Knopf zu den Einstellungen oben rechts auf der Startseite hebt sich jetzt farblich ab, statt im Hintergrund zu verschwinden
+- In Fenstern erscheint rechts keine Bildlaufleiste mehr; gescrollt wird wie gewohnt
+- Die Jahresauswahl in der Abrechnung sitzt jetzt bündig am rechten Rand
 - Die Favoriten auf der Startseite stehen jetzt in einem eigenen, farblich abgesetzten Bereich und sind auf einen Blick als Schnellzugriff zu erkennen
 - Die Reihenfolge von Abrechnungsträgern, Anlässen und Orten lässt sich jetzt auch auf dem Handy per Ziehen am Griff ändern — bisher tat sich dort beim Wischen nichts. Während des Ziehens ist zu sehen, wo die Zeile landet. Die Pfeiltasten auf dem Griff verschieben sie weiterhin
 - Startort, Datum, Anlass und Abrechnungsträger klappen ihre Auswahl jetzt mit einem Tipp direkt auf, statt erst ein Zwischenmenü zu zeigen. Beim Datum öffnet sich die Auswahl des Geräts sofort
@@ -58,6 +62,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- Wurde eine Fahrt über den Kurzbefehl mit zwei gespeicherten Orten eingetragen, brach das Speichern mit einer Meldung zur Kilometerzahl ab, obwohl für die Strecke eine Entfernung hinterlegt war. Ohne eigene Kilometerangabe wird jetzt wieder die hinterlegte Entfernung genommen — beim Anlegen wie beim Bearbeiten
 - In der App verdeckte die Tastatur das Eingabefeld, in das man gerade schreibt — in jedem Fenster mit Eingabefeldern: Anlässe, Orte, Träger, Profil, Fahrt erfassen und bearbeiten, Mitfahrer. Das Fenster rückt jetzt über die Tastatur, ohne leeren Streifen dazwischen, und das Feld bleibt sichtbar, auch beim Wechsel ins nächste. Ebenso auf der Anmeldeseite, wo Benutzername und Passwort hinter der Tastatur liegen konnten
 - Die Mitnahmeentschädigung im Abrechnungsformular rechnete alle Fahrten mit dem zuletzt eingetragenen Satz, auch ältere. Wurde der Satz zum Beispiel zum 1. Juli erhöht, wies eine Abrechnung über Mai bis Juli auch für Mai und Juni zu hohe Beträge aus, und ein erst künftig gültiger Satz wirkte bereits. Jede Fahrt wird jetzt mit dem Satz gerechnet, der an ihrem Datum galt; wechselt der Satz innerhalb des Zeitraums, weist das Formular den sich ergebenden Mischsatz aus
 - Wurde direkt nach dem Speichern „Rückgängig" getippt, während die Fahrt noch gesichert wurde, konnte die Rückfahrt trotzdem angelegt werden und blieb ohne Verbindung zur Hinfahrt stehen — sie wäre unbemerkt mit abgerechnet worden. „Rückgängig" nimmt jetzt in jedem Fall beide Fahrten zurück
