@@ -8,6 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased] - 2.3.0
 
 ### Hinzugefügt
+- Eine Dokumentation der Schnittstelle steht unter `/api-docs` bereit: alle Abrufe mit Feldern, Antworten und Beispielen, zum direkten Ausprobieren im Browser. Der Zugang ist mit Benutzername und Passwort geschützt; ohne hinterlegte Zugangsdaten bleibt sie abgeschaltet
 - Anlässe lassen sich als eigene Liste pflegen und beim Erfassen einer Fahrt direkt auswählen; neue Anlässe können dabei ohne Umweg angelegt werden. Häufig genutzte stehen oben. Die bisher genutzten Anlässe werden einmalig übernommen, und das Löschen eines Anlasses lässt bereits erfasste Fahrten unverändert
 - Langes Tippen auf das App-Symbol bietet „Fahrt erfassen" und „Letzte Fahrt wiederholen" an — beide öffnen die Erfassung direkt, ohne den Umweg über die Startseite
 - Ein Tipp auf einen Balken im Kilometer-Diagramm zeigt die Werte des Monats: Kilometer, Anzahl der Fahrten, Erstattung und Status. Am Rechner genügt weiterhin der Mauszeiger

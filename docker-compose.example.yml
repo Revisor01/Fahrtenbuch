@@ -33,6 +33,9 @@ services:
       # Gueltigkeit der Anmeldung; ohne Angabe 14 Tage. Wird bei Nutzung
       # gleitend erneuert, laeuft also nur bei Inaktivitaet ab.
       - TOKEN_LAUFZEIT=${TOKEN_LAUFZEIT:-14d}
+      # API-Dokumentation unter /api-docs. Ohne beide Werte bleibt sie aus.
+      - DOKU_USER=${DOKU_USER:-}
+      - DOKU_PASSWORT=${DOKU_PASSWORT:-}
       # Kommaseparierte Allowlist erlaubter Web-Origins; ein Einzelwert
       # funktioniert unverändert. Die Origins der mobilen Apps
       # (capacitor://localhost sowie https://localhost und http://localhost)

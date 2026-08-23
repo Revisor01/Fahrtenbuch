@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js"
+    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js && node test/doku.test.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +23,7 @@
     "jszip": "^3.10.1",
     "mysql2": "^3.23.2",
     "nodemailer": "^9.0.5",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
