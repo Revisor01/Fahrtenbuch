@@ -42,6 +42,12 @@ function MonatKarte({ row, expanded, onToggle, aktionen, onExport }) {
   const summe = monatSumme(kategorien);
   const istOffen = faellig || expanded;
   const erstattet = !laufend && status === 'erhalten';
+  // Einreichen steht ueberall, wo noch etwas offen ist — nicht nur bei
+  // faelligen Monaten. Im laufenden Monat und in bereits teilweise
+  // eingereichten gab es unten nur „Exportieren", also einen Download ohne
+  // Statuswechsel; wer den Monat abschliessen wollte, musste jede
+  // Traegerzeile einzeln antippen (Simon 23.08.).
+  const offeneAnzahl = kategorien.filter((k) => k.status === 'offen').length;
 
   // Kopfinhalt: Titel, Summe und Fortschrittsleiste
   const kopfInhalt = (
@@ -104,9 +110,7 @@ function MonatKarte({ row, expanded, onToggle, aktionen, onExport }) {
                 className="btn-primary flex-1"
                 onClick={() => aktionen.einreichen(month, kategorien)}
               >
-                {kategorien.filter((k) => k.status === 'offen').length > 1
-                  ? 'Alle einreichen'
-                  : 'Einreichen'}
+                {offeneAnzahl > 1 ? 'Alle einreichen' : 'Einreichen'}
               </button>
               <button
                 type="button"
@@ -119,14 +123,37 @@ function MonatKarte({ row, expanded, onToggle, aktionen, onExport }) {
               </button>
             </div>
           ) : (
-            <div className="abr-karte-fuss abr-karte-fuss-leise">
-              <button
-                type="button"
-                className="abr-link"
-                onClick={() => onExport(month)}
-              >
-                Exportieren
-              </button>
+            <div
+              className={`abr-karte-fuss${offeneAnzahl === 0 ? ' abr-karte-fuss-leise' : ''}`}
+            >
+              {offeneAnzahl > 0 ? (
+                <>
+                  <button
+                    type="button"
+                    className="btn-primary flex-1"
+                    onClick={() => aktionen.einreichen(month, kategorien)}
+                  >
+                    {offeneAnzahl > 1 ? 'Alle einreichen' : 'Einreichen'}
+                  </button>
+                  <button
+                    type="button"
+                    className="abr-download-btn"
+                    title="Exportieren ohne Statuswechsel"
+                    aria-label={`${monatLabel(month)} exportieren, ohne den Status zu ändern`}
+                    onClick={() => onExport(month)}
+                  >
+                    <Download size={18} />
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="abr-link"
+                  onClick={() => onExport(month)}
+                >
+                  Exportieren
+                </button>
+              )}
             </div>
           )}
         </>
