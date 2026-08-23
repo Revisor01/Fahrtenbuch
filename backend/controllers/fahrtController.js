@@ -139,6 +139,15 @@ exports.updateFahrt = async (req, res) => {
       }
     }
 
+    // Ohne Kilometerangabe die hinterlegte Distanz nehmen — wie beim Anlegen.
+    // Vorher blieb das Feld hier einfach leer: Wer eine Fahrt zwischen zwei
+    // gespeicherten Orten ohne Kilometer speicherte, hatte danach 0 km stehen,
+    // statt der hinterlegten Strecke (Simon 23.08.).
+    let updateKilometer = kilometer;
+    if (!updateKilometer && vonOrtId && nachOrtId) {
+      updateKilometer = await getDistance(vonOrtId, nachOrtId, userId);
+    }
+
     const updateData = {
       vonOrtId: vonOrtId || null,
       nachOrtId: nachOrtId || null,
@@ -146,7 +155,7 @@ exports.updateFahrt = async (req, res) => {
       einmaligerNachOrt: einmaligerNachOrt || null,
       anlass: anlass || null,
       // Fehlt kilometer, warf .toString() einen TypeError und damit einen 500er
-      kilometer: kilometer !== undefined && kilometer !== null ? kilometer.toString() : null,
+      kilometer: updateKilometer !== undefined && updateKilometer !== null ? updateKilometer.toString() : null,
       abrechnung: abrechnung || null,
       datum: datum || null
     };

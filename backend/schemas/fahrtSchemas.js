@@ -11,12 +11,37 @@ const richtungSchema = z
   .nullish()
   .transform((wert) => wert ?? 'hin');
 
+// Kilometer sind optional: Wer zwei gespeicherte Orte waehlt, ueberlaesst die
+// Strecke der hinterlegten Distanz — der Controller rechnet sie dann selbst
+// aus. Frueher stand hier `z.coerce.number().positive()`, und das wies genau
+// diesen Fall ab: Der iOS-Kurzbefehl sendet das Feld immer mit, bei zwei
+// gespeicherten Orten als leeren Text. `z.coerce` macht daraus die Zahl 0,
+// `positive()` lehnte sie ab — die Fahrt scheiterte mit „Kilometer falsch",
+// obwohl die Distanz hinterlegt war (Simon 23.08.).
+// Leer, 0 und null bedeuten jetzt einheitlich „nicht angegeben" → null, und
+// erst dadurch greift die Berechnung im Controller. Echte Werte bleiben
+// unveraendert, negative werden weiterhin abgewiesen.
+const kilometerSchema = z
+  .union([z.string(), z.number(), z.null(), z.undefined()])
+  .optional()
+  .nullable()
+  .transform((wert) => {
+    if (wert === null || wert === undefined) return null;
+    if (typeof wert === 'string' && wert.trim() === '') return null;
+    const zahl = Number(wert);
+    if (!Number.isFinite(zahl)) return NaN; // faellt unten durch die Pruefung
+    return zahl === 0 ? null : zahl;
+  })
+  .refine((wert) => wert === null || (Number.isFinite(wert) && wert > 0), {
+    error: 'Kilometer muss eine positive Zahl sein',
+  });
+
 const createFahrtSchema = z.object({
   vonOrtId: z.coerce.number().int().positive().nullable().optional(),
   nachOrtId: z.coerce.number().int().positive().nullable().optional(),
   datum: z.string().min(1, 'Datum ist erforderlich'),
   anlass: z.string().min(1, 'Anlass ist erforderlich'),
-  kilometer: z.coerce.number().positive().optional().nullable(),
+  kilometer: kilometerSchema,
   abrechnung: z.coerce.number().int().positive('Abrechnungstraeger ist erforderlich'),
   einmaligerVonOrt: z.string().optional().nullable(),
   einmaligerNachOrt: z.string().optional().nullable(),
@@ -35,7 +60,7 @@ const updateFahrtSchema = z.object({
   nachOrtId: z.coerce.number().int().positive().nullable().optional(),
   datum: z.string().min(1, 'Datum ist erforderlich'),
   anlass: z.string().min(1, 'Anlass ist erforderlich'),
-  kilometer: z.coerce.number().positive().optional().nullable(),
+  kilometer: kilometerSchema,
   abrechnung: z.coerce.number().int().positive('Abrechnungstraeger ist erforderlich'),
   einmaligerVonOrt: z.string().optional().nullable(),
   einmaligerNachOrt: z.string().optional().nullable(),
