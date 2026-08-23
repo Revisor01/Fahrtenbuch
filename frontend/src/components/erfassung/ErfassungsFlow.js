@@ -56,6 +56,18 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
   // prefill mit Ziel springt direkt in Schritt 2 („Wiederholen"-Signatur)
   const [step, setStep] = useState(prefill?.nachOrtId ? 2 : 1);
+  // Wer in Schritt 1 startet, hat das Datum dort schon gesetzt — dann muss es
+  // in Schritt 2 nicht noch einmal stehen (Simon 23.08.). Nur der Einstieg
+  // ueber „Wiederholen" ueberspringt Schritt 1 und braucht die Zeile, sonst
+  // liefe die Fahrt ungesehen auf das heutige Datum. Der Merker haelt fest,
+  // wie der Flow begonnen hat: Wer aus Schritt 2 zurueckgeht und wiederkommt,
+  // hat das Datum inzwischen gesehen.
+  const startetInSchritt2 = useRef(!!prefill?.nachOrtId);
+  useEffect(() => {
+    // Sobald Schritt 1 einmal sichtbar war, ist das Datum gesetzt worden —
+    // danach entfaellt die Zeile in Schritt 2 auch beim Wiederholen-Einstieg.
+    if (step === 1) startetInSchritt2.current = false;
+  }, [step]);
   const [startOrtId, setStartOrtId] = useState(prefill?.vonOrtId ? String(prefill.vonOrtId) : null);
   const [datum, setDatum] = useState(prefill?.datum || heute());
   const [zielOrtId, setZielOrtId] = useState(prefill?.nachOrtId ? String(prefill.nachOrtId) : null);
@@ -982,12 +994,16 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         </button>
       </div>
 
-      {/* Für welchen Tag wird gespeichert? Bei „Wiederholen" startet der Flow
-          direkt hier — ohne diese Zeile bliebe das Datum ungesehen. */}
-      <div className="erf-feld">
-        <span className="erf-feld-label">Wann</span>
-        <DatumsFeld datum={datum} setDatum={setDatum} />
-      </div>
+      {/* Nur beim Einstieg ueber „Wiederholen": Dann wurde Schritt 1 mit
+          seinem Datumsfeld uebersprungen, und ohne diese Zeile liefe die Fahrt
+          ungesehen auf heute. Wer den Flow normal durchlaeuft, hat das Datum
+          oben schon gesetzt und braucht es hier nicht noch einmal. */}
+      {startetInSchritt2.current && (
+        <div className="erf-feld">
+          <span className="erf-feld-label">Wann</span>
+          <DatumsFeld datum={datum} setDatum={setDatum} />
+        </div>
+      )}
 
       {kmEdit && (
         <div className="erf-km-edit">

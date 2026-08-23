@@ -24,6 +24,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Von der Anmeldung der App führt ein Weg zurück zur Auswahl der Kirchenkreise, falls man sich vertan hat
 
 ### Geändert
+- Beim Erfassen einer Fahrt wird das Datum nur noch einmal abgefragt. Auf der Bestätigungsseite steht es nur dann, wenn die Fahrt über „Wiederholen" begonnen wurde — dort wird der erste Schritt übersprungen
 - In der Abrechnung steht „Alle einreichen" jetzt bei jedem Monat, in dem noch etwas offen ist — bisher nur bei fälligen. Wer den laufenden oder einen teilweise eingereichten Monat abschließen wollte, musste vorher jeden Träger einzeln antippen
 - Der Knopf zu den Einstellungen oben rechts auf der Startseite hebt sich jetzt farblich ab, statt im Hintergrund zu verschwinden
 - In Fenstern erscheint rechts keine Bildlaufleiste mehr; gescrollt wird wie gewohnt
