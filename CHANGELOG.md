@@ -66,6 +66,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- Im Browser am Rechner lässt sich das Datum einer Fahrt wieder ändern — beim Erfassen wie beim Nachbearbeiten. Bisher war das Feld dort nur mit dem heutigen Datum belegt und ließ sich weder anklicken noch tippen; rückwirkende Fahrten waren nur am Handy einzutragen
 - Eine E-Mail-Adresse, die bereits zu einem anderen Konto gehört, lässt sich nicht mehr für das eigene Profil eintragen
 - Die Registrierung wird jetzt einheitlich beurteilt: Bisher konnte das Anmeldeformular erscheinen, obwohl der Server die Registrierung ablehnte
 - Abrechnungsträgern lässt sich wieder eine Farbe geben — die Angabe wurde bisher stillschweigend verworfen

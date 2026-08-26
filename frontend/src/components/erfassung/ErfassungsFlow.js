@@ -7,6 +7,7 @@ import { useAdressSuche, adresseZuKoordinaten } from '../useAdressSuche';
 import { Pencil, Search, ChevronRight, ChevronLeft, MapPin, Crosshair, Check, Plus, X } from 'lucide-react';
 import MitfahrerModal from '../../MitfahrerModal';
 import { RICHTUNG_TEXT } from '../../FahrtForm';
+import DatumsFeld from '../ui/DatumsFeld';
 
 // Zweistufiger Erfassungsflow nach Design-Spec (Redesign 2026, Screen 2):
 // Schritt 1 „Wohin?" — Startort/Datum vorbelegt und antippbar, Ortsliste nach
@@ -751,7 +752,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         {/* Datum zuerst — gleiche Reihenfolge wie im Bearbeiten-Formular */}
         <div className="erf-feld">
           <span className="erf-feld-label">Wann</span>
-          <DatumsFeld datum={datum} setDatum={setDatum} />
+          <DatumsFeld datum={datum} setDatum={setDatum} format={formatDatumZeile} />
         </div>
 
         {/* Ab-Ort dauerhaft sichtbar: es muss immer klar sein, von wo es losgeht */}
@@ -1001,7 +1002,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       {startetInSchritt2.current && (
         <div className="erf-feld">
           <span className="erf-feld-label">Wann</span>
-          <DatumsFeld datum={datum} setDatum={setDatum} />
+          <DatumsFeld datum={datum} setDatum={setDatum} format={formatDatumZeile} />
         </div>
       )}
 
@@ -1335,39 +1336,6 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         />
       )}
     </Sheet>
-  );
-}
-
-// Ein-Tap-Datumswahl: das native Datumsfeld liegt unsichtbar über dem Button.
-// Vorher brauchte es zwei Taps — einen zum Einblenden, einen zum Öffnen.
-function DatumsFeld({ datum, setDatum }) {
-  return (
-    <div style={{ position: 'relative' }}>
-      <button type="button" className="erf-von-btn" tabIndex={-1} aria-hidden="true">
-        {formatDatumZeile(datum)}
-      </button>
-      <input
-        type="date"
-        value={datum}
-        onChange={(e) => {
-          if (e.target.value) setDatum(e.target.value);
-        }}
-        aria-label="Datum ändern"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 0,
-          border: 0,
-          padding: 0,
-          margin: 0,
-          background: 'transparent',
-          cursor: 'pointer',
-          zIndex: 1,
-        }}
-      />
-    </div>
   );
 }
 

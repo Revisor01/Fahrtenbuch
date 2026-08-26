@@ -6807,3 +6807,32 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   gap: 6px;
   flex-shrink: 0;
 }
+
+/* ============================================================
+   Datumsfeld auf dem Desktop
+   ============================================================ */
+
+/* Auf Touch liegt das Datumsfeld unsichtbar über einem Knopf — ein Tipp
+   öffnet dort den nativen Picker. Auf dem Desktop geht das nicht: Chrome
+   und Firefox öffnen den Kalender nur über das Icon, und ein Feld mit
+   opacity: 0 hat keins zum Treffen. Dort steht deshalb ein sichtbares
+   Feld, das wie der Knopf aussieht und sich auch tippen lässt. */
+.datum-feld {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.datum-feld::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.datum-feld::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Im dunklen Modus ist das Kalender-Icon sonst schwarz auf dunkel */
+[data-theme='dark'] .datum-feld::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
