@@ -5,6 +5,7 @@ import MitfahrerModal from './MitfahrerModal';
 import axios from 'axios';
 import Sheet from './components/ui/Sheet';
 import AddressAutocomplete from './components/AddressAutocomplete';
+import DatumsFeld from './components/ui/DatumsFeld';
 
 // Klartext statt der internen Schluessel ('hin_rueck' sagt niemandem etwas)
 // Auch vom Erfassungsflow genutzt — eine Quelle, damit die Beschriftung der
@@ -14,61 +15,6 @@ export const RICHTUNG_TEXT = {
   rueck: 'Rückfahrt',
   hin_rueck: 'Hin- und Rückfahrt',
 };
-
-// Ein-Tap-Datumswahl wie im Erfassungsflow: das native Datumsfeld liegt
-// unsichtbar ueber dem Knopf. Vorher brauchte es zwei Taps.
-function DatumsFeld({ datum, setDatum }) {
-  return (
-    <div style={{ position: 'relative' }}>
-      <button type="button" className="erf-von-btn" tabIndex={-1} aria-hidden="true">
-        {datum ? formatDatumZeile(datum) : 'Datum wählen'}
-      </button>
-      <input
-        type="date"
-        value={datum}
-        onChange={(e) => {
-          if (e.target.value) setDatum(e.target.value);
-        }}
-        aria-label="Datum ändern"
-        required
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 0,
-          border: 0,
-          padding: 0,
-          margin: 0,
-          background: 'transparent',
-          cursor: 'pointer',
-          zIndex: 1,
-        }}
-      />
-    </div>
-  );
-}
-
-// Lokales Datum, nicht UTC: toISOString() liefert zwischen Mitternacht und
-// 2 Uhr (Sommerzeit) noch den Vortag.
-const heute = () => {
-  const d = new Date();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${mm}-${dd}`;
-};
-
-function formatDatumZeile(datum) {
-  const d = new Date(`${datum}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return datum;
-  const label = d.toLocaleDateString('de-DE', {
-    weekday: 'short',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-  return datum === heute() ? `heute, ${label}` : label;
-}
 
 // Bearbeiten einer bestehenden Fahrt (Edit-Modal). Das Anlegen neuer Fahrten
 // läuft seit dem Redesign 2026 ausschließlich über den zweistufigen
@@ -656,6 +602,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     <DatumsFeld
     datum={formData.datum}
     setDatum={(v) => setFormData(prev => ({ ...prev, datum: v }))}
+    required
     />
     </div>
 
