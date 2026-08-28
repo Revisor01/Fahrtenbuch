@@ -243,10 +243,17 @@ export function useFahrtenExport() {
       const route = range ? 'export-pdf-range' : 'export-pdf';
       const response = await axios.get(`/api/fahrten/${route}/${type}/${pfad}`, { responseType: 'blob' });
 
-      let filename = dateinameAusHeader(response, `fahrtenabrechnung_${type}_${dateiname}.pdf`);
-      if (!filename.endsWith('.pdf')) filename = `${filename}.pdf`;
+      // Ab 30 Fahrten im Monat teilt der Server die Abrechnung auf mehrere
+      // Formularblätter auf und liefert sie als ZIP. Das früher fest gesetzte
+      // application/pdf machte daraus eine .pdf mit ZIP-Inhalt — die kein
+      // Betrachter öffnen konnte („Datei beschädigt").
+      const contentType = response.headers['content-type'];
+      const istZip = contentType === 'application/zip';
+      const endung = istZip ? '.zip' : '.pdf';
+      let filename = dateinameAusHeader(response, `fahrtenabrechnung_${type}_${dateiname}${endung}`);
+      if (!filename.endsWith(endung)) filename = `${filename}${endung}`;
 
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blob = new Blob([response.data], { type: istZip ? 'application/zip' : 'application/pdf' });
       if (blob.size === 0) {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
@@ -277,8 +284,16 @@ export function useFahrtenExport() {
       // ersten Bild komplett parsen muss (Simon 16.08.: schneller starten).
       const { default: JSZip } = await import('jszip');
       const zip = new JSZip();
-      zip.file(`${baseFilename}.xlsx`, excelRes.data);
-      zip.file(`${baseFilename}.pdf`, pdfRes.data);
+      // Bei vielen Fahrten ist die Antwort selbst schon ein ZIP mit mehreren
+      // Formularblaettern. Dann wandert die Endung mit — sonst laege in der
+      // Sammel-ZIP eine .xlsx/.pdf, die sich nicht oeffnen laesst — und beide
+      // brauchen einen eigenen Namen, sonst ueberschreiben sie sich.
+      const eintrag = (res, standard) =>
+        res.headers['content-type'] === 'application/zip'
+          ? `${baseFilename}_${standard}.zip`
+          : `${baseFilename}.${standard}`;
+      zip.file(eintrag(excelRes, 'xlsx'), excelRes.data);
+      zip.file(eintrag(pdfRes, 'pdf'), pdfRes.data);
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       await downloadBlob(zipBlob, `${baseFilename}.zip`);
       erfolgsToast(type, opts);

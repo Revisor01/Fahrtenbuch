@@ -66,6 +66,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Anmeldung hält jetzt zwei Wochen und verlängert sich bei Nutzung; das tägliche Neuanmelden entfällt
 
 ### Behoben
+- Der PDF-Export einer Abrechnung mit mehr als 29 Fahrten lässt sich wieder öffnen: Die Formularblätter stehen jetzt als Seiten in einer einzigen PDF-Datei. Bisher kam in diesem Fall ein Archiv, das als PDF gespeichert wurde und sich deshalb nicht öffnen ließ. Der Excel-Export liefert die Blätter weiterhin als einzelne Dateien in einem ZIP-Archiv, damit jedes für sich bearbeitbar bleibt
 - Im Browser am Rechner lässt sich das Datum einer Fahrt wieder ändern — beim Erfassen wie beim Nachbearbeiten. Bisher war das Feld dort nur mit dem heutigen Datum belegt und ließ sich weder anklicken noch tippen; rückwirkende Fahrten waren nur am Handy einzutragen
 - Eine E-Mail-Adresse, die bereits zu einem anderen Konto gehört, lässt sich nicht mehr für das eigene Profil eintragen
 - Die Registrierung wird jetzt einheitlich beurteilt: Bisher konnte das Anmeldeformular erscheinen, obwohl der Server die Registrierung ablehnte

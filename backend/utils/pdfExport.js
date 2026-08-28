@@ -37,9 +37,50 @@ function entferneLeereBlaetter(workbook) {
  });
 }
 
+// Reicht eine Abrechnung über mehrere Formularblätter (ab 30 Fahrten im
+// Monat), lieferte der Export bisher eine ZIP mit je einer PDF pro Blatt.
+// Zum Einreichen ist eine Datei mit mehreren Seiten praktischer — LibreOffice
+// druckt jedes Blatt einer Arbeitsmappe ohnehin auf eine eigene Seite.
+// Deshalb wandern die Blätter der Teil-Mappen vor der Umwandlung in die
+// erste Mappe. Der Excel-Export bleibt bei getrennten Dateien: dort sind es
+// eigenständige Arbeitsmappen, die auch einzeln bearbeitet werden.
+const BLAETTER_NUR_EINMAL = ['Vorlage', 'Mitnahmeentschädigung'];
+
+function fuehreWorkbooksZusammen(dateien) {
+ const [{ workbook: ziel }] = dateien;
+
+ dateien.slice(1).forEach(({ workbook }) => {
+   workbook.eachSheet((blatt) => {
+     // Deckblatt und Mitnahmeentschädigung stehen in jeder Teil-Mappe
+     // identisch drin — sie gehören einmal ins PDF, nicht je Teil.
+     // Aufgeteilt werden nur die Fahrten, also die Quartalsblätter.
+     if (BLAETTER_NUR_EINMAL.includes(blatt.name)) return;
+
+     // Blattnamen müssen eindeutig sein; die Nummer sagt zugleich, das
+     // wievielte Blatt der Abrechnung es ist.
+     let name = blatt.name;
+     for (let n = 2; ziel.getWorksheet(name); n++) {
+       name = `${blatt.name} (${n})`;
+     }
+
+     const model = JSON.parse(JSON.stringify(blatt.model));
+     const neuesBlatt = ziel.addWorksheet(name);
+     neuesBlatt.model = { ...model, name, id: neuesBlatt.id };
+   });
+ });
+
+ return [{ dateiname: dateien[0].dateiname, workbook: ziel }];
+}
+
 async function sendePdfAntwort(res, ergebnis) {
+ // Der Dateiname der ersten Teil-Mappe endet auf „_1" — bei einer
+ // zusammengeführten Datei wäre das irreführend, deshalb der Sammelname.
+ const dateien = ergebnis.dateien.length > 1
+   ? fuehreWorkbooksZusammen(ergebnis.dateien).map((d) => ({ ...d, dateiname: ergebnis.zipName }))
+   : ergebnis.dateien;
+
  const files = [];
- for (const { dateiname, workbook } of ergebnis.dateien) {
+ for (const { dateiname, workbook } of dateien) {
    entferneLeereBlaetter(workbook);
    const xlsxBuffer = Buffer.from(await workbook.xlsx.writeBuffer());
    // Der Dateiname landet über die Kopf-/Fußzeile des Formulars (&F) im PDF —
@@ -103,3 +144,6 @@ exports.exportToPdfRange = async (req, res) => {
    }
  }
 };
+
+// Fuer Tests: die Zusammenfuehrung ist ohne HTTP pruefbar.
+exports.fuehreWorkbooksZusammen = fuehreWorkbooksZusammen;

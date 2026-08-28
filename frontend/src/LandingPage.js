@@ -804,17 +804,28 @@ export default function LandingPage() {
             </p>
           </AccordionItem>
 
-          <AccordionItem {...item('ex-2')} title="Quartalsblätter und mehrere Dateien">
+          <AccordionItem {...item('ex-2')} title="Viele Fahrten: mehrere Formularblätter">
             <p>
               Das Formular ist in <strong>Quartalsblätter</strong> gegliedert
               (Januar–März, April–Juni, Juli–September, Oktober–Dezember); die Datei enthält
               das Blatt des passenden Quartals.
             </p>
             <p>
-              Pro Blatt passen <strong>maximal 29 Fahrten</strong>. Hast du mehr, teilt die App
-              den Export automatisch auf mehrere Dateien auf und liefert sie zusammen als
-              <strong> ZIP-Archiv</strong>.
+              Pro Blatt passen <strong>maximal 29 Fahrten</strong>. Bei mehr Fahrten braucht
+              die Abrechnung mehrere Blätter — und die beiden Formate gehen damit
+              unterschiedlich um:
             </p>
+            <ul className="help-ul">
+              <li>
+                <strong>Excel</strong> — je Blatt eine eigene Datei, zusammen in einem
+                <strong> ZIP-Archiv</strong>. So bleibt jedes Blatt einzeln bearbeitbar.
+              </li>
+              <li>
+                <strong>PDF</strong> — <strong>eine einzige Datei</strong>, in der die Blätter
+                nacheinander als Seiten stehen. Zum Ausdrucken und Einreichen brauchst du
+                also nichts zusammenzufügen.
+              </li>
+            </ul>
           </AccordionItem>
 
           <AccordionItem {...item('ex-3')} title="PDF als Alternative">
@@ -822,6 +833,10 @@ export default function LandingPage() {
               Überall, wo Excel angeboten wird, gibt es auch <strong>PDF</strong> und
               <strong> „Beide (ZIP)"</strong>. Das PDF hat denselben Inhalt und ist praktisch,
               wenn die Abrechnung nur unterschrieben und weitergereicht werden soll.
+            </p>
+            <p>
+              Reicht die Abrechnung über mehrere Formularblätter, bleibt das PDF trotzdem
+              <strong> eine Datei mit mehreren Seiten</strong>.
             </p>
           </AccordionItem>
 
