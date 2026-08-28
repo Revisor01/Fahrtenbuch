@@ -244,16 +244,11 @@ export function useFahrtenExport() {
       const response = await axios.get(`/api/fahrten/${route}/${type}/${pfad}`, { responseType: 'blob' });
 
       // Der PDF-Export liefert immer genau eine Datei: reicht die Abrechnung
-      // über mehrere Formularblätter, stehen sie als Seiten darin. Früher kam
-      // dafür eine ZIP, die hier unbesehen als .pdf gespeichert wurde — die
-      // Datei liess sich dann nicht öffnen („beschädigt“). Der Content-Type
-      // entscheidet, damit das nicht unbemerkt wiederkommen kann.
-      const istZip = response.headers['content-type'] === 'application/zip';
-      const endung = istZip ? '.zip' : '.pdf';
-      let filename = dateinameAusHeader(response, `fahrtenabrechnung_${type}_${dateiname}${endung}`);
-      if (!filename.endsWith(endung)) filename = `${filename}${endung}`;
+      // über mehrere Formularblätter, stehen sie als Seiten darin.
+      let filename = dateinameAusHeader(response, `fahrtenabrechnung_${type}_${dateiname}.pdf`);
+      if (!filename.endsWith('.pdf')) filename = `${filename}.pdf`;
 
-      const blob = new Blob([response.data], { type: istZip ? 'application/zip' : 'application/pdf' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       if (blob.size === 0) {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
@@ -284,16 +279,13 @@ export function useFahrtenExport() {
       // ersten Bild komplett parsen muss (Simon 16.08.: schneller starten).
       const { default: JSZip } = await import('jszip');
       const zip = new JSZip();
-      // Bei vielen Fahrten ist die Antwort selbst schon ein ZIP mit mehreren
-      // Formularblaettern. Dann wandert die Endung mit — sonst laege in der
-      // Sammel-ZIP eine .xlsx/.pdf, die sich nicht oeffnen laesst — und beide
-      // brauchen einen eigenen Namen, sonst ueberschreiben sie sich.
-      const eintrag = (res, standard) =>
-        res.headers['content-type'] === 'application/zip'
-          ? `${baseFilename}_${standard}.zip`
-          : `${baseFilename}.${standard}`;
-      zip.file(eintrag(excelRes, 'xlsx'), excelRes.data);
-      zip.file(eintrag(pdfRes, 'pdf'), pdfRes.data);
+      // Reicht die Abrechnung über mehrere Formularblätter, ist die
+      // Excel-Antwort selbst schon ein ZIP mit einer Mappe je Blatt. Dann
+      // wandert die Endung mit, sonst läge hier eine .xlsx, die sich nicht
+      // öffnen lässt. Das PDF ist immer genau eine Datei.
+      const istZip = excelRes.headers['content-type'] === 'application/zip';
+      zip.file(`${baseFilename}.${istZip ? 'zip' : 'xlsx'}`, excelRes.data);
+      zip.file(`${baseFilename}.pdf`, pdfRes.data);
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       await downloadBlob(zipBlob, `${baseFilename}.zip`);
       erfolgsToast(type, opts);
