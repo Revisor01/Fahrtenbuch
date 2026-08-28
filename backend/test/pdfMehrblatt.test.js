@@ -199,6 +199,20 @@ async function main() {
     });
   }
 
+  // --- Der Antwortpfad schickt nie wieder eine ZIP ----------------------
+  await pruefe('der PDF-Export kennt keinen ZIP-Zweig mehr', async () => {
+    const quelltext = require('fs').readFileSync(
+      path.join(__dirname, '..', 'utils', 'pdfExport.js'), 'utf8'
+    );
+
+    assert.ok(!/application\/zip/.test(quelltext),
+      'der PDF-Export darf keine ZIP mehr ausliefern — genau daran scheiterte das Öffnen');
+    assert.ok(!/JSZip/.test(quelltext),
+      'ohne ZIP-Zweig wird JSZip hier nicht mehr gebraucht');
+    assert.ok(/Content-Type', 'application\/pdf'/.test(quelltext),
+      'die Antwort muss als PDF ausgezeichnet sein');
+  });
+
   console.log(`\n${geprueft} Prüfungen bestanden.\n`);
 }
 

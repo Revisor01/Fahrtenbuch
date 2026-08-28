@@ -1,4 +1,3 @@
-const JSZip = require('jszip');
 const { baueMonatsWorkbooks, baueZeitraumWorkbooks } = require('./excelExport');
 const { convertXlsxBufferToPdf } = require('./xlsxToPdf');
 
@@ -85,38 +84,22 @@ function fuehreWorkbooksZusammen(dateien) {
 }
 
 async function sendePdfAntwort(res, ergebnis) {
- // Der Dateiname der ersten Teil-Mappe endet auf „_1" — bei einer
- // zusammengeführten Datei wäre das irreführend, deshalb der Sammelname.
- const dateien = ergebnis.dateien.length > 1
-   ? fuehreWorkbooksZusammen(ergebnis.dateien).map((d) => ({ ...d, dateiname: ergebnis.zipName }))
-   : ergebnis.dateien;
+ // Der PDF-Export liefert immer genau eine Datei — mehrere Formularblätter
+ // werden zu Seiten darin. Der Name der Teil-Mappen endet auf „_1", „_2" …;
+ // für die eine Datei ist der Sammelname richtig.
+ const dateien = fuehreWorkbooksZusammen(ergebnis.dateien)
+   .map((d) => ({ ...d, dateiname: ergebnis.zipName }));
 
- const files = [];
- for (const { dateiname, workbook } of dateien) {
-   entferneLeereBlaetter(workbook);
-   const xlsxBuffer = Buffer.from(await workbook.xlsx.writeBuffer());
-   // Der Dateiname landet über die Kopf-/Fußzeile des Formulars (&F) im PDF —
-   // deshalb den echten Exportnamen und keinen Zufallsnamen verwenden.
-   const pdfBuffer = await convertXlsxBufferToPdf(xlsxBuffer, dateiname);
-   files.push({ fileName: `${dateiname}.pdf`, buffer: pdfBuffer });
- }
+ const [{ dateiname, workbook }] = dateien;
+ entferneLeereBlaetter(workbook);
+ const xlsxBuffer = Buffer.from(await workbook.xlsx.writeBuffer());
+ // Der Dateiname landet über die Kopf-/Fußzeile des Formulars (&F) im PDF —
+ // deshalb den echten Exportnamen und keinen Zufallsnamen verwenden.
+ const pdfBuffer = await convertXlsxBufferToPdf(xlsxBuffer, dateiname);
 
- if (files.length === 1) {
-   res.setHeader('Content-Type', 'application/pdf');
-   res.setHeader('Content-Disposition', `attachment; filename=${files[0].fileName}`);
-   return res.send(files[0].buffer);
- }
-
- const zip = new JSZip();
- files.forEach(file => {
-   zip.file(file.fileName, file.buffer);
- });
-
- const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-
- res.setHeader('Content-Type', 'application/zip');
- res.setHeader('Content-Disposition', `attachment; filename=${ergebnis.zipName}.zip`);
- res.send(zipBuffer);
+ res.setHeader('Content-Type', 'application/pdf');
+ res.setHeader('Content-Disposition', `attachment; filename=${dateiname}.pdf`);
+ res.send(pdfBuffer);
 }
 
 exports.exportToPdf = async (req, res) => {
