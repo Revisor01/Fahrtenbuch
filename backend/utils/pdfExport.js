@@ -85,8 +85,8 @@ function fuehreWorkbooksZusammen(dateien) {
 
 async function sendePdfAntwort(res, ergebnis) {
  // Der PDF-Export liefert immer genau eine Datei — mehrere Formularblätter
- // werden zu Seiten darin. Der Name der Teil-Mappen endet auf „_1", „_2" …;
- // für die eine Datei ist der Sammelname richtig.
+ // werden zu Seiten darin. Die Teil-Mappen heißen „…_1", „…_2"; für die eine
+ // Datei passt der Sammelname, unter dem der Excel-Export sein ZIP ablegt.
  const dateien = fuehreWorkbooksZusammen(ergebnis.dateien)
    .map((d) => ({ ...d, dateiname: ergebnis.zipName }));
 
