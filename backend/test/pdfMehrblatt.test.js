@@ -36,7 +36,12 @@ async function teilMappe(markierung) {
     const ws = workbook.getWorksheet(name);
     if (ws) workbook.removeWorksheet(ws.id);
   });
-  workbook.getWorksheet(QUARTAL).getCell('A8').value = markierung;
+  const blatt = workbook.getWorksheet(QUARTAL);
+  blatt.getCell('A8').value = markierung;
+  // Das echte Formular enthält Datumswerte — Fahrtdatum und
+  // Ausstellungsdatum. Sie müssen die Zusammenführung als Date überstehen.
+  blatt.getCell('A9').value = new Date(2026, 7, 25);
+  blatt.getCell('B40').value = new Date(2026, 7, 28);
   return workbook;
 }
 
@@ -69,6 +74,39 @@ async function main() {
     assert.deepStrictEqual(namen, ['Vorlage', QUARTAL, MITNAHME, `${QUARTAL} (2)`]);
     assert.strictEqual(workbook.getWorksheet(QUARTAL).getCell('A8').value, 'ERSTES BLATT');
     assert.strictEqual(workbook.getWorksheet(`${QUARTAL} (2)`).getCell('A8').value, 'ZWEITES BLATT');
+  });
+
+  // Regression: über JSON geklonte Blätter machten aus Datumswerten
+  // Zeichenketten — der Export brach beim Schreiben ab
+  // („d.getTime is not a function"), sobald echte Fahrten drinstanden.
+  await pruefe('Datumswerte bleiben Datumswerte', async () => {
+    const dateien = [
+      { dateiname: 'abrechnung_1', workbook: await teilMappe('ERSTES BLATT') },
+      { dateiname: 'abrechnung_2', workbook: await teilMappe('ZWEITES BLATT') },
+    ];
+
+    const [{ workbook }] = fuehreWorkbooksZusammen(dateien);
+    const kopiert = workbook.getWorksheet(`${QUARTAL} (2)`);
+
+    assert.ok(kopiert.getCell('A9').value instanceof Date,
+      'das Fahrtdatum muss ein Date bleiben');
+    assert.strictEqual(kopiert.getCell('A9').value.getTime(), new Date(2026, 7, 25).getTime());
+    assert.ok(kopiert.getCell('B40').value instanceof Date,
+      'das Ausstellungsdatum muss ein Date bleiben');
+  });
+
+  // Die zusammengeführte Mappe muss sich auch schreiben lassen
+  await pruefe('die zusammengeführte Mappe lässt sich als XLSX schreiben', async () => {
+    const dateien = [
+      { dateiname: 'abrechnung_1', workbook: await teilMappe('ERSTES BLATT') },
+      { dateiname: 'abrechnung_2', workbook: await teilMappe('ZWEITES BLATT') },
+    ];
+
+    const [{ workbook }] = fuehreWorkbooksZusammen(dateien);
+    const puffer = Buffer.from(await workbook.xlsx.writeBuffer());
+
+    assert.ok(puffer.length > 0);
+    assert.strictEqual(puffer.subarray(0, 2).toString('latin1'), 'PK');
   });
 
   // Das Deckblatt steckt in jeder Teil-Mappe identisch drin und darf im

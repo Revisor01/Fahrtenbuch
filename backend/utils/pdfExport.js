@@ -46,6 +46,19 @@ function entferneLeereBlaetter(workbook) {
 // eigenständige Arbeitsmappen, die auch einzeln bearbeitet werden.
 const BLAETTER_NUR_EINMAL = ['Vorlage', 'Mitnahmeentschädigung'];
 
+// Tiefe Kopie, die Date-Werte als Date belässt. Über JSON würden sie zu
+// Zeichenketten — ExcelJS erwartet beim Schreiben aber echte Daten und
+// bricht sonst mit „d.getTime is not a function" ab. Im Formular stecken
+// welche: das Datum jeder Fahrt und das Ausstellungsdatum.
+function klone(wert) {
+ if (wert instanceof Date) return new Date(wert.getTime());
+ if (Array.isArray(wert)) return wert.map(klone);
+ if (wert && typeof wert === 'object') {
+   return Object.fromEntries(Object.entries(wert).map(([k, v]) => [k, klone(v)]));
+ }
+ return wert;
+}
+
 function fuehreWorkbooksZusammen(dateien) {
  const [{ workbook: ziel }] = dateien;
 
@@ -63,9 +76,8 @@ function fuehreWorkbooksZusammen(dateien) {
        name = `${blatt.name} (${n})`;
      }
 
-     const model = JSON.parse(JSON.stringify(blatt.model));
      const neuesBlatt = ziel.addWorksheet(name);
-     neuesBlatt.model = { ...model, name, id: neuesBlatt.id };
+     neuesBlatt.model = { ...klone(blatt.model), name, id: neuesBlatt.id };
    });
  });
 
