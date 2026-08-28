@@ -377,7 +377,7 @@ const paths = {
         { name: 'year', in: 'path', required: true, schema: { type: 'string' } },
         { name: 'month', in: 'path', required: true, schema: { type: 'string' } },
       ],
-      responses: { 200: { description: 'PDF oder ZIP', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } }, 'application/zip': { schema: { type: 'string', format: 'binary' } } } }, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
+      responses: { 200: { description: 'Eine PDF-Datei. Reicht die Abrechnung über mehrere Formularblätter, stehen sie als Seiten in derselben Datei.', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } } }, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
     },
   },
   '/api/fahrten/export-pdf-range/{type}/{startYear}/{startMonth}/{endYear}/{endMonth}': {
@@ -388,7 +388,7 @@ const paths = {
         { name: 'type', in: 'path', required: true, schema: { type: 'string' } },
         ...['startYear', 'startMonth', 'endYear', 'endMonth'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string' } })),
       ],
-      responses: { 200: { description: 'PDF oder ZIP', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } }, 'application/zip': { schema: { type: 'string', format: 'binary' } } } }, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
+      responses: { 200: { description: 'Eine PDF-Datei. Reicht die Abrechnung über mehrere Formularblätter, stehen sie als Seiten in derselben Datei.', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } } }, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
     },
   },
   '/api/fahrten/abrechnungsstatus': {

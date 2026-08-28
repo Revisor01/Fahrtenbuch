@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js && node test/doku.test.js && node test/haertung.test.js"
+    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js && node test/doku.test.js && node test/haertung.test.js && node test/pdfMehrblatt.test.js"
   },
   "keywords": [],
   "author": "",
