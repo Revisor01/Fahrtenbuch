@@ -5,7 +5,7 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
-## [Unreleased] - 2.3.0
+## [2.3.0] - 2026-08-28
 
 ### Hinzugefügt
 - Eine Dokumentation der Schnittstelle steht unter `/api-docs` bereit: alle Abrufe mit Feldern, Antworten und Beispielen, zum direkten Ausprobieren im Browser. Der Zugang läuft über eine eigene Anmeldeseite; ohne hinterlegte Zugangsdaten bleibt sie abgeschaltet

@@ -243,12 +243,12 @@ export function useFahrtenExport() {
       const route = range ? 'export-pdf-range' : 'export-pdf';
       const response = await axios.get(`/api/fahrten/${route}/${type}/${pfad}`, { responseType: 'blob' });
 
-      // Ab 30 Fahrten im Monat teilt der Server die Abrechnung auf mehrere
-      // Formularblätter auf und liefert sie als ZIP. Das früher fest gesetzte
-      // application/pdf machte daraus eine .pdf mit ZIP-Inhalt — die kein
-      // Betrachter öffnen konnte („Datei beschädigt").
-      const contentType = response.headers['content-type'];
-      const istZip = contentType === 'application/zip';
+      // Der PDF-Export liefert immer genau eine Datei: reicht die Abrechnung
+      // über mehrere Formularblätter, stehen sie als Seiten darin. Früher kam
+      // dafür eine ZIP, die hier unbesehen als .pdf gespeichert wurde — die
+      // Datei liess sich dann nicht öffnen („beschädigt“). Der Content-Type
+      // entscheidet, damit das nicht unbemerkt wiederkommen kann.
+      const istZip = response.headers['content-type'] === 'application/zip';
       const endung = istZip ? '.zip' : '.pdf';
       let filename = dateinameAusHeader(response, `fahrtenabrechnung_${type}_${dateiname}${endung}`);
       if (!filename.endsWith(endung)) filename = `${filename}${endung}`;
