@@ -2,9 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../ThemeContext';
 import { overlayBeobachten } from '../utils/overlayStack';
 
-// Plattform-Navigation fuer die native Huelle: eine ECHTE Systemleiste, kein
-// Nachbau in der WebView. Auf iOS 26 rendert UIKit die systemeigene
-// Liquid-Glass-Tab-Bar, auf Android eine echte Material-3-Navigationsleiste.
+// Plattform-Navigation fuer die native Huelle: die Leiste gehoert zum Geraet,
+// nicht ins WebView-Fenster. Auf iOS 26 rendert UIKit die systemeigene
+// Liquid-Glass-Tab-Bar (das Plugin waehlt sie ueber usesSystemLiquidGlass).
+// Auf Android zeichnet das Plugin selbst (NativeTabbarLayout in onDraw) — es
+// bindet zwar com.google.android.material ein, nutzt daraus aber keine
+// Komponente. Die Form muss deshalb hier plattformweise gesetzt werden, sonst
+// bekommt Android die iOS-Kapsel.
 //
 // Die Komponente zeichnet deshalb nichts (`return null`) — sie beschreibt nur
 // den Zustand der nativen Leiste per Effekt. Die Props-Schnittstelle bleibt
@@ -117,6 +121,36 @@ function alsHex(wert, ersatz) {
   return ersatz;
 }
 
+// Form der Leiste je Plattform.
+//
+// Die Vorgabe des Plugins ist in beiden Faellen die iOS-Kapsel: schwebend,
+// 24 dp Rand, 430 dp breit, voll abgerundet. Auf iOS ist das richtig — dort
+// waehlt das Plugin ab iOS 26 ohnehin die System-Tab-Bar und die Masse
+// beschreiben nur den Fallback fuer aeltere Versionen.
+//
+// Auf Android ist dieselbe Kapsel falsch: Material 3 kennt keine schwebende
+// Leiste, sondern eine angedockte ueber die volle Breite. Mit der Vorgabe
+// schnitt das Label "Einstellungen" ab und der prominente Knopf lag ueber dem
+// Inhalt. Die Masse unten sind die von Material 3 (Hoehe 80 dp, keine Raender,
+// kein Radius).
+//
+// Was damit NICHT zu erreichen ist: der aktive Eintrag bekommt im Plugin einen
+// runden Kreis (GradientDrawable.OVAL, 58 dp, fest verdrahtet), MD3 verlangt
+// dort eine Pille 64x32 dp. Dafuer waere ein Fork des Plugins noetig.
+function formFuer(plattform) {
+  if (plattform === 'android') {
+    return { shape: 'floating', height: 80, horizontalMargin: 0, maxWidth: 0, bottomGap: 0, cornerRadius: 0 };
+  }
+  return { shape: 'floating' };
+}
+
+// Das Glas ist ein iOS-Material. Auf Android gibt es kein Gegenstueck — das
+// Plugin malt dort nur eine halbtransparente Flaeche, was die Leiste vor
+// hellem Inhalt ausfransen laesst. MD3 will eine deckende Flaeche.
+function glasFuer(plattform) {
+  return plattform === 'android' ? undefined : { effect: 'liquidGlass' };
+}
+
 function leseFarben() {
   const stil = getComputedStyle(document.documentElement);
   const token = (name, ersatz) => alsHex(stil.getPropertyValue(name), ersatz);
@@ -148,8 +182,10 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
     [items]
   );
 
-  const stand = useRef({ onSelect, aktivId, aktionsIds });
-  stand.current = { onSelect, aktivId, aktionsIds };
+  // plattform steht hier mit drin, damit der configure-Effekt unten sie lesen
+  // kann, ohne sie als Abhaengigkeit zu bekommen — er darf nur einmal laufen.
+  const stand = useRef({ onSelect, aktivId, aktionsIds, plattform });
+  stand.current = { onSelect, aktivId, aktionsIds, plattform };
 
   // Was die native Leiste zuletzt SELBST gemeldet hat. Kommt ein Wechsel von
   // dort, hat sie ihre Auswahl bereits umgestellt; ein Rueckruf nach nativ
@@ -190,7 +226,7 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
           platformStyle: 'auto',
           contentInsetMode: 'css',
           colors: leseFarben(),
-          glass: { effect: 'liquidGlass' },
+          glass: glasFuer(stand.current.plattform),
         })
           .then(() =>
             NativeNavigation.addListener('tabSelect', (ereignis) => {
@@ -276,8 +312,8 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
         selectedId: vonNativ ? undefined : aktivId,
         labels: true,
         colors: leseFarben(),
-        glass: { effect: 'liquidGlass' },
-        style: { shape: 'floating' },
+        glass: glasFuer(plattform),
+        style: formFuer(plattform),
         animated: true,
       })
       .catch(() => {});
