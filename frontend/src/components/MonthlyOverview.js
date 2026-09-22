@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { Receipt } from 'lucide-react';
+import { CalendarRange, Receipt } from 'lucide-react';
 import { AppContext } from '../contexts/AppContext';
 import EmptyState from './ui/EmptyState';
 import MonatKarte from './abrechnung/MonatKarte';
@@ -199,6 +199,21 @@ function MonthlyOverview() {
           {jahrSelect}
         </div>
 
+        {/* Mehrere Monate zusammen abrechnen — bisher nur im Desktop-Kopf und
+            damit auf dem Handy gar nicht erreichbar (.abr-desktop ist unter
+            768px ausgeblendet). Wer wenig faehrt und August bis Oktober
+            sammelt, fand den Weg nicht (Simon 22.09.). */}
+        {rows.length > 0 && monthlyData.length > 1 && (
+          <button
+            type="button"
+            className="btn-secondary abr-m-zeitraum"
+            onClick={() => setExportSheet({ monat: null })}
+          >
+            <CalendarRange size={16} />
+            Mehrere Monate abrechnen
+          </button>
+        )}
+
         {rows.length === 0 ? (
           leererZustand
         ) : (
@@ -233,7 +248,8 @@ function MonthlyOverview() {
               className="btn-secondary"
               onClick={() => setExportSheet({ monat: null })}
             >
-              Zeitraum-Export
+              <CalendarRange size={16} />
+              Mehrere Monate
             </button>
             {aeltester && (
               <button

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { FileDown, FileSpreadsheet } from 'lucide-react';
+import { FileArchive, FileDown, FileSpreadsheet } from 'lucide-react';
 import Sheet from '../ui/Sheet';
 import Spinner from '../ui/Spinner';
 import { AppContext } from '../../contexts/AppContext';
@@ -102,12 +102,12 @@ function ExportSheet({ isOpen, onClose }) {
               </button>
               <button
                 type="button"
-                className="btn-ghost"
+                className="btn-secondary"
                 onClick={() => starte(exportBeides, key, 'beides')}
                 disabled={!!laeuft}
               >
-                {wartet(key, 'beides') && <Spinner />}
-                {wartet(key, 'beides') ? 'Erstellt …' : 'Beide (ZIP)'}
+                {wartet(key, 'beides') ? <Spinner /> : <FileArchive size={16} />}
+                {wartet(key, 'beides') ? 'Erstellt …' : 'Beide'}
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { FileDown, FileSpreadsheet } from 'lucide-react';
+import { FileArchive, FileDown, FileSpreadsheet } from 'lucide-react';
 import Sheet from '../ui/Sheet';
 import Spinner from '../ui/Spinner';
 import { AppContext } from '../../contexts/AppContext';
@@ -7,13 +7,18 @@ import { useFahrtenExport } from '../fahrten/useFahrtenExport';
 import { formatBetrag } from '../fahrten/zeitraumUtils';
 import { monatKategorien, monatLabel } from './abrechnungUtils';
 
-// Export-Sheet der Abrechnung (Phase R6) — Export ohne Statuswechsel,
-// je Träger Excel / PDF / Beide (ZIP), gleiche Zeilenform wie das
-// Export-Sheet der Fahrtenliste. Zwei Betriebsarten:
+// Export-Sheet der Abrechnung (Phase R6) — je Träger Excel / PDF / Beide,
+// gleiche Zeilenform wie das Export-Sheet der Fahrtenliste.
+// Zwei Betriebsarten:
 //   monat gesetzt  → fester Einzelmonat (Download-Button einer Monatskarte)
 //   monat null     → Zeitraum-Export mit Von-/Bis-Wahl über alle Monate
-//                    mit Daten (Desktop-Kopf „Zeitraum-Export")
-// Der Statuswechsel läuft bewusst nicht hier, sondern über „Einreichen".
+//                    mit Daten
+//
+// Statuswechsel: Beim Einzelmonat passiert keiner — der läuft über
+// „Einreichen". Beim Zeitraum (Von ≠ Bis) setzt dagegen das Backend selbst
+// jeden Monat auf „eingereicht" (setzeZeitraumStatus in
+// backend/utils/excelExport.js). Deshalb steht darüber ein Hinweis; die
+// frühere pauschale Zusage „ohne Statuswechsel" war dort falsch.
 function AbrechnungExportSheet({ isOpen, onClose, monat }) {
   const { monthlyData, abrechnungstraeger } = useContext(AppContext);
   const { exportExcel, exportPdf, exportBeides } = useFahrtenExport();
@@ -90,11 +95,23 @@ function AbrechnungExportSheet({ isOpen, onClose, monat }) {
       onClose={onClose}
       title={monat ? `Export ${monatLabel(monat)}` : 'Zeitraum-Export'}
     >
+      {/* Der Hinweis muss zwischen Einzelmonat und Zeitraum unterscheiden:
+          Ein Zeitraum-Export (Von ≠ Bis) setzt serverseitig JEDEN Monat des
+          Zeitraums auf „eingereicht" (setzeZeitraumStatus in
+          backend/utils/excelExport.js). Hier stand frueher pauschal „Export
+          ohne Statuswechsel" — fuer den Zeitraum war das schlicht falsch, und
+          wer ihn nutzte, reichte ein, ohne es zu wissen. */}
       <p className="fl-export-sub">
-        {monat
+        {monat || vonEff === bisEff
           ? 'Export ohne Statuswechsel — die Fahrten bleiben, wie sie sind.'
-          : 'Export ohne Statuswechsel über einen frei wählbaren Zeitraum.'}
+          : 'Export über einen frei wählbaren Zeitraum.'}
       </p>
+
+      {!monat && vonEff !== bisEff && gueltig && (
+        <p className="abr-export-warnung">
+          Alle Monate des Zeitraums werden dabei als eingereicht markiert.
+        </p>
+      )}
 
       {!monat && (
         <div className="abr-export-zeitraum">
@@ -162,12 +179,12 @@ function AbrechnungExportSheet({ isOpen, onClose, monat }) {
               </button>
               <button
                 type="button"
-                className="btn-ghost"
+                className="btn-secondary"
                 onClick={() => starte(exportBeides, key, 'beides')}
                 disabled={!!laeuft}
               >
-                {wartet(key, 'beides') && <Spinner />}
-                {wartet(key, 'beides') ? 'Erstellt …' : 'Beide (ZIP)'}
+                {wartet(key, 'beides') ? <Spinner /> : <FileArchive size={16} />}
+                {wartet(key, 'beides') ? 'Erstellt …' : 'Beide'}
               </button>
             </div>
           </div>
