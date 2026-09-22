@@ -74,6 +74,13 @@ public class MaterialNavPlugin extends Plugin {
      */
     private String auswahlId;
 
+    /**
+     * Bauplan der zuletzt gesetzten Eintraege (Id, Titel, Rolle in
+     * Reihenfolge). Stimmt er ueberein, bleibt das Menue unangetastet — siehe
+     * setzeTabs().
+     */
+    private String letzterBauplan = "";
+
     private int farbeAktiv = Color.parseColor("#0F5257");
     private int farbeInaktiv = Color.parseColor("#47605F");
     private int farbeFlaeche = Color.WHITE;
@@ -214,13 +221,48 @@ public class MaterialNavPlugin extends Plugin {
         androidx.core.view.ViewCompat.requestApplyInsets(behaelter);
     }
 
+    /**
+     * Baut die Eintraege der Leiste auf.
+     *
+     * NativeNav.js schickt bei JEDEM Zustandswechsel die vollstaendige
+     * Tab-Liste — auch wenn sich nur die Auswahl geaendert hat. Wuerde das
+     * Menue dabei jedes Mal geleert und neu gefuellt, liefen die Eintraege bei
+     * jedem Tippen sichtbar von links herein: Material animiert neu
+     * hinzugefuegte Menue-Eintraege. Deshalb wird zuerst verglichen, ob sich
+     * an Reihenfolge, Ids oder Titeln ueberhaupt etwas geaendert hat. Badges
+     * und Symbole wandern getrennt und ohne Neuaufbau.
+     */
     private void setzeTabs(JSArray tabs) throws Exception {
-        Menu menue = leiste.getMenu();
-        menue.clear();
-        tabIds.clear();
-        aktionsId = null;
-
         JSONArray roh = tabs;
+
+        // Signatur aus id und Titel in Reihenfolge: nur was hier abweicht,
+        // rechtfertigt einen Neuaufbau des Menues.
+        StringBuilder bauplan = new StringBuilder();
+        for (int i = 0; i < roh.length(); i++) {
+            JSONObject tab = roh.getJSONObject(i);
+            String id = tab.optString("id", null);
+            if (id == null) {
+                continue;
+            }
+            bauplan
+                .append(id)
+                .append('\u001f')
+                .append(tab.optString("title", ""))
+                .append('\u001f')
+                .append(tab.optString("role", "normal"))
+                .append('\u001e');
+        }
+        boolean neuAufbauen = !bauplan.toString().equals(letzterBauplan);
+
+        Menu menue = leiste.getMenu();
+        if (neuAufbauen) {
+            menue.clear();
+            tabIds.clear();
+            aktionsId = null;
+            letzterBauplan = bauplan.toString();
+        }
+
+        int position = 0;
         for (int i = 0; i < roh.length(); i++) {
             JSONObject tab = roh.getJSONObject(i);
             String id = tab.optString("id", null);
@@ -232,25 +274,29 @@ public class MaterialNavPlugin extends Plugin {
 
             if (!"normal".equals(rolle)) {
                 // Aktion statt Tab: als FAB ueber der Leiste.
-                aktionsId = id;
-                aktionsKnopf.setVisibility(View.VISIBLE);
-                aktionsKnopf.setContentDescription(titel);
-                Drawable symbol = symbolAus(svgAus(tab));
-                if (symbol != null) {
-                    aktionsKnopf.setImageDrawable(symbol);
+                if (neuAufbauen) {
+                    aktionsId = id;
+                    aktionsKnopf.setVisibility(View.VISIBLE);
+                    aktionsKnopf.setContentDescription(titel);
+                    Drawable symbol = symbolAus(svgAus(tab));
+                    if (symbol != null) {
+                        aktionsKnopf.setImageDrawable(symbol);
+                    }
                 }
                 continue;
             }
 
-            int position = tabIds.size();
-            MenuItem eintrag = menue.add(Menu.NONE, position, position, titel);
-            tabIds.add(id);
-
-            Drawable symbol = symbolAus(svgAus(tab));
-            if (symbol != null) {
-                eintrag.setIcon(symbol);
+            if (neuAufbauen) {
+                MenuItem eintrag = menue.add(Menu.NONE, position, position, titel);
+                tabIds.add(id);
+                Drawable symbol = symbolAus(svgAus(tab));
+                if (symbol != null) {
+                    eintrag.setIcon(symbol);
+                }
             }
 
+            // Badges aendern sich unabhaengig vom Bauplan (offene
+            // Abrechnungen) und werden deshalb immer nachgezogen.
             int anzahl = tab.optInt("badge", 0);
             if (anzahl > 0) {
                 BadgeDrawable badge = leiste.getOrCreateBadge(position);
@@ -260,6 +306,7 @@ public class MaterialNavPlugin extends Plugin {
             } else {
                 leiste.removeBadge(position);
             }
+            position++;
         }
     }
 
