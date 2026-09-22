@@ -5,6 +5,7 @@ import EmptyState from './ui/EmptyState';
 import MonatKarte from './abrechnung/MonatKarte';
 import AbrechnungsMatrix from './abrechnung/AbrechnungsMatrix';
 import Sheet from './ui/Sheet';
+import Spinner from './ui/Spinner';
 import AbrechnungExportSheet from './abrechnung/AbrechnungExportSheet';
 import { useEinreichen } from './abrechnung/useEinreichen';
 import {
@@ -268,16 +269,29 @@ function MonthlyOverview() {
 
       {/* Formatwahl vor dem Einreichen (User-Feedback 07.08.): der Export
           gehört zum Einreichen, das Format soll man trotzdem wählen können */}
+      {/* Waehrend der Exporte offen halten: Das Einreichen laedt je Traeger
+          eine Datei, ein PDF dauert gemessene ~4,3 s. Schloesse das Sheet
+          beim Klick, liefe die Wartezeit unsichtbar ab. */}
       <Sheet
-        isOpen={!!aktionen.formatFrage}
-        onClose={aktionen.formatFrageSchliessen}
+        isOpen={!!aktionen.formatFrage || !!aktionen.fortschritt}
+        onClose={aktionen.fortschritt ? () => {} : aktionen.formatFrageSchliessen}
         title={
           aktionen.formatFrage
             ? `${monatLabel(aktionen.formatFrage.month)} einreichen`
             : 'Einreichen'
         }
       >
-        {aktionen.formatFrage && (
+        {aktionen.fortschritt && (
+          <div className="fav-frage">
+            <p className="fav-frage-text abr-laeuft">
+              <Spinner size={18} />
+              {aktionen.fortschritt.gesamt > 1
+                ? `Abrechnung wird erstellt — ${aktionen.fortschritt.fertig} von ${aktionen.fortschritt.gesamt} …`
+                : 'Abrechnung wird erstellt …'}
+            </p>
+          </div>
+        )}
+        {aktionen.formatFrage && !aktionen.fortschritt && (
           <div className="fav-frage">
             {/* Welcher Traeger eingereicht wird, stand nirgends — der Titel
                 nannte nur den Monat, und bei mehreren Traegern war nicht zu

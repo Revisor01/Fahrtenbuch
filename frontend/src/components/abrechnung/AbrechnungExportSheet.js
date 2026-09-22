@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { FileDown, FileSpreadsheet } from 'lucide-react';
 import Sheet from '../ui/Sheet';
+import Spinner from '../ui/Spinner';
 import { AppContext } from '../../contexts/AppContext';
 import { useFahrtenExport } from '../fahrten/useFahrtenExport';
 import { formatBetrag } from '../fahrten/zeitraumUtils';
@@ -64,11 +65,24 @@ function AbrechnungExportSheet({ isOpen, onClose, monat }) {
       ? monatOption(monate.find((m) => m.yearMonth === vonEff) || {})
       : `${monatOption(monate.find((m) => m.yearMonth === vonEff) || {})} bis ${monatOption(monate.find((m) => m.yearMonth === bisEff) || {})}`;
 
-  const starte = (fn, key) => {
-    if (!gueltig) return;
-    fn(key, { von: vonEff, bis: bisEff, erfolg: 'einfach' });
-    onClose();
+  // Welcher Knopf gerade wartet: "<traeger>:<format>" oder null.
+  const [laeuft, setLaeuft] = useState(null);
+
+  // Auf den Export warten statt sofort schliessen — Begruendung wie im
+  // Export-Sheet der Fahrtenliste: Der PDF-Export braucht gemessene ~4,3 s,
+  // und ohne Rueckmeldung wirkte der Knopf tot.
+  const starte = async (fn, key, format) => {
+    if (!gueltig || laeuft) return;
+    setLaeuft(`${key}:${format}`);
+    try {
+      const ok = await fn(key, { von: vonEff, bis: bisEff, erfolg: 'einfach' });
+      if (ok) onClose();
+    } finally {
+      setLaeuft(null);
+    }
   };
+
+  const wartet = (key, format) => laeuft === `${key}:${format}`;
 
   return (
     <Sheet
@@ -131,25 +145,29 @@ function AbrechnungExportSheet({ isOpen, onClose, monat }) {
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => starte(exportExcel, key)}
+                onClick={() => starte(exportExcel, key, 'excel')}
+                disabled={!!laeuft}
               >
-                <FileSpreadsheet size={16} />
-                Excel
+                {wartet(key, 'excel') ? <Spinner /> : <FileSpreadsheet size={16} />}
+                {wartet(key, 'excel') ? 'Erstellt …' : 'Excel'}
               </button>
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => starte(exportPdf, key)}
+                onClick={() => starte(exportPdf, key, 'pdf')}
+                disabled={!!laeuft}
               >
-                <FileDown size={16} />
-                PDF
+                {wartet(key, 'pdf') ? <Spinner /> : <FileDown size={16} />}
+                {wartet(key, 'pdf') ? 'Erstellt …' : 'PDF'}
               </button>
               <button
                 type="button"
                 className="btn-ghost"
-                onClick={() => starte(exportBeides, key)}
+                onClick={() => starte(exportBeides, key, 'beides')}
+                disabled={!!laeuft}
               >
-                Beide (ZIP)
+                {wartet(key, 'beides') && <Spinner />}
+                {wartet(key, 'beides') ? 'Erstellt …' : 'Beide (ZIP)'}
               </button>
             </div>
           </div>
