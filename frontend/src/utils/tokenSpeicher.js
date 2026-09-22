@@ -22,10 +22,25 @@ export const SCHLUESSEL_USER = 'user';
 // ziehen, wo davon nichts gebraucht wird.
 let sicherModulPromise = null;
 
+// Das Plugin steckt in { plugin }, statt direkt aufgeloest zu werden: Ein
+// Capacitor-Proxy beantwortet JEDEN Zugriff als Bruecken-Aufruf, auch `.then`.
+// Direkt aus einem Promise zurueckgegeben, hielte die Laufzeit ihn fuer ein
+// Thenable und riefe `SecureStorage.then()` nativ auf. Auf Android gibt es die
+// Methode nicht — jeder Zugriff lief damit in die Zeitgrenze unten und die
+// Anmeldung liess sich nicht speichern ("Systemspeicher antwortet nicht").
+// Das Plugin bleibt IMMER in { plugin } verpackt — auch als Rueckgabewert.
+//
+// registerPlugin liefert einen Proxy, der jeden Property-Zugriff als
+// Bruecken-Aufruf beantwortet, `.then` eingeschlossen. Wird er zum
+// Ergebniswert eines Promise, halten ihn Promise.resolve und Promise.race fuer
+// ein Thenable, greifen auf `.then` zu und rufen `SecureStorage.then()` nativ
+// auf. Die Methode gibt es nicht: der Aufruf kehrte nie zurueck, lief in die
+// Zeitgrenze unten und die Anmeldung liess sich auf Android nicht speichern
+// ("Systemspeicher antwortet nicht (laden)").
 async function ladeSicherenSpeicher() {
   if (!sicherModulPromise) {
     sicherModulPromise = import('@aparajita/capacitor-secure-storage').then(
-      (modul) => modul.SecureStorage
+      (modul) => ({ plugin: modul.SecureStorage })
     );
   }
   return sicherModulPromise;
@@ -55,18 +70,20 @@ function mitZeitgrenze(promise, was) {
 // Bewusst getItem/setItem/removeItem statt get/set: diese Varianten arbeiten
 // mit reinen Strings, waehrend get()/set() zusaetzlich JSON serialisieren.
 // So bleibt der gespeicherte Wert Zeichen fuer Zeichen derselbe wie im Web.
+// .plugin wird erst NACH der Zeitgrenze ausgepackt — siehe Begruendung an
+// ladeSicherenSpeicher(): der nackte Proxy darf durch keine Promise-Kette.
 async function leseNativ(schluessel) {
-  const speicher = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
+  const { plugin: speicher } = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
   return mitZeitgrenze(speicher.getItem(schluessel), 'lesen');
 }
 
 async function schreibeNativ(schluessel, wert) {
-  const speicher = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
+  const { plugin: speicher } = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
   await mitZeitgrenze(speicher.setItem(schluessel, wert), 'schreiben');
 }
 
 async function loescheNativ(schluessel) {
-  const speicher = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
+  const { plugin: speicher } = await mitZeitgrenze(ladeSicherenSpeicher(), 'laden');
   await mitZeitgrenze(speicher.removeItem(schluessel), 'loeschen');
 }
 
