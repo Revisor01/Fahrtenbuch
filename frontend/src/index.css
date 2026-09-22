@@ -3480,6 +3480,29 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text);
 }
 
+/* „Mehrere Monate abrechnen" im Abrechnungs-Tab auf dem Handy */
+.abr-m-zeitraum {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* Hinweis im Zeitraum-Export: Der Server setzt dabei jeden Monat auf
+   „eingereicht" — das muss vor dem Tippen zu sehen sein.
+   accent-soft statt eigener Warnfarbe: Das Token gibt es bereits in beiden
+   Designs, und dieselbe Farbe markiert in der Abrechnung schon die faelligen
+   Monate. */
+.abr-export-warnung {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: var(--r-input);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
 /* ---------- Fahrtenliste desktop (≥ 768px): Tabelle nach dem
    Dashboard-Tabellen-Muster (Spec Screen 5) ---------- */
 .fl-tablecard {

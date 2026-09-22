@@ -148,25 +148,38 @@ export function useFahrtenExport() {
   const wartenBisVerdeckt = async () => {
     if (!IST_NATIVE) return;
     const { App } = await import('@capacitor/app');
-    await new Promise((fertig) => {
-      let erledigt = false;
-      const schliessen = (handle) => {
-        if (erledigt) return;
-        erledigt = true;
-        handle?.remove?.();
-        fertig();
-      };
-      let abmelden = null;
-      const uhr = setTimeout(() => schliessen(abmelden), 600);
-      App.addListener('appStateChange', ({ isActive }) => {
-        if (isActive) return;
-        clearTimeout(uhr);
-        schliessen(abmelden);
-      }).then((handle) => {
-        abmelden = handle;
-        if (erledigt) handle.remove();
-      });
+
+    // Listener ZUERST anmelden und per await holen, nicht per .then():
+    // addListener liefert ein Proxy-behaftetes Objekt, auf dem `.then` als
+    // Bruecken-Aufruf landet und nie aufloest. Genau daran blieb der Spinner
+    // haengen (beobachtet 22.09.) — derselbe Fallstrick wie beim sicheren
+    // Speicher.
+    let melden = null;
+    const warten = new Promise((fertig) => {
+      melden = fertig;
     });
+
+    let handle = null;
+    try {
+      handle = await App.addListener('appStateChange', ({ isActive }) => {
+        if (!isActive) melden();
+      });
+    } catch (error) {
+      return; // Ohne Listener nicht warten — der Export ist fertig.
+    }
+
+    try {
+      // Zeitgrenze, falls die Meldung ausbleibt: etwa wenn das Teilen-Blatt
+      // abgebrochen wurde ("Share canceled") und die App im Vordergrund
+      // bleibt. Dann gibt es nichts zu verdecken.
+      await Promise.race([warten, new Promise((f) => setTimeout(f, 600))]);
+    } finally {
+      try {
+        handle.remove();
+      } catch (error) {
+        /* schon weg */
+      }
+    }
   };
 
   const dateinameAusHeader = (response, fallback) => {

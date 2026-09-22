@@ -11,7 +11,12 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Navigationsleiste der Android-App folgt jetzt dem Aussehen von Android statt dem des iPhones: durchgehend am unteren Rand statt als schwebende Kapsel, mit der gewohnten Markierung des aktiven Eintrags. „Einstellungen“ wird nicht mehr abgeschnitten, und der Knopf zum Erfassen liegt über der Leiste statt über dem Inhalt
 - Beim Export zeigt der angetippte Knopf jetzt „Erstellt …“, solange die Datei entsteht. Das Fenster bleibt so lange offen und schließt erst, wenn die Datei da ist. Ein PDF braucht einige Sekunden, weil es auf dem Server aus dem Formular erzeugt wird — bisher passierte sichtbar nichts, und der Knopf wirkte wie ohne Funktion. Beim Einreichen mehrerer Abrechnungsträger steht dabei, der wievielte gerade erstellt wird
 
+### Hinzugefügt
+- „Mehrere Monate abrechnen“ steht jetzt auch auf dem Handy im Abrechnungs-Tab. Wer wenig fährt und etwa August bis Oktober sammelt, wählt dort Von- und Bis-Monat und bekommt eine Abrechnung über den ganzen Zeitraum. Bisher gab es diesen Weg nur am Rechner
+
 ### Behoben
+- Beim Abrechnen über mehrere Monate stand „Export ohne Statuswechsel“, obwohl dabei alle Monate des Zeitraums als eingereicht markiert werden. Jetzt steht der Hinweis darauf vor dem Export
+- In der Android-App blieb nach dem Export der Ladekreis stehen, wenn das Teilen-Fenster abgebrochen wurde
 - In der Android-App blieb die Anmeldung nicht erhalten — nach jedem Start erschien wieder die Anmeldemaske. Die Anmeldedaten lassen sich jetzt wie vorgesehen im gesicherten Bereich des Geräts ablegen
 
 ## [2.3.0] - 2026-08-28
