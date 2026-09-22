@@ -121,6 +121,29 @@ function alsHex(wert, ersatz) {
   return ersatz;
 }
 
+// Welches Plugin die Leiste stellt.
+//
+// Android: MaterialNav, eigenes Plugin in android/app/src/.../MaterialNavPlugin.java.
+// Es setzt BottomNavigationView (NavigationBarView) aus
+// com.google.android.material ein — damit kommen Pillen-Indikator, Ripple,
+// Typografie und Bedienhilfen von Material 3 selbst. Das Fremdplugin zeichnete
+// stattdessen die iOS-Kapsel nach, was sich nicht abstellen liess.
+//
+// iOS: weiter @capgo/capacitor-native-navigation. Dort waehlt es ab iOS 26 die
+// systemeigene UITabBarController — genau das, was gewuenscht ist.
+// Der Rueckgabewert steckt in { plugin }: Ein Capacitor-Proxy beantwortet
+// JEDEN Zugriff als Bruecken-Aufruf, auch `.then`. Direkt aus einer
+// async-Funktion zurueckgegeben, hielte die Laufzeit ihn fuer ein Thenable und
+// riefe `MaterialNav.then()` nativ auf — was es nicht gibt.
+async function ladePlugin(plattform) {
+  if (plattform === 'android') {
+    const { registerPlugin } = await import('@capacitor/core');
+    return { plugin: registerPlugin('MaterialNav') };
+  }
+  const { NativeNavigation } = await import('@capgo/capacitor-native-navigation');
+  return { plugin: NativeNavigation };
+}
+
 // Form der Leiste je Plattform.
 //
 // Die Vorgabe des Plugins ist in beiden Faellen die iOS-Kapsel: schwebend,
@@ -212,22 +235,28 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
     let abgebrochen = false;
     let abmelden = null;
 
-    import('@capgo/capacitor-native-navigation')
-      .then(({ NativeNavigation }) => {
-        if (abgebrochen) return undefined;
+    ladePlugin(stand.current.plattform)
+      .then(({ plugin: NativeNavigation }) => {
+        if (abgebrochen || !NativeNavigation) return undefined;
         pluginRef.current = NativeNavigation;
 
         // contentInsetMode: 'css' laesst das Plugin die tatsaechliche Hoehe der
         // Leiste als CSS-Variablen an <html> schreiben. Nur damit stimmt der
         // Abstand des Inhalts zur echten Leiste — feste Werte plus
         // env(safe-area-inset-bottom) koennen das nicht treffen.
-        return NativeNavigation.configure({
-          enabled: true,
-          platformStyle: 'auto',
-          contentInsetMode: 'css',
-          colors: leseFarben(),
-          glass: glasFuer(stand.current.plattform),
-        })
+        // MaterialNav (Android) kennt nur colors — die uebrigen Angaben
+        // beschreiben Eigenschaften der iOS-Leiste und entfallen dort.
+        return NativeNavigation.configure(
+          stand.current.plattform === 'android'
+            ? { colors: leseFarben() }
+            : {
+                enabled: true,
+                platformStyle: 'auto',
+                contentInsetMode: 'css',
+                colors: leseFarben(),
+                glass: glasFuer(stand.current.plattform),
+              }
+        )
           .then(() =>
             NativeNavigation.addListener('tabSelect', (ereignis) => {
               const { onSelect: waehle, aktivId: aktuell, aktionsIds: aktionen } =

@@ -9,7 +9,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <!-- Material3 statt AppCompat: NavigationBarView (MaterialNav-Plugin)
+         loest sonst beim Aufbauen eine IllegalArgumentException aus, weil ihm
+         die Material-Attribute des Themes fehlen. -->
+    <style name="AppTheme.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>

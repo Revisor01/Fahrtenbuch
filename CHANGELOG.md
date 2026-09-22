@@ -5,6 +5,14 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
+## [Unreleased] - 2.3.1
+
+### Geändert
+- Die Navigationsleiste der Android-App folgt jetzt dem Aussehen von Android statt dem des iPhones: durchgehend am unteren Rand statt als schwebende Kapsel, mit der gewohnten Markierung des aktiven Eintrags. „Einstellungen“ wird nicht mehr abgeschnitten, und der Knopf zum Erfassen liegt über der Leiste statt über dem Inhalt
+
+### Behoben
+- In der Android-App blieb die Anmeldung nicht erhalten — nach jedem Start erschien wieder die Anmeldemaske. Die Anmeldedaten lassen sich jetzt wie vorgesehen im gesicherten Bereich des Geräts ablegen
+
 ## [2.3.0] - 2026-08-28
 
 ### Hinzugefügt
