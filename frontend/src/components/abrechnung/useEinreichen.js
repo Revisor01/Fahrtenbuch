@@ -25,6 +25,10 @@ export function useEinreichen() {
   const { exportExcel, exportPdf, exportBeides } = useFahrtenExport();
   const toast = useToast();
 
+  // Laufender Mehrfach-Export beim Einreichen: { fertig, gesamt } oder null.
+  // Die Oberflaeche zeigt daraus „Erstellt 2 von 3 …".
+  const [fortschritt, setFortschritt] = useState(null);
+
   const refresh = async () => {
     await fetchMonthlyData();
     await fetchFahrten();
@@ -50,15 +54,25 @@ export function useEinreichen() {
       format === 'pdf' ? exportPdf : format === 'beides' ? exportBeides : exportExcel;
 
     // 1. Export-Downloads anstoßen (sequentiell, je Träger eine Datei)
+    //
+    // Hier ist ein Zähler angebracht — anders als beim einzelnen Export gibt
+    // es echte Schritte. Ein PDF dauert gemessene ~4,3 s; bei drei Trägern
+    // wartet man über 13 s, und ohne Anzeige wirkte die App eingefroren.
     const exportiert = [];
-    for (const k of offene) {
-      // eslint-disable-next-line no-await-in-loop
-      const ok = await exportFn(k.key, {
-        von: month.yearMonth,
-        bis: month.yearMonth,
-        erfolg: 'keiner',
-      });
-      if (ok) exportiert.push(k);
+    setFortschritt({ fertig: 0, gesamt: offene.length });
+    try {
+      for (const k of offene) {
+        // eslint-disable-next-line no-await-in-loop
+        const ok = await exportFn(k.key, {
+          von: month.yearMonth,
+          bis: month.yearMonth,
+          erfolg: 'keiner',
+        });
+        if (ok) exportiert.push(k);
+        setFortschritt({ fertig: exportiert.length, gesamt: offene.length });
+      }
+    } finally {
+      setFortschritt(null);
     }
     if (exportiert.length === 0) return; // Fehler-Toast kam aus dem Export-Hook
 
@@ -216,6 +230,7 @@ export function useEinreichen() {
   return {
     einreichen: einreichenFragen,
     einreichenDirekt: einreichen,
+    fortschritt,
     formatFrage,
     einreichenBestaetigen,
     formatFrageSchliessen: () => setFormatFrage(null),

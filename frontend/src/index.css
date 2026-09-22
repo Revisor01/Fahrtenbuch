@@ -3432,6 +3432,54 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   gap: 6px;
 }
 
+/* Laufender Kreis fuer Knoepfe, die auf den Server warten (PDF-Export:
+   gemessen ~4,3 s). Dreht sich nur, zeigt keinen Fortschritt — es gibt
+   keinen: Die Zeit steckt im Start von LibreOffice, nicht in der Menge
+   der Fahrten. */
+.spinner {
+  animation: spinner-dreh 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spinner-dreh {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Wer Bewegung abgestellt hat, bekommt statt der Drehung ein ruhiges
+   Pulsieren — ganz ohne Rueckmeldung bliebe sonst unklar, ob noch etwas
+   passiert. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: spinner-puls 1.4s ease-in-out infinite;
+  }
+
+  @keyframes spinner-puls {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+}
+
+/* Der wartende Knopf behaelt seine Breite, damit die Zeile beim Wechsel
+   von „PDF" auf „Erstellt …" nicht springt. */
+.fl-export-btns button:disabled {
+  cursor: progress;
+}
+
+/* Laufzeile beim Einreichen mehrerer Traeger („Erstellt 2 von 3 …") */
+.abr-laeuft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+
 /* ---------- Fahrtenliste desktop (≥ 768px): Tabelle nach dem
    Dashboard-Tabellen-Muster (Spec Screen 5) ---------- */
 .fl-tablecard {

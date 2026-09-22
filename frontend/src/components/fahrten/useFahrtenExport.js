@@ -134,6 +134,41 @@ export function useFahrtenExport() {
     }
   };
 
+  // Warten, bis das System-Blatt wirklich oben liegt.
+  //
+  // Share.share() kehrt zurueck, sobald der Teilen-Vorgang abgeschlossen ist —
+  // nicht, sobald das Blatt sichtbar wird. In der Luecke dazwischen war das
+  // Export-Sheet bereits geschlossen und die Vorschau noch nicht da: einen
+  // Wimpernschlag lang stand die nackte Liste da (Simon 22.09.).
+  //
+  // appStateChange mit isActive=false ist der Moment, in dem die App den
+  // Vordergrund abgibt — also genau dann, wenn das Blatt uebernimmt. Die
+  // Zeitgrenze haelt den Ablauf frei, falls die Meldung ausbleibt (etwa weil
+  // das Blatt gar nicht erscheint); gewartet wird hoechstens kurz.
+  const wartenBisVerdeckt = async () => {
+    if (!IST_NATIVE) return;
+    const { App } = await import('@capacitor/app');
+    await new Promise((fertig) => {
+      let erledigt = false;
+      const schliessen = (handle) => {
+        if (erledigt) return;
+        erledigt = true;
+        handle?.remove?.();
+        fertig();
+      };
+      let abmelden = null;
+      const uhr = setTimeout(() => schliessen(abmelden), 600);
+      App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) return;
+        clearTimeout(uhr);
+        schliessen(abmelden);
+      }).then((handle) => {
+        abmelden = handle;
+        if (erledigt) handle.remove();
+      });
+    });
+  };
+
   const dateinameAusHeader = (response, fallback) => {
     const contentDisposition = response.headers['content-disposition'];
     const filenameMatch = contentDisposition && contentDisposition.match(/filename="?(.+)"?/i);
@@ -228,6 +263,7 @@ export function useFahrtenExport() {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
       await downloadBlob(blob, filename);
+      await wartenBisVerdeckt();
       erfolgsToast(type, opts);
       return true;
     } catch (error) {
@@ -253,6 +289,7 @@ export function useFahrtenExport() {
         throw new Error('Die heruntergeladene Datei scheint leer oder fehlerhaft zu sein');
       }
       await downloadBlob(blob, filename);
+      await wartenBisVerdeckt();
       erfolgsToast(type, opts);
       return true;
     } catch (error) {
@@ -288,6 +325,7 @@ export function useFahrtenExport() {
       zip.file(`${baseFilename}.pdf`, pdfRes.data);
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       await downloadBlob(zipBlob, `${baseFilename}.zip`);
+      await wartenBisVerdeckt();
       erfolgsToast(type, opts);
       return true;
     } catch (error) {
