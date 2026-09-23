@@ -22,6 +22,13 @@ services:
     # TLS direkt aus dem Internet erreichbar.
     ports:
       - "127.0.0.1:5000:5000"
+    # Obergrenze für den Speicher. Der PDF-Export startet LibreOffice, das
+    # pro Lauf rund 210 MB braucht (gemessen auf dem Produktionsserver).
+    # Die Anwendung begrenzt die Gleichzeitigkeit selbst auf zwei Läufe
+    # (SOFFICE_MAX_PARALLEL); dieses Limit ist die zweite Sicherung, damit
+    # ein Fehler dort nicht den ganzen Server mitnimmt — ohne Grenze trifft
+    # der OOM-Killer sonst den größten Prozess, und das ist die Datenbank.
+    mem_limit: 1g
     environment:
       # Ohne production liefert Express im Fehlerfall HTML-Stacktraces aus
       - NODE_ENV=production
