@@ -70,13 +70,19 @@ export const DatenschutzInhalt = () => (
       </ul>
     </div>
 
+    {/* Dieser Abschnitt nannte bis zum 24.09.2026 Plausible Analytics und
+        Session-Cookies. Beides gibt es in dieser Anwendung nicht (im Code
+        nachgesehen: kein Analyse-Skript, kein document.cookie). Umgekehrt
+        fehlte der einzige Drittanbieter, der tatsaechlich Daten erhaelt.
+        Wer den Text pflegt: bitte gegen den Code pruefen, nicht ergaenzen,
+        was plausibel klingt. */}
     <div className="sheet-abschnitt">
       <div className="form-label">3. Cookies und Analysedienste</div>
       <p className="sheet-text">
-        Die Anwendung verwendet notwendige Session-Cookies für die Aufrechterhaltung der Funktionalität.
-        Zusätzlich nutzen wir Plausible Analytics für die Erfassung der dienstlichen Nutzung.
-        Dies ist ein datenschutzfreundliches Analysetool, das ohne Cookies arbeitet und keine personenbezogenen Daten speichert.
-        Eine Opt-out-Möglichkeit wird nicht angeboten, da die Nutzungsstatistiken für dienstliche Zwecke erforderlich sind.
+        Diese Anwendung setzt keine Cookies und nutzt keinen Analyse- oder
+        Trackingdienst. Es wird nicht ausgewertet, wer die Anwendung wie
+        häufig benutzt. Die Anmeldung wird auf dem Gerät gespeichert — im
+        Browser lokal, in der App im gesicherten Bereich des Betriebssystems.
       </p>
     </div>
 
@@ -96,7 +102,19 @@ export const DatenschutzInhalt = () => (
       <ul className="sheet-liste">
         <li>Hosting: ip-projects.de</li>
         <li>E-Mail-Versand: Interner Mailserver</li>
+        <li>Adresssuche: Photon (photon.komoot.io, Komoot GmbH)</li>
       </ul>
+      <p className="sheet-text">
+        Zur Adresssuche wird der eingetippte Suchbegriff an Photon übertragen,
+        sobald drei Zeichen eingegeben sind — also etwa ein Ortsname oder eine
+        Straße. Wird beim Erfassen einer Fahrt der Knopf zur
+        Standortbestimmung angetippt, gehen zusätzlich die vom Gerät
+        ermittelten Koordinaten dorthin, um daraus eine Adresse zu ermitteln.
+        Das geschieht nur auf ausdrückliches Antippen; der Standort wird nicht
+        im Hintergrund erfasst und nicht auf dem Server gespeichert. Orte
+        lassen sich auch von Hand eintragen, dann gehen keine Daten an diesen
+        Dienstleister.
+      </p>
     </div>
 
     <div className="sheet-abschnitt">
