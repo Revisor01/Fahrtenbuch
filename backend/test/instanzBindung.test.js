@@ -26,6 +26,16 @@ function pruefe(beschreibung, fn) {
 const liesFrontend = (pfad) =>
   fs.readFileSync(__dirname + '/../../frontend/' + pfad, 'utf8');
 
+// Rumpf einer Funktion aus dem Quelltext schneiden — bis zum Beginn der
+// naechsten Deklaration auf derselben Ebene. Eine feste Zeichenzahl haette
+// bei laengeren Funktionen (fetchMonthlyData: 3286 Zeichen) danebengelegen.
+function rumpfVon(quelle, name) {
+  const nach = quelle.split(`const ${name} = async`)[1];
+  if (!nach) return '';
+  const ende = nach.indexOf('\n  const ');
+  return ende > 0 ? nach.slice(0, ende) : nach;
+}
+
 // --- 1. Der Vergleich selbst ---------------------------------------------
 console.log('\n1 — Wann gilt eine gespeicherte Anmeldung als passend:');
 
@@ -140,6 +150,61 @@ pruefe('eine Anmeldung ohne Zuordnung wird einmalig nachgeruestet', () => {
   );
   // Die Begruendung muss im Code stehen, sonst sieht das wie eine Luecke aus.
   assert.ok(/Wechsel meldet ab/.test(block), 'Begruendung fehlt');
+});
+
+// --- 5. Spaete Antworten von A ueberschreiben B nicht --------------------
+console.log('\n5 — Antworten aus einer beendeten Sitzung werden verworfen:');
+
+// Bisher prueften das nur die Nutzerdaten. Die uebrigen Abrufe schrieben
+// blind — und behielten dabei Basis-URL und Header von A, weil axios die
+// Vorgaben beim Aufruf mischt, nicht beim Versand.
+
+pruefe('es gibt einen gemeinsamen Waechter', () => {
+  const q = liesFrontend('src/contexts/AppContext.js');
+  assert.ok(/const sitzungVorbei = /.test(q));
+});
+
+pruefe('alle sechs Abrufe fassen die Sitzung und pruefen sie', () => {
+  const q = liesFrontend('src/contexts/AppContext.js');
+  for (const fn of [
+    'fetchFavoriten',
+    'fetchAnlaesse',
+    'fetchOrte',
+    'fetchDistanzen',
+    'fetchFahrten',
+    'fetchMonthlyData',
+  ]) {
+    const kopf = rumpfVon(q, fn);
+    assert.ok(kopf, `${fn} nicht gefunden`);
+    assert.ok(
+      /const sitzung = sitzungsZaehler\.current/.test(kopf),
+      `${fn} merkt sich die Sitzung nicht`
+    );
+    assert.ok(/sitzungVorbei\(sitzung\)/.test(kopf), `${fn} prueft sie nicht`);
+  }
+});
+
+pruefe('auch die Fehlerzweige schreiben nichts mehr zurueck', () => {
+  // Sonst leerte ein spaeter Fehler von A die frisch geladenen Daten von B.
+  const q = liesFrontend('src/contexts/AppContext.js');
+  for (const fn of ['fetchFavoriten', 'fetchDistanzen', 'fetchFahrten']) {
+    const catchTeil = rumpfVon(q, fn).split('} catch')[1] || '';
+    assert.ok(
+      /sitzungVorbei\(sitzung\)/.test(catchTeil.slice(0, 400)),
+      `${fn}: der catch-Zweig prueft die Sitzung nicht`
+    );
+  }
+});
+
+pruefe('Listen werden nur als Array uebernommen', () => {
+  // Liefert der Server etwas anderes, warf .map/.filter spaeter einen
+  // TypeError — derselbe Fehler, der in einem anderen Projekt die Apps
+  // nach dem Login abstuerzen liess.
+  const q = liesFrontend('src/contexts/AppContext.js');
+  for (const fn of ['fetchOrte', 'fetchDistanzen', 'fetchFavoriten']) {
+    const block = rumpfVon(q, fn);
+    assert.ok(/Array\.isArray\(response\.data\)/.test(block), `${fn} prueft die Form nicht`);
+  }
 });
 
 console.log('\n' + geprueft + ' Pruefungen bestanden.\n');
