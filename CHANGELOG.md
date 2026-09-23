@@ -5,6 +5,12 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
+## [Unreleased] - 2.3.2
+
+### Behoben
+- Über eine besonders geschriebene Benutzernummer ließen sich Einstellungen fremder Konten ändern — darunter die E-Mail-Adresse, worüber sich ein fremdes Konto hätte übernehmen lassen. Die Prüfung greift jetzt zuverlässig
+- Nach „Passwort vergessen“ blieben Anmeldungen auf anderen Geräten weiter gültig. Wer sein Passwort zurücksetzt, sperrt damit jetzt auch fremde Zugriffe aus — wie es beim Ändern des Passworts im Profil schon war
+
 ## [2.3.1] - 2026-09-23
 
 ### Geändert

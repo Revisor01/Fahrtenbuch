@@ -190,11 +190,12 @@ exports.updateUser = async (req, res) => {
         const { id } = req.params;
         const { username, email, role, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis } = req.body;
         
-        // Berechtigungsprüfung: Nur Admin oder der User selbst darf ändern
-        if (req.user.role !== 'admin' && req.user.id !== parseInt(id)) {
-            return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
-        }
-        
+        // Die Berechtigung prueft requireAdminOrSelf in der Route; sie weist
+        // auch krumme IDs ab und normalisiert req.params.id. Ein zweiter
+        // Vergleich per parseInt hier war genau die Luecke: parseInt('2e1')
+        // ist 2, die Abfragen unten bekamen aber den Rohwert '2e1', den MySQL
+        // als 20 liest.
+
         // Normale User dürfen keine Rollen ändern
         if (req.user.role !== 'admin' && role) {
             return res.status(403).json({ message: 'Keine Berechtigung, die Rolle zu ändern' });
@@ -270,9 +271,16 @@ exports.deleteUser = async (req, res) => {
         }
 
         const { id } = req.params;
-        
+
+        // Nur reine Ziffern. Sonst umginge ein Admin den Selbstschutz unten:
+        // parseInt('2e1') ist 2, geloescht wuerde aber Nutzer 20, weil MySQL
+        // '2e1' im Vergleich mit einer INT-Spalte als Double liest.
+        if (!/^\d+$/.test(String(id))) {
+            return res.status(400).json({ message: 'Ungültige ID' });
+        }
+
         // Verhindere, dass der Admin sich selbst löscht
-        if (parseInt(id) === req.user.id) {
+        if (Number(id) === req.user.id) {
             return res.status(400).json({ message: 'Sie können Ihren eigenen Account nicht löschen' });
         }
 
@@ -374,9 +382,18 @@ exports.setPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         
         // Update user: Setze Passwort, lösche Token und markiere Email als verifiziert
+        //
+        // passwort_geaendert_am MUSS mitgesetzt werden: Die Middleware wirft
+        // damit alle Token raus, die vor der Aenderung ausgestellt wurden
+        // (authMiddleware.js:57-62). Ohne den Zeitstempel blieb ein gestohlenes
+        // Token nach "Passwort vergessen" bis zu 14 Tage gueltig — und
+        // verlaengerte sich bei Nutzung immer weiter. User.setPassword und
+        // User.resetPassword im Model machen es richtig; dieser Weg schrieb
+        // eigenes SQL daran vorbei.
         await db.execute(
             `UPDATE users
             SET password = ?,
+                passwort_geaendert_am = NOW(),
                 verification_token = NULL,
                 verification_token_expires = NULL,
                 password_reset_token = NULL,
@@ -398,10 +415,8 @@ exports.changePassword = async (req, res) => {
         const { id } = req.params;
         const { currentPassword, newPassword } = req.body;
 
-        // Prüfe Berechtigungen
-        if (req.user.role !== 'admin' && req.user.id !== parseInt(id)) {
-            return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
-        }
+        // Berechtigung und ID-Form prueft requireAdminOrSelf in der Route
+        // (siehe Kommentar in updateUser).
 
         // Admin kann Passwort ohne altes Passwort ändern
         if (req.user.role === 'admin') {

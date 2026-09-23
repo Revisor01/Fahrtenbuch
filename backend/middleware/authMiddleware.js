@@ -100,11 +100,29 @@ const requireAdminOrSelf = (paramName = 'id') => {
       return res.status(401).json({ message: 'Nicht authentifiziert' });
     }
 
-    const requestedId = parseInt(req.params[paramName]);
-    
+    const roh = req.params[paramName];
+
+    // Nur reine Ziffernfolgen. parseInt allein reichte nicht: parseInt('2e1')
+    // ist 2, die Abfragen bekamen aber den Rohwert, und MySQL liest '2e1' im
+    // Vergleich mit einer INT-Spalte als Double = 20. Nutzer 2 erreichte so
+    // die Konten 20–29 (gemessen auf Produktion: SELECT 20 = '2e1' -> 1).
+    // Dasselbe gilt fuer '+2', ' 2', '2.0' und '0x2'.
+    if (typeof roh !== 'string' || !/^\d+$/.test(roh)) {
+      return res.status(400).json({ message: 'Ungültige ID' });
+    }
+
+    const requestedId = Number(roh);
+    if (!Number.isSafeInteger(requestedId)) {
+      return res.status(400).json({ message: 'Ungültige ID' });
+    }
+
     if (req.user.role !== 'admin' && req.user.id !== requestedId) {
       return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
     }
+
+    // Normalisiert zurueckschreiben, damit nachgelagerte Abfragen nie den
+    // Rohwert sehen — auch wenn spaeter jemand eine Stelle uebersieht.
+    req.params[paramName] = String(requestedId);
 
     next();
   };
