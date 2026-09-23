@@ -26,7 +26,7 @@ import { ladeServerKonfig } from '../api/konfig';
 import {
   KURZBEFEHL_WIEDERHOLEN,
   aufKurzbefehlHoeren,
-  offenenKurzbefehlAbholen,
+  offenenKurzbefehlAbholenAsync,
 } from '../utils/kurzbefehle';
 
 // Das Zeichen: offener Ring (die gefahrene Strecke), um −45° gedreht.
@@ -228,10 +228,17 @@ function AppContent() {
 
     // Beim Kaltstart hat die native Seite den Typ hinterlegt, bevor dieser
     // Listener stand — der Wert liegt dann bereit und wird hier abgeholt.
-    const offener = offenenKurzbefehlAbholen();
-    if (offener) ausfuehren(offener);
+    // Auf iOS synchron aus window.__kurzbefehl, auf Android ueber die
+    // Bruecke; deshalb async, mit Abbruch falls der Effekt schon weg ist.
+    let abgeraeumt = false;
+    offenenKurzbefehlAbholenAsync().then((offener) => {
+      if (!abgeraeumt && offener) ausfuehren(offener);
+    });
 
-    return abmelden;
+    return () => {
+      abgeraeumt = true;
+      abmelden();
+    };
   }, [isLoggedIn, erfassung]);
 
   // Welche Flaeche traegt der gerade sichtbare Bildschirm? Startbildschirm,

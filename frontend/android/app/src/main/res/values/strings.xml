@@ -4,4 +4,12 @@
     <string name="title_activity_main">Fahrtenbuch</string>
     <string name="package_name">de.godsapp.fahrtenbuch</string>
     <string name="custom_url_scheme">de.godsapp.fahrtenbuch</string>
+
+    <!-- Kurzbefehle (langes Tippen aufs App-Symbol), siehe res/xml/kurzbefehle.xml.
+         Wortlaut wie auf iOS in Info.plist, damit beide Plattformen dasselbe sagen.
+         Kurzform: hoechstens 10 Zeichen laut Android-Leitfaden. -->
+    <string name="kurzbefehl_erfassen_kurz">Erfassen</string>
+    <string name="kurzbefehl_erfassen_lang">Fahrt erfassen</string>
+    <string name="kurzbefehl_wiederholen_kurz">Wiederholen</string>
+    <string name="kurzbefehl_wiederholen_lang">Letzte Fahrt wiederholen</string>
 </resources>

@@ -17,9 +17,28 @@ import { PLATTFORM } from './plattform';
 export const KURZBEFEHL_ERFASSEN = 'de.godsapp.fahrtenbuch.erfassen';
 export const KURZBEFEHL_WIEDERHOLEN = 'de.godsapp.fahrtenbuch.wiederholen';
 
-// Bislang nur iOS: Android-Kurzbefehle brauchen eigene XML-Ressourcen und
-// einen Intent-Weg — das kommt mit dem ersten Android-Durchlauf.
-const VERFUEGBAR = PLATTFORM === 'ios';
+// Beide Plattformen, auf zwei Wegen:
+//   iOS     — Kurzbefehle.swift schreibt direkt in die WebView (kein Plugin,
+//             weil Capacitor 8 nur Plugins aus dem SPM-Paket laedt).
+//   Android — KurzbefehlePlugin.java meldet ueber die Bruecke; dort greift
+//             die Einschraenkung nicht.
+// Die Typ-Kennungen sind auf beiden Seiten dieselben, deshalb sieht der
+// Aufrufer keinen Unterschied.
+const VERFUEGBAR = PLATTFORM === 'ios' || PLATTFORM === 'android';
+const UEBER_PLUGIN = PLATTFORM === 'android';
+
+// Plugin erst bei Bedarf laden. In { plugin } verpackt, weil ein
+// Capacitor-Proxy jeden Zugriff als Bruecken-Aufruf beantwortet — auch
+// `.then`, was die Kette sonst haengen laesst (siehe tokenSpeicher.js).
+let pluginPromise = null;
+async function ladePlugin() {
+  if (!pluginPromise) {
+    pluginPromise = import('@capacitor/core').then((m) => ({
+      plugin: m.registerPlugin('Kurzbefehle'),
+    }));
+  }
+  return (await pluginPromise).plugin;
+}
 
 // Holt einen beim Start hinterlegten Kurzbefehl ab und raeumt ihn weg.
 // Liefert den Typ oder null.
@@ -30,9 +49,44 @@ export function offenenKurzbefehlAbholen() {
   return typ;
 }
 
+// Android: Das Ereignis kann gefeuert haben, bevor ein Listener stand.
+// Liefert ein Promise, weil der Wert ueber die Bruecke kommt. Auf iOS
+// erledigt das der synchrone Puffer oben.
+export async function offenenKurzbefehlAbholenAsync() {
+  if (!UEBER_PLUGIN) return offenenKurzbefehlAbholen();
+  try {
+    const plugin = await ladePlugin();
+    const { typ } = await plugin.offenen();
+    return typ || null;
+  } catch (error) {
+    // Ohne Kurzbefehl startet die App normal — kein Grund fuer eine Meldung.
+    return null;
+  }
+}
+
 // Meldet einen Listener an und liefert die Abmeldefunktion.
 export function aufKurzbefehlHoeren(handler) {
   if (!VERFUEGBAR || typeof window === 'undefined') return () => {};
+
+  if (UEBER_PLUGIN) {
+    let handle = null;
+    let abgemeldet = false;
+    ladePlugin()
+      .then((plugin) => plugin.addListener('kurzbefehl', (e) => handler(e?.typ)))
+      .then((h) => {
+        handle = h;
+        if (abgemeldet) h.remove();
+      })
+      .catch(() => {});
+    return () => {
+      abgemeldet = true;
+      try {
+        handle?.remove?.();
+      } catch (error) {
+        /* schon weg */
+      }
+    };
+  }
 
   const beiEreignis = (e) => {
     const typ = e.detail || window.__kurzbefehl;
