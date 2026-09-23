@@ -48,6 +48,17 @@ function AppProvider({ children }) {
   // Abmelden eintrifft, darf die geloeschten Nutzerdaten nicht zurueckschreiben
   // — beim Kirchenkreis-Wechsel waeren das sogar die Daten des alten Servers.
   const sitzungsZaehler = useRef(0);
+
+  // Wurde seit dem Start dieser Anfrage abgemeldet oder der Kirchenkreis
+  // gewechselt? Dann darf ihre Antwort nichts mehr setzen.
+  //
+  // Bisher prueften das nur die Nutzerdaten. Alle anderen Abrufe schrieben
+  // blind — und behielten dabei Basis-URL und Header von A, weil axios die
+  // Vorgaben beim Aufruf mischt, nicht beim Versand. Wer bei A eine Fahrt
+  // anlegt (rund 30 Anfragen), sofort wechselt und sich bei B anmeldet, sah
+  // danach A's Daten unter B's Anmeldung, bis zum naechsten Nachladen. Auf
+  // Mobilfunk ist das kein Randfall.
+  const sitzungVorbei = (sitzung) => sitzung !== sitzungsZaehler.current;
   const toast = useToast();
 
   const [favoriten, setFavoriten] = useState([]);
@@ -64,11 +75,14 @@ function AppProvider({ children }) {
   });
 
   const fetchFavoriten = async () => {
+    const sitzung = sitzungsZaehler.current;
     try {
       const response = await axios.get(`${API_BASE_URL}/favoriten`);
-      setFavoriten(response.data);
+      if (sitzungVorbei(sitzung)) return;
+      setFavoriten(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Fehler beim Abrufen der Favoriten:', error);
+      if (sitzungVorbei(sitzung)) return;
       setFavoriten([]);
     }
   };
@@ -105,7 +119,9 @@ function AppProvider({ children }) {
   };
 
   const fetchAnlaesse = async () => {
+    const sitzung = sitzungsZaehler.current;
     const daten = await ladeAnlaesse();
+    if (sitzungVorbei(sitzung)) return [];
     setAnlaesse(daten);
     return daten;
   };
@@ -404,9 +420,11 @@ function AppProvider({ children }) {
   };
 
   const fetchOrte = async () => {
+    const sitzung = sitzungsZaehler.current;
     try {
       const response = await axios.get(`${API_BASE_URL}/orte`);
-      setOrte(response.data);
+      if (sitzungVorbei(sitzung)) return;
+      setOrte(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Fehler beim Abrufen der Orte:', error);
     }
@@ -440,16 +458,20 @@ function AppProvider({ children }) {
   };
 
   const fetchDistanzen = async () => {
+    const sitzung = sitzungsZaehler.current;
     try {
       const response = await axios.get(`${API_BASE_URL}/distanzen`);
-      setDistanzen(response.data);
+      if (sitzungVorbei(sitzung)) return;
+      setDistanzen(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Fehler beim Abrufen der Distanzen:', error);
+      if (sitzungVorbei(sitzung)) return;
       setDistanzen([]);
     }
   };
 
   const fetchFahrten = async () => {
+    const sitzung = sitzungsZaehler.current;
     try {
       const [bisYear, bisMonth] = selectedMonth.split('-');
 
@@ -468,6 +490,7 @@ function AppProvider({ children }) {
       const geladeneFahrten = Array.isArray(response?.data?.fahrten)
         ? response.data.fahrten
         : [];
+      if (sitzungVorbei(sitzung)) return;
       setFahrten(geladeneFahrten.map(fahrt => ({
         ...fahrt,
         mitfahrer: fahrt.mitfahrer || []
@@ -475,6 +498,7 @@ function AppProvider({ children }) {
       setSummary(response?.data?.summary || {});
     } catch (error) {
       console.error('Fehler beim Abrufen der Fahrten:', error);
+      if (sitzungVorbei(sitzung)) return;
       setFahrten([]);
       setSummary({});
     }
@@ -575,6 +599,7 @@ function AppProvider({ children }) {
   };
 
   const fetchMonthlyData = async () => {
+    const sitzung = sitzungsZaehler.current;
     try {
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear();
@@ -644,12 +669,14 @@ function AppProvider({ children }) {
         return dateB - dateA;
       });
 
+      if (sitzungVorbei(sitzung)) return [];
       setMonthlyData(data);
       return data;
     } catch (error) {
       console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
       // Leere Liste statt des alten Standes: Komponenten iterieren darueber,
       // ein undefined liesse die Oberflaeche beim naechsten Rendern abstuerzen
+      if (sitzungVorbei(sitzung)) return [];
       setMonthlyData([]);
       return [];
     }
