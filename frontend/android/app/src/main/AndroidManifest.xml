@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- allowBackup=false: Mit aktiviertem Auto-Backup landet der
+         Ausweichspeicher der App (WebView-localStorage) im Google-Konto.
+         Dort liegt das Anmelde-Token, wenn der gesicherte Systemspeicher
+         beim Anmelden nicht erreichbar war (siehe tokenSpeicher.js). Ein
+         Backup ist auch sonst wenig wert: Alle Fahrten stehen auf dem
+         Server, nach einer Neuinstallation genuegt die Anmeldung. -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/datenregeln"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -38,4 +46,16 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Standort: Der Knopf "Aktueller Standort" beim Erfassen einer Fahrt
+         ruft navigator.geolocation (ErfassungsFlow.js). Ohne diese Eintraege
+         lehnt Android die Anfrage ohne Dialog ab — der Knopf war auf Android
+         schlicht wirkungslos, waehrend er auf iOS funktionierte (dort steht
+         die Begruendung in der Info.plist).
+         COARSE reicht fuer eine Adresse; FINE ist fuer die Genauigkeit beim
+         Ermitteln der Startadresse trotzdem sinnvoll. Beide sind optional:
+         Wer sie ablehnt, traegt den Ort wie bisher von Hand ein. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
 </manifest>

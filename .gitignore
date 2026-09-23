@@ -174,3 +174,8 @@ frontend/android/.idea/
 *.p8
 *.p12
 *.mobileprovision
+# .jks und keystore.properties fehlten: build.gradle liest genau diese
+# Dateien (Pfad und Passwoerter im Klartext), sie lagen also nur zufaellig
+# nicht im Repository.
+*.jks
+keystore.properties
