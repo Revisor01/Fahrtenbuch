@@ -1,6 +1,7 @@
 import React from 'react';
 import './index.css';
 import LandingPage from './LandingPage';
+import RechtlichesSeite from './components/RechtlichesSeite';
 import VerifyEmail from './VerifyEmail';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SetPassword from './SetPassword';
@@ -31,6 +32,10 @@ function App() {
     <ErfassungProvider>
     <Routes>
     <Route path="/help" element={<LandingPage />} />
+    {/* Oeffentlich, ohne Anmeldung: Apple 5.1.1 (i) verlangt, dass die
+        Datenschutzerklaerung in der App erreichbar ist — auch fuer eine
+        Pruefer:in ohne Konto. */}
+    <Route path="/rechtliches" element={<RechtlichesSeite />} />
     <Route path="/verify-email" element={<VerifyEmail />} />
     <Route path="/reset-password" element={<SetPassword />} />
     <Route path="/set-password" element={<SetPassword />} />

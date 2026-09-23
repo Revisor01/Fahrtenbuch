@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Building2, RefreshCw } from 'lucide-react';
 import { AuthLogo } from './LoginPage';
 import { ladeInstanzen } from '../api/instanzen';
@@ -124,6 +125,11 @@ function InstanzAuswahl({ onGewaehlt, aktuelleUrl }) {
             </>
           )}
         </div>
+
+        {/* Auch hier, nicht nur auf der Anmeldeseite: Das ist der erste
+            Bildschirm der App, und die Datenschutzerklaerung muss ohne Konto
+            erreichbar sein (Apple 5.1.1 i). */}
+        <Link to="/rechtliches" className="auth-foot">Impressum & Datenschutz</Link>
 
         {aktuelleUrl && (
           <div className="auth-foot">Aktuell: {aktuelleUrl.replace(/^https?:\/\//, '')}</div>

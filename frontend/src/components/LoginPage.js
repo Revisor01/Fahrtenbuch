@@ -240,6 +240,11 @@ function LoginPage({ onInstanzWechsel }) {
 
         <Link to="/help" className="auth-foot">Hilfe & Tutorials</Link>
 
+        {/* Pflicht fuer den App Store (5.1.1 i): Die Datenschutzerklaerung
+            muss auch ohne Konto erreichbar sein. Bisher stand sie nur im
+            Info-Fenster des angemeldeten Bereichs. */}
+        <Link to="/rechtliches" className="auth-foot">Impressum & Datenschutz</Link>
+
         {/* Nur in der App: Der Wechsel des Kirchenkreises ist die Ausnahme,
             deshalb unauffaellig unter der Hilfe statt als Knopf in der Karte.
             Waehrend Registrierung oder Passwort-Reset wuerde er vom laufenden

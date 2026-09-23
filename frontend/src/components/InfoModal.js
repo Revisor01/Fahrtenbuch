@@ -13,7 +13,7 @@ const TITEL = {
   datenschutz: 'Datenschutzerklärung',
 };
 
-const ImpressumInhalt = () => (
+export const ImpressumInhalt = () => (
   <>
     <div className="sheet-abschnitt">
       <div className="form-label">Angaben gemäß § 5 TMG</div>
@@ -42,7 +42,7 @@ const ImpressumInhalt = () => (
   </>
 );
 
-const DatenschutzInhalt = () => (
+export const DatenschutzInhalt = () => (
   <>
     <div className="sheet-abschnitt">
       <div className="form-label">1. Grundsätzliche Angaben zur Datenverarbeitung</div>
