@@ -590,7 +590,9 @@ function Dashboard({ onNavigate }) {
       {/* ================= Mobil (<768px) ================= */}
       <div className="dash-mobile">
         <div className="dash-m-head">
-          <h1 className="dash-m-monat">{monatName(currentYM)}</h1>
+          {/* Mit Jahr: Wer im Januar den Dezember ansieht, las sonst nur
+              „Dezember" und musste raten, welches Jahr gemeint ist. */}
+          <h1 className="dash-m-monat">{monatJahr(currentYM)}</h1>
           <button
             type="button"
             className="dash-avatar"

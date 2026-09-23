@@ -5,9 +5,10 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
-## [Unreleased] - 2.3.1
+## [2.3.1] - 2026-09-23
 
 ### Geändert
+- Auf der Startseite steht über dem Monat jetzt auch das Jahr. Wer im Januar den Dezember ansieht, musste bisher raten, welches Jahr gemeint ist
 - Die Navigationsleiste der Android-App folgt jetzt dem Aussehen von Android statt dem des iPhones: durchgehend am unteren Rand statt als schwebende Kapsel, mit der gewohnten Markierung des aktiven Eintrags. „Einstellungen“ wird nicht mehr abgeschnitten, und der Knopf zum Erfassen liegt über der Leiste statt über dem Inhalt
 - Beim Export zeigt der angetippte Knopf jetzt „Erstellt …“, solange die Datei entsteht. Das Fenster bleibt so lange offen und schließt erst, wenn die Datei da ist. Ein PDF braucht einige Sekunden, weil es auf dem Server aus dem Formular erzeugt wird — bisher passierte sichtbar nichts, und der Knopf wirkte wie ohne Funktion. Beim Einreichen mehrerer Abrechnungsträger steht dabei, der wievielte gerade erstellt wird
 
