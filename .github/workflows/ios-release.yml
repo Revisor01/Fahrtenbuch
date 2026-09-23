@@ -53,7 +53,11 @@ jobs:
       - name: Node einrichten
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          # Mindestens 22: Die Capacitor-CLI bricht darunter ab
+          # ("The Capacitor CLI requires NodeJS >=22.0.0"). Die Dockerfiles
+          # bauen mit 20 — das betrifft aber nur den Web-Container, in dem
+          # kein cap sync laeuft.
+          node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
