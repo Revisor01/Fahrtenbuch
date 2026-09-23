@@ -15,7 +15,18 @@ const changePasswordSchema = z.object({
   confirmPassword: z.string().min(1, 'Passwort-Bestätigung ist erforderlich'),
 });
 
+// Konto selbst loeschen. Apple (5.1.1 v) und Google verlangen, dass eine App,
+// in der man ein Konto anlegen kann, es auch wieder loeschen laesst — und zwar
+// in der App, nicht per Mail an eine Verwaltung.
+//
+// Das Passwort ist Pflicht: Wer ein fremdes, offenes Geraet in die Hand
+// bekommt, soll damit nicht das Konto samt aller Fahrten loeschen koennen.
+const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'Passwort ist zur Bestätigung erforderlich'),
+});
+
 module.exports = {
   updateProfileSchema,
   changePasswordSchema,
+  deleteAccountSchema,
 };

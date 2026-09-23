@@ -114,7 +114,7 @@ const server = app.listen(0, async () => {
   if (spec) {
     const anzahl = Object.values(spec.paths).reduce((n, ops) =>
       n + Object.keys(ops).filter(m => ['get','post','put','delete','patch'].includes(m)).length, 0);
-    pruefe('enthaelt 77 Operationen', anzahl === 77, 'waren ' + anzahl);
+    pruefe('enthaelt 78 Operationen', anzahl === 78, 'waren ' + anzahl);
     pruefe('OpenAPI 3.1', spec.openapi === '3.1.0', spec.openapi);
     pruefe('beide Anmeldewege beschrieben',
       !!spec.components.securitySchemes.Token && !!spec.components.securitySchemes.ApiSchluessel, '');

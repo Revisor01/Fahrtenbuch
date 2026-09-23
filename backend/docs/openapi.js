@@ -638,6 +638,12 @@ const paths = {
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string', format: 'email' }, fullName: { type: ['string', 'null'] }, iban: { type: ['string', 'null'] }, kirchengemeinde: { type: ['string', 'null'] }, kirchspiel: { type: ['string', 'null'] }, kirchenkreis: { type: ['string', 'null'] } } } } } },
       responses: { 200: MELDUNG('Profil erfolgreich aktualisiert.'), 400: VALIDIERUNG, 401: FEHLER[401], 500: FEHLER[500] },
     },
+    delete: {
+      tags: ['Profil'], summary: 'Eigenes Konto endgültig löschen',
+      description: 'Löscht das eigene Konto samt Fahrten, Orten, Distanzen, Abrechnungsträgern, Erstattungssätzen, Abrechnungen, Profil und API-Schlüsseln — in einer Transaktion, nichts bleibt zurück. Nicht umkehrbar. Zur Bestätigung ist das eigene Passwort nötig; höchstens 10 Versuche in 10 Minuten je Konto. Das letzte Administrator-Konto lässt sich nicht löschen (409), sonst wäre das Fahrtenbuch nicht mehr verwaltbar. Gelöscht wird immer das Konto der aufrufenden Anmeldung — eine fremde ID lässt sich nicht angeben.',
+      requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['password'], properties: { password: { type: 'string', format: 'password', description: 'Das eigene Passwort zur Bestätigung' } } } } } },
+      responses: { 200: MELDUNG('Konto und alle zugehörigen Daten wurden gelöscht'), 400: ANTWORT('Passwort falsch oder fehlend', { message: 'Passwort ist falsch' }), 401: FEHLER[401], 404: MELDUNG('Benutzer nicht gefunden'), 409: ANTWORT('Letztes Administrator-Konto', { message: 'Das letzte Administrator-Konto kann nicht gelöscht werden. Bitte zuerst eine andere Person zur Administratorin machen.' }), 429: FEHLER[429], 500: FEHLER[500] },
+    },
   },
   '/api/profile/change-password': {
     put: {

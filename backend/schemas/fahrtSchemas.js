@@ -58,10 +58,44 @@ const kilometerSchema = z
     error: 'Kilometer muss eine positive Zahl sein',
   });
 
+// Datum einer Fahrt: Format, Gueltigkeit und ein plausibler Bereich.
+//
+// Bisher genuegte z.string().min(1). In der Produktionsdatenbank stehen
+// dadurch Fahrten mit den Jahren 0024, 0206, 0525 und 0026 — Tippfehler beim
+// Eintippen. Sie tauchen in keiner Monats-, Jahres- oder Zeitraumansicht auf
+// und wurden nie abgerechnet; die Nutzer haben es nie bemerkt, weil die
+// Fahrt scheinbar gespeichert war.
+//
+// Der Bereich ist bewusst weit: Das Fahrtenbuch wird oft rueckwirkend
+// gefuehrt, und geplante Fahrten im naechsten Monat sind normal. Abgewiesen
+// wird nur, was ein Vertipper sein muss.
+const JAHR_FRUEHESTENS = 2015;
+
+const datumSchema = z
+  .string()
+  .min(1, 'Datum ist erforderlich')
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Datum muss im Format JJJJ-MM-TT angegeben werden')
+  .refine((wert) => {
+    // new Date('2026-02-30') ergibt den 2. Maerz — der Rueckvergleich faengt
+    // solche Kalendersprünge ab.
+    const d = new Date(`${wert}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === wert;
+  }, 'Dieses Datum gibt es nicht')
+  .refine((wert) => Number(wert.slice(0, 4)) >= JAHR_FRUEHESTENS, {
+    error: `Das Datum liegt zu weit zurück (frühestens ${JAHR_FRUEHESTENS})`,
+  })
+  .refine((wert) => {
+    // Ein Jahr Vorlauf reicht fuer geplante Fahrten; alles darueber ist ein
+    // Zahlendreher im Jahr.
+    const grenze = new Date();
+    grenze.setFullYear(grenze.getFullYear() + 1);
+    return new Date(`${wert}T00:00:00Z`) <= grenze;
+  }, 'Das Datum liegt zu weit in der Zukunft');
+
 const createFahrtSchema = z.object({
   vonOrtId: optionaleIdSchema,
   nachOrtId: optionaleIdSchema,
-  datum: z.string().min(1, 'Datum ist erforderlich'),
+  datum: datumSchema,
   anlass: z.string().min(1, 'Anlass ist erforderlich'),
   kilometer: kilometerSchema,
   abrechnung: z.coerce.number().int().positive('Abrechnungstraeger ist erforderlich'),
@@ -80,7 +114,7 @@ const createFahrtSchema = z.object({
 const updateFahrtSchema = z.object({
   vonOrtId: optionaleIdSchema,
   nachOrtId: optionaleIdSchema,
-  datum: z.string().min(1, 'Datum ist erforderlich'),
+  datum: datumSchema,
   anlass: z.string().min(1, 'Anlass ist erforderlich'),
   kilometer: kilometerSchema,
   abrechnung: z.coerce.number().int().positive('Abrechnungstraeger ist erforderlich'),
