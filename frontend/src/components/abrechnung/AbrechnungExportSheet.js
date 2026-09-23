@@ -93,7 +93,7 @@ function AbrechnungExportSheet({ isOpen, onClose, monat }) {
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      title={monat ? `Export ${monatLabel(monat)}` : 'Zeitraum-Export'}
+      title={monat ? `Export ${monatLabel(monat)}` : 'Mehrere Monate abrechnen'}
     >
       {/* Der Hinweis muss zwischen Einzelmonat und Zeitraum unterscheiden:
           Ein Zeitraum-Export (Von ≠ Bis) setzt serverseitig JEDEN Monat des

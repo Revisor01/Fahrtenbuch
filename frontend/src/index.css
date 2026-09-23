@@ -3421,15 +3421,21 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text);
 }
 
+/* Die drei Formate teilen sich die Breite zu gleichen Teilen, statt
+   umzubrechen und unterschiedlich breit dazustehen. flex-basis: 0 sorgt
+   dafuer, dass der laengere Text („Erstellt …") die Aufteilung nicht
+   verschiebt — sonst sprang die Zeile, sobald ein Knopf zu laden begann. */
 .fl-export-btns {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
-.fl-export-btns .btn-secondary,
-.fl-export-btns .btn-ghost {
+.fl-export-btns > button {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 /* Laufender Kreis fuer Knoepfe, die auf den Server warten (PDF-Export:
@@ -4133,14 +4139,25 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 }
 
 /* ---------- Export-Sheet: Zeitraum-Wahl + Betrag je Träger ---------- */
+/* Von und Bis stehen untereinander, jedes ueber die volle Breite:
+   nebeneinander war „September 2026" auf dem Handy abgeschnitten, sodass
+   sich Monat und Jahr nicht mehr lesen liessen. */
 .abr-export-zeitraum {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
 }
 
 .abr-export-zeitraum .fl-zeitraum-gruppe {
-  flex: 1;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.abr-export-zeitraum .fl-zeitraum-gruppe .form-select {
+  width: 100%;
 }
 
 .abr-export-betrag {
