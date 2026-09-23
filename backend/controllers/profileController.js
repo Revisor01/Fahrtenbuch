@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const mailService = require('../services/mailService');
+const User = require('../models/User');
 
 exports.getProfile = async (req, res) => {
     try {
@@ -165,5 +166,45 @@ exports.changePassword = async (req, res) => {
     } catch (error) {
         console.error('Fehler beim Ändern des Passworts:', error);
         res.status(500).json({ message: 'Serverfehler beim Ändern des Passworts' });
+    }
+};
+// Eigenes Konto endgueltig loeschen.
+//
+// Pflicht fuer die App-Stores: Wo man ein Konto anlegen kann, muss man es auch
+// wieder loeschen koennen (Apple 5.1.1 v, Google Play). Bisher ging das nur
+// ueber eine Administratorin — Apple lehnt eine Einreichung deswegen ab.
+//
+// Geloescht wird ueber User.delete: eine Transaktion, die Abrechnungen,
+// Erstattungsbetraege, Traeger, Fahrten, Distanzen, Orte, Mitfahrer-Saetze und
+// E-Mail-Verifikationen mitnimmt; Profil und API-Schluessel haengen per
+// CASCADE am Konto. Der Schutz des letzten Administrators bleibt bestehen —
+// sonst waere das Fahrtenbuch danach nicht mehr verwaltbar.
+exports.deleteAccount = async (req, res) => {
+    const { password } = req.body;
+
+    try {
+        const [users] = await db.execute('SELECT password FROM users WHERE id = ?', [req.user.id]);
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+        }
+
+        // Passwort pruefen, auch wenn die Anfrage mit einem API-Schluessel
+        // kommt: Das Loeschen ist nicht umkehrbar.
+        const stimmt = await bcrypt.compare(password, users[0].password);
+        if (!stimmt) {
+            return res.status(400).json({ message: 'Passwort ist falsch' });
+        }
+
+        await User.delete(req.user.id);
+        res.json({ message: 'Konto und alle zugehörigen Daten wurden gelöscht' });
+    } catch (error) {
+        // User.delete wirft mit Klartext, wenn es der letzte Administrator ist.
+        if (/letzte Admin/i.test(error.message || '')) {
+            return res.status(409).json({
+                message: 'Das letzte Administrator-Konto kann nicht gelöscht werden. Bitte zuerst eine andere Person zur Administratorin machen.',
+            });
+        }
+        console.error('Fehler beim Löschen des Kontos:', error);
+        res.status(500).json({ message: 'Konto konnte nicht gelöscht werden' });
     }
 };

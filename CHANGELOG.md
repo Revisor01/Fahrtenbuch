@@ -7,7 +7,11 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased] - 2.3.2
 
+### Hinzugefügt
+- Das eigene Konto lässt sich jetzt in den Einstellungen unter „Profil“ selbst löschen. Zur Bestätigung ist das Passwort nötig; danach sind Fahrten, Orte, Abrechnungsträger und Abrechnungen endgültig weg. Das letzte Administrator-Konto bleibt geschützt
+
 ### Behoben
+- Beim Erfassen ließen sich unmögliche Daten eintragen (etwa das Jahr 0206 statt 2026). Solche Fahrten tauchten in keiner Monats- oder Jahresübersicht auf und wurden nie abgerechnet, ohne dass es jemandem auffiel. Das Datum wird jetzt geprüft; Nachträge aus früheren Jahren bleiben möglich
 - Über eine besonders geschriebene Benutzernummer ließen sich Einstellungen fremder Konten ändern — darunter die E-Mail-Adresse, worüber sich ein fremdes Konto hätte übernehmen lassen. Die Prüfung greift jetzt zuverlässig
 - Nach „Passwort vergessen“ blieben Anmeldungen auf anderen Geräten weiter gültig. Wer sein Passwort zurücksetzt, sperrt damit jetzt auch fremde Zugriffe aus — wie es beim Ändern des Passworts im Profil schon war
 - Bei hängender Verbindung wartete die App unbegrenzt: Fenster blieben auf „Speichert …“ stehen, ohne Rückmeldung. Jetzt bricht eine Anfrage nach 20 Sekunden ab und meldet, dass der Server nicht antwortet

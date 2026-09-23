@@ -1,20 +1,53 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { Home, AlertTriangle } from 'lucide-react';
+import { Home, AlertTriangle, Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
+import Sheet from '../ui/Sheet';
+import Spinner from '../ui/Spinner';
+import fehlerText from '../../utils/fehlerText';
 import BereichKopf from './BereichKopf';
 
 // Profil & Passwort: persönliche Daten für die Abrechnung + Passwortwechsel.
 // Formulare bleiben Seiteninhalt (mehrfeldrig, kein Sheet).
 function ProfilBereich() {
-  const { setUser, refreshAllData, orte, updateOrt } = useContext(AppContext);
+  const { setUser, refreshAllData, orte, updateOrt, logout } = useContext(AppContext);
   const toast = useToast();
   const [profile, setProfile] = useState({});
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [wohnortLaeuft, setWohnortLaeuft] = useState(false);
+  const [loeschenOffen, setLoeschenOffen] = useState(false);
+  const [loeschPasswort, setLoeschPasswort] = useState('');
+  const [loeschenLaeuft, setLoeschenLaeuft] = useState(false);
+
+  const schliesseLoeschen = () => {
+    setLoeschenOffen(false);
+    setLoeschPasswort('');
+  };
+
+  // Konto endgueltig loeschen. Der Server prueft das Passwort noch einmal und
+  // raeumt in einer Transaktion alles ab, was am Konto haengt.
+  const loescheKonto = async () => {
+    if (!loeschPasswort || loeschenLaeuft) return;
+    setLoeschenLaeuft(true);
+    try {
+      await axios.delete('/api/profile', { data: { password: loeschPasswort } });
+      // Erst abmelden, dann melden: Ohne Konto wuerde jeder weitere Abruf in
+      // ein 401 laufen und die Oberflaeche in einen unklaren Zustand bringen.
+      schliesseLoeschen();
+      logout();
+      toast.success('Konto und alle Daten wurden gelöscht.');
+    } catch (error) {
+      console.error(
+        'Konto konnte nicht gelöscht werden:',
+        error.response?.status || error.code || 'Netzfehler'
+      );
+      toast.error(fehlerText(error, 'Konto konnte nicht gelöscht werden.'));
+      setLoeschenLaeuft(false);
+    }
+  };
 
   // Der als Wohnort markierte Ort liefert die Anschrift fürs Abrechnungsformular
   const wohnort = (orte || []).find((o) => o.ist_wohnort);
@@ -350,6 +383,70 @@ function ProfilBereich() {
           <button type="submit" className="btn-primary mobile-full">Passwort ändern</button>
         </div>
       </form>
+
+      {/* Konto loeschen — Pflicht fuer App Store und Play Store: Wo man ein
+          Konto anlegen kann, muss man es auch wieder loeschen koennen
+          (Apple 5.1.1 v). Bisher ging das nur ueber eine Administratorin. */}
+      <hr className="set-divider" />
+      <div className="set-subhead">Konto löschen</div>
+      <p className="set-subsatz">
+        Dabei werden alle Fahrten, Orte, Abrechnungsträger und Abrechnungen
+        endgültig gelöscht. Das lässt sich nicht rückgängig machen.
+      </p>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          className="btn-destructive mobile-full"
+          onClick={() => setLoeschenOffen(true)}
+        >
+          <Trash2 size={16} />
+          Konto löschen
+        </button>
+      </div>
+
+      <Sheet
+        isOpen={loeschenOffen}
+        onClose={() => (loeschenLaeuft ? null : schliesseLoeschen())}
+        title="Konto endgültig löschen"
+      >
+        <div className="fav-frage">
+          <p className="fav-frage-text">
+            Alle Fahrten, Orte, Abrechnungsträger und Abrechnungen werden
+            gelöscht. Das lässt sich nicht rückgängig machen.
+          </p>
+          <div>
+            <label className="form-label" htmlFor="loesch-pw">
+              Zur Bestätigung das Passwort eingeben
+            </label>
+            <input
+              id="loesch-pw"
+              type="password"
+              autoComplete="current-password"
+              value={loeschPasswort}
+              onChange={(e) => setLoeschPasswort(e.target.value)}
+              className="form-input"
+              disabled={loeschenLaeuft}
+            />
+          </div>
+          <button
+            type="button"
+            className="btn-destructive w-full"
+            onClick={loescheKonto}
+            disabled={loeschenLaeuft || !loeschPasswort}
+          >
+            {loeschenLaeuft ? <Spinner /> : <Trash2 size={16} />}
+            {loeschenLaeuft ? 'Wird gelöscht …' : 'Endgültig löschen'}
+          </button>
+          <button
+            type="button"
+            className="btn-ghost w-full"
+            onClick={schliesseLoeschen}
+            disabled={loeschenLaeuft}
+          >
+            Abbrechen
+          </button>
+        </div>
+      </Sheet>
     </div>
   );
 }
