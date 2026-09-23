@@ -107,7 +107,12 @@ function ProfilBereich() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      console.error('Fehler beim Ändern des Passworts:', error);
+      // Nur der Status — error.config.data enthaelt hier altes UND neues
+      // Passwort im Klartext und landet sonst im Geraetelog.
+      console.error(
+        'Passwortwechsel fehlgeschlagen:',
+        error.response?.status || error.code || 'Netzfehler'
+      );
       toast.error(error.response?.data?.message || 'Passwort konnte nicht geändert werden.');
     }
   };

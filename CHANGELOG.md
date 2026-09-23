@@ -10,6 +10,11 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Behoben
 - Über eine besonders geschriebene Benutzernummer ließen sich Einstellungen fremder Konten ändern — darunter die E-Mail-Adresse, worüber sich ein fremdes Konto hätte übernehmen lassen. Die Prüfung greift jetzt zuverlässig
 - Nach „Passwort vergessen“ blieben Anmeldungen auf anderen Geräten weiter gültig. Wer sein Passwort zurücksetzt, sperrt damit jetzt auch fremde Zugriffe aus — wie es beim Ändern des Passworts im Profil schon war
+- Bei hängender Verbindung wartete die App unbegrenzt: Fenster blieben auf „Speichert …“ stehen, ohne Rückmeldung. Jetzt bricht eine Anfrage nach 20 Sekunden ab und meldet, dass der Server nicht antwortet
+- Beschriftungen in heller Darstellung waren zu blass für die Barrierefreiheits-Norm (gemessen 3,88:1 statt der geforderten 4,5:1). Sie sind jetzt dunkler
+
+### Sonstiges
+- Beim Anmelden und beim Passwortwechsel landete im Fehlerfall das Passwort im Klartext in der Entwickler-Konsole — in der App im Gerätelog. Es wird nur noch der Fehlercode notiert
 
 ## [2.3.1] - 2026-09-23
 

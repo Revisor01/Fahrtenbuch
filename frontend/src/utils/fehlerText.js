@@ -18,6 +18,14 @@ export default function fehlerText(error, fallback = 'Das hat nicht geklappt.') 
     if (typeof erster?.message === 'string') return erster.message;
   }
 
+  // Zeitgrenze erreicht (axios.defaults.timeout in api/client.js). Das ist
+  // etwas anderes als „keine Verbindung": Der Server ist erreichbar, hat aber
+  // nicht rechtzeitig geantwortet. Ein Hinweis auf die Internetverbindung
+  // waere hier irrefuehrend.
+  if (error?.code === 'ECONNABORTED' || error?.code === 'ETIMEDOUT') {
+    return 'Der Server antwortet nicht. Bitte erneut versuchen.';
+  }
+
   // Netzwerkfehler: keine Antwort erhalten
   if (error?.request && !error?.response) {
     return 'Keine Verbindung zum Server. Bitte Internetverbindung prüfen.';

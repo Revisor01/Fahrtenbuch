@@ -343,7 +343,11 @@ function AppProvider({ children }) {
       fetchCurrentUser();
       setIsLoggedIn(true);
     } catch (error) {
-      console.error('Login failed:', error);
+      // Bewusst nur der Status: Ein AxiosError traegt error.config.data —
+      // bei der Anmeldung also Benutzername UND Passwort im Klartext. In der
+      // App landet console.error im Geraetelog (Console.app, adb logcat,
+      // sysdiagnose), im Browser in der Konsole.
+      console.error('Anmeldung fehlgeschlagen:', error.response?.status || error.code || 'Netzfehler');
       throw error;
     }
   };

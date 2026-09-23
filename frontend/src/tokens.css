@@ -18,7 +18,7 @@
   /* ---------- Text ---------- */
   --text:        #08201F;  /* AA auf --bg = 15.1:1 */
   --text-2:      #47605F;  /* AA = 7.2:1 */
-  --text-3:      #6E8685;  /* nur Labels ≥12px/700, AA = 4.6:1 */
+  --text-3:      #5A7271;  /* AA = 5.15:1 auf --surface (nachgerechnet 23.09.) */
 
   /* ---------- Marke: Petrol ---------- */
   --brand:        #0F5257;
