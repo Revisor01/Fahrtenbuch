@@ -31,6 +31,16 @@ function ermittleStartwert() {
 let apiBaseUrl = ermittleStartwert();
 axios.defaults.baseURL = apiBaseUrl;
 
+// Zeitgrenze fuer JEDE Anfrage. Ohne sie bleibt ein Request bei haengender
+// Verbindung minutenlang offen: Das Erfassungs-Sheet steht auf „Speichert …",
+// optimistisch angelegte Fahrten bleiben gesperrt in der Liste, und der
+// Nutzer kann nur schliessen — und verliert die Eingabe.
+//
+// 20 s statt 15: Der PDF-Export braucht auf dem Server gemessene ~4,3 s, bei
+// mehreren Traegern hintereinander mehr. Zu knapp gesetzt bricht die
+// Zeitgrenze einen Export ab, der noch laeuft.
+axios.defaults.timeout = 20000;
+
 export function getApiBaseUrl() {
   return apiBaseUrl;
 }
