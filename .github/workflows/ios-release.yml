@@ -184,6 +184,26 @@ jobs:
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        # set -e ist hier zwingend: Ohne das meldete der Schritt Erfolg,
+        # obwohl altool mit Netzwerk-Timeouts abbrach (Lauf 35844707667 war
+        # gruen, Build 30 kam nie in ASC an).
+        #
+        # Drei Versuche: Der Upload laeuft ueber Apples Content-Delivery und
+        # laeuft dort gelegentlich in -1001 (request timed out) — ein
+        # einzelner Abbruch heisst nicht, dass etwas falsch konfiguriert ist.
         run: |
-          xcrun altool --upload-app -f build/export/App.ipa -t ios \
-            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          set -e
+          for versuch in 1 2 3; do
+            echo "--- Upload-Versuch $versuch von 3 ---"
+            if xcrun altool --upload-app -f build/export/App.ipa -t ios \
+                 --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"; then
+              echo "Upload erfolgreich."
+              exit 0
+            fi
+            if [ "$versuch" -lt 3 ]; then
+              echo "Fehlgeschlagen, neuer Versuch in 60 s."
+              sleep 60
+            fi
+          done
+          echo "Upload nach drei Versuchen fehlgeschlagen."
+          exit 1
