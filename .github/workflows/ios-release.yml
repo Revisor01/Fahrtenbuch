@@ -1,0 +1,185 @@
+name: iOS Release Build
+
+# Baut das iOS-Release auf einem GitHub-Runner mit RELEASE-macOS und laedt es
+# zu App Store Connect hoch (TestFlight).
+#
+# Warum nicht lokal: Builds von Beta-macOS-Maschinen lehnt Apple mit
+# ITMS-90111 ab (Beta-Host-Stempel im Binary). Simons Entwickler-Mac laeuft
+# auf macOS-Beta — deshalb baut die CI. Uebernommen aus Konfi-Quest, wo
+# genau das die Ursache war.
+#
+# Version und Build-Nummer stehen in frontend/ios/App/App.xcodeproj
+# (MARKETING_VERSION / CURRENT_PROJECT_VERSION) und werden VOR dem Start
+# hier im Repo gesetzt und committet — der Workflow zaehlt nicht selbst hoch,
+# damit die hochgeladene Nummer immer einem Commit entspricht.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-upload:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Neuestes stabiles Xcode waehlen
+        run: |
+          set -o pipefail
+          # Beta-Installationen ausschliessen — genau deren Stempel verursachen ITMS-90111.
+          #
+          # Sortiert wird nach der Versionsnummer allein, nicht nach dem ganzen
+          # Pfad: Bei gemischten Staenden kann ein naives `sort -V` ueber den
+          # vollen Dateinamen die falsche Fassung waehlen (Hinweis aus
+          # moin-kark). Hier zuerst die Nummer herausloesen, sortieren, dann
+          # den Pfad wieder zusammensetzen.
+          XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null \
+            | grep -iv beta \
+            | sed 's#^/Applications/Xcode_##; s#\.app$##' \
+            | sort -V | tail -1)
+          if [ -n "$XCODE" ]; then
+            XCODE="/Applications/Xcode_${XCODE}.app"
+          else
+            XCODE=/Applications/Xcode.app
+          fi
+          echo "Verwende: $XCODE"
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+          xcodebuild -version
+
+      - name: Node einrichten
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Web-Build + Capacitor-Sync
+        working-directory: frontend
+        # Die Laufzeit-Konfiguration (API-Basis, Titel) kommt in dieser App
+        # NICHT aus Build-Variablen, sondern aus public/config.js bzw. der
+        # Instanzwahl beim ersten Start. Hier ist deshalb nichts zu setzen.
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          npx cap sync ios
+
+      - name: Version und Build-Nummer pruefen
+        working-directory: frontend/ios/App
+        # VOR dem Archiv pruefen, nicht danach: Apple lehnt ein falsches
+        # Versionsformat erst beim Upload ab — das kostet den ganzen Lauf.
+        # Ausserdem muessen beide Build-Konfigurationen (Debug/Release)
+        # denselben Wert tragen, sonst laedt man eine andere Nummer hoch als
+        # die, die im Repo steht.
+        run: |
+          set -o pipefail
+          VERSION=$(grep -m1 'MARKETING_VERSION' App.xcodeproj/project.pbxproj | sed 's/.*= *//; s/;//')
+          BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' App.xcodeproj/project.pbxproj | sed 's/.*= *//; s/;//')
+          echo "Version: $VERSION, Build: $BUILD"
+
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+            echo "Version '$VERSION' passt nicht zu Apples Format (x.y oder x.y.z)."
+            exit 1
+          fi
+          if ! echo "$BUILD" | grep -Eq '^[0-9]+$'; then
+            echo "Build-Nummer '$BUILD' ist nicht rein numerisch."
+            exit 1
+          fi
+
+          # Alle Vorkommen muessen uebereinstimmen — sonst baut Release mit
+          # einem anderen Wert als erwartet.
+          if [ "$(grep -c "MARKETING_VERSION = $VERSION;" App.xcodeproj/project.pbxproj)" \
+             != "$(grep -c 'MARKETING_VERSION' App.xcodeproj/project.pbxproj)" ]; then
+            echo "MARKETING_VERSION steht nicht ueberall auf $VERSION."
+            grep -n 'MARKETING_VERSION' App.xcodeproj/project.pbxproj
+            exit 1
+          fi
+          if [ "$(grep -c "CURRENT_PROJECT_VERSION = $BUILD;" App.xcodeproj/project.pbxproj)" \
+             != "$(grep -c 'CURRENT_PROJECT_VERSION' App.xcodeproj/project.pbxproj)" ]; then
+            echo "CURRENT_PROJECT_VERSION steht nicht ueberall auf $BUILD."
+            grep -n 'CURRENT_PROJECT_VERSION' App.xcodeproj/project.pbxproj
+            exit 1
+          fi
+          echo "Version und Build-Nummer sind stimmig."
+
+      - name: Signing-Keychain einrichten
+        env:
+          P12_BASE64: ${{ secrets.IOS_DIST_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+        run: |
+          echo "$P12_BASE64" | base64 --decode > dist.p12
+          security create-keychain -p ci-build build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ci-build build.keychain
+          security set-keychain-settings -t 3600 build.keychain
+          security import dist.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k ci-build build.keychain >/dev/null
+          rm dist.p12
+
+      - name: ASC-API-Key ablegen
+        env:
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+
+      - name: Archiv bauen
+        working-directory: frontend/ios/App
+        # -project, nicht -workspace: Diese App bindet die Capacitor-Plugins
+        # ueber Swift Package Manager ein (CapApp-SPM), es gibt kein Podfile
+        # und damit auch keinen Workspace.
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -o pipefail
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/App.xcarchive archive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" | tail -40
+
+      - name: IPA exportieren
+        working-directory: frontend/ios/App
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -o pipefail
+          cat > ExportOptions-ci.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>destination</key><string>export</string>
+            <key>method</key><string>app-store-connect</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>stripSwiftSymbols</key><true/>
+            <key>teamID</key><string>J459G9CJT5</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive -archivePath build/App.xcarchive \
+            -exportPath build/export -exportOptionsPlist ExportOptions-ci.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" | tail -10
+
+      - name: Zu App Store Connect hochladen
+        working-directory: frontend/ios/App
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          xcrun altool --upload-app -f build/export/App.ipa -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
