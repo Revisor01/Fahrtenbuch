@@ -8,11 +8,15 @@ import { ladeAnlaesse, legeAnlassAn } from '../api/anlaesse';
 import {
   SCHLUESSEL_TOKEN,
   SCHLUESSEL_USER,
+  SCHLUESSEL_INSTANZ,
   leseWert,
   schreibeWert,
   loescheWert,
+  loescheAnmeldung,
+  leseAnmeldungFuer,
   migriereAusLocalStorage
 } from '../utils/tokenSpeicher';
+import { getApiBaseUrl } from '../api/client';
 
 // Header, ueber den der Server ein erneuertes Token zurueckgibt. Axios
 // normalisiert Header-Namen auf Kleinbuchstaben.
@@ -218,8 +222,15 @@ function AppProvider({ children }) {
       // Speicher uebernehmen (nur nativ, im Web ein No-Op).
       await migriereAusLocalStorage();
 
-      const gespeicherterToken = await leseWert(SCHLUESSEL_TOKEN);
-      const gespeicherterUser = await leseWert(SCHLUESSEL_USER);
+      // Die Anmeldung nur uebernehmen, wenn sie zur aktuell gewaehlten
+      // Instanz gehoert. Sonst wuerde das Token von Kirchenkreis A an Server
+      // B gehen — siehe SCHLUESSEL_INSTANZ in utils/tokenSpeicher.js.
+      const anmeldung = await leseAnmeldungFuer(getApiBaseUrl());
+      if (anmeldung.verworfen) {
+        console.warn('Gespeicherte Anmeldung gehoerte zu einem anderen Kirchenkreis und wurde verworfen.');
+      }
+      const gespeicherterToken = anmeldung.token;
+      const gespeicherterUser = anmeldung.user ? JSON.stringify(anmeldung.user) : null;
       // Ab hier steht die Antwort fest — die Notbremse darf nicht mehr
       // dazwischenfunken.
       speicherHatGeantwortet = true;
@@ -296,6 +307,7 @@ function AppProvider({ children }) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${erneuert}`;
           setToken(erneuert);
           schreibeWert(SCHLUESSEL_TOKEN, erneuert);
+          schreibeWert(SCHLUESSEL_INSTANZ, String(getApiBaseUrl() || ''));
         }
         return response;
       },
@@ -336,6 +348,11 @@ function AppProvider({ children }) {
       // bereits gesetzt. Wartete die Anmeldung darauf, bliebe sie bei einem
       // stockenden Systemspeicher haengen und der Knopf taete scheinbar nichts.
       schreibeWert(SCHLUESSEL_TOKEN, token);
+      // Festhalten, zu welcher Instanz diese Anmeldung gehoert. Ohne die
+      // Notiz wuerde sie beim naechsten Start als "fremd" verworfen — und
+      // ohne die Pruefung ginge das Token bei einem Wechsel an den falschen
+      // Server (siehe utils/tokenSpeicher.js).
+      schreibeWert(SCHLUESSEL_INSTANZ, String(getApiBaseUrl() || ''));
       // Ohne await: Der Effekt auf `token` laedt die Nutzerdaten ohnehin.
       // Wurde hier zusaetzlich gewartet, lief die Anfrage doppelt und die
       // Anmeldung stand solange still — auf dem Geraet spuerbar als
@@ -365,10 +382,23 @@ function AppProvider({ children }) {
     // Der Header muss mit fallen, sonst schickt der naechste Request noch den
     // Token des abgemeldeten Kontos mit.
     delete axios.defaults.headers.common['Authorization'];
-    Promise.all([
-      loescheWert(SCHLUESSEL_TOKEN),
-      loescheWert(SCHLUESSEL_USER)
-    ]).catch((error) => {
+
+    // Alle geladenen Daten mit leeren. Bisher blieben sie stehen: Nach einem
+    // Wechsel des Kirchenkreises zeigten Dashboard, Fahrtenliste und die
+    // Erfassung so lange die Daten von A, bis B geantwortet hatte — und
+    // dauerhaft, wenn B's Abruf scheiterte (die catch-Zweige setzen nichts
+    // zurueck). Damit saehe man unter der Anmeldung von B die Fahrten,
+    // Adressen und Traeger eines anderen Kirchenkreises.
+    setOrte([]);
+    setFahrten([]);
+    setMonthlyData([]);
+    setDistanzen([]);
+    setAbrechnungstraeger([]);
+    setSummary({});
+    setFavoriten([]);
+    setAnlaesse([]);
+
+    loescheAnmeldung().catch((error) => {
       console.error('Abmeldedaten konnten nicht entfernt werden:', error);
     });
   };
