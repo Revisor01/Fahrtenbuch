@@ -5,7 +5,7 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
-## [Unreleased] - 2.3.2
+## [2.3.2] - 2026-09-24
 
 ### Hinzugefügt
 - Langes Tippen auf das App-Symbol bietet jetzt auch auf Android „Fahrt erfassen“ und „Letzte Fahrt wiederholen“ an — bisher gab es das nur auf dem iPhone
