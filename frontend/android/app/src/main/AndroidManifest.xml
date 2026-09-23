@@ -30,6 +30,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Kurzbefehle beim langen Tippen aufs App-Symbol. Gegenstueck zu
+                 UIApplicationShortcutItems auf iOS; die Typ-Kennungen sind
+                 dieselben, damit das JavaScript auf beiden Plattformen
+                 denselben Wert sieht. -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/kurzbefehle" />
+
         </activity>
 
         <provider

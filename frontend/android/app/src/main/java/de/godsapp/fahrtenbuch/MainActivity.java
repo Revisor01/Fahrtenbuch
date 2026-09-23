@@ -10,6 +10,7 @@ public class MainActivity extends BridgeActivity {
         // Eigene Plugins muessen VOR super.onCreate registriert sein, sonst
         // baut die Bruecke sie nicht mit auf.
         registerPlugin(MaterialNavPlugin.class);
+        registerPlugin(KurzbefehlePlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

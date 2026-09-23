@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Kurzbefehle beim langen Tippen auf das App-Symbol.
+
+  Gegenstueck zu UIApplicationShortcutItems in ios/App/App/Info.plist — gleiche
+  Eintraege, gleiche Reihenfolge, gleiche Typ-Kennungen, damit sich beide
+  Plattformen gleich anfuehlen. Die Kennung reist als Intent-Action und wird in
+  KurzbefehlePlugin.java an die WebView weitergereicht.
+
+  Statisch statt dynamisch (ShortcutManager): Die beiden Eintraege aendern sich
+  nie, und statische Kurzbefehle stehen schon vor dem ersten App-Start bereit.
+
+  Ab Android 7.1 (API 25); minSdk ist 24, dort werden sie schlicht ignoriert.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="erfassen"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/kurzbefehl_erfassen_kurz"
+        android:shortcutLongLabel="@string/kurzbefehl_erfassen_lang">
+        <intent
+            android:action="de.godsapp.fahrtenbuch.erfassen"
+            android:targetPackage="de.godsapp.fahrtenbuch"
+            android:targetClass="de.godsapp.fahrtenbuch.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="wiederholen"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/kurzbefehl_wiederholen_kurz"
+        android:shortcutLongLabel="@string/kurzbefehl_wiederholen_lang">
+        <intent
+            android:action="de.godsapp.fahrtenbuch.wiederholen"
+            android:targetPackage="de.godsapp.fahrtenbuch"
+            android:targetClass="de.godsapp.fahrtenbuch.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+</shortcuts>
