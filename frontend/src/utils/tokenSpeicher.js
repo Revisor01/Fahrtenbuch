@@ -17,6 +17,22 @@ import { IST_NATIVE } from './plattform';
 export const SCHLUESSEL_TOKEN = 'token';
 export const SCHLUESSEL_USER = 'user';
 
+// Zu welcher Instanz die gespeicherte Anmeldung gehoert.
+//
+// Ohne diese Notiz war das Token an keinen Kirchenkreis gebunden: Es lag im
+// Systemspeicher, die Server-Adresse daneben in localStorage, und nichts
+// verband beides. Nach einem Wechsel schickte die App das Token von
+// Kirchenkreis A an Server B — als Bearer-Token, zusammen mit rund 30
+// weiteren Abrufen. B antwortet zwar 401, hat es dann aber in seinen
+// Protokollen: ein bei A bis zu 14 Tage gueltiges Token liegt beim Betreiber
+// eines fremden Kirchenkreises.
+//
+// Verschaerfend: Der iOS-Keychain ueberlebt das Loeschen der App. Wer sie
+// entfernt, um sich vor der Weitergabe des Geraets "abzumelden", war nach
+// einer Neuinstallation wieder angemeldet — localStorage ist dann leer, der
+// Keychain nicht.
+export const SCHLUESSEL_INSTANZ = 'tokenInstanz';
+
 // Das Plugin wird erst beim ersten nativen Zugriff geladen. Ein statischer
 // Import wuerde @capacitor/core samt Plugin-Registry fest ins Web-Bundle
 // ziehen, wo davon nichts gebraucht wird.
@@ -209,4 +225,79 @@ export async function migriereAusLocalStorage() {
       console.error('Anmeldedaten konnten nicht uebernommen werden:', error);
     }
   }
+}
+
+// Anmeldung nur herausgeben, wenn sie zur aktuell gewaehlten Instanz gehoert.
+//
+// Passt sie nicht — Kirchenkreis gewechselt, App neu installiert, Token aus
+// einem Backup —, wird sie geloescht statt benutzt. Lieber eine Anmeldemaske
+// als ein fremdes Token an einen fremden Server.
+//
+// `aktuelleInstanz` kommt als Parameter herein, damit dieses Modul nichts aus
+// api/client importieren muss (das importiert seinerseits axios und wuerde
+// den Startpfad unnoetig aufblaehen).
+export async function leseAnmeldungFuer(aktuelleInstanz) {
+  let notiert = await leseWert(SCHLUESSEL_INSTANZ);
+  const token = await leseWert(SCHLUESSEL_TOKEN);
+
+  if (!token) return { token: null, user: null };
+
+  // Einmalige Nachruestung: Wer beim Update dieser Fassung angemeldet ist,
+  // hat noch keine Zuordnung — sie wurde ja gerade erst eingefuehrt. Diese
+  // Anmeldungen ohne Weiteres zu verwerfen, wuerde alle Nutzer:innen ohne
+  // Not aussperren. Die aktuell eingestellte Instanz ist in diesem Moment
+  // zwangslaeufig die richtige: Ein Wechsel meldet ab und loescht das Token,
+  // ein Token kann also nur von der gerade eingestellten Instanz stammen.
+  //
+  // Danach greift die Pruefung normal: Jede spaeter geschriebene Anmeldung
+  // traegt ihre Zuordnung, und eine fehlende bedeutet dann "fremd".
+  if (notiert === null || notiert === undefined) {
+    await schreibeWert(SCHLUESSEL_INSTANZ, String(aktuelleInstanz || ''));
+    notiert = String(aktuelleInstanz || '');
+  }
+
+  // Vergleich ohne abschliessenden Schraegstrich: '' und undefined sind
+  // dasselbe (Web-Fall, gleicher Host wie das Frontend).
+  const gleich = (a, b) =>
+    String(a || '').replace(/\/+$/, '') === String(b || '').replace(/\/+$/, '');
+
+  if (!gleich(notiert, aktuelleInstanz)) {
+    // Kein Sonderfall fuer "noch keine Notiz": Eine Anmeldung ohne Zuordnung
+    // stammt aus einer aelteren Fassung oder aus einem fremden Zustand — in
+    // beiden Faellen ist Neuanmelden der sichere Weg.
+    await Promise.all([
+      loescheWert(SCHLUESSEL_TOKEN),
+      loescheWert(SCHLUESSEL_USER),
+      loescheWert(SCHLUESSEL_INSTANZ),
+    ]).catch(() => {});
+    return { token: null, user: null, verworfen: true };
+  }
+
+  const rohUser = await leseWert(SCHLUESSEL_USER);
+  let user = null;
+  try {
+    user = rohUser ? JSON.parse(rohUser) : null;
+  } catch (error) {
+    console.error('Gespeicherte Nutzerdaten unlesbar, werden verworfen:', error);
+    await loescheWert(SCHLUESSEL_USER);
+  }
+  return { token, user };
+}
+
+// Anmeldung samt Zugehoerigkeit ablegen.
+export async function schreibeAnmeldung(token, user, instanz) {
+  await schreibeWert(SCHLUESSEL_TOKEN, token);
+  await schreibeWert(SCHLUESSEL_INSTANZ, String(instanz || ''));
+  if (user !== undefined) {
+    await schreibeWert(SCHLUESSEL_USER, JSON.stringify(user));
+  }
+}
+
+// Alles entfernen, was zu einer Anmeldung gehoert.
+export async function loescheAnmeldung() {
+  await Promise.all([
+    loescheWert(SCHLUESSEL_TOKEN),
+    loescheWert(SCHLUESSEL_USER),
+    loescheWert(SCHLUESSEL_INSTANZ),
+  ]);
 }
