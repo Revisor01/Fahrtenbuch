@@ -8,6 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased] - 2.3.2
 
 ### Hinzugefügt
+- Impressum und Datenschutzerklärung sind jetzt auch ohne Anmeldung erreichbar — über „Impressum & Datenschutz“ unter der Anmeldung und bei der Wahl des Kirchenkreises
 - Das eigene Konto lässt sich jetzt in den Einstellungen unter „Profil“ selbst löschen. Zur Bestätigung ist das Passwort nötig; danach sind Fahrten, Orte, Abrechnungsträger und Abrechnungen endgültig weg. Das letzte Administrator-Konto bleibt geschützt
 
 ### Behoben
