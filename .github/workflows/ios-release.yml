@@ -210,7 +210,10 @@ jobs:
           PYEOF
 
           JWT=$(cat /tmp/asc.jwt)
-          NAME="Fahrtenbuch AppStore"
+          # export, nicht nur setzen: Das Python-Skript unten liest den Namen
+          # ueber os.environ. Ohne export sieht es nur eine Shell-Variable und
+          # bricht mit KeyError ab (im Lauf 35961345562 passiert).
+          export NAME="Fahrtenbuch AppStore"
           PROFIL=$(curl -s -H "Authorization: Bearer $JWT" \
             "https://api.appstoreconnect.apple.com/v1/profiles?limit=200&fields%5Bprofiles%5D=name,profileContent")
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
