@@ -800,7 +800,14 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
   if (step === 1) {
     return (
-      <Sheet isOpen={isOpen} onClose={onClose} title="Wohin?">
+      <Sheet
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Wohin?"
+        // In Schritt 1 nur schuetzen, wenn schon ein Ziel gewaehlt ist —
+        // ein leeres Sheet darf man beilaeufig wegtippen.
+        schutz={!!zielOrtId || !!zielAdresse}
+      >
         {/* Datum zuerst — gleiche Reihenfolge wie im Bearbeiten-Formular */}
         <div className="erf-feld">
           <span className="erf-feld-label">Wann</span>
@@ -1008,7 +1015,18 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
   // Schritt 2 — Bestätigen
   return (
-    <Sheet isOpen={isOpen} onClose={onClose} ariaLabel="Fahrt bestätigen">
+    <Sheet
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="Fahrt bestätigen"
+      // Schritt 2 immer schuetzen: Hier stehen Ziel, Anlass, Kilometer und
+      // Mitfahrer. Ein Daumen aufs Overlay hat das bisher verworfen.
+      schutz
+      // Die Android-Zurueck-Taste (und Esc, und das Wischen) gehen von hier
+      // eine Ebene zurueck statt den ganzen Flow zu verwerfen — dasselbe,
+      // was der Zurueck-Pfeil im Sheet tut.
+      onZurueck={() => setStep(1)}
+    >
       {/* Zurück zur Zielauswahl. Vorher war der Klick auf die Route der
           einzige Weg — als Schaltfläche aber nicht erkennbar. */}
       <button type="button" className="erf-zurueck" onClick={() => setStep(1)}>

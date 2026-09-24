@@ -17,6 +17,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
 ### Behoben
+- Beim Erfassen genügte ein Tipp neben das Fenster, ein Wisch nach unten oder die Zurück-Taste, um alles Eingetippte zu verwerfen — ohne Nachfrage. Jetzt wird gefragt, und die Zurück-Taste führt aus dem Bestätigen-Schritt zurück zur Zielauswahl, statt die Erfassung abzubrechen
 - Ließen sich die Fahrten nicht laden — etwa im Funkloch —, stand in der Liste „Noch keine Fahrten in diesem Monat", als wäre nichts erfasst. Wer die Fahrten daraufhin neu eintrug, rechnete sie doppelt ab. Jetzt steht dort, dass das Laden fehlgeschlagen ist, mit Knopf „Erneut versuchen"
 - Lief die Anmeldung ab, stand man ohne Erklärung wieder vor der Anmeldemaske — mitten im Formular. Jetzt erscheint der Hinweis „Die Sitzung ist abgelaufen". Ein offenes Erfassungs- oder Statusfenster schließt sich dabei, statt über der Anmeldung stehen zu bleiben
 - Trat beim Anzeigen ein Fehler auf, blieb der Bildschirm in manchen Bereichen einfach weiß — etwa auf der Seite mit Impressum und Datenschutz, bei der Erfassung oder nach dem Öffnen eines Links aus einer E-Mail. Jetzt erscheint überall eine Meldung mit dem Knopf „Neu laden"
