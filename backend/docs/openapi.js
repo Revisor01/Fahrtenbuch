@@ -321,8 +321,17 @@ const paths = {
   '/api/fahrten/monthly-summary': {
     get: {
       tags: ['Auswertungen'], summary: 'Monatsübersicht über alle Monate',
+      description: 'Liefert jeden Monat mit mindestens einer Fahrt. Seit dem 24.09.2026 zusätzlich `abrechnungsStatus`, `kmProTraeger`, `fahrtenCount`, `totalKm` und `gesamtErstattung` je Monat — die bisherigen Felder sind unverändert. Damit deckt ein Abruf ab, wofür die Oberfläche vorher 28 Monatsberichte einzeln geholt hat.',
       responses: {
-        200: ANTWORT('Je Monat Kilometer und Erstattung pro Träger', [{ yearMonth: '2026-08', erstattungen: { 1: { kilometer: 124.5, erstattung: 37.35 } } }]),
+        200: ANTWORT('Je Monat Kilometer und Erstattung pro Träger', [{
+          yearMonth: '2026-08',
+          erstattungen: { 1: { kilometer: 124.5, erstattung: 37.35 }, mitfahrer: { kilometer: 40, erstattung: 2 } },
+          abrechnungsStatus: { 1: { eingereicht_am: '2026-09-05', erhalten_am: null } },
+          kmProTraeger: { 1: 124.5 },
+          fahrtenCount: 12,
+          totalKm: 124.5,
+          gesamtErstattung: 39.35,
+        }]),
         401: FEHLER[401], 404: MELDUNG('Keine Daten für die monatliche Zusammenfassung gefunden'), 500: FEHLER[500],
       },
     },

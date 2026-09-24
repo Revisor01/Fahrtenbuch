@@ -451,22 +451,45 @@ exports.getMonthlySummary = async (req, res) => {
     const saetzeProTraeger = await ladeErstattungssaetze(userId);
 
     // Gruppiere nach Monaten
+    // Status aller Monate in einer Abfrage statt einer je Monat.
+    const statusNachMonat = await Abrechnung.getStatusNachMonat(userId);
+
     const summary = fahrten.reduce((acc, fahrt) => {
       if (!acc[fahrt.yearMonth]) {
         acc[fahrt.yearMonth] = {
           yearMonth: fahrt.yearMonth,
-          erstattungen: {}
+          erstattungen: {},
+          // Zusaetzlich zu `erstattungen`, damit die Monatsuebersicht im
+          // Frontend nicht mehr 28 Einzelberichte abrufen muss. Die
+          // bisherigen Felder bleiben unveraendert — ein Client, der nur
+          // `yearMonth` und `erstattungen` liest, merkt nichts davon.
+          abrechnungsStatus: statusNachMonat[fahrt.yearMonth] || {},
+          kmProTraeger: {},
+          fahrtenCount: 0,
+          totalKm: 0,
+          gesamtErstattung: 0,
         };
       }
-      const monat = acc[fahrt.yearMonth].erstattungen;
+      const eintrag = acc[fahrt.yearMonth];
+      const monat = eintrag.erstattungen;
+
+      eintrag.fahrtenCount += 1;
+      const km = Number(fahrt.kilometer || 0);
+      eintrag.totalKm += km;
+      if (fahrt.abrechnung !== null && fahrt.abrechnung !== undefined) {
+        const schluessel = String(fahrt.abrechnung);
+        eintrag.kmProTraeger[schluessel] = (eintrag.kmProTraeger[schluessel] || 0) + km;
+      }
 
       if (!monat[fahrt.abrechnung]) {
         monat[fahrt.abrechnung] = { kilometer: 0, erstattung: 0 };
       }
       monat[fahrt.abrechnung].kilometer += Number(fahrt.kilometer || 0);
-      monat[fahrt.abrechnung].erstattung += berechneFahrtErstattung(
+      const fahrtErstattung = berechneFahrtErstattung(
         saetzeProTraeger, fahrt.abrechnung, fahrt.kilometer, fahrt.datum
       );
+      monat[fahrt.abrechnung].erstattung += fahrtErstattung;
+      eintrag.gesamtErstattung += fahrtErstattung;
 
       const mitfahrerErstattung = berechneMitfahrerErstattung(
         saetzeProTraeger, fahrt.mitfahrer_count, fahrt.kilometer, fahrt.datum
@@ -477,6 +500,7 @@ exports.getMonthlySummary = async (req, res) => {
         }
         monat.mitfahrer.kilometer += Number(fahrt.kilometer || 0);
         monat.mitfahrer.erstattung += mitfahrerErstattung;
+        eintrag.gesamtErstattung += mitfahrerErstattung;
       }
 
       return acc;

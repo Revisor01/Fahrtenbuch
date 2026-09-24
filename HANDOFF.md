@@ -33,6 +33,7 @@ alten Liste").
 | `342e93c` | 14, 12 | Beschriftungen, Trefferflächen, Healthcheck, Favorit |
 | `5c40be6` | 15 | Zugangsdaten aus dem Protokoll, toter Code raus |
 | `9bfd1f7` | 11, 15 | API-Schlüssel gehasht (Migration 0015), Profilname |
+| `0abef7e` | 12 | Monatsübersicht in einem Abruf: App-Start 35 → 8 Anfragen |
 
 Dazu: Git-Tags `v2.3.1` und `v2.3.2` nachgetragen (annotiert, auf ihren
 Release-Commits; das Repo nutzt entgegen der globalen Notiz ein
@@ -46,6 +47,7 @@ Release-Commits; das Repo nutzt entgegen der globalen Notiz ein
   Sprung.
 - **Nutzer-Enumeration**: Zeitunterschied 53,7 → 0,2 ms.
 - **npm audit** (Backend): 11 → 5 Befunde.
+- **App-Start**: 35 → 8 Anfragen (die Monatsübersicht allein 28 → 1).
 - **Sicherheits-Kopfzeilen**: an allen sieben Pfaden gegen ein echtes
   nginx-Image geprüft, bei 200 wie bei 404, Cache-Header unverändert.
 - **Healthcheck**: „Access denied" bei Exit-Code 0 nachgestellt — bestätigt.
@@ -132,12 +134,6 @@ Beim Nachprüfen hat sich einiges anders dargestellt:
 
 ### Bewusst verschoben
 
-- **28 parallele Monatsabrufe beim App-Start** (`fetchMonthlyData`). Die
-  vorhandene Sammel-Route `/api/fahrten/monthly-summary` liefert weder
-  `abrechnungsStatus` noch `kmProTraeger` noch `fahrtenCount`. Sie zu
-  erweitern heißt, eine Antwortform zu ändern, die ausgelieferte Apps
-  lesen — das gehört in einen eigenen Schritt mit Blick auf die Apps im
-  Store. Begründung steht im Kopf von `test/requestSturm.test.js`.
 - **`fahrten.abrechnung` VARCHAR ohne Fremdschlüssel** (6 Fahrten zeigen auf
   den gelöschten Träger 19). Simons Entscheidung vom 24.09.: Daten bleiben.
 - **`/var/lib/docker` 46 von 47 GB** — `docker system df` ansehen. Nicht
