@@ -964,8 +964,9 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     >
     <div className="set-sheet-form">
     <div>
-    <label className="form-label">Adresse</label>
+    <label className="form-label" htmlFor="ort-adresse">Adresse</label>
     <input
+    id="ort-adresse"
     type="text"
     value={ortSpeichernModal.adresse}
     readOnly
@@ -973,8 +974,9 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     />
     </div>
     <div>
-    <label className="form-label">Name des Ortes</label>
+    <label className="form-label" htmlFor="ort-name">Name des Ortes</label>
     <input
+    id="ort-name"
     type="text"
     value={ortSpeichernModal.name}
     onChange={(e) => setOrtSpeichernModal({...ortSpeichernModal, name: e.target.value})}
@@ -989,8 +991,9 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
 
     {/* Ortstyp-Auswahl hinzufügen */}
     <div>
-    <label className="form-label">Art des Ortes</label>
+    <label className="form-label" htmlFor="ort-typ">Art des Ortes</label>
     <select
+    id="ort-typ"
     value={ortSpeichernModal.ortTyp}
     onChange={(e) => setOrtSpeichernModal({...ortSpeichernModal, ortTyp: e.target.value})}
     className="form-select"

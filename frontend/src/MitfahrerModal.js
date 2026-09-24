@@ -34,11 +34,15 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     title={readOnly ? 'Mitfahrer:in' : (initialData ? 'Mitfahrer:in bearbeiten' : 'Mitfahrer:in hinzufügen')}
     >
     <form onSubmit={handleSubmit} className="set-sheet-form">
+    {/* htmlFor/id verbinden Beschriftung und Feld. Ohne sie liest ein
+        Screenreader nur „Eingabefeld", und ein Tipp auf die Beschriftung
+        setzt den Fokus nicht ins Feld. */}
     <div>
-    <label className="form-label">
+    <label className="form-label" htmlFor="mitfahrer-name">
     Name
     </label>
     <input
+    id="mitfahrer-name"
     type="text"
     value={name}
     onChange={(e) => setName(e.target.value)}
@@ -49,10 +53,11 @@ function MitfahrerModal({ isOpen, onClose, onSave, initialData, readOnly = false
     </div>
     
     <div>
-    <label className="form-label">
+    <label className="form-label" htmlFor="mitfahrer-arbeitsstaette">
     Arbeitsstätte
     </label>
     <input
+    id="mitfahrer-arbeitsstaette"
     type="text"
     value={arbeitsstaette}
     onChange={(e) => setArbeitsstaette(e.target.value)}

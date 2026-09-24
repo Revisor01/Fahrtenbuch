@@ -84,7 +84,9 @@ services:
         condition: service_healthy
 
   db:
-    image: mysql:8
+    # Auf 8.4 festgelegt statt `mysql:8`: Der bewegliche Tag holt beim
+    # naechsten Pull ungefragt den naechsten Hauptstand ins Produktionssystem.
+    image: mysql:8.4
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
       MYSQL_DATABASE: ${DB_NAME}
@@ -104,7 +106,18 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --log_bin_trust_function_creators=1
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # Mit Zugangsdaten. Ohne sie antwortete mysqladmin „Access denied" —
+      # und beendete sich trotzdem mit 0 (nachgemessen). Der Container galt
+      # damit als gesund, sobald das Netz stand, nicht wenn die Datenbank
+      # bereit war. Das Backend startet ueber depends_on: service_healthy
+      # genau darauf hin.
+      #
+      # Nebenwirkung der abgewiesenen Versuche: Sie zaehlen als
+      # Aborted_connects — daher die 88.046 von 88.352 in der Statistik.
+      #
+      # $$ statt $: Compose ersetzt sonst die Variable schon beim Lesen der
+      # Datei, statt sie an den Container weiterzureichen.
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
       timeout: 5s
       retries: 10
     restart: unless-stopped

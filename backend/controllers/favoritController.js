@@ -103,6 +103,7 @@ exports.executeFavorit = async (req, res) => {
     const fahrtId = await Fahrt.create(fahrtData, null, req.user.id);
 
     // Rueckfahrt anlegen wenn gewuenscht
+    let rueckfahrtFehlt = false;
     if (mitRueckfahrt) {
       try {
         const rueckKilometer = await getDistance(favorit.nach_ort_id, favorit.von_ort_id, req.user.id);
@@ -120,13 +121,24 @@ exports.executeFavorit = async (req, res) => {
         // Als Paar verknuepfen — beide Fahrten gehoeren zusammen
         await Fahrt.create(rueckfahrtData, null, req.user.id, [], fahrtId);
       } catch (rueckError) {
+        // Nicht verschweigen: Bisher meldete die Antwort trotzdem „Hin- und
+        // Rueckfahrt erstellt", obwohl nur die Hinfahrt stand. Der Nutzer
+        // hielt die Rueckfahrt fuer erfasst und rechnete sie nie ab.
         console.error('Fehler beim Erstellen der Rueckfahrt:', rueckError);
+        rueckfahrtFehlt = true;
       }
     }
 
-    const message = mitRueckfahrt
-      ? 'Hin- und Rueckfahrt aus Favorit erstellt'
-      : 'Fahrt aus Favorit erfolgreich erstellt';
+    // Die Antwortform bleibt { id, message } — die Apps auf den Geraeten
+    // lesen genau diese beiden Felder. Nur der Text sagt jetzt die Wahrheit.
+    let message;
+    if (!mitRueckfahrt) {
+      message = 'Fahrt aus Favorit erfolgreich erstellt';
+    } else if (rueckfahrtFehlt) {
+      message = 'Hinfahrt erstellt — die Rueckfahrt konnte nicht angelegt werden';
+    } else {
+      message = 'Hin- und Rueckfahrt aus Favorit erstellt';
+    }
     res.status(201).json({ id: fahrtId, message });
   } catch (error) {
     console.error('Fehler beim Ausfuehren des Favoriten:', error);

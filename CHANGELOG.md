@@ -22,6 +22,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
 ### Behoben
+- Beim Anlegen einer Fahrt aus einem Favoriten mit Rückfahrt meldete die App „Hin- und Rückfahrt erstellt", auch wenn die Rückfahrt gescheitert war. Sie fehlte dann unbemerkt in der Abrechnung. Jetzt steht in der Meldung, was wirklich angelegt wurde
+- Die kleinen Knöpfe in den Listen — Sortiergriff, Bearbeiten, Löschen und der Haken auf der Startseite — ließen sich auf dem Handy schwer treffen. Die Tippfläche ist jetzt so groß wie vorgeschrieben, das Aussehen bleibt gleich
+- Beim Erfassen von Mitfahrer:innen und beim Speichern eines Ortes waren die Eingabefelder nicht mit ihren Beschriftungen verbunden. Die Sprachausgabe las nur „Eingabefeld", und ein Tipp auf die Beschriftung setzte den Cursor nicht ins Feld
 - Beim Ändern der eigenen E-Mail-Adresse über die Benutzerverwaltung wurde nicht geprüft, ob die Adresse schon einem anderen Konto gehört. Die andere Person hätte darüber den Zugang verlieren können. Jetzt wird die Änderung abgewiesen — wie es beim Bearbeiten des eigenen Profils schon war
 - Beim schnellen Wechsel zwischen Monaten konnten die Fahrten des zuvor gewählten Monats unter der neuen Monatsüberschrift landen — mit falscher Summe. Es zählt jetzt immer die zuletzt gestellte Abfrage
 - Ein Doppelklick auf „Speichern" legte einen Mitfahrer-Satz oder einen Favoriten zweimal an. Beim Mitfahrer-Satz entschied danach der Zufall, welcher Betrag für die Abrechnung galt. Der Knopf sperrt jetzt während des Speicherns, und für Mitfahrer-Sätze gilt: ein Satz je Stichtag. Vorhandene Doppeleinträge werden beim Update bereinigt — der zuletzt gespeicherte bleibt
