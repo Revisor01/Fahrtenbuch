@@ -678,7 +678,7 @@ exports.exportToExcel = async (req, res) => {
    return await sendeExcelAntwort(res, ergebnis);
  } catch (error) {
    console.error('Fehler beim Exportieren nach Excel:', error);
-   res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
+   res.status(500).json({ message: 'Fehler beim Exportieren nach Excel' });
  }
 };
 
@@ -700,7 +700,7 @@ exports.exportToExcelRange = async (req, res) => {
    return;
  } catch (error) {
    console.error('Fehler beim Exportieren nach Excel (Range):', error);
-   res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
+   res.status(500).json({ message: 'Fehler beim Exportieren nach Excel' });
  }
 };
 

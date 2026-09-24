@@ -273,6 +273,14 @@ exports.addErstattungssatz = async (req, res) => {
         
         res.status(201).json({ message: 'Erstattungssatz erfolgreich hinzugefügt' });
     } catch (error) {
+        // idx_traeger_datum laesst je Traeger und Stichtag nur einen Satz zu.
+        // Das ist ein Bedienfehler, kein Serverfehler — und die Oberflaeche
+        // hat dafuer eine eigene Meldung, die bisher nie ankam.
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({
+                message: 'Für dieses Datum existiert bereits ein Satz'
+            });
+        }
         console.error('Fehler beim Hinzufügen des Erstattungssatzes:', error);
         res.status(500).json({ message: 'Erstattungssatz konnte nicht hinzugefügt werden' });
     }

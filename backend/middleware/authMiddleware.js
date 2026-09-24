@@ -37,7 +37,12 @@ const authMiddleware = async (req, res, next) => {
   const token = authHeader.replace('Bearer ', '');
   
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // algorithms festnageln: Bei einem String-Secret ist der Verwechslungs-
+    // Angriff (RS256-Token gegen HS256-Pruefung) zwar nicht moeglich und
+    // jsonwebtoken >=9 lehnt `alg: none` ohnehin ab — aber die Annahme steht
+    // dann im Code und nicht nur in der Bibliotheksversion. Signiert wird in
+    // authController ohne Angabe, also bereits HS256.
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     
     // Lade aktuelle User-Daten aus der Datenbank
     const user = await User.findById(decoded.id);

@@ -115,7 +115,7 @@ exports.exportToPdf = async (req, res) => {
  } catch (error) {
    console.error('Fehler beim PDF-Export:', error);
    if (!res.headersSent) {
-     res.status(500).json({ message: 'Fehler beim PDF-Export', error: error.message });
+     res.status(500).json({ message: 'Fehler beim PDF-Export' });
    }
  }
 };
@@ -140,7 +140,7 @@ exports.exportToPdfRange = async (req, res) => {
  } catch (error) {
    console.error('Fehler beim PDF-Export (Range):', error);
    if (!res.headersSent) {
-     res.status(500).json({ message: 'Fehler beim PDF-Export', error: error.message });
+     res.status(500).json({ message: 'Fehler beim PDF-Export' });
    }
  }
 };

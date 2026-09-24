@@ -34,6 +34,23 @@ if (fehlend.length > 0) {
     process.exit(1);
 }
 
+// Ein kurzes JWT_SECRET laesst sich durchprobieren, und wer es hat, stellt
+// sich beliebige Anmeldungen aus.
+//
+// Bewusst nur eine Warnung, kein Abbruch: Was in der Produktion steht, ist
+// von hier aus nicht einsehbar. Ein process.exit() liesse den Server beim
+// naechsten Deploy einfach nicht mehr hochkommen — ein Ausfall als Antwort
+// auf ein Risiko, das seit Monaten besteht. Die Warnung steht im Log, das
+// Secret kann in Ruhe getauscht werden (das meldet alle Geraete einmal ab).
+const JWT_MINDESTLAENGE = 32;
+if (process.env.JWT_SECRET.length < JWT_MINDESTLAENGE) {
+    console.warn(
+        `WARNUNG: JWT_SECRET ist nur ${process.env.JWT_SECRET.length} Zeichen lang `
+        + `(empfohlen: mindestens ${JWT_MINDESTLAENGE}). Ein kurzes Secret laesst `
+        + 'sich durchprobieren. Ein Wechsel meldet alle Geraete einmal ab.'
+    );
+}
+
 // Hinter dem Reverse Proxy (Caddy) tragen alle Requests dieselbe Quell-IP.
 // Ohne trust proxy teilen sich alle Nutzenden einen Rate-Limit-Zaehler: 20
 // Fehlversuche eines Einzelnen sperren den Login fuer alle.
@@ -117,7 +134,7 @@ app.use(['/api-docs', '/api-docs.json'], helmet({
 dokuEinhaengen(app);
 
 app.use(helmet());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Define path to React build directory
 const reactBuildPath = path.join(__dirname, '../frontend/public');

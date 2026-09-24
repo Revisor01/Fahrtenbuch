@@ -105,8 +105,30 @@ const passwortLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Routen, die eine Mail an eine frei waehlbare Adresse schicken.
+//
+// `POST /api/users/resend-verification` nimmt den Empfaenger aus dem Rumpf,
+// nicht aus dem angemeldeten Konto. Bisher galt nur das allgemeine
+// Schreiblimit: 200 Mails in 5 Minuten an eine beliebige fremde Adresse —
+// abgeschickt vom Mailserver der Kirche, was dessen Ruf kostet. Jede Anfrage
+// legt zusaetzlich eine Zeile in email_verifications an.
+//
+// Pro Konto gezaehlt wie beim Passwortlimit: Der Versand setzt eine Anmeldung
+// voraus, und mehrere Nutzer:innen hinter demselben Anschluss sollen sich
+// nicht gegenseitig aussperren. Fuenf Mails in der Stunde decken jede echte
+// Nutzung ab — normal ist eine.
+const mailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  keyGenerator: (req) => (req.user?.id ? 'nutzer:' + req.user.id : ipKeyGenerator(req)),
+  message: { message: 'Zu viele E-Mails in kurzer Zeit. Bitte in einer Stunde erneut versuchen.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   apiLimiter,
+  mailLimiter,
   passwortLimiter,
   schreibLimiter,
   exportLimiter,

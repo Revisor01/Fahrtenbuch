@@ -7,7 +7,7 @@ const {
     requireAdminOrSelf
 } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
-const { resetLimiter, passwortLimiter } = require('../middleware/rateLimiter');
+const { resetLimiter, passwortLimiter, mailLimiter } = require('../middleware/rateLimiter');
 const { createUserSchema, updateUserSchema, resetPasswordRequestSchema, resetPasswordSchema, setPasswordSchema, verifyEmailSchema, resendVerificationSchema, changePasswordSchema } = require('../schemas/userSchemas');
 
 
@@ -21,7 +21,7 @@ router.post('/verify-email', resetLimiter, validate(verifyEmailSchema), userCont
 
 // Protected routes
 router.get('/me', authMiddleware, userController.getCurrentUser);
-router.post('/resend-verification', authMiddleware, validate(resendVerificationSchema), userController.resendVerification);
+router.post('/resend-verification', authMiddleware, mailLimiter, validate(resendVerificationSchema), userController.resendVerification);
 
 // Admin or self routes
 // passwortLimiter NACH authMiddleware: Er zaehlt pro Konto, und dafuer muss
