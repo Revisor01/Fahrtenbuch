@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
+import logFehler from '../../utils/logFehler';
 import { Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
@@ -145,7 +146,7 @@ function FavoritenBereich() {
             });
             toast.success('Favorit wiederhergestellt.');
           } catch (error) {
-            console.error('Fehler beim Wiederherstellen des Favoriten:', error);
+            logFehler('Fehler beim Wiederherstellen des Favoriten:', error);
             toast.error('Favorit konnte nicht wiederhergestellt werden.');
           }
         },

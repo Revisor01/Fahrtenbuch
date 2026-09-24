@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import logFehler from '../../utils/logFehler';
 import axios from 'axios';
 import { AppContext } from '../../contexts/AppContext';
 import Sheet from '../ui/Sheet';
@@ -460,7 +461,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           setOrtenStatus(null);
           setEditStart(false);
         } catch (err) {
-          console.error('Reverse-Geocoding fehlgeschlagen:', err);
+          logFehler('Reverse-Geocoding fehlgeschlagen:', err);
           setOrtenStatus('fehler');
         }
       },
@@ -509,7 +510,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         );
       }
     } catch (error) {
-      console.error('Anlass konnte nicht gespeichert werden:', error);
+      logFehler('Anlass konnte nicht gespeichert werden:', error);
       setNeueAnlaesse((prev) => prev.filter((a) => a.id !== platzhalter.id));
       toast.error('Der Anlass konnte nicht gespeichert werden — er gilt nur für diese Fahrt.');
     } finally {
@@ -560,7 +561,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       try {
         await addAnlass(anlassClean);
       } catch (err) {
-        console.error('Anlass konnte nicht gemerkt werden:', err);
+        logFehler('Anlass konnte nicht gemerkt werden:', err);
         toast.error('Der Anlass konnte nicht gemerkt werden — die Fahrt wird trotzdem angelegt.');
       }
     }
@@ -577,7 +578,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         gemerkteZielId = res.data?.id ?? null;
       } catch (err) {
         // Fahrt trotzdem speichern, aber nicht so tun, als sei der Ort da
-        console.error('Ort konnte nicht gespeichert werden:', err);
+        logFehler('Ort konnte nicht gespeichert werden:', err);
         toast.error('Der Ort konnte nicht dauerhaft gespeichert werden — die Fahrt wird trotzdem angelegt.');
       }
     }
@@ -680,7 +681,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         await refreshAllData();
         toast.success(trips.length > 1 ? 'Fahrten wieder entfernt.' : 'Fahrt wieder entfernt.');
       } catch (error) {
-        console.error('Fehler beim Rückgängigmachen:', error);
+        logFehler('Fehler beim Rückgängigmachen:', error);
         toast.error('Rückgängig machen fehlgeschlagen.');
       }
       })();
@@ -748,7 +749,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         // Ein Refresh für alles — ersetzt auch die optimistischen Einträge
         await refreshAllData();
       } catch (error) {
-        console.error('Fehler beim Speichern der Fahrt(en):', error);
+        logFehler('Fehler beim Speichern der Fahrt(en):', error);
         // Rollback der optimistischen Einträge + bereits angelegter Fahrten
         setFahrten((prev) => prev.filter((f) => !tempIds.includes(f.id)));
         // Teilerfolg zurücknehmen und erst dann die Liste leeren: Scheitert

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import logFehler from '../../utils/logFehler';
 import axios from 'axios';
 import { GripVertical, Check, Pencil, Trash2, Power } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
@@ -82,7 +83,7 @@ function TraegerBereich() {
       const response = await axios.get('/api/abrechnungstraeger');
       setTraegerListe(sortiert(response.data));
     } catch (error) {
-      console.error('Fehler beim Laden der Abrechnungsträger:', error);
+      logFehler('Fehler beim Laden der Abrechnungsträger:', error);
       toast.error('Abrechnungsträger konnten nicht geladen werden.');
     }
   };
@@ -112,7 +113,7 @@ function TraegerBereich() {
       setSheet(null);
       await refresh();
     } catch (error) {
-      console.error('Fehler beim Speichern des Trägers:', error);
+      logFehler('Fehler beim Speichern des Trägers:', error);
       toast.error('Träger konnte nicht gespeichert werden.');
     }
   };
@@ -131,7 +132,7 @@ function TraegerBereich() {
       await axios.put('/api/abrechnungstraeger/sort', { sortOrder });
       await refresh();
     } catch (error) {
-      console.error('Fehler beim Sortieren:', error);
+      logFehler('Fehler beim Sortieren:', error);
       toast.error('Reihenfolge konnte nicht aktualisiert werden.');
       fetchTraeger();
     }
@@ -148,7 +149,7 @@ function TraegerBereich() {
       toast.success(traeger.active ? 'Träger deaktiviert.' : 'Träger aktiviert.');
       await refresh();
     } catch (error) {
-      console.error('Fehler beim Ändern des Status:', error);
+      logFehler('Fehler beim Ändern des Status:', error);
       toast.error('Status konnte nicht aktualisiert werden.');
     }
   };
@@ -161,7 +162,7 @@ function TraegerBereich() {
       toast.success('Träger gelöscht.');
       await refresh();
     } catch (error) {
-      console.error('Fehler beim Löschen:', error);
+      logFehler('Fehler beim Löschen:', error);
       toast.error(error.response?.data?.message || 'Träger konnte nicht gelöscht werden.');
     }
   };

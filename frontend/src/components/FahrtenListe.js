@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import logFehler from '../utils/logFehler';
 import { Car, Pencil, Trash2, RotateCw, ArrowLeftRight, CloudOff } from 'lucide-react';
 import { AppContext } from '../contexts/AppContext';
 import { useToast } from './ui/Toast';
@@ -140,13 +141,13 @@ function FahrtenListe() {
             fetchMonthlyData();
             toast.success('Fahrt wiederhergestellt.');
           } catch (error) {
-            console.error('Fehler beim Wiederherstellen der Fahrt:', error);
+            logFehler('Fehler beim Wiederherstellen der Fahrt:', error);
             toast.error('Fahrt konnte nicht wiederhergestellt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Löschen der Fahrt:', error);
+      logFehler('Fehler beim Löschen der Fahrt:', error);
       toast.error('Beim Löschen der Fahrt ist ein Fehler aufgetreten.');
     }
   };
@@ -187,7 +188,7 @@ function FahrtenListe() {
       fetchMonthlyData();
       toast.success('Rückfahrt angelegt.');
     } catch (error) {
-      console.error('Fehler beim Anlegen der Rückfahrt:', error);
+      logFehler('Fehler beim Anlegen der Rückfahrt:', error);
       toast.error('Rückfahrt konnte nicht angelegt werden.');
     }
   };

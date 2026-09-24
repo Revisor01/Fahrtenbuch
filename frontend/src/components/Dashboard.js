@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import logFehler from '../utils/logFehler';
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { aktuellerMonat as aktuellerMonatISO, heuteISO } from '../utils/datum';
@@ -204,13 +205,13 @@ function Dashboard({ onNavigate }) {
             await fetchFahrten();
             toast.success('Rückgängig gemacht.');
           } catch (error) {
-            console.error('Fehler beim Zurücknehmen:', error);
+            logFehler('Fehler beim Zurücknehmen:', error);
             toast.error('Status konnte nicht zurückgesetzt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Markieren als erstattet:', error);
+      logFehler('Fehler beim Markieren als erstattet:', error);
       toast.error('Status konnte nicht aktualisiert werden.');
     }
   };
@@ -273,7 +274,7 @@ function Dashboard({ onNavigate }) {
         });
         if (aktiv) setRecent(alle.slice(0, 5));
       } catch (error) {
-        console.error('Fehler beim Laden der letzten Fahrten:', error);
+        logFehler('Fehler beim Laden der letzten Fahrten:', error);
         if (aktiv) setRecent([]);
       }
     };
@@ -340,7 +341,7 @@ function Dashboard({ onNavigate }) {
         await refreshAllData();
         toast.success('Fahrt wieder entfernt.');
       } catch (error) {
-        console.error('Fehler beim Entfernen der Fahrt:', error);
+        logFehler('Fehler beim Entfernen der Fahrt:', error);
         toast.error('Fahrt konnte nicht entfernt werden.');
       }
     };
@@ -369,7 +370,7 @@ function Dashboard({ onNavigate }) {
           await entferneAngelegte();
         }
       } catch (error) {
-        console.error('Fehler beim Ausführen des Favoriten:', error);
+        logFehler('Fehler beim Ausführen des Favoriten:', error);
         entferneOptimistisch(tempId);
         if (!op.abgebrochen) toast.error('Favorit konnte nicht ausgeführt werden.');
       }
@@ -393,7 +394,7 @@ function Dashboard({ onNavigate }) {
         await refreshAllData();
         toast.success('Fahrt wieder entfernt.');
       } catch (error) {
-        console.error('Fehler beim Entfernen der Fahrt:', error);
+        logFehler('Fehler beim Entfernen der Fahrt:', error);
         toast.error('Fahrt konnte nicht entfernt werden.');
       }
     };
@@ -433,7 +434,7 @@ function Dashboard({ onNavigate }) {
         }
         await refreshAllData();
       } catch (error) {
-        console.error('Fehler beim Wiederholen der Fahrt:', error);
+        logFehler('Fehler beim Wiederholen der Fahrt:', error);
         entferneOptimistisch(tempId);
         if (!op.abgebrochen) toast.error('Fahrt konnte nicht erstellt werden.');
       }
@@ -485,7 +486,7 @@ function Dashboard({ onNavigate }) {
       await refreshAllData();
       toast.success('Rückfahrt angelegt.');
     } catch (error) {
-      console.error('Fehler beim Anlegen der Rückfahrt:', error);
+      logFehler('Fehler beim Anlegen der Rückfahrt:', error);
       toast.error('Rückfahrt konnte nicht angelegt werden.');
     }
   };

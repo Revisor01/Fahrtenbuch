@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import logFehler from '../../utils/logFehler';
 import axios from 'axios';
 import { Home, AlertTriangle, Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
@@ -79,7 +80,7 @@ function ProfilBereich() {
       });
       toast.success(`${ort.name} ist jetzt dein Wohnort.`);
     } catch (error) {
-      console.error('Fehler beim Setzen des Wohnorts:', error);
+      logFehler('Fehler beim Setzen des Wohnorts:', error);
       toast.error('Wohnort konnte nicht gesetzt werden.');
     } finally {
       setWohnortLaeuft(false);
@@ -93,7 +94,7 @@ function ProfilBereich() {
       setProfile(profileData);
       setUser((prev) => ({ ...prev, email_verified: profileData.email_verified }));
     } catch (error) {
-      console.error('Fehler beim Abrufen des Profils:', error);
+      logFehler('Fehler beim Abrufen des Profils:', error);
       toast.error('Profil konnte nicht geladen werden.');
     }
   };
@@ -118,7 +119,7 @@ function ProfilBereich() {
       fetchProfile();
       await refreshAllData();
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Profils:', error);
+      logFehler('Fehler beim Aktualisieren des Profils:', error);
       toast.error('Profil konnte nicht aktualisiert werden.');
     }
   };
@@ -155,7 +156,7 @@ function ProfilBereich() {
       await axios.post('/api/users/resend-verification', { email: profile.email });
       toast.success('Verifizierungs-E-Mail erneut gesendet.');
     } catch (error) {
-      console.error('Fehler beim Senden der Verifizierungs-E-Mail:', error);
+      logFehler('Fehler beim Senden der Verifizierungs-E-Mail:', error);
       toast.error('Verifizierungs-E-Mail konnte nicht gesendet werden.');
     }
   };

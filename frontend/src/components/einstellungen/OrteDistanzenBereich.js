@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useContext } from 'react';
+import logFehler from '../../utils/logFehler';
 import axios from 'axios';
 import { Search, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
@@ -293,7 +294,7 @@ function OrteDistanzenBereich() {
       await refreshAllData();
       setReihenfolge(null);
     } catch (error) {
-      console.error('Reihenfolge der Orte konnte nicht gespeichert werden:', error);
+      logFehler('Reihenfolge der Orte konnte nicht gespeichert werden:', error);
       toast.error(fehlerText(error, 'Reihenfolge konnte nicht gespeichert werden.'));
       setReihenfolge(null); // zurueck auf den Stand aus dem Context
     } finally {
@@ -349,7 +350,7 @@ function OrteDistanzenBereich() {
       setOrtSheet(null);
     } catch (error) {
       // Sheet offen lassen, damit die Eingaben nicht verloren gehen
-      console.error('Ort konnte nicht gespeichert werden:', error);
+      logFehler('Ort konnte nicht gespeichert werden:', error);
       toast.error(fehlerText(error, 'Ort konnte nicht gespeichert werden.'));
     }
   };
@@ -370,13 +371,13 @@ function OrteDistanzenBereich() {
             });
             toast.success('Ort wiederhergestellt.');
           } catch (error) {
-            console.error('Fehler beim Wiederherstellen des Ortes:', error);
+            logFehler('Fehler beim Wiederherstellen des Ortes:', error);
             toast.error('Ort konnte nicht wiederhergestellt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Löschen des Ortes:', error);
+      logFehler('Fehler beim Löschen des Ortes:', error);
       // Das Backend unterscheidet inzwischen zwischen "in Fahrten verwendet"
       // und "Distanzen gepflegt" - diese Meldung ist hilfreicher als eine
       // pauschale.
@@ -399,7 +400,7 @@ function OrteDistanzenBereich() {
       }
       setDistSheet(null);
     } catch (error) {
-      console.error('Distanz konnte nicht gespeichert werden:', error);
+      logFehler('Distanz konnte nicht gespeichert werden:', error);
       toast.error(fehlerText(error, 'Distanz konnte nicht gespeichert werden.'));
     }
   };
@@ -418,13 +419,13 @@ function OrteDistanzenBereich() {
             });
             toast.success('Distanz wiederhergestellt.');
           } catch (error) {
-            console.error('Fehler beim Wiederherstellen der Distanz:', error);
+            logFehler('Fehler beim Wiederherstellen der Distanz:', error);
             toast.error('Distanz konnte nicht wiederhergestellt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Löschen der Distanz:', error);
+      logFehler('Fehler beim Löschen der Distanz:', error);
       toast.error('Distanz konnte nicht gelöscht werden.');
     }
   };

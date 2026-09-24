@@ -40,13 +40,21 @@ const pwa = VitePWA({
     // Nur die App-Huelle. Grosse Assets gehoeren nicht in den Precache.
     maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
     // Offline oeffnet die App-Huelle aus dem Precache; die React-App meldet
-    // dann selbst, dass keine Daten geladen werden koennen. offline.html liegt
-    // ebenfalls im Precache und traegt den Fall, dass die Huelle fehlt — etwa
-    // beim allerersten Aufruf ohne Netz.
+    // dann selbst, dass keine Daten geladen werden koennen.
+    //
+    // (Fruehere Fassung nannte hier offline.html als Auffang, falls die
+    // Huelle fehlt. Die Datei lag zwar im Precache, wurde aber von nichts
+    // referenziert — ohne index.html gibt es auch keinen Weg zu ihr. Sie ist
+    // deshalb entfernt.)
     navigateFallback: '/index.html',
-    // API-Aufrufe und die Laufzeit-Konfiguration duerfen nie ueber den
-    // Navigations-Fallback laufen — sonst bekaeme fetch() HTML statt JSON.
-    navigateFallbackDenylist: [/^\/api\//, /^\/config\.js$/],
+    // Diese Pfade duerfen nie ueber den Navigations-Fallback laufen:
+    //  - /api/…      sonst bekaeme fetch() HTML statt JSON
+    //  - /config.js  die Laufzeit-Konfiguration
+    //  - /api-docs   die Swagger-Oberflaeche kommt vom Backend. Ohne diesen
+    //    Eintrag lieferte der Service Worker dort die React-Huelle aus dem
+    //    Precache, und die Doku war fuer alle mit installierter App nicht
+    //    mehr erreichbar.
+    navigateFallbackDenylist: [/^\/api\//, /^\/api-docs/, /^\/config\.js$/],
     cleanupOutdatedCaches: true,
     clientsClaim: false, // erst nach bestaetigtem Update uebernehmen
     skipWaiting: false,
@@ -113,7 +121,7 @@ export default defineConfig({
             return 'react';
           }
           if (id.includes('react-router')) return 'router';
-          if (id.includes('lucide-react') || id.includes('@heroicons')) return 'icons';
+          if (id.includes('lucide-react')) return 'icons';
           // Dynamisch geladene Pakete NICHT nach `vendor` ziehen: Wer hier
           // einen Namen zurueckgibt, hebelt den Lazy-Import aus — Rollup legt
           // das Modul dann in den benannten Brocken, und der laedt beim

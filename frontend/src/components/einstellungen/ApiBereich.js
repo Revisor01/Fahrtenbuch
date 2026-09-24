@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logFehler from '../../utils/logFehler';
 import axios from 'axios';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '../ui/Toast';
@@ -24,7 +25,7 @@ function ApiKeySheet({ offen, onClose, onCreated }) {
       setGeneratedKey(response.data.key);
       onCreated();
     } catch (error) {
-      console.error('Fehler beim Generieren des API-Keys:', error);
+      logFehler('Fehler beim Generieren des API-Keys:', error);
       toast.error('API-Key konnte nicht erstellt werden.');
     } finally {
       setLaeuft(false);
@@ -92,7 +93,7 @@ function ApiBereich() {
       const response = await axios.get('/api/keys');
       setApiKeys(response.data);
     } catch (error) {
-      console.error('Fehler beim Laden der API-Keys:', error);
+      logFehler('Fehler beim Laden der API-Keys:', error);
       toast.error('API-Keys konnten nicht geladen werden.');
     }
   };
@@ -110,7 +111,7 @@ function ApiBereich() {
       await fetchApiKeys();
       toast.success('API-Key gelöscht.');
     } catch (error) {
-      console.error('Fehler beim Löschen des API-Keys:', error);
+      logFehler('Fehler beim Löschen des API-Keys:', error);
       toast.error('API-Key konnte nicht gelöscht werden.');
     }
   };

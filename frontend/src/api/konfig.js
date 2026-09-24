@@ -1,5 +1,6 @@
 import { apiUrl } from './client';
 import { setServerKonfig } from '../utils/appConfig';
+import logFehler from '../utils/logFehler';
 
 // Holt die oeffentliche Konfiguration der gewaehlten Instanz (/api/konfig).
 //
@@ -57,7 +58,7 @@ export async function ladeServerKonfig() {
   } catch (error) {
     // Aeltere Backends kennen /api/konfig nicht, und ohne Netz kommt gar nichts:
     // beides ist kein Grund zum Abbruch — dann gelten die Werte aus dem Bundle.
-    console.error('Konfiguration der Instanz nicht abrufbar:', error);
+    logFehler('Konfiguration der Instanz nicht abrufbar:', error);
     return null;
   } finally {
     clearTimeout(wecker);

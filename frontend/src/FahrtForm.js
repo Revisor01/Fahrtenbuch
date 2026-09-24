@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo, useRef } from 'react';
+import logFehler from './utils/logFehler';
 import { Plus, X, Pencil, Search, ChevronRight, MapPin } from 'lucide-react';
 import { AppContext } from './contexts/AppContext';
 import MitfahrerModal from './MitfahrerModal';
@@ -145,7 +146,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
             setIsKilometerLocked(false);
           }
         } catch (error) {
-          console.error('Fehler beim Abrufen der Distanz:', error);
+          logFehler('Fehler beim Abrufen der Distanz:', error);
           setGepflegteDistanz(null);
           setIsKilometerLocked(false);
         }
@@ -315,7 +316,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
         );
       }
     } catch (error) {
-      console.error('Anlass konnte nicht gespeichert werden:', error);
+      logFehler('Anlass konnte nicht gespeichert werden:', error);
       setNeueAnlaesse((prev) => prev.filter((a) => a.id !== platzhalter.id));
       showNotification(
         'Hinweis',
@@ -402,7 +403,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       showNotification("Erfolg", "Fahrt wurde aktualisiert.");
       if (onUpdate) onUpdate();
     } catch (error) {
-      console.error('Fehler beim Aktualisieren:', error);
+      logFehler('Fehler beim Aktualisieren:', error);
       showNotification("Fehler", "Aenderungen konnten nicht gespeichert werden. Bitte versuche es erneut.");
     }
   };
@@ -1068,7 +1069,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
             refreshAllData();
           }
         } catch (error) {
-          console.error('Fehler beim Speichern des Ortes:', error);
+          logFehler('Fehler beim Speichern des Ortes:', error);
           showNotification("Fehler", "Der Ort konnte nicht gespeichert werden");
         }
       } else {
