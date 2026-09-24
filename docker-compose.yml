@@ -22,6 +22,12 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
+    # Nur fuer die Entwicklung: Das Image laeuft als `node` (siehe
+    # backend/Dockerfile). Hier liegt aber ein Bind-Mount des Host-
+    # Verzeichnisses auf /app, das root gehoert — ohne diese Zeile koennte
+    # der Prozess dort nicht lesen. In der Produktion
+    # (docker-compose.example.yml) gibt es keinen Mount, dort bleibt `node`.
+    user: root
     volumes:
       - ./backend:/app
       - /app/node_modules
