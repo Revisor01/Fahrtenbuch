@@ -1,11 +1,11 @@
-# Handoff — Stand 24.09.2026, mittags
+# Handoff — Stand 24.09.2026, abends
 
 **Produktion läuft auf dem neuen Stand.** 28 Commits seit dem letzten
 Handoff, alle gepusht, Arbeitsbaum sauber. HEAD: `8aef819`.
 
 - **Web**: kkd-fahrtenbuch.de, deployt und geprüft
-- **iOS**: Build 32 (2.3.2) in App Store Connect — der erste mit korrekter
-  Distribution-Signatur
+- **iOS**: Build 32 (2.3.2) in TestFlight, **VALID und freigegeben** — der
+  erste mit korrekter Distribution-Signatur
 - **Android**: kein Release (Play Console nicht angelegt)
 - **Tests**: 516 Prüfungen in 30 Dateien (`cd backend && npm test`), grün
 
@@ -36,6 +36,23 @@ demselben** Distribution-Zertifikat `D22NVZMW4W`. Läuft es ab, baut **keines
 der drei Projekte** mehr — auch nicht am Mac. Nötig: neues erzeugen, als
 `.p12` exportieren, in `IOS_DIST_P12_BASE64` hinterlegen, in allen drei Repos.
 Das Limit liegt bei 3, Platz zum Vorbereiten ist da.
+
+### Exportkonformität: am 24.09. abends nachgesetzt
+
+Build 32 hing in TestFlight fest, weil `usesNonExemptEncryption` nicht
+gesetzt war — `VALID`, aber für Tester nicht freigegeben. Per ASC-API auf
+`false` gesetzt, Build ist jetzt verfügbar.
+
+**Das passiert bei JEDEM Build erneut.** Gehört in `ios-release.yml`
+automatisiert; steht unten unter „Offen". Prüfen lässt es sich so:
+
+```
+cd ~/.claude/secrets
+./asc-jwt.sh get "/v1/builds?filter[app]=6801855861&limit=1&fields[builds]=version,processingState,usesNonExemptEncryption"
+```
+
+Steht dort `null`, ist der Build blockiert. Setzen per `PATCH` auf
+`/v1/builds/<id>` mit `{"usesNonExemptEncryption": false}`.
 
 ### Alle Nutzer müssen sich neu anmelden
 
@@ -135,7 +152,12 @@ Caddy setzt weiterhin HSTS, `X-Content-Type-Options` und `X-Frame-Options`
   Konto-Typ klären, AAB, Play App Signing, Data-Safety, Content Rating,
   Datenschutz-URL. Ein `android-release.yml` analog zu `ios-release.yml`
   wäre ~½ Tag. Actions-Minuten sind für dieses Repo kostenlos (öffentlich).
-- **Exportkonformität** pro Build von Hand (`usesNonExemptEncryption`).
+- **Exportkonformität automatisieren.** Muss derzeit nach jedem Build von
+  Hand gesetzt werden, sonst bleibt er in TestFlight hängen (am 24.09. bei
+  Build 32 passiert). Ein Schritt am Ende von `ios-release.yml`, der nach
+  dem Upload auf die Build-ID wartet und `usesNonExemptEncryption: false`
+  patcht, würde das erledigen — der ASC-Key liegt im Workflow ohnehin schon
+  vor.
 
 ### Bewusst verschoben
 
