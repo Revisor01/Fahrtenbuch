@@ -649,78 +649,82 @@ function AppProvider({ children }) {
   const fetchMonthlyData = async () => {
     const sitzung = sitzungsZaehler.current;
     try {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth();
-      const promises = [];
-      const months = [];
-
-      // 3 Monate nach vorne
-      for (let i = 1; i <= 3; i++) {
-        const futureDate = new Date(currentYear, currentMonth + i, 1);
-        months.push(futureDate);
-      }
-
-      // Aktueller Monat
-      months.push(new Date(currentYear, currentMonth, 1));
-
-      // Rückwärts gehen (24 Monate)
-      for (let i = 1; i <= 24; i++) {
-        const pastDate = new Date(currentYear, currentMonth - i, 1);
-        months.push(pastDate);
-      }
-
-      // API-Calls vorbereiten
-      for (const date of months) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        promises.push(axios.get(`/api/fahrten/report/${year}/${month}`));
-      }
-
-      const responses = await Promise.all(promises);
-      const data = responses
-      .map((response, index) => {
-        const date = months[index];
-        // summary fehlt, wenn der Endpunkt einen Fehler meldet (etwa weil das
-        // Konto nicht mehr existiert). Ohne Absicherung warf der Zugriff hier
-        // einen TypeError und die ganze Oberflaeche blieb weiss.
-        const summary = response?.data?.summary || {};
-        return {
-          yearMonth: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
-          monthName: date.toLocaleString('default', { month: 'long' }),
-          year: date.getFullYear(),
-          monatNr: date.getMonth() + 1,
-          erstattungen: summary.erstattungen || {},
-          abrechnungsStatus: summary.abrechnungsStatus || {},
-          totalErstattung: summary.gesamtErstattung || 0,
-          totalKm: (response.data.fahrten || []).reduce((sum, f) => sum + (parseFloat(f.kilometer) || 0), 0),
-          // km je Abrechnungsträger (für die Trägerzeilen der Abrechnung)
-          kmProTraeger: (response.data.fahrten || []).reduce((acc, f) => {
-            if (f.abrechnung != null) {
-              const key = f.abrechnung.toString();
-              acc[key] = (acc[key] || 0) + (parseFloat(f.kilometer) || 0);
-            }
-            return acc;
-          }, {}),
-          fahrtenCount: (response.data.fahrten || []).length
-        };
-      })
-      // Nur Monate mit Fahrten oder Erstattungen behalten
-      .filter(month => {
-        const hasErstattungen = Object.values(month.erstattungen).some(betrag => betrag > 0);
-        return hasErstattungen || month.fahrtenCount > 0;
-      })
-      // Nach Datum sortieren (neueste zuerst)
-      .sort((a, b) => {
-        const dateA = new Date(a.year, a.monatNr - 1);
-        const dateB = new Date(b.year, b.monatNr - 1);
-        return dateB - dateA;
-      });
-
+      // EIN Abruf statt 28. Vorher holte diese Funktion fuer jeden der 28
+      // betrachteten Monate einen eigenen Monatsbericht — beim App-Start,
+      // nach jedem Speichern und nach jedem Statuswechsel. Zusammen mit den
+      // uebrigen Abrufen kam der Start auf rund 40 Anfragen, waehrend das
+      // Rate-Limit bei 600 in fuenf Minuten liegt.
+      //
+      // /api/fahrten/monthly-summary liefert seit dem 24.09. zusaetzlich
+      // abrechnungsStatus, kmProTraeger, fahrtenCount, totalKm und
+      // gesamtErstattung je Monat — damit reicht dieser eine Aufruf. Die
+      // bisherigen Felder der Route sind unveraendert geblieben.
+      //
+      // Die Route liefert alle Monate mit Fahrten, nicht nur die 28 aus dem
+      // alten Fenster. Das ist kein Nachteil: Gefiltert wird ohnehin auf
+      // Monate mit Inhalt, und aeltere Jahrgaenge fehlten bisher in der
+      // Auswahl, obwohl es sie gab.
+      const response = await axios.get(`${API_BASE_URL}/fahrten/monthly-summary`);
       if (sitzungVorbei(sitzung)) return [];
+
+      const roh = Array.isArray(response?.data) ? response.data : [];
+      const data = roh
+        .map((eintrag) => {
+          // yearMonth ist "2026-08" — daraus Jahr, Monatsnummer und Name.
+          const [jahr, monat] = String(eintrag.yearMonth || '').split('-');
+          const datum = new Date(Number(jahr), Number(monat) - 1, 1);
+          return {
+            yearMonth: eintrag.yearMonth,
+            monthName: datum.toLocaleString('default', { month: 'long' }),
+            year: Number(jahr),
+            monatNr: Number(monat),
+            // WICHTIG: Die Sammel-Route liefert je Traeger ein Objekt
+            // { kilometer, erstattung }, der frueher genutzte Monatsbericht
+            // dagegen eine blosse Zahl. Dashboard und Abrechnung rechnen mit
+            // der Zahl (`Number(erstattungen[id])`, `b > 0`) — ohne diese
+            // Umwandlung stuenden dort ueberall 0 € und NaN.
+            erstattungen: Object.fromEntries(
+              Object.entries(eintrag.erstattungen || {})
+                .map(([schluessel, wert]) => [
+                  schluessel,
+                  Number(wert?.erstattung ?? wert) || 0,
+                ])
+            ),
+            // Die Kilometer je Traeger stecken in derselben Struktur und
+            // ergaenzen kmProTraeger, falls die Route es nicht mitliefert.
+            kilometerJeTraeger: Object.fromEntries(
+              Object.entries(eintrag.erstattungen || {})
+                .map(([schluessel, wert]) => [
+                  schluessel,
+                  Number(wert?.kilometer ?? 0) || 0,
+                ])
+            ),
+            abrechnungsStatus: eintrag.abrechnungsStatus || {},
+            totalErstattung: eintrag.gesamtErstattung || 0,
+            totalKm: eintrag.totalKm || 0,
+            kmProTraeger: eintrag.kmProTraeger || {},
+            fahrtenCount: eintrag.fahrtenCount || 0,
+          };
+        })
+        // Nur Monate mit Fahrten oder Erstattungen behalten — wie bisher.
+        .filter((month) => {
+          const hatErstattungen = Object.values(month.erstattungen).some((betrag) => betrag > 0);
+          return hatErstattungen || month.fahrtenCount > 0;
+        })
+        // Nach Datum sortieren (neueste zuerst)
+        .sort((a, b) => new Date(b.year, b.monatNr - 1) - new Date(a.year, a.monatNr - 1));
+
       setMonthlyData(data);
       return data;
     } catch (error) {
+      // 404 heisst hier „noch keine Fahrten erfasst" — kein Fehler, den man
+      // melden muesste. Die Route antwortet so seit jeher, der Vertrag
+      // bleibt unangetastet.
+      if (error?.response?.status === 404) {
+        if (sitzungVorbei(sitzung)) return [];
+        setMonthlyData([]);
+        return [];
+      }
       logFehler('Fehler beim Abrufen der monatlichen Übersicht:', error);
       // Leere Liste statt des alten Standes: Komponenten iterieren darueber,
       // ein undefined liesse die Oberflaeche beim naechsten Rendern abstuerzen

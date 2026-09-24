@@ -150,6 +150,28 @@ class Abrechnung {
         }
     }
 
+    // Status aller Monate in EINER Abfrage, gruppiert als
+    // { "2026-08": { "1": { eingereicht_am, erhalten_am } } }.
+    //
+    // Fuer die Monatsuebersicht: Die holte sich bisher 28 Einzelberichte,
+    // jeder mit eigener Status-Abfrage. Hier reicht eine.
+    static async getStatusNachMonat(userId) {
+        const [rows] = await db.execute(
+            'SELECT jahr, monat, typ, eingereicht_am, erhalten_am FROM abrechnungen WHERE user_id = ?',
+            [userId]
+        );
+        const nachMonat = {};
+        for (const row of rows) {
+            const schluessel = `${row.jahr}-${String(row.monat).padStart(2, '0')}`;
+            if (!nachMonat[schluessel]) nachMonat[schluessel] = {};
+            nachMonat[schluessel][row.typ] = {
+                eingereicht_am: row.eingereicht_am,
+                erhalten_am: row.erhalten_am,
+            };
+        }
+        return nachMonat;
+    }
+
     static async getAllStatusForYear(userId, jahr) {
         try {
             const [rows] = await db.execute(
