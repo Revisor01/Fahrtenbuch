@@ -59,6 +59,11 @@ code {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    /* Abstand zwischen Symbol und Beschriftung. Gehoert hierher und nicht in
+       einzelne Regeln: Ohne gap kleben Symbol und Text aneinander, und das
+       fiel nur dort nicht auf, wo ein Container (.fl-export-btns) zufaellig
+       selbst einen gap mitbringt. */
+    gap: 6px;
     height: var(--control-h);
     min-height: var(--tap-min);
     padding: 0 16px;
