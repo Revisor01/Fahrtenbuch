@@ -14,6 +14,9 @@ RUN npm run build
 FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+# Die Sicherheits-Kopfzeilen liegen getrennt, weil jeder location-Block sie
+# einzeln einbinden muss (nginx vererbt add_header nicht).
+COPY ./security-headers.conf /etc/nginx/security-headers.conf
 COPY ./docker-entrypoint.sh /docker-entrypoint-fahrtenbuch.sh
 RUN chmod +x /docker-entrypoint-fahrtenbuch.sh
 EXPOSE 80

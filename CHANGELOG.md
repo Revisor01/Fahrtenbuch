@@ -7,6 +7,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased] - 2.3.3
 
+### Sonstiges
+- Die Oberfläche wird jetzt mit den üblichen Schutz-Kopfzeilen ausgeliefert, und der Server-Dienst läuft nicht mehr mit vollen Rechten. Für Nutzende ändert sich nichts
+
 ### Geändert
 - Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
