@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import logFehler from './utils/logFehler';
 import axios from 'axios';
 import './index.css';
 import { AppContext } from './contexts/AppContext';
@@ -143,7 +144,7 @@ export default function UserManagement() {
       const response = await axios.get('/api/users');
       setUsers(response.data);
     } catch (error) {
-      console.error('Fehler beim Laden der Benutzer:', error);
+      logFehler('Fehler beim Laden der Benutzer:', error);
       showNotification('Fehler', 'Benutzer konnten nicht geladen werden');
     }
   };
@@ -155,7 +156,7 @@ export default function UserManagement() {
       setSheet(null);
       fetchUsers();
     } catch (error) {
-      console.error('Fehler beim Erstellen des Benutzers:', error);
+      logFehler('Fehler beim Erstellen des Benutzers:', error);
       showNotification('Fehler', error.response?.data?.message || 'Benutzer konnte nicht erstellt werden');
     }
   };
@@ -167,7 +168,7 @@ export default function UserManagement() {
       setSheet(null);
       fetchUsers();
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Benutzers:', error);
+      logFehler('Fehler beim Aktualisieren des Benutzers:', error);
       showNotification('Fehler', error.response?.data?.message || 'Benutzer konnte nicht aktualisiert werden');
     }
   };
@@ -178,7 +179,7 @@ export default function UserManagement() {
       showNotification('Erfolg', 'Benutzer wurde gelöscht');
       fetchUsers();
     } catch (error) {
-      console.error('Fehler beim Löschen des Benutzers:', error);
+      logFehler('Fehler beim Löschen des Benutzers:', error);
       showNotification('Fehler', error.response?.data?.message || 'Benutzer konnte nicht gelöscht werden');
     }
   };

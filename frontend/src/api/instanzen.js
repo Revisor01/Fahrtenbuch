@@ -15,6 +15,8 @@
 // Ein spaeterer Wechsel dieser Adresse braucht ein App-Update, weil sie im
 // Bundle liegt. Deshalb bewusst neutral gewaehlt und nicht an eine Instanz
 // gebunden.
+import logFehler from '../utils/logFehler';
+
 const VERZEICHNIS_URL = (
   import.meta.env.VITE_INSTANZ_VERZEICHNIS || 'https://verzeichnis.kkd-fahrtenbuch.de'
 ).replace(/\/+$/, '');
@@ -64,7 +66,7 @@ export async function ladeInstanzen({ signal } = {}) {
     return { instanzen: gueltig, quelle: 'verzeichnis' };
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
-    console.error('Instanz-Verzeichnis nicht erreichbar, nutze Fallback-Liste:', error);
+    logFehler('Instanz-Verzeichnis nicht erreichbar, nutze Fallback-Liste:', error);
     return { instanzen: FALLBACK_INSTANZEN, quelle: 'fallback' };
   }
 }

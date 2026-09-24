@@ -5,6 +5,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import { monateImZeitraum } from './zeitraumUtils';
 import { IST_NATIVE } from '../../utils/plattform';
+import logFehler from '../../utils/logFehler';
 
 // Filesystem erwartet reines Base64 ohne den "data:...;base64,"-Kopf, den
 // readAsDataURL voranstellt.
@@ -189,7 +190,7 @@ export function useFahrtenExport() {
   };
 
   const fehlerToast = (error, was) => {
-    console.error(`Fehler beim Exportieren (${was}):`, error);
+    logFehler(`Fehler beim Exportieren (${was}):`, error);
     if (error.response && error.response.status === 404) {
       toast.error('Keine Daten für den gewählten Zeitraum gefunden.');
     } else {
@@ -252,7 +253,7 @@ export function useFahrtenExport() {
           await fetchFahrten();
           toast.success('Als eingereicht markiert.');
         } catch (error) {
-          console.error('Fehler beim Markieren als eingereicht:', error);
+          logFehler('Fehler beim Markieren als eingereicht:', error);
           toast.error('Status konnte nicht aktualisiert werden.');
         }
       },

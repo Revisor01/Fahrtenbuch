@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import logFehler from '../../utils/logFehler';
 import axios from 'axios';
 import { Tag, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
@@ -94,7 +95,7 @@ function AnlassBereich() {
       }
       return true;
     } catch (error) {
-      console.error('Anlass konnte nicht angelegt werden:', error);
+      logFehler('Anlass konnte nicht angelegt werden:', error);
       toast.error(fehlerText(error, 'Anlass konnte nicht angelegt werden.'));
       return false;
     }
@@ -109,7 +110,7 @@ function AnlassBereich() {
         await fetchAnlaesse();
       } catch (error) {
         // Sheet offen lassen, damit die Eingabe nicht verloren geht
-        console.error('Anlass konnte nicht umbenannt werden:', error);
+        logFehler('Anlass konnte nicht umbenannt werden:', error);
         toast.error(fehlerText(error, 'Anlass konnte nicht umbenannt werden.'));
       }
       return;
@@ -124,7 +125,7 @@ function AnlassBereich() {
       toast.success('Anlass aus der Liste entfernt.');
       await fetchAnlaesse();
     } catch (error) {
-      console.error('Anlass konnte nicht gelöscht werden:', error);
+      logFehler('Anlass konnte nicht gelöscht werden:', error);
       toast.error(fehlerText(error, 'Anlass konnte nicht gelöscht werden.'));
     }
   };
@@ -150,7 +151,7 @@ function AnlassBereich() {
       await fetchAnlaesse();
       setReihenfolge(null);
     } catch (error) {
-      console.error('Reihenfolge konnte nicht gespeichert werden:', error);
+      logFehler('Reihenfolge konnte nicht gespeichert werden:', error);
       toast.error(fehlerText(error, 'Reihenfolge konnte nicht gespeichert werden.'));
       setReihenfolge(null); // zurueck auf den Stand aus dem Context
       await fetchAnlaesse();

@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import logFehler from '../../utils/logFehler';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
 import { useFahrtenExport } from '../fahrten/useFahrtenExport';
@@ -98,13 +99,13 @@ export function useEinreichen() {
             await refresh();
             toast.success('Einreichen rückgängig gemacht.');
           } catch (error) {
-            console.error('Fehler beim Zurücknehmen des Einreichens:', error);
+            logFehler('Fehler beim Zurücknehmen des Einreichens:', error);
             toast.error('Status konnte nicht zurückgesetzt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Einreichen:', error);
+      logFehler('Fehler beim Einreichen:', error);
       toast.error('Status konnte nicht aktualisiert werden.');
     }
   };
@@ -126,13 +127,13 @@ export function useEinreichen() {
             await refresh();
             toast.success('Rückgängig gemacht.');
           } catch (error) {
-            console.error('Fehler beim Zurücknehmen:', error);
+            logFehler('Fehler beim Zurücknehmen:', error);
             toast.error('Status konnte nicht zurückgesetzt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Markieren als eingereicht:', error);
+      logFehler('Fehler beim Markieren als eingereicht:', error);
       toast.error('Status konnte nicht aktualisiert werden.');
     }
   };
@@ -155,13 +156,13 @@ export function useEinreichen() {
             await refresh();
             toast.success('Rückgängig gemacht.');
           } catch (error) {
-            console.error('Fehler beim Zurücknehmen der Erstattung:', error);
+            logFehler('Fehler beim Zurücknehmen der Erstattung:', error);
             toast.error('Status konnte nicht zurückgesetzt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Markieren als erstattet:', error);
+      logFehler('Fehler beim Markieren als erstattet:', error);
       toast.error('Status konnte nicht aktualisiert werden.');
     }
   };
@@ -186,13 +187,13 @@ export function useEinreichen() {
             await refresh();
             toast.success('Status wiederhergestellt.');
           } catch (error) {
-            console.error('Fehler beim Wiederherstellen des Status:', error);
+            logFehler('Fehler beim Wiederherstellen des Status:', error);
             toast.error('Status konnte nicht wiederhergestellt werden.');
           }
         },
       });
     } catch (error) {
-      console.error('Fehler beim Zurücksetzen des Status:', error);
+      logFehler('Fehler beim Zurücksetzen des Status:', error);
       toast.error('Status konnte nicht zurückgesetzt werden.');
     }
   };

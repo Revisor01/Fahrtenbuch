@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext, useRef } from 'react';
 import fehlerText from '../utils/fehlerText';
+import logFehler from '../utils/logFehler';
 import axios from 'axios';
 import { aktuellerMonat } from '../utils/datum';
 import StatusDatumSheet from '../components/abrechnung/StatusDatumSheet';
@@ -94,7 +95,7 @@ function AppProvider({ children }) {
       if (sitzungVorbei(sitzung)) return;
       setFavoriten(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error('Fehler beim Abrufen der Favoriten:', error);
+      logFehler('Fehler beim Abrufen der Favoriten:', error);
       if (sitzungVorbei(sitzung)) return;
       setFavoriten([]);
     }
@@ -105,7 +106,7 @@ function AppProvider({ children }) {
       await axios.post(`${API_BASE_URL}/favoriten`, data);
       await fetchFavoriten();
     } catch (error) {
-      console.error('Fehler beim Hinzufügen des Favoriten:', error);
+      logFehler('Fehler beim Hinzufügen des Favoriten:', error);
       throw error;
     }
   };
@@ -115,7 +116,7 @@ function AppProvider({ children }) {
       await axios.delete(`${API_BASE_URL}/favoriten/${id}`);
       await fetchFavoriten();
     } catch (error) {
-      console.error('Fehler beim Löschen des Favoriten:', error);
+      logFehler('Fehler beim Löschen des Favoriten:', error);
       throw error;
     }
   };
@@ -126,7 +127,7 @@ function AppProvider({ children }) {
       await refreshAllData();
       return response.data;
     } catch (error) {
-      console.error('Fehler beim Ausführen des Favoriten:', error);
+      logFehler('Fehler beim Ausführen des Favoriten:', error);
       throw error;
     }
   };
@@ -185,7 +186,7 @@ function AppProvider({ children }) {
         }
       }
     } catch (error) {
-      console.error('Fehler beim Aktualisieren der Daten:', error);
+      logFehler('Fehler beim Aktualisieren der Daten:', error);
     }
   };
 
@@ -213,7 +214,7 @@ function AppProvider({ children }) {
       // naechsten Start darf die laufende Anmeldung nicht aufhalten.
       schreibeWert(SCHLUESSEL_USER, JSON.stringify(userData));
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      logFehler('Error fetching user data:', error);
       // Nur abmelden, wenn die Sitzung noch dieselbe ist — sonst wuerde ein
       // spaeter eintreffender Fehler eine frisch begonnene Sitzung beenden.
       if (sitzung === sitzungsZaehler.current) logout();
@@ -271,7 +272,7 @@ function AppProvider({ children }) {
       try {
         userDaten = gespeicherterUser ? JSON.parse(gespeicherterUser) : null;
       } catch (error) {
-        console.error('Gespeicherte Nutzerdaten unlesbar, werden verworfen:', error);
+        logFehler('Gespeicherte Nutzerdaten unlesbar, werden verworfen:', error);
         await loescheWert(SCHLUESSEL_USER);
       }
 
@@ -298,7 +299,7 @@ function AppProvider({ children }) {
         // Ein Fehler beim Lesen darf nicht dazu fuehren, dass die App im
         // Ladezustand stehen bleibt. Ohne gespeicherte Anmeldung landet man
         // auf der Anmeldemaske — das ist der richtige Ausgang.
-        console.error('Anmeldedaten konnten nicht gelesen werden:', error);
+        logFehler('Anmeldedaten konnten nicht gelesen werden:', error);
       } finally {
         clearTimeout(notbremse);
         setAnmeldungGeladen(true);
@@ -441,7 +442,7 @@ function AppProvider({ children }) {
     setAnlaesse([]);
 
     loescheAnmeldung().catch((error) => {
-      console.error('Abmeldedaten konnten nicht entfernt werden:', error);
+      logFehler('Abmeldedaten konnten nicht entfernt werden:', error);
     });
 
     // Der erzwungene Logout kam bisher wortlos: Wer mitten im Formular sass,
@@ -458,7 +459,7 @@ function AppProvider({ children }) {
       if (sitzungVorbei(sitzung)) return;
       setOrte(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error('Fehler beim Abrufen der Orte:', error);
+      logFehler('Fehler beim Abrufen der Orte:', error);
     }
   };
 
@@ -480,7 +481,7 @@ function AppProvider({ children }) {
       }
       if (!silent) toast.success('Abrechnungsstatus wurde aktualisiert.');
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
+      logFehler('Fehler beim Aktualisieren des Abrechnungsstatus:', error);
       if (!silent) {
         // Backend-Meldung durchreichen (z. B. „muss erst eingereicht werden")
         toast.error(error.response?.data?.message || 'Status konnte nicht aktualisiert werden.');
@@ -496,7 +497,7 @@ function AppProvider({ children }) {
       if (sitzungVorbei(sitzung)) return;
       setDistanzen(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error('Fehler beim Abrufen der Distanzen:', error);
+      logFehler('Fehler beim Abrufen der Distanzen:', error);
       if (sitzungVorbei(sitzung)) return;
       setDistanzen([]);
     }
@@ -533,7 +534,7 @@ function AppProvider({ children }) {
       setSummary(response?.data?.summary || {});
       setFahrtenFehler(null);
     } catch (error) {
-      console.error('Fehler beim Abrufen der Fahrten:', error);
+      logFehler('Fehler beim Abrufen der Fahrten:', error);
       // Auch den Fehler verwerfen, wenn ein neuerer Abruf laeuft: Sonst
       // leert der alte die Liste, die der neue gerade fuellt.
       if (sitzungVorbei(sitzung) || ueberholt()) return;
@@ -553,7 +554,7 @@ function AppProvider({ children }) {
       await axios.post(`${API_BASE_URL}/orte`, ort);
       fetchOrte();
     } catch (error) {
-      console.error('Fehler beim Hinzufügen des Ortes:', error);
+      logFehler('Fehler beim Hinzufügen des Ortes:', error);
       throw error;
     }
   };
@@ -581,7 +582,7 @@ function AppProvider({ children }) {
         return response.data;
       }
     } catch (error) {
-      console.error('Fehler beim Hinzufügen der Fahrt:', error);
+      logFehler('Fehler beim Hinzufügen der Fahrt:', error);
       throw error;
     }
   };
@@ -595,7 +596,7 @@ function AppProvider({ children }) {
         return response.data;
       }
     } catch (error) {
-      console.error('Fehler beim Aktualisieren der Fahrt:', error);
+      logFehler('Fehler beim Aktualisieren der Fahrt:', error);
       throw error;
     }
   };
@@ -605,7 +606,7 @@ function AppProvider({ children }) {
       await axios.post(`${API_BASE_URL}/distanzen`, distanz);
       fetchDistanzen();
     } catch (error) {
-      console.error('Fehler beim Hinzufügen der Distanz:', error);
+      logFehler('Fehler beim Hinzufügen der Distanz:', error);
       throw error;
     }
   };
@@ -640,7 +641,7 @@ function AppProvider({ children }) {
       }[aktion] || 'Abrechnungsstatus wurde aktualisiert.';
       toast.success(meldung);
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Status:', error);
+      logFehler('Fehler beim Aktualisieren des Status:', error);
       toast.error(error.response?.data?.message || 'Status konnte nicht aktualisiert werden.');
     }
   };
@@ -720,7 +721,7 @@ function AppProvider({ children }) {
       setMonthlyData(data);
       return data;
     } catch (error) {
-      console.error('Fehler beim Abrufen der monatlichen Übersicht:', error);
+      logFehler('Fehler beim Abrufen der monatlichen Übersicht:', error);
       // Leere Liste statt des alten Standes: Komponenten iterieren darueber,
       // ein undefined liesse die Oberflaeche beim naechsten Rendern abstuerzen
       if (sitzungVorbei(sitzung)) return [];
@@ -734,7 +735,7 @@ function AppProvider({ children }) {
       await axios.put(`${API_BASE_URL}/orte/${id}`, ort);
       fetchOrte();
     } catch (error) {
-      console.error('Fehler beim Aktualisieren des Ortes:', error);
+      logFehler('Fehler beim Aktualisieren des Ortes:', error);
       throw error;
     }
   };
@@ -748,7 +749,7 @@ function AppProvider({ children }) {
       });
       fetchDistanzen();
     } catch (error) {
-      console.error('Fehler beim Aktualisieren der Distanz:', error);
+      logFehler('Fehler beim Aktualisieren der Distanz:', error);
       throw error;
     }
   };
@@ -759,7 +760,7 @@ function AppProvider({ children }) {
       await fetchFahrten();
       await refreshAllData(); // Hier hinzufügen
     } catch (error) {
-      console.error('Fehler beim Löschen der Fahrt:', error);
+      logFehler('Fehler beim Löschen der Fahrt:', error);
       throw error;
     }
   };
@@ -769,7 +770,7 @@ function AppProvider({ children }) {
       await axios.delete(`${API_BASE_URL}/orte/${id}`);
       fetchOrte();
     } catch (error) {
-      console.error('Fehler beim Löschen des Ortes:', error);
+      logFehler('Fehler beim Löschen des Ortes:', error);
       throw error;
     }
   };
@@ -779,7 +780,7 @@ function AppProvider({ children }) {
       await axios.delete(`${API_BASE_URL}/distanzen/${id}`);
       fetchDistanzen();
     } catch (error) {
-      console.error('Fehler beim Löschen der Distanz:', error);
+      logFehler('Fehler beim Löschen der Distanz:', error);
       throw error;
     }
   };

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from './client';
+import logFehler from '../utils/logFehler';
 
 // Gespeicherte Anlaesse (user-scoped Stammdaten). Die Endpunkte sind neu —
 // solange eine Instanz sie noch nicht kennt, darf die Erfassung nicht
@@ -18,7 +19,7 @@ export async function ladeAnlaesse() {
         : [];
     return daten;
   } catch (error) {
-    console.error('Fehler beim Abrufen der Anlässe:', error);
+    logFehler('Fehler beim Abrufen der Anlässe:', error);
     return [];
   }
 }
