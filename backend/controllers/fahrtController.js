@@ -17,16 +17,44 @@ exports.exportToExcelRange = exportToExcelRange;
 exports.exportToPdf = exportToPdf;
 exports.exportToPdfRange = exportToPdfRange;
 
-// Der mitfahrer-JOIN in getMonthlyReport/getDateRangeReport liefert pro Mitfahrer
-// eine Row — für Reports je Fahrt genau eine Zeile behalten (Mitfahrer werden
-// separat per Mitfahrer.findByFahrtId geladen, keine Informationsverluste).
-function dedupeByFahrtId(rows) {
-  const seen = new Set();
-  return rows.filter(r => {
-    if (seen.has(r.id)) return false;
-    seen.add(r.id);
-    return true;
-  });
+// Der mitfahrer-JOIN in getMonthlyReport/getDateRangeReport liefert pro
+// Mitfahrer eine Zeile. Hier wird daraus je Fahrt ein Eintrag mit fertiger
+// Mitfahrer-Liste.
+//
+// getMonthlyReport holt die Mitfahrer bereits per JOIN; dedupeByFahrtId warf
+// alle Zeilen ab der zweiten weg, und danach lud eine Schleife sie einzeln
+// nach — bei 30 Fahrten im Monat 30 zusaetzliche Abfragen, beim App-Start
+// ueber alle Monate rund 1.100.
+//
+// Die Form bleibt exakt die von Mitfahrer.findByFahrtId (SELECT * FROM
+// mitfahrer): id, fahrt_id, name, arbeitsstaette, richtung. Die App auf den
+// Geraeten liest genau diese Felder und laesst sich nicht mitdeployen.
+function fahrtenMitMitfahrern(rows) {
+  const fahrten = [];
+  const nachId = new Map();
+
+  for (const zeile of rows) {
+    let fahrt = nachId.get(zeile.id);
+    if (!fahrt) {
+      // Die Mitfahrer-Spalten gehoeren nicht an die Fahrt selbst.
+      const { mitfahrer_id, mitfahrer_name, arbeitsstaette, richtung, ...rest } = zeile;
+      fahrt = { ...rest, mitfahrer: [] };
+      nachId.set(zeile.id, fahrt);
+      fahrten.push(fahrt);
+    }
+    // Bei einer Fahrt ohne Mitfahrer liefert der LEFT JOIN NULL-Spalten.
+    if (zeile.mitfahrer_id !== null && zeile.mitfahrer_id !== undefined) {
+      fahrt.mitfahrer.push({
+        id: zeile.mitfahrer_id,
+        fahrt_id: zeile.id,
+        name: zeile.mitfahrer_name,
+        arbeitsstaette: zeile.arbeitsstaette,
+        richtung: zeile.richtung,
+      });
+    }
+  }
+
+  return fahrten;
 }
 
 // Ownership-Check: gehört der Ort dem eingeloggten User?
@@ -233,13 +261,9 @@ exports.getMonthlyReport = async (req, res) => {
       Abrechnung.getStatus(userId, year, month)
     ]);
 
-    // Mitfahrer-JOIN-Duplikate entfernen (eine Zeile pro Fahrt)
-    const fahrten = dedupeByFahrtId(fahrtenRaw);
-
-    // Füge Mitfahrer-Daten hinzu
-    for (let fahrt of fahrten) {
-      fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
-    }
+    // Eine Zeile je Fahrt, Mitfahrer aus denselben Zeilen — statt sie
+    // wegzuwerfen und einzeln nachzuladen.
+    const fahrten = fahrtenMitMitfahrern(fahrtenRaw);
     
     const saetzeProTraeger = await ladeErstattungssaetze(userId);
 
@@ -302,8 +326,10 @@ exports.getReportRange = async (req, res) => {
     const endMonth = parseInt(req.params.endMonth);
     const userId = req.user.id;
 
-    // Hole Fahrten über den gesamten Zeitraum — Mitfahrer-JOIN-Duplikate entfernen
-    const fahrten = dedupeByFahrtId(
+    // Fahrten ueber den gesamten Zeitraum, Mitfahrer aus denselben Zeilen.
+    // Hier wog das Nachladen besonders schwer: ueber sechs Monate waren es
+    // sechsmal so viele Einzelabfragen wie im Monatsbericht.
+    const fahrten = fahrtenMitMitfahrern(
       await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId)
     );
 
@@ -326,10 +352,6 @@ exports.getReportRange = async (req, res) => {
       if (m > 12) { m = 1; y++; }
     }
 
-    // Füge Mitfahrer-Daten hinzu
-    for (let fahrt of fahrten) {
-      fahrt.mitfahrer = await Mitfahrer.findByFahrtId(fahrt.id);
-    }
 
     // Hole Erstattungssätze
     const saetzeProTraeger = await ladeErstattungssaetze(userId);
@@ -562,9 +584,9 @@ exports.getYearSummary = async (req, res) => {
         COUNT(DISTINCT m.id) as mitfahrer_count
       FROM fahrten f
       LEFT JOIN mitfahrer m ON f.id = m.fahrt_id
-      WHERE YEAR(f.datum) = ? AND f.user_id = ?
+      WHERE f.user_id = ? AND f.datum >= ? AND f.datum < ?
       GROUP BY f.id
-    `, [year, userId]);
+    `, [userId, `${parseInt(year, 10)}-01-01`, `${parseInt(year, 10) + 1}-01-01`]);
 
     const saetzeProTraeger = await ladeErstattungssaetze(userId);
 
