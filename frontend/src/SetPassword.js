@@ -3,6 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthLogo } from './components/LoginPage';
 import { appConfigValue } from './utils/appConfig';
+import fehlerText from './utils/fehlerText';
+
+// Muss zu backend/schemas/userSchemas.js passen. Steht als Konstante hier,
+// damit Pruefliste, Vorab-Pruefung und Meldung denselben Wert nennen — sie
+// liefen einmal auseinander, und der Nutzer sah „Validierungsfehler",
+// obwohl die Liste alles gruen zeigte.
+const PASSWORT_MINDESTLAENGE = 8;
 
 // Passwort setzen/zurücksetzen im Anmelde-Layout (Spec Screen 8):
 // Vollfläche --brand, zentrierte Formularkarte. Bedient beide Routen —
@@ -27,6 +34,16 @@ export default function SetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (password.length < PASSWORT_MINDESTLAENGE) {
+      // Vor dem Absenden pruefen: Der Server weist es sonst mit
+      // „Validierungsfehler" ab, und der Nutzer sieht nicht, woran es lag.
+      setStatus({
+        type: 'error',
+        message: `Das Passwort muss mindestens ${PASSWORT_MINDESTLAENGE} Zeichen lang sein.`,
+      });
+      setIsSubmitting(false);
+      return;
+    }
     if (password !== confirmPassword) {
       setStatus({ type: 'error', message: 'Die Passwörter stimmen nicht überein.' });
       return;
@@ -48,19 +65,20 @@ export default function SetPassword() {
     } catch (error) {
       setStatus({
         type: 'error',
-        message:
-          error.response?.data?.message ||
-          'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.',
+        // fehlerText loest auch Zod-Fehler auf: Die Middleware sendet
+        // `message: 'Validierungsfehler'` und die Einzelheiten in `errors[]`.
+        // Ohne das stand hier woertlich „Validierungsfehler".
+        message: fehlerText(error, 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.'),
       });
     }
     setIsSubmitting(false);
   };
 
   const validatePassword = (value) =>
-    value.length >= 8 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value);
+    value.length >= PASSWORT_MINDESTLAENGE && /[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value);
 
   const pruefungen = [
-    { ok: password.length >= 8, text: 'Mindestens 8 Zeichen' },
+    { ok: password.length >= PASSWORT_MINDESTLAENGE, text: `Mindestens ${PASSWORT_MINDESTLAENGE} Zeichen` },
     { ok: /[A-Z]/.test(password), text: 'Großbuchstaben' },
     { ok: /[a-z]/.test(password), text: 'Kleinbuchstaben' },
     { ok: /\d/.test(password), text: 'Mindestens eine Zahl' },

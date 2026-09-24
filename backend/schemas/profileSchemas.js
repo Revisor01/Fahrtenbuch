@@ -11,11 +11,14 @@ const updateProfileSchema = z.object({
 
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, 'Altes Passwort ist erforderlich'),
-  // 10 statt 6 (24.09.2026): In diesem Konto stehen IBAN und ein
-  // Bewegungsprofil. Niemand wird dadurch ausgesperrt — das Anmelde-Schema
-  // (authSchemas) prueft bewusst nur min(1), die Laenge gilt allein bei der
-  // Neuvergabe. Bestehende kuerzere Passwoerter funktionieren weiter.
-  newPassword: z.string().min(10, 'Neues Passwort muss mindestens 10 Zeichen lang sein'),
+  // 8 statt 6 (24.09.2026): In diesem Konto stehen IBAN und ein
+  // Bewegungsprofil. 8 ist der Wert, den die Oberflaeche seit jeher nennt
+  // („Mindestens 8 Zeichen" samt Pruefliste) — Server und Anzeige muessen
+  // denselben Wert fordern, sonst zeigt die Liste einen gruenen Punkt und
+  // das Speichern scheitert trotzdem.
+  // Niemand wird ausgesperrt: Das Anmelde-Schema (authSchemas) prueft
+  // bewusst nur min(1), die Laenge gilt allein bei der Neuvergabe.
+  newPassword: z.string().min(8, 'Neues Passwort muss mindestens 8 Zeichen lang sein'),
   confirmPassword: z.string().min(1, 'Passwort-Bestätigung ist erforderlich'),
 });
 

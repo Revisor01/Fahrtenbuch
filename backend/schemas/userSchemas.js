@@ -28,12 +28,12 @@ const resetPasswordRequestSchema = z.object({
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Token ist erforderlich'),
-  newPassword: z.string().min(10, 'Passwort muss mindestens 10 Zeichen lang sein'),
+  newPassword: z.string().min(8, 'Passwort muss mindestens 8 Zeichen lang sein'),
 });
 
 const setPasswordSchema = z.object({
   token: z.string().min(1, 'Token ist erforderlich'),
-  newPassword: z.string().min(10, 'Passwort muss mindestens 10 Zeichen lang sein'),
+  newPassword: z.string().min(8, 'Passwort muss mindestens 8 Zeichen lang sein'),
 });
 
 const verifyEmailSchema = z.object({
@@ -46,7 +46,7 @@ const resendVerificationSchema = z.object({
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Aktuelles Passwort ist erforderlich'),
-  newPassword: z.string().min(10, 'Neues Passwort muss mindestens 10 Zeichen lang sein'),
+  newPassword: z.string().min(8, 'Neues Passwort muss mindestens 8 Zeichen lang sein'),
 });
 
 module.exports = {

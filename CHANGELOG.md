@@ -17,7 +17,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Veraltete Programmbibliotheken im Bauwerkzeug aktualisiert. An der Anwendung selbst ändert sich nichts
 - API-Schlüssel für die Kurzbefehle liegen nicht mehr lesbar in der Datenbank. Bestehende Kurzbefehle funktionieren unverändert weiter — es muss nichts neu eingerichtet werden
 - Im Fehlerfall schrieb die App das komplette Anfrageobjekt ins Protokoll — darin stand die Anmeldekennung, in der Handy-App im auslesbaren Gerätelog. Notiert werden jetzt nur noch Fehlercode, Adresse und Meldung
-- Neu vergebene Passwörter müssen jetzt mindestens zehn Zeichen haben statt sechs. Bestehende Passwörter bleiben gültig, das Anmelden ändert sich nicht
+- Neu vergebene Passwörter müssen jetzt mindestens acht Zeichen haben statt sechs — so viele, wie die Anzeige beim Eintippen ohnehin schon verlangt hat. Bestehende Passwörter bleiben gültig, das Anmelden ändert sich nicht
 - Ein zu langer Anlass wird beim Erfassen jetzt mit einer Meldung abgewiesen, statt die Fahrt ohne erkennbaren Grund scheitern zu lassen
 - Fehlermeldungen des Servers enthalten keine internen Angaben mehr, die Anmelde-Abfrage verrät über ihre Antwortzeit nicht mehr, welche Konten existieren, und das erneute Senden einer Bestätigungsmail ist auf fünf pro Stunde begrenzt
 - Die Oberfläche wird jetzt mit den üblichen Schutz-Kopfzeilen ausgeliefert, und der Server-Dienst läuft nicht mehr mit vollen Rechten. Für Nutzende ändert sich nichts
