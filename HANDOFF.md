@@ -1,10 +1,10 @@
 # Handoff — Stand 24.09.2026, nachts
 
 Ausgeliefert: **2.3.2 / iOS Build 31** (TestFlight, `IN_BETA_TESTING`).
-Im Arbeitsbaum steht **2.3.3 unreleased** — 15 Commits, noch **nicht
+Im Arbeitsbaum steht **2.3.3 unreleased** — 17 Commits, noch **nicht
 getaggt und nicht deployt**.
 
-Tests: 481 Prüfungen in 28 Dateien (`cd backend && npm test`), alle grün.
+Tests: 502 Prüfungen in 29 Dateien (`cd backend && npm test`), alle grün.
 Frontend-Build läuft.
 
 ---
@@ -33,7 +33,7 @@ alten Liste").
 | `342e93c` | 14, 12 | Beschriftungen, Trefferflächen, Healthcheck, Favorit |
 | `5c40be6` | 15 | Zugangsdaten aus dem Protokoll, toter Code raus |
 | `9bfd1f7` | 11, 15 | API-Schlüssel gehasht (Migration 0015), Profilname |
-| `0abef7e` | 12 | Monatsübersicht in einem Abruf: App-Start 35 → 8 Anfragen |
+| `3e3021e` | 12 | Monatsübersicht in einem Abruf: App-Start 35 → 8 Anfragen |
 
 Dazu: Git-Tags `v2.3.1` und `v2.3.2` nachgetragen (annotiert, auf ihren
 Release-Commits; das Repo nutzt entgegen der globalen Notiz ein
