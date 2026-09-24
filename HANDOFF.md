@@ -1,194 +1,367 @@
-# Übergabe — Mobile Apps (Stand 16.08.2026, abends)
+# Handoff — Stand 24.09.2026
 
-> Arbeitsübergabe, kein Projektdokument. Nach dem Weiterarbeiten löschen.
+Ausgeliefert: **2.3.2 / iOS Build 31** (in TestFlight, `IN_BETA_TESTING`).
+Letzter Commit: `7d08404 release: 2.3.2`. Alles gepusht.
 
-## Wo wir stehen
+Diese Datei löst den Stand vom 21.08. ab (der sagte noch „Android: nie
+gestartet" — Android läuft inzwischen).
 
-**iOS: Build 18 in TestFlight** (`IN_BETA_TESTING`, App-ID `6801855861`,
-Version 2.3.0, hochgeladen 21.08.2026). Enthält den Umbau des
-Erfassungs-Modals: Startort, Datum und Abrechnungsträger ohne
-Zwischenschritt, Trägername vollständig lesbar. Dazu die Fixes aus dem
-Usability-Audit — Esc schließt nur noch das oberste Fenster, und das
-Bearbeiten-Formular überschreibt manuell gesetzte Kilometer nicht mehr.
+---
 
-Davor: Build 16 mit nativen Navigationsleisten, Kirchenkreis-Auswahl,
-Registrierung, Export über das Teilen-Fenster, Anmeldung im Systemspeicher.
+## Woher die Liste kommt
 
-**Web/Produktion wurde heute deployt** — siehe eigener Abschnitt unten.
-2.470 Fahrten, 31 Nutzer, nach dem Deploy nachgeprüft und unverändert.
+Am 23./24.09. haben fünf Prüf-Agenten Backend, Datenbank, Web-Frontend,
+Mobile und einen Widget-Plan durchgesehen. Etwa ein Drittel der Befunde ist
+behoben — die, die einen Launch blockiert hätten. Der Rest steht hier.
 
-Branch `master`, alles gepusht.
+**Wichtig für den, der weitermacht:** Jeder Befund unten ist eine
+*Behauptung eines Agenten*, soweit nicht ausdrücklich als „gemessen"
+gekennzeichnet. Vor dem Beheben gegen den Code prüfen. In dieser Sitzung
+haben sich zwei Agenten-Befunde als falsch erwiesen (siehe „Korrigierte
+Befunde" unten).
 
-## Das Nächste
+---
 
-1. **Quick Actions** — von Simon als wichtig benannt, gibt es noch nicht.
-   Weder `UIApplicationShortcutItem` in der Info.plist noch etwas im
-   Frontend. Naheliegend: „Fahrt erfassen" und „Letzte Fahrt wiederholen".
-2. **Android**: nie gestartet. Keystore
-   (`~/.claude/secrets/keystores/fahrtenbuch-keystore.env`), Signierung in
-   `android/app/build.gradle` und ein gebautes Bundle liegen vor. Es fehlt
-   der erste Durchlauf auf Gerät/Emulator. Braucht **JDK 21**, nicht 17/25.
-3. **Offline-Erfassung**: Konzept unter
-   `/private/tmp/claude-501/.../scratchpad/offline-konzept.md` (falls weg:
-   neu erstellen lassen). Kern: nur Neuanlage offline, IndexedDB, Idempotenz
-   über `client_uuid` (neue Migration), `POST /api/fahrten/sync` mit
-   gruppenweiser Transaktion. Geschätzt 16–18 halbe Tage.
+## Erledigt in dieser Runde (11 Commits)
 
-Kleinere offene Punkte:
-- **Symbol „Abrechnung"** in der Tab-Leiste ist ein Dokument (`doc.text`) —
-  für „Beleg" gibt es kein verlässliches Systemsymbol. Unbewertet.
-- **`StatusUebersicht.js`** liegt unbenutzt im Repo. Sie war die
-  Erstattungs-Karte im Fahrten-Tab; falls die Aufteilung doch nicht
-  gefällt, ist der Weg zurück kurz.
-- Zwei Fähigkeiten dieser Karte fehlen seitdem: Status über einen **freien
-  Zeitraum** in einem Rutsch setzen (Abrechnung kann nur monatsweise), und
-  die Monats-Chips je Träger.
+| Commit | Inhalt |
+|---|---|
+| `5c4d983` | Kontoübernahme über ID-Schreibweise (`2e1` → Nutzer 20), Token nach Passwort-Reset |
+| `24316bb` | Passwort im Gerätelog, axios-Timeout (20 s), Kontrast 3,88 → 5,15:1 |
+| `ec10edf` | PDF-Export: max. 2 gleichzeitig (gemessen 209 MB/Lauf) |
+| `8c8b03b` | Konto-Selbstlöschung, Datumsprüfung |
+| `e1c0f07` | Impressum/Datenschutz ohne Anmeldung |
+| `3991da1` | Anmeldung an Kirchenkreis gebunden, logout leert alle Daten |
+| `e09ebe9` | Antworten aus beendeter Sitzung verwerfen |
+| `0405a77` | Datenschutzerklärung beschreibt die App |
+| `03abc10` | Android: Standort-Berechtigung, kein Cloud-Backup, Signing in .gitignore |
+| `be8cab9` | Android: Kurzbefehle beim langen Tippen |
+| `7d08404` | Release 2.3.2 |
 
-## PRODUKTIONS-DEPLOY vom 16.08.
+Tests: 10 Suiten im Backend (`npm test`), alle grün. Jeder Sicherheitsfix
+hat einen Test, der gegen den ungepatchten Stand fehlschlug.
 
-Die Regel „nie auf Produktion" gilt weiter — dieser Deploy lief auf Simons
-ausdrückliche Ansage. Grund: `/api/konfig` fehlte auf dem Server, deshalb
-erschien in der App kein „Registrieren".
+---
 
-- Images **auf dem Server gebaut** (lokal läuft kein Docker): Repo nach
-  `/opt/fahrtenbuch/build-src` geklont, `docker build`, danach gelöscht.
-- Alte Images als `:vorher` getaggt. **Rückweg:**
-  ```bash
-  docker tag revisoren/fahrtenbuch-server:vorher revisoren/fahrtenbuch-server:latest
-  docker tag revisoren/fahrtenbuch-app:vorher    revisoren/fahrtenbuch-app:latest
-  cd /opt/fahrtenbuch && docker compose up -d
-  ```
-- `TOKEN_LAUFZEIT=14d` in `stack.env` ergänzt (Simons Entscheidung): Die
-  Anmeldung hält zwei Wochen und verlängert sich bei Nutzung, statt täglich
-  abzulaufen. In geteilten Büros bleibt jemand damit länger angemeldet.
-- Migrationen waren auf beiden Seiten identisch (0009 zuletzt) — **keine
-  Schema-Änderung**.
-- Nach dem Deploy geprüft: 2.470 Fahrten, 31 Nutzer, `/api/konfig` liefert
-  `allowRegistration: true`, Registrieren-Knopf in der App sichtbar, keine
-  Fehler in den Logs.
+## OFFEN — nach Dringlichkeit
 
-## Arbeitsweise — das Wichtigste
+### 1. Erfassungsflow verwirft Eingaben bei Fehler (KRITISCH, trifft täglich)
 
-**Bauen, installieren, ansehen, nachmessen — nicht raten.** Mehrfach wurden
-Fehler auf Verdacht korrigiert, und Simon musste jeden selbst finden. Die
-echten Ursachen lagen fast nie dort, wo sie vermutet wurden.
+`frontend/src/components/erfassung/ErfassungsFlow.js:617` ruft `onClose()`
+**vor** den POSTs. `ErfassungContext.js:19` zählt `instanz` hoch → der `key`
+wechselt, der Zustand ist weg. Scheitert der POST (`:726-735`), bleibt nur
+ein Toast — Ziel, Anlass, km, Mitfahrer sind verloren, kein Retry.
 
-**Der Simulator lässt sich fernsteuern** (`idb`, in `~/.local/bin`). Damit
-kommt man bis in die angemeldete App und durch jeden Ablauf.
+Bei Funkloch der häufigste reale Fehlerfall. **Das ist der wichtigste
+verbleibende Punkt**, weil er Nutzer trifft, während die anderen
+Angriffsszenarien oder Wachstumsprobleme sind.
 
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-idb ui tap   --udid <UDID> <x> <y>          # Punkte, nicht Pixel: px/3
-idb ui swipe --udid <UDID> <x1> <y1> <x2> <y2> --duration 0.3
-idb ui text  --udid <UDID> "text"
-idb ui key   --udid <UDID> 42               # 42 = Backspace
-```
+Fix: POST-Block in eine Funktion `sende(trips)` auslagern, im `catch`
+`toast.error(…, { actionLabel: 'Erneut versuchen', onAction: () => sende(trips) })`.
+Die Closure hält `trips` über den Unmount hinweg.
 
-Zwei Fallen: Die Tastatur liegt auf **deutschem Layout** — `@` und `-`
-kommen als `"` und `ß` an; für Anmeldungen den Benutzernamen (`simon`)
-statt der E-Mail nehmen. Und nach `launch` **8–10 Sekunden warten**, sonst
-landet der erste Tap im Startbildschirm.
+Verwandt: `ErfassungsFlow.js:726-731` löscht bei Teilfehler die bereits
+gespeicherte Hinfahrt per `axios.delete(...).catch(() => {})`. Bei Timeout,
+den der Server doch verarbeitet hat, scheitert auch das Delete stumm →
+Waise auf dem Server, Nutzer legt neu an → Duplikat.
 
-Bauen und installieren:
+### 2. Unbegrenzte Zeiträume (HOCH, DoS durch jeden Angemeldeten)
 
-```bash
-cd frontend && npm run build && npx cap sync ios
-cd ios/App && xcodebuild -project App.xcodeproj -scheme App -sdk iphonesimulator \
-  -configuration Release -destination 'id=<UDID>' \
-  -derivedDataPath /tmp/simrel build CODE_SIGNING_ALLOWED=NO
-xcrun simctl install <UDID> /tmp/simrel/Build/Products/Release-iphonesimulator/App.app
-xcrun simctl launch <UDID> de.godsapp.fahrtenbuch
-xcrun simctl io <UDID> screenshot bild.png
-magick bild.png -format "%[pixel:p{600,2600}]" info:   # Farbe nachmessen
-```
+`backend/utils/excelExport.js:621-629` und
+`backend/controllers/fahrtController.js:313-327`: Schleife über alle Monate
+ohne Bereichsgrenze. `GET /api/fahrten/report-range/1/1/9999/12` = 120.000
+Monatsabfragen sequentiell, bei 10 Pool-Verbindungen. Der Export-Weg legt
+zusätzlich 120.000 Zeilen in `abrechnungen` an.
 
-**Release, nicht Debug** — nur der zählt für TestFlight, und der Debug-Build
-startet spürbar langsamer.
+Keine Validierung in `backend/schemas/fahrtSchemas.js`; die Routen
+`routes/fahrten.js:14,16,20` haben kein `validate`.
 
-Für Abläufe über die Zeit (Start, Übergänge) **filmen statt Einzelbilder**:
+Fix: Zod-Params-Schema (`year` 2000–2100, `month` 1–12, `type`
+`/^\d+$|^mitfahrer$/`) plus Bereichsgrenze max. 24 Monate, `start <= end`.
+Für `/report-range`, `/export-range`, `/export-pdf-range`, `/export`,
+`/export-pdf`, `/report`.
 
-```bash
-xcrun simctl io <UDID> recordVideo --codec h264 -f start.mp4 &
-# ... starten ...
-kill -INT <pid>
-ffmpeg -i start.mp4 -vf "fps=10,scale=200:-1" frames/f%03d.png
-magick montage frames/f0[2-6]?.png -tile 10x -geometry +2+2 kontakt.png
-```
+### 3. Range-Export setzt Status, bevor die Datei existiert (HOCH)
 
-## TestFlight-Build erzeugen
+`excelExport.js:561, 609`: `setzeZeitraumStatus` läuft in
+`baueZeitraumWorkbooks`, also **vor** dem Senden; beim PDF folgt danach noch
+LibreOffice (60 s Timeout). Bricht es bei Monat 3 von 6 ab, sind zwei Monate
+„eingereicht", vier nicht, und es gibt keine Datei. Jedes `updateStatus` ist
+ein eigenes Autocommit, keine Transaktion.
 
-Vier Fallstricke, die je einen Fehlversuch gekostet haben:
+Fix: Status erst nach erfolgreichem Senden, alle Monate in einer
+Transaktion. Oder ganz herausnehmen — das Frontend hat den Toast „Als
+eingereicht markieren" bereits.
 
-1. **Build-Nummer erhöhen**, sonst weist Apple ab:
-   `perl -pi -e 's/CURRENT_PROJECT_VERSION = N;/CURRENT_PROJECT_VERSION = N+1;/' App.xcodeproj/project.pbxproj`
-2. **Manuelle Signierung**: `CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=J459G9CJT5
-   PROVISIONING_PROFILE_SPECIFIER="Fahrtenbuch AppStore"
-   CODE_SIGN_IDENTITY="Apple Distribution: Simon Luthe (J459G9CJT5)"`
-3. **Beim Export `PATH` auf Apples Werkzeuge setzen** —
-   `PATH="/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Xcode.app/Contents/Developer/usr/bin"`.
-   Homebrew hat ein neueres `rsync`, das ein Apple-Flag nicht kennt.
-4. **Profil per UUID, nicht per Name.** Xcodes Apple-ID-Sitzung läuft ab
-   („Your session has expired"); dann findet der Export das Profil über den
-   Namen nicht und bricht mit „requires a provisioning profile" ab. UUID für
-   „Fahrtenbuch AppStore": `3a6d3cd4-3301-4640-baca-360e58acdab9`.
-   Export-Plist unter `/tmp/ExportOptions<Build>.plist` — **`/tmp` wird
-   geleert**, die Datei ist beim nächsten Mal weg und muss neu geschrieben
-   werden (`method: app-store-connect`, `signingStyle: manual`, Profil per
-   UUID unter `provisioningProfiles` → `de.godsapp.fahrtenbuch`).
-   Die abgelaufene Sitzung meldet sich beim Export weiterhin als
-   „Your session has expired" — mit der UUID läuft er trotzdem durch,
-   maßgeblich ist `** EXPORT SUCCEEDED **`.
+### 4. Backend-Container läuft als root (HOCH)
 
-Danach `xcrun altool --upload-app`, Verschlüsselungserklärung per API setzen
-(`usesNonExemptEncryption: false`). Testgruppe ist intern — Builds landen
-automatisch dort, `betaGroups`-Zuordnung per API schlägt fehl (422) und ist
-nicht nötig. Status prüfen über `buildBetaDetail` → `internalBuildState`.
+`backend/Dockerfile` ohne `USER`. LibreOffice rendert darin Nutzertexte.
+Fix: `USER node` nach dem `COPY`, `npm ci --omit=dev`.
 
-ASC-API: `~/.claude/secrets/asc-jwt.sh`, Zugangsdaten in `~/.claude/secrets.env`.
-Eckige Klammern in Query-Parametern **URL-kodieren** (`filter%5Bapp%5D=...`),
-sonst bricht curl ab.
+### 5. Netzfehler sieht aus wie „keine Fahrten" (HOCH, Gefahr doppelter Erfassung)
 
-## Fallen, die schon zugeschnappt sind
+`AppContext.js:443-446`: bei Fehler `setFahrten([])`, nur `console.error`.
+`FahrtenListe.js:272-283` zeigt dann „Noch keine Fahrten im September". Der
+Nutzer legt sie erneut an → doppelte Abrechnung.
 
-- **Die weißen Ränder lagen NICHT im CSS.** `contentInset: "always"` hielt die
-  WebView aus den Systemrändern; dort war die native Fläche weiß. Jetzt
-  `"never"` plus `backgroundColor`.
-- **Dieselbe Falle beim Start:** Der weiße Bildschirm in Sekunde 2–3 kam aus
-  `LaunchScreen.storyboard` — die imageView trug `systemBackgroundColor`, im
-  hellen Design reines Weiß. Weder CSS noch `capacitor.config.json`
-  erreichen das. Beim Prüfen **vorher deinstallieren**: iOS hält den
-  Launch-Screen im Cache.
-- **Tailwind wirft dynamisch gebaute Klassen aus dem Build.** Die
-  Fortschrittsleiste (`status-progress-${state}`) zeigte monatelang nur ihre
-  Beschriftung — Kreise und Linien fehlten, weil der Scanner die Namen nie
-  vollständig im Quelltext sieht. Jetzt in `tailwind.config.js` unter
-  `safelist`. **Bei jeder neuen `${}`-Klasse daran denken** und im Build
-  nachsehen: `grep <klasse> build/assets/*.css`.
-- **Der Startbildschirm blitzte auf, obwohl angemeldet:** Die Notbremse stand
-  auf 2500 ms, der Keychain-Zugriff hat aber drei Etappen à 800 ms. Jetzt
-  4000 ms plus ein Merker, der die Notbremse entschärft, sobald der Speicher
-  geantwortet hat.
-- **Fehler ohne Fehlermeldung:** Fehlte die Keychain-Berechtigung, kehrte der
-  Aufruf nie zurück — kein `catch` griff. Alle Speicherzugriffe haben jetzt
-  eine Zeitgrenze.
-- **`--brand` und `--on-brand` kippen im dunklen Design.** Auf dem
-  Startbildschirm sind die Farben deshalb fest verdrahtet (`#0F5257`,
-  `#FFFFFF`, `#E8B461`) — die native Fläche darunter bleibt immer Petrol.
-- **ImageMagick zeichnet keine SVG-Konturen.** Icons mit `rsvg-convert`
-  rendern, sonst fehlt der Ring im Logo.
-- **Die Sandbox kann aussetzen** (`EPERM: uv_cwd` bei Node und git, obwohl
-  Dateien lesbar sind). Kein Projektfehler — Sitzung neu starten, dann läuft
-  es wieder.
+Der axios-Interceptor (`:302-310`) behandelt nur 401; 403/500/Netz lösen
+keinen Toast aus. `fehlerText.js` existiert, wird aber nur an zwei Stellen
+genutzt.
 
-## Simons Vorgaben
+Fix: `fahrtenFehler`-State, `toast.error(fehlerText(error))` im catch,
+EmptyState nur bei `!fahrtenFehler`.
 
-- **Nativ ist gesetzt**, Aufwand ist kein Gegenargument (Notiz
-  `feedback_native_ui_gesetzt.md`). Nicht abwägend zurückfragen.
-- **Web bleibt** wie es ist — außer er verlangt ausdrücklich eine Änderung.
-- **Aus einem Guss**: bestehendes Designsystem, Petrol `#0F5257`. Kein
-  Material You, das würde die Markenfarbe überschreiben.
-- **Beide Listen gleich**: Dashboard „Zuletzt" und Fahrtenliste tragen
-  dieselbe Struktur. Darauf legt er Wert.
-- **Zahlen brauchen eine Fläche.** Frei stehende Werte zwischen Abschnitten
-  wirken verloren — Karten mit Beschriftung, keine nackten Zahlen.
-- **Vor größeren Umbauten committen**, damit ein Rückweg bleibt.
+### 6. Sheets schließen ohne Nachfrage (HOCH)
+
+`Sheet.js:350` Backdrop, `:47-53` Esc, `:333` Swipe,
+`useZurueckButton.js:34` Android-Zurück — alle rufen direkt `onClose()`.
+Kein `dirty`-Konzept, kein `beforeunload`. Im Erfassungsflow Schritt 2 mit
+Mitfahrern genügt ein Daumen aufs Overlay.
+
+Fix: Prop `schutz` am `Sheet`, in `schliessen()` (`Sheet.js:89`) abfragen.
+`ErfassungsFlow` gibt `schutz={step === 2 || !!zielOrtId || !!zielAdresse}`.
+
+### 7. Keine Security-Header für die SPA (HOCH)
+
+`frontend/nginx.conf` setzt nur Cache-Header. Kein CSP, kein
+`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`. `helmet()`
+schützt nur die API-Antworten, nicht das HTML. Token liegt im Web in
+`localStorage` → jede XSS-Lücke exfiltriert es.
+
+**Vorher prüfen, was Caddy auf dem KKD-Server schon setzt** — die
+Caddy-Konfiguration liegt nicht im Repo.
+
+Vorschlag: `Content-Security-Policy "default-src 'self'; connect-src 'self'
+https://photon.komoot.io; img-src 'self' data:; style-src 'self'
+'unsafe-inline'; font-src 'self'; frame-ancestors 'none'"` (inline `<style>`
+in `index.html:19` erzwingt `'unsafe-inline'` oder einen Hash).
+
+### 8. Sitzungsablauf: stiller Logout mitten im Formular (HOCH)
+
+`AppContext.js:303-307` `logout()` ohne Toast; `AppContent.js:147-167`
+prüft alle 60 s `exp` und meldet still ab. Beim Logout unmountet
+`AppContent` mit allen Sheets samt Eingaben. Der `isLoggingOut`-Guard wird
+in `logout()` selbst sofort zurückgesetzt → 35 parallele 401 = 35×
+`logout()`. `ErfassungsFlow` liegt außerhalb von `AppContent` → das Sheet
+steht nach Zwangs-Logout über der Anmeldemaske.
+
+Fix: Toast „Sitzung abgelaufen", `isLoggingOut.current = false` in `login()`
+statt `logout()`, im `ErfassungProvider`
+`useEffect(() => { if (!isLoggedIn) close(); }, [isLoggedIn])`.
+
+### 9. Fehlergrenze umschließt nur AppContent (HOCH)
+
+`App.js:37`. Außerhalb: `ErfassungsFlow`, `StatusDatumSheet`, `PwaUpdater`,
+die Routen `/help`, `/verify-email`, `/reset-password`, `/set-password`,
+`/rechtliches`. Ein Render-Fehler dort = weiße Seite. `Fehlergrenze.js:26-38`
+bietet keinen Knopf; „App schließen und neu öffnen" hilft in der PWA nicht.
+
+Fix: Fehlergrenze um `<Routes>` innerhalb der Provider, zweite um
+`<ErfassungsFlow>`, Knopf „Neu laden" mit `window.location.reload()`.
+
+### 10. manualChunks macht Lazy-Imports wirkungslos (HOCH)
+
+`vite.config.js:120-127`: `if (!id.includes('node_modules')) return; …
+return 'vendor'`. Jedes node_modules-Modul landet in `vendor`, auch
+dynamisch importierte. Belegt per String-Zählung im Bundle: JSZip 7×, pako
+18×, SecureStorage 7×, NativeNavigation 5×. Der Web-Nutzer lädt beim Start
+jszip+pako (~90 kB roh) und alle nativen Plugins.
+
+Fix, eine Zeile vor `return 'vendor'`:
+`if (/node_modules\/(jszip|pako|@capacitor|@capgo|@aparajita)\//.test(id)) return;`
+
+### 11. Weitere Backend-Punkte (MITTEL)
+
+- **E-Mail-Kollision**: `userController.js:223-243` prüft nicht, ob die neue
+  Adresse einem anderen Konto gehört. `user_profiles.email` ohne UNIQUE.
+  In `profileController.js:64-71` ist es gefixt, hier nicht.
+- **Mailversand ohne eigenes Limit**: `POST /api/users/resend-verification`
+  (nur `schreibLimiter` 200/5 min), Empfänger ist Nutzer-Input → 200 Mails
+  in 5 Minuten an eine fremde Adresse vom Kirchen-Mailserver.
+- **`error.message` an den Client**: `excelExport.js:669, 687`,
+  `pdfExport.js:118, 138` — enthält MySQL-Texte, LibreOffice-stderr und
+  Temp-Pfade.
+- **Nutzer-Enumeration**: `authController.js:37-43` (bcrypt nur bei
+  existierendem Nutzer, ≈100 ms Unterschied), `userController.js:306-318`.
+  Fix: Dummy-Hash vergleichen, Reset-Mail asynchron.
+- **API-Keys im Klartext**: `models/ApiKey.js:6-9, 27`. Ein DB-Backup
+  enthält nutzbare Dauer-Zugänge. Fix: SHA-256 speichern.
+- **`jwt.verify` ohne `algorithms`**: `authMiddleware.js:40`. Geprüft: bei
+  String-Secret nicht ausnutzbar, trotzdem `{ algorithms: ['HS256'] }`.
+- **JWT_SECRET ohne Mindestlänge**: `app.js:29-35` prüft nur Existenz.
+- **Passwort-Mindestlänge 6** (`profileSchemas.js:14`) — bei IBAN und
+  Bewegungsprofilen zu kurz, ≥10.
+- **`express.json({ limit: '10mb' })`** (`app.js:120`) — 1 MB reicht.
+- **`npm audit fix`** im Backend: nodemailer ≥9.1.1, qs ≥6.16, beide ohne
+  Major. Von den 22 GitHub-Meldungen sind nur diese zwei zur Laufzeit
+  erreichbar; der Rest ist Build-Werkzeug.
+
+### 12. Datenbank und Last (wird bei Wachstum gefährlich)
+
+Alles gemessen auf Produktion, 24.09.:
+
+- **N+1 bei Mitfahrern**: `fahrtController.js:240-242` lädt sie pro Fahrt
+  nach, obwohl `Fahrt.js:281` sie schon per JOIN holt und `:237` wegwirft.
+  App-Start ≈ 1.100 Abfragen bei 30 Fahrten/Monat.
+- **`YEAR()/MONTH()` statt Datumsbereich**: `Fahrt.js:282`,
+  `fahrtController.js:565`. Gemessen: 7,3 ms gegen **0,79 ms** mit
+  `datum >= ? AND datum < ?` — Faktor 9. Index `(user_id, datum)` fehlt; der
+  vorhandene `idx_fahrten_datum_user` hat die falsche Reihenfolge.
+- **`GET /api/fahrten` ungepaginiert**: 1.043 Zeilen = 52,7 ms, **341,6 KB
+  JSON**, bei jedem App-Start und nach jedem Speichern.
+- **Frontend-Request-Sturm**: App-Start ≈ 40 Requests (28 Monatsreports
+  parallel, `AppContext.js:543-576`), jedes Speichern ≈ 36, Zeitraum-Status
+  bis 389. Rate-Limit ist 600/5 min — wer eine Woche nachträgt, läuft hinein.
+  Schnellfix: `refresh=false` an `AppContext.js:522` und
+  `useFahrtenExport.js:241/244`, doppelte `fetchFahrten()` streichen.
+- **Fahrt ändern: zwei Transaktionen**: `fahrtController.js:163` (Autocommit)
+  danach `Mitfahrer.updateMitfahrerForFahrt` (:170, eigene Transaktion).
+  Fehler dort → km geändert, Mitfahrer alt, Client bekommt 500.
+- **`favoritController.js:103-124`**: Rückfahrt scheitert, `catch` loggt nur,
+  Antwort trotzdem 201 „Hin- und Rückfahrt erstellt".
+- **Healthcheck ohne Passwort**: `mysqladmin ping` → Access denied, Exit 0,
+  Status „healthy". Nebenwirkung: Aborted_connects 88.046 von 88.352.
+- **`mysql:8` nicht gepinnt** — läuft schon auf 8.4.11, nächster Major kommt
+  ungefragt. Auf `mysql:8.4` festlegen.
+- **`/var/lib/docker` 46 von 47 GB belegt** — `docker system df` ansehen.
+- **`user_profiles.email` ohne Index**, `fahrten.abrechnung` VARCHAR ohne FK
+  (6 Fahrten zeigen auf gelöschten Träger 19).
+
+### 13. Mobile und Store
+
+- **Android-Zurücktaste verwirft den Erfassungsflow**
+  (`useZurueckButton.js:33-34` → Sheet `onClose` → in Schritt 2 der ganze
+  Flow). Fix: in Schritt 2 → `setStep(1)`.
+- **Kurzbefehl-Kaltstart-Timing auf iOS ungeprüft**: `Kurzbefehle.swift:53-56`
+  löscht `offenerTyp`, sobald `evaluateJavaScript` zurückkehrt; der in
+  `:57-58` versprochene Neuversuch beim Vordergrund-Wechsel fehlt. Auf
+  langsamem Netz per Kaltstart prüfen.
+- **Play Console**: App `de.godsapp.fahrtenbuch` **nicht angelegt** (404 bei
+  intaktem Service-Konto, gegengeprüft mit zwei anderen Paketen). Nötig:
+  Konto-Typ klären (Personal = 12 Tester × 14 Tage Closed Testing vor
+  Production; Organisationskonten befreit), AAB, Play App Signing,
+  Data-Safety, Content Rating, Datenschutz-URL. Kein Android-Workflow in
+  `.github/workflows/` — `android-release.yml` analog zu `ios-release.yml`
+  wäre ~½ Tag.
+- **Exportkonformität** muss derzeit pro Build von Hand gesetzt werden
+  (`usesNonExemptEncryption: false` per ASC-API). Könnte in
+  `ios-release.yml` wandern.
+- **Ungenutzte Plugins**: `@capacitor/network`, `@capacitor/preferences` —
+  nirgends importiert, bringen aber `ACCESS_NETWORK_STATE` mit.
+- **Git-Tag `v2.3.1` und `v2.3.2` fehlen** (letzter Tag: `v2.3.0`).
+
+### 14. Zugänglichkeit (wichtig bei dieser Zielgruppe)
+
+- **Eingabefelder ohne Beschriftung**: `MitfahrerModal.js:38-48, 52-62`,
+  `FahrtForm.js:967-973, 976-983, 992-996` — `<label>` ohne `htmlFor`,
+  `<input>` ohne `id`. Screenreader liest „Eingabefeld".
+- **Trefferflächen unter 44 px**: `.dash-uw-btn` 34×34 (`index.css:2189`),
+  `.set-action` 36×36 (`:4700`), `.set-grip` 32×36 (`:5197`). Der Token
+  `--tap-min` existiert (`tokens.css:53`), wird dort aber nicht genutzt.
+- **11-px-Inhaltswerte**: `.fl-mf-betrag` (`:5074`), `.dash-chart-monat`
+  (`:2719`), `.fl-zeile-mf` (`:3329`).
+
+### 15. Kleinkram
+
+- **Token in ~60 `console.error(…, error)`**: Jeder AxiosError trägt
+  `config.headers.Authorization` und `config.data`. In Capacitor landet das
+  im Gerätelog. Fix: Helfer `logFehler(kontext, error)`, der nur
+  `{status, url, message}` ausgibt.
+- **`.map`/`.find` auf ungeprüften Antworten**: `UserManagement.js:144`,
+  `ApiBereich.js:93` (die Context-Stellen sind seit `e09ebe9` gefixt).
+- **Fehlende Doppelklick-Sperren**: `FahrtForm.js:951`,
+  `SatzBausteine.js:18-23/55`, `FavoritenBereich.js:98-114`,
+  `UserManagement.js:42-45`.
+- **Veraltete Daten**: `ProfilBereich.js:83-86` ruft nicht
+  `fetchCurrentUser` → Dashboard-Begrüßung bleibt alt. Sechs
+  `fetchOrte()`/`fetchDistanzen()` ohne `await`.
+- **Race beim Monatswechsel**: `fetchFahrten` ohne Request-Nummer,
+  `ZeitraumSegmente.js:188-189` setzt Von und Bis in zwei `setState`s.
+- **Tote Dateien**: `src/utils.js` (41 Z.), `fahrten/StatusUebersicht.js`
+  (170 Z.), `@heroicons/react` in `package.json` (0 Imports).
+- **`offline.html`** wird precacht, aber nirgends referenziert.
+- **`navigateFallbackDenylist`** (`vite.config.js:52`) kennt `/api-docs`
+  nicht.
+- **CSV-Injection**: praktisch nicht ausnutzbar (ExcelJS schreibt Strings
+  als Text, gemessen), aber `anlass` hat kein `.max()` in
+  `fahrtSchemas.js:65/84`.
+- **Deploy-Skripte**: DB-Passwort per `-p"$kennwort"` auf der Kommandozeile
+  (`deploy/deploy.sh:94-96`), `StrictHostKeyChecking=no` (`:44`).
+
+---
+
+## Korrigierte Befunde — nicht nochmal jagen
+
+Zwei Agenten-Behauptungen haben sich beim Nachprüfen als **falsch** erwiesen:
+
+1. **„iOS-Navigationsleiste ist eine Eigenbau-View."** Falsch. Die Weiche
+   `ensureTabBar()` (`NativeNavigationPlugin.swift:673`) hängt an
+   `usesSystemLiquidGlass`, und das ist `#available(iOS 26.0)`. Auf iOS 26+
+   läuft Apples echte `UITabBarController`. Die Eigenbau-View ist der
+   Fallback für iOS 15–25.
+
+2. **„`sort -V` wählt die falsche Xcode-Version."** Bei den konkreten
+   Ständen (26.4.1 / 26.6 / 16.2) wählt es korrekt 26.6. Die robustere
+   Variante ist trotzdem im Workflow, weil sie bei anderen Ständen kippen
+   kann.
+
+Ebenfalls geprüft und **nicht** gefährlich:
+- **Formel-Injection im Excel-Export**: ExcelJS schreibt `=…` als
+  Shared-String, nicht als Formel — gemessen.
+- **Mandantentrennung**: Jede UPDATE/DELETE trägt `AND user_id = ?`. Keine
+  Route gefunden, über die man fremde Daten erreicht.
+- **15 Fahrten mit kaputtem Datum**: Es sind **sechs** (der Agent hat Hin-
+  und Rückfahrten doppelt gezählt), zusammen ~8 €. Entscheidung Simon:
+  Daten bleiben, nur die Ursache ist geschlossen.
+
+---
+
+## Widget und Sprachsteuerung
+
+**Recherchiert am 24.09., mit Quellen und Datum.**
+
+- **iOS/Siri: geht.** App Intents (iOS 16+) mit gesprochenen Rückfragen.
+  Einschränkung: Eine Aufruf-Phrase darf **höchstens einen Parameter**
+  enthalten — „Hey Siri, Fahrt anlegen nach Büsum", der Rest per Rückfrage.
+  Braucht eine eigene Swift-Schicht für HTTP und Keychain (die WebView läuft
+  beim Hintergrundstart nicht), plus zweites Signing-Ziel in der CI.
+  Voraussetzung: Keychain-Zugriffsklasse auf
+  `afterFirstUnlockThisDeviceOnly` umstellen, sonst `errSecInteractionNotAllowed`.
+  Geprüft: **`cap sync ios` zerstört ein zusätzliches Target nicht** — nur
+  `cap add ios` würde es.
+
+- **Android/„Hey Google": geht nicht.** App Actions löst Gemini seit dem
+  04.09.2026 nicht mehr aus (Entwicklerberichte in Googles Forum, keine
+  Antwort von Google). Der Nachfolger AppFunctions ist Alpha, Kotlin-only,
+  Android 16+, und die Gemini-Anbindung ist seit Mai 2026 geschlossene
+  Vorschau. Auf Android bleibt „Hey Google, öffne Fahrtenbuch".
+
+- **Widget**: Kann auf **keiner** Plattform ein Formular zeigen. Nur
+  Anzeige plus Ein-Tipp-Buchung vordefinierter Fahrten. Simon hat entschieden:
+  kein Widget, kein Favoriten-Ausbau, Long-Press reicht.
+
+---
+
+## Betrieb
+
+- **Backup**: `/opt/backups/backup.sh`, Cron 3:00, Hetzner Storage Box.
+  Seit 24.09. wird `stack.env` AES-256-verschlüsselt mitgesichert;
+  Passphrase in `/root/.backup-passphrase` (0400) **und**
+  `KKD_BACKUP_PASSPHRASE` in `~/.claude/secrets.env`. Rückholung getestet.
+  Rotation: lokal 14 Tage, auswärts keine (Box zu 80 % voll).
+- **Rückspielung des DB-Dumps ungeprüft** — zuletzt 17.08., seither drei
+  Migrationen. Simon: erstmal ignorieren.
+- **iOS-Build**: `.github/workflows/ios-release.yml`, nur
+  `workflow_dispatch`. Version vorher in der pbxproj setzen und committen,
+  dann Lauf starten (~3–5 min). Grund für die CI: Simons Mac läuft auf
+  macOS-Beta, Apple lehnt solche Builds mit `ITMS-90111` ab.
+
+## Arbeitsregeln
+
+- **Emulator/Simulator nur auf ausdrückliche Ansage** — eine Freigabe gilt
+  für den Anlass, nicht für die Sitzung. Ohne Emulator prüfbar:
+  `./gradlew assembleDebug`, `aapt2 dump xmltree` aufs APK, `npm test`,
+  `vite preview` im Browser.
+- Testserver ist `server.godsapp.de`, **nicht** KKD.
+- CHANGELOG bei jedem Nutzer-sichtbaren Commit mitschreiben, OpenAPI bei
+  jeder Routenänderung.
