@@ -114,6 +114,14 @@ export default defineConfig({
           }
           if (id.includes('react-router')) return 'router';
           if (id.includes('lucide-react') || id.includes('@heroicons')) return 'icons';
+          // Dynamisch geladene Pakete NICHT nach `vendor` ziehen: Wer hier
+          // einen Namen zurueckgibt, hebelt den Lazy-Import aus — Rollup legt
+          // das Modul dann in den benannten Brocken, und der laedt beim
+          // Start. jszip und pako braucht nur der ZIP-Export, die
+          // Capacitor-Plugins nur die App; im Browser werden sie nie
+          // angefordert. Ohne `return` entscheidet Rollup selbst und legt
+          // sie in eigene Dateien.
+          if (/node_modules\/(jszip|pako|@capacitor|@capgo|@aparajita)\//.test(id)) return;
           return 'vendor';
         },
       },

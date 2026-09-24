@@ -7,6 +7,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased] - 2.3.3
 
+### Geändert
+- Die App startet im Browser schneller: Beim Start werden nur noch die Teile geladen, die sofort gebraucht werden. Was zum Erstellen von ZIP-Dateien oder allein in der Handy-App nötig ist, kommt erst bei Bedarf dazu — gemessen 164 kB statt 203 kB beim Start
+
 ### Sonstiges
 - Die Oberfläche wird jetzt mit den üblichen Schutz-Kopfzeilen ausgeliefert, und der Server-Dienst läuft nicht mehr mit vollen Rechten. Für Nutzende ändert sich nichts
 
