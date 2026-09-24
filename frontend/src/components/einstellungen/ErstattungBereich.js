@@ -19,12 +19,17 @@ function ErstattungBereich() {
   const fetchSaetze = async () => {
     try {
       const response = await axios.get('/api/abrechnungstraeger');
+      // Meldet der Endpunkt einen Fehler, steht im Rumpf ein Objekt statt
+      // einer Liste — .map warf dann einen TypeError und die Einstellungen
+      // blieben leer, ohne Hinweis. Gleiches gilt fuer die Historie.
+      const traegerListe = Array.isArray(response.data) ? response.data : [];
       const mitHistorie = await Promise.all(
-        response.data.map(async (traeger) => {
+        traegerListe.map(async (traeger) => {
           const historieRes = await axios.get(`/api/abrechnungstraeger/${traeger.id}/historie`);
+          const historie = Array.isArray(historieRes.data) ? historieRes.data : [];
           return {
             ...traeger,
-            erstattungsbetraege: historieRes.data.sort(
+            erstattungsbetraege: historie.sort(
               (a, b) => new Date(b.gueltig_ab) - new Date(a.gueltig_ab)
             ),
           };
