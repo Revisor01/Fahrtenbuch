@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { overlayAnmelden } from '../../utils/overlayStack';
 import { tastaturAbonnieren, tastaturHoehe } from '../../utils/tastatur';
+import { useToast } from './Toast';
 
 // Bottom-Sheet nach Design-Spec (Redesign 2026):
 // - mobil: --surface, border-radius 28px 28px 0 0, Griff 44×5px --line-strong,
@@ -70,7 +71,7 @@ function escAnmelden(refHalter) {
   };
 }
 
-function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
+function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, schutz = false, onZurueck, children }) {
   const panelRef = useRef(null);
   const koerperRef = useRef(null);
   const triggerRef = useRef(null);
@@ -86,7 +87,56 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   // Fokus zurueck aufs Panel und scrollte den Inhalt mitten im Tippen auf 0.
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
-  const schliessen = useCallback(() => onCloseRef.current?.(), []);
+
+  // `schutz` bremst das beilaeufige Schliessen. Alle vier Wege — Tipp auf die
+  // Flaeche daneben, Esc, Wischen nach unten und die Android-Zurueck-Taste —
+  // laufen ueber schliessen(); die Pruefung sitzt deshalb hier an einer
+  // Stelle statt viermal.
+  //
+  // Kein zweites Overlay zur Rueckfrage: Ein Dialog ueber dem Sheet waere auf
+  // dem Handy ein weiterer Stapel mit eigenem Zurueck-Verhalten. Stattdessen
+  // ein Toast mit „Verwerfen" — derselbe Weg wie beim Rueckgaengigmachen
+  // einer Fahrt, und er laesst das Sheet mitsamt Eingaben stehen, bis
+  // entschieden ist.
+  const schutzRef = useRef(schutz);
+  schutzRef.current = schutz;
+  const toast = useToast();
+  const verwerfenBestaetigt = useRef(false);
+
+  // Gibt es eine Ebene darunter (z. B. Schritt 2 -> Schritt 1 im
+  // Erfassungsflow), fuehrt das Zurueckgehen dorthin statt zu schliessen.
+  // Das ist die bessere Antwort auf die Android-Zurueck-Taste als eine
+  // Rueckfrage: Der Nutzer wollte eine Ebene zurueck, nicht abbrechen.
+  const zurueckRef = useRef(onZurueck);
+  zurueckRef.current = onZurueck;
+
+  const schliessen = useCallback(() => {
+    if (zurueckRef.current) {
+      zurueckRef.current();
+      return;
+    }
+    if (schutzRef.current && !verwerfenBestaetigt.current) {
+      toast.error('Eingaben verwerfen?', {
+        bleibt: true,
+        actionLabel: 'Verwerfen',
+        onAction: () => {
+          verwerfenBestaetigt.current = true;
+          onCloseRef.current?.();
+        },
+      });
+      return;
+    }
+    onCloseRef.current?.();
+  }, [toast]);
+
+  // Beim erneuten Oeffnen wieder scharf stellen.
+  useEffect(() => {
+    if (isOpen) verwerfenBestaetigt.current = false;
+  }, [isOpen]);
+
+  // Halter fuer den Esc-Stapel, der einen Ref erwartet.
+  const schliessenRef = useRef(schliessen);
+  schliessenRef.current = schliessen;
 
   // Am globalen Overlay-Stapel anmelden, damit der Android-Zurueck-Button das
   // oberste offene Sheet schliesst statt die App zu verlassen. Zusammen mit
@@ -94,7 +144,9 @@ function Sheet({ isOpen, onClose, title, ariaLabel, wide = false, children }) {
   useEffect(() => {
     if (!isOpen) return undefined;
     const abOverlay = overlayAnmelden(schliessen);
-    const abEsc = escAnmelden(onCloseRef);
+    // Ueber schliessenRef, nicht onCloseRef: Der Esc-Stapel rief bisher den
+    // rohen onClose auf und umginge damit die Schutzabfrage.
+    const abEsc = escAnmelden(schliessenRef);
     return () => {
       abEsc();
       abOverlay();
