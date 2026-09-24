@@ -12,6 +12,38 @@ name: iOS Release Build
 # (MARKETING_VERSION / CURRENT_PROJECT_VERSION) und werden VOR dem Start
 # hier im Repo gesetzt und committet — der Workflow zaehlt nicht selbst hoch,
 # damit die hochgeladene Nummer immer einem Commit entspricht.
+#
+# SIGNIERUNG — bitte vor Aenderungen lesen (24.09.2026):
+#
+# Beides muss auf MANUELL stehen, sonst legt Xcode im Apple-Konto
+# Development-Zertifikate an, bis das kontoweite Limit voll ist. Dann kann
+# KEIN Projekt mehr bauen, auch nicht am Mac — Fahrtenbuch, Konfi Quest und
+# Moin Kark teilen sich dieses Limit.
+#
+#   1. Die Release-Konfiguration in project.pbxproj
+#      (CODE_SIGN_STYLE = Manual, CODE_SIGN_IDENTITY = "Apple Distribution",
+#      PROVISIONING_PROFILE_SPECIFIER). Debug bleibt auf Development, sonst
+#      laesst sich lokal nicht mehr aufs eigene Geraet bauen.
+#   2. Die ExportOptions weiter unten (signingStyle: manual).
+#
+# Die zweite Stelle wird leicht uebersehen. `xcodebuild -help` zu
+# signingStyle: „If your archive is manually signed and you choose to
+# automatically sign when distributing, then Xcode will create provisioning
+# profiles and managed cloud signing certificates as necessary." Der Export
+# ist also ein eigenes Schlupfloch — das Projekt allein umzustellen genuegt
+# nicht.
+#
+# `-allowProvisioningUpdates` gehoert deshalb NICHT mehr an xcodebuild. Fehlt
+# ein Profil, soll der Lauf abbrechen und es sagen, statt sich still eins zu
+# besorgen. Der Schritt „Provisioning-Profil laden" holt es ueber die
+# ASC-API.
+#
+# Warum das monatelang unbemerkt blieb: Es wird nirgends etwas rot. Die
+# Builds sind VALID, der Export re-signiert fuers App-Store-Ziel, und die
+# Versionen gehen durch TestFlight und Store-Pruefung. Belegt am Log von
+# Build 31 (Lauf 35933605897): „Signing Identity: Apple Development: Created
+# via API" — das Archiv war falsch signiert, das Ergebnis trotzdem gueltig.
+# Nur die Zahl im Konto stieg.
 
 on:
   workflow_dispatch:
