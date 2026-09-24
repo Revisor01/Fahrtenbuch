@@ -305,10 +305,11 @@ const paths = {
       tags: ['Auswertungen'], summary: 'Monatsbericht',
       description: 'Alle Fahrten des Monats mit berechneter Erstattung je Fahrt und einer Zusammenfassung je Abrechnungsträger.',
       parameters: [
-        { name: 'year', in: 'path', required: true, schema: { type: 'integer' }, example: 2026 },
-        { name: 'month', in: 'path', required: true, schema: { type: 'integer' }, example: 8 },
+        { name: 'year', in: 'path', required: true, schema: { type: 'integer', minimum: 2000, maximum: 2100 }, example: 2026 },
+        { name: 'month', in: 'path', required: true, schema: { type: 'integer', minimum: 1, maximum: 12 }, example: 8 },
       ],
       responses: {
+        400: VALIDIERUNG,
         200: ANTWORT('Bericht des Monats', {
           fahrten: [{ id: 2830, datum: '2026-08-24', anlass: 'Dienstbesprechung', kilometer: '32.00', erstattungssatz: 0.3, erstattung: 9.6 }],
           summary: { erstattungen: { 1: 9.6, mitfahrer: 1.2 }, gesamtErstattung: 10.8, abrechnungsStatus: { 1: { eingereicht_am: '2026-08-05', erhalten_am: null } } },
@@ -336,8 +337,14 @@ const paths = {
   '/api/fahrten/report-range/{startYear}/{startMonth}/{endYear}/{endMonth}': {
     get: {
       tags: ['Auswertungen'], summary: 'Bericht über einen Zeitraum',
-      parameters: ['startYear', 'startMonth', 'endYear', 'endMonth'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'integer' } })),
-      responses: { 200: ANTWORT('Bericht des Zeitraums, zusätzlich je Monat aufgeschlüsselt', { fahrten: [], summary: { erstattungen: {}, erstattungenProMonat: {}, gesamtErstattung: 0, abrechnungsStatus: {} } }), 401: FEHLER[401], 500: FEHLER[500] },
+      description: 'Jahr 2000–2100, Monat 1–12, Zeitraum höchstens 120 Monate und nicht rückwärts laufend (seit 24.09.2026 geprüft).',
+      parameters: [
+        { name: 'startYear', in: 'path', required: true, schema: { type: 'integer', minimum: 2000, maximum: 2100 }, example: 2026 },
+        { name: 'startMonth', in: 'path', required: true, schema: { type: 'integer', minimum: 1, maximum: 12 }, example: 1 },
+        { name: 'endYear', in: 'path', required: true, schema: { type: 'integer', minimum: 2000, maximum: 2100 }, example: 2026 },
+        { name: 'endMonth', in: 'path', required: true, schema: { type: 'integer', minimum: 1, maximum: 12 }, example: 6 },
+      ],
+      responses: { 200: ANTWORT('Bericht des Zeitraums, zusätzlich je Monat aufgeschlüsselt', { fahrten: [], summary: { erstattungen: {}, erstattungenProMonat: {}, gesamtErstattung: 0, abrechnungsStatus: {} } }), 400: VALIDIERUNG, 401: FEHLER[401], 500: FEHLER[500] },
     },
   },
   '/api/fahrten/export/{type}/{year}/{month}': {
@@ -347,9 +354,10 @@ const paths = {
       parameters: [
         { name: 'type', in: 'path', required: true, schema: { type: 'string' }, description: 'ID des Abrechnungsträgers oder `mitfahrer`', example: '1' },
         { name: 'year', in: 'path', required: true, schema: { type: 'string' }, example: '2026' },
-        { name: 'month', in: 'path', required: true, schema: { type: 'string' }, description: 'Entweder `08` oder `2026-08`.', example: '08' },
+        { name: 'month', in: 'path', required: true, schema: { type: 'string' }, description: 'Entweder `08` oder `2026-08` — beide Schreibweisen bleiben gültig. Monat 1–12, Jahr 2000–2100 (seit 24.09.2026 geprüft).', example: '08' },
       ],
       responses: {
+        400: VALIDIERUNG,
         200: { description: 'Excel-Datei, bei mehreren Blättern ein ZIP', content: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': { schema: { type: 'string', format: 'binary' } }, 'application/zip': { schema: { type: 'string', format: 'binary' } } } },
         401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: ANTWORT('Zu viele Exporte', { message: 'Zu viele Exporte in kurzer Zeit. Bitte einen Moment warten.' }), 500: FEHLER[500],
       },
@@ -358,37 +366,39 @@ const paths = {
   '/api/fahrten/export-range/{type}/{startYear}/{startMonth}/{endYear}/{endMonth}': {
     get: {
       tags: ['Export'], summary: 'Zeitraum-Abrechnung als Excel',
-      description: '**Achtung:** Dieser Abruf verändert Daten — er setzt jeden Monat des Zeitraums auf „eingereicht" mit dem heutigen Datum.',
+      description: '**Achtung:** Dieser Abruf verändert Daten — er setzt jeden Monat des Zeitraums auf „eingereicht" mit dem heutigen Datum.\n\nJahr 2000–2100, Monat 1–12, Zeitraum höchstens 120 Monate und nicht rückwärts laufend (seit 24.09.2026 geprüft).',
       parameters: [
-        { name: 'type', in: 'path', required: true, schema: { type: 'string' }, description: 'ID des Abrechnungsträgers oder `mitfahrer`' },
-        ...['startYear', 'startMonth', 'endYear', 'endMonth'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string' } })),
+        { name: 'type', in: 'path', required: true, schema: { type: 'string', pattern: '^(\\d+|mitfahrer)$' }, description: 'ID des Abrechnungsträgers oder `mitfahrer`' },
+        ...['startYear', 'endYear'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string', pattern: '^\\d{4}$' } })),
+        ...['startMonth', 'endMonth'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string', pattern: '^(0?[1-9]|1[0-2])$' } })),
       ],
       responses: {
         200: { description: 'Excel-Datei oder ZIP', content: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': { schema: { type: 'string', format: 'binary' } }, 'application/zip': { schema: { type: 'string', format: 'binary' } } } },
-        401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500],
+        400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500],
       },
     },
   },
   '/api/fahrten/export-pdf/{type}/{year}/{month}': {
     get: {
-      tags: ['Export'], summary: 'Monatsabrechnung als PDF', description: 'Ändert nichts am Status.',
+      tags: ['Export'], summary: 'Monatsabrechnung als PDF', description: 'Ändert nichts am Status. Monat als `08` oder `2026-08`; Monat 1–12, Jahr 2000–2100 (seit 24.09.2026 geprüft).',
       parameters: [
-        { name: 'type', in: 'path', required: true, schema: { type: 'string' } },
-        { name: 'year', in: 'path', required: true, schema: { type: 'string' } },
+        { name: 'type', in: 'path', required: true, schema: { type: 'string', pattern: '^(\\d+|mitfahrer)$' } },
+        { name: 'year', in: 'path', required: true, schema: { type: 'string', pattern: '^\\d{4}$' } },
         { name: 'month', in: 'path', required: true, schema: { type: 'string' } },
       ],
-      responses: { 200: { description: 'Eine PDF-Datei. Reicht die Abrechnung über mehrere Formularblätter, stehen sie als Seiten in derselben Datei.', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } } }, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
+      responses: { 200: { description: 'Eine PDF-Datei. Reicht die Abrechnung über mehrere Formularblätter, stehen sie als Seiten in derselben Datei.', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } } }, 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
     },
   },
   '/api/fahrten/export-pdf-range/{type}/{startYear}/{startMonth}/{endYear}/{endMonth}': {
     get: {
       tags: ['Export'], summary: 'Zeitraum-Abrechnung als PDF',
-      description: '**Achtung:** Setzt jeden Monat des Zeitraums auf „eingereicht".',
+      description: '**Achtung:** Setzt jeden Monat des Zeitraums auf „eingereicht".\n\nJahr 2000–2100, Monat 1–12, Zeitraum höchstens 120 Monate und nicht rückwärts laufend (seit 24.09.2026 geprüft).',
       parameters: [
-        { name: 'type', in: 'path', required: true, schema: { type: 'string' } },
-        ...['startYear', 'startMonth', 'endYear', 'endMonth'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string' } })),
+        { name: 'type', in: 'path', required: true, schema: { type: 'string', pattern: '^(\\d+|mitfahrer)$' } },
+        ...['startYear', 'endYear'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string', pattern: '^\\d{4}$' } })),
+        ...['startMonth', 'endMonth'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string', pattern: '^(0?[1-9]|1[0-2])$' } })),
       ],
-      responses: { 200: { description: 'Eine PDF-Datei. Reicht die Abrechnung über mehrere Formularblätter, stehen sie als Seiten in derselben Datei.', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } } }, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
+      responses: { 200: { description: 'Eine PDF-Datei. Reicht die Abrechnung über mehrere Formularblätter, stehen sie als Seiten in derselben Datei.', content: { 'application/pdf': { schema: { type: 'string', format: 'binary' } } } }, 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Keine Daten für den ausgewählten Zeitraum und Typ gefunden.'), 429: FEHLER[429], 500: FEHLER[500] },
     },
   },
   '/api/fahrten/abrechnungsstatus': {
