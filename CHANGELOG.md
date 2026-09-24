@@ -13,6 +13,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die App startet im Browser schneller: Beim Start werden nur noch die Teile geladen, die sofort gebraucht werden. Was zum Erstellen von ZIP-Dateien oder allein in der Handy-App nötig ist, kommt erst bei Bedarf dazu — gemessen 164 kB statt 203 kB beim Start
 
 ### Sonstiges
+- API-Schlüssel für die Kurzbefehle liegen nicht mehr lesbar in der Datenbank. Bestehende Kurzbefehle funktionieren unverändert weiter — es muss nichts neu eingerichtet werden
 - Im Fehlerfall schrieb die App das komplette Anfrageobjekt ins Protokoll — darin stand die Anmeldekennung, in der Handy-App im auslesbaren Gerätelog. Notiert werden jetzt nur noch Fehlercode, Adresse und Meldung
 - Neu vergebene Passwörter müssen jetzt mindestens zehn Zeichen haben statt sechs. Bestehende Passwörter bleiben gültig, das Anmelden ändert sich nicht
 - Ein zu langer Anlass wird beim Erfassen jetzt mit einer Meldung abgewiesen, statt die Fahrt ohne erkennbaren Grund scheitern zu lassen
@@ -23,6 +24,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
 ### Behoben
+- Nach dem Ändern des eigenen Namens im Profil stand auf der Startseite bis zum nächsten App-Start weiter der alte Name
 - Beim Anlegen einer Fahrt aus einem Favoriten mit Rückfahrt meldete die App „Hin- und Rückfahrt erstellt", auch wenn die Rückfahrt gescheitert war. Sie fehlte dann unbemerkt in der Abrechnung. Jetzt steht in der Meldung, was wirklich angelegt wurde
 - Die kleinen Knöpfe in den Listen — Sortiergriff, Bearbeiten, Löschen und der Haken auf der Startseite — ließen sich auf dem Handy schwer treffen. Die Tippfläche ist jetzt so groß wie vorgeschrieben, das Aussehen bleibt gleich
 - Beim Erfassen von Mitfahrer:innen und beim Speichern eines Ortes waren die Eingabefelder nicht mit ihren Beschriftungen verbunden. Die Sprachausgabe las nur „Eingabefeld", und ein Tipp auf die Beschriftung setzte den Cursor nicht ins Feld

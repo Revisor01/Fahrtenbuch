@@ -12,7 +12,7 @@ import BereichKopf from './BereichKopf';
 // Profil & Passwort: persönliche Daten für die Abrechnung + Passwortwechsel.
 // Formulare bleiben Seiteninhalt (mehrfeldrig, kein Sheet).
 function ProfilBereich() {
-  const { setUser, refreshAllData, orte, updateOrt, logout } = useContext(AppContext);
+  const { setUser, refreshAllData, orte, updateOrt, logout, fetchCurrentUser } = useContext(AppContext);
   const toast = useToast();
   const [profile, setProfile] = useState({});
   const [oldPassword, setOldPassword] = useState('');
@@ -116,7 +116,15 @@ function ProfilBereich() {
 
       await axios.put('/api/profile', cleanProfile);
       toast.success('Profil aktualisiert.');
-      fetchProfile();
+      // fetchProfile fuellt nur dieses Formular; den Namen fuer die
+      // Begruessung auf der Startseite haelt `user` im Context. Ohne
+      // fetchCurrentUser stand dort nach einer Namensaenderung bis zum
+      // naechsten Start der alte Name.
+      //
+      // Mit await: Sonst laeuft der Abruf neben refreshAllData weiter, und
+      // ein Wechsel der Ansicht unmittelbar danach zeigt noch den alten
+      // Stand.
+      await Promise.all([fetchProfile(), fetchCurrentUser()]);
       await refreshAllData();
     } catch (error) {
       logFehler('Fehler beim Aktualisieren des Profils:', error);
