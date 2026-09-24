@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Car, Pencil, Trash2, RotateCw, ArrowLeftRight } from 'lucide-react';
+import { Car, Pencil, Trash2, RotateCw, ArrowLeftRight, CloudOff } from 'lucide-react';
 import { AppContext } from '../contexts/AppContext';
 import { useToast } from './ui/Toast';
 import { useErfassung } from '../contexts/ErfassungContext';
@@ -30,6 +30,7 @@ function FahrtenListe() {
     selectedMonth,
     selectedVonMonth,
     fetchFahrten,
+    fahrtenFehler,
     deleteFahrt,
     addFahrt,
     fetchMonthlyData,
@@ -269,7 +270,19 @@ function FahrtenListe() {
         </div>
       </div>
 
-      {sortierteFahrten.length === 0 ? (
+      {/* Konnte nicht geladen werden ist etwas anderes als „nichts da". Stand
+          hier frueher „Noch keine Fahrten im September", obwohl nur das Netz
+          fehlte, erfasste die Nutzer:in sie ein zweites Mal — und rechnete
+          sie doppelt ab. */}
+      {sortierteFahrten.length === 0 && fahrtenFehler ? (
+        <EmptyState
+          icon={<CloudOff size={22} />}
+          title="Die Fahrten konnten nicht geladen werden"
+          text={fahrtenFehler}
+          actionLabel="Erneut versuchen"
+          onAction={() => fetchFahrten()}
+        />
+      ) : sortierteFahrten.length === 0 ? (
         <EmptyState
           icon={<Car size={22} />}
           title={

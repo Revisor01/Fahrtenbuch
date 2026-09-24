@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext, useRef } from 'react';
+import fehlerText from '../utils/fehlerText';
 import axios from 'axios';
 import { aktuellerMonat } from '../utils/datum';
 import StatusDatumSheet from '../components/abrechnung/StatusDatumSheet';
@@ -26,6 +27,11 @@ export const AppContext = createContext();
 
 function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Merkt, dass das Laden der Fahrten fehlgeschlagen ist. Ohne diese
+  // Unterscheidung sah ein Netzfehler wie „keine Fahrten in diesem Monat"
+  // aus — der gefaehrlichste Fall in dieser App, weil die Nutzer:in die
+  // Fahrten dann ein zweites Mal erfasst und doppelt abrechnet.
+  const [fahrtenFehler, setFahrtenFehler] = useState(null);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   // Solange die gespeicherte Anmeldung noch nicht gelesen ist, darf die App
@@ -331,7 +337,7 @@ function AppProvider({ children }) {
         if (error.response && error.response.status === 401) {
           if (!isLoggingOut.current) {
             isLoggingOut.current = true;
-            logout();
+            logout({ grund: 'abgelaufen' });
           }
         }
         return Promise.reject(error);
@@ -357,6 +363,8 @@ function AppProvider({ children }) {
       // Neue Sitzung: noch laufende Aufrufe der vorigen Anmeldung duerfen
       // weder ihre Nutzerdaten schreiben noch diese Anmeldung wieder beenden.
       sitzungsZaehler.current += 1;
+      // Hier statt in logout(): siehe Begruendung dort.
+      isLoggingOut.current = false;
       setToken(token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       // Ohne await: Das Speichern entscheidet nur darueber, ob die Anmeldung
@@ -389,12 +397,23 @@ function AppProvider({ children }) {
   // Kirchenkreis-Wechsel rufen logout() ohne await auf, deshalb muss der State
   // sofort fallen. Das Loeschen im Speicher laeuft daneben — die App zeigt
   // schon die Anmeldung, waehrend der Systemspeicher aufraeumt.
-  const logout = () => {
+  // grund: 'abgelaufen' fuer den erzwungenen Logout (Token abgelaufen oder
+  // vom Server abgewiesen), sonst das bewusste Abmelden ueber den Knopf.
+  const logout = ({ grund } = {}) => {
     sitzungsZaehler.current += 1;
     setToken(null);
     setUser(null);
     setIsLoggedIn(false);
-    isLoggingOut.current = false;
+    // isLoggingOut wird hier BEWUSST nicht zurueckgesetzt, sondern erst beim
+    // naechsten Login. logout() laeuft synchron durch; stuende die
+    // Ruecksetzung hier, waere das Flag beim zweiten der ~35 parallelen
+    // 401-Fehler schon wieder false und logout() liefe fuer jeden einzelnen
+    // erneut. Ohne Meldung fiel das nicht auf (logout ist idempotent) — mit
+    // der Meldung unten waeren es 35 Toasts uebereinander.
+    // Ein offenes Erfassungs-Sheet oder Status-Fenster steht sonst nach dem
+    // Zwangs-Logout ueber der Anmeldemaske: Beide werden von ihren Providern
+    // gerendert, nicht von AppContent, und ueberleben dessen Wechsel.
+    setAbrechnungsStatusModal({ open: false });
     // Der Header muss mit fallen, sonst schickt der naechste Request noch den
     // Token des abgemeldeten Kontos mit.
     delete axios.defaults.headers.common['Authorization'];
@@ -417,6 +436,12 @@ function AppProvider({ children }) {
     loescheAnmeldung().catch((error) => {
       console.error('Abmeldedaten konnten nicht entfernt werden:', error);
     });
+
+    // Der erzwungene Logout kam bisher wortlos: Wer mitten im Formular sass,
+    // stand ploetzlich vor der Anmeldung, ohne zu wissen warum.
+    if (grund === 'abgelaufen') {
+      toast.error('Die Sitzung ist abgelaufen. Bitte erneut anmelden.');
+    }
   };
 
   const fetchOrte = async () => {
@@ -496,11 +521,18 @@ function AppProvider({ children }) {
         mitfahrer: fahrt.mitfahrer || []
       })));
       setSummary(response?.data?.summary || {});
+      setFahrtenFehler(null);
     } catch (error) {
       console.error('Fehler beim Abrufen der Fahrten:', error);
       if (sitzungVorbei(sitzung)) return;
       setFahrten([]);
       setSummary({});
+      // Bei 401 meldet der Interceptor bereits ab und zeigt seine eigene
+      // Meldung — hier kaeme sonst ein zweiter Toast obendrauf.
+      if (error?.response?.status !== 401) {
+        setFahrtenFehler(fehlerText(error, 'Die Fahrten konnten nicht geladen werden.'));
+        toast.error(fehlerText(error, 'Die Fahrten konnten nicht geladen werden.'));
+      }
     }
   };
 
@@ -740,6 +772,7 @@ function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       isLoggedIn,
+      fahrtenFehler,
       anmeldungGeladen,
       login,
       logout,

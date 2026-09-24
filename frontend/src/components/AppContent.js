@@ -150,14 +150,15 @@ function AppContent() {
       try {
         const tokenData = JSON.parse(atob(token.split('.')[1]));
         if (tokenData.exp * 1000 < Date.now()) {
-          logout();
+          // Mit Grund: Der Logout kam bisher wortlos, mitten im Formular.
+          logout({ grund: 'abgelaufen' });
         }
       } catch (error) {
         // Ein defekter Token darf die App nicht zerlegen: die Exception lief
         // bisher aus dem useEffect heraus, React warf den Baum weg (weisse
         // Seite) und der kaputte Wert blieb liegen - jeder Reload crashte neu.
         console.error('Token unlesbar, wird verworfen:', error);
-        logout();
+        logout({ grund: 'abgelaufen' });
       }
     };
 
@@ -428,7 +429,7 @@ function AppContent() {
             <button
               type="button"
               className="sidebar-tool sidebar-logout"
-              onClick={logout}
+              onClick={() => logout()}
               title="Abmelden"
               aria-label="Abmelden"
             >

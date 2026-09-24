@@ -128,7 +128,7 @@ function EinstellungenView({ initialTab, onShowInfo, onShowNewFeatures }) {
               </button>
               <button
                 type="button"
-                onClick={logout}
+                onClick={() => logout()}
                 className="set-nav-foot-link is-abmelden"
               >
                 <LogOut size={18} />
