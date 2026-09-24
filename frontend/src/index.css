@@ -6946,3 +6946,44 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
 [data-theme='dark'] .datum-feld::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
+
+/* Trefferflaechen auf --tap-min (44px) bringen, ohne das Aussehen zu aendern.
+ *
+ * Diese drei Knoepfe sind bewusst klein gezeichnet (34-36px) und sollen es
+ * bleiben — sie stehen in dichten Listenzeilen. Zu klein ist aber nur die
+ * FLAECHE, nicht das Bild: Ein unsichtbares ::after zentriert ueber dem
+ * Knopf faengt den Daumen ab, der danebentrifft.
+ *
+ * Der Knopf braucht dafuer position: relative; das Pseudoelement liegt
+ * ausserhalb und darf den Inhalt nicht ueberdecken (kein eigener Hintergrund).
+ * Die Regel steht am Ende der Datei, damit sie die Basisregeln oben ergaenzt
+ * statt mit ihnen zu ringen.
+ */
+.dash-uw-btn,
+.set-action,
+.set-grip {
+  position: relative;
+}
+
+.dash-uw-btn::after,
+.set-action::after,
+.set-grip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  width: 100%;
+  height: 100%;
+}
+
+/* Der Sortiergriff bekommt nur in der Breite mehr: In der Hoehe liegen die
+ * Griffe benachbarter Listenzeilen sonst uebereinander, und ein Zug an der
+ * Grenze erwischte die falsche Zeile. Die Zeilen sind knapp 48px hoch —
+ * die volle Zeilenhoehe ist als Ziel gross genug. */
+.set-grip::after {
+  min-height: 0;
+  height: 100%;
+}
