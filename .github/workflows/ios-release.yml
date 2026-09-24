@@ -132,6 +132,59 @@ jobs:
           echo "$ASC_KEY_P8_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
           chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
 
+      # Bei manueller Signierung sucht Xcode das Profil im lokalen Ordner und
+      # legt sich keins an. Ohne diesen Schritt bricht der Build ab, statt
+      # sich still ein Development-Zertifikat zu besorgen — das ist gewollt:
+      # ein fehlendes Profil soll auffallen, nicht umgangen werden.
+      - name: Provisioning-Profil laden
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          set -euo pipefail
+          # JWT fuer die App-Store-Connect-API (ES256, 10 Minuten gueltig)
+          python3 - <<'PYEOF' > /tmp/asc.jwt
+          import base64, json, os, time
+          from cryptography.hazmat.primitives.serialization import load_pem_private_key
+          from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
+          from cryptography.hazmat.primitives.asymmetric import ec
+          from cryptography.hazmat.primitives import hashes
+
+          def b64(o):
+              roh = o if isinstance(o, bytes) else json.dumps(o, separators=(',', ':')).encode()
+              return base64.urlsafe_b64encode(roh).rstrip(b'=')
+
+          schluessel = load_pem_private_key(
+              base64.b64decode(os.environ['ASC_KEY_P8_BASE64']), password=None)
+          kopf = {'alg': 'ES256', 'kid': os.environ['ASC_KEY_ID'], 'typ': 'JWT'}
+          rumpf = {'iss': os.environ['ASC_ISSUER_ID'], 'iat': int(time.time()),
+                   'exp': int(time.time()) + 600, 'aud': 'appstoreconnect-v1'}
+          zuSignieren = b64(kopf) + b'.' + b64(rumpf)
+          roh = schluessel.sign(zuSignieren, ec.ECDSA(hashes.SHA256()))
+          r, s = decode_dss_signature(roh)
+          print((zuSignieren + b'.' + b64(r.to_bytes(32, 'big') + s.to_bytes(32, 'big'))).decode())
+          PYEOF
+
+          JWT=$(cat /tmp/asc.jwt)
+          NAME="Fahrtenbuch AppStore"
+          PROFIL=$(curl -s -H "Authorization: Bearer $JWT" \
+            "https://api.appstoreconnect.apple.com/v1/profiles?limit=200&fields%5Bprofiles%5D=name,profileContent")
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROFIL" | python3 -c "
+          import json, sys, base64, pathlib, os
+          daten = json.load(sys.stdin).get('data', [])
+          treffer = [p for p in daten if p['attributes']['name'] == os.environ['NAME']]
+          if not treffer:
+              print('Profil \'' + os.environ['NAME'] + '\' nicht gefunden. Vorhanden:', file=sys.stderr)
+              for p in daten: print('  -', p['attributes']['name'], file=sys.stderr)
+              sys.exit(1)
+          ziel = pathlib.Path.home() / 'Library/MobileDevice/Provisioning Profiles' / (treffer[0]['id'] + '.mobileprovision')
+          ziel.write_bytes(base64.b64decode(treffer[0]['attributes']['profileContent']))
+          print('Profil abgelegt:', ziel)
+          "
+          rm -f /tmp/asc.jwt
+
       - name: Archiv bauen
         working-directory: frontend/ios/App
         # -project, nicht -workspace: Diese App bindet die Capacitor-Plugins
@@ -145,7 +198,6 @@ jobs:
           xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath build/App.xcarchive archive \
-            -allowProvisioningUpdates \
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" | tail -40
@@ -164,7 +216,15 @@ jobs:
           <dict>
             <key>destination</key><string>export</string>
             <key>method</key><string>app-store-connect</string>
-            <key>signingStyle</key><string>automatic</string>
+            <!-- manual passend zum Projekt: Bei automatic durfte Xcode sich
+                 fehlende Anmeldedaten selbst besorgen und legte dafuer
+                 Development-Zertifikate im Konto an. -->
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>de.godsapp.fahrtenbuch</key><string>Fahrtenbuch AppStore</string>
+            </dict>
             <key>stripSwiftSymbols</key><true/>
             <key>teamID</key><string>J459G9CJT5</string>
             <key>uploadSymbols</key><true/>
@@ -174,7 +234,6 @@ jobs:
           EOF
           xcodebuild -exportArchive -archivePath build/App.xcarchive \
             -exportPath build/export -exportOptionsPlist ExportOptions-ci.plist \
-            -allowProvisioningUpdates \
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" | tail -10
