@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import logFehler from '../../utils/logFehler';
+
+// Muss zu backend/schemas/profileSchemas.js passen — und zu SetPassword.js.
+// Der Wert stand hier auf 8, waehrend der Server kurzzeitig 10 verlangte:
+// Die Pruefliste zeigte einen gruenen Punkt, und das Speichern scheiterte
+// trotzdem mit „Validierungsfehler". Jetzt fordern beide Seiten 8.
+const PASSWORT_MINDESTLAENGE = 8;
 import axios from 'axios';
 import { Home, AlertTriangle, Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
@@ -170,7 +176,7 @@ function ProfilBereich() {
   };
 
   const pruefungen = [
-    { ok: newPassword.length >= 8, text: 'Mindestens 8 Zeichen' },
+    { ok: newPassword.length >= PASSWORT_MINDESTLAENGE, text: `Mindestens ${PASSWORT_MINDESTLAENGE} Zeichen` },
     { ok: /[A-Z]/.test(newPassword), text: 'Großbuchstaben' },
     { ok: /[a-z]/.test(newPassword), text: 'Kleinbuchstaben' },
     { ok: /\d/.test(newPassword), text: 'Mindestens eine Zahl' },
@@ -332,7 +338,7 @@ function ProfilBereich() {
       <hr className="set-divider" />
 
       <div className="set-subhead">Passwort ändern</div>
-      <p className="set-subsatz">Mindestens 8 Zeichen, mit Groß- und Kleinbuchstaben und einer Zahl.</p>
+      <p className="set-subsatz">{`Mindestens ${PASSWORT_MINDESTLAENGE} Zeichen, mit Groß- und Kleinbuchstaben und einer Zahl.`}</p>
 
       <form onSubmit={handlePasswordChange} className="space-y-4">
         <div>

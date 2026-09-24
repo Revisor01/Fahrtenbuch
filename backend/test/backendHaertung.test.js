@@ -171,11 +171,39 @@ pruefe('der Rumpf darf hoechstens 1 MB gross sein', () => {
     'es gibt keinen Upload-Pfad, 10 MB war unnoetig viel');
 });
 
-pruefe('Passwoerter brauchen bei Neuvergabe 10 Zeichen', () => {
+pruefe('Passwoerter brauchen bei Neuvergabe 8 Zeichen', () => {
   for (const datei of ['schemas/userSchemas.js', 'schemas/profileSchemas.js']) {
     const inhalt = lies(datei);
     assert.ok(!/min\(6,/.test(inhalt), `${datei} erlaubt noch 6 Zeichen`);
-    assert.ok(/min\(10,/.test(inhalt));
+    assert.ok(/min\(8,/.test(inhalt));
+  }
+});
+
+pruefe('Server und Oberflaeche fordern denselben Wert', () => {
+  // Der eigentliche Fehler war nicht die Zahl, sondern dass sie auseinander
+  // lief: Die Pruefliste zeigte „Mindestens 8 Zeichen" gruen, der Server
+  // verlangte 10 und wies mit „Validierungsfehler" ab. Wer eine Seite
+  // aendert, muss die andere mitziehen — das faengt diese Pruefung ab.
+  const serverWert = lies('schemas/userSchemas.js').match(/min\((\d+), 'Passwort muss/);
+  assert.ok(serverWert, 'Mindestlaenge im Server-Schema nicht gefunden');
+
+  const frontend = __dirname + '/../../frontend/src/';
+  for (const datei of ['SetPassword.js', 'components/einstellungen/ProfilBereich.js']) {
+    const inhalt = fs.readFileSync(frontend + datei, 'utf8');
+    const treffer = inhalt.match(/const PASSWORT_MINDESTLAENGE = (\d+);/);
+    assert.ok(treffer, `${datei} hat keine Konstante fuer die Mindestlaenge`);
+    assert.strictEqual(treffer[1], serverWert[1],
+      `${datei} fordert ${treffer[1]}, der Server ${serverWert[1]}`);
+  }
+});
+
+pruefe('die Oberflaeche nennt keine abweichende Zahl im Text', () => {
+  // Fest eingetippte Zahlen laufen genau so auseinander wie vorher.
+  const frontend = __dirname + '/../../frontend/src/';
+  for (const datei of ['SetPassword.js', 'components/einstellungen/ProfilBereich.js']) {
+    const inhalt = fs.readFileSync(frontend + datei, 'utf8');
+    assert.ok(!/Mindestens \d+ Zeichen/.test(inhalt),
+      `${datei} nennt eine feste Zahl statt PASSWORT_MINDESTLAENGE`);
   }
 });
 
