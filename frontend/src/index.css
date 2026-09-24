@@ -6747,6 +6747,28 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
 /* Fehlermeldung auf dem Startbildschirm. Bewusst schmal und lesbar: In der
    App gibt es keine Entwicklerkonsole, das ist die einzige Stelle, an der
    ein Fehler ueberhaupt sichtbar wird. */
+/* „Neu laden" in der Fehlergrenze. Weisser Knopf auf der Markenflaeche.
+   Farben fest verdrahtet wie bei Logo und Name darueber: Die Flaeche bleibt
+   in beiden Designs Petrol, var(--brand-strong) kippt im dunklen aber ins
+   Helle — heller Text auf weissem Knopf waere unlesbar.
+   Trefferflaeche ueber --tap-min, weil das hier der einzige Ausweg ist. */
+.startbildschirm-knopf {
+  margin-top: 4px;
+  min-height: var(--tap-min);
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--r-btn);
+  background: #FFFFFF;
+  color: #0F5257;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.startbildschirm-knopf:active {
+  opacity: .85;
+}
+
 .startbildschirm-fehler {
   max-width: 320px;
   margin: 4px 0 0;

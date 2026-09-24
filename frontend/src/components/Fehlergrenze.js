@@ -28,11 +28,26 @@ class Fehlergrenze extends React.Component {
         <div className="startbildschirm-inhalt">
           <span className="startbildschirm-name">Etwas ist schiefgelaufen</span>
           <span className="startbildschirm-text">
-            Bitte die App einmal schließen und neu öffnen.
+            Ein erneuter Versuch hilft meistens.
           </span>
-          <pre className="startbildschirm-fehler">
-            {String(this.state.fehler?.message || this.state.fehler)}
-          </pre>
+          {/* „Schliessen und neu oeffnen" half im Browser nicht weiter, und in
+              der installierten App ist es umstaendlich. Ein Knopf, der neu
+              laedt, deckt beide Faelle ab. */}
+          <button
+            type="button"
+            className="startbildschirm-knopf"
+            onClick={() => window.location.reload()}
+          >
+            Neu laden
+          </button>
+          {/* Die Fehlermeldung nur bei der Entwicklung: Auf dem Geraet einer
+              Nutzer:in sagt sie nichts, und Apple-Pruefer:innen sehen sonst
+              ein Stacktrace-Fragment auf der oeffentlichen Rechtsseite. */}
+          {import.meta.env?.DEV && (
+            <pre className="startbildschirm-fehler">
+              {String(this.state.fehler?.message || this.state.fehler)}
+            </pre>
+          )}
         </div>
       </div>
     );

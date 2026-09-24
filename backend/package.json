@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js && node test/doku.test.js && node test/haertung.test.js && node test/pdfMehrblatt.test.js && node test/kontoUebernahme.test.js && node test/exportGrenze.test.js && node test/datumPruefung.test.js && node test/kontoLoeschen.test.js && node test/instanzBindung.test.js && node test/erfassungWiederholen.test.js && node test/zeitraumGrenzen.test.js && node test/zeitraumStatus.test.js"
+    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js && node test/doku.test.js && node test/haertung.test.js && node test/pdfMehrblatt.test.js && node test/kontoUebernahme.test.js && node test/exportGrenze.test.js && node test/datumPruefung.test.js && node test/kontoLoeschen.test.js && node test/instanzBindung.test.js && node test/erfassungWiederholen.test.js && node test/zeitraumGrenzen.test.js && node test/zeitraumStatus.test.js && node test/fehlergrenze.test.js"
   },
   "keywords": [],
   "author": "",

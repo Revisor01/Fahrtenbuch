@@ -11,6 +11,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
 ### Behoben
+- Trat beim Anzeigen ein Fehler auf, blieb der Bildschirm in manchen Bereichen einfach weiß — etwa auf der Seite mit Impressum und Datenschutz, bei der Erfassung oder nach dem Öffnen eines Links aus einer E-Mail. Jetzt erscheint überall eine Meldung mit dem Knopf „Neu laden"
 - Beim Abrechnen mehrerer Monate galten einzelne Monate schon als eingereicht, obwohl der Export danach fehlschlug und gar keine Datei entstand — besonders beim PDF, das länger braucht. Der Status wird jetzt erst gesetzt, wenn die Datei da ist, und für alle Monate gemeinsam: Entweder gelten alle als eingereicht oder keiner
 - Schlug das Speichern einer Fahrt fehl — im Funkloch der häufigste Fall —, war alles Eingetippte weg: Ziel, Anlass, Kilometer und Mitfahrer mussten neu erfasst werden. Die Meldung bietet jetzt „Erneut versuchen" an und bleibt stehen, bis entschieden ist. Wurde bei einer Fahrt mit Rückfahrt nur die erste gespeichert, wird sie vor dem neuen Versuch entfernt, damit die Fahrt nicht doppelt in der Abrechnung landet
 

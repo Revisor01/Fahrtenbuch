@@ -25,6 +25,17 @@ function App() {
 
   return (
     <ThemeProvider>
+    {/* Die Fehlergrenze umschliesst den ganzen Baum, nicht nur AppContent.
+        Vorher lag sie innerhalb der Routen, und alles darueber war
+        ungeschuetzt: PwaUpdater, ErfassungsFlow und StatusDatumSheet (beide
+        werden von ihren Providern gerendert, nicht hier), die oeffentlichen
+        Routen /help, /rechtliches, /verify-email, /reset-password,
+        /set-password — und die Provider-Ruempfe selbst. Ein Render-Fehler an
+        einer dieser Stellen ergab eine weisse Seite.
+        Besonders heikel: /rechtliches rufen Apple-Pruefer:innen ohne Konto
+        auf. Innerhalb des ThemeProviders, damit die Meldung im richtigen
+        Farbschema erscheint. */}
+    <Fehlergrenze>
     <BrowserRouter>
     <ToastProvider>
     <PwaUpdater />
@@ -39,12 +50,13 @@ function App() {
     <Route path="/verify-email" element={<VerifyEmail />} />
     <Route path="/reset-password" element={<SetPassword />} />
     <Route path="/set-password" element={<SetPassword />} />
-    <Route path="/*" element={<Fehlergrenze><AppContent /></Fehlergrenze>} />
+    <Route path="/*" element={<AppContent />} />
     </Routes>
     </ErfassungProvider>
     </AppProvider>
     </ToastProvider>
     </BrowserRouter>
+    </Fehlergrenze>
     </ThemeProvider>
   );
 }
