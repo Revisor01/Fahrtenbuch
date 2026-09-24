@@ -38,12 +38,23 @@ name: iOS Release Build
 # besorgen. Der Schritt „Provisioning-Profil laden" holt es ueber die
 # ASC-API.
 #
-# Warum das monatelang unbemerkt blieb: Es wird nirgends etwas rot. Die
-# Builds sind VALID, der Export re-signiert fuers App-Store-Ziel, und die
-# Versionen gehen durch TestFlight und Store-Pruefung. Belegt am Log von
-# Build 31 (Lauf 35933605897): „Signing Identity: Apple Development: Created
-# via API" — das Archiv war falsch signiert, das Ergebnis trotzdem gueltig.
-# Nur die Zahl im Konto stieg.
+# Warum das monatelang unbemerkt blieb: Es wird nirgends etwas rot.
+#
+# Gemessen: Build 31 (Lauf 35933605897) meldet im Archiv-Schritt „Signing
+# Identity: Apple Development: Created via API" — und war trotzdem
+# erfolgreich, inklusive Upload. Bei Konfi Quest sind drei so gebaute
+# Fassungen (2.0.0, 2.1.1, 2.2.0) READY_FOR_SALE, also durch TestFlight UND
+# Store-Pruefung.
+#
+# OFFEN, bewusst nicht als geklaert notiert: WARUM das durchgeht. Die
+# naheliegende Erklaerung ist, dass der Export fuers App-Store-Ziel neu
+# signiert — belegt ist sie NICHT. Die Signierung des Exports steht nicht im
+# CI-Log, sondern in den xcdistributionlogs unter /var/folders, die der
+# Runner nicht hochlaedt. Wer es klaeren will: diese Logs als Artefakt
+# hochladen.
+#
+# Fuer den Umgang mit dem Fehler aendert das nichts — die Zahl im Konto
+# steigt so oder so, und genau das ist der Schaden.
 
 on:
   workflow_dispatch:
