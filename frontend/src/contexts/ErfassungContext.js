@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ErfassungsFlow from '../components/erfassung/ErfassungsFlow';
+import { AppContext } from './AppContext';
 
 // Zentraler Einstieg in den zweistufigen Erfassungsflow (Redesign 2026).
 // Alle „Neue Fahrt"-Einstiege der App (Dashboard-Button, später FAB und
@@ -22,6 +23,15 @@ export function ErfassungProvider({ children }) {
   const close = useCallback(() => {
     setState((s) => ({ ...s, offen: false }));
   }, []);
+
+  // Beim Abmelden schliessen. Der Flow wird hier gerendert, nicht in
+  // AppContent — er ueberlebt dessen Wechsel zur Anmeldemaske und stand nach
+  // einem Zwangs-Logout (abgelaufene Sitzung) offen darueber. Die Eingaben
+  // darin waeren ohnehin verloren, weil das Token weg ist.
+  const { isLoggedIn } = useContext(AppContext) || {};
+  useEffect(() => {
+    if (!isLoggedIn) close();
+  }, [isLoggedIn, close]);
 
   const value = useMemo(() => ({ open, close, isOpen: state.offen }), [open, close, state.offen]);
 
