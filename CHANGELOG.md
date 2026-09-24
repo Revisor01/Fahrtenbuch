@@ -14,6 +14,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die App startet im Browser schneller: Beim Start werden nur noch die Teile geladen, die sofort gebraucht werden. Was zum Erstellen von ZIP-Dateien oder allein in der Handy-App nötig ist, kommt erst bei Bedarf dazu — gemessen 164 kB statt 203 kB beim Start
 
 ### Sonstiges
+- Veraltete Programmbibliotheken im Bauwerkzeug aktualisiert. An der Anwendung selbst ändert sich nichts
 - API-Schlüssel für die Kurzbefehle liegen nicht mehr lesbar in der Datenbank. Bestehende Kurzbefehle funktionieren unverändert weiter — es muss nichts neu eingerichtet werden
 - Im Fehlerfall schrieb die App das komplette Anfrageobjekt ins Protokoll — darin stand die Anmeldekennung, in der Handy-App im auslesbaren Gerätelog. Notiert werden jetzt nur noch Fehlercode, Adresse und Meldung
 - Neu vergebene Passwörter müssen jetzt mindestens zehn Zeichen haben statt sechs. Bestehende Passwörter bleiben gültig, das Anmelden ändert sich nicht
