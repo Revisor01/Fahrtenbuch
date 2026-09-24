@@ -15,8 +15,12 @@
 // Das Limit ist KONTOWEIT: Fahrtenbuch, Konfi Quest und Moin Kark teilen es
 // sich. Gemessen am 24.09.: 6 Zertifikate, 4 davon "Created via API".
 //
-// Der Export re-signierte fuers App-Store-Ziel, deshalb kam Build 31 durch —
-// das Archiv war trotzdem falsch signiert.
+// Build 31 kam trotz der Development-Signatur durch, inklusive Upload; bei
+// Konfi Quest sind drei so gebaute Fassungen sogar READY_FOR_SALE. WARUM das
+// durchgeht, ist offen: Die naheliegende Erklaerung (der Export signiert
+// fuers App-Store-Ziel neu) ist eine Vermutung, keine Messung — die
+// Export-Signierung steht in den xcdistributionlogs unter /var/folders, die
+// der Runner nicht hochlaedt.
 //
 // Laeuft ohne Test-Framework: `node test/iosSignierung.test.js`.
 
