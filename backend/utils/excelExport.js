@@ -558,15 +558,16 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
      saetze
    });
 
-   await setzeZeitraumStatus({ startYear, startMonth, endYear, endMonth, type, userId });
-
    const basis = `mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`;
    return {
      dateien: workbooks.map((workbook, i) => ({
        dateiname: workbooks.length > 1 ? `${basis}_teil${i + 1}` : basis,
        workbook
      })),
-     zipName: `mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`
+     zipName: `mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`,
+     // Nicht hier setzen: Der Status gehoert erst gesetzt, wenn die Datei
+     // beim Nutzer ist (siehe markiereZeitraum unten).
+     zeitraumStatus: { startYear, startMonth, endYear, endMonth, type, userId }
    };
  }
 
@@ -606,25 +607,36 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
    saetze
  });
 
- await setzeZeitraumStatus({ startYear, startMonth, endYear, endMonth, type, userId });
-
  return {
    dateien: workbooks.map((workbook, index) => ({
      dateiname: `fahrtenabrechnung_${type}_${startYear}_${startMonth}_bis_${endYear}_${endMonth}_${index + 1}`,
      workbook
    })),
-   zipName: `fahrtenabrechnung_${type}_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`
+   zipName: `fahrtenabrechnung_${type}_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`,
+   zeitraumStatus: { startYear, startMonth, endYear, endMonth, type, userId }
  };
 }
 
-// Status-Update für jeden Monat im Zeitraum
-async function setzeZeitraumStatus({ startYear, startMonth, endYear, endMonth, type, userId }) {
- let y = parseInt(startYear), m = parseInt(startMonth);
- const ey = parseInt(endYear), em = parseInt(endMonth);
- while (y < ey || (y === ey && m <= em)) {
-   await Abrechnung.updateStatus(userId, y, m, type, 'eingereicht', heuteISO());
-   m++;
-   if (m > 12) { m = 1; y++; }
+// Zeitraum als eingereicht markieren — NACH dem Senden der Datei.
+//
+// Frueher lief das mitten im Bauen der Workbooks, pro Monat ein eigenes
+// Autocommit. Brach der Lauf danach ab (beim PDF folgt noch LibreOffice mit
+// 60-s-Timeout), standen einzelne Monate auf „eingereicht", ohne dass es
+// eine Datei gab. Jetzt: alle Monate in einer Transaktion, und erst, wenn
+// der Nutzer die Datei hat.
+//
+// Scheitert die Markierung, ist die Datei bereits raus — dann bleibt nur
+// das Protokoll. Der Nutzer kann den Status im Frontend selbst setzen
+// („Als eingereicht markieren").
+async function markiereZeitraum(zeitraumStatus) {
+ if (!zeitraumStatus) return;
+ const { startYear, startMonth, endYear, endMonth, type, userId } = zeitraumStatus;
+ try {
+   await Abrechnung.markiereZeitraumEingereicht({
+     userId, startYear, startMonth, endYear, endMonth, typ: type, datum: heuteISO()
+   });
+ } catch (error) {
+   console.error('Zeitraum konnte nicht als eingereicht markiert werden:', error);
  }
 }
 
@@ -681,7 +693,11 @@ exports.exportToExcelRange = async (req, res) => {
      return res.status(404).json({ message: 'Keine Daten für den ausgewählten Zeitraum und Typ gefunden.' });
    }
 
-   return await sendeExcelAntwort(res, ergebnis);
+   await sendeExcelAntwort(res, ergebnis);
+   // Erst jetzt: Die Datei ist raus. Schlaegt das Bauen oder Senden fehl,
+   // steht kein Monat auf „eingereicht", zu dem es keine Datei gibt.
+   await markiereZeitraum(ergebnis.zeitraumStatus);
+   return;
  } catch (error) {
    console.error('Fehler beim Exportieren nach Excel (Range):', error);
    res.status(500).json({ message: 'Fehler beim Exportieren nach Excel', error: error.message });
@@ -691,3 +707,4 @@ exports.exportToExcelRange = async (req, res) => {
 // Für den PDF-Export (utils/pdfExport.js)
 exports.baueMonatsWorkbooks = baueMonatsWorkbooks;
 exports.baueZeitraumWorkbooks = baueZeitraumWorkbooks;
+exports.markiereZeitraum = markiereZeitraum;
