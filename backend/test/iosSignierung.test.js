@@ -103,9 +103,13 @@ pruefe('der Profilname ist der, den es im Konto gibt', () => {
 // --- 2. Der Workflow besorgt nichts mehr selbst ----------------------------
 console.log('\n2 — Workflow:');
 
-pruefe('-allowProvisioningUpdates ist raus', () => {
-  assert.ok(!/allowProvisioningUpdates/.test(workflow),
-    'damit durfte Xcode sich Zertifikate ueber die ASC-API anlegen');
+pruefe('-allowProvisioningUpdates steht in keiner Befehlszeile mehr', () => {
+  // Auf ausgefuehrte Zeilen pruefen, nicht auf das blosse Wort: Der
+  // Dateikopf erklaert den Befund und nennt die Option dabei.
+  const zeilen = workflow.split('\n')
+    .filter((z) => z.includes('allowProvisioningUpdates') && !z.trim().startsWith('#'));
+  assert.deepStrictEqual(zeilen, [],
+    'damit duerfte Xcode sich Zertifikate ueber die ASC-API anlegen');
 });
 
 pruefe('das Profil wird stattdessen geladen', () => {
