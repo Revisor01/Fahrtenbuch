@@ -1,6 +1,7 @@
 # Handoff — Stand 24.09.2026, nachts
 
-Ausgeliefert: **2.3.2 / iOS Build 31** (TestFlight, `IN_BETA_TESTING`).
+Ausgeliefert: **2.3.2 / iOS Build 32** (24.09., Lauf 35961508946 — der erste
+mit korrekter Distribution-Signatur).
 Im Arbeitsbaum steht **2.3.3 unreleased** — 17 Commits, noch **nicht
 getaggt und nicht deployt**.
 
@@ -112,6 +113,27 @@ Beim Nachprüfen hat sich einiges anders dargestellt:
 ---
 
 ## OFFEN
+
+### Terminsache: Zertifikat läuft am 28.11.2026 ab
+
+Seit dem 24.09. signieren **Fahrtenbuch, Konfi Quest und Moin Kark alle mit
+demselben** Distribution-Zertifikat `D22NVZMW4W`. Es läuft in 66 Tagen ab.
+Danach baut **keines der drei Projekte** mehr, bis ein neues erzeugt, als
+`.p12` exportiert und in `IOS_DIST_P12_BASE64` hinterlegt ist — in allen drei
+Repos. Das Distribution-Limit liegt bei 3, Platz zum Vorbereiten ist also da.
+
+Hintergrund: Der iOS-Build signierte bis dahin mit Development-Zertifikaten,
+die Xcode sich über `-allowProvisioningUpdates` selbst anlegte — pro Lauf
+eines, bis das kontoweite Limit (2 für Development) mit 5 überzogen war.
+Behoben an allen drei Projekten und je einmal per Lauf belegt; bei
+Fahrtenbuch Lauf `35961508946`, Build 32. Die vier überzähligen Zertifikate
+sind gelöscht, das Konto steht bei 2.
+
+Was dabei leicht übersehen wird und im Kopf von `ios-release.yml` steht: Es
+müssen **beide** Stellen manuell signieren — die Release-Konfiguration in
+`project.pbxproj` **und** die ExportOptions. Laut `xcodebuild -help` legt
+Xcode auch bei manuell signiertem Archiv noch Anmeldedaten an, wenn der
+Export auf `automatic` steht.
 
 ### Braucht einen Build oder ein Gerät (deshalb heute Nacht nicht gemacht)
 

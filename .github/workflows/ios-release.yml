@@ -36,7 +36,15 @@ name: iOS Release Build
 # `-allowProvisioningUpdates` gehoert deshalb NICHT mehr an xcodebuild. Fehlt
 # ein Profil, soll der Lauf abbrechen und es sagen, statt sich still eins zu
 # besorgen. Der Schritt „Provisioning-Profil laden" holt es ueber die
-# ASC-API.
+# ASC-API. Belegt: Lauf 35961345562 scheiterte an einem Skriptfehler und legte
+# dabei KEIN Zertifikat an — genau das ist der Zweck.
+#
+# ACHTUNG, Ablaufdatum: Seit dem 24.09.2026 signieren Fahrtenbuch, Konfi Quest
+# und Moin Kark alle mit DEMSELBEN Distribution-Zertifikat D22NVZMW4W. Das
+# laeuft am 28.11.2026 ab. Danach baut KEINES der drei Projekte mehr, bis ein
+# neues erzeugt, als .p12 exportiert und in IOS_DIST_P12_BASE64 hinterlegt ist
+# — in allen drei Repos. Das Distribution-Limit liegt bei 3, Platz ist also
+# da, um das neue vor dem Ablauf anzulegen.
 #
 # Warum das monatelang unbemerkt blieb: Es wird nirgends etwas rot.
 #
