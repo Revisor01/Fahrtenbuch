@@ -148,10 +148,119 @@ const abrechnungsStatusSchema = z.object({
   datum: z.string().optional().nullable(),
 });
 
+// --- Zeitraum-Parameter der Export- und Report-Routen ---------------------
+//
+// Die Zeitraum-Routen liefen ohne jede Pruefung in eine Monatsschleife:
+// `GET /api/fahrten/report-range/1/1/9999/12` ergab 120.000 Monatsabfragen
+// nacheinander bei 10 Pool-Verbindungen; ueber den Export-Weg zusaetzlich
+// 120.000 Zeilen in `abrechnungen`. Jeder Angemeldete konnte damit den
+// Server lahmlegen.
+//
+// MAX_MONATE begrenzt die Spanne. Die Grenze liegt bewusst hoch: Die
+// Jahresauswahl der Oberflaeche (ZeitraumSegmente.js, JAHRE = 2024..2029)
+// laesst bis zu 72 Monate zu, und eine engere Grenze haette genau die
+// Kombinationen abgewiesen, die dort waehlbar sind — auch in den bereits
+// ausgelieferten Apps, die sich nicht mitdeployen lassen.
+//
+// Teuer ist die Spanne ohnehin nicht linear: Der Export holt die Fahrten in
+// EINER Abfrage (getDateRangeReport); pro Monat laeuft nur ein Status-UPDATE
+// bzw. im Report eine Status-Abfrage. 120 Monate sind damit eine Groessen-
+// ordnung, die der Pool vertraegt, waehrend das eigentliche Problem — das
+// unbegrenzte `9999` mit 120.000 Monatsdurchlaeufen — sicher abgewiesen wird.
+const MAX_MONATE = 120;
+
+const jahrZahlSchema = z.coerce
+  .number({ error: 'Jahr muss eine Zahl sein' })
+  .int('Jahr muss eine ganze Zahl sein')
+  .min(2000, 'Jahr muss zwischen 2000 und 2100 liegen')
+  .max(2100, 'Jahr muss zwischen 2000 und 2100 liegen');
+
+// Wie beim Monat: als String zurueck, damit sich an dem, was die Handler
+// sehen, nichts aendert.
+const jahrSchema = jahrZahlSchema.transform((j) => String(j));
+
+const monatZahlSchema = z.coerce
+  .number({ error: 'Monat muss eine Zahl sein' })
+  .int('Monat muss eine ganze Zahl sein')
+  .min(1, 'Monat muss zwischen 1 und 12 liegen')
+  .max(12, 'Monat muss zwischen 1 und 12 liegen');
+
+// Nach aussen bleibt der Monat ein nullgepolsterter String — genau das, was
+// bisher aus dem Pfad kam. Die Handler rufen darauf `.split('-')` auf und
+// bauen daraus Dateinamen (`..._2026_08`); eine Zahl haette dort einen 500er
+// ausgeloest und den Dateinamen zu `_8` verkuerzt.
+const monatSchema = monatZahlSchema.transform((m) => String(m).padStart(2, '0'));
+
+// Abrechnungstraeger-ID oder die Sonderkategorie `mitfahrer`. Das Frontend
+// schickt den Wert kleingeschrieben (`key.toLowerCase()`).
+const exportTypSchema = z
+  .string()
+  .regex(/^(\d+|mitfahrer)$/, 'Typ muss eine Abrechnungstraeger-ID oder "mitfahrer" sein');
+
+// Der Einzelmonats-Export nimmt seit jeher auch „2026-08" als Monat an
+// (baueMonatsWorkbooks: `month.split('-')[1] || month`), und die
+// API-Dokumentation nennt dieses Format ausdruecklich. Es bleibt gueltig —
+// ein Client, der es nutzt, laesst sich nicht mitdeployen.
+const monatMitJahrSchema = z
+  .union([z.string(), z.number()])
+  .transform((wert) => String(wert))
+  .transform((wert) => (wert.includes('-') ? wert.split('-')[1] : wert))
+  .pipe(monatSchema);
+
+
+const monatsParamsSchema = z.object({
+  year: jahrSchema,
+  month: monatMitJahrSchema,
+});
+
+const monatsExportParamsSchema = monatsParamsSchema.extend({
+  type: exportTypSchema,
+});
+
+// Spanne in Monaten, Endpunkte eingeschlossen: Januar–Januar = 1 Monat.
+// Die Params sind hier bereits Strings ('2026', '08') — fuer die Rechnung
+// zurueck in Zahlen. Number('08') ist 8, nicht oktal.
+const spanneInMonaten = ({ startYear, startMonth, endYear, endMonth }) =>
+  (Number(endYear) - Number(startYear)) * 12 +
+  (Number(endMonth) - Number(startMonth)) + 1;
+
+const zeitraumRegeln = (schema) =>
+  schema
+    .refine((p) => spanneInMonaten(p) >= 1, {
+      error: 'Der Zeitraum darf nicht rueckwaerts laufen',
+    })
+    .refine((p) => spanneInMonaten(p) <= MAX_MONATE, {
+      error: `Der Zeitraum darf hoechstens ${MAX_MONATE} Monate umfassen`,
+    });
+
+const zeitraumParamsSchema = zeitraumRegeln(
+  z.object({
+    startYear: jahrSchema,
+    startMonth: monatSchema,
+    endYear: jahrSchema,
+    endMonth: monatSchema,
+  })
+);
+
+const zeitraumExportParamsSchema = zeitraumRegeln(
+  z.object({
+    type: exportTypSchema,
+    startYear: jahrSchema,
+    startMonth: monatSchema,
+    endYear: jahrSchema,
+    endMonth: monatSchema,
+  })
+);
+
 module.exports = {
   createFahrtSchema,
   updateFahrtSchema,
   addMitfahrerSchema,
   updateMitfahrerSchema,
   abrechnungsStatusSchema,
+  monatsParamsSchema,
+  monatsExportParamsSchema,
+  zeitraumParamsSchema,
+  zeitraumExportParamsSchema,
+  MAX_MONATE,
 };
