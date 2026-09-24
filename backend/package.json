@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js && node test/doku.test.js && node test/haertung.test.js && node test/pdfMehrblatt.test.js && node test/kontoUebernahme.test.js && node test/exportGrenze.test.js && node test/datumPruefung.test.js && node test/kontoLoeschen.test.js && node test/instanzBindung.test.js && node test/erfassungWiederholen.test.js && node test/zeitraumGrenzen.test.js && node test/zeitraumStatus.test.js && node test/fehlergrenze.test.js && node test/sitzungUndLadefehler.test.js && node test/containerHaertung.test.js && node test/bundleAufteilung.test.js && node test/sheetSchutz.test.js && node test/monatsRace.test.js && node test/doppelklickSperren.test.js"
+    "test": "node test/fahrtSchemas.test.js && node test/befunde.test.js && node test/doku.test.js && node test/haertung.test.js && node test/pdfMehrblatt.test.js && node test/kontoUebernahme.test.js && node test/exportGrenze.test.js && node test/datumPruefung.test.js && node test/kontoLoeschen.test.js && node test/instanzBindung.test.js && node test/erfassungWiederholen.test.js && node test/zeitraumGrenzen.test.js && node test/zeitraumStatus.test.js && node test/fehlergrenze.test.js && node test/sitzungUndLadefehler.test.js && node test/containerHaertung.test.js && node test/bundleAufteilung.test.js && node test/sheetSchutz.test.js && node test/monatsRace.test.js && node test/doppelklickSperren.test.js && node test/backendHaertung.test.js"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
     "mysql2": "^3.23.2",
-    "nodemailer": "^9.0.5",
+    "nodemailer": "^9.1.1",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.3.6"
   },

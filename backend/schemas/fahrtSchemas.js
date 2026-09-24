@@ -96,7 +96,11 @@ const createFahrtSchema = z.object({
   vonOrtId: optionaleIdSchema,
   nachOrtId: optionaleIdSchema,
   datum: datumSchema,
-  anlass: z.string().min(1, 'Anlass ist erforderlich'),
+  // max(255) spiegelt fahrten.anlass VARCHAR(255). Ohne die Grenze warf
+  // MySQL im Strict Mode „Data too long" — der Nutzer sah einen 500er
+  // statt einer Meldung, und die Fahrt war weg. Favoriten erlauben 500
+  // Zeichen (0007); ein langer Favoriten-Anlass lief hier genau hinein.
+  anlass: z.string().min(1, 'Anlass ist erforderlich').max(255, 'Anlass darf höchstens 255 Zeichen lang sein'),
   kilometer: kilometerSchema,
   abrechnung: z.coerce.number().int().positive('Abrechnungstraeger ist erforderlich'),
   einmaligerVonOrt: z.string().optional().nullable(),
@@ -115,7 +119,11 @@ const updateFahrtSchema = z.object({
   vonOrtId: optionaleIdSchema,
   nachOrtId: optionaleIdSchema,
   datum: datumSchema,
-  anlass: z.string().min(1, 'Anlass ist erforderlich'),
+  // max(255) spiegelt fahrten.anlass VARCHAR(255). Ohne die Grenze warf
+  // MySQL im Strict Mode „Data too long" — der Nutzer sah einen 500er
+  // statt einer Meldung, und die Fahrt war weg. Favoriten erlauben 500
+  // Zeichen (0007); ein langer Favoriten-Anlass lief hier genau hinein.
+  anlass: z.string().min(1, 'Anlass ist erforderlich').max(255, 'Anlass darf höchstens 255 Zeichen lang sein'),
   kilometer: kilometerSchema,
   abrechnung: z.coerce.number().int().positive('Abrechnungstraeger ist erforderlich'),
   einmaligerVonOrt: z.string().optional().nullable(),

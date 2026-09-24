@@ -542,7 +542,7 @@ const paths = {
       tags: ['Abrechnungsträger'], summary: 'Erstattungssatz hinzufügen', parameters: [pfadId('ID des Trägers')],
       description: 'Jede Fahrt wird mit dem Satz gerechnet, der an ihrem Datum galt.',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['betrag'], properties: { betrag: { type: 'number', minimum: 0, example: 0.3 }, gueltig_ab: { type: ['string', 'null'], format: 'date', description: 'Ohne Angabe gilt der heutige Tag.' } } } } } },
-      responses: { 201: MELDUNG('Erstattungssatz erfolgreich hinzugefügt'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Abrechnungsträger nicht gefunden'), 500: FEHLER[500] },
+      responses: { 201: MELDUNG('Erstattungssatz erfolgreich hinzugefügt'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Abrechnungsträger nicht gefunden'), 409: MELDUNG('Für dieses Datum existiert bereits ein Satz'), 500: FEHLER[500] },
     },
   },
   '/api/abrechnungstraeger/{id}/erstattung/{erstattungssatzId}': {
@@ -570,7 +570,7 @@ const paths = {
     post: {
       tags: ['Mitfahrer-Erstattung'], summary: 'Satz setzen',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['betrag'], properties: { betrag: { type: 'number', minimum: 0, example: 0.05 }, gueltig_ab: { type: ['string', 'null'], format: 'date', description: 'Ohne Angabe gilt der heutige Tag.' } } } } } },
-      responses: { 200: MELDUNG('Erstattungssatz erfolgreich gesetzt'), 400: VALIDIERUNG, 401: FEHLER[401], 500: FEHLER[500] },
+      responses: { 200: MELDUNG('Erstattungssatz erfolgreich gesetzt'), 400: VALIDIERUNG, 401: FEHLER[401], 409: MELDUNG('Für dieses Datum existiert bereits ein Satz'), 500: FEHLER[500] },
     },
   },
   '/api/mitfahrer-erstattung/{erstattungssatzId}': {
@@ -578,7 +578,7 @@ const paths = {
       tags: ['Mitfahrer-Erstattung'], summary: 'Satz ändern',
       parameters: [{ name: 'erstattungssatzId', in: 'path', required: true, schema: { type: 'integer' } }],
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['betrag'], properties: { betrag: { type: 'number', minimum: 0 }, gueltig_ab: { type: ['string', 'null'], format: 'date' } } } } } },
-      responses: { 200: MELDUNG('Erstattungssatz erfolgreich aktualisiert'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Erstattungssatz nicht gefunden'), 500: FEHLER[500] },
+      responses: { 200: MELDUNG('Erstattungssatz erfolgreich aktualisiert'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Erstattungssatz nicht gefunden'), 409: MELDUNG('Für dieses Datum existiert bereits ein Satz'), 500: FEHLER[500] },
     },
     delete: {
       tags: ['Mitfahrer-Erstattung'], summary: 'Satz löschen',
@@ -703,9 +703,9 @@ const paths = {
   '/api/users/resend-verification': {
     post: {
       tags: ['Benutzer'], summary: 'Bestätigungsmail erneut senden',
-      description: 'Gehört die Adresse bereits einem anderen Konto, wird die Anfrage abgewiesen.',
+      description: 'Gehört die Adresse bereits einem anderen Konto, wird die Anfrage abgewiesen. Rate-Limit: 5 E-Mails je Konto in 60 Minuten (seit 24.09.2026).',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['email'], properties: { email: { type: 'string', format: 'email' } } } } } },
-      responses: { 200: MELDUNG('Verifizierungs-E-Mail wurde erneut gesendet'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Benutzer nicht gefunden'), 500: FEHLER[500] },
+      responses: { 200: MELDUNG('Verifizierungs-E-Mail wurde erneut gesendet'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Benutzer nicht gefunden'), 429: ANTWORT('Zu viele E-Mails', { message: 'Zu viele E-Mails in kurzer Zeit. Bitte in einer Stunde erneut versuchen.' }), 500: FEHLER[500] },
     },
   },
   '/api/users/reset-password/request': {

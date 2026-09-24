@@ -45,7 +45,11 @@ function MitfahrerBereich() {
       await refreshAllData();
     } catch (error) {
       console.error('Fehler beim Speichern des Mitfahrer-Satzes:', error);
-      if (error.response?.data?.error?.includes('Duplicate entry')) {
+      // Der Server antwortet bei einem doppelten Stichtag mit 409 und
+      // einer fertigen Meldung. Frueher stand hier eine Suche nach
+      // „Duplicate entry" in einem `error`-Feld, das gar nicht gesendet
+      // wurde — die Meldung konnte nie erscheinen.
+      if (error.response?.status === 409) {
         toast.error('Für dieses Datum existiert bereits ein Satz.');
       } else {
         toast.error('Mitfahrer-Satz konnte nicht gespeichert werden.');

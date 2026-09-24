@@ -222,6 +222,21 @@ exports.updateUser = async (req, res) => {
            // Bei E-Mail-Änderung Verifikation starten
            // Hier wird die Email auch in der Profil Tabelle aktualisiert. Das sollte ok sein, da die Email eh aus dem Profil geholt wird.
            if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
+                // Gehoert die Adresse schon jemand anderem? Dieselbe Pruefung
+                // wie in profileController und resendVerification — hier
+                // fehlte sie als einziger der drei Schreibwege. Ohne sie
+                // liesse sich ein Konto auf eine fremde, vergebene Adresse
+                // umziehen; die andere Person verloere ihren Zugang ueber
+                // „Passwort vergessen".
+                const [belegt] = await connection.execute(
+                    'SELECT user_id FROM user_profiles WHERE email = ? AND user_id != ?',
+                    [email, id]
+                );
+                if (belegt.length > 0) {
+                    await connection.rollback();
+                    return res.status(400).json({ message: 'Diese E-Mail-Adresse wird bereits verwendet' });
+                }
+
                // Email verifiziert Status wieder auf 0 setzen
                  await connection.execute(
                     'UPDATE users SET email_verified = FALSE WHERE id = ?',

@@ -44,6 +44,14 @@ exports.setBetrag = async (req, res) => {
         );
         res.json({ message: 'Erstattungssatz erfolgreich gesetzt' });
     } catch (error) {
+        // Seit Migration 0013 gibt es einen Satz je Stichtag. Das ist ein
+        // Bedienfehler, kein Serverfehler — und die Oberflaeche zeigt dafuer
+        // schon die passende Meldung an, sie kam bisher nur nie an.
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({
+                message: 'Für dieses Datum existiert bereits ein Satz'
+            });
+        }
         console.error('Fehler beim Setzen des Erstattungssatzes:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
     }
@@ -62,6 +70,11 @@ exports.updateErstattungssatz = async (req, res) => {
         }
         res.json({ message: 'Erstattungssatz erfolgreich aktualisiert' });
     } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({
+                message: 'Für dieses Datum existiert bereits ein Satz'
+            });
+        }
         console.error('Fehler beim Aktualisieren des Erstattungssatzes:', error);
         res.status(500).json({ message: 'Interner Server-Fehler' });
     }

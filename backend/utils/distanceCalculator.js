@@ -66,7 +66,7 @@ exports.updateDistanz = async (req, res) => {
     }
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Distanz:', error);
-    res.status(500).json({ message: 'Fehler beim Aktualisieren der Distanz', error: error.message });
+    res.status(500).json({ message: 'Fehler beim Aktualisieren der Distanz' });
   }
 };
 

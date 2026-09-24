@@ -6,6 +6,13 @@ const crypto = require('crypto');
 const mailService = require('../services/mailService');
 const { TOKEN_LAUFZEIT } = require('../utils/tokenLaufzeit');
 
+// Vergleichshash fuer nicht existierende Konten (siehe login). Beim Start
+// einmal mit derselben Kostenstufe erzeugt, die auch echte Passwoerter
+// nutzen (bcrypt.genSalt(10) in userController) — so bleibt die Rechenzeit
+// gleich, auch wenn die Stufe spaeter steigt. Der Klartext ist bedeutungslos
+// und passt zu keinem Konto.
+const DUMMY_HASH = bcrypt.hashSync('kein-konto-mit-diesem-namen', 10);
+
 // Fehler aus dem Mailversand von echten Serverfehlern unterscheiden.
 // nodemailer setzt einen SMTP-Code (EAUTH bei falschen Zugangsdaten,
 // ECONNECTION/ETIMEDOUT wenn der Server nicht erreichbar ist) oder liefert
@@ -34,7 +41,13 @@ exports.login = async (req, res) => {
           [username, username]
       );
         
+      // Auch bei unbekanntem Namen einen Hash vergleichen, damit beide Faelle
+      // gleich lange dauern. Sonst antwortete der unbekannte Name in wenigen
+      // Millisekunden und der bekannte erst nach dem bcrypt-Lauf (~100 ms) —
+      // an dem Unterschied liess sich ablesen, welche Konten es gibt.
+      // Die Meldung war schon immer fuer beide Faelle dieselbe.
       if (rows.length === 0) {
+          await bcrypt.compare(password, DUMMY_HASH);
           return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
       }
         

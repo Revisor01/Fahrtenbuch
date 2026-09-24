@@ -11,7 +11,11 @@ const updateProfileSchema = z.object({
 
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, 'Altes Passwort ist erforderlich'),
-  newPassword: z.string().min(6, 'Neues Passwort muss mindestens 6 Zeichen lang sein'),
+  // 10 statt 6 (24.09.2026): In diesem Konto stehen IBAN und ein
+  // Bewegungsprofil. Niemand wird dadurch ausgesperrt — das Anmelde-Schema
+  // (authSchemas) prueft bewusst nur min(1), die Laenge gilt allein bei der
+  // Neuvergabe. Bestehende kuerzere Passwoerter funktionieren weiter.
+  newPassword: z.string().min(10, 'Neues Passwort muss mindestens 10 Zeichen lang sein'),
   confirmPassword: z.string().min(1, 'Passwort-Bestätigung ist erforderlich'),
 });
 
