@@ -235,13 +235,18 @@ export function useFahrtenExport() {
       onAction: async () => {
         try {
           const today = heuteISO();
+          // refresh=false in der Schleife: Sonst laedt JEDER Monat Fahrten
+          // und Monatsdaten neu — bei zwoelf Monaten 24 Abrufe, von denen 22
+          // sofort veraltet sind. Das Rate-Limit liegt bei 600 in fuenf
+          // Minuten, und wer eine Woche nachtraegt, lief hinein.
+          // Einmal aktualisiert wird unten, nach der Schleife.
           if (istZeitraum) {
             for (const mk of exportedMonths) {
               const [y, m] = mk.split('-');
-              await updateAbrechnungsStatus(y, m, type, 'eingereicht', today, true);
+              await updateAbrechnungsStatus(y, m, type, 'eingereicht', today, true, false);
             }
           } else {
-            await updateAbrechnungsStatus(bisYear, formattedBisMonth, type, 'eingereicht', today, true);
+            await updateAbrechnungsStatus(bisYear, formattedBisMonth, type, 'eingereicht', today, true, false);
           }
           await fetchMonthlyData();
           await fetchFahrten();

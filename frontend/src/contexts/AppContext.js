@@ -621,11 +621,14 @@ function AppProvider({ children }) {
         while (current <= end) {
           const y = current.getFullYear().toString();
           const m = (current.getMonth() + 1).toString().padStart(2, '0');
-          await updateAbrechnungsStatus(y, m, traegerId, aktion, datum, true);
+          // refresh=false: Sonst laedt jeder Monat der Schleife Fahrten und
+          // Monatsdaten neu — bei zwoelf Monaten 24 Abrufe, von denen 22
+          // sofort veraltet sind. Aktualisiert wird einmal danach.
+          await updateAbrechnungsStatus(y, m, traegerId, aktion, datum, true, false);
           current.setMonth(current.getMonth() + 1);
         }
       } else {
-        await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum, true);
+        await updateAbrechnungsStatus(jahr, monat, traegerId, aktion, datum, true, false);
       }
       await fetchMonthlyData();
       await fetchFahrten();
