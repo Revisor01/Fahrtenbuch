@@ -552,7 +552,7 @@ function AppProvider({ children }) {
   const addOrt = async (ort) => {
     try {
       await axios.post(`${API_BASE_URL}/orte`, ort);
-      fetchOrte();
+      await fetchOrte();
     } catch (error) {
       logFehler('Fehler beim Hinzufügen des Ortes:', error);
       throw error;
@@ -604,7 +604,7 @@ function AppProvider({ children }) {
   const addDistanz = async (distanz) => {
     try {
       await axios.post(`${API_BASE_URL}/distanzen`, distanz);
-      fetchDistanzen();
+      await fetchDistanzen();
     } catch (error) {
       logFehler('Fehler beim Hinzufügen der Distanz:', error);
       throw error;
@@ -733,7 +733,7 @@ function AppProvider({ children }) {
   const updateOrt = async (id, ort) => {
     try {
       await axios.put(`${API_BASE_URL}/orte/${id}`, ort);
-      fetchOrte();
+      await fetchOrte();
     } catch (error) {
       logFehler('Fehler beim Aktualisieren des Ortes:', error);
       throw error;
@@ -747,7 +747,7 @@ function AppProvider({ children }) {
         nachOrtId: distanz.nach_ort_id,
         distanz: distanz.distanz
       });
-      fetchDistanzen();
+      await fetchDistanzen();
     } catch (error) {
       logFehler('Fehler beim Aktualisieren der Distanz:', error);
       throw error;
@@ -768,7 +768,7 @@ function AppProvider({ children }) {
   const deleteOrt = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/orte/${id}`);
-      fetchOrte();
+      await fetchOrte();
     } catch (error) {
       logFehler('Fehler beim Löschen des Ortes:', error);
       throw error;
@@ -778,7 +778,7 @@ function AppProvider({ children }) {
   const deleteDistanz = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/distanzen/${id}`);
-      fetchDistanzen();
+      await fetchDistanzen();
     } catch (error) {
       logFehler('Fehler beim Löschen der Distanz:', error);
       throw error;
@@ -789,6 +789,7 @@ function AppProvider({ children }) {
     <AppContext.Provider value={{
       isLoggedIn,
       fahrtenFehler,
+      fetchCurrentUser,
       anmeldungGeladen,
       login,
       logout,
