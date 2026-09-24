@@ -638,7 +638,11 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     setFahrten((prev) => [...optimistisch, ...prev]);
 
     // Undo funktioniert auch, wenn die POSTs noch laufen: Flag + spätere Löschung
-    const op = { abgebrochen: false, ids: [], laeuft: null };
+    // waisen: Fahrten, die angelegt wurden, deren Löschung beim Aufräumen aber
+    // selbst scheiterte (Timeout, den der Server doch verarbeitet hat). Sie
+    // stehen bewusst NICHT in ids — diese Liste steuert die Partner-
+    // Verknüpfung. Der nächste Sendelauf räumt sie zuerst weg.
+    const op = { abgebrochen: false, ids: [], waisen: [], laeuft: null };
     const entferneAngelegte = async () => {
       // Laeuft schon ein Aufraeumen, auf dieses warten statt ein zweites zu
       // starten. Frueher lief "Rückgängig" mitten in den POSTs und der
@@ -695,8 +699,28 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       },
     });
 
-    (async () => {
+    // Der Sendelauf als benannte Funktion: Scheitert er, hält die Closure
+    // `trips` weiterhin — das Sheet ist zwar zu und sein Zustand verworfen,
+    // die Nutzlast aber vollständig. „Erneut versuchen" ruft genau hier
+    // wieder herein, statt den Nutzer alles neu tippen zu lassen.
+    const sende = async () => {
+      op.sendetGerade = true;
       try {
+        // Reste des vorigen Fehlversuchs zuerst wegräumen, sonst steht die
+        // halb angelegte Fahrt doppelt in der Abrechnung, sobald dieser Lauf
+        // gelingt. Was sich weiterhin nicht löschen lässt, bleibt gemerkt.
+        if (op.waisen.length > 0) {
+          const bleibt = [];
+          for (const id of op.waisen) {
+            try {
+              await axios.delete(`/api/fahrten/${id}`);
+            } catch (delErr) {
+              if (delErr?.response?.status !== 404) bleibt.push(id);
+            }
+          }
+          op.waisen.length = 0;
+          op.waisen.push(...bleibt);
+        }
         for (const t of trips) {
           // Vor JEDEM POST pruefen, nicht erst nach allen: Wer waehrend des
           // Speicherns "Rückgängig" tippt, bekam sonst die Rueckfahrt noch
@@ -727,19 +751,47 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         console.error('Fehler beim Speichern der Fahrt(en):', error);
         // Rollback der optimistischen Einträge + bereits angelegter Fahrten
         setFahrten((prev) => prev.filter((f) => !tempIds.includes(f.id)));
+        // Teilerfolg zurücknehmen und erst dann die Liste leeren: Scheitert
+        // ein Delete (Timeout, den der Server doch verarbeitet hat), bleibt
+        // die ID stehen. Der nächste Versuch räumt sie mit auf, statt eine
+        // Waise auf dem Server zu hinterlassen.
         for (const id of op.ids) {
-          axios.delete(`/api/fahrten/${id}`).catch(() => {});
+          try {
+            await axios.delete(`/api/fahrten/${id}`);
+          } catch (delErr) {
+            // Nicht in op.ids zurücklegen: Diese Liste steuert die
+            // Partner-Verknüpfung (op.ids[0]), eine Waise darin würde die
+            // neue Hinfahrt an eine fremde Fahrt hängen. Der nächste
+            // Versuch räumt sie über op.waisen auf.
+            if (delErr?.response?.status !== 404) op.waisen.push(id);
+          }
         }
+        op.ids.length = 0;
         if (!op.abgebrochen) {
-          toast.error('Fahrt konnte nicht gespeichert werden.');
+          // Bleibt stehen, bis der Nutzer entscheidet — die Eingaben stecken
+          // nur noch in dieser Closure, ein ablaufender Toast verlöre sie.
+          toast.error('Fahrt konnte nicht gespeichert werden.', {
+            bleibt: true,
+            actionLabel: 'Erneut versuchen',
+            onAction: () => {
+              // Doppeltipp auf „Erneut versuchen" würde sonst zwei Läufe
+              // starten und die Fahrt doppelt anlegen.
+              if (op.sendetGerade) return;
+              setFahrten((prev) => [...optimistisch, ...prev]);
+              sende();
+            },
+          });
         }
       } finally {
+        op.sendetGerade = false;
         // Sperre loesen: das Sheet ist zwar schon zu, wird es aber erneut
         // geoeffnet (Wiederholen), muss Speichern wieder moeglich sein.
         speichertRef.current = false;
         setSpeichert(false);
       }
-    })();
+    };
+
+    sende();
   };
 
   // ---- Rendering ---------------------------------------------------------

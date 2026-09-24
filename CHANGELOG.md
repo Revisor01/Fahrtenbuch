@@ -5,6 +5,11 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
+## [Unreleased] - 2.3.3
+
+### Behoben
+- Schlug das Speichern einer Fahrt fehl — im Funkloch der häufigste Fall —, war alles Eingetippte weg: Ziel, Anlass, Kilometer und Mitfahrer mussten neu erfasst werden. Die Meldung bietet jetzt „Erneut versuchen" an und bleibt stehen, bis entschieden ist. Wurde bei einer Fahrt mit Rückfahrt nur die erste gespeichert, wird sie vor dem neuen Versuch entfernt, damit die Fahrt nicht doppelt in der Abrechnung landet
+
 ## [2.3.2] - 2026-09-24
 
 ### Hinzugefügt
