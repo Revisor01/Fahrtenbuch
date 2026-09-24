@@ -31,11 +31,19 @@ export function ToastProvider({ children }) {
     const id = ++toastCounter;
     const onAction = options.undo || options.onAction || null;
     const actionLabel = options.undo ? 'Rückgängig' : options.actionLabel || null;
-    setToasts((prev) => [...prev, { id, variant, message, actionLabel, onAction }]);
+    const bleibt = options.bleibt === true;
+    setToasts((prev) => [...prev, { id, variant, message, actionLabel, onAction, bleibt }]);
     // Standzeit 5 s; Toasts mit Aktion („Rückgängig") bekommen 8 s.
     // (Abweichung von der Spec „bis zum Klick": dauerhaft stehende Toasts
     // stapelten sich in der Praxis — User-Feedback vom 07.08.2026.)
-    timers.current[id] = setTimeout(() => dismiss(id), onAction ? 8000 : 5000);
+    //
+    // Ausnahme: Ein Fehler-Toast, dessen Aktion die einzige Rettung für nicht
+    // gespeicherte Eingaben ist, bleibt stehen. Wer wegschaut, während die
+    // Sekunden ablaufen, hätte sonst die ganze Fahrt verloren. Solche Toasts
+    // stapeln sich nicht, weil sie nur im Fehlerfall entstehen.
+    if (!bleibt) {
+      timers.current[id] = setTimeout(() => dismiss(id), onAction ? 8000 : 5000);
+    }
     return id;
   }, [dismiss]);
 
@@ -54,7 +62,10 @@ export function ToastProvider({ children }) {
             key={t.id}
             className="toast"
             role="status"
-            onClick={() => dismiss(t.id)}
+            // Bleibende Toasts nicht per Flächentipp schließen: Der Daumen
+            // landet dort beim Greifen des Telefons, und mit dem Toast wäre
+            // die einzige Wiederholen-Möglichkeit weg.
+            onClick={t.bleibt ? undefined : () => dismiss(t.id)}
           >
             <span
               className={`toast-status ${t.variant === 'error' ? 'toast-status-error' : 'toast-status-ok'}`}
