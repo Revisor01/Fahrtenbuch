@@ -1,4 +1,4 @@
-const { baueMonatsWorkbooks, baueZeitraumWorkbooks } = require('./excelExport');
+const { baueMonatsWorkbooks, baueZeitraumWorkbooks, markiereZeitraum } = require('./excelExport');
 const { convertXlsxBufferToPdf } = require('./xlsxToPdf');
 
 // Der PDF-Export baut exakt dieselben Arbeitsmappen wie der Excel-Export und
@@ -131,7 +131,12 @@ exports.exportToPdfRange = async (req, res) => {
      return res.status(404).json({ message: 'Keine Daten für den ausgewählten Zeitraum und Typ gefunden.' });
    }
 
-   return await sendePdfAntwort(res, ergebnis);
+   await sendePdfAntwort(res, ergebnis);
+   // Erst nach dem Senden markieren: Zwischen Bauen und Auslieferung liegt
+   // hier noch die LibreOffice-Konvertierung (60-s-Timeout). Bricht sie ab,
+   // darf kein Monat als eingereicht gelten.
+   await markiereZeitraum(ergebnis.zeitraumStatus);
+   return;
  } catch (error) {
    console.error('Fehler beim PDF-Export (Range):', error);
    if (!res.headersSent) {

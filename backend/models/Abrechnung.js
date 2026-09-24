@@ -89,6 +89,67 @@ class Abrechnung {
         }
     }
     
+    // Alle Monate eines Zeitraums in EINER Transaktion auf „eingereicht"
+    // setzen.
+    //
+    // Der Zeitraum-Export rief bisher updateStatus pro Monat auf, jeweils mit
+    // eigenem Autocommit — und das mitten im Bauen der Datei, also bevor
+    // feststand, dass ueberhaupt eine Datei herauskommt. Brach der Lauf bei
+    // Monat 3 von 6 ab (oder spaeter LibreOffice mit 60-s-Timeout), standen
+    // zwei Monate auf „eingereicht", vier nicht, und der Nutzer hatte nichts
+    // in der Hand. Zurueckgenommen werden musste das von Hand.
+    //
+    // Entweder alle Monate oder keiner. Aufgerufen wird das erst, wenn die
+    // Datei beim Nutzer ist.
+    static async markiereZeitraumEingereicht({ userId, startYear, startMonth, endYear, endMonth, typ, datum }) {
+        const istMitfahrer = String(typ) === 'mitfahrer';
+        // Dieselbe Falle wie in updateStatus: `abrechnungen.typ` ist VARCHAR
+        // mit gemischtem Inhalt, ein numerischer Bind castet die Spalte.
+        const typForDb = istMitfahrer ? 'mitfahrer' : String(parseInt(typ, 10));
+
+        if (!istMitfahrer) {
+            if (!Number.isInteger(parseInt(typ, 10))) {
+                throw new Error('Ungültiger Abrechnungsträger');
+            }
+            const [traeger] = await db.execute(
+                'SELECT id FROM abrechnungstraeger WHERE id = ? AND user_id = ?',
+                [parseInt(typ, 10), userId]
+            );
+            if (traeger.length === 0) {
+                throw new Error('Ungültiger Abrechnungsträger');
+            }
+        }
+
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            let y = parseInt(startYear, 10);
+            let m = parseInt(startMonth, 10);
+            const ey = parseInt(endYear, 10);
+            const em = parseInt(endMonth, 10);
+
+            while (y < ey || (y === ey && m <= em)) {
+                await connection.execute(
+                    `INSERT INTO abrechnungen (user_id, jahr, monat, typ, eingereicht_am)
+                     VALUES (?, ?, ?, ?, ?)
+                     ON DUPLICATE KEY UPDATE eingereicht_am = ?`,
+                    [userId, y, m, typForDb, datum, datum]
+                );
+                m++;
+                if (m > 12) { m = 1; y++; }
+            }
+
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            console.error('Fehler beim Markieren des Zeitraums als eingereicht:', error);
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
     static async getAllStatusForYear(userId, jahr) {
         try {
             const [rows] = await db.execute(

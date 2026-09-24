@@ -366,7 +366,7 @@ const paths = {
   '/api/fahrten/export-range/{type}/{startYear}/{startMonth}/{endYear}/{endMonth}': {
     get: {
       tags: ['Export'], summary: 'Zeitraum-Abrechnung als Excel',
-      description: '**Achtung:** Dieser Abruf verändert Daten — er setzt jeden Monat des Zeitraums auf „eingereicht" mit dem heutigen Datum.\n\nJahr 2000–2100, Monat 1–12, Zeitraum höchstens 120 Monate und nicht rückwärts laufend (seit 24.09.2026 geprüft).',
+      description: '**Achtung:** Dieser Abruf verändert Daten — er setzt jeden Monat des Zeitraums auf „eingereicht" mit dem heutigen Datum. Der Status wird erst nach dem Ausliefern der Datei gesetzt, und zwar für alle Monate gemeinsam: Schlägt der Export fehl, bleibt kein Monat als eingereicht zurück (seit 24.09.2026).\n\nJahr 2000–2100, Monat 1–12, Zeitraum höchstens 120 Monate und nicht rückwärts laufend (seit 24.09.2026 geprüft).',
       parameters: [
         { name: 'type', in: 'path', required: true, schema: { type: 'string', pattern: '^(\\d+|mitfahrer)$' }, description: 'ID des Abrechnungsträgers oder `mitfahrer`' },
         ...['startYear', 'endYear'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string', pattern: '^\\d{4}$' } })),
@@ -392,7 +392,7 @@ const paths = {
   '/api/fahrten/export-pdf-range/{type}/{startYear}/{startMonth}/{endYear}/{endMonth}': {
     get: {
       tags: ['Export'], summary: 'Zeitraum-Abrechnung als PDF',
-      description: '**Achtung:** Setzt jeden Monat des Zeitraums auf „eingereicht".\n\nJahr 2000–2100, Monat 1–12, Zeitraum höchstens 120 Monate und nicht rückwärts laufend (seit 24.09.2026 geprüft).',
+      description: '**Achtung:** Setzt jeden Monat des Zeitraums auf „eingereicht" — erst nach dem Ausliefern der Datei und für alle Monate gemeinsam (seit 24.09.2026).\n\nJahr 2000–2100, Monat 1–12, Zeitraum höchstens 120 Monate und nicht rückwärts laufend (seit 24.09.2026 geprüft).',
       parameters: [
         { name: 'type', in: 'path', required: true, schema: { type: 'string', pattern: '^(\\d+|mitfahrer)$' } },
         ...['startYear', 'endYear'].map((n) => ({ name: n, in: 'path', required: true, schema: { type: 'string', pattern: '^\\d{4}$' } })),
