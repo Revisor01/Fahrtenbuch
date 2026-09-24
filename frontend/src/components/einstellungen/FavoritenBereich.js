@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Trash2 } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 import { useToast } from '../ui/Toast';
@@ -12,9 +12,23 @@ function FavoritSheet({ offen, orte, abrechnungstraeger, onClose, onSave }) {
 
   const sortierteOrte = [...orte].sort((a, b) => a.name.localeCompare(b.name));
 
-  const handleSubmit = (e) => {
+  // Sperre gegen den zweiten Klick: favoriten_fahrten hat keine
+  // Eindeutigkeitsregel, der Doppelklick legte den Favoriten zweimal an.
+  const [speichert, setSpeichert] = useState(false);
+  const montiertRef = useRef(true);
+  useEffect(() => () => { montiertRef.current = false; }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(form);
+    if (speichert) return;
+    setSpeichert(true);
+    try {
+      await onSave(form);
+    } finally {
+      // Bei Erfolg schliesst der Aufrufer das Sheet, die Komponente ist dann
+      // schon weg.
+      if (montiertRef.current) setSpeichert(false);
+    }
   };
 
   return (
@@ -77,7 +91,9 @@ function FavoritSheet({ offen, orte, abrechnungstraeger, onClose, onSave }) {
         </div>
         <div className="set-sheet-buttons">
           <button type="button" className="btn-secondary" onClick={onClose}>Abbrechen</button>
-          <button type="submit" className="btn-primary">Speichern</button>
+          <button type="submit" className="btn-primary" disabled={speichert}>
+            {speichert ? 'Speichert …' : 'Speichern'}
+          </button>
         </div>
       </form>
     </Sheet>

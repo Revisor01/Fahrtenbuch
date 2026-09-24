@@ -50,6 +50,13 @@ function AppProvider({ children }) {
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [summary, setSummary] = useState({});
   const isLoggingOut = useRef(false);
+  // Laufende Nummer je Fahrten-Abruf. Der sitzungsZaehler daneben steigt nur
+  // bei An- und Abmeldung und hilft hier nicht: Wer schnell zwischen Monaten
+  // wechselt, loest zwei Abrufe derselben Sitzung aus. Antwortete der aeltere
+  // spaeter, standen die Fahrten von Monat A unter der Ueberschrift von
+  // Monat B — in einer Abrechnungs-App die falscheste Zahl an der
+  // sichtbarsten Stelle.
+  const fahrtenAbrufNr = useRef(0);
   // Zaehlt jede Abmeldung mit. Eine Antwort auf /users/me, die erst nach dem
   // Abmelden eintrifft, darf die geloeschten Nutzerdaten nicht zurueckschreiben
   // — beim Kirchenkreis-Wechsel waeren das sogar die Daten des alten Servers.
@@ -497,6 +504,9 @@ function AppProvider({ children }) {
 
   const fetchFahrten = async () => {
     const sitzung = sitzungsZaehler.current;
+    const abruf = ++fahrtenAbrufNr.current;
+    // Veraltet = inzwischen wurde ein neuerer Abruf gestartet.
+    const ueberholt = () => abruf !== fahrtenAbrufNr.current;
     try {
       const [bisYear, bisMonth] = selectedMonth.split('-');
 
@@ -515,7 +525,7 @@ function AppProvider({ children }) {
       const geladeneFahrten = Array.isArray(response?.data?.fahrten)
         ? response.data.fahrten
         : [];
-      if (sitzungVorbei(sitzung)) return;
+      if (sitzungVorbei(sitzung) || ueberholt()) return;
       setFahrten(geladeneFahrten.map(fahrt => ({
         ...fahrt,
         mitfahrer: fahrt.mitfahrer || []
@@ -524,7 +534,9 @@ function AppProvider({ children }) {
       setFahrtenFehler(null);
     } catch (error) {
       console.error('Fehler beim Abrufen der Fahrten:', error);
-      if (sitzungVorbei(sitzung)) return;
+      // Auch den Fehler verwerfen, wenn ein neuerer Abruf laeuft: Sonst
+      // leert der alte die Liste, die der neue gerade fuellt.
+      if (sitzungVorbei(sitzung) || ueberholt()) return;
       setFahrten([]);
       setSummary({});
       // Bei 401 meldet der Interceptor bereits ab und zeigt seine eigene

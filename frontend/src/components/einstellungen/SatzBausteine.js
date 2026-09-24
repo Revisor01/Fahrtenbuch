@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { heuteISO, alsISODatum } from '../../utils/datum';
 import { Pencil, Trash2 } from 'lucide-react';
 import Sheet from '../ui/Sheet';
@@ -15,11 +15,32 @@ export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
       : heuteISO()
   );
 
-  const handleSubmit = (e) => {
+  // Sperre gegen den zweiten Klick. Beim Mitfahrer-Satz legte er bis zur
+  // Migration 0013 tatsaechlich zwei Saetze mit demselben Stichtag an —
+  // welcher dann galt, entschied die Sortierung. Die Regel in der Datenbank
+  // faengt das jetzt ab, aber der Nutzer soll den Fehler gar nicht erst
+  // ausloesen.
+  const [speichert, setSpeichert] = useState(false);
+  const montiertRef = useRef(true);
+  useEffect(() => () => { montiertRef.current = false; }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (speichert) return;
     const wert = parseFloat(betrag);
     if (Number.isNaN(wert) || wert <= 0) return;
-    onSave({ betrag: wert, gueltig_ab: gueltigAb });
+    setSpeichert(true);
+    try {
+      // onSave ist bei beiden Aufrufern async; await wartet auch auf eine
+      // gewoehnliche Rueckgabe gefahrlos.
+      await onSave({ betrag: wert, gueltig_ab: gueltigAb });
+    } finally {
+      // Nur setzen, wenn es die Komponente noch gibt: Bei Erfolg schliessen
+      // beide Aufrufer das Sheet (setSheet(null)), die Komponente ist dann
+      // schon weg. React 18 verzeiht das zwar stillschweigend, aber darauf
+      // soll sich der Code nicht verlassen.
+      if (montiertRef.current) setSpeichert(false);
+    }
   };
 
   return (
@@ -53,7 +74,9 @@ export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
         </div>
         <div className="set-sheet-buttons">
           <button type="button" className="btn-secondary" onClick={onClose}>Abbrechen</button>
-          <button type="submit" className="btn-primary">Speichern</button>
+          <button type="submit" className="btn-primary" disabled={speichert}>
+            {speichert ? 'Speichert …' : 'Speichern'}
+          </button>
         </div>
       </form>
     </Sheet>
