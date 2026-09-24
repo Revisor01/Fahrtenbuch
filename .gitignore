@@ -179,3 +179,7 @@ frontend/android/.idea/
 # nicht im Repository.
 *.jks
 keystore.properties
+
+# Rechercheberichte und Notizen (nicht Teil der Anwendung)
+reports/
+research_notes/
