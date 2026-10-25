@@ -1,6 +1,7 @@
 # Ausrollen
 
 ```bash
+export KKD_SSH_HOST='…'          # Server, der per Passwort angesprochen wird
 export KKD_SSH_PASS='…'          # nur fuer Dithmarschen noetig
 
 ./deploy/deploy.sh test           # immer zuerst
@@ -14,9 +15,14 @@ Das Skript sichert vor dem Ausrollen die Datenbank, prueft danach, ob die
 Instanz antwortet, ob die Container mit dem **neuen** Image laufen, und ob der
 Datenstand unveraendert ist. Bei jedem Fehler bricht es ab.
 
+Statt die Variablen jedes Mal zu setzen, kann `deploy/lokal.env` sie setzen;
+das Skript liest die Datei, wenn sie da ist. Sie ist ignoriert, genau wie
+`deploy/instanzen/`. Werte gehoeren auch dort nicht hinein, nur Verweise auf
+Variablen aus der eigenen Umgebung.
+
 ## Eine Instanz hinzufuegen
 
-Eine Datei `instanzen/<name>.env` anlegen — `dithmarschen.env` als Vorlage:
+Eine Datei `instanzen/<name>.env` anlegen (die Dateien liegen nicht im Repo):
 
 | Feld | Bedeutung |
 |---|---|
@@ -52,7 +58,10 @@ Verweise. Sollte nach groesseren Aenderungen am Schema wiederholt werden.
 `backup.sh` laeuft per Cron auf dem jeweiligen Server (KKD: taeglich 3:00,
 `/opt/backups/backup.sh`). Es sichert alle Datenbanken, die in der Liste am
 Anfang des Skripts stehen, plus die Mailserver-Konfiguration, und schiebt alles
-zur Hetzner-Box.
+zur Hetzner-Box. Das Ziel (`benutzer@host`) steht in `BACKUP_SFTP_ZIEL`,
+entweder in der Umgebung des Cron-Jobs oder in `backup.env` neben dem Skript
+(`/opt/backups/backup.env`). Fehlt es, meldet das Skript einen Fehler, statt
+still nur lokal zu sichern.
 
 **Einen Kirchenkreis aufnehmen** — Zeile in `INSTANZEN` ergaenzen:
 
