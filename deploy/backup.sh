@@ -28,7 +28,9 @@ INSTANZEN=(
 
 ZIEL="/opt/backups/fahrtenbuch"
 LOG="/opt/backups/fahrtenbuch-backup.log"
-SFTP_ZIEL="«storagebox»"
+# Ziel als benutzer@host, aus der Umgebung oder aus backup.env neben dem Skript.
+[[ -f "$(dirname "$0")/backup.env" ]] && source "$(dirname "$0")/backup.env"
+SFTP_ZIEL="${BACKUP_SFTP_ZIEL:-}"
 TAGE_LOKAL=14
 
 # Meldung bei Fehlern. Ohne sie faellt ein stillgelegtes Backup erst auf, wenn
@@ -117,7 +119,10 @@ fi
 
 # ------------------------------------------------ Auswaerts (Hetzner-Box)
 
-if [[ ${#DATEIEN[@]} -gt 0 ]]; then
+if [[ -z "$SFTP_ZIEL" ]]; then
+  notiz "FEHLER BACKUP_SFTP_ZIEL fehlt — nichts auswaerts gesichert"
+  FEHLER+=("BACKUP_SFTP_ZIEL fehlt")
+elif [[ ${#DATEIEN[@]} -gt 0 ]]; then
   befehle="mkdir fahrtenbuch\n"
   for d in "${DATEIEN[@]}"; do
     befehle+="put $ZIEL/$d fahrtenbuch/$d\n"

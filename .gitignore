@@ -183,3 +183,8 @@ keystore.properties
 # Rechercheberichte und Notizen (nicht Teil der Anwendung)
 reports/
 research_notes/
+
+# Lokale Deploy-Ziele
+deploy/instanzen/
+deploy/lokal.env
+deploy/backup.env

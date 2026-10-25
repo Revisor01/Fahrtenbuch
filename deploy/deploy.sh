@@ -23,6 +23,9 @@ set -euo pipefail
 
 HIER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTANZ_VERZEICHNIS="$HIER/instanzen"
+# Hosts und Zugangsdaten kommen aus der Umgebung, optional aus deploy/lokal.env
+# (ignoriert, siehe deploy/README.md).
+[[ -f "$HIER/lokal.env" ]] && source "$HIER/lokal.env"
 
 ROT=$'\033[0;31m'; GRUEN=$'\033[0;32m'; GELB=$'\033[0;33m'; GRAU=$'\033[0;90m'; AUS=$'\033[0m'
 
@@ -40,7 +43,7 @@ abbruch() { fehler "$1"; exit 1; }
 # der Umgebung, steht also nie in einer Datei im Repo.
 fern() {
   local host="$1"; shift
-  if [[ "$host" == *"«server»"* && -n "${KKD_SSH_PASS:-}" ]]; then
+  if [[ -n "${KKD_SSH_HOST:-}" && "$host" == *"$KKD_SSH_HOST"* && -n "${KKD_SSH_PASS:-}" ]]; then
     sshpass -p "$KKD_SSH_PASS" ssh -o StrictHostKeyChecking=no "$host" "$@"
   else
     ssh -o StrictHostKeyChecking=no "$host" "$@"
