@@ -213,7 +213,7 @@ docker exec fahrtenbuch-db-1 sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --
 
 ## Lizenz
 
-Copyright © 2026 Simon Luthe. Alle Rechte vorbehalten.
+Copyright © 2024–2026 Simon Luthe. Alle Rechte vorbehalten.
 
 Einzelpersonen dürfen die Software für private Zwecke frei nutzen. Die Nutzung durch Organisationen, Institutionen, Vereine, Kirchen oder andere juristische Personen bedarf einer vorherigen Vereinbarung — Anfragen an [mail@simonluthe.de](mailto:mail@simonluthe.de).
 
