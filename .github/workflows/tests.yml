@@ -1,0 +1,45 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      # Ohne LibreOffice ueberspringt der PDF-Test die Umwandlung stillschweigend.
+      - name: LibreOffice Calc installieren
+        timeout-minutes: 6
+        run: |
+          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends libreoffice-calc
+
+      - name: Abhaengigkeiten
+        working-directory: backend
+        run: npm ci --no-audit --no-fund
+
+      - name: Backend-Tests
+        working-directory: backend
+        run: npm test
