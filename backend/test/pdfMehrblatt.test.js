@@ -95,6 +95,26 @@ async function main() {
       'das Ausstellungsdatum muss ein Date bleiben');
   });
 
+  // Regression (Rückmeldung 30.09.): ExcelJS liefert Zellverbünde im Modell
+  // als `merges`, liest sie beim Setzen aber aus `mergeCells`. Ohne sie
+  // stand auf jedem Folgeblatt der Text gequetscht in einzelnen Spalten.
+  await pruefe('Zellverbünde des Formulars bleiben auf Folgeblättern erhalten', async () => {
+    const dateien = [
+      { dateiname: 'abrechnung_1', workbook: await teilMappe('ERSTES BLATT') },
+      { dateiname: 'abrechnung_2', workbook: await teilMappe('ZWEITES BLATT') },
+    ];
+
+    const [{ workbook }] = fuehreWorkbooksZusammen(dateien);
+    const geschrieben = new ExcelJS.Workbook();
+    await geschrieben.xlsx.load(await workbook.xlsx.writeBuffer());
+
+    const verbuende = (name) => [...geschrieben.getWorksheet(name).model.merges].sort();
+    const erstes = verbuende(QUARTAL);
+
+    assert.strictEqual(erstes.length, 92, 'das Formular hat 92 Zellverbünde');
+    assert.deepStrictEqual(verbuende(`${QUARTAL} (2)`), erstes);
+  });
+
   // Die zusammengeführte Mappe muss sich auch schreiben lassen
   await pruefe('die zusammengeführte Mappe lässt sich als XLSX schreiben', async () => {
     const dateien = [
