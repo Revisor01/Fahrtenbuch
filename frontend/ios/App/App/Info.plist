@@ -5,7 +5,11 @@
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>de</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>de</string>
+	</array>
 	<key>CFBundleDisplayName</key>
         <string>Fahrtenbuch</string>
 	<!-- Ohne diesen Text fragt iOS gar nicht erst nach der Erlaubnis, und der

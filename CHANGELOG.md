@@ -28,6 +28,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Englische Fassung der README und der Vorlagen für Fehlermeldungen
 
 ### Behoben
+- iPhone: Die App meldet sich jetzt als deutschsprachig; Datumsauswahl und Systemknöpfe erscheinen auf Deutsch, der App Store nennt Deutsch als Sprache
 - Sicherheitslücke in der Grundlage der iPhone-App geschlossen: Über einen internen Umweg ließen sich unter Umständen fremde Inhalte so laden, als kämen sie von der App selbst. Wirksam mit der nächsten Fassung im App Store
 - Nach dem Ändern des eigenen Namens im Profil stand auf der Startseite bis zum nächsten App-Start weiter der alte Name
 - Beim Anlegen einer Fahrt aus einem Favoriten mit Rückfahrt meldete die App „Hin- und Rückfahrt erstellt", auch wenn die Rückfahrt gescheitert war. Sie fehlte dann unbemerkt in der Abrechnung. Jetzt steht in der Meldung, was wirklich angelegt wurde
