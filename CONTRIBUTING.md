@@ -2,55 +2,19 @@
 
 **Deutsch** · [English](#contributing)
 
-Fehlermeldungen, Vorschläge und Pull Requests sind willkommen.
-
-- Fehler und Ideen bitte als [Issue](../../issues/new/choose) melden,
-  Sicherheitslücken vertraulich wie in [SECURITY.md](SECURITY.md) beschrieben.
-- Ein Pull Request behandelt ein Thema. Tests und Secret-Scan laufen in der
-  CI; Änderungen, die Nutzer:innen bemerken, kommen in `CHANGELOG.md` unter
-  `[Unreleased]`.
-- Commits nach [Conventional Commits](https://www.conventionalcommits.org/de/),
-  auf Deutsch oder Englisch.
-
-## Beitragserklärung
-
-Fahrtenbuch ist quelloffen zur Einsicht (siehe [LICENSE](LICENSE)); der
-Urheber vergibt Nutzungsrechte einzeln. Damit das
-auch mit Beiträgen anderer möglich bleibt, gilt für jeden Pull Request:
-
-> Ich bin berechtigt, diesen Beitrag einzureichen. Ich stelle ihn unter der
-> Lizenz dieses Projekts bereit und räume Simon Luthe zusätzlich das
-> nicht-ausschließliche, unbefristete und unwiderrufliche Recht ein, den
-> Beitrag auch unter anderen Lizenzbedingungen, einschließlich kommerzieller,
-> zu nutzen, zu ändern und weiterzugeben. Mein Urheberrecht am Beitrag bleibt
-> bestehen.
-
-Mit dem Häkchen in der Pull-Request-Vorlage stimmst du dieser Erklärung zu.
+Fehlermeldungen und Vorschläge sind willkommen, bitte als
+[Issue](../../issues/new/choose); Sicherheitslücken vertraulich wie in
+[SECURITY.md](SECURITY.md) beschrieben. Pull Requests von außen werden nicht
+übernommen: Fahrtenbuch ist quelloffen zur Einsicht und frei für
+Einzelpersonen, alle Rechte liegen beim Urheber (siehe [LICENSE](LICENSE)).
+Gute Vorschläge setzt er selbst um.
 
 ---
 
 # Contributing
 
-Bug reports, suggestions and pull requests are welcome.
-
-- Please report bugs and ideas as an [issue](../../issues/new/choose) and
-  security issues privately as described in [SECURITY.md](SECURITY.md).
-- One pull request per topic. Tests and a secret scan run in CI; changes that
-  users notice go into `CHANGELOG.md` under `[Unreleased]`.
-- Commits follow [Conventional Commits](https://www.conventionalcommits.org/),
-  in English or German.
-
-## Contributor statement
-
-Fahrtenbuch is source available (see [LICENSE](LICENSE)); the author grants
-usage rights individually. To keep that possible with
-contributions from others, every pull request is made under this statement:
-
-> I am entitled to submit this contribution. I provide it under this project's
-> license and additionally grant Simon Luthe the non-exclusive, perpetual and
-> irrevocable right to use, modify and distribute the contribution under other
-> license terms, including commercial ones. I keep my copyright in the
-> contribution.
-
-By ticking the box in the pull request template you agree to this statement.
-The German version of this statement is legally binding.
+Bug reports and suggestions are welcome as an [issue](../../issues/new/choose);
+security issues privately as described in [SECURITY.md](SECURITY.md). Pull
+requests from outside are not accepted: Fahrtenbuch is source-available for
+inspection and free for individuals; all rights stay with the author (see
+[LICENSE](LICENSE)). Good suggestions are implemented by the author.

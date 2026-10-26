@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Plattform-Web%20%C2%B7%20PWA-blue" alt="Plattform">
   <img src="https://img.shields.io/docker/v/revisoren/fahrtenbuch-app?label=Docker&logo=docker" alt="Docker-Image">
-  <img src="https://img.shields.io/badge/Lizenz-Einsicht%20frei%2C%20Betrieb%20nach%20Vereinbarung-lightgrey" alt="Lizenz">
+  <img src="https://img.shields.io/badge/Lizenz-frei%20f%C3%BCr%20Einzelpersonen%2C%20Organisationen%20nach%20Vereinbarung-lightgrey" alt="Lizenz">
 </p>
 
 ## Worum es geht
@@ -69,8 +69,9 @@ Version zusammen.
 
 ## Selbst betreiben
 
-Der Betrieb braucht eine schriftliche Vereinbarung (siehe [Lizenz](#lizenz)).
-Zum Ausprobieren auf dem eigenen Rechner ohne Daten Dritter genügt Folgendes.
+Für die eigenen Fahrten darfst du Fahrtenbuch frei selbst betreiben, auch für
+dienstliche. Gemeinden, Kirchenkreise und andere Organisationen brauchen eine
+schriftliche Vereinbarung (siehe [Lizenz](#lizenz)).
 
 Nötig sind Docker mit Docker Compose und ein Reverse Proxy mit TLS davor. Die
 fertigen Abbilder liegen auf Docker Hub (`revisoren/fahrtenbuch-app` und
@@ -150,22 +151,25 @@ stehen in [CLAUDE.md](CLAUDE.md).
 ## Datenschutz
 
 Fahrtenbuch enthält keine Analyse, keine Werbung und keine fremden Dienste.
-Die Daten liegen in der Datenbank der Instanz, die die Organisation selbst
-betreibt; für den Schutz dort ist sie verantwortlich. Passwörter werden nur als
+Die Daten liegen in der Datenbank der eigenen Instanz; für den Schutz dort ist
+verantwortlich, wer sie betreibt. Passwörter werden nur als
 Hash gespeichert, API-Schlüssel ebenso.
 
 ## Lizenz
 
-**Quelloffen zur Einsicht — Nutzung nur mit schriftlicher Erlaubnis.**
-Der vollständige Text steht in [LICENSE](LICENSE), eine englische Übersetzung
-in [LICENSE.en.md](LICENSE.en.md) (maßgeblich ist die deutsche Fassung).
+**Quelloffen zur Einsicht — frei für Einzelpersonen, für Organisationen nur
+mit schriftlicher Erlaubnis.** Der vollständige Text steht in
+[LICENSE](LICENSE), eine englische Übersetzung in
+[LICENSE.en.md](LICENSE.en.md) (maßgeblich ist die deutsche Fassung).
 
-- **Ohne Weiteres erlaubt:** lesen, herunterladen, studieren, zu Lern- und
-  Prüfzwecken auf eigenen Geräten ausführen, Sicherheitslücken melden,
-  darüber berichten.
-- **Braucht eine Vereinbarung:** der Betrieb für echte Nutzer:innen (auch den
-  eigenen), die Weitergabe an Dritte, die Verwendung von Teilen des Codes in
-  anderer Software. Anfragen an [mail@simonluthe.de](mailto:mail@simonluthe.de).
+- **Frei für dich:** lesen, studieren, Sicherheitslücken melden, darüber
+  berichten — und Fahrtenbuch für deine eigenen Fahrten selbst betreiben und
+  anpassen, auch für berufliche und dienstliche Fahrten.
+- **Braucht eine Vereinbarung:** der Einsatz durch oder für eine Gemeinde,
+  einen Kirchenkreis, ein Unternehmen, einen Verein oder eine Behörde, der
+  Betrieb für andere, die Weitergabe an Dritte und die Verwendung von Teilen
+  des Codes in anderer Software. Anfragen an
+  [mail@simonluthe.de](mailto:mail@simonluthe.de).
 
 ## Kontakt
 
