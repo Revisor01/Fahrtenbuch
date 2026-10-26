@@ -10,6 +10,10 @@
 </p>
 
 <p align="center">
+  <b>Deutsch</b> · <a href="README.en.md">English</a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Plattform-Web%20%C2%B7%20PWA-blue" alt="Plattform">
   <img src="https://img.shields.io/docker/v/revisoren/fahrtenbuch-app?label=Docker&logo=docker" alt="Docker-Image">
   <img src="https://img.shields.io/badge/Lizenz-frei%20f%C3%BCr%20Einzelpersonen%2C%20Organisationen%20nach%20Vereinbarung-lightgrey" alt="Lizenz">
@@ -145,8 +149,8 @@ Fahrtenbuch
 Fehlermeldungen und Vorschläge sind willkommen — gern als
 [Issue](https://github.com/Revisor01/Fahrtenbuch/issues). Sicherheitslücken
 bitte vertraulich melden, wie in [SECURITY.md](SECURITY.md) beschrieben. Pull
-Requests laufen durch Tests und einen Secret-Scan; die Grundsätze für Beiträge
-stehen in [CLAUDE.md](CLAUDE.md).
+Requests von außen werden nicht übernommen; warum, steht in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Datenschutz
 
