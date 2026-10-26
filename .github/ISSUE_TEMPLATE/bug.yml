@@ -1,0 +1,50 @@
+name: Report a bug
+description: Something does not work as expected.
+labels: ["fehler"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please do not include credentials, server
+        addresses or account names; this issue is public. Report security
+        issues as described in SECURITY.md.
+  - type: textarea
+    id: beobachtung
+    attributes:
+      label: What happened
+      description: What did you observe?
+    validations:
+      required: true
+  - type: textarea
+    id: erwartung
+    attributes:
+      label: What you expected
+      description: What did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: schritte
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version of the app or program
+      placeholder: "e.g. 2.2.0 (build 29)"
+    validations:
+      required: true
+  - type: input
+    id: server
+    attributes:
+      label: Server version (if applicable)
+      placeholder: "e.g. Umami 3.4.1"
+  - type: input
+    id: geraet
+    attributes:
+      label: Device and operating system
+      placeholder: "e.g. iPhone 16, iOS 26.1"
