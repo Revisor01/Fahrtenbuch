@@ -1,17 +1,19 @@
 Fahrtenbuch
 Copyright (c) 2024-2026 Simon Luthe
 
-QUELLOFFEN ZUR EINSICHT — NUTZUNG NUR MIT SCHRIFTLICHER ERLAUBNIS
+QUELLOFFEN ZUR EINSICHT — FREI FUER EINZELPERSONEN,
+FUER ORGANISATIONEN NUR MIT SCHRIFTLICHER ERLAUBNIS
 
 Der Quelltext jeder veroeffentlichten Version dieser Software ist
 oeffentlich einsehbar. Wer nachlesen will, wie das Fahrtenbuch arbeitet,
 welche Daten es verarbeitet und wie es gesichert ist, soll das jederzeit
 tun koennen. Diese Offenheit ist gewollt.
 
-Einsehen ist aber nicht dasselbe wie Betreiben. Der produktive Einsatz
-dieser Software — fuer eine Gemeinde, einen Kirchenkreis, eine
-Landeskirche oder sonst jemanden — bedarf einer schriftlichen
-Vereinbarung mit dem Urheber.
+Einzelpersonen duerfen Fahrtenbuch fuer ihre eigenen Fahrten selbst
+betreiben. Der Einsatz durch, fuer oder im Auftrag einer Organisation —
+einer Gemeinde, eines Kirchenkreises, einer Landeskirche, eines
+Unternehmens, eines Vereins oder einer Behoerde — bedarf einer
+schriftlichen Vereinbarung mit dem Urheber.
 
 Kontakt: mail@simonluthe.de
 
@@ -30,7 +32,13 @@ Ohne gesonderte Vereinbarung duerfen Sie:
 
   c) Sicherheitsluecken und Fehler suchen und melden;
 
-  d) ueber die Software berichten, sie zitieren und besprechen.
+  d) ueber die Software berichten, sie zitieren und besprechen;
+
+  e) als natuerliche Person die Software fuer die eigenen Fahrten selbst
+     betreiben und dafuer anpassen, auch fuer berufliche und dienstliche
+     Fahrten. Das gilt, solange die Instanz nur von dieser Person genutzt
+     und nicht von einer Organisation bereitgestellt, betrieben oder
+     vorgeschrieben wird.
 
 
 ================================================================================
@@ -40,11 +48,10 @@ Ohne gesonderte Vereinbarung duerfen Sie:
 Einer vorherigen schriftlichen Vereinbarung mit dem Urheber bedarf
 insbesondere:
 
-  a) der Betrieb der Software fuer echte Nutzerinnen und Nutzer,
-     gleich ob entgeltlich oder unentgeltlich;
+  a) der Betrieb der Software durch, fuer oder im Auftrag einer
+     Organisation, gleich ob entgeltlich oder unentgeltlich;
 
-  b) der Betrieb als Dienst fuer Personen ausserhalb der eigenen
-     Organisation;
+  b) der Betrieb fuer andere Personen als sich selbst, auch als Dienst;
 
   c) die Weitergabe der Software oder veraenderter Fassungen an Dritte;
 
@@ -52,7 +59,9 @@ insbesondere:
 
 Dies gilt unabhaengig davon, ob die Nutzung kommerziell erfolgt.
 Auch kirchliche, gemeinnuetzige und oeffentliche Einrichtungen fallen
-hierunter.
+hierunter. Organisation im Sinne dieser Lizenz ist jede juristische
+Person, Koerperschaft, Anstalt, Behoerde und Personenvereinigung,
+einschliesslich ihrer Untergliederungen.
 
 
 ================================================================================
@@ -113,3 +122,15 @@ abgestellt und ist es der erste Verstoss, leben die Rechte wieder auf.
 ================================================================================
 
 Es gilt deutsches Recht.
+
+
+================================================================================
+9. GELTUNGSBEREICH UND BEITRAEGE
+================================================================================
+
+Diese Bedingungen gelten fuer jede Fassung dieses Quelltexts, auch fuer
+fruehere, und ersetzen alle frueheren Lizenzangaben. Rechte, die jemand
+nachweislich schon vorher wirksam erworben hat, bleiben unberuehrt.
+
+Beitraege von aussen werden nicht uebernommen. Vorschlaege und Fehler
+sind als Issue willkommen; eine Umsetzung erfolgt durch den Urheber.
