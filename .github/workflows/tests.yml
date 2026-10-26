@@ -38,7 +38,7 @@ jobs:
           apt_opts=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
           for versuch in 1 2 3; do
             if timeout 180 sudo apt-get "${apt_opts[@]}" update -qq \
-              && timeout 300 sudo apt-get "${apt_opts[@]}" install -y -qq --no-install-recommends libreoffice-calc; then
+              && timeout 300 sudo apt-get "${apt_opts[@]}" install -y --no-install-recommends libreoffice-calc; then
               exit 0
             fi
             echo "::warning::Versuch $versuch fehlgeschlagen, neuer Versuch."
