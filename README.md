@@ -149,8 +149,8 @@ Fahrtenbuch
 Fehlermeldungen und Vorschläge sind willkommen — gern als
 [Issue](https://github.com/Revisor01/Fahrtenbuch/issues). Sicherheitslücken
 bitte vertraulich melden, wie in [SECURITY.md](SECURITY.md) beschrieben. Pull
-Requests von außen werden nicht übernommen; warum, steht in
-[CONTRIBUTING.md](CONTRIBUTING.md).
+Requests sind willkommen; was dabei für die Rechte an deinem Beitrag gilt,
+steht in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Datenschutz
 

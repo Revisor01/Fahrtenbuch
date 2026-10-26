@@ -102,5 +102,10 @@ These terms apply to every version of this source code, including earlier
 ones, and replace all earlier license statements. Rights that someone can
 show they validly acquired before remain unaffected.
 
-Contributions from outside are not accepted. Suggestions and bug reports are
-welcome as issues; any implementation is done by the author.
+Contributions are welcome. Anyone who submits a contribution, for example as
+a pull request, makes it available under these terms and additionally grants
+the author a non-exclusive, perpetual, worldwide, irrevocable, transferable and
+sublicensable right of use: the author may use and modify the contribution and
+distribute and license it under other terms, including for a fee. Copyright in
+the contribution remains with the person who submits it. Anyone who submits a
+contribution confirms that they are entitled to do so.
