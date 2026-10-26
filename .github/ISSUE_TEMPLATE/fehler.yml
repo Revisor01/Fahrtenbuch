@@ -42,7 +42,7 @@ body:
     id: server
     attributes:
       label: Server-Version (falls zutreffend)
-      placeholder: "z. B. Umami 3.4.1"
+      placeholder: "z. B. 2.3.2"
   - type: input
     id: geraet
     attributes:
