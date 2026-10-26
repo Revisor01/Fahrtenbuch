@@ -1,15 +1,115 @@
-# Lizenz
+Fahrtenbuch
+Copyright (c) 2024-2026 Simon Luthe
 
-Copyright (c) 2024–2026 Simon Luthe
+QUELLOFFEN ZUR EINSICHT — NUTZUNG NUR MIT SCHRIFTLICHER ERLAUBNIS
 
-Alle Rechte vorbehalten.
+Der Quelltext jeder veroeffentlichten Version dieser Software ist
+oeffentlich einsehbar. Wer nachlesen will, wie das Fahrtenbuch arbeitet,
+welche Daten es verarbeitet und wie es gesichert ist, soll das jederzeit
+tun koennen. Diese Offenheit ist gewollt.
 
-Diese Software darf von Einzelpersonen für private Zwecke frei genutzt werden.
+Einsehen ist aber nicht dasselbe wie Betreiben. Der produktive Einsatz
+dieser Software — fuer eine Gemeinde, einen Kirchenkreis, eine
+Landeskirche oder sonst jemanden — bedarf einer schriftlichen
+Vereinbarung mit dem Urheber.
 
-Die Nutzung dieser Software durch Organisationen, Institutionen, Vereine, Kirchen oder andere juristische Personen ist nur nach vorheriger Vereinbarung mit dem Urheberrechtsinhaber gestattet.
+Kontakt: mail@simonluthe.de
 
-Für eine Nutzungsvereinbarung kontaktieren Sie bitte [mail@simonluthe.de](mailto:mail@simonluthe.de).
 
-## Haftungsausschluss
+================================================================================
+1. WAS OHNE WEITERES ERLAUBT IST
+================================================================================
 
-DIESE SOFTWARE WIRD "WIE BESEHEN" OHNE JEGLICHE AUSDRÜCKLICHE ODER STILLSCHWEIGENDE GARANTIE ZUR VERFÜGUNG GESTELLT, EINSCHLIESSLICH, ABER NICHT BESCHRÄNKT AUF DIE GARANTIEN DER MARKTGÄNGIGKEIT, DER EIGNUNG FÜR EINEN BESTIMMTEN ZWECK UND DER NICHTVERLETZUNG VON RECHTEN DRITTER. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHT-INHABER HAFTBAR FÜR ANSPRÜCHE, SCHÄDEN ODER ANDERE VERPFLICHTUNGEN, SEI ES DURCH VERTRAG, UNERLAUBTE HANDLUNG ODER ANDERWEITIG, DIE SICH AUS, AUSSERHALB ODER IM ZUSAMMENHANG MIT DER SOFTWARE ODER DER NUTZUNG ODER ANDEREN GESCHÄFTEN MIT DER SOFTWARE ERGEBEN.
+Ohne gesonderte Vereinbarung duerfen Sie:
+
+  a) den Quelltext lesen, herunterladen und studieren;
+
+  b) die Software zu eigenen Lern-, Pruef- und Forschungszwecken auf
+     eigenen Geraeten ausfuehren, solange dabei keine Daten Dritter
+     verarbeitet werden;
+
+  c) Sicherheitsluecken und Fehler suchen und melden;
+
+  d) ueber die Software berichten, sie zitieren und besprechen.
+
+
+================================================================================
+2. WAS EINER VEREINBARUNG BEDARF
+================================================================================
+
+Einer vorherigen schriftlichen Vereinbarung mit dem Urheber bedarf
+insbesondere:
+
+  a) der Betrieb der Software fuer echte Nutzerinnen und Nutzer,
+     gleich ob entgeltlich oder unentgeltlich;
+
+  b) der Betrieb als Dienst fuer Personen ausserhalb der eigenen
+     Organisation;
+
+  c) die Weitergabe der Software oder veraenderter Fassungen an Dritte;
+
+  d) die Nutzung von Teilen des Quelltextes in anderer Software.
+
+Dies gilt unabhaengig davon, ob die Nutzung kommerziell erfolgt.
+Auch kirchliche, gemeinnuetzige und oeffentliche Einrichtungen fallen
+hierunter.
+
+
+================================================================================
+3. VEREINBARUNGEN
+================================================================================
+
+Vereinbarungen nach Abschnitt 2 werden einzeln getroffen. Der Urheber
+erteilt sie nach eigenem Ermessen; ein Anspruch darauf besteht nicht.
+
+Eine erteilte Erlaubnis gilt nur fuer die darin genannte Einrichtung,
+den genannten Umfang und den genannten Zeitraum. Sie ist nicht
+uebertragbar, soweit nichts anderes vereinbart ist.
+
+
+================================================================================
+4. URHEBERVERMERK
+================================================================================
+
+In jeder erlaubten Fassung und in jedem erlaubten Betrieb bleibt der
+Urhebervermerk erhalten:
+
+  Fahrtenbuch — Copyright (c) 2024-2026 Simon Luthe
+  mail@simonluthe.de
+
+
+================================================================================
+5. KEINE MARKENRECHTE
+================================================================================
+
+Diese Lizenz erteilt keine Rechte an den Namen "Fahrtenbuch" in Verbindung mit dieser Software, an Logos
+oder an sonstigen Kennzeichen.
+
+
+================================================================================
+6. GEWAEHRLEISTUNG UND HAFTUNG
+================================================================================
+
+Die Software wird ohne jede Gewaehr bereitgestellt. Der Urheber haftet
+nicht fuer Schaeden, die aus ihrer Nutzung entstehen, soweit gesetzlich
+zulaessig. Insbesondere wird keine Verfuegbarkeit, Fehlerfreiheit oder
+Eignung fuer einen bestimmten Zweck zugesichert.
+
+Diese Beschraenkung gilt nicht bei Vorsatz und grober Fahrlaessigkeit
+sowie bei der Verletzung von Leben, Koerper und Gesundheit.
+
+
+================================================================================
+7. BEENDIGUNG
+================================================================================
+
+Wer gegen diese Bedingungen verstoesst, verliert die daraus folgenden
+Rechte. Wird der Verstoss innerhalb von 30 Tagen nach Kenntnis
+abgestellt und ist es der erste Verstoss, leben die Rechte wieder auf.
+
+
+================================================================================
+8. ANWENDBARES RECHT
+================================================================================
+
+Es gilt deutsches Recht.
