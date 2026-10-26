@@ -42,6 +42,8 @@ jobs:
               exit 0
             fi
             echo "::warning::Versuch $versuch fehlgeschlagen, neuer Versuch."
+            # Ein abgebrochenes apt kann dpkg halb fertig zurücklassen.
+            sudo dpkg --configure -a || true
             sleep 10
           done
           exit 1
