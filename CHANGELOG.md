@@ -13,6 +13,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Beim Einreichen mehrerer Monate auf einmal lud die App nach jedem einzelnen Monat die gesamte Fahrtenliste neu. Bei zwölf Monaten waren das zwei Dutzend überflüssige Abfragen, die in ungünstigen Fällen an die Anfragegrenze stießen. Jetzt wird einmal am Ende aktualisiert
 - Der Start der App und jedes Speichern brauchen deutlich weniger Abfragen: 8 statt 35. Die Monatsübersicht kommt jetzt in einer Abfrage statt in 28 einzelnen. In der Monatsauswahl erscheinen dadurch auch Jahrgänge, die älter als zwei Jahre sind — bisher fehlten sie dort, obwohl die Fahrten vorhanden waren
 - Die App startet im Browser schneller: Beim Start werden nur noch die Teile geladen, die sofort gebraucht werden. Was zum Erstellen von ZIP-Dateien oder allein in der Handy-App nötig ist, kommt erst bei Bedarf dazu — gemessen 164 kB statt 203 kB beim Start
+- Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
 ### Sonstiges
 - Programmbibliotheken mit bekannten Sicherheitslücken aktualisiert, unter anderem für den Mailversand und die Handy-App. Für Nutzende ändert sich nichts
@@ -24,9 +25,6 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Fehlermeldungen des Servers enthalten keine internen Angaben mehr, die Anmelde-Abfrage verrät über ihre Antwortzeit nicht mehr, welche Konten existieren, und das erneute Senden einer Bestätigungsmail ist auf fünf pro Stunde begrenzt
 - Die Oberfläche wird jetzt mit den üblichen Schutz-Kopfzeilen ausgeliefert, und der Server-Dienst läuft nicht mehr mit vollen Rechten. Für Nutzende ändert sich nichts
 - Englische Fassung der README und der Vorlagen für Fehlermeldungen
-
-### Geändert
-- Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
 ### Behoben
 - Nach dem Ändern des eigenen Namens im Profil stand auf der Startseite bis zum nächsten App-Start weiter der alte Name
