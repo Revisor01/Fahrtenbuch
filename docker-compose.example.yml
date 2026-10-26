@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: revisoren/fahrtenbuch-app:latest
+    image: ghcr.io/revisor01/fahrtenbuch-app:latest
     ports:
       - "9642:80"
     environment:
@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: revisoren/fahrtenbuch-server:latest
+    image: ghcr.io/revisor01/fahrtenbuch-server:latest
     # Nur lokal veröffentlichen — der Reverse Proxy (Caddy) spricht das
     # Backend über den Host an. Ohne Bindung an 127.0.0.1 wäre die API ohne
     # TLS direkt aus dem Internet erreichbar.

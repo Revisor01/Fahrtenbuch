@@ -15,7 +15,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Web%20%C2%B7%20PWA-blue" alt="Platform">
-  <img src="https://img.shields.io/docker/v/revisoren/fahrtenbuch-app?label=Docker&logo=docker" alt="Docker image">
+  <img src="https://img.shields.io/badge/Image-ghcr.io-blue?logo=docker" alt="Docker image">
   <img src="https://img.shields.io/badge/License-free%20for%20individuals%2C%20organisations%20by%20agreement-lightgrey" alt="License">
 </p>
 
@@ -77,8 +77,8 @@ trips. Parishes, church districts and other organisations need a written
 agreement (see [License](#license)).
 
 You need Docker with Docker Compose and a reverse proxy with TLS in front. The
-ready-made images are on Docker Hub (`revisoren/fahrtenbuch-app` and
-`revisoren/fahrtenbuch-server`).
+ready-made images are in the GitHub Container Registry
+(`ghcr.io/revisor01/fahrtenbuch-app` and `ghcr.io/revisor01/fahrtenbuch-server`).
 
 **1. Create the Compose file.** The template
 [docker-compose.example.yml](docker-compose.example.yml) contains the

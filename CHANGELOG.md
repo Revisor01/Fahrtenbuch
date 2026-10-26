@@ -8,6 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased] - 2.3.3
 
 ### Geändert
+- Die fertigen Abbilder liegen jetzt unter `ghcr.io/revisor01/fahrtenbuch-app` und `ghcr.io/revisor01/fahrtenbuch-server` statt auf Docker Hub; dort erscheinen keine neuen Versionen mehr
 - Neue Lizenz: Für die eigenen Fahrten bleibt Fahrtenbuch frei, auch für dienstliche. Gemeinden, Kirchenkreise und andere Organisationen brauchen für den Einsatz eine schriftliche Vereinbarung
 - Fahrtenliste, Monatsbericht und Jahresübersicht laden spürbar schneller, besonders bei vielen erfassten Fahrten. Gemessen an einem Bestand von 50.000 Fahrten muss die Datenbank für einen Monatsbericht noch 28 statt 1.250 Zeilen durchsehen; die Mitfahrer kommen jetzt in derselben Abfrage mit statt in rund 1.100 einzelnen
 - Beim Einreichen mehrerer Monate auf einmal lud die App nach jedem einzelnen Monat die gesamte Fahrtenliste neu. Bei zwölf Monaten waren das zwei Dutzend überflüssige Abfragen, die in ungünstigen Fällen an die Anfragegrenze stießen. Jetzt wird einmal am Ende aktualisiert

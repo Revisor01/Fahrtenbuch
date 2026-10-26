@@ -20,17 +20,17 @@ jobs:
       matrix:
         include:
           - teil: backend
-            image: revisoren/fahrtenbuch-server
+            image: ghcr.io/revisor01/fahrtenbuch-server
           - teil: frontend
-            image: revisoren/fahrtenbuch-app
+            image: ghcr.io/revisor01/fahrtenbuch-app
+    permissions:
+      contents: read
+      packages: write
     uses: Revisor01/workflows/.github/workflows/docker-image.yml@9eb921a3c730493b1aea79d5b22bf655356d5e43 # 1.2.0
     with:
       image: ${{ matrix.image }}
       kontext: ./${{ matrix.teil }}
-      registry-benutzer: revisoren
       tags: |
         type=semver,pattern={{version}}
         type=semver,pattern={{major}}.{{minor}}
         type=raw,value=latest,enable={{is_default_branch}}
-    secrets:
-      registry-token: ${{ secrets.DOCKERHUB_TOKEN }}
