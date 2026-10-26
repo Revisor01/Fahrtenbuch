@@ -13,6 +13,7 @@
 - [ ] Tests grün
 - [ ] `CHANGELOG.md` unter `[Unreleased]` ergänzt (oder: ändert nachweislich nichts Sichtbares, weil …)
 - [ ] Diff, Titel und Beschreibung frei von Zugangsdaten, Hostnamen, Pfaden und Testkonten
+- [ ] Ich stimme der [Beitragserklärung](../blob/master/CONTRIBUTING.md#beitragserklärung) zu / I agree to the contributor statement
 
 ## Offen
 
