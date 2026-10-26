@@ -1,89 +1,36 @@
 name: Docker Build & Push
 
+# Baut und veröffentlicht die Images. Ausgerollt wird von Hand mit
+# ./deploy/deploy.sh <instanz> (test, dann dithmarschen, dann alle); das Skript
+# sichert vorher die Datenbank und prüft hinterher den neuen Stand.
+
 on:
   push:
-    branches: 
-      - 'master'
-    tags:
-      - 'v*'
+    branches: [master]
+    tags: ['v*']
   pull_request:
-    branches: 
-      - 'master'
+    branches: [master]
 
 permissions:
   contents: read
 
 jobs:
-  docker:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set Docker tags backend
-        id: meta-backend
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
-        with:
-          images: revisoren/fahrtenbuch-server
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Set Docker tags frontend
-        id: meta-frontend
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
-        with:
-          images: revisoren/fahrtenbuch-app
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
-      - name: Login to Docker Hub
-        # PRs bauen nur und bekommen kein Secret (Dependabot); ohne diese Bedingung bricht der Login ab.
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
-        with:
-          username: revisoren
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push Backend
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push Frontend
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-frontend.outputs.tags }}
-          labels: ${{ steps.meta-frontend.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # Kein automatischer Deploy mehr an dieser Stelle: Hier stand ein Aufruf
-      # eines Portainer-Webhooks, aber auf dem Zielserver laeuft kein
-      # Portainer. Der Aufruf lief ohne Fehler ins Leere — die CI meldete
-      # Erfolg, waehrend auf dem Server tagealte Images liefen.
-      #
-      # Ausgerollt wird jetzt bewusst von Hand, in dieser Reihenfolge:
-      #   ./deploy/deploy.sh test           immer zuerst
-      #   ./deploy/deploy.sh dithmarschen   Referenzinstanz
-      #   ./deploy/deploy.sh alle           uebrige Kirchenkreise
-      # Das Skript sichert vorher die Datenbank und prueft hinterher, ob der
-      # neue Stand wirklich laeuft.
-      - name: Hinweis zum Ausrollen
-        if: github.event_name != 'pull_request'
-        run: echo "Images gebaut. Ausrollen mit ./deploy/deploy.sh <instanz>"
+  image:
+    strategy:
+      matrix:
+        include:
+          - teil: backend
+            image: revisoren/fahrtenbuch-server
+          - teil: frontend
+            image: revisoren/fahrtenbuch-app
+    uses: Revisor01/workflows/.github/workflows/docker-image.yml@9eb921a3c730493b1aea79d5b22bf655356d5e43 # 1.2.0
+    with:
+      image: ${{ matrix.image }}
+      kontext: ./${{ matrix.teil }}
+      registry-benutzer: revisoren
+      tags: |
+        type=semver,pattern={{version}}
+        type=semver,pattern={{major}}.{{minor}}
+        type=raw,value=latest,enable={{is_default_branch}}
+    secrets:
+      registry-token: ${{ secrets.DOCKERHUB_TOKEN }}
