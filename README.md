@@ -15,7 +15,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Plattform-Web%20%C2%B7%20PWA-blue" alt="Plattform">
-  <img src="https://img.shields.io/docker/v/revisoren/fahrtenbuch-app?label=Docker&logo=docker" alt="Docker-Image">
+  <img src="https://img.shields.io/badge/Image-ghcr.io-blue?logo=docker" alt="Docker-Image">
   <img src="https://img.shields.io/badge/Lizenz-frei%20f%C3%BCr%20Einzelpersonen%2C%20Organisationen%20nach%20Vereinbarung-lightgrey" alt="Lizenz">
 </p>
 
@@ -78,8 +78,8 @@ dienstliche. Gemeinden, Kirchenkreise und andere Organisationen brauchen eine
 schriftliche Vereinbarung (siehe [Lizenz](#lizenz)).
 
 Nötig sind Docker mit Docker Compose und ein Reverse Proxy mit TLS davor. Die
-fertigen Abbilder liegen auf Docker Hub (`revisoren/fahrtenbuch-app` und
-`revisoren/fahrtenbuch-server`).
+fertigen Abbilder liegen in der GitHub Container Registry
+(`ghcr.io/revisor01/fahrtenbuch-app` und `ghcr.io/revisor01/fahrtenbuch-server`).
 
 **1. Compose-Datei anlegen.** Die Vorlage
 [docker-compose.example.yml](docker-compose.example.yml) enthält Oberfläche,
