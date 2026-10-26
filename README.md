@@ -157,7 +157,8 @@ Hash gespeichert, API-Schlüssel ebenso.
 ## Lizenz
 
 **Quelloffen zur Einsicht — Nutzung nur mit schriftlicher Erlaubnis.**
-Der vollständige Text steht in [LICENSE](LICENSE).
+Der vollständige Text steht in [LICENSE](LICENSE), eine englische Übersetzung
+in [LICENSE.en.md](LICENSE.en.md) (maßgeblich ist die deutsche Fassung).
 
 - **Ohne Weiteres erlaubt:** lesen, herunterladen, studieren, zu Lern- und
   Prüfzwecken auf eigenen Geräten ausführen, Sicherheitslücken melden,
