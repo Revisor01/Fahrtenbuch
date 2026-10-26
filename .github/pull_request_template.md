@@ -1,3 +1,5 @@
+> Mit dem Einreichen stellst du deinen Beitrag unter die Bedingungen in [CONTRIBUTING.md](https://github.com/Revisor01/Fahrtenbuch/blob/master/CONTRIBUTING.md#rechte-an-beiträgen). / By submitting you agree to the terms in [CONTRIBUTING.md](https://github.com/Revisor01/Fahrtenbuch/blob/master/CONTRIBUTING.md#rights-in-contributions).
+
 ## Worum es geht / What this is about
 
 <!-- Ausgangslage und Ziel in zwei, drei Sätzen. Öffentlich: keine Server, Konten, Pfade.

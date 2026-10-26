@@ -148,8 +148,8 @@ Fahrtenbuch
 Bug reports and suggestions are welcome as an
 [issue](https://github.com/Revisor01/Fahrtenbuch/issues). Please report
 security issues privately as described in [SECURITY.md](SECURITY.md). Pull
-requests from outside are not accepted; [CONTRIBUTING.md](CONTRIBUTING.md)
-explains why.
+requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) explains what applies
+to the rights in your contribution.
 
 ## Privacy
 
