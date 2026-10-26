@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "SEE LICENSE IN ../LICENSE",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

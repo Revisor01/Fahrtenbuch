@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Plattform-Web%20%C2%B7%20PWA-blue" alt="Plattform">
   <img src="https://img.shields.io/docker/v/revisoren/fahrtenbuch-app?label=Docker&logo=docker" alt="Docker-Image">
-  <img src="https://img.shields.io/badge/Lizenz-privat%20frei-lightgrey" alt="Lizenz">
+  <img src="https://img.shields.io/badge/Lizenz-Einsicht%20frei%2C%20Betrieb%20nach%20Vereinbarung-lightgrey" alt="Lizenz">
 </p>
 
 ## Worum es geht
@@ -68,6 +68,9 @@ der Nutzer:innen geschrieben. Die
 Version zusammen.
 
 ## Selbst betreiben
+
+Der Betrieb braucht eine schriftliche Vereinbarung (siehe [Lizenz](#lizenz)).
+Zum Ausprobieren auf dem eigenen Rechner ohne Daten Dritter genügt Folgendes.
 
 Nötig sind Docker mit Docker Compose und ein Reverse Proxy mit TLS davor. Die
 fertigen Abbilder liegen auf Docker Hub (`revisoren/fahrtenbuch-app` und
@@ -153,12 +156,15 @@ Hash gespeichert, API-Schlüssel ebenso.
 
 ## Lizenz
 
-Copyright © 2024–2026 Simon Luthe. Alle Rechte vorbehalten.
+**Quelloffen zur Einsicht — Nutzung nur mit schriftlicher Erlaubnis.**
+Der vollständige Text steht in [LICENSE](LICENSE).
 
-Einzelpersonen dürfen die Software für private Zwecke frei nutzen. Die Nutzung
-durch Organisationen, Institutionen, Vereine, Kirchen oder andere juristische
-Personen braucht eine vorherige Vereinbarung. Die Bedingungen stehen in
-[LICENSE](LICENSE).
+- **Ohne Weiteres erlaubt:** lesen, herunterladen, studieren, zu Lern- und
+  Prüfzwecken auf eigenen Geräten ausführen, Sicherheitslücken melden,
+  darüber berichten.
+- **Braucht eine Vereinbarung:** der Betrieb für echte Nutzer:innen (auch den
+  eigenen), die Weitergabe an Dritte, die Verwendung von Teilen des Codes in
+  anderer Software. Anfragen an [mail@simonluthe.de](mailto:mail@simonluthe.de).
 
 ## Kontakt
 

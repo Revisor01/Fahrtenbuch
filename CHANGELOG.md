@@ -8,6 +8,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ## [Unreleased] - 2.3.3
 
 ### Geändert
+- Neue Lizenz: Der Quelltext bleibt öffentlich einsehbar, der Betrieb – auch für den eigenen Gebrauch – braucht jetzt eine schriftliche Vereinbarung. Bisher war die private Nutzung frei
 - Fahrtenliste, Monatsbericht und Jahresübersicht laden spürbar schneller, besonders bei vielen erfassten Fahrten. Gemessen an einem Bestand von 50.000 Fahrten muss die Datenbank für einen Monatsbericht noch 28 statt 1.250 Zeilen durchsehen; die Mitfahrer kommen jetzt in derselben Abfrage mit statt in rund 1.100 einzelnen
 - Beim Einreichen mehrerer Monate auf einmal lud die App nach jedem einzelnen Monat die gesamte Fahrtenliste neu. Bei zwölf Monaten waren das zwei Dutzend überflüssige Abfragen, die in ungünstigen Fällen an die Anfragegrenze stießen. Jetzt wird einmal am Ende aktualisiert
 - Der Start der App und jedes Speichern brauchen deutlich weniger Abfragen: 8 statt 35. Die Monatsübersicht kommt jetzt in einer Abfrage statt in 28 einzelnen. In der Monatsauswahl erscheinen dadurch auch Jahrgänge, die älter als zwei Jahre sind — bisher fehlten sie dort, obwohl die Fahrten vorhanden waren
