@@ -1,6 +1,5 @@
-// Xcode Cloud soll den iOS-Release bauen koennen (27.10.2026). Das Skript nach
-// dem Klonen muss die Schritte des GitHub-Release gehen und darf die feste
-// Signierung nur im Klon umstellen; der GitHub-Weg bleibt bis zur Umstellung.
+// Xcode Cloud baut den iOS-Release. Das Skript nach dem Klonen bereitet Web-Build,
+// Plugins und Build-Nummer vor und darf die feste Signierung nur im Klon umstellen.
 //
 // Laeuft ohne Test-Framework: `node test/xcodeCloud.test.js`.
 
@@ -22,7 +21,7 @@ const ios = path.join(wurzel, 'frontend/ios/App');
 const skript = path.join(ios, 'ci_scripts/ci_post_clone.sh');
 const text = fs.readFileSync(skript, 'utf8');
 const pbx = fs.readFileSync(path.join(ios, 'App.xcodeproj/project.pbxproj'), 'utf8');
-const workflow = fs.readFileSync(path.join(wurzel, '.github/workflows/ios-release.yml'), 'utf8');
+const lock = JSON.parse(fs.readFileSync(path.join(wurzel, 'frontend/package-lock.json'), 'utf8'));
 
 console.log('\n1 — Skript nach dem Klonen:');
 
@@ -31,7 +30,7 @@ pruefe('liegt neben dem Projekt, ist ausfuehrbar und bricht bei jedem Fehler ab'
   assert.ok(/^set -euo pipefail$/m.test(text));
 });
 
-pruefe('geht die Schritte des GitHub-Release in dieser Reihenfolge', () => {
+pruefe('geht die Schritte in dieser Reihenfolge', () => {
   const schritte = ['brew install node@22', 'CI_BUILD_NUMBER', 'npm ci', 'npm run build', 'npx cap sync ios',
     'xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App', 'CODE_SIGN_STYLE = Automatic;'];
   const stellen = schritte.map((s) => text.indexOf(s));
@@ -39,9 +38,10 @@ pruefe('geht die Schritte des GitHub-Release in dieser Reihenfolge', () => {
   assert.deepStrictEqual([...stellen].sort((a, b) => a - b), stellen);
 });
 
-pruefe('dieselbe Node-Linie wie ios-release.yml', () => {
-  const linie = workflow.match(/node-version: (\d+)/)[1];
-  assert.strictEqual(linie, '22');
+pruefe('die Node-Linie genuegt der Capacitor-CLI', () => {
+  const linie = Number(text.match(/brew install node@(\d+)/)[1]);
+  const mindestens = Number(lock.packages['node_modules/@capacitor/cli'].engines.node.match(/^>=(\d+)\./)[1]);
+  assert.ok(linie >= mindestens, `node@${linie} < ${mindestens}`);
   assert.ok(text.includes(`[ "$(node -p 'process.versions.node.split(".")[0]')" = ${linie} ]`));
 });
 

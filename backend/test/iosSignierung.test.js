@@ -1,26 +1,7 @@
-// Der iOS-Build signierte das Archiv mit einem Development-Zertifikat, das
-// Xcode sich dafuer selbst anlegte.
-//
-// Belegt am Log von Build 31 (Lauf 35933605897, 23.09.2026):
-//   Signing Identity:     "Apple Development: Created via API (***)"
-//   Provisioning Profile: "iOS Team Provisioning Profile: de.godsapp.fahrtenbuch"
-//
-// Ursache: In der Release-Konfiguration des Xcode-Projekts standen
-// CODE_SIGN_STYLE = Automatic und CODE_SIGN_IDENTITY = "iPhone Developer".
-// Bei automatischer Signierung entscheidet das Projekt, nicht der Keychain —
-// und `-allowProvisioningUpdates` erlaubte Xcode, sich das Fehlende ueber
-// die App-Store-Connect-API zu besorgen. Der Keychain eines CI-Runners ist
-// bei jedem Lauf leer, also entstand dort ein Zertifikat.
-//
-// Das Limit ist KONTOWEIT: Fahrtenbuch, Konfi Quest und Moin Kark teilen es
-// sich. Gemessen am 24.09.: 6 Zertifikate, 4 davon "Created via API".
-//
-// Build 31 kam trotz der Development-Signatur durch, inklusive Upload; bei
-// Konfi Quest sind drei so gebaute Fassungen sogar READY_FOR_SALE. WARUM das
-// durchgeht, ist offen: Die naheliegende Erklaerung (der Export signiert
-// fuers App-Store-Ziel neu) ist eine Vermutung, keine Messung — die
-// Export-Signierung steht in den xcdistributionlogs unter /var/folders, die
-// der Runner nicht hochlaedt.
+// Die Release-Konfiguration signiert fest mit Distribution-Zertifikat und
+// Profil, damit Xcode sich nirgends selbst Zertifikate anlegt (das Limit gilt
+// fuer das ganze Konto). Gebaut wird in Xcode Cloud; das Skript nach dem Klonen
+// stellt nur im Klon auf automatisch um und erwartet genau diese Zeilen.
 //
 // Laeuft ohne Test-Framework: `node test/iosSignierung.test.js`.
 
@@ -104,43 +85,31 @@ pruefe('der Profilname ist der, den es im Konto gibt', () => {
     `steht: ${treffer[0].text}`);
 });
 
-// --- 2. Der Workflow besorgt nichts mehr selbst ----------------------------
+// --- 2. Der Workflow baut in Xcode Cloud ----------------------------------
 console.log('\n2 — Workflow:');
 
-pruefe('-allowProvisioningUpdates steht in keiner Befehlszeile mehr', () => {
-  // Auf ausgefuehrte Zeilen pruefen, nicht auf das blosse Wort: Der
-  // Dateikopf erklaert den Befund und nennt die Option dabei.
-  const zeilen = workflow.split('\n')
-    .filter((z) => z.includes('allowProvisioningUpdates') && !z.trim().startsWith('#'));
-  assert.deepStrictEqual(zeilen, [],
-    'damit duerfte Xcode sich Zertifikate ueber die ASC-API anlegen');
+pruefe('ruft den Baustein xcode-cloud.yml in einer festen Fassung auf', () => {
+  assert.ok(/uses: Revisor01\/workflows\/\.github\/workflows\/xcode-cloud\.yml@[0-9a-f]{40} # \d+\.\d+\.\d+\n/.test(workflow),
+    'ohne feste Fassung baut der Release mit dem, was gerade im Baustein steht');
 });
 
-pruefe('das Profil wird stattdessen geladen', () => {
-  assert.ok(/name: Provisioning-Profil laden/.test(workflow));
-  assert.ok(/Library\/MobileDevice\/Provisioning/.test(workflow),
-    'Xcode sucht es dort');
+pruefe('nimmt die Workflow-ID aus der Repo-Variable und reicht die drei ASC-Secrets durch', () => {
+  assert.ok(/workflow-id: \$\{\{ vars\.XCODE_CLOUD_WORKFLOW \}\}/.test(workflow));
+  assert.ok(/asc-key-id: \$\{\{ secrets\.ASC_KEY_ID \}\}/.test(workflow));
+  assert.ok(/asc-issuer-id: \$\{\{ secrets\.ASC_ISSUER_ID \}\}/.test(workflow));
+  assert.ok(/asc-key-p8: \$\{\{ secrets\.ASC_KEY_P8_BASE64 \}\}/.test(workflow));
 });
 
-pruefe('ein fehlendes Profil bricht ab, statt umgangen zu werden', () => {
-  const schritt = workflow.split('name: Provisioning-Profil laden')[1].split('- name:')[0];
-  assert.ok(/sys\.exit\(1\)/.test(schritt), 'sonst faellt es erst beim Signieren auf');
-  assert.ok(/nicht gefunden/.test(schritt), 'mit verstaendlicher Meldung');
+pruefe('startet nur von Hand', () => {
+  assert.ok(/^on:\n  workflow_dispatch:\n\n/m.test(workflow));
 });
 
-pruefe('das Distribution-Zertifikat kommt weiterhin aus dem Secret', () => {
-  assert.ok(/IOS_DIST_P12_BASE64/.test(workflow));
-  assert.ok(/security import dist\.p12/.test(workflow));
-});
-
-pruefe('der Export signiert ebenfalls manuell', () => {
-  assert.ok(/<key>signingStyle<\/key><string>manual<\/string>/.test(workflow),
-    'automatic hier haette dasselbe Schlupfloch offengelassen');
-  assert.ok(/<key>signingCertificate<\/key><string>Apple Distribution<\/string>/.test(workflow));
-});
-
-pruefe('der Export nennt Bundle-ID und Profil', () => {
-  assert.ok(/de\.godsapp\.fahrtenbuch<\/key><string>Fahrtenbuch AppStore<\/string>/.test(workflow));
+pruefe('braucht kein Distribution-Zertifikat und baut nicht selbst', () => {
+  // Xcode Cloud signiert selbst; ein Zertifikat im Workflow liefe am 28.11.2026 ab.
+  for (const wort of ['IOS_DIST_P12_BASE64', 'IOS_P12_PASSWORD', 'security import', 'xcodebuild',
+    'allowProvisioningUpdates', 'runs-on: macos']) {
+    assert.ok(!workflow.includes(wort), wort);
+  }
 });
 
 console.log('\n' + geprueft + ' Pruefungen bestanden.');

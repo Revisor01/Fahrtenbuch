@@ -82,14 +82,6 @@ targetRules = ["label-passwort", "label-api-key"]
 paths = ['''(?i)(?:^|/)(?:tests?|__tests__|spec|[A-Za-z]+Tests)/''']
 
 [[allowlists]]
-description = "iOS-Release: Schluessel ohne Passwort (password=None) und Profilordner des Runners"
-condition = "AND"
-targetRules = ["label-passwort-text", "lokaler-pfad"]
-paths = ['''^\.github/workflows/ios-release\.yml$''']
-regexTarget = "match"
-regexes = ['''password=None''', '''^~/Library/$''']
-
-[[allowlists]]
 description = "Markierung fuer das noch nicht gesetzte Admin-Passwort (Migration 0002)"
 condition = "AND"
 targetRules = ["label-passwort"]
