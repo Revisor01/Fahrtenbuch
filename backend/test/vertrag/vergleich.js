@@ -42,6 +42,10 @@ for (const e of alt) {
   }
 }
 
+for (const e of alt) {
+  const n = neuNachSchritt.get(e.schritt);
+  console.log(`  ${String(e.status).padEnd(4)}${String(n ? n.status : '-').padEnd(4)}${e.schritt}`);
+}
 console.log(`${alt.length} Anfragen verglichen (alt ${alt.length}, neu ${neu.length}).`);
 if (fehler.length) {
   console.log(`${fehler.length} Abweichungen:`);

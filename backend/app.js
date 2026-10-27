@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -181,7 +181,8 @@ app.use('/api', (req, res) => {
 // Catch-all route for SPAs. Im Container liegt kein Frontend-Build (nginx
 // liefert ihn aus), deshalb hier ein sauberer Fallback statt eines ENOENT,
 // das frueher im Express-Default-Handler als HTML-Stacktrace landete.
-app.get('*', (req, res) => {
+// Express 5 (path-to-regexp 8): ein blosses '*' ist kein gueltiger Pfad mehr.
+app.get('/{*rest}', (req, res) => {
     const indexPfad = path.join(reactBuildPath, 'index.html');
     res.sendFile(indexPfad, (err) => {
         if (err) {
