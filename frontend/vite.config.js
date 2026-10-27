@@ -1,4 +1,4 @@
-import { defineConfig, transformWithEsbuild } from 'vite';
+import { defineConfig, transformWithOxc } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'node:fs';
@@ -7,16 +7,16 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 
 // Der Bestand nutzt durchgaengig .js fuer JSX (57 Dateien). Vite parst .js
 // standardmaessig ohne JSX und bricht ab. Statt 57 Dateien umzubenennen,
-// laeuft esbuild mit dem jsx-Loader vor der Import-Analyse — 'pre' ist
+// laeuft Oxc mit lang 'jsx' vor der Import-Analyse — 'pre' ist
 // noetig, damit der Hook vor vite:build-import-analysis greift.
 const jsxInJs = {
   name: 'jsx-in-js',
   enforce: 'pre',
   async transform(code, id) {
     if (!id.match(/src\/.*\.js$/)) return null;
-    return transformWithEsbuild(code, id, {
-      loader: 'jsx',
-      jsx: 'automatic',
+    return transformWithOxc(code, id, {
+      lang: 'jsx',
+      jsx: { runtime: 'automatic' },
     });
   },
 };
@@ -89,8 +89,8 @@ export default defineConfig({
   plugins: [jsxInJs, react(), pwa],
 
   optimizeDeps: {
-    esbuildOptions: {
-      loader: { '.js': 'jsx' },
+    rolldownOptions: {
+      moduleTypes: { '.js': 'jsx' },
     },
   },
 
@@ -105,7 +105,7 @@ export default defineConfig({
     outDir: 'build',
     sourcemap: false,
 
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         // Ein einziges 584-KB-Buendel hiess: Die WebView muss alles geladen
         // und geparst haben, bevor das erste Pixel erscheint — auf dem Geraet
@@ -115,23 +115,23 @@ export default defineConfig({
         // zu rendern. Die Grenzen sind nach Aenderungshaeufigkeit gezogen:
         // React aendert sich fast nie und bleibt so ueber Deploys hinweg im
         // Cache, waehrend der App-Code neu geladen wird.
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return;
+        codeSplitting: { groups: [{ name(id) {
+          if (!id.includes('node_modules')) return null;
           if (id.includes('react-dom') || /node_modules\/react\//.test(id)) {
             return 'react';
           }
           if (id.includes('react-router')) return 'router';
           if (id.includes('lucide-react')) return 'icons';
           // Dynamisch geladene Pakete NICHT nach `vendor` ziehen: Wer hier
-          // einen Namen zurueckgibt, hebelt den Lazy-Import aus — Rollup legt
+          // einen Namen zurueckgibt, hebelt den Lazy-Import aus — Rolldown legt
           // das Modul dann in den benannten Brocken, und der laedt beim
           // Start. jszip und pako braucht nur der ZIP-Export, die
           // Capacitor-Plugins nur die App; im Browser werden sie nie
-          // angefordert. Ohne `return` entscheidet Rollup selbst und legt
+          // angefordert. Mit `null` entscheidet Rolldown selbst und legt
           // sie in eigene Dateien.
-          if (/node_modules\/(jszip|pako|@capacitor|@capgo|@aparajita)\//.test(id)) return;
+          if (/node_modules\/(jszip|pako|@capacitor|@capgo|@aparajita)\//.test(id)) return null;
           return 'vendor';
-        },
+        } }] },
       },
     },
   },

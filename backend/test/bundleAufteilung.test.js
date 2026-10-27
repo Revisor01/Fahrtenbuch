@@ -36,24 +36,24 @@ const config = fs.readFileSync(frontend + 'vite.config.js', 'utf8');
 console.log('\n1 — Die Aufteilungsregel:');
 
 pruefe('dynamisch geladene Pakete werden ausgenommen', () => {
-  const chunks = config.split('manualChunks(id)')[1].split('},')[0];
+  const chunks = config.split('name(id)')[1].split('} }]')[0];
   assert.ok(/jszip\|pako\|@capacitor\|@capgo\|@aparajita/.test(chunks),
     'ohne diese Ausnahme landet alles in vendor und haengt am Start');
 });
 
 pruefe('die Ausnahme steht VOR dem vendor-Auffang', () => {
-  const chunks = config.split('manualChunks(id)')[1].split('},')[0];
+  const chunks = config.split('name(id)')[1].split('} }]')[0];
   assert.ok(chunks.indexOf('jszip|pako') < chunks.indexOf("return 'vendor'"),
     'danach griffe sie nie');
 });
 
-pruefe('die Ausnahme gibt nichts zurueck', () => {
+pruefe('die Ausnahme gibt null zurueck', () => {
   // Ein Name — auch ein eigener — haenge den Brocken wieder an den Start.
-  // Nur ohne Rueckgabe entscheidet Rollup selbst.
-  const chunks = config.split('manualChunks(id)')[1].split('},')[0];
+  // Nur mit null entscheidet Rolldown (Vite 8, codeSplitting.groups) selbst.
+  const chunks = config.split('name(id)')[1].split('} }]')[0];
   const zeile = chunks.split('\n').find((z) => z.includes('jszip|pako'));
-  assert.ok(/\) return;\s*$/.test(zeile.trim()),
-    `muss mit blossem "return;" enden, steht aber: ${zeile.trim()}`);
+  assert.ok(/\) return null;\s*$/.test(zeile.trim()),
+    `muss mit "return null;" enden, steht aber: ${zeile.trim()}`);
 });
 
 pruefe('die uebrigen Brocken bleiben wie sie waren', () => {
@@ -125,13 +125,16 @@ if (!fs.existsSync(indexPfad)) {
       'und darf nicht in index.html stehen');
   });
 
-  pruefe('die Startlast bleibt unter 600 kB roh', () => {
-    // Gemessen nach der Aenderung: 542.929 B. Die Schranke faengt einen
-    // Rueckfall auf den alten Stand (672.526 B) sicher ab.
+  pruefe('die Startlast ohne React bleibt unter 450 kB roh', () => {
+    // React selbst bleibt aussen vor: Mit React 19 wuchs der react-Brocken
+    // von 138.769 auf 210.909 B, ohne dass sich an der Aufteilung etwas
+    // aenderte (27.10.2026). Ohne ihn: vorher 408.258 B, mit React 19 und
+    // Vite 8 415.362 B; der alte Rueckfall laege bei rund 533.000 B.
     const summe = startDateien
+      .filter((d) => !/assets\/react-/.test(d))
       .reduce((s, d) => s + fs.statSync(frontend + 'build/' + d).size, 0);
-    assert.ok(summe < 600_000,
-      `Startlast ${summe} B — vor der Aenderung waren es 672.526 B`);
+    assert.ok(summe < 450_000,
+      `Startlast ohne React ${summe} B — vor der Aufteilung waren es rund 533.000 B`);
   });
 }
 
