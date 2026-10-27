@@ -1,6 +1,31 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Quellen wie bisher nur aus content in tailwind.config.js (src, index.html),
+   nicht aus dem ganzen Ordner. */
+@import 'tailwindcss' source(none);
+@config '../tailwind.config.js';
+
+/* Zur Laufzeit zusammengesetzte Klassen (status-progress-${state}); v4 kennt
+   safelist aus der JS-Konfiguration nicht mehr. */
+@source inline("status-progress-{done,current,open} status-progress-line-{done,open} status-progress-label-open");
+
+/* v4 setzt Rahmenfarbe currentcolor, Platzhalter halbtransparent und
+   Buttons ohne Zeiger; hier wie in v3. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 /* ============================================================
    Basis-Typografie & Grundfläche (Redesign 2026)
@@ -46,7 +71,8 @@ code {
 }
 
 @layer components {
-  .base-container {
+  .base-container,
+  .card-container {
     background-color: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--r-card);
@@ -55,7 +81,11 @@ code {
     transition: background-color 150ms ease, border-color 150ms ease;
   }
 
-  .btn-base {
+  .btn-base,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-destructive {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -75,19 +105,26 @@ code {
       color 150ms ease, box-shadow 150ms ease;
   }
 
-  .btn-base:focus-visible {
+  .btn-base:focus-visible,
+  .btn-primary:focus-visible,
+  .btn-secondary:focus-visible,
+  .btn-ghost:focus-visible,
+  .btn-destructive:focus-visible {
     outline: none;
     box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
   }
 
-  .btn-base:disabled {
+  .btn-base:disabled,
+  .btn-primary:disabled,
+  .btn-secondary:disabled,
+  .btn-ghost:disabled,
+  .btn-destructive:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
 
   .card-container {
-    @apply base-container;
     padding: 16px;
   }
 
@@ -153,7 +190,8 @@ code {
   }
 
   /* ---------- Eingabefelder: 52 px hoch, 16 px Schrift (nie kleiner!) ---------- */
-  .form-input {
+  .form-input,
+  .form-select {
     @apply w-full max-w-full;
     height: var(--field-h);
     padding: 0 16px;
@@ -167,11 +205,13 @@ code {
       box-shadow 150ms ease;
   }
 
-  .form-input::placeholder {
+  .form-input::placeholder,
+  .form-select::placeholder {
     color: var(--text-3);
   }
 
-  .form-input:focus {
+  .form-input:focus,
+  .form-select:focus {
     outline: none;
     border-color: var(--brand);
     /* Rand wächst optisch 1 → 1,5 px: 0,5 px über box-shadow kompensiert,
@@ -179,13 +219,16 @@ code {
     box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
   }
 
-  .form-input:disabled {
+  .form-input:disabled,
+  .form-select:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
   .form-input[aria-invalid='true'],
-  .form-input.input-error {
+  .form-select[aria-invalid='true'],
+  .form-input.input-error,
+  .form-select.input-error {
     border-color: var(--danger);
     box-shadow: 0 0 0 0.5px var(--danger);
   }
@@ -203,13 +246,13 @@ code {
      (User-Feedback 14.08.). text-overflow greift bei <select> nicht auf allen
      Systemen, deshalb loest hier allein der Platz das Problem. */
   .form-select {
-    @apply form-input;
     padding-right: 40px;
     text-overflow: ellipsis;
   }
 
   /* Mehrzeilige Felder: Höhe frei, Padding aus der Skala */
-  textarea.form-input {
+  textarea.form-input,
+  textarea.form-select {
     height: auto;
     min-height: var(--field-h);
     padding: 12px 16px;
@@ -217,7 +260,10 @@ code {
 
 
   /* ---------- Statussystem: drei Zustände, Form + Wort + Farbe ---------- */
-  .status-badge {
+  .status-badge,
+  .status-erfasst,
+  .status-eingereicht,
+  .status-badge-primary {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -232,7 +278,6 @@ code {
 
   /* Erfasst: gestrichelter Ring, transparent */
   .status-erfasst {
-    @apply status-badge;
     background-color: transparent;
     color: var(--text-2);
     border: 1px dashed var(--line-strong);
@@ -240,7 +285,6 @@ code {
 
   /* Eingereicht: Sand */
   .status-eingereicht {
-    @apply status-badge;
     background-color: var(--accent-soft);
     color: var(--accent-text);
     border: 1px solid var(--accent-line);
@@ -250,7 +294,6 @@ code {
      Mitfahrer-Pills in FahrtForm (fliegt mit deren Phase) */
   .status-erstattet,
   .status-badge-primary {
-    @apply status-badge;
     background-color: var(--ok-soft);
     color: var(--ok);
     border: 1px solid var(--ok-line);
@@ -297,6 +340,8 @@ code {
     font-weight: 600;
   }
 
+  /* Die Farbe kommt bewusst vom umgebenden Text: Farbregeln je Status
+     griffen unter v3 nie (Klasse zur Laufzeit zusammengesetzt). */
   .status-dot-circle {
     width: 9px;
     height: 9px;
@@ -304,26 +349,17 @@ code {
     flex-shrink: 0;
   }
 
-  .status-dot-offen {
-    color: var(--text-2);
-  }
 
   .status-dot-offen .status-dot-circle {
     border: 1.5px dashed var(--line-strong);
     background-color: transparent;
   }
 
-  .status-dot-eingereicht {
-    color: var(--accent-text);
-  }
 
   .status-dot-eingereicht .status-dot-circle {
     background-color: var(--accent);
   }
 
-  .status-dot-erhalten {
-    color: var(--ok);
-  }
 
   .status-dot-erhalten .status-dot-circle {
     background-color: var(--ok);
@@ -447,7 +483,6 @@ code {
 
 
   .btn-primary {
-    @apply btn-base;
     background-color: var(--brand);
     color: var(--on-brand);
     border: none;
@@ -458,7 +493,6 @@ code {
   }
 
   .btn-secondary {
-    @apply btn-base;
     background-color: var(--surface);
     color: var(--text);
     border: 1px solid var(--line-strong);
@@ -469,7 +503,6 @@ code {
   }
 
   .btn-ghost {
-    @apply btn-base;
     background-color: transparent;
     color: var(--brand);
     border: none;
@@ -480,7 +513,6 @@ code {
   }
 
   .btn-destructive {
-    @apply btn-base;
     background-color: transparent;
     color: var(--danger);
     border: 1px solid var(--danger);
@@ -4971,7 +5003,8 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   padding: 24px;
 }
 
-.auth-card .form-input {
+.auth-card .form-input,
+.auth-card .form-select {
   margin-bottom: 16px;
 }
 
@@ -6823,7 +6856,9 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
 
    Nur unter data-platform: Im Browser bleibt das Datumsfeld unveraendert. */
 [data-platform="ios"] input[type="date"].form-input,
-[data-platform="android"] input[type="date"].form-input {
+[data-platform="ios"] input[type="date"].form-select,
+[data-platform="android"] input[type="date"].form-input,
+[data-platform="android"] input[type="date"].form-select {
   -webkit-appearance: none;
   appearance: none;
   height: var(--field-h);
@@ -6840,14 +6875,16 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
 
 /* Der innere Container des Rades bringt auf iOS eigene Abstaende mit, die das
    Feld trotz fester Hoehe optisch verschieben. */
-[data-platform="ios"] input[type="date"].form-input::-webkit-date-and-time-value {
+[data-platform="ios"] input[type="date"].form-input::-webkit-date-and-time-value,
+[data-platform="ios"] input[type="date"].form-select::-webkit-date-and-time-value {
   text-align: left;
   margin: 0;
   /* Fuellt die Feldhoehe, damit der Text mittig sitzt statt oben zu kleben. */
   line-height: var(--field-h);
 }
 
-[data-platform="ios"] input[type="date"].form-input::-webkit-datetime-edit {
+[data-platform="ios"] input[type="date"].form-input::-webkit-datetime-edit,
+[data-platform="ios"] input[type="date"].form-select::-webkit-datetime-edit {
   padding: 0;
 }
 
