@@ -92,6 +92,12 @@ const datumSchema = z
     return new Date(`${wert}T00:00:00Z`) <= grenze;
   }, 'Das Datum liegt zu weit in der Zukunft');
 
+// Die Spalte ist NOT NULL; die Apps senden '' fuer "keine Angabe".
+const arbeitsstaetteSchema = z
+  .string()
+  .nullish()
+  .transform((wert) => wert ?? '');
+
 const createFahrtSchema = z.object({
   vonOrtId: optionaleIdSchema,
   nachOrtId: optionaleIdSchema,
@@ -110,7 +116,7 @@ const createFahrtSchema = z.object({
   partnerFahrtId: optionaleIdSchema,
   mitfahrer: z.array(z.object({
     name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
-    arbeitsstaette: z.string().optional().nullable(),
+    arbeitsstaette: arbeitsstaetteSchema,
     richtung: richtungSchema,
   })).optional(),
 });
@@ -131,20 +137,20 @@ const updateFahrtSchema = z.object({
   mitfahrer: z.array(z.object({
     id: z.coerce.number().int().positive().optional(),
     name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
-    arbeitsstaette: z.string().optional().nullable(),
+    arbeitsstaette: arbeitsstaetteSchema,
     richtung: richtungSchema,
   })).optional(),
 });
 
 const addMitfahrerSchema = z.object({
   name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
-  arbeitsstaette: z.string().optional().nullable(),
+  arbeitsstaette: arbeitsstaetteSchema,
   richtung: richtungSchema,
 });
 
 const updateMitfahrerSchema = z.object({
   name: z.string().min(1, 'Mitfahrer-Name ist erforderlich'),
-  arbeitsstaette: z.string().optional().nullable(),
+  arbeitsstaette: arbeitsstaetteSchema,
   richtung: richtungSchema,
 });
 

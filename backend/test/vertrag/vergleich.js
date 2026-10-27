@@ -29,12 +29,21 @@ function abweichungen(a, b, ort) {
   return [`${ort}: ${JSON.stringify(a)} -> ${JSON.stringify(b)}`];
 }
 
+// Bewusste Aenderungen eines PRs: Schritt, alter und neuer Status, Grund.
+// Sie werden ausgewiesen statt als Fehler gezaehlt. Nur Wechsel weg von
+// einem 5xx gehoeren hierher; eine Erfolgsantwort darf sich nie aendern.
+// Ein Eintrag wirkt nur, solange der Basis-Branch noch den 5xx liefert.
+const bewusst = JSON.parse(fs.readFileSync(__dirname + '/bewusst.json', 'utf8'));
+
 const fehler = [];
+const ausgewiesen = [];
 const neuNachSchritt = new Map(neu.map((e) => [e.schritt, e]));
 for (const e of alt) {
   const n = neuNachSchritt.get(e.schritt);
   const kennung = `${e.schritt} (${e.methode} ${e.pfad})`;
   if (!n) { fehler.push(`${kennung}: fehlt in neu`); continue; }
+  const b = bewusst.find((x) => x.schritt === e.schritt && x.alt === e.status && x.neu === n.status);
+  if (b && e.status >= 500) { ausgewiesen.push(`${kennung}: ${e.status} -> ${n.status} (${b.grund})`); continue; }
   if (e.status !== n.status) fehler.push(`${kennung}: Status ${e.status} -> ${n.status}`);
   if (e.typ !== n.typ) fehler.push(`${kennung}: Typ ${e.typ} -> ${n.typ}`);
   if (e.form !== undefined) {
@@ -45,6 +54,10 @@ for (const e of alt) {
 for (const e of alt) {
   const n = neuNachSchritt.get(e.schritt);
   console.log(`  ${String(e.status).padEnd(4)}${String(n ? n.status : '-').padEnd(4)}${e.schritt}`);
+}
+if (ausgewiesen.length) {
+  console.log(`${ausgewiesen.length} bewusste Aenderungen (bewusst.json):`);
+  for (const a of ausgewiesen) console.log('  * ' + a);
 }
 console.log(`${alt.length} Anfragen verglichen (alt ${alt.length}, neu ${neu.length}).`);
 if (fehler.length) {

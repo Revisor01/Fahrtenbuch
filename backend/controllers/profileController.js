@@ -90,16 +90,28 @@ exports.updateProfile = async (req, res) => {
               await mailService.sendEmailVerification(email, user[0].username, verificationToken);
              }
 
-            // Profil aktualisieren/erstellen
+            // Nicht gesendete Felder bleiben wie gespeichert (neu: null); null
+            // leert ein Feld. undefined bricht in mysql2 als Parameter ab.
+            const alt = existingProfile[0] || {};
+            const wert = (neu, gespeichert) => (neu === undefined ? (gespeichert ?? null) : neu);
+            const felder = [
+                wert(email, alt.email),
+                wert(fullName, alt.full_name),
+                wert(iban, alt.iban),
+                wert(kirchengemeinde, alt.kirchengemeinde),
+                wert(kirchspiel, alt.kirchspiel),
+                wert(kirchenkreis, alt.kirchenkreis),
+            ];
+
             if (existingProfile.length > 0) {
                 await connection.execute(
                     'UPDATE user_profiles SET email = ?, full_name = ?, iban = ?, kirchengemeinde = ?, kirchspiel = ?, kirchenkreis = ? WHERE user_id = ?',
-                    [email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis, userId]
+                    [...felder, userId]
                 );
             } else {
                 await connection.execute(
                     'INSERT INTO user_profiles (user_id, email, full_name, iban, kirchengemeinde, kirchspiel, kirchenkreis) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    [userId, email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis]
+                    [userId, ...felder]
                 );
             }
 

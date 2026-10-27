@@ -147,6 +147,7 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
     mitfahrer: [{ name: 'Erika Muster', arbeitsstaette: 'Heide', richtung: 'hin_rueck' }],
   } });
   const m = await anfrage('mitfahrer', 'POST', `/api/fahrten/${fahrtId}/mitfahrer`, { body: { name: 'Max Muster', arbeitsstaette: 'Meldorf', richtung: 'hin' } });
+  await anfrage('mitfahrer-ohne-arbeitsstaette', 'POST', `/api/fahrten/${fahrtId}/mitfahrer`, { body: { name: 'Ohne Ort', richtung: 'hin' } });
   if (m && m.id) await anfrage('mitfahrer-aendern', 'PUT', `/api/fahrten/${fahrtId}/mitfahrer/${m.id}`, { body: { name: 'Max Muster', arbeitsstaette: 'Meldorf', richtung: 'rueck' } });
   await anfrage('bericht', 'GET', '/api/fahrten/report/2026/10');
   await anfrage('bericht-fehler', 'GET', '/api/fahrten/report/1999/13');
@@ -176,6 +177,8 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
     token = gemerkt;
   }
 
+  // Am Ende, damit die geaenderten Daten keine fruehere Antwort beeinflussen.
+  await anfrage('profil-teilweise', 'PUT', '/api/profile', { body: { kirchspiel: 'West' } });
   await anfrage('kaputtes-json', 'POST', '/api/orte', { rohBody: '{"name":', kopf: { 'Content-Type': 'application/json' } });
   await anfrage('unbekannt-api', 'GET', '/api/gibt-es-nicht');
   await anfrage('unbekannt-seite', 'GET', '/irgendeine/seite');

@@ -1,0 +1,20 @@
+[
+  {
+    "schritt": "profil-ohne-koerper",
+    "alt": 500,
+    "neu": 200,
+    "grund": "Leerer Profil-Körper: alle Felder bleiben wie gespeichert statt Serverfehler"
+  },
+  {
+    "schritt": "profil-teilweise",
+    "alt": 500,
+    "neu": 200,
+    "grund": "Profil mit Teilangaben: fehlende Felder bleiben wie gespeichert statt Serverfehler"
+  },
+  {
+    "schritt": "mitfahrer-ohne-arbeitsstaette",
+    "alt": 500,
+    "neu": 201,
+    "grund": "Mitfahrer ohne Arbeitsstaette wird mit leerer Arbeitsstaette gespeichert statt Serverfehler"
+  }
+]
