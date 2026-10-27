@@ -365,7 +365,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Hinzugefügt
 - Erste Fassung: Digitales Fahrtenbuch mit Fahrten-Erfassung, Orten, Distanzen, Abrechnungsträgern und Excel-Export
 
-[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/2.3.2...HEAD
+[2.3.2]: https://github.com/Revisor01/Fahrtenbuch/compare/2.3.1...2.3.2
+[2.3.1]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.3.0...2.3.1
 [2.3.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.1...v2.2.0
 [2.1.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.0...v2.1
