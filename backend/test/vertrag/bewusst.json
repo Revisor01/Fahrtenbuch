@@ -1,5 +1,11 @@
 [
   {
+    "schritt": "profil-ohne-koerper",
+    "alt": 500,
+    "neu": 200,
+    "grund": "Leerer Profil-Körper: alle Felder bleiben wie gespeichert statt Serverfehler"
+  },
+  {
     "schritt": "profil-teilweise",
     "alt": 500,
     "neu": 200,

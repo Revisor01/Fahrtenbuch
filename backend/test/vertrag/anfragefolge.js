@@ -90,7 +90,6 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
   await anfrage('profil', 'GET', '/api/profile');
   await anfrage('profil-aendern', 'PUT', '/api/profile', { body: { email: 'admin@example.org', fullName: 'Vertrag Test', iban: null, kirchengemeinde: 'Heide', kirchspiel: null, kirchenkreis: 'Dithmarschen' } });
   await anfrage('profil-ohne-koerper', 'PUT', '/api/profile');
-  await anfrage('profil-teilweise', 'PUT', '/api/profile', { body: { kirchspiel: 'West' } });
   await anfrage('konto-loeschen-ohne-koerper', 'DELETE', '/api/profile');
   await anfrage('benutzer', 'GET', '/api/users');
 
@@ -178,6 +177,8 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
     token = gemerkt;
   }
 
+  // Am Ende, damit die geaenderten Daten keine fruehere Antwort beeinflussen.
+  await anfrage('profil-teilweise', 'PUT', '/api/profile', { body: { kirchspiel: 'West' } });
   await anfrage('kaputtes-json', 'POST', '/api/orte', { rohBody: '{"name":', kopf: { 'Content-Type': 'application/json' } });
   await anfrage('unbekannt-api', 'GET', '/api/gibt-es-nicht');
   await anfrage('unbekannt-seite', 'GET', '/irgendeine/seite');
