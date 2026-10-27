@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -135,6 +135,13 @@ dokuEinhaengen(app);
 
 app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
+// Express 5 laesst req.body ohne Anfragekoerper undefined (4 setzte {}).
+// Validierung und Controller lesen daraus; ohne diese Zeile wird z. B. aus
+// einem leeren PUT /api/profile ein 400 statt der bisherigen Antwort.
+app.use((req, res, next) => {
+    if (req.body === undefined) req.body = {};
+    next();
+});
 
 // Define path to React build directory
 const reactBuildPath = path.join(__dirname, '../frontend/public');
@@ -181,7 +188,8 @@ app.use('/api', (req, res) => {
 // Catch-all route for SPAs. Im Container liegt kein Frontend-Build (nginx
 // liefert ihn aus), deshalb hier ein sauberer Fallback statt eines ENOENT,
 // das frueher im Express-Default-Handler als HTML-Stacktrace landete.
-app.get('*', (req, res) => {
+// Express 5 (path-to-regexp 8): ein blosses '*' ist kein gueltiger Pfad mehr.
+app.get('/{*rest}', (req, res) => {
     const indexPfad = path.join(reactBuildPath, 'index.html');
     res.sendFile(indexPfad, (err) => {
         if (err) {

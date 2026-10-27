@@ -84,3 +84,93 @@ jobs:
       - name: Backend-Tests
         working-directory: backend
         run: npm test
+
+  # Antwortformen sind ein Vertrag mit den Apps im Store: Dieselbe
+  # Anfragefolge laeuft gegen den Basis-Branch und gegen den PR, jeweils mit
+  # frischer Datenbank. Status, Inhaltstyp und jede alte Form muessen
+  # bleiben; neue Felder sind erlaubt.
+  api-vertrag:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: vertrag
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -pvertrag"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USER: root
+      DB_PASSWORD: vertrag
+      JWT_SECRET: vertrag-vertrag-vertrag-vertrag-vertrag
+      INITIAL_ADMIN_USERNAME: vertragsadmin
+      INITIAL_ADMIN_PASSWORD: vertrag-passwort-1
+      INITIAL_ADMIN_EMAIL: admin@example.org
+      DEFAULT_ERSTATTUNG_TRAEGER: "0.30"
+      DEFAULT_ERSTATTUNG_MITFAHRER: "0.05"
+      DEFAULT_ERSTATTUNG_DATUM: "2024-01-01"
+      CORS_ORIGIN: http://localhost
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          path: neu
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.base_ref }}
+          path: alt
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Datenbanken anlegen
+        run: |
+          for db in fb_alt fb_neu; do
+            mysql -h 127.0.0.1 -uroot -pvertrag -e "CREATE DATABASE $db CHARACTER SET utf8mb4"
+          done
+
+      - name: Abhaengigkeiten
+        run: |
+          npm ci --prefix alt/backend --no-audit --no-fund
+          npm ci --prefix neu/backend --no-audit --no-fund
+
+      - name: Beide Fassungen starten
+        run: |
+          (cd alt/backend && DB_NAME=fb_alt PORT=5101 node app.js > ../../alt.log 2>&1 &)
+          (cd neu/backend && DB_NAME=fb_neu PORT=5102 node app.js > ../../neu.log 2>&1 &)
+          for port in 5101 5102; do
+            for i in $(seq 1 60); do
+              curl -sf "http://127.0.0.1:$port/api/instanzen" >/dev/null && break
+              sleep 1
+            done
+            curl -sf "http://127.0.0.1:$port/api/instanzen" >/dev/null || { cat alt.log neu.log; exit 1; }
+          done
+
+      - name: Anfragefolge und Vergleich
+        run: |
+          node neu/backend/test/vertrag/anfragefolge.js http://127.0.0.1:5101 alt.json
+          VERTRAG_INHALT=neu-inhalt.json node neu/backend/test/vertrag/anfragefolge.js http://127.0.0.1:5102 neu.json
+          node neu/backend/test/vertrag/vergleich.js alt.json neu.json
+
+      - name: Antworten als Testdaten
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: api-vertrag
+          path: |
+            alt.json
+            neu.json
+            neu-inhalt.json
+          retention-days: 7
+
+      - name: Protokolle bei Fehler
+        if: failure()
+        run: |
+          echo "--- alt.log"; tail -n 80 alt.log || true
+          echo "--- neu.log"; tail -n 80 neu.log || true
+          echo "--- neu.json"; cat neu.json || true
