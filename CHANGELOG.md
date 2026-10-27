@@ -28,6 +28,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - README, Vorlagen und Hinweise gibt es nur noch auf Deutsch.
 - Die iOS-App wird auf einem neuen Weg gebaut und ausgeliefert. Für Nutzende ändert sich nichts
 - Eine Hilfsbibliothek für Kennungen mit bekannter Sicherheitslücke auf die neueste Fassung gehoben. Für Nutzende ändert sich nichts
+- Der Server läuft auf der neuen Hauptversion seines Web-Frameworks. Die Antworten an Browser und Apps bleiben gleich; eine neue Prüfung stellt das bei jeder Änderung sicher
 - Die Oberfläche läuft auf den neuen Hauptversionen von React, Vite und der Symbolbibliothek. Aussehen und Bedienung bleiben gleich
 
 ### Behoben
