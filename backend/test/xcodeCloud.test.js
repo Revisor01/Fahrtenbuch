@@ -60,6 +60,13 @@ pruefe('das Schema App ist geteilt und archiviert Release', () => {
   assert.ok(/<ArchiveAction\s+buildConfiguration = "Release"/.test(schema));
 });
 
+pruefe('die App erklaert sich frei von meldepflichtiger Verschluesselung', () => {
+  // Ohne die Angabe bleibt jeder Build auf MISSING_EXPORT_COMPLIANCE und laesst
+  // sich keiner internen Testgruppe zuordnen (Build 33, 27.10.2026).
+  const plist = fs.readFileSync(path.join(ios, 'App/Info.plist'), 'utf8');
+  assert.ok(/<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/.test(plist));
+});
+
 pruefe('Package.resolved pinnt die Capacitor-Version, die Package.swift verlangt', () => {
   // Stand vorher: 8.5.0 gepinnt, 8.5.3 verlangt. Xcode Cloud bricht daran ab.
   const verlangt = fs.readFileSync(path.join(ios, 'CapApp-SPM/Package.swift'), 'utf8')
