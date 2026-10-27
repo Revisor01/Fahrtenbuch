@@ -16,6 +16,8 @@ updates:
   - package-ecosystem: npm
     directory: /backend
     schedule: { interval: weekly, day: monday, time: "06:00", timezone: Europe/Berlin }
+    versioning-strategy: increase
+    open-pull-requests-limit: 10
     groups:
       minor-und-patch:
         update-types: [minor, patch]
@@ -24,6 +26,8 @@ updates:
   - package-ecosystem: npm
     directory: /frontend
     schedule: { interval: weekly, day: monday, time: "06:00", timezone: Europe/Berlin }
+    versioning-strategy: increase
+    open-pull-requests-limit: 10
     groups:
       minor-und-patch:
         update-types: [minor, patch]
