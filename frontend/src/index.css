@@ -331,7 +331,8 @@ code {
     color: var(--ok-soft);
   }
 
-  /* ---------- Status als Punkt + Wort (dichte Listen/Tabellen) ---------- */
+  /* ---------- Status als Punkt + Wort (dichte Listen/Tabellen) ----------
+     Wortfarbe wie in der Pille, Kontrast >= 4,5:1 (statusFarben.test.js). */
   .status-dot {
     display: inline-flex;
     align-items: center;
@@ -340,8 +341,6 @@ code {
     font-weight: 600;
   }
 
-  /* Die Farbe kommt bewusst vom umgebenden Text: Farbregeln je Status
-     griffen unter v3 nie (Klasse zur Laufzeit zusammengesetzt). */
   .status-dot-circle {
     width: 9px;
     height: 9px;
@@ -349,17 +348,26 @@ code {
     flex-shrink: 0;
   }
 
+  .status-dot-offen {
+    color: var(--text-2);
+  }
 
   .status-dot-offen .status-dot-circle {
     border: 1.5px dashed var(--line-strong);
     background-color: transparent;
   }
 
+  .status-dot-eingereicht {
+    color: var(--accent-text);
+  }
 
   .status-dot-eingereicht .status-dot-circle {
     background-color: var(--accent);
   }
 
+  .status-dot-erhalten {
+    color: var(--ok);
+  }
 
   .status-dot-erhalten .status-dot-circle {
     background-color: var(--ok);
@@ -3776,6 +3784,12 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 /* Erstattete Monate treten zurück */
 .abr-karte-erstattet {
   opacity: 0.72;
+}
+
+/* Unter der Deckkraft fiele das grüne Wort unter 4,5:1; es bleibt in
+   Textfarbe, Punkt und Wort tragen den Status. */
+.abr-karte-erstattet .status-dot {
+  color: var(--text);
 }
 
 .abr-karte-kopf {

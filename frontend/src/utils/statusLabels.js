@@ -13,6 +13,19 @@ export const STATUS_LABELS = {
 // Feste Reihenfolge der drei Stationen (u. a. für die Fortschrittsleiste)
 export const STATUS_ORDER = ['offen', 'eingereicht', 'erhalten'];
 
+// Feste Klassennamen je Status: Der CSS-Build sieht nur, was wörtlich im
+// Quelltext steht. Unbekannte Werte bekommen die neutrale Darstellung von
+// „Erfasst“.
+export const STATUS_KLASSEN = {
+  offen: { badge: 'status-erfasst', dot: 'status-dot-offen' },
+  eingereicht: { badge: 'status-eingereicht', dot: 'status-dot-eingereicht' },
+  erhalten: { badge: 'status-erstattet', dot: 'status-dot-erhalten' },
+};
+
+export function statusKlassen(status) {
+  return Object.prototype.hasOwnProperty.call(STATUS_KLASSEN, status) ? STATUS_KLASSEN[status] : STATUS_KLASSEN.offen;
+}
+
 export function statusLabel(status) {
   return STATUS_LABELS[status] || status;
 }
