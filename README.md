@@ -62,8 +62,7 @@ als App installieren. Eine eigene Instanz einrichten: siehe
 
 ## Versionen
 
-Was sich wann geändert hat, steht in [CHANGELOG.md](CHANGELOG.md) — aus Sicht
-der Nutzer:innen geschrieben. Die
+Was sich wann geändert hat, steht in [CHANGELOG.md](CHANGELOG.md); die
 [Releases](https://github.com/Revisor01/Fahrtenbuch/releases) fassen jede
 Version zusammen.
 
@@ -114,9 +113,8 @@ Die Oberfläche hört auf Port 9642, das Backend nur lokal auf Port 5000. Die
 Datenbank wird beim ersten Start angelegt, Migrationen laufen bei jedem Start
 des Backends mit. Danach mit dem ersten Admin-Konto anmelden.
 
-**Update:** `docker compose pull && docker compose up -d`. Vor einem Update
-lohnt eine Sicherung der Datenbank, sie enthält alles Wesentliche
-(`mysqldump --single-transaction` läuft ohne Sperre im laufenden Betrieb).
+**Update:** `docker compose pull && docker compose up -d`. Vorher die
+Datenbank sichern, etwa mit `mysqldump --single-transaction`.
 
 ## Aufbau
 
