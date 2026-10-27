@@ -28,6 +28,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Englische Fassung der README und der Vorlagen für Fehlermeldungen
 
 ### Behoben
+- Reichte eine Monatsabrechnung über mehr als ein Formularblatt, war im PDF ab der zweiten Seite die Tabelle zerschossen: Adressen und Reisezweck standen zusammengequetscht und übereinander, statt des Datums erschien „###“. Die Folgeseiten sehen jetzt aus wie die erste
 - iPhone: Die App meldet sich jetzt als deutschsprachig; Datumsauswahl und Systemknöpfe erscheinen auf Deutsch, der App Store nennt Deutsch als Sprache
 - Sicherheitslücke in der Grundlage der iPhone-App geschlossen: Über einen internen Umweg ließen sich unter Umständen fremde Inhalte so laden, als kämen sie von der App selbst. Wirksam mit der nächsten Fassung im App Store
 - Nach dem Ändern des eigenen Namens im Profil stand auf der Startseite bis zum nächsten App-Start weiter der alte Name

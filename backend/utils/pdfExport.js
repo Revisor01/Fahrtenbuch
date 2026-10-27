@@ -75,8 +75,11 @@ function fuehreWorkbooksZusammen(dateien) {
        name = `${blatt.name} (${n})`;
      }
 
+     // ExcelJS gibt Zellverbünde als `merges` heraus, liest sie beim Setzen
+     // aber aus `mergeCells` (geprüft gegen 4.4.0 am 27.10.2026).
      const neuesBlatt = ziel.addWorksheet(name);
-     neuesBlatt.model = { ...klone(blatt.model), name, id: neuesBlatt.id };
+     const modell = klone(blatt.model);
+     neuesBlatt.model = { ...modell, mergeCells: modell.merges, name, id: neuesBlatt.id };
    });
  });
 
