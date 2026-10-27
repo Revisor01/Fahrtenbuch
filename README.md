@@ -10,10 +10,6 @@
 </p>
 
 <p align="center">
-  <b>Deutsch</b> · <a href="README.en.md">English</a>
-</p>
-
-<p align="center">
   <img src="https://img.shields.io/badge/Plattform-Web%20%C2%B7%20PWA-blue" alt="Plattform">
   <img src="https://img.shields.io/badge/Image-ghcr.io-blue?logo=docker" alt="Docker-Image">
   <img src="https://img.shields.io/badge/Lizenz-frei%20f%C3%BCr%20Einzelpersonen%2C%20Organisationen%20nach%20Vereinbarung-lightgrey" alt="Lizenz">
@@ -163,8 +159,7 @@ Hash gespeichert, API-Schlüssel ebenso.
 
 **Quelloffen zur Einsicht — frei für Einzelpersonen, für Organisationen nur
 mit schriftlicher Erlaubnis.** Der vollständige Text steht in
-[LICENSE](LICENSE), eine englische Übersetzung in
-[LICENSE.en.md](LICENSE.en.md) (maßgeblich ist die deutsche Fassung).
+[LICENSE](LICENSE).
 
 - **Frei für dich:** lesen, studieren, Sicherheitslücken melden, darüber
   berichten — und Fahrtenbuch für deine eigenen Fahrten selbst betreiben und
