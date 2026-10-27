@@ -185,7 +185,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 
 ## [2.2.0] - 2026-08-14
 
-### Added
+### Hinzugefügt
 - Abrechnung über mehrere Monate: Statt Monat für Monat lässt sich ein Zeitraum wählen — etwa ein Quartal — und alles landet in einer Abrechnung; bei mehreren Dateien automatisch als ZIP
 - Kostenstelle je Abrechnungsträger, die automatisch in den Export übernommen wird
 - „Rückfahrt hinzufügen": legt die Gegenrichtung einer Fahrt am selben Tag an — ein Tipp statt vollständiger Neuerfassung
@@ -214,7 +214,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Bereich „Darstellung": genau drei Optionen Hell / Dunkel / System mit Radio-Semantik; der provisorische Umschalter aus der Kopfzeile entfällt
 - Anmeldung nach Redesign-Spec: zentrierte Formularkarte auf Markenfläche, Logo-Kachel 52 px, Felder/Primärbutton 52 px; Registrierung und Passwort-vergessen im selben Layout statt als Modals, Passwort-Reset-/Setzen-Seiten und E-Mail-Verifizierung nachgezogen
 
-### Changed
+### Geändert
 - Mitfahrer:innen lassen sich jetzt direkt beim Erfassen eintragen, nicht erst nachträglich über „Bearbeiten"
 - Im Erfassungsflow führt eine „Zurück"-Schaltfläche zur Zielauswahl — bisher kam man nur über einen Klick auf die Route dorthin, was nicht erkennbar war
 - Zusammengehörige Fahrten: Beim Überfahren einer Zeile wird die passende Hin- oder Rückfahrt mit hervorgehoben; das Detail zeigt die Gegenfahrt samt Strecke, Kilometern und Betrag
@@ -257,7 +257,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Status in der Fahrtenliste einheitlich über StatusBadge (Punkt+Wort; Zeitraum als Monats-Chips); Status-Reset bei „Erstattet" funktioniert wieder (Klick lief zuvor ins nie öffnende Modal); Erstattungen je Träger als neutrale Karte statt farbiger KPI-Kacheln
 - Statusaktionen der Abrechnung laufen direkt mit Undo-Toast statt über das Bestätigungs-Modal; der Datums-Dialog (Nachfolger des AbrechnungsStatusModal) ist ein kompaktes Sheet und existiert nur noch einmal global — der Doppel-Mount, bei dem die Abrechnungs-Instanz `singleMonth` nicht übergab, ist behoben
 
-### Fixed
+### Behoben
 - Beim Export über mehrere Monate wurden auch Monate ohne Fahrten als eingereicht markiert. Sie standen danach dauerhaft in der Übersicht, ohne je abschließbar zu sein
 - Mitfahrer:innen mit „Nur die Rückfahrt" wurden an der Hinfahrt gespeichert statt an der Rückfahrt
 - Beim Löschen einer von zwei zusammengehörigen Fahrten verschwand die mitfahrende Person auch von der verbleibenden Fahrt. Sie bleibt jetzt dort und gilt für die verbliebene Richtung
@@ -286,7 +286,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Excel-/PDF-Export und Monatsreport zählten Fahrten mit mehreren Mitfahrern mehrfach (Dedup nach Fahrt-ID)
 - Export rechnete hartcodiert mit 0,30 €/km statt mit den gepflegten, zeitabhängigen Erstattungssätzen des Trägers
 
-### Removed
+### Entfernt
 - Video-Anleitungen auf der Hilfeseite entfernt (die Aufnahmen zeigten die alte Oberfläche) — neue Videos folgen
 - Freies Nachzeichnen des Formulars per PDFKit (samt Abhängigkeit `pdfkit`) — ersetzt durch die Excel-Konvertierung
 - Die neun wählbaren Farbthemes (`themes.css`) und die globale Transition auf allen Elementen (`darkMode.css`)
@@ -301,71 +301,73 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Seite wird mit zusätzlichen Sicherheitsvorgaben ausgeliefert: Sie lässt sich nicht mehr in fremde Websites einbetten, erlaubt nur noch Inhalte aus bekannten Quellen und gibt beim Wechsel auf externe Seiten keine Adressdaten mehr weiter
 - Das Frontend wird mit einem neuen Werkzeug gebaut. Für die Anwendung ändert sich nichts; im Hintergrund verschwinden damit 25 Sicherheitsmeldungen veralteter Build-Abhängigkeiten, und der Build dauert Sekunden statt einer Minute
 
-### Security
-- IDOR behoben: Erstattungssätze fremder Nutzer waren les-, änder- und löschbar (Ownership-Check auf Abrechnungsträger)
-- IDOR behoben: Mitfahrer fremder Fahrten waren änder- und löschbar (Fahrt-Ownership-Prüfung)
-- Cross-User-Schreibzugriff behoben: Distanz-Updates konnten Kilometer fremder Fahrten überschreiben (user_id-Scoping aller `UPDATE fahrten`, Ort-/Träger-Ownership-Validierung)
+### Sicherheit
+- Behoben: Erstattungssätze fremder Nutzer waren les-, änder- und löschbar (Ownership-Check auf Abrechnungsträger)
+- Behoben: Mitfahrer fremder Fahrten waren änder- und löschbar (Fahrt-Ownership-Prüfung)
+- Schreibzugriff auf fremde Fahrten behoben: Distanz-Updates konnten Kilometer fremder Fahrten überschreiben (user_id-Scoping aller `UPDATE fahrten`, Ort-/Träger-Ownership-Validierung)
 - Registrierung serverseitig abgesichert: `ALLOW_REGISTRATION`, `ALLOWED_EMAIL_DOMAINS`, `REGISTRATION_CODE` (timing-safe) + Rate-Limits auf Registrierung und Passwort-Reset (5/h)
 - mysql2 2.x → 3.23 (kritische RCE-Advisory), ungenutztes verwundbares `xlsx`-Paket entfernt, `npm audit fix` in Backend und Frontend
 - Admin-Passwort wird nicht mehr bei jedem Container-Start auf `INITIAL_ADMIN_PASSWORD` zurückgesetzt (nur noch beim Erstlauf)
 
 ## [2.1.0] - 2026-04-04
 
-### Changed
+### Geändert
 - UI-Konsistenz & View-Architektur: globale CSS-Patterns, View-Polish, Navigation überarbeitet (5 Phasen)
 
 ## [2.0.0] - 2026-04-03
 
-### Changed
-- Design Makeover: Designsystem eingeführt, alle Views modernisiert (7 Phasen)
+### Geändert
+- Neues Erscheinungsbild: Designsystem eingeführt, alle Views modernisiert (7 Phasen)
 
 ## [1.6.0] - 2026-03-22
 
-### Added
+### Hinzugefügt
 - PDF-Export, ZIP-Export für Mehrfach-Exporte
 
-### Changed
+### Geändert
 - App.js von 3056 auf 36 Zeilen refaktoriert (Komponenten-Aufteilung)
 
 ## [1.5.0] - 2026-03-22
 
-### Added
-- Dashboard, Favoriten, Statistiken, Adress-Autocomplete (Milestone „v1.3 Dashboard & UX")
+### Hinzugefügt
+- Dashboard, Favoriten, Statistiken, Adress-Autocomplete (Meilenstein „v1.3 Dashboard & UX")
 
-### Changed
-- UX-Polish und Navigations-Umbau (Milestone „v1.4")
+### Geändert
+- UX-Polish und Navigations-Umbau (Meilenstein „v1.4")
 
 ## [1.4.0] - 2026-03-22
 
-### Added
+### Hinzugefügt
 - Zeitraum-Auswahl für Exporte, Kostenstellen
 
 ## [1.3.0] - 2026-03-22
 
-### Fixed
-- Stabilität & Security: Bugfixes, helmet, Zod-Validierung, npm audit (Milestone „v1.1")
+### Behoben
+- Stabilität & Security: Bugfixes, helmet, Zod-Validierung, npm audit (Meilenstein „v1.1")
 
 ## [1.2.0] - 2025-05-15
 
-### Added
+### Hinzugefügt
 - Benutzerfreundliche Verbesserungen (Excel-Export, Distanz-Updates)
 
 ## [1.1.0] - 2025-03-20
 
-### Added
+### Hinzugefügt
 - Hilfeseite und Verbesserungen
 
 ## [1.0.1] - 2025-02-13
 
-### Added
+### Hinzugefügt
 - Rechtliche Informationen (Impressum/Datenschutz)
 
 ## [1.0.0] - 2025-02-13
 
-### Added
-- Initial Release: Digitales Fahrtenbuch mit Fahrten-Erfassung, Orten, Distanzen, Abrechnungsträgern und Excel-Export
+### Hinzugefügt
+- Erste Fassung: Digitales Fahrtenbuch mit Fahrten-Erfassung, Orten, Distanzen, Abrechnungsträgern und Excel-Export
 
-[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/2.3.2...HEAD
+[2.3.2]: https://github.com/Revisor01/Fahrtenbuch/compare/2.3.1...2.3.2
+[2.3.1]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.3.0...2.3.1
 [2.3.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.1...v2.2.0
 [2.1.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.0...v2.1
