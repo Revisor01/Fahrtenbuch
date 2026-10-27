@@ -135,6 +135,13 @@ dokuEinhaengen(app);
 
 app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
+// Express 5 laesst req.body ohne Anfragekoerper undefined (4 setzte {}).
+// Validierung und Controller lesen daraus; ohne diese Zeile wird z. B. aus
+// einem leeren PUT /api/profile ein 400 statt der bisherigen Antwort.
+app.use((req, res, next) => {
+    if (req.body === undefined) req.body = {};
+    next();
+});
 
 // Define path to React build directory
 const reactBuildPath = path.join(__dirname, '../frontend/public');

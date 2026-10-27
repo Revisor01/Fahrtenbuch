@@ -42,6 +42,9 @@ function vereinige(a, b) {
 }
 
 const protokoll = [];
+// Mit VERTRAG_INHALT=<datei> zusaetzlich die vollen Antworten, etwa als
+// Testdaten fuer Oberflaechenvergleiche ohne Datenbank.
+const inhalte = [];
 let token = null;
 
 async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, rohBody } = {}) {
@@ -60,6 +63,7 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
   let eintrag;
   if (typ === 'application/json') {
     inhalt = await antwort.json();
+    inhalte.push({ schritt, methode, pfad, status: antwort.status, inhalt });
     eintrag = { schritt, methode, pfad, status: antwort.status, typ, form: form(inhalt) };
   } else {
     const puffer = Buffer.from(await antwort.arrayBuffer());
@@ -84,7 +88,7 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
 
   await anfrage('me', 'GET', '/api/users/me');
   await anfrage('profil', 'GET', '/api/profile');
-  await anfrage('profil-aendern', 'PUT', '/api/profile', { body: { fullName: 'Vertrag Test', kirchengemeinde: 'Heide' } });
+  await anfrage('profil-aendern', 'PUT', '/api/profile', { body: { email: 'admin@example.org', fullName: 'Vertrag Test', iban: null, kirchengemeinde: 'Heide', kirchspiel: null, kirchenkreis: 'Dithmarschen' } });
   await anfrage('profil-ohne-koerper', 'PUT', '/api/profile');
   await anfrage('konto-loeschen-ohne-koerper', 'DELETE', '/api/profile');
   await anfrage('benutzer', 'GET', '/api/users');
@@ -114,7 +118,7 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
   await anfrage('traeger-einzeln', 'GET', `/api/abrechnungstraeger/${traegerId}`);
   await anfrage('traeger-satz', 'POST', `/api/abrechnungstraeger/${traegerId}/erstattung`, { body: { betrag: 0.3, gueltig_ab: '2026-01-01' } });
   await anfrage('traeger-historie', 'GET', `/api/abrechnungstraeger/${traegerId}/historie`);
-  await anfrage('traeger-aendern', 'PUT', `/api/abrechnungstraeger/${traegerId}`, { body: { kostenstelle: '4712' } });
+  await anfrage('traeger-aendern', 'PUT', `/api/abrechnungstraeger/${traegerId}`, { body: { name: 'Kirchengemeinde Heide', kostenstelle: '4712', farbe: '#336699', active: true } });
 
   await anfrage('mitfahrer-satz-aktuell', 'GET', '/api/mitfahrer-erstattung/current');
   await anfrage('mitfahrer-satz', 'POST', '/api/mitfahrer-erstattung', { body: { betrag: 0.05, gueltig_ab: '2026-01-01' } });
@@ -140,9 +144,10 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
   await anfrage('fahrt-einzeln', 'GET', `/api/fahrten/${fahrtId}`);
   await anfrage('fahrt-aendern', 'PUT', `/api/fahrten/${fahrtId}`, { body: {
     vonOrtId: a.id, nachOrtId: b.id, datum: '2026-10-01', anlass: 'Besuch lang', abrechnung: traegerId,
+    mitfahrer: [{ name: 'Erika Muster', arbeitsstaette: 'Heide', richtung: 'hin_rueck' }],
   } });
-  const m = await anfrage('mitfahrer', 'POST', `/api/fahrten/${fahrtId}/mitfahrer`, { body: { name: 'Max Muster', richtung: 'hin' } });
-  if (m && m.id) await anfrage('mitfahrer-aendern', 'PUT', `/api/fahrten/${fahrtId}/mitfahrer/${m.id}`, { body: { name: 'Max Muster', richtung: 'rueck' } });
+  const m = await anfrage('mitfahrer', 'POST', `/api/fahrten/${fahrtId}/mitfahrer`, { body: { name: 'Max Muster', arbeitsstaette: 'Meldorf', richtung: 'hin' } });
+  if (m && m.id) await anfrage('mitfahrer-aendern', 'PUT', `/api/fahrten/${fahrtId}/mitfahrer/${m.id}`, { body: { name: 'Max Muster', arbeitsstaette: 'Meldorf', richtung: 'rueck' } });
   await anfrage('bericht', 'GET', '/api/fahrten/report/2026/10');
   await anfrage('bericht-fehler', 'GET', '/api/fahrten/report/1999/13');
   await anfrage('monatsuebersicht', 'GET', '/api/fahrten/monthly-summary');
@@ -177,6 +182,7 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
   await anfrage('fahrt-loeschen', 'DELETE', `/api/fahrten/${fahrtId}`);
 
   fs.writeFileSync(ausgabe, JSON.stringify(protokoll, null, 2) + '\n');
+  if (process.env.VERTRAG_INHALT) fs.writeFileSync(process.env.VERTRAG_INHALT, JSON.stringify(inhalte, null, 2) + '\n');
   console.log(`${protokoll.length} Anfragen protokolliert: ${ausgabe}`);
 })().catch((fehler) => {
   console.error(fehler);

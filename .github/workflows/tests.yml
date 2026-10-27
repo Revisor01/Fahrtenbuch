@@ -154,8 +154,19 @@ jobs:
       - name: Anfragefolge und Vergleich
         run: |
           node neu/backend/test/vertrag/anfragefolge.js http://127.0.0.1:5101 alt.json
-          node neu/backend/test/vertrag/anfragefolge.js http://127.0.0.1:5102 neu.json
+          VERTRAG_INHALT=neu-inhalt.json node neu/backend/test/vertrag/anfragefolge.js http://127.0.0.1:5102 neu.json
           node neu/backend/test/vertrag/vergleich.js alt.json neu.json
+
+      - name: Antworten als Testdaten
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: api-vertrag
+          path: |
+            alt.json
+            neu.json
+            neu-inhalt.json
+          retention-days: 7
 
       - name: Protokolle bei Fehler
         if: failure()
