@@ -1,5 +1,5 @@
 import React from 'react';
-import { STATUS_ORDER, statusLabel } from '../../utils/statusLabels';
+import { STATUS_ORDER, statusKlassen, statusLabel } from '../../utils/statusLabels';
 
 // Statussystem (Redesign 2026): drei Zustände, drei Darstellungsformen.
 // Jeder Status trägt Form + Wort + Farbe — die Form allein genügt zur
@@ -26,11 +26,7 @@ function BadgeIcon({ status }) {
 }
 
 function Badge({ status, className }) {
-  const pillClass = {
-    offen: 'status-erfasst',
-    eingereicht: 'status-eingereicht',
-    erhalten: 'status-erstattet',
-  }[status] || 'status-erfasst';
+  const pillClass = statusKlassen(status).badge;
 
   return (
     <span className={`${pillClass}${className ? ` ${className}` : ''}`}>
@@ -43,7 +39,7 @@ function Badge({ status, className }) {
 // Punkt + Wort — nie der Punkt allein
 function Dot({ status, className }) {
   return (
-    <span className={`status-dot status-dot-${status}${className ? ` ${className}` : ''}`}>
+    <span className={`status-dot ${statusKlassen(status).dot}${className ? ` ${className}` : ''}`}>
       <span className="status-dot-circle" aria-hidden="true" />
       <span>{statusLabel(status)}</span>
     </span>
