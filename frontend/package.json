@@ -20,7 +20,7 @@
     "@capgo/capacitor-native-navigation": "^8.13.2",
     "axios": "^1.7.7",
     "jszip": "^3.10.2",
-    "lucide-react": "^0.451.0",
+    "lucide-react": "^1.61.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.4"
