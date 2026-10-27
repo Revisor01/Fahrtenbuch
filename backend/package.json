@@ -27,7 +27,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12"
+    "nodemon": "^3.1.14"
   },
   "overrides": {
     "uuid": "^14.0.3"
