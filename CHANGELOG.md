@@ -25,7 +25,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Ein zu langer Anlass wird beim Erfassen jetzt mit einer Meldung abgewiesen, statt die Fahrt ohne erkennbaren Grund scheitern zu lassen
 - Fehlermeldungen des Servers enthalten keine internen Angaben mehr, die Anmelde-Abfrage verrät über ihre Antwortzeit nicht mehr, welche Konten existieren, und das erneute Senden einer Bestätigungsmail ist auf fünf pro Stunde begrenzt
 - Die Oberfläche wird jetzt mit den üblichen Schutz-Kopfzeilen ausgeliefert, und der Server-Dienst läuft nicht mehr mit vollen Rechten. Für Nutzende ändert sich nichts
-- Englische Fassung der README und der Vorlagen für Fehlermeldungen
+- README, Vorlagen und Hinweise gibt es nur noch auf Deutsch.
 - Die iOS-App kann jetzt auch in Xcode Cloud gebaut werden. Für Nutzende ändert sich nichts
 
 ### Behoben
@@ -365,4 +365,16 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Added
 - Initial Release: Digitales Fahrtenbuch mit Fahrten-Erfassung, Orten, Distanzen, Abrechnungsträgern und Excel-Export
 
-[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.1...HEAD
+[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.1...v2.2.0
+[2.1.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.0...v2.1
+[2.0.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.6.0...v2.0
+[1.6.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/Revisor01/Fahrtenbuch/releases/tag/v1.0.0
