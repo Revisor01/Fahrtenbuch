@@ -60,6 +60,45 @@ const MAX_ROWS_PER_SHEET = 29;
 
 const TEMPLATE_PATH = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
 
+// Anschrift und Reisezweck stehen in verbundenen Zellen; deren Zeilenhöhe
+// passen weder Excel noch LibreOffice an, umgebrochener Text läuft sonst in
+// die Nachbarzeile. Gemessen in H:J (Breite 37) am 27.10.2026: 41 Zeichen
+// mit Arial, 48 mit DejaVu Sans im Container; 1,0 liegt darunter.
+const TEXTSPALTEN = [['B', 'E'], ['F', 'G'], ['H', 'J']];
+const ZEICHEN_JE_BREITE = 1.0;
+const ZEILENHOEHE = 13;
+
+// Zählt die Zeilen bei Umbruch an Leerzeichen; großzügig gerechnet, eine
+// Zeile zu viel kostet nur etwas Platz.
+function benoetigteZeilen(text, breite) {
+ const proZeile = Math.max(1, Math.floor(breite * ZEICHEN_JE_BREITE));
+ let zeilen = 1;
+ let belegt = 0;
+ String(text ?? '').split(/\s+/).filter(Boolean).forEach((wort) => {
+   const laenge = belegt ? belegt + 1 + wort.length : wort.length;
+   if (laenge <= proZeile) {
+     belegt = laenge;
+     return;
+   }
+   if (belegt) zeilen += 1;
+   zeilen += Math.ceil(wort.length / proZeile) - 1;
+   belegt = wort.length % proZeile || proZeile;
+ });
+ return zeilen;
+}
+
+function passeZeilenhoeheAn(worksheet, excelRow) {
+ const zeilen = Math.max(...TEXTSPALTEN.map(([von, bis]) => {
+   let breite = 0;
+   for (let c = worksheet.getColumn(von).number; c <= worksheet.getColumn(bis).number; c++) {
+     breite += worksheet.getColumn(c).width || 0;
+   }
+   return benoetigteZeilen(excelRow.getCell(von).value, breite);
+ }));
+ const hoehe = zeilen * ZEILENHOEHE;
+ if (zeilen > 1 && hoehe > (excelRow.height || 0)) excelRow.height = hoehe;
+}
+
 // Mitnahmeentschädigung: im offiziellen Formular fest mit 0,05 €/km vorgegeben
 // (Beschriftung "km x 0,05 € =" steht statisch in F42).
 const MITNAHME_SATZ = 0.05;
@@ -116,6 +155,7 @@ function fillQuartalSheet(worksheet, data, year, satz, saetze) {
    excelRow.getCell('F').value = row.nachOrt;
    excelRow.getCell('H').value = row.anlass;
    excelRow.getCell('K').value = row.kilometer;
+   passeZeilenhoeheAn(worksheet, excelRow);
  });
 
  // Gesamt km in K37
@@ -708,3 +748,5 @@ exports.exportToExcelRange = async (req, res) => {
 exports.baueMonatsWorkbooks = baueMonatsWorkbooks;
 exports.baueZeitraumWorkbooks = baueZeitraumWorkbooks;
 exports.markiereZeitraum = markiereZeitraum;
+exports.fillQuartalSheet = fillQuartalSheet;
+exports.benoetigteZeilen = benoetigteZeilen;
