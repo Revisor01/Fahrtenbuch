@@ -1,7 +1,7 @@
 #!/bin/bash
 # Xcode Cloud, nach dem Klonen: Web-Build, Capacitor-Sync, Swift-Pakete,
-# Build-Nummer und Signierung, mit denselben Schritten wie der iOS-Release auf
-# GitHub. Ohne sie fehlen dem Projekt Web-Buendel und Plugin-Pakete.
+# Build-Nummer und Signierung. Ohne sie fehlen dem Projekt Web-Buendel und
+# Plugin-Pakete.
 set -euo pipefail
 
 REPO="${CI_PRIMARY_REPOSITORY_PATH:?Nur fuer Xcode Cloud gedacht.}"
@@ -10,7 +10,7 @@ IOS="$FRONTEND/ios/App"
 PBXPROJ="$IOS/App.xcodeproj/project.pbxproj"
 RESOLVED="$IOS/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
 
-# Dieselbe Node-Linie wie im GitHub-Release; die Capacitor-CLI verlangt mindestens 22.
+# Die Capacitor-CLI verlangt mindestens Node 22.
 export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1
 brew install node@22
 NODE_PREFIX=$(brew --prefix node@22)
@@ -44,8 +44,8 @@ xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
 [ -f "$RESOLVED" ] || { echo "FEHLER: Package.resolved fehlt nach der Paketaufloesung."; exit 1; }
 
 # Xcode Cloud signiert selbst und braucht dafuer automatisches Signieren. Die
-# Release-Konfiguration ist fuer den GitHub-Weg fest auf Profil und
-# Distribution-Zertifikat gestellt; hier wird sie nur im Klon umgestellt.
+# Release-Konfiguration bleibt fest auf Profil und Distribution-Zertifikat, damit
+# Xcode anderswo keine Zertifikate anlegt; hier wird sie nur im Klon umgestellt.
 for paar in 'CODE_SIGN_STYLE = Manual;:1' 'CODE_SIGN_IDENTITY = "Apple Distribution";:2' 'PROVISIONING_PROFILE_SPECIFIER = "Fahrtenbuch AppStore";:1'; do
   zeile="${paar%:*}"; soll="${paar##*:}"
   [ "$(grep -cF "$zeile" "$PBXPROJ")" = "$soll" ] || { echo "FEHLER: '$zeile' steht nicht genau ${soll}-mal in project.pbxproj."; exit 1; }

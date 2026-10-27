@@ -26,7 +26,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Fehlermeldungen des Servers enthalten keine internen Angaben mehr, die Anmelde-Abfrage verrät über ihre Antwortzeit nicht mehr, welche Konten existieren, und das erneute Senden einer Bestätigungsmail ist auf fünf pro Stunde begrenzt
 - Die Oberfläche wird jetzt mit den üblichen Schutz-Kopfzeilen ausgeliefert, und der Server-Dienst läuft nicht mehr mit vollen Rechten. Für Nutzende ändert sich nichts
 - README, Vorlagen und Hinweise gibt es nur noch auf Deutsch.
-- Die iOS-App kann jetzt auch in Xcode Cloud gebaut werden. Für Nutzende ändert sich nichts
+- Die iOS-App wird auf einem neuen Weg gebaut und ausgeliefert. Für Nutzende ändert sich nichts
 
 ### Behoben
 - Ein langer Reisezweck oder eine lange Anschrift, die im Formular auf zwei Zeilen umbricht, lief in die Zeile darüber und war kaum lesbar. Solche Zeilen werden jetzt entsprechend höher, das Blatt passt weiter auf eine Seite
