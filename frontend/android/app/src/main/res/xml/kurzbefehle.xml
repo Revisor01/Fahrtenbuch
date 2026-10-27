@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Kurzbefehle beim langen Tippen auf das App-Symbol.
-
-  Gegenstueck zu UIApplicationShortcutItems in ios/App/App/Info.plist — gleiche
-  Eintraege, gleiche Reihenfolge, gleiche Typ-Kennungen, damit sich beide
-  Plattformen gleich anfuehlen. Die Kennung reist als Intent-Action und wird in
-  KurzbefehlePlugin.java an die WebView weitergereicht.
-
-  Statisch statt dynamisch (ShortcutManager): Die beiden Eintraege aendern sich
-  nie, und statische Kurzbefehle stehen schon vor dem ersten App-Start bereit.
-
-  Ab Android 7.1 (API 25); minSdk ist 24, dort werden sie schlicht ignoriert.
--->
+<!-- Statische Kurzbefehle am App-Symbol, gleich wie in ios/App/App/Info.plist; ab Android 7.1. -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
 
     <shortcut

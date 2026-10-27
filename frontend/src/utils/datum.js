@@ -1,9 +1,4 @@
-// Datumshelfer, die die LOKALE Zeit verwenden.
-//
-// `new Date().toISOString()` rechnet nach UTC. In deutscher Sommerzeit liefert
-// das zwischen Mitternacht und 2 Uhr noch den Vortag — eine spätabends erfasste
-// Fahrt bekäme also ein falsches Datum, und am Monatsersten wäre kurzzeitig der
-// Vormonat als „aktuell" ausgewählt.
+// Datumshelfer in lokaler Zeit, toISOString() liefert nachts noch den Vortag.
 
 /** Heutiges Datum als `YYYY-MM-DD` (lokal). */
 export function heuteISO() {

@@ -44,9 +44,7 @@ exports.setBetrag = async (req, res) => {
         );
         res.json({ message: 'Erstattungssatz erfolgreich gesetzt' });
     } catch (error) {
-        // Seit Migration 0013 gibt es einen Satz je Stichtag. Das ist ein
-        // Bedienfehler, kein Serverfehler — und die Oberflaeche zeigt dafuer
-        // schon die passende Meldung an, sie kam bisher nur nie an.
+        // Ein Satz je Stichtag (Migration 0013); ein Bedienfehler mit eigener Meldung.
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({
                 message: 'Für dieses Datum existiert bereits ein Satz'
@@ -95,10 +93,7 @@ exports.deleteErstattungssatz = async (req, res) => {
         );
         
         if (saetze[0].count <= 1) {
-            // Ohne rollback ging die Verbindung mit offener Transaktion zurueck
-            // in den Pool — der naechste Nutzer der Verbindung haette darin
-            // weitergearbeitet. In der Abrechnungstraeger-Variante steht das
-            // rollback bereits, hier fehlte es (24.08.).
+            // Sonst geht die Verbindung mit offener Transaktion zurück in den Pool.
             await connection.rollback();
             return res.status(400).json({ message: 'Der letzte Erstattungssatz kann nicht gelöscht werden' });
         }

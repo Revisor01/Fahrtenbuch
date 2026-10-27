@@ -17,10 +17,7 @@ import Fehlergrenze from './components/Fehlergrenze';
 function App() {
   React.useEffect(() => {
     document.title = "Fahrtenbuch";
-    // Der native Startbildschirm wird NICHT hier ausgeblendet: Er zeigt nur
-    // das Zeichen, der eigene zusaetzlich den Namen. Wer hier ausblendet,
-    // sieht beide nacheinander. Das Ausblenden passiert deshalb erst, wenn
-    // der erste eigene Bildschirm steht — siehe AppContent.
+    // Den nativen Startbildschirm erst in AppContent ausblenden, sonst sieht man beide nacheinander.
   }, []);
 
   return (

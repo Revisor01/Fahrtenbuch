@@ -1,7 +1,4 @@
--- Insert Initial Admin User
--- Spalten-Aliase sind noetig: heisst der Admin selbst "admin", leitet MySQL
--- aus den Literalen zweimal denselben Spaltennamen ab und bricht mit
--- "Duplicate column name 'admin'" ab.
+-- Initialer Admin. Aliase, sonst bricht MySQL bei einem Admin namens "admin" mit doppeltem Spaltennamen ab.
 INSERT INTO users (username, password, role, email_verified)
 SELECT * FROM (SELECT
     '${INITIAL_ADMIN_USERNAME}' AS username,
@@ -13,9 +10,7 @@ WHERE NOT EXISTS (
     SELECT username FROM users WHERE username = '${INITIAL_ADMIN_USERNAME}'
 );
 
--- Insert Initial Admin User Profile
--- Nur anlegen, wenn noch keins existiert: auf einer Bestands-DB entstuende
--- sonst ein zweites Profil (user_profiles.user_id ist nicht UNIQUE).
+-- Profil nur, wenn keins existiert, user_profiles.user_id ist nicht UNIQUE.
 INSERT INTO user_profiles (user_id, email)
 SELECT u.id, '${INITIAL_ADMIN_EMAIL}'
 FROM users u

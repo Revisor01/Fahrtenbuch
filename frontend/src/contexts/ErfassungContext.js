@@ -2,13 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import ErfassungsFlow from '../components/erfassung/ErfassungsFlow';
 import { AppContext } from './AppContext';
 
-// Zentraler Einstieg in den zweistufigen Erfassungsflow (Redesign 2026).
-// Alle „Neue Fahrt"-Einstiege der App (Dashboard-Button, später FAB und
-// „Wiederholen") öffnen den Flow über useErfassung().open(prefill?).
-//
-// prefill (alles optional):
-//   { vonOrtId, nachOrtId, anlass, abrechnung, datum, kilometer, mitRueckfahrt }
-// Mit nachOrtId startet der Flow direkt in Schritt 2 („Wiederholen"-Fall).
+// Einstieg in den Erfassungsflow: useErfassung().open(prefill?) mit { vonOrtId, nachOrtId, anlass, abrechnung, datum, kilometer, mitRueckfahrt }; mit nachOrtId direkt Schritt 2.
 
 const ErfassungContext = createContext(null);
 
@@ -24,10 +18,7 @@ export function ErfassungProvider({ children }) {
     setState((s) => ({ ...s, offen: false }));
   }, []);
 
-  // Beim Abmelden schliessen. Der Flow wird hier gerendert, nicht in
-  // AppContent — er ueberlebt dessen Wechsel zur Anmeldemaske und stand nach
-  // einem Zwangs-Logout (abgelaufene Sitzung) offen darueber. Die Eingaben
-  // darin waeren ohnehin verloren, weil das Token weg ist.
+  // Beim Abmelden schließen, der Flow wird hier gerendert und überlebt sonst den Wechsel zur Anmeldemaske.
   const { isLoggedIn } = useContext(AppContext) || {};
   useEffect(() => {
     if (!isLoggedIn) close();

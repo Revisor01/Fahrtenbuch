@@ -1,13 +1,4 @@
-// LandingPage.js — Hilfeseite unter /help (auch ohne Login erreichbar).
-//
-// Redesign 2026: eigenes Layout auf den Design-Tokens aus tokens.css
-// (--brand, --surface, --text-2, --r-card …) und den globalen Klassen
-// (.card-container, .btn-*, .form-label). Kein AppContext-Zwang — die
-// Inhalte stehen auch anonymen Besucher:innen zur Verfügung.
-//
-// Die FAQ beschreibt ausschließlich, was die App tatsächlich tut; die
-// Abschnitte folgen der Navigation (Start · Fahrt erfassen · Fahrten ·
-// Abrechnung · Einstellungen · Verwaltung) plus Querschnittsthemen.
+// Hilfeseite unter /help, auch ohne Anmeldung; beschreibt nur, was die App tatsächlich tut.
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './index.css';
@@ -15,9 +6,7 @@ import { ChevronDown, ArrowLeft, Car, Mail } from 'lucide-react';
 import { AppContext } from './contexts/AppContext';
 import { appConfigValue } from './utils/appConfig';
 
-// ---------------------------------------------------------------------------
-// Bausteine
-// ---------------------------------------------------------------------------
+// ── Bausteine ──
 
 function AccordionItem({ id, title, isOpen, onToggle, children }) {
   return (
@@ -55,9 +44,7 @@ function Abschnitt({ id, titel, satz, children }) {
 
 const Tipp = ({ children }) => <div className="help-tipp">{children}</div>;
 
-// ---------------------------------------------------------------------------
-// Inhalte
-// ---------------------------------------------------------------------------
+// ── Inhalte ──
 
 const ABSCHNITTE = [
   { id: 'start', titel: 'Erste Schritte' },

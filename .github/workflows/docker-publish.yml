@@ -1,8 +1,6 @@
 name: Docker Build & Push
 
-# Baut und veröffentlicht die Images. Ausgerollt wird von Hand mit
-# ./deploy/deploy.sh <instanz> (test, dann dithmarschen, dann alle); das Skript
-# sichert vorher die Datenbank und prüft hinterher den neuen Stand.
+# Baut und veröffentlicht die Images; ausgerollt wird von Hand mit ./deploy/deploy.sh <instanz>.
 
 on:
   push:

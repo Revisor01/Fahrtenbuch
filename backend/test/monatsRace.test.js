@@ -1,19 +1,4 @@
-// Punkt 15 der Pre-Launch-Liste, Teilbefund „Race beim Monatswechsel".
-//
-// fetchFahrten hatte keine Request-Nummer. Der vorhandene `sitzungsZaehler`
-// half nicht: Er steigt nur bei An- und Abmeldung (AppContext: login,
-// logout). Zwei Abrufe derselben Sitzung — etwa beim schnellen Blaettern
-// zwischen Monaten — trugen dieselbe Nummer, beide Guards griffen nie.
-// Antwortete der aeltere Abruf spaeter, ueberschrieb er den neueren: die
-// Fahrten von Monat A unter der Ueberschrift von Monat B.
-//
-// In einer Abrechnungs-App ist das die falscheste Zahl an der sichtbarsten
-// Stelle: Der Monatsbetrag stimmt nicht mit dem angezeigten Monat ueberein.
-//
-// Geprueft wird die Struktur im Quelltext und die Reihenfolge-Logik als
-// Nachbau.
-//
-// Laeuft ohne Test-Framework: `node test/monatsRace.test.js`.
+// Ein älterer Monatsabruf darf den neueren nicht überschreiben. Aufruf: node test/monatsRace.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -42,8 +27,7 @@ pruefe('der Zaehler steigt bei JEDEM Abruf', () => {
 });
 
 pruefe('der Sitzungszaehler bleibt daneben bestehen', () => {
-  // Er deckt einen anderen Fall ab (Instanz-/Sitzungswechsel) und darf
-  // nicht ersetzt werden.
+  // Der Sitzungszähler deckt Instanzwechsel ab und bleibt.
   assert.ok(/const sitzung = sitzungsZaehler\.current;/.test(fetchFahrten));
   const treffer = (ctx.match(/sitzungsZaehler\.current \+= 1/g) || []).length;
   assert.strictEqual(treffer, 2, 'nur login und logout erhoehen ihn');
@@ -120,8 +104,7 @@ pruefe('auch bei drei schnellen Wechseln gewinnt der letzte', () => {
 });
 
 pruefe('ein erneuter Abruf desselben Monats schreibt wieder', () => {
-  // Nach dem Speichern wird neu geladen — das darf der Zaehler nicht
-  // verschlucken.
+  // Neu laden nach dem Speichern darf der Zähler nicht verschlucken.
   const a = baueAbrufe();
   a.starte('2026-09').antworte();
   const nochmal = a.starte('2026-09');

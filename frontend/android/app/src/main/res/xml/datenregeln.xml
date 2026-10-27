@@ -1,18 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Regeln fuer Sicherung und Geraeteuebertragung ab Android 12.
-
-  Beides ist ausgeschlossen: Im Ausweichspeicher der App (WebView-
-  localStorage) kann das Anmelde-Token liegen, wenn der gesicherte
-  Systemspeicher beim Anmelden nicht erreichbar war. Ein Backup wuerde es in
-  das Google-Konto tragen, eine Geraeteuebertragung auf ein neues Geraet.
-
-  Es geht dabei nichts verloren: Alle Fahrten, Orte und Abrechnungen stehen
-  auf dem Server. Nach einer Neuinstallation genuegt die Anmeldung.
-
-  allowBackup="false" im Manifest deckt Android 11 und aelter ab; diese
-  Datei ist die Entsprechung fuer Android 12 und neuer.
--->
+<!-- Kein Backup und keine Geräteübertragung ab Android 12, im WebView-Speicher kann das Anmelde-Token liegen. -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="root" />

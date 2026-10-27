@@ -1,6 +1,4 @@
-/* Fahrtenbuch Redesign 2026 — Design Tokens
-   Ersetzt frontend/src/themes.css vollständig.
-   Genau zwei Modi. Keine wählbaren Themes mehr. */
+/* Design-Tokens, genau zwei Modi. */
 
 :root {
   color-scheme: light;
@@ -90,17 +88,7 @@
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
 }
 
-/* ============================================================
-   ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen
-   Bestandskomponenten nutzen noch die alten primary-/secondary-
-   Skalen (bg-primary-500, dark:text-primary-100 …). Diese
-   Variablen bilden die alten Stufen auf die neuen semantischen
-   Tokens ab, damit alles weiter baut und halbwegs stimmig
-   aussieht, bis die Screen-Phasen die Klassen ersetzen.
-   Die .dark-Overrides korrigieren den Doppel-Flip: dark:-Klassen
-   erwarten die alten hell/dunkel-Stufen, die Tokens flippen aber
-   selbst schon mit.
-   ============================================================ */
+/* ===== Übergangs-Alias der alten primary-/secondary-Skalen; .dark korrigiert den Doppel-Flip ===== */
 :root {
   --primary-25:  var(--bg);
   --primary-50:  var(--brand-soft);

@@ -1,21 +1,4 @@
-// Punkt 6 der Pre-Launch-Liste (und der Android-Teil von Punkt 13):
-// Sheets schlossen ohne Nachfrage.
-//
-// Vier Wege fuehrten direkt zu onClose(): Tipp auf die Flaeche daneben
-// (Sheet.js), Esc, Wischen nach unten und die Android-Zurueck-Taste ueber
-// den Overlay-Stapel. Im Erfassungsflow, Schritt 2, genuegte damit ein
-// Daumen aufs Overlay, um Ziel, Anlass, Kilometer und Mitfahrer zu
-// verwerfen — ohne Rueckfrage, ohne Weg zurueck.
-//
-// Zwei Antworten, je nach Lage:
-//  - Gibt es eine Ebene darunter (Schritt 2 -> Schritt 1), fuehrt das
-//    Zurueckgehen dorthin. Das ist, was der Nutzer mit der Zurueck-Taste
-//    meint.
-//  - Sonst ein Toast mit „Verwerfen", der stehen bleibt. Kein zweites
-//    Overlay: Ein Dialog ueber dem Sheet waere auf dem Handy ein weiterer
-//    Stapel mit eigenem Zurueck-Verhalten.
-//
-// Laeuft ohne Test-Framework: `node test/sheetSchutz.test.js`.
+// Sheets schließen nicht ohne Nachfrage: zurück auf die Ebene darunter, sonst ein stehender Toast „Verwerfen“. Aufruf: node test/sheetSchutz.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -46,8 +29,7 @@ pruefe('der Tipp auf die Flaeche daneben ruft schliessen', () => {
 });
 
 pruefe('das Wischen ruft schliessen', () => {
-  // Die Auswertung der Geste steht beim ZWEITEN Vorkommen der Schwelle
-  // (das erste ist die Konstante selbst).
+  // Das zweite Vorkommen der Schwelle, das erste ist die Konstante.
   const geste = sheet.split('SCHLIESS_SCHWELLE').pop().slice(0, 200);
   assert.ok(/schliessen\(\)/.test(geste));
 });
@@ -116,8 +98,7 @@ pruefe('Schritt 2 geht bei Zurueck eine Ebene hoch statt zu verwerfen', () => {
 });
 
 pruefe('das Speichern schliesst weiterhin ohne Rueckfrage', () => {
-  // handleSpeichern ruft onClose() direkt, nicht schliessen() — gewolltes
-  // Schliessen darf nicht nachfragen.
+  // Gewolltes Schließen fragt nicht nach.
   const speichern = flow.split('const handleSpeichern')[1].split('// ---- Rendering')[0];
   assert.ok(/\n    onClose\(\);/.test(speichern));
 });

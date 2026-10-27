@@ -1,26 +1,10 @@
 #!/usr/bin/env bash
-#
-# Naechtliche Sicherung aller Fahrtenbuch-Datenbanken auf diesem Server.
-#
-# Laeuft per Cron auf dem jeweiligen Server, nicht vom Arbeitsplatz aus:
-#   0 3 * * * /opt/backups/backup.sh
-#
-# Warum im Repo: Das bisherige Skript lag nur auf dem Server. Ging die Maschine
-# verloren, waere mit ihr auch die Sicherungslogik weg gewesen. Ausserdem stand
-# dort das MySQL-Root-Passwort im Klartext — hier kommen die Zugangsdaten aus
-# der stack.env der jeweiligen Instanz, und ein Dump der eigenen Datenbank
-# braucht kein root.
-#
-# Welche Instanzen gesichert werden, steht in der Liste unten. Kommt ein
-# Kirchenkreis dazu, wird er dort eingetragen — sonst laeuft er ungesichert,
-# und das faellt erst im Ernstfall auf.
+# Naechtliche Sicherung aller Fahrtenbuch-Datenbanken dieses Servers, per Cron.
 
 set -uo pipefail
 
 # ---------------------------------------------------------------- Instanzen
-#
-# Je Zeile: <name>|<stack-pfad>|<db-container>|<db-name>
-# Der Rest (Nutzer, Passwort) kommt aus <stack-pfad>/stack.env.
+# <name>|<stack-pfad>|<db-container>|<db-name>, Zugangsdaten aus <stack-pfad>/stack.env; wer fehlt, wird nicht gesichert.
 
 INSTANZEN=(
   "dithmarschen|/opt/fahrtenbuch|fahrtenbuch-db-1|fahrtenbuch"
@@ -33,8 +17,7 @@ LOG="/opt/backups/fahrtenbuch-backup.log"
 SFTP_ZIEL="${BACKUP_SFTP_ZIEL:-}"
 TAGE_LOKAL=14
 
-# Meldung bei Fehlern. Ohne sie faellt ein stillgelegtes Backup erst auf, wenn
-# man es braucht — der teuerste Zeitpunkt.
+# Sonst faellt ein stillgelegtes Backup erst im Ernstfall auf.
 NTFY_URL="https://push.godsapp.de/fahrtenbuch"
 NTFY_TOKEN_DATEI="/opt/backups/.ntfy-token"
 
@@ -84,9 +67,7 @@ for eintrag in "${INSTANZEN[@]}"; do
   docker exec "$container" mysqldump -u "$nutzer" -p"$kennwort" \
     --single-transaction "$db" 2>/dev/null | gzip > "$ZIEL/$datei"
 
-  # Beide Bedingungen noetig: mysqldump kann scheitern, waehrend gzip brav eine
-  # leere Datei schreibt. Ein leerer Dump ist schlimmer als gar keiner — er
-  # sieht aus wie eine Sicherung.
+  # mysqldump kann scheitern, waehrend gzip eine leere Datei schreibt.
   if [[ ${PIPESTATUS[0]} -eq 0 && -s "$ZIEL/$datei" ]]; then
     groesse=$(du -h "$ZIEL/$datei" | cut -f1)
     tabellen=$(gunzip -c "$ZIEL/$datei" | grep -c '^CREATE TABLE')

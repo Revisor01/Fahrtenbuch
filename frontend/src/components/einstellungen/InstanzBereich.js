@@ -6,12 +6,7 @@ import { useToast } from '../ui/Toast';
 import { ladeInstanzen } from '../../api/instanzen';
 import { getApiBaseUrl, setApiBaseUrl } from '../../api/client';
 
-// Wechsel des Kirchenkreises in der App. Nur nativ eingebunden (siehe
-// EinstellungenView) — im Web gibt es nichts zu wechseln.
-//
-// SICHERHEIT: Der Wechsel meldet zwingend ab. Das Token gilt nur bei der
-// Instanz, die es ausgestellt hat; es nach dem Wechsel liegen zu lassen hiesse,
-// die Anmeldedaten des einen Kirchenkreises an den anderen zu schicken.
+// Kirchenkreis wechseln, nur in der App; der Wechsel meldet zwingend ab, das Token gilt nur bei seiner Instanz.
 function InstanzBereich() {
   const { logout } = useContext(AppContext);
   const toast = useToast();
@@ -44,9 +39,7 @@ function InstanzBereich() {
     const instanz = instanzen.find((i) => i.id === ausgewaehlt);
     if (!instanz || instanz.apiUrl === aktuelleUrl) return;
     setApiBaseUrl(instanz.apiUrl);
-    // Erst die Basis umstellen, dann abmelden: logout() raeumt Token und
-    // Nutzerdaten weg, danach landet die App wieder auf der Anmeldung — jetzt
-    // gegen den neu gewaehlten Kirchenkreis.
+    // Erst die Basis umstellen, dann abmelden.
     logout();
     toast.success(`Gewechselt zu ${instanz.name}. Bitte neu anmelden.`);
   };

@@ -1,25 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Sortieren per Ziehen — fuer Maus, Finger und Stift mit einer Implementierung.
-//
-// Warum nicht HTML5-Drag & Drop (draggable + dragstart/drop)?
-// Mobile Safari feuert diese Events schlicht nicht; ein Wisch scrollt
-// stattdessen die Seite. Das Sortieren war auf dem iPhone damit tot.
-// Pointer-Events decken alle drei Eingabearten ab und funktionieren
-// ueberall dort, wo die App laeuft.
-//
-// Der Hook liefert nur Props und Zustand — das Markup bleibt bei den
-// Bereichen. Das ist Absicht: die Orte-Liste rendert dieselbe Reihenfolge
-// zweimal (Desktop-Tabelle und mobile Liste) und speist beide aus einem
-// gemeinsamen Ziehzustand.
-//
-// Aufruf:
-//   const sortieren = useSortierbareListe({ anzahl, onReorder, deaktiviert });
-//   <div {...sortieren.zeilenProps(index)} className={...sortieren.zeilenKlasse(index)}>
-//     <button className="set-grip" {...sortieren.griffProps(index, label)} />
-//
-// `onReorder(von, nach)` wird genau einmal pro Zug ausgeloest, erst beim
-// Loslassen. Das Speichern (PUT auf /sort) liegt beim Aufrufer.
+// Sortieren per Pointer-Events, weil Mobile Safari kein HTML5-Drag & Drop auslöst; onReorder(von, nach) einmal beim Loslassen.
 
 export default function useSortierbareListe({ anzahl, onReorder, deaktiviert = false }) {
   // Index der gezogenen Zeile und Index der Position, an der sie landen wuerde
@@ -28,8 +9,7 @@ export default function useSortierbareListe({ anzahl, onReorder, deaktiviert = f
 
   // Laufender Zug: alles, was die Move-Handler brauchen, ohne Re-Render
   const zug = useRef(null);
-  // Registrierte Zeilen-Elemente je Index — daraus lesen wir beim Ziehen die
-  // Rechtecke, um zu bestimmen, ueber welcher Zeile der Zeiger steht.
+  // Zeilen-Elemente je Index für die Rechtecke beim Ziehen.
   const zeilenRefs = useRef(new Map());
 
   // Frische Werte fuer die Handler, ohne sie neu zu binden
@@ -44,14 +24,10 @@ export default function useSortierbareListe({ anzahl, onReorder, deaktiviert = f
     setOverIndex(null);
   }, []);
 
-  // Sicherheitsnetz: bricht der Zug ab, weil die Komponente verschwindet,
-  // bleibt sonst der Zustand haengen.
+  // Sonst bleibt der Zustand hängen, wenn die Komponente verschwindet.
   useEffect(() => () => { zug.current = null; }, []);
 
-  // Merkt sich die DOM-Elemente einer Zeile. Je Index koennen mehrere
-  // Elemente registriert sein: die Orte rendern dieselbe Reihenfolge zweimal
-  // (Desktop-Tabelle und mobile Liste), von denen immer nur eine sichtbar
-  // ist. Beim Aushaengen raeumen wir den Eintrag wieder weg.
+  // Mehrere Elemente je Index, weil die Orte zweimal rendern.
   const zeileRef = useCallback((index) => (element) => {
     const map = zeilenRefs.current;
     if (element) {
@@ -63,18 +39,14 @@ export default function useSortierbareListe({ anzahl, onReorder, deaktiviert = f
     }
   }, []);
 
-  // Ueber welcher Zeile steht der Zeiger gerade? Wir vergleichen gegen die
-  // Mitte jeder Zeile: solange der Zeiger die Mitte der Nachbarzeile nicht
-  // ueberschritten hat, bleibt die Vorschau stehen. Das verhindert das
-  // Flackern, das entsteht, wenn schon der erste Pixel Ueberlappung zaehlt.
+  // Gegen die Zeilenmitte, sonst flackert die Vorschau.
   const zielIndexFinden = useCallback((clientY, startIndex) => {
     let ziel = startIndex;
     zeilenRefs.current.forEach((menge, index) => {
       if (index >= anzahlRef.current) return;
       menge.forEach((element) => {
         const rect = element.getBoundingClientRect();
-        // Die unsichtbare Variante (display:none) liefert lauter Nullen und
-        // faellt damit von selbst raus.
+        // Die unsichtbare Variante liefert Nullen und fällt raus.
         if (rect.height === 0) return;
         const mitte = rect.top + rect.height / 2;
         if (index < startIndex && clientY < mitte) {
@@ -92,19 +64,15 @@ export default function useSortierbareListe({ anzahl, onReorder, deaktiviert = f
     // Nur die primaere Taste zieht; Rechtsklick und Zusatztasten nicht.
     if (e.pointerType === 'mouse' && e.button !== 0) return;
 
-    // Wichtig fuer iOS: verhindert, dass der Wisch als Seiten-Scroll oder
-    // als Textauswahl endet. Zusammen mit `touch-action: none` am Griff
-    // gehoert die Geste damit uns.
+    // Sonst wird der Wisch auf iOS zum Scrollen oder zur Textauswahl.
     e.preventDefault();
 
     const griff = e.currentTarget;
     try {
-      // Ab hier landen alle Pointer-Events bei diesem Griff — auch wenn der
-      // Finger die Zeile laengst verlassen hat.
+      // Alle Pointer-Events beim Griff, auch außerhalb der Zeile.
       griff.setPointerCapture(e.pointerId);
     } catch (fehler) {
-      // Aeltere Engines ohne Capture: der Zug laeuft trotzdem, nur weniger
-      // robust am Rand des Fensters.
+      // Ohne Capture läuft der Zug trotzdem.
     }
 
     zug.current = { pointerId: e.pointerId, startIndex: index, griff };
@@ -137,8 +105,7 @@ export default function useSortierbareListe({ anzahl, onReorder, deaktiviert = f
   const handlePointerUp = useCallback((e) => beenden(e, false), [beenden]);
   const handlePointerCancel = useCallback((e) => beenden(e, true), [beenden]);
 
-  // Tastatur bleibt gleichwertig: Pfeil hoch/runter auf dem fokussierten
-  // Griff verschiebt die Zeile um eine Position.
+  // Pfeil hoch/runter verschiebt um eine Position.
   const handleKeyDown = useCallback((e, index) => {
     if (deaktiviert) return;
     if (e.key === 'ArrowUp' && index > 0) {
@@ -153,19 +120,16 @@ export default function useSortierbareListe({ anzahl, onReorder, deaktiviert = f
   // Props fuer die Zeile: nur die Referenz, damit wir ihr Rechteck kennen.
   const zeilenProps = useCallback((index) => ({ ref: zeileRef(index) }), [zeileRef]);
 
-  // Zusatzklassen fuer die Zeile — die vorhandenen Klassen aus index.css.
-  // `is-dragover` markiert die Einfuegestelle, nie die gezogene Zeile selbst.
+  // `is-dragover` markiert die Einfügestelle, nie die gezogene Zeile.
   const zeilenKlasse = useCallback((index) => {
     if (dragIndex === null) return '';
     if (dragIndex === index) return ' is-dragging';
     if (overIndex !== index) return '';
-    // Kommt die Zeile von oben, rutscht sie unter das Ziel — dann gehoert
-    // die Linie an die Unterkante.
+    // Von oben kommend gehört die Linie an die Unterkante.
     return dragIndex < index ? ' is-dragover is-dragover-unten' : ' is-dragover';
   }, [dragIndex, overIndex]);
 
-  // Props fuer den Griff. `label` wandert in title/aria-label, damit jede
-  // Zeile ansagbar bleibt.
+  // `label` in title/aria-label, damit jede Zeile ansagbar bleibt.
   const griffProps = useCallback((index, label) => ({
     onPointerDown: (e) => handlePointerDown(e, index),
     onPointerMove: handlePointerMove,

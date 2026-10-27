@@ -1,16 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-// Live-Adresssuche über Photon (photon.komoot.io) — auf Autocomplete ausgelegt,
-// tippfehlertolerant, OpenStreetMap-basiert.
-//
-// Kartenmittelpunkt Dithmarschen: gewichtet die Treffer, schliesst aber nichts
-// aus - Adressen ausserhalb werden weiterhin gefunden, nur spaeter.
+// Live-Adresssuche über Photon, gewichtet auf Dithmarschen, ohne andere auszuschließen.
 export const BIAS_LAT = 54.15;
 export const BIAS_LON = 9.10;
 
-// Photon liefert kein display_name, sondern Einzelfelder. Der Anzeigetext wird
-// daraus zusammengesetzt: Gebaeudetreffer haben kein name, dafuer aber
-// street/housenumber - Strassentreffer umgekehrt.
+// Anzeigetext aus den Einzelfeldern, Gebäude haben street/housenumber statt name.
 export function formatAdresse(props) {
   const strasse = [props.street, props.housenumber].filter(Boolean).join(' ');
   const ort = [props.postcode, props.city].filter(Boolean).join(' ');
@@ -37,9 +31,7 @@ function zuVorschlag(f) {
   };
 }
 
-// Hausnummer aus der Eingabe ziehen: "Süderstraße 18, 25779 Hennstedt" -> "18".
-// Nur eine Zahl, die direkt auf Buchstaben folgt (optional mit Buchstabenzusatz
-// wie "3A"); Postleitzahlen (fuenfstellig) bleiben aussen vor.
+// Hausnummer direkt nach Buchstaben, Postleitzahlen bleiben außen vor.
 function hausnummerAusEingabe(eingabe) {
   const treffer = eingabe.match(/[a-zäöüß.]\s+(\d{1,4}[a-z]?)(?![\d])/i);
   if (!treffer) return null;
@@ -47,8 +39,7 @@ function hausnummerAusEingabe(eingabe) {
   return /^\d{5}$/.test(nummer) ? null : nummer;
 }
 
-// Vergleichsform fuer Strassennamen: Gross/Klein, Abkuerzungen und Bindestriche
-// vereinheitlichen, damit "Süderstr." und "Süderstraße" als gleich gelten.
+// Straßennamen vereinheitlicht, damit „Süderstr.“ und „Süderstraße“ gleich sind.
 function strasseNormal(wert) {
   return (wert || '')
     .toLowerCase()
@@ -57,10 +48,7 @@ function strasseNormal(wert) {
     .replace(/[\s-]/g, '');
 }
 
-// OpenStreetMap kennt nicht ueberall Hausnummern (z. B. Süderstraße in
-// Hennstedt). Photon liefert dann nur den Strassentreffer. Wenn die Eingabe
-// eine Hausnummer enthaelt und der Treffer dieselbe Strasse ohne Nummer ist,
-// wird sie uebernommen - die Koordinaten bleiben die der Strasse.
+// Fehlt die Hausnummer in OSM, wird sie aus der Eingabe übernommen, die Koordinaten bleiben die der Straße.
 function mitHausnummerAusEingabe(vorschlag, props, hausnummer) {
   if (!hausnummer || props.housenumber) return vorschlag;
 
@@ -86,8 +74,7 @@ export async function adresseZuKoordinaten(lat, lon) {
   return f ? zuVorschlag(f) : null;
 }
 
-// Liefert Adressvorschlaege zu `query` (debounced). Nutzt einen Anfragezaehler,
-// damit eine langsame aeltere Antwort keine neueren Vorschlaege ueberschreibt.
+// Vorschläge zu `query`, mit Anfragezähler gegen langsame ältere Antworten.
 export function useAdressSuche(query, { minLaenge = 3, aktiv = true } = {}) {
   const [vorschlaege, setVorschlaege] = useState([]);
   const [laedt, setLaedt] = useState(false);
@@ -107,9 +94,7 @@ export function useAdressSuche(query, { minLaenge = 3, aktiv = true } = {}) {
 
     const q = (query || '').trim();
     if (!aktiv || q.length < minLaenge) {
-      // Zaehler mit hochziehen: sonst besteht eine noch laufende aeltere
-      // Anfrage den Guard unten und schreibt ihre Treffer zurueck, obwohl das
-      // Feld inzwischen geleert wurde.
+      // Zähler hochziehen, sonst schreibt eine ältere Anfrage nach dem Leeren zurück.
       requestId.current++;
       setVorschlaege([]);
       setLaedt(false);
@@ -121,8 +106,7 @@ export function useAdressSuche(query, { minLaenge = 3, aktiv = true } = {}) {
 
     debounceTimer.current = setTimeout(async () => {
       try {
-        // limit bewusst hoeher als die angezeigten Eintraege: Strassen kommen
-        // haeufig als mehrere Segmente zurueck und fallen im Filter unten raus.
+        // Höher als angezeigt, Straßensegmente fallen im Filter raus.
         const url =
           `https://photon.komoot.io/api/?limit=15&lang=de` +
           `&lat=${BIAS_LAT}&lon=${BIAS_LON}` +

@@ -1,11 +1,6 @@
 import { IST_NATIVE } from './plattform';
 
-// Haptik bewusst sparsam: nur an Stellen, an denen das Geraet eine Auswahl
-// bestaetigt. Ein Klopfen bei jedem Tap stumpft ab und wirkt billig.
-//
-// Das Plugin wird erst beim ersten Bedarf geladen (dynamischer Import), damit
-// der Web-Build es gar nicht erst mitzieht. Fehler werden verschluckt: Haptik
-// ist Beiwerk und darf eine Navigation nie blockieren.
+// Haptik nur bei bestaetigter Auswahl; Plugin wird lazy geladen, Fehler sind egal.
 let haptikModul = null;
 
 async function ladeHaptik() {

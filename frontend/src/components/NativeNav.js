@@ -2,30 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../ThemeContext';
 import { overlayBeobachten } from '../utils/overlayStack';
 
-// Plattform-Navigation fuer die native Huelle: die Leiste gehoert zum Geraet,
-// nicht ins WebView-Fenster. Auf iOS 26 rendert UIKit die systemeigene
-// Liquid-Glass-Tab-Bar (das Plugin waehlt sie ueber usesSystemLiquidGlass).
-// Auf Android zeichnet das Plugin selbst (NativeTabbarLayout in onDraw) — es
-// bindet zwar com.google.android.material ein, nutzt daraus aber keine
-// Komponente. Die Form muss deshalb hier plattformweise gesetzt werden, sonst
-// bekommt Android die iOS-Kapsel.
-//
-// Die Komponente zeichnet deshalb nichts (`return null`) — sie beschreibt nur
-// den Zustand der nativen Leiste per Effekt. Die Props-Schnittstelle bleibt
-// dieselbe wie beim frueheren DOM-Nachbau, damit AppContent unveraendert
-// bleibt.
-//
-// Die Web-Bottom-Nav (.bottom-nav) ist davon nicht beruehrt: AppContent
-// rendert entweder diese Komponente ODER die Web-Nav. Das Plugin wird per
-// dynamischem import() geladen, damit es im Web-Bundle gar nicht erst landet.
+// Beschreibt die native Leiste per Effekt und rendert selbst nichts; das Plugin wird dynamisch geladen, damit es nicht ins Web-Bundle kommt.
 
-// Native Leisten rendern Symbole selbst — React-Komponenten aus lucide-react
-// sind ueber die Bruecke nicht uebertragbar. Deshalb pro Tab zwei
-// serialisierbare Beschreibungen:
-//   iOS     -> SF Symbol (Systemsatz, passt automatisch zur Glass-Bar)
-//   Android -> Inline-SVG mit den Pfaden aus lucide-react, damit die App auf
-//              beiden Plattformen dieselbe Bildsprache behaelt.
-// Die Zuordnung laeuft ueber die id aus NAV_ITEMS, nicht ueber die Reihenfolge.
+// Je Tab ein SF Symbol (iOS) und Inline-SVG aus lucide (Android), zugeordnet über die id.
 const SVG_KOPF = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
 
 function svg(inhalt) {
@@ -60,9 +39,7 @@ const SYMBOLE = {
         '<path d="M12 17.5v-11"/>'
     ),
   },
-  // Prominenter Knopf: das Plus ist auf beiden Systemen das Zeichen fuer
-  // „neu anlegen". Kein gefuelltes Gegenstueck — der Knopf hat keinen
-  // ausgewaehlten Zustand, er loest nur aus.
+  // Plus für „neu anlegen“, ohne gefülltes Gegenstück, der Knopf hat keine Auswahl.
   erfassen: {
     ios: { sfSymbol: 'plus' },
     iosAktiv: { sfSymbol: 'plus' },
@@ -78,8 +55,7 @@ const SYMBOLE = {
   },
 };
 
-// Fallback, falls NAV_ITEMS spaeter einen Eintrag ohne Symbol bekommt: lieber
-// ein neutrales Zeichen als eine leere Flaeche in der Systemleiste.
+// Lieber ein neutrales Zeichen als eine leere Fläche.
 const ERSATZSYMBOL = {
   ios: { sfSymbol: 'circle' },
   iosAktiv: { sfSymbol: 'circle.fill' },
@@ -94,16 +70,7 @@ function symbolFuer(id, plattform, aktiv) {
   return { android: { svg: eintrag.android }, width: 24, height: 24 };
 }
 
-// ---------------------------------------------------------------------------
-// Farben aus dem Designsystem statt fester Werte im Aufruf: Die native Leiste
-// soll aus demselben Guss sein wie die App. Die Tokens stehen als
-// CSS-Variablen am <html>, also werden sie zur Laufzeit dort ausgelesen und
-// als Hex uebergeben. Beim Wechsel hell/dunkel setzt ThemeContext die Klasse
-// .dark — der Effekt unten haengt an isDark und liest neu.
-//
-// Farbwerte muessen dem nativen Parser als #RRGGBB bzw. #AARRGGBB zugehen.
-// tokens.css liefert bereits Hex; alles andere (etwa ein rgb()-Wert aus einem
-// spaeteren Token) wird hier umgerechnet.
+// ── Farben aus den CSS-Tokens zur Laufzeit als #RRGGBB/#AARRGGBB, neu bei Wechsel hell/dunkel ──
 function alsHex(wert, ersatz) {
   const roh = (wert || '').trim();
   if (/^#[0-9a-f]{6}$/i.test(roh)) return roh.toUpperCase();
@@ -121,20 +88,7 @@ function alsHex(wert, ersatz) {
   return ersatz;
 }
 
-// Welches Plugin die Leiste stellt.
-//
-// Android: MaterialNav, eigenes Plugin in android/app/src/.../MaterialNavPlugin.java.
-// Es setzt BottomNavigationView (NavigationBarView) aus
-// com.google.android.material ein — damit kommen Pillen-Indikator, Ripple,
-// Typografie und Bedienhilfen von Material 3 selbst. Das Fremdplugin zeichnete
-// stattdessen die iOS-Kapsel nach, was sich nicht abstellen liess.
-//
-// iOS: weiter @capgo/capacitor-native-navigation. Dort waehlt es ab iOS 26 die
-// systemeigene UITabBarController — genau das, was gewuenscht ist.
-// Der Rueckgabewert steckt in { plugin }: Ein Capacitor-Proxy beantwortet
-// JEDEN Zugriff als Bruecken-Aufruf, auch `.then`. Direkt aus einer
-// async-Funktion zurueckgegeben, hielte die Laufzeit ihn fuer ein Thenable und
-// riefe `MaterialNav.then()` nativ auf — was es nicht gibt.
+// Android MaterialNav (eigenes Plugin, Material 3), iOS @capgo/capacitor-native-navigation; Rückgabe in { plugin }, weil ein Capacitor-Proxy sonst als Thenable gilt.
 async function ladePlugin(plattform) {
   if (plattform === 'android') {
     const { registerPlugin } = await import('@capacitor/core');
@@ -144,22 +98,7 @@ async function ladePlugin(plattform) {
   return { plugin: NativeNavigation };
 }
 
-// Form der Leiste je Plattform.
-//
-// Die Vorgabe des Plugins ist in beiden Faellen die iOS-Kapsel: schwebend,
-// 24 dp Rand, 430 dp breit, voll abgerundet. Auf iOS ist das richtig — dort
-// waehlt das Plugin ab iOS 26 ohnehin die System-Tab-Bar und die Masse
-// beschreiben nur den Fallback fuer aeltere Versionen.
-//
-// Auf Android ist dieselbe Kapsel falsch: Material 3 kennt keine schwebende
-// Leiste, sondern eine angedockte ueber die volle Breite. Mit der Vorgabe
-// schnitt das Label "Einstellungen" ab und der prominente Knopf lag ueber dem
-// Inhalt. Die Masse unten sind die von Material 3 (Hoehe 80 dp, keine Raender,
-// kein Radius).
-//
-// Was damit NICHT zu erreichen ist: der aktive Eintrag bekommt im Plugin einen
-// runden Kreis (GradientDrawable.OVAL, 58 dp, fest verdrahtet), MD3 verlangt
-// dort eine Pille 64x32 dp. Dafuer waere ein Fork des Plugins noetig.
+// Android mit MD3-Maßen (80 dp, ohne Rand und Radius), sonst bekäme es die iOS-Kapsel.
 function formFuer(plattform) {
   if (plattform === 'android') {
     return { shape: 'floating', height: 80, horizontalMargin: 0, maxWidth: 0, bottomGap: 0, cornerRadius: 0 };
@@ -167,9 +106,7 @@ function formFuer(plattform) {
   return { shape: 'floating' };
 }
 
-// Das Glas ist ein iOS-Material. Auf Android gibt es kein Gegenstueck — das
-// Plugin malt dort nur eine halbtransparente Flaeche, was die Leiste vor
-// hellem Inhalt ausfransen laesst. MD3 will eine deckende Flaeche.
+// Auf Android deckend, MD3 kennt kein Glas.
 function glasFuer(plattform) {
   return plattform === 'android' ? undefined : { effect: 'liquidGlass' };
 }
@@ -178,8 +115,7 @@ function leseFarben() {
   const stil = getComputedStyle(document.documentElement);
   const token = (name, ersatz) => alsHex(stil.getPropertyValue(name), ersatz);
   return {
-    // dynamic MUSS false bleiben: Material You wuerde sonst auf Android die
-    // Systemfarbe der Nutzer:innen ueber unser Petrol legen.
+    // false, sonst legt Material You die Systemfarbe über das Petrol.
     dynamic: false,
     tint: token('--brand', '#0F5257'),
     inactiveTint: token('--text-2', '#47605F'),
@@ -195,37 +131,24 @@ function leseFarben() {
 function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl = 0 }) {
   const { isDark } = useTheme();
 
-  // Aktuelle Callbacks als Ref: Der Listener wird nur EINMAL angemeldet. Waere
-  // onSelect eine Abhaengigkeit, meldete er sich bei jedem Render neu an — in
-  // der Luecke dazwischen gingen Taps ins Leere.
-  // Ids, die nur eine Aktion ausloesen und keinen Screen oeffnen (role
-  // 'prominent'/'search'). Sie duerfen in der Leiste nicht ausgewaehlt bleiben.
+  // Callbacks als Ref, damit der Listener nur einmal anmeldet; Aktions-Ids bleiben nicht ausgewählt.
   const aktionsIds = useMemo(
     () => new Set(items.filter((i) => i.role && i.role !== 'normal').map((i) => i.id)),
     [items]
   );
 
-  // plattform steht hier mit drin, damit der configure-Effekt unten sie lesen
-  // kann, ohne sie als Abhaengigkeit zu bekommen — er darf nur einmal laufen.
+  // Damit der configure-Effekt sie liest, ohne sie als Abhängigkeit zu haben.
   const stand = useRef({ onSelect, aktivId, aktionsIds, plattform });
   stand.current = { onSelect, aktivId, aktionsIds, plattform };
 
-  // Was die native Leiste zuletzt SELBST gemeldet hat. Kommt ein Wechsel von
-  // dort, hat sie ihre Auswahl bereits umgestellt; ein Rueckruf nach nativ
-  // waere ueberfluessig und koennte ein weiteres Ereignis ausloesen. Der
-  // React-State bleibt die einzige Wahrheit, dieser Ref ist nur die Notiz
-  // "das weiss die Leiste schon".
+  // Zuletzt von der Leiste gemeldet, ein Rückruf dorthin wäre überflüssig.
   const nativBekannt = useRef(null);
 
   const pluginRef = useRef(null);
-  // Zaehler statt Boolean: Er macht das Eintreffen des Plugins zu einer
-  // Abhaengigkeit des Effekts unten. Ohne ihn liefe der erste Aufbau der Leiste
-  // ins Leere, weil das Plugin beim ersten Render noch geladen wird.
+  // Zähler, damit das Eintreffen des Plugins den Effekt auslöst.
   const [pluginBereit, setPluginBereit] = useState(0);
 
-  // Overlay-Kopplung: Die native Leiste liegt UEBER der WebView — kein z-index
-  // im Dokument erreicht sie. Ein offenes Sheet wuerde sonst unten von ihr
-  // angeschnitten. Solange etwas im Overlay-Stapel liegt, verschwindet sie.
+  // Die native Leiste liegt über der WebView, bei offenem Overlay verschwindet sie.
   const [overlayOffen, setOverlayOffen] = useState(false);
 
   useEffect(() => overlayBeobachten(setOverlayOffen), []);
@@ -240,12 +163,7 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
         if (abgebrochen || !NativeNavigation) return undefined;
         pluginRef.current = NativeNavigation;
 
-        // contentInsetMode: 'css' laesst das Plugin die tatsaechliche Hoehe der
-        // Leiste als CSS-Variablen an <html> schreiben. Nur damit stimmt der
-        // Abstand des Inhalts zur echten Leiste — feste Werte plus
-        // env(safe-area-inset-bottom) koennen das nicht treffen.
-        // MaterialNav (Android) kennt nur colors — die uebrigen Angaben
-        // beschreiben Eigenschaften der iOS-Leiste und entfallen dort.
+        // 'css' schreibt die echte Leistenhöhe als CSS-Variablen; MaterialNav kennt nur colors.
         return NativeNavigation.configure(
           stand.current.plattform === 'android'
             ? { colors: leseFarben() }
@@ -261,11 +179,7 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
             NativeNavigation.addListener('tabSelect', (ereignis) => {
               const { onSelect: waehle, aktivId: aktuell, aktionsIds: aktionen } =
                 stand.current;
-              // Aktions-Eintraege (der prominente Knopf) haben keinen Screen.
-              // Die Leiste hat ihn beim Tippen trotzdem als ausgewaehlt
-              // markiert — deshalb NICHT als bekannten Stand merken, sondern
-              // die Auswahl sofort auf den offenen Tab zuruecksetzen. Sonst
-              // bliebe der Knopf hervorgehoben, obwohl nur ein Sheet aufging.
+              // Aktions-Einträge sofort auf den offenen Tab zurücksetzen, sonst bleibt der Knopf markiert.
               if (aktionen?.has(ereignis.id)) {
                 nativBekannt.current = null;
                 pluginRef.current
@@ -275,8 +189,7 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
                 return;
               }
               nativBekannt.current = ereignis.id;
-              // Gleicher Tab: nichts zu tun. Sonst liefe bei jedem Tippen auf
-              // den offenen Tab ein Zustandswechsel samt Haptik.
+              // Gleicher Tab, nichts zu tun.
               if (ereignis.id === aktuell) return;
               waehle(ereignis.id);
             })
@@ -292,31 +205,23 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
           });
       })
       .catch(() => {
-        // Ohne Plugin bleibt die App bedienbar: Die Leiste fehlt dann, aber
-        // nichts blockiert. Ein Absturz waere hier das schlechtere Verhalten.
+        // Ohne Plugin fehlt die Leiste, aber nichts blockiert.
       });
 
     return () => {
       abgebrochen = true;
       if (abmelden) abmelden();
-      // Beim Abmelden (Logout, Instanzwechsel) muss die native Leiste weg —
-      // sie liegt sonst weiter ueber der Anmeldemaske.
+      // Beim Abmelden muss die Leiste weg, sonst liegt sie über der Anmeldemaske.
       pluginRef.current?.setTabbar({ hidden: true, animated: false }).catch(() => {});
     };
   }, []);
 
-  // Tabs, Auswahl, Badge und Farben an die native Leiste geben.
-  //
-  // Ein Effekt fuer alles: Die native Leiste nimmt ihren Zustand als Ganzes
-  // entgegen, und getrennte Effekte wuerden nur mehrere Bruecken-Aufrufe pro
-  // Wechsel erzeugen.
+  // Ein Effekt für Tabs, Auswahl, Badge und Farben, weil die Leiste ihren Zustand als Ganzes nimmt.
   useEffect(() => {
     const plugin = pluginRef.current;
     if (!plugin) return;
 
-    // Kam der Wechsel gerade von der Leiste selbst, kennt sie ihn schon.
-    // Trotzdem laufen Farben und Badge unten weiter durch — nur die Auswahl
-    // wird dann nicht erneut gesetzt.
+    // Kam der Wechsel von der Leiste, wird nur die Auswahl nicht erneut gesetzt.
     const vonNativ = nativBekannt.current === aktivId;
     nativBekannt.current = aktivId;
 
@@ -324,13 +229,11 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
       id: item.id,
       title: item.label,
       icon: symbolFuer(item.id, plattform, item.id === aktivId),
-      // Auf iOS wechselt die Systemleiste beim Auswaehlen selbst auf das
-      // gefuellte Symbol; auf Android bleibt es beim Umriss (MD3-Idiom).
+      // iOS wechselt selbst aufs gefüllte Symbol, Android bleibt beim Umriss.
       selectedIcon: plattform === 'ios' ? symbolFuer(item.id, plattform, true) : undefined,
       // Native Badges kuerzen selbst — der frueher noetige "9+"-Trick entfaellt.
       badge: item.id === badgeId && badgeAnzahl > 0 ? badgeAnzahl : undefined,
-      // 'prominent' loest den Eintrag aus der Kapsel und stellt ihn als runden
-      // Knopf daneben. Ohne role bleibt es beim normalen Tab.
+      // 'prominent' stellt den Eintrag als runden Knopf neben die Kapsel.
       role: item.role,
     }));
 
@@ -346,9 +249,7 @@ function NativeNav({ plattform, items, aktivId, onSelect, badgeId, badgeAnzahl =
         animated: true,
       })
       .catch(() => {});
-    // isDark steht bewusst in den Abhaengigkeiten, obwohl es im Rumpf nicht
-    // vorkommt: Es ist der Ausloeser dafuer, die Tokens neu auszulesen.
-    // pluginBereit ebenso — es markiert den Moment, ab dem die Bruecke steht.
+    // isDark und pluginBereit als Auslöser, obwohl sie im Rumpf fehlen.
   }, [
     items,
     aktivId,

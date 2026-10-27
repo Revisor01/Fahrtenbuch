@@ -5,16 +5,9 @@ import { AppContext } from '../contexts/AppContext';
 import { useToast } from './ui/Toast';
 import { appConfigValue } from '../utils/appConfig';
 
-// Anmeldung nach Spec Screen 8: Vollfläche --brand, Logo 52px in
-// rgba(255,255,255,.14), Titel 26px/600 --on-brand, Formularkarte
-// --surface/--r-card/24px. Registrierung und Passwort-vergessen laufen
-// im selben Layout (Kartentausch statt Modal).
+// Anmeldung; Registrierung und Passwort vergessen im selben Layout per Kartentausch.
 
-// Geometrie eins zu eins aus public/icons/icon.svg, damit Logo und App-Icon
-// dasselbe Zeichen zeigen: offener Ring plus Sand-Punkt am oberen Ende der
-// Luecke. Der Punkt misst 52 von 512 Einheiten — bei 26px Anzeige rund 2,6px
-// und damit sichtbar, solange er sich farblich vom Ring absetzt. Die Farben
-// kommen aus dem Stylesheet (.auth-logo), weil sie im dunklen Design kippen.
+// Geometrie aus public/icons/icon.svg, damit Logo und App-Icon gleich sind; Farben aus .auth-logo wegen Dunkelmodus.
 export function AuthLogo() {
   return (
     <div className="auth-logo" aria-hidden="true">
@@ -51,9 +44,7 @@ function LoginPage({ onInstanzWechsel }) {
   const appTitle = appConfigValue('appTitle', import.meta.env.VITE_TITLE, 'Fahrtenbuch Kirchenkreis Dithmarschen');
   const allowRegistration = appConfigValue('allowRegistration', import.meta.env.VITE_ALLOW_REGISTRATION) === 'true';
   const allowedEmailDomains = appConfigValue('allowedEmailDomains', import.meta.env.VITE_ALLOWED_EMAIL_DOMAINS);
-  // Nur die Information, OB ein Code verlangt wird. Der Wert selbst stand
-  // frueher im oeffentlich abrufbaren config.js und war damit fuer jeden
-  // Besucher lesbar; geprueft wird er ohnehin serverseitig.
+  // Nur ob ein Code verlangt wird, geprüft wird serverseitig.
   const codeErforderlich =
     appConfigValue('registrationCodeRequired', undefined) === true ||
     appConfigValue('registrationCodeRequired', undefined) === 'true' ||

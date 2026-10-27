@@ -1,25 +1,4 @@
-// Punkt 12 der Pre-Launch-Liste, letzter offener Teil: 28 parallele
-// Monatsabrufe beim App-Start.
-//
-// fetchMonthlyData holte fuer jeden der 28 betrachteten Monate einen eigenen
-// Monatsbericht — beim Start, nach jedem Speichern und nach jedem
-// Statuswechsel. Zusammen mit den uebrigen Abrufen kam der Start auf 35
-// Anfragen, bei einem Rate-Limit von 600 in fuenf Minuten.
-//
-// Die Sammel-Route /api/fahrten/monthly-summary gab es bereits, sie wurde
-// aber von niemandem aufgerufen. Sie ist jetzt um abrechnungsStatus,
-// kmProTraeger, fahrtenCount, totalKm und gesamtErstattung erweitert —
-// additiv, die bisherigen Felder sind unveraendert.
-//
-// Gemessen: 35 -> 8 Anfragen beim App-Start.
-//
-// DIE FALLE, um die es hier vor allem geht: Der Monatsbericht liefert
-// `erstattungen[traegerId]` als blosse ZAHL, die Sammel-Route als OBJEKT
-// { kilometer, erstattung }. Dashboard und Abrechnung rechnen mit der Zahl
-// (`Number(...)`, `b > 0`) — ohne Umwandlung stuenden dort ueberall 0 € und
-// NaN. Genau diese Umwandlung wird unten mit echten Werten nachgerechnet.
-//
-// Laeuft ohne Test-Framework: `node test/monatsuebersicht.test.js`.
+// Monatsübersicht über /api/fahrten/monthly-summary; erstattungen kommen dort als Objekt und werden zur Zahl umgewandelt. Aufruf: node test/monatsuebersicht.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -56,8 +35,7 @@ pruefe('genau ein axios-Aufruf bleibt', () => {
 });
 
 pruefe('„keine Fahrten" (404) ist kein Fehler', () => {
-  // Die Route antwortet seit jeher mit 404, wenn nichts erfasst ist. Ohne
-  // diesen Zweig saehe die Nutzer:in beim ersten Start eine Fehlermeldung.
+  // 404 ohne Erfassungen darf keine Fehlermeldung zeigen.
   assert.ok(/error\?\.response\?\.status === 404/.test(fnQuelle));
   // Nur den if-Block selbst, nicht was danach folgt.
   const zweig = fnQuelle.split('=== 404) {')[1].split('\n      }')[0];

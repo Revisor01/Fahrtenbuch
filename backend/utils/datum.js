@@ -1,8 +1,4 @@
-// Datumshelfer, die die LOKALE Zeit verwenden.
-//
-// `new Date().toISOString()` rechnet nach UTC. In deutscher Sommerzeit liefert
-// das zwischen Mitternacht und 2 Uhr noch den Vortag — ein nachts gesetzter
-// Erstattungssatz oder Einreichungsvermerk bekäme also das falsche Datum.
+// Datumshelfer in lokaler Zeit, toISOString() liefert nachts noch den Vortag.
 
 /** Heutiges Datum als `YYYY-MM-DD` (lokal). */
 function heuteISO() {

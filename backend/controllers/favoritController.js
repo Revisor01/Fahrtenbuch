@@ -41,10 +41,7 @@ exports.createFavorit = async (req, res) => {
     res.status(201).json(favorit);
   } catch (error) {
     if (error.name === 'ZodError') {
-      // Zod 4 liefert die Liste als `issues`; `errors` gibt es dort nicht mehr.
-      // Ohne den Fallback warf dieser Handler selbst (`.map` auf undefined) und
-      // der Nutzer sah einen 500er statt der Meldung, welches Feld fehlt —
-      // dieselbe Falle, die middleware/validate.js schon abfaengt.
+      // Zod 4 liefert `issues`, ohne Rückfall gäbe es einen 500er.
       const issues = error.issues || error.errors || [];
       return res.status(400).json({
         message: 'Validierungsfehler',
@@ -121,16 +118,13 @@ exports.executeFavorit = async (req, res) => {
         // Als Paar verknuepfen — beide Fahrten gehoeren zusammen
         await Fahrt.create(rueckfahrtData, null, req.user.id, [], fahrtId);
       } catch (rueckError) {
-        // Nicht verschweigen: Bisher meldete die Antwort trotzdem „Hin- und
-        // Rueckfahrt erstellt", obwohl nur die Hinfahrt stand. Der Nutzer
-        // hielt die Rueckfahrt fuer erfasst und rechnete sie nie ab.
+        // Nicht verschweigen, wenn nur die Hinfahrt steht.
         console.error('Fehler beim Erstellen der Rueckfahrt:', rueckError);
         rueckfahrtFehlt = true;
       }
     }
 
-    // Die Antwortform bleibt { id, message } — die Apps auf den Geraeten
-    // lesen genau diese beiden Felder. Nur der Text sagt jetzt die Wahrheit.
+    // Die Form { id, message } bleibt, die Apps lesen genau diese Felder.
     let message;
     if (!mitRueckfahrt) {
       message = 'Fahrt aus Favorit erfolgreich erstellt';

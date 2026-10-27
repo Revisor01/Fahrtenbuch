@@ -154,10 +154,7 @@ exports.resendVerification = async (req, res) => {
             return res.status(404).json({ message: 'Benutzer nicht gefunden' });
         }
         
-        // Gehoert die Adresse schon jemand anderem? Ohne diese Pruefung liess
-        // sich die eigene Profil-E-Mail auf eine fremde, bereits vergebene
-        // Adresse umziehen — die andere Person haette ihren Zugang ueber
-        // "Passwort vergessen" verloren (24.08.).
+        // Eine fremde, vergebene Adresse nähme der anderen Person den Passwort-Reset.
         const [belegt] = await db.execute(
             'SELECT user_id FROM user_profiles WHERE email = ? AND user_id != ?',
             [email, userId]
@@ -190,11 +187,7 @@ exports.updateUser = async (req, res) => {
         const { id } = req.params;
         const { username, email, role, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis } = req.body;
         
-        // Die Berechtigung prueft requireAdminOrSelf in der Route; sie weist
-        // auch krumme IDs ab und normalisiert req.params.id. Ein zweiter
-        // Vergleich per parseInt hier war genau die Luecke: parseInt('2e1')
-        // ist 2, die Abfragen unten bekamen aber den Rohwert '2e1', den MySQL
-        // als 20 liest.
+        // Berechtigung und ID-Form prüft requireAdminOrSelf, ein parseInt hier war die Lücke ('2e1').
 
         // Normale User dürfen keine Rollen ändern
         if (req.user.role !== 'admin' && role) {
@@ -205,9 +198,7 @@ exports.updateUser = async (req, res) => {
         try {
             await connection.beginTransaction();
             
-            // User-Basisdaten aktualisieren. role ist im Schema optional - ohne
-            // COALESCE haette ein Update ohne role-Feld die Rolle auf NULL
-            // gesetzt und den Nutzer entrechtet.
+            // COALESCE, sonst setzt ein Update ohne role die Rolle auf NULL.
             await connection.execute(
                 'UPDATE users SET username = ?, role = COALESCE(?, role) WHERE id = ?',
                 [username, role ?? null, id]
@@ -219,15 +210,9 @@ exports.updateUser = async (req, res) => {
                 [id]
             );
             
-           // Bei E-Mail-Änderung Verifikation starten
-           // Hier wird die Email auch in der Profil Tabelle aktualisiert. Das sollte ok sein, da die Email eh aus dem Profil geholt wird.
+           // Bei E-Mail-Änderung Verifikation starten.
            if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
-                // Gehoert die Adresse schon jemand anderem? Dieselbe Pruefung
-                // wie in profileController und resendVerification — hier
-                // fehlte sie als einziger der drei Schreibwege. Ohne sie
-                // liesse sich ein Konto auf eine fremde, vergebene Adresse
-                // umziehen; die andere Person verloere ihren Zugang ueber
-                // „Passwort vergessen".
+                // Eine fremde, vergebene Adresse nähme der anderen Person den Passwort-Reset.
                 const [belegt] = await connection.execute(
                     'SELECT user_id FROM user_profiles WHERE email = ? AND user_id != ?',
                     [email, id]
@@ -287,9 +272,7 @@ exports.deleteUser = async (req, res) => {
 
         const { id } = req.params;
 
-        // Nur reine Ziffern. Sonst umginge ein Admin den Selbstschutz unten:
-        // parseInt('2e1') ist 2, geloescht wuerde aber Nutzer 20, weil MySQL
-        // '2e1' im Vergleich mit einer INT-Spalte als Double liest.
+        // Nur Ziffern, MySQL liest '2e1' als 20.
         if (!/^\d+$/.test(String(id))) {
             return res.status(400).json({ message: 'Ungültige ID' });
         }
@@ -376,9 +359,7 @@ exports.setPassword = async (req, res) => {
             return res.status(400).json({ message: 'Token und neues Passwort sind erforderlich' });
         }
         
-        // Token akzeptieren, egal ob Verification oder Reset - aber jeweils nur,
-        // solange er gueltig ist. Ohne diese Pruefung liess sich ein beliebig
-        // alter Einladungslink zur Kontouebernahme nutzen.
+        // Nur gültige Token, sonst taugt ein alter Einladungslink zur Kontoübernahme.
         const [rows] = await db.execute(
             `SELECT id FROM users
              WHERE (verification_token = ? AND verification_token_expires > NOW())
@@ -396,15 +377,7 @@ exports.setPassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         
-        // Update user: Setze Passwort, lösche Token und markiere Email als verifiziert
-        //
-        // passwort_geaendert_am MUSS mitgesetzt werden: Die Middleware wirft
-        // damit alle Token raus, die vor der Aenderung ausgestellt wurden
-        // (authMiddleware.js:57-62). Ohne den Zeitstempel blieb ein gestohlenes
-        // Token nach "Passwort vergessen" bis zu 14 Tage gueltig — und
-        // verlaengerte sich bei Nutzung immer weiter. User.setPassword und
-        // User.resetPassword im Model machen es richtig; dieser Weg schrieb
-        // eigenes SQL daran vorbei.
+        // passwort_geaendert_am mitsetzen, sonst bleibt ein gestohlenes Token nach dem Reset gültig.
         await db.execute(
             `UPDATE users
             SET password = ?,
@@ -430,19 +403,13 @@ exports.changePassword = async (req, res) => {
         const { id } = req.params;
         const { currentPassword, newPassword } = req.body;
 
-        // Berechtigung und ID-Form prueft requireAdminOrSelf in der Route
-        // (siehe Kommentar in updateUser).
+        // Berechtigung und ID-Form prüft requireAdminOrSelf.
 
         // Admin kann Passwort ohne altes Passwort ändern
         if (req.user.role === 'admin') {
             await User.setPassword(id, newPassword);
         } else {
-            // User muss aktuelles Passwort angeben.
-            // findById liefert den Hash bewusst NICHT (er steckt sonst in
-            // req.user). Hier stand frueher trotzdem findById: bcrypt.compare
-            // bekam undefined, warf "data and hash arguments required" und der
-            // Nutzer sah einen 500er — das Aendern des eigenen Passworts war
-            // ueber diesen Weg gar nicht moeglich (24.08.).
+            // Mit Hash laden, findById liefert ihn bewusst nicht.
             const user = await User.findByIdMitPasswort(id);
             if (!user) {
                 return res.status(404).json({ message: 'Benutzer nicht gefunden' });

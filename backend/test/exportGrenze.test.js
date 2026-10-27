@@ -1,14 +1,4 @@
-// Begrenzung gleichzeitiger PDF-Konvertierungen (23.09.2026).
-//
-// Befund der Pre-Launch-Pruefung: xlsxToPdf startete pro Anfrage einen
-// eigenen LibreOffice-Prozess, ohne Obergrenze. Auf dem Produktionsserver
-// gemessen: 1 Lauf = 4,74 s und 209 MB Spitzenspeicher. Das Rate-Limit
-// erlaubt 60 Exporte je 10 Minuten und begrenzt nur die Anzahl, nicht die
-// Gleichzeitigkeit — 60 parallele Laeufe waeren rund 12,6 GB bei 6,3 GB
-// freiem Speicher. Der OOM-Killer haette mysqld erwischt (groesster Prozess).
-//
-// Geprueft wird die Warteschlange selbst, nicht LibreOffice: Der echte
-// Konvertierungsweg wird gegen die laufende Instanz gemessen, nicht hier.
+// Begrenzung gleichzeitiger PDF-Konvertierungen, weil ein Lauf 209 MB braucht.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -48,8 +38,7 @@ const lies = (pfad) => fs.readFileSync(__dirname + '/../' + pfad, 'utf8');
     assert.ok(vorne > 0 && vorne < mkdtemp, 'sonst haeufen sich temporaere Verzeichnisse an');
   });
 
-  // --- 2. Verhalten der Warteschlange --------------------------------------
-  // Nachbau der Logik aus xlsxToPdf.js, um sie ohne LibreOffice zu pruefen.
+  // --- 2. Warteschlange als Nachbau aus xlsxToPdf.js ---
   console.log('\n2 — Die Warteschlange laesst nur zwei gleichzeitig durch:');
 
   function baueSchlange(max) {

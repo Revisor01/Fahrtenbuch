@@ -1,20 +1,4 @@
-// Punkt 12 der Pre-Launch-Liste: N+1 beim Laden der Mitfahrer.
-//
-// getMonthlyReport und getDateRangeReport holen die Mitfahrer bereits per
-// LEFT JOIN. Der Controller warf alle Zeilen ab der zweiten weg
-// (dedupeByFahrtId) und lud sie danach einzeln nach — bei 30 Fahrten im
-// Monat 30 zusaetzliche Abfragen, beim App-Start ueber alle Monate rund
-// 1.100. Im Zeitraum-Report ueber sechs Monate entsprechend mehr.
-//
-// Der heikle Teil ist die Antwortform: Die Apps auf den Geraeten lesen
-// `mitfahrer` mit den Feldern aus `SELECT * FROM mitfahrer` und lassen sich
-// nicht mitdeployen. Der Nachbau muss exakt dieselbe Form liefern.
-//
-// Zweite Falle: Der Excel-Export ruft Fahrt.getMonthlyReport DIREKT und
-// braucht die rohen JOIN-Zeilen mit mitfahrer_id an der Fahrt. Er darf nicht
-// auf den Controller-Helfer umgestellt werden.
-//
-// Laeuft ohne Test-Framework: `node test/mitfahrerNplus1.test.js`.
+// Mitfahrer aus den JOIN-Zeilen statt Einzelabfragen, in der Form von SELECT * FROM mitfahrer; der Excel-Export bleibt bei den Rohzeilen. Aufruf: node test/mitfahrerNplus1.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -61,8 +45,7 @@ pruefe('die Mitfahrer haengen an der richtigen Fahrt', () => {
 });
 
 pruefe('eine Fahrt ohne Mitfahrer bekommt eine leere Liste, keine NULL-Person', () => {
-  // Der LEFT JOIN liefert dort NULL-Spalten — die duerfen nicht als
-  // Mitfahrer „ohne Namen" in der Abrechnung landen.
+  // NULL-Spalten des LEFT JOIN sind keine Mitfahrer.
   assert.deepStrictEqual(ergebnis[1].mitfahrer, []);
 });
 

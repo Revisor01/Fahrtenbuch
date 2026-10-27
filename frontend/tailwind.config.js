@@ -4,11 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  // Klassennamen, die erst zur Laufzeit zusammengesetzt werden — der Scanner
-  // sieht im Quelltext nur `status-progress-${state}` und warf die Regeln
-  // heraus. Die Fortschrittsleiste zeigte dadurch nur ihre Beschriftung,
-  // Kreise und Verbindungslinien fehlten (gefunden 16.08., als sie dauerhaft
-  // sichtbar wurde — vorher lag sie hinter dem Aufklappen).
+  // Zur Laufzeit zusammengesetzte Klassen, die der Scanner sonst verwirft.
   safelist: [
     'status-progress-done',
     'status-progress-current',
@@ -61,9 +57,7 @@ export default {
           '2': 'var(--text-2)',
           '3': 'var(--text-3)',
         },
-        /* ÜBERGANGS-ALIAS — entfernen nach Screen-Phasen
-           (alte primary-/secondary-Skalen, gemappt auf die neuen
-           Tokens via Alias-Variablen in src/tokens.css) */
+        /* Übergangs-Alias der alten primary-/secondary-Skalen */
         primary: {
           25: 'var(--primary-25)',
           50: 'var(--primary-50)',

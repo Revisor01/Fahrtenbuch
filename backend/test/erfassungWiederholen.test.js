@@ -1,16 +1,4 @@
-// Punkt 1 der Pre-Launch-Liste: Der Erfassungsflow verwarf bei einem
-// fehlgeschlagenen POST alle Eingaben — es blieb ein Toast, der nach 8 s
-// verschwand, und die Fahrt war weg. Haeufigster realer Fall: Funkloch.
-//
-// Geprueft wird hier zweierlei:
-//  1. Die Struktur im Frontend (der Sendelauf ist wiederholbar, der Toast
-//     bleibt stehen) — per Quelltext, weil es kein Frontend-Testframework
-//     gibt und die Datei React-JSX enthaelt.
-//  2. Die eigentliche Logik — als nachgebauter Sendelauf mit Fake-axios.
-//     Das faengt die Fehler, die eine Textsuche nicht sieht: doppeltes
-//     Anlegen beim Neuversuch und falsche Partner-Verknuepfung.
-//
-// Laeuft ohne Test-Framework: `node test/erfassungWiederholen.test.js`.
+// Ein fehlgeschlagenes Speichern lässt sich wiederholen, ohne doppelt anzulegen. Aufruf: node test/erfassungWiederholen.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -107,10 +95,7 @@ pruefe('bleibt landet im Toast-Objekt', () => {
     'ohne das Feld kann das Rendering es nicht auswerten');
 });
 
-// --- Logik: Sendelauf nachgebaut ------------------------------------------
-// Nachbau der Ablaufsteuerung aus handleSpeichern. Wenn sich die echte Logik
-// aendert, muss dieser Nachbau mitgezogen werden — die Strukturtests oben
-// halten die Verbindung.
+// --- Sendelauf als Nachbau von handleSpeichern, die Strukturtests oben halten ihn aktuell ---
 console.log('\nLogik — Sendelauf mit Fake-axios:');
 
 function baueSendelauf({ postVerhalten, deleteVerhalten }) {
@@ -230,9 +215,7 @@ async function logikTests() {
     console.log('  ok  Neuversuch legt genau zwei Fahrten an, keine Duplikate');
   }
 
-  // Fall C: Das Aufraeumen scheitert selbst (Timeout). Die Waise darf NICHT
-  // als Partner-ID des naechsten Laufs dienen, und sie muss weggeraeumt
-  // werden, sobald es wieder geht.
+  // Scheitert das Aufräumen, darf die Waise nicht Partner des nächsten Laufs werden.
   {
     let loeschenGehtWieder = false;
     let versuch = 0;

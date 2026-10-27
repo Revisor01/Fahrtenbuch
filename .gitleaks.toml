@@ -1,6 +1,4 @@
-# Secret-Scan fuer dieses Repo. Ergaenzt die Standardregeln von gitleaks um
-# Zugangsdaten hinter Labels und um lokale Pfade. Weitere Muster kommen in CI
-# aus dem Repo-Secret GITLEAKS_EXTRA_RULES und stehen hier bewusst nicht.
+# Secret-Scan; weitere Muster kommen in CI aus dem Repo-Secret GITLEAKS_EXTRA_RULES.
 
 title = "secret-scan"
 
@@ -66,8 +64,7 @@ regexes = [
   '''(?i)^(?:passwor[td]|kennwort|password\d?|secret|token|apikey|api_key)[,;)\]]*$''',
 ]
 
-# Nur für Regeln, die Werte hinter einem Label melden: Ohne targetRules gälte
-# die Ausnahme auch für Hostnamen (server.example.de sieht aus wie a.b.c).
+# targetRules, sonst gälte die Ausnahme auch für Hostnamen.
 [[allowlists]]
 description = "Code-Bezeichner hinter einem Label"
 targetRules = ["label-passwort", "label-passwort-text", "label-api-key", "label-api-key-text", "generic-api-key"]
@@ -89,9 +86,7 @@ paths = ['''^backend/initDb\.js$''']
 regexTarget = "secret"
 regexes = ['''^[A-Z]+(?:_[A-Z]+)+$''']
 
-# Öffentliche Adressen: die App selbst, die Besucherzählung in der CSP und der
-# ntfy-Server, an den die Sicherung meldet.
-# Ohne targetRules: die Regel dafuer kommt erst in CI dazu.
+# Öffentliche Adressen (App, Besucherzählung, ntfy); ohne targetRules, die Regel kommt erst in CI dazu.
 [[allowlists]]
 description = "Produkt-Domain"
 regexTarget = "match"

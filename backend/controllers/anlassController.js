@@ -28,9 +28,7 @@ exports.createAnlass = async (req, res) => {
     const { name, sortOrder } = req.body;
     const { anlass, neu } = await Anlass.create(req.user.id, name, sortOrder);
 
-    // Existiert der Anlass schon, gilt das nicht als Fehler: das Modal legt
-    // Anlaesse nebenbei an, dort ist ein Duplikat der Normalfall. 200 statt
-    // 201 macht fuer das Frontend trotzdem unterscheidbar, was passiert ist.
+    // Duplikat ist im Modal der Normalfall; 200 statt 201 macht es unterscheidbar.
     res.status(neu ? 201 : 200).json(anlass);
   } catch (error) {
     console.error('Fehler beim Erstellen des Anlasses:', error);
@@ -48,8 +46,7 @@ exports.updateAnlass = async (req, res) => {
       return res.status(404).json({ message: 'Anlass nicht gefunden' });
     }
 
-    // Umbenennen auf einen bereits belegten Namen wuerde am UNIQUE-Schluessel
-    // scheitern - vorher abfangen und als Klartext beantworten.
+    // Belegten Namen vor dem UNIQUE-Schlüssel abfangen.
     if (req.body.name !== undefined) {
       const namensZwilling = await Anlass.findByName(userId, req.body.name);
       if (namensZwilling && String(namensZwilling.id) !== String(id)) {
@@ -66,10 +63,7 @@ exports.updateAnlass = async (req, res) => {
   }
 };
 
-/**
- * Bulk-Umsortierung. Ersetzt die bisherigen Einzel-PUTs je verschobenem
- * Anlass - das Frontend schickt jetzt die komplette neue Reihenfolge.
- */
+/** Bulk-Umsortierung mit der kompletten neuen Reihenfolge. */
 exports.updateSortOrder = async (req, res) => {
   try {
     const { sortOrder } = req.body;
@@ -83,8 +77,7 @@ exports.updateSortOrder = async (req, res) => {
 
 exports.deleteAnlass = async (req, res) => {
   try {
-    // Bewusst ohne Verwendungspruefung: bestehende Fahrten behalten ihren
-    // Anlass-Text, es haengt kein Fremdschluessel daran.
+    // Ohne Verwendungsprüfung, Fahrten behalten ihren Anlass-Text.
     const deleted = await Anlass.delete(req.params.id, req.user.id);
     if (!deleted) {
       return res.status(404).json({ message: 'Anlass nicht gefunden' });

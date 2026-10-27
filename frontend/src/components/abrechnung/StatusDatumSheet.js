@@ -3,13 +3,7 @@ import { heuteISO } from '../../utils/datum';
 import Sheet from '../ui/Sheet';
 import { statusLabel } from '../../utils/statusLabels';
 
-// Nachfolger des AbrechnungsStatusModal (Phase R6): kompaktes Sheet für
-// Statusaktionen mit Datumswahl — heute vor allem „Datum ändern" aus den
-// Trägerzeilen der Abrechnung sowie die Statusklicks der Fahrtenliste
-// (StatusUebersicht). Genau ein Mount, global im AppContext; jede Aktion
-// läuft singleMonth-korrekt über den dort übergebenen onSubmit.
-// abrechnungstraeger kommt als Prop (kein Context-Import — vermeidet den
-// Import-Zyklus AppContext ↔ Dialog des Vorgängers).
+// Sheet für Statusaktionen mit Datumswahl, ein Mount im AppContext; Träger als Prop gegen einen Import-Zyklus.
 function StatusDatumSheet({
   isOpen,
   onClose,

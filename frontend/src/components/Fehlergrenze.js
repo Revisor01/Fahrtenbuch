@@ -1,11 +1,6 @@
 import React from 'react';
 
-// Faengt Fehler beim Rendern ab und zeigt sie an, statt einen leeren oder
-// eingefrorenen Bildschirm zu hinterlassen.
-//
-// In der App ist das mehr als Komfort: Ohne Entwicklerkonsole ist ein Fehler
-// dort sonst unsichtbar — die App steht einfach, und niemand kann sagen,
-// woran es lag.
+// Zeigt Render-Fehler an, statt einen leeren Bildschirm zu hinterlassen; in der App gibt es keine Konsole.
 class Fehlergrenze extends React.Component {
   constructor(props) {
     super(props);

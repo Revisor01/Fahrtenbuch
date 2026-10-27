@@ -1,18 +1,4 @@
-// Anmeldung ist an den Kirchenkreis gebunden (24.09.2026).
-//
-// Befund der Pre-Launch-Pruefung: Das Token lag im Systemspeicher, die
-// Server-Adresse daneben in localStorage — nichts verband beides. Nach einem
-// Wechsel schickte die App das Token von Kirchenkreis A an Server B, als
-// Bearer-Token, zusammen mit rund 30 weiteren Abrufen. B antwortet 401, hat
-// es dann aber in seinen Protokollen: ein bei A bis zu 14 Tage gueltiges
-// Token beim Betreiber eines fremden Kirchenkreises.
-//
-// Dazu: logout() leerte die geladenen Daten nicht. Nach dem Wechsel zeigten
-// Dashboard, Fahrtenliste und Erfassung die Orte, Fahrten und Traeger von A,
-// bis B geantwortet hatte — und dauerhaft, wenn B's Abruf scheiterte.
-//
-// Das Frontend hat kein Testframework; geprueft wird daher die Logik am
-// Quelltext und der Vergleich selbst nachgebaut.
+// Anmeldung ist an den Kirchenkreis gebunden, logout leert die geladenen Daten.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -26,9 +12,7 @@ function pruefe(beschreibung, fn) {
 const liesFrontend = (pfad) =>
   fs.readFileSync(__dirname + '/../../frontend/' + pfad, 'utf8');
 
-// Rumpf einer Funktion aus dem Quelltext schneiden — bis zum Beginn der
-// naechsten Deklaration auf derselben Ebene. Eine feste Zeichenzahl haette
-// bei laengeren Funktionen (fetchMonthlyData: 3286 Zeichen) danebengelegen.
+// Funktionsrumpf bis zur nächsten Deklaration derselben Ebene.
 function rumpfVon(quelle, name) {
   const nach = quelle.split(`const ${name} = async`)[1];
   if (!nach) return '';
@@ -48,8 +32,7 @@ pruefe('VERBOTEN: Token von A gilt nicht bei B', () => {
 });
 
 pruefe('VERBOTEN: leere Zuordnung passt nicht zu einer Instanz', () => {
-  // Nach der einmaligen Nachruestung traegt jede Anmeldung eine Zuordnung.
-  // Steht dort etwas anderes als die aktuelle Instanz, ist sie fremd.
+  // Eine fremde Zuordnung heißt fremde Anmeldung.
   assert.strictEqual(gleich('', 'https://b.example.org'), false);
 });
 
@@ -155,9 +138,7 @@ pruefe('eine Anmeldung ohne Zuordnung wird einmalig nachgeruestet', () => {
 // --- 5. Spaete Antworten von A ueberschreiben B nicht --------------------
 console.log('\n5 — Antworten aus einer beendeten Sitzung werden verworfen:');
 
-// Bisher prueften das nur die Nutzerdaten. Die uebrigen Abrufe schrieben
-// blind — und behielten dabei Basis-URL und Header von A, weil axios die
-// Vorgaben beim Aufruf mischt, nicht beim Versand.
+// axios mischt Vorgaben beim Aufruf, nicht beim Versand.
 
 pruefe('es gibt einen gemeinsamen Waechter', () => {
   const q = liesFrontend('src/contexts/AppContext.js');
@@ -197,9 +178,7 @@ pruefe('auch die Fehlerzweige schreiben nichts mehr zurueck', () => {
 });
 
 pruefe('Listen werden nur als Array uebernommen', () => {
-  // Liefert der Server etwas anderes, warf .map/.filter spaeter einen
-  // TypeError — derselbe Fehler, der in einem anderen Projekt die Apps
-  // nach dem Login abstuerzen liess.
+  // Sonst wirft später .map/.filter einen TypeError.
   const q = liesFrontend('src/contexts/AppContext.js');
   for (const fn of ['fetchOrte', 'fetchDistanzen', 'fetchFavoriten']) {
     const block = rumpfVon(q, fn);

@@ -9,9 +9,7 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- Material3 statt AppCompat: NavigationBarView (MaterialNav-Plugin)
-         loest sonst beim Aufbauen eine IllegalArgumentException aus, weil ihm
-         die Material-Attribute des Themes fehlen. -->
+    <!-- Material3, sonst wirft NavigationBarView eine IllegalArgumentException. -->
     <style name="AppTheme.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

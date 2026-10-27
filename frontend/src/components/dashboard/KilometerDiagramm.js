@@ -1,21 +1,9 @@
 import React, { useState } from 'react';
 import StatusBadge from '../ui/StatusBadge';
 
-// Kilometer-Balken ueber die Monate — eine Komponente fuer beide Ansichten.
-//
-// Mobil und Desktop hatten das Diagramm bis 16.08. je einmal nachgebaut, samt
-// eigener Legende und eigener Farbliste. Jede Aenderung musste an zwei Stellen
-// passieren, und genau daran liefen sie auseinander (Simon 16.08.).
-//
-// Bedienung: Am Rechner reicht Hover, auf dem Handy gibt es das nicht — dort
-// oeffnet ein Tipp die Werte, ein zweiter schliesst sie wieder. Der Zustand
-// liegt hier, damit immer nur ein Monat offen ist.
+// Kilometer-Balken für Mobil und Desktop; am Handy öffnet ein Tipp die Werte.
 
-// Dieselben Farben, die das Statussystem ueberall sonst traegt (StatusBadge,
-// Abrechnung): Sand fuer „Eingereicht", Gruen fuer „Erstattet", neutral fuer
-// „Erfasst". Der Balken stand fuer „Erfasst" bis 16.08. in Petrol — der
-// Markenfarbe — und behauptete damit eine andere Ordnung als die Abrechnung
-// zwei Tabs weiter.
+// Farben wie im Statussystem.
 export const CHART_FARBEN = {
   erhalten: 'var(--ok)',
   eingereicht: 'var(--accent)',

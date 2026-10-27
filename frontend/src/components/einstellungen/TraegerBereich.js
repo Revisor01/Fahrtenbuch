@@ -9,9 +9,7 @@ import AktionsSheet from '../ui/AktionsSheet';
 import BereichKopf from './BereichKopf';
 import useSortierbareListe from './useSortierbareListe';
 
-// Formular im Sheet: Name + Kostenstelle (kleines Formular = Sheet).
-// Die alte Farbwahl entfällt — die Träger-Farbe wird seit dem Redesign
-// nirgends mehr angezeigt (Akzent-Regel), das Feld bleibt in der DB.
+// Formular im Sheet; die Trägerfarbe wird nirgends mehr angezeigt, das Feld bleibt in der DB.
 function TraegerSheet({ offen, traeger, onClose, onSave }) {
   const [name, setName] = useState(traeger?.name || '');
   const [kostenstelle, setKostenstelle] = useState(traeger?.kostenstelle || '');
@@ -118,9 +116,7 @@ function TraegerBereich() {
     }
   };
 
-  // Reihenfolge: Ziehen am Griff (User-Feedback 07.08. — die Pfeil-Buttons
-  // entfallen); Tastatur: Pfeil hoch/runter auf dem Griff. Beides kommt aus
-  // dem gemeinsamen Hook, damit sich alle Listen gleich anfuehlen.
+  // Ziehen am Griff und Tastatur aus dem gemeinsamen Hook.
   const handleReorder = async (von, nach) => {
     if (von === null || nach === null || von === nach) return;
     const neu = [...traegerListe];
@@ -154,8 +150,7 @@ function TraegerBereich() {
     }
   };
 
-  // Löschen ohne Rückfrage (Design-Spec) — kein Undo möglich, da am
-  // Träger Erstattungssätze und Historie hängen
+  // Ohne Rückfrage und ohne Undo.
   const handleDelete = async (traeger) => {
     try {
       await axios.delete(`/api/abrechnungstraeger/${traeger.id}`);

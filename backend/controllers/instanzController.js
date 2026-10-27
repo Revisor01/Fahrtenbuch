@@ -1,18 +1,8 @@
 const { instanzenSchema } = require('../schemas/instanzSchemas');
 
-// Oeffentliches Instanz-Verzeichnis fuer die mobilen Apps.
-//
-// Die App kennt beim ersten Start noch keinen Server: Nutzende waehlen zuerst
-// ihren Kirchenkreis und melden sich dann gegen dessen Instanz an. Damit dafuer
-// keine neue Version noetig ist, sobald ein Kirchenkreis dazukommt, kommt die
-// Liste aus der Umgebung statt aus dem App-Bundle.
-//
-// Bewusst KEINE Datenbank: Das Verzeichnis ist ohne Anmeldung erreichbar und
-// darf deshalb nichts enthalten, was mit Personendaten zu tun hat.
+// Öffentliches Instanz-Verzeichnis für die Apps, aus der Umgebung und bewusst ohne Datenbank.
 
-// Fallback, solange INSTANZEN nicht gesetzt ist. Ohne ihn liefe die App bei
-// jeder bestehenden Installation ins Leere, denn Dithmarschen laeuft heute
-// ohne diese Variable.
+// Rückfall ohne INSTANZEN, weil bestehende Installationen die Variable nicht setzen.
 const STANDARD_INSTANZEN = [
   {
     id: 'dithmarschen',
@@ -21,9 +11,7 @@ const STANDARD_INSTANZEN = [
   },
 ];
 
-// Einmal beim Start aufloesen statt bei jedem Request: die Konfiguration
-// aendert sich nur beim Neustart des Containers, und eine kaputte Variable
-// soll in den Logs auftauchen und nicht erst beim ersten Aufruf.
+// Einmal beim Start, damit eine kaputte Variable gleich im Log steht.
 let instanzenCache = null;
 
 function ladeInstanzen() {
@@ -75,13 +63,10 @@ function getInstanzen() {
 
 exports.getAllInstanzen = async (req, res) => {
   try {
-    // Explizit nur die drei oeffentlichen Felder herausgeben — auch wenn das
-    // Schema bereits strict ist. Doppelte Absicherung, weil diese Antwort
-    // ohne Anmeldung aus dem ganzen Internet abrufbar ist.
+    // Nur die drei öffentlichen Felder, auch wenn das Schema strict ist.
     const instanzen = getInstanzen().map(({ id, name, apiUrl }) => ({ id, name, apiUrl }));
 
-    // Die Liste aendert sich selten; ein kurzer Cache entlastet den Endpunkt
-    // gegen wiederholte Abrufe. `public`, weil nichts Nutzerbezogenes drinsteht.
+    // Kurzer öffentlicher Cache, nichts Nutzerbezogenes.
     res.set('Cache-Control', 'public, max-age=300');
     res.json({ instanzen });
   } catch (error) {

@@ -1,6 +1,4 @@
 const db = require('../config/database');
-// heuteISO wurde unten benutzt, aber nie importiert — der Zweig haette einen
-// ReferenceError geworfen, sobald ein Betrag mitgegeben wird (24.08.).
 const { heuteISO } = require('../utils/datum');
 
 class AbrechnungsTraeger {
@@ -105,8 +103,7 @@ class AbrechnungsTraeger {
             if (updateData.betrag !== undefined) {
                 await connection.execute(
                     'INSERT INTO erstattungsbetraege (abrechnungstraeger_id, betrag, gueltig_ab) VALUES (?, ?, ?)',
-                    // Lokales Datum statt toISOString(): letzteres rechnet nach UTC
-                    // und setzte einen neuen Satz nachts faelschlich auf den Vortag.
+                    // Lokales Datum, toISOString() setzte nachts den Vortag.
                     [id, updateData.betrag, updateData.gueltig_ab || heuteISO()]
                 );
             }
@@ -144,9 +141,7 @@ class AbrechnungsTraeger {
     }
 
     static async checkForFahrten(id, userId) {
-        // abrechnung ist VARCHAR, die id kommt als Zahl oder String - beide
-        // Seiten als CHAR vergleichen, sonst castet MySQL implizit und der
-        // Index bleibt ungenutzt.
+        // Beide Seiten als CHAR, sonst castet MySQL und der Index bleibt ungenutzt.
         const [rows] = await db.execute(
             'SELECT COUNT(*) as count FROM fahrten WHERE abrechnung = CAST(? AS CHAR) AND user_id = ?',
             [id, userId]

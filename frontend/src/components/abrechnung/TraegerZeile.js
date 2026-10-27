@@ -3,14 +3,7 @@ import StatusBadge from '../ui/StatusBadge';
 import { formatBetrag, rundeKilometer } from '../fahrten/zeitraumUtils';
 import { formatDatumKurz } from './abrechnungUtils';
 
-// Eine Trägerzeile einer Monatsabrechnung (Spec „Abrechnung mobil"):
-// Statuspunkt + Wort (StatusBadge dot), Name 16px, Untertitel 13px
-// „{Status} [am {Datum}] · {km} km", Betrag Mono 14px rechts.
-// Aktionen je nach Status als Textlinks (direkt + Undo-Toast, kein Modal):
-//   Erfasst     → „Einreichen" (Export + Status)
-//   Eingereicht → „Als erstattet markieren" · „Datum ändern"
-//   Erstattet   → „Zurücksetzen" · „Datum ändern"
-// Wird auch in der aufgeklappten Detail-Zeile der Desktop-Matrix genutzt.
+// Trägerzeile einer Monatsabrechnung mit Aktionen je Status als Textlinks und Undo-Toast.
 function TraegerZeile({ month, kategorie, aktionen }) {
   const { name, betrag, km, status, statusData } = kategorie;
   const datum = status === 'erhalten'

@@ -1,23 +1,4 @@
-// Punkt 10 der Pre-Launch-Liste: manualChunks machte die Lazy-Imports
-// wirkungslos.
-//
-// `if (!id.includes('node_modules')) return; … return 'vendor'` warf JEDES
-// Paket aus node_modules in den `vendor`-Brocken — auch die zehn, die der
-// Code ausdruecklich dynamisch laedt. Rollup legt ein Modul dorthin, wo
-// manualChunks es hinschickt; der Brocken haengt dann am Start. Der
-// Web-Nutzer lud so jszip, pako und saemtliche Capacitor-Plugins mit,
-// obwohl er sie nie anfordert.
-//
-// Gemessen (24.09.2026, `npm run build`, Startlast = die in index.html
-// referenzierten Skripte):
-//   vorher  672.526 B roh / 203.187 B gzip
-//   nachher 542.929 B roh / 163.707 B gzip
-//   also 39.480 B gzip weniger, rund 19 %.
-//
-// Geprueft wird hier die Regel in vite.config.js und, falls ein Build
-// vorliegt, dessen Ergebnis.
-//
-// Laeuft ohne Test-Framework: `node test/bundleAufteilung.test.js`.
+// manualChunks darf dynamisch geladene Pakete nicht in den Start-Brocken ziehen. Aufruf: node test/bundleAufteilung.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -48,8 +29,7 @@ pruefe('die Ausnahme steht VOR dem vendor-Auffang', () => {
 });
 
 pruefe('die Ausnahme gibt null zurueck', () => {
-  // Ein Name — auch ein eigener — haenge den Brocken wieder an den Start.
-  // Nur mit null entscheidet Rolldown (Vite 8, codeSplitting.groups) selbst.
+  // Nur null lässt Rolldown selbst entscheiden, ein Name hängt den Brocken an den Start.
   const chunks = config.split('name(id)')[1].split('} }]')[0];
   const zeile = chunks.split('\n').find((z) => z.includes('jszip|pako'));
   assert.ok(/\) return null;\s*$/.test(zeile.trim()),
@@ -90,14 +70,7 @@ if (!fs.existsSync(indexPfad)) {
   });
 
   pruefe('von den Capacitor-Plugins steht nur noch der Ladeaufruf im Start', () => {
-    // Nicht auf das blosse Vorkommen des Namens pruefen: Der dynamische
-    // Import laesst zwangslaeufig ein `.then(t => t.SecureStorage)` im
-    // Startbundle zurueck — das ist der Zweck der Sache. Entscheidend ist,
-    // dass die Umsetzung in einer NACHGELADENEN Datei liegt.
-    // Gemessen nach der Aenderung: SecureStorage 1, NativeNavigation 3 —
-    // letzteres steht dreimal in derselben Destrukturierungs-Zeile des
-    // dynamischen Imports (`const {NativeNavigation: s} = await …`), nicht
-    // als Plugin-Code. Vorher waren es 7 bzw. 5 samt Umsetzung.
+    // Entscheidend ist, dass die Umsetzung in einer nachgeladenen Datei liegt; Restverweise im Startbundle sind gewollt.
     for (const [nadel, grenze] of [['SecureStorage', 2], ['NativeNavigation', 3]]) {
       const treffer = (startInhalt.match(new RegExp(nadel, 'g')) || []).length;
       assert.ok(treffer <= grenze,
@@ -126,10 +99,7 @@ if (!fs.existsSync(indexPfad)) {
   });
 
   pruefe('die Startlast ohne React bleibt unter 450 kB roh', () => {
-    // React selbst bleibt aussen vor: Mit React 19 wuchs der react-Brocken
-    // von 138.769 auf 210.909 B, ohne dass sich an der Aufteilung etwas
-    // aenderte (27.10.2026). Ohne ihn: vorher 408.258 B, mit React 19 und
-    // Vite 8 415.362 B; der alte Rueckfall laege bei rund 533.000 B.
+    // React bleibt außen vor, es wuchs mit React 19 ohne Änderung der Aufteilung.
     const summe = startDateien
       .filter((d) => !/assets\/react-/.test(d))
       .reduce((s, d) => s + fs.statSync(frontend + 'build/' + d).size, 0);

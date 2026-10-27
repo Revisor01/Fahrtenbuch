@@ -17,18 +17,7 @@ exports.exportToExcelRange = exportToExcelRange;
 exports.exportToPdf = exportToPdf;
 exports.exportToPdfRange = exportToPdfRange;
 
-// Der mitfahrer-JOIN in getMonthlyReport/getDateRangeReport liefert pro
-// Mitfahrer eine Zeile. Hier wird daraus je Fahrt ein Eintrag mit fertiger
-// Mitfahrer-Liste.
-//
-// getMonthlyReport holt die Mitfahrer bereits per JOIN; dedupeByFahrtId warf
-// alle Zeilen ab der zweiten weg, und danach lud eine Schleife sie einzeln
-// nach — bei 30 Fahrten im Monat 30 zusaetzliche Abfragen, beim App-Start
-// ueber alle Monate rund 1.100.
-//
-// Die Form bleibt exakt die von Mitfahrer.findByFahrtId (SELECT * FROM
-// mitfahrer): id, fahrt_id, name, arbeitsstaette, richtung. Die App auf den
-// Geraeten liest genau diese Felder und laesst sich nicht mitdeployen.
+// Fasst die JOIN-Zeilen je Fahrt mit Mitfahrer-Liste zusammen; die Form gleicht Mitfahrer.findByFahrtId, weil die Apps sie lesen.
 function fahrtenMitMitfahrern(rows) {
   const fahrten = [];
   const nachId = new Map();
@@ -115,9 +104,7 @@ exports.createFahrt = async (req, res) => {
       userId
     };
     
-    // Mitfahrer und die Paar-Verknuepfung laufen in derselben Transaktion wie
-    // die Fahrt. verknuepfePaar prueft selbst, ob die Partnerfahrt dem Nutzer
-    // gehoert — eine fremde ID bleibt wirkungslos.
+    // In derselben Transaktion; verknuepfePaar prüft die Partnerfahrt selbst.
     const id = await Fahrt.create(
       fahrtData,
       null,
@@ -167,10 +154,7 @@ exports.updateFahrt = async (req, res) => {
       }
     }
 
-    // Ohne Kilometerangabe die hinterlegte Distanz nehmen — wie beim Anlegen.
-    // Vorher blieb das Feld hier einfach leer: Wer eine Fahrt zwischen zwei
-    // gespeicherten Orten ohne Kilometer speicherte, hatte danach 0 km stehen,
-    // statt der hinterlegten Strecke (Simon 23.08.).
+    // Ohne Kilometer die hinterlegte Distanz, wie beim Anlegen.
     let updateKilometer = kilometer;
     if (!updateKilometer && vonOrtId && nachOrtId) {
       updateKilometer = await getDistance(vonOrtId, nachOrtId, userId);
@@ -191,9 +175,7 @@ exports.updateFahrt = async (req, res) => {
     const updated = await Fahrt.update(id, updateData, userId);
 
     if (updated) {
-      // Auch ein leeres Array verarbeiten: sonst liess sich der letzte
-      // Mitfahrer nie entfernen - die Oberflaeche meldete Erfolg, nach dem
-      // Neuladen war er wieder da (und wurde weiter erstattet).
+      // Auch ein leeres Array, sonst ließe sich der letzte Mitfahrer nie entfernen.
       if (Array.isArray(mitfahrer)) {
         await Mitfahrer.updateMitfahrerForFahrt(id, mitfahrer);
       }
@@ -261,8 +243,7 @@ exports.getMonthlyReport = async (req, res) => {
       Abrechnung.getStatus(userId, year, month)
     ]);
 
-    // Eine Zeile je Fahrt, Mitfahrer aus denselben Zeilen — statt sie
-    // wegzuwerfen und einzeln nachzuladen.
+    // Mitfahrer aus denselben Zeilen statt Einzelabfragen.
     const fahrten = fahrtenMitMitfahrern(fahrtenRaw);
     
     const saetzeProTraeger = await ladeErstattungssaetze(userId);
@@ -326,9 +307,7 @@ exports.getReportRange = async (req, res) => {
     const endMonth = parseInt(req.params.endMonth);
     const userId = req.user.id;
 
-    // Fahrten ueber den gesamten Zeitraum, Mitfahrer aus denselben Zeilen.
-    // Hier wog das Nachladen besonders schwer: ueber sechs Monate waren es
-    // sechsmal so viele Einzelabfragen wie im Monatsbericht.
+    // Mitfahrer aus denselben Zeilen statt Einzelabfragen.
     const fahrten = fahrtenMitMitfahrern(
       await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId)
     );
@@ -358,8 +337,7 @@ exports.getReportRange = async (req, res) => {
 
     // Erstelle die Zusammenfassung
     const erstattungen = {};
-    // Beträge je Träger UND Monat — die Zeitraum-Übersicht braucht sie, um
-    // Monate ohne Vorgang von wirklich offenen zu unterscheiden
+    // Je Träger und Monat, um Monate ohne Vorgang von offenen zu unterscheiden.
     const erstattungenProMonat = {};
     const merkeMonat = (key, ym, betrag) => {
       if (!erstattungenProMonat[key]) erstattungenProMonat[key] = {};
@@ -367,8 +345,7 @@ exports.getReportRange = async (req, res) => {
     };
 
     const report = fahrten.map((fahrt) => {
-      // fahrt.datum ist ein Date-Objekt (mysql2) — String(...) ergäbe
-      // „Wed Jan 01 ...“; lokal formatieren, damit „YYYY-MM“ herauskommt
+      // Date-Objekt aus mysql2, lokal zu „YYYY-MM“ formatieren.
       const fahrtDatum = new Date(fahrt.datum);
       const fahrtYM = `${fahrtDatum.getFullYear()}-${String(fahrtDatum.getMonth() + 1).padStart(2, '0')}`;
       const erstattungssatz = findeSatz(saetzeProTraeger, fahrt.abrechnung, fahrt.datum);
@@ -426,10 +403,7 @@ exports.getMonthlySummary = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Je Fahrt eine Zeile — die Erstattung entsteht immer auf Fahrt-Ebene.
-    // Vorher aggregierte die Abfrage schon in SQL auf Monat/Traeger und
-    // multiplizierte dann die Mitfahrer-Anzahl des Monats mit dessen
-    // Kilometersumme: bis zum 40-fachen des richtigen Betrags.
+    // Je Fahrt, weil die Erstattung auf Fahrt-Ebene entsteht.
     const [fahrten] = await db.execute(`
       SELECT
         DATE_FORMAT(f.datum, '%Y-%m') as yearMonth,
@@ -450,8 +424,7 @@ exports.getMonthlySummary = async (req, res) => {
 
     const saetzeProTraeger = await ladeErstattungssaetze(userId);
 
-    // Gruppiere nach Monaten
-    // Status aller Monate in einer Abfrage statt einer je Monat.
+    // Status aller Monate in einer Abfrage.
     const statusNachMonat = await Abrechnung.getStatusNachMonat(userId);
 
     const summary = fahrten.reduce((acc, fahrt) => {
@@ -459,10 +432,7 @@ exports.getMonthlySummary = async (req, res) => {
         acc[fahrt.yearMonth] = {
           yearMonth: fahrt.yearMonth,
           erstattungen: {},
-          // Zusaetzlich zu `erstattungen`, damit die Monatsuebersicht im
-          // Frontend nicht mehr 28 Einzelberichte abrufen muss. Die
-          // bisherigen Felder bleiben unveraendert — ein Client, der nur
-          // `yearMonth` und `erstattungen` liest, merkt nichts davon.
+          // Zusätzlich, damit die Monatsübersicht keine Einzelberichte abruft; die alten Felder bleiben.
           abrechnungsStatus: statusNachMonat[fahrt.yearMonth] || {},
           kmProTraeger: {},
           fahrtenCount: 0,
@@ -513,14 +483,7 @@ exports.getMonthlySummary = async (req, res) => {
   }
 };
 
-// Die drei Einzel-Endpunkte schreiben NICHT mehr direkt in die Tabelle,
-// sondern bauen aus dem aktuellen Stand plus ihrer einen Aenderung die
-// vollstaendige Liste und geben sie an updateMitfahrerForFahrt. Nur dieser Weg
-// haelt die Gegenfahrt eines Paares mit (Transaktion inklusive). Direkt
-// geschrieben entstanden einseitige Zustaende: Ein 'hin_rueck' -> 'hin' an der
-// Hinfahrt liess die Spiegelkopie an der Rueckfahrt stehen, die Person wurde
-// fuer beide Strecken erstattet (UEBERZAHLUNG). Das Frontend nutzt diese
-// Endpunkte nicht, API-Key-Clients schon.
+// Die Einzel-Endpunkte gehen über updateMitfahrerForFahrt, weil nur dieser Weg die Gegenfahrt eines Paares mitführt.
 exports.addMitfahrer = async (req, res) => {
   try {
     const { fahrtId } = req.params;
@@ -534,8 +497,7 @@ exports.addMitfahrer = async (req, res) => {
       ...vorhandene,
       { name, arbeitsstaette, richtung },
     ]);
-    // Die id entsteht erst im INSERT: den neuen Eintrag danach heraussuchen,
-    // damit die Antwort wie bisher eine id mitgibt.
+    // Die id entsteht erst im INSERT.
     const danach = await Mitfahrer.findByFahrtId(fahrtId);
     const bekannt = new Set(vorhandene.map(m => String(m.id)));
     const neuer = danach.find(m => !bekannt.has(String(m.id)));
@@ -598,8 +560,7 @@ exports.getYearSummary = async (req, res) => {
     const { year } = req.params;
     const userId = req.user.id;
     
-    // Hole alle Fahrten des Jahres — COUNT(DISTINCT m.id), damit ein zweiter
-    // JOIN-Treffer die Mitfahrer nicht doppelt zaehlt
+    // COUNT(DISTINCT m.id), sonst zählt ein zweiter JOIN-Treffer doppelt.
     const [fahrten] = await db.execute(`
       SELECT
         f.datum,

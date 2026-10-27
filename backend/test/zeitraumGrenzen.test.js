@@ -1,17 +1,4 @@
-// Punkt 2 der Pre-Launch-Liste: Die Zeitraum-Routen nahmen jeden Pfad an.
-//
-// `GET /api/fahrten/report-range/1/1/9999/12` lief in eine Monatsschleife mit
-// 120.000 Durchlaeufen bei 10 Pool-Verbindungen; ueber den Export-Weg legte
-// dieselbe Schleife zusaetzlich 120.000 Zeilen in `abrechnungen` an. Jeder
-// Angemeldete konnte den Server damit lahmlegen. Die Routen hatten kein
-// `validate`, und `fahrtSchemas.js` kannte keine Params.
-//
-// Geprueft wird der verbotene UND der erlaubte Fall. Der erlaubte ist hier
-// der wichtigere: Die Jahresauswahl der Oberflaeche laesst bis zu 72 Monate
-// zu (JAHRE = 2024..2029), und die ausgelieferten Apps lassen sich nicht
-// mitdeployen — eine zu enge Grenze haette sie gebrochen.
-//
-// Laeuft ohne Test-Framework: `node test/zeitraumGrenzen.test.js`.
+// Zeitraum-Routen begrenzen die Spanne, lassen aber alles zu, was die App wählen kann. Aufruf: node test/zeitraumGrenzen.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -91,9 +78,7 @@ pruefe('die Spanne ist auf MAX_MONATE begrenzt', () => {
   }), `${zuLang} Monate muessen abgewiesen werden`);
 });
 
-// --- 2. Der erlaubte Fall geht weiterhin ----------------------------------
-// Der wichtigere Teil: Was die Oberflaeche zulaesst, muss durchkommen — auch
-// aus den bereits ausgelieferten Apps.
+// --- 2. Der erlaubte Fall, auch aus ausgelieferten Apps ---
 console.log('\n2 — Was die App schickt, kommt durch:');
 
 pruefe('ein einzelner Monat geht', () => {
@@ -109,8 +94,7 @@ pruefe('ein normaler Zeitraum ueber den Jahreswechsel geht', () => {
 });
 
 pruefe('die weiteste in der Oberflaeche waehlbare Spanne geht (2024-01..2029-12)', () => {
-  // ZeitraumSegmente.js: JAHRE = [...Array(6)].map((_, i) => 2024 + i)
-  // Januar 2024 bis Dezember 2029 = 72 Monate. Genau das muss durchkommen.
+  // JAHRE 2024..2029 in ZeitraumSegmente.js ergeben 72 Monate.
   assert.strictEqual(fehler(zeitraumParamsSchema, {
     startYear: '2024', startMonth: '1', endYear: '2029', endMonth: '12',
   }), null, 'sonst bricht der Export in den ausgelieferten Apps');
@@ -129,9 +113,7 @@ pruefe('fuehrende Nullen aus padStart werden akzeptiert', () => {
 });
 
 pruefe('geprueste Werte bleiben Strings im bisherigen Format', () => {
-  // Die Handler rufen auf dem Monat `.split('-')` auf und bauen daraus
-  // Dateinamen. Eine Zahl loeste dort einen 500er aus und verkuerzte den
-  // Namen zu `_8` — beides waere ein Bruch fuer ausgelieferte Apps.
+  // Der Monat bleibt String, die Handler bauen daraus Dateinamen.
   const p = zeitraumParamsSchema.parse({
     startYear: '2026', startMonth: '1', endYear: '2026', endMonth: '03',
   });
@@ -141,9 +123,7 @@ pruefe('geprueste Werte bleiben Strings im bisherigen Format', () => {
 });
 
 pruefe('der Einzelmonat nimmt weiterhin „2026-08" an (dokumentiertes Format)', () => {
-  // baueMonatsWorkbooks: `month.split('-')[1] || month`; die API-Doku nennt
-  // dieses Format ausdruecklich. Ein Client, der es nutzt (API-Key, aeltere
-  // App), laesst sich nicht mitdeployen.
+  // „2026-08“ bleibt gültig, die API-Doku nennt es.
   const p = monatsParamsSchema.safeParse({ year: '2026', month: '2026-08' });
   assert.ok(p.success, 'das dokumentierte Format muss gueltig bleiben');
   assert.strictEqual(p.data.month, '08');
@@ -199,8 +179,7 @@ pruefe('export/:type/:year/:month prueft zusaetzlich den Typ', () => {
   assert.ok(!gueltig(monatsExportParamsSchema, { type: 'x', year: '2026', month: '9' }));
 });
 
-// --- 5. Die Routen nutzen die Schemas auch ---------------------------------
-// Ein Schema, das nirgends haengt, schuetzt nichts.
+// --- 5. Die Routen nutzen die Schemas ---
 console.log('\n5 — Verdrahtung:');
 
 const routen = fs.readFileSync(__dirname + '/../routes/fahrten.js', 'utf8');

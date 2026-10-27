@@ -1,9 +1,4 @@
-// Tests zur Haertung vom 24.08. — die Punkte aus der Endpunkt-Analyse, die
-// nicht Nutzer:innen direkt betrafen, aber Luecken waren.
-//
-// Geprueft wird, was ohne Datenbank pruefbar ist: Schema-Verhalten,
-// Modulstruktur und die Token-Logik der Middleware. Der tatsaechliche
-// Datenbank-Weg wird gegen die laufende Instanz gemessen, nicht hier.
+// Härtung ohne Datenbank: Schemas, Modulstruktur, Token-Logik der Middleware.
 
 const assert = require('assert');
 const fs = require('fs');

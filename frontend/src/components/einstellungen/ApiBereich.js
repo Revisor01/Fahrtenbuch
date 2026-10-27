@@ -7,8 +7,7 @@ import AktionsSheet from '../ui/AktionsSheet';
 import Sheet from '../ui/Sheet';
 import BereichKopf from './BereichKopf';
 
-// API-Zugriff: Keys für Kurzbefehle/externe Anwendungen.
-// Anlegen im Sheet — der Klartext-Key erscheint dort genau einmal.
+// API-Schlüssel für Kurzbefehle; der Klartext erscheint beim Anlegen genau einmal.
 function ApiKeySheet({ offen, onClose, onCreated }) {
   const toast = useToast();
   const [beschreibung, setBeschreibung] = useState('');
@@ -103,8 +102,7 @@ function ApiBereich() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Löschen ohne Rückfrage (Design-Spec) — kein Undo möglich, da der
-  // Klartext-Key nach dem Anlegen nicht mehr rekonstruierbar ist
+  // Ohne Rückfrage und ohne Undo, der Klartext ist nicht rekonstruierbar.
   const handleDelete = async (key) => {
     try {
       await axios.delete(`/api/keys/${key.id}`);

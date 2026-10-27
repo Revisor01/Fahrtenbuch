@@ -11,16 +11,11 @@ android {
         versionName "2.3.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+             // Für moderne Web-Apps angepasste Ausschlussliste der Assets.
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-    // Signaturschluessel liegt ausserhalb des Repos: Wer ihn hat, kann
-    // Updates unter dieser App-Kennung veroeffentlichen. Geht er verloren,
-    // laesst sich die App nie wieder aktualisieren — deshalb gehoert er in
-    // die Passwortverwaltung und ins Backup, nicht in die Versionskontrolle.
-    // Pfad ueber die Datei keystore.properties oder Umgebungsvariablen.
+    // Signaturschlüssel außerhalb des Repos, über keystore.properties oder Umgebungsvariablen; geht er verloren, gibt es keine Updates mehr.
     signingConfigs {
         release {
             def propsDatei = rootProject.file('keystore.properties')
@@ -43,8 +38,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            // Nur signieren, wenn Zugangsdaten vorliegen — sonst laesst sich
-            // das Projekt ohne Schluessel nicht einmal oeffnen.
+            // Nur mit Zugangsdaten, sonst ließe sich das Projekt nicht öffnen.
             if (rootProject.file('keystore.properties').exists() || System.getenv('FAHRTENBUCH_KEYSTORE_PATH')) {
                 signingConfig signingConfigs.release
             }
@@ -63,8 +57,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
-    // Material 3: liefert NavigationBarView und FloatingActionButton fuer die
-    // eigene Navigationsleiste (MaterialNav-Plugin).
+    // Material 3 für die eigene Navigationsleiste (MaterialNav-Plugin).
     implementation "com.google.android.material:material:$materialVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"

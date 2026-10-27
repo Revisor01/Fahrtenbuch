@@ -1,20 +1,10 @@
 const rateLimit = require('express-rate-limit');
-// ipKeyGenerator normalisiert IPv6 korrekt — selbst zusammengebaute Schluessel
-// aus req.ip sind bei IPv6 unzuverlaessig.
+// ipKeyGenerator normalisiert IPv6.
 const { ipKeyGenerator } = require('express-rate-limit');
 
-// Rate-Limiting an einer Stelle.
-//
-// Die App hat rund 30 bekannte Nutzende hinter einem Login. Die Limits sind
-// deshalb so gesetzt, dass normales Arbeiten nie anschlägt — sie bremsen
-// automatisierte Anfragen, nicht Menschen.
-//
-// Wichtig: app.js setzt `trust proxy`, sonst zählen hinter Caddy alle Anfragen
-// auf dieselbe IP und ein einzelner Nutzer sperrt alle anderen aus.
+// Limits bremsen Automaten, nicht Menschen; app.js setzt `trust proxy`.
 
-// Grundschutz für alle API-Routen. 600 Anfragen in 5 Minuten sind großzügig:
-// Das Dashboard lädt beim Start rund 30 Requests, ein Monatswechsel je einen
-// weiteren. Wer das überschreitet, ist kein Mensch am Formular.
+// 600 in 5 Minuten, das Dashboard lädt beim Start etwa 30.
 const apiLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 600,
@@ -34,8 +24,7 @@ const schreibLimiter = rateLimit({
   skip: (req) => ['GET', 'HEAD', 'OPTIONS'].includes(req.method),
 });
 
-// Exporte erzeugen Excel- bzw. PDF-Dateien und starten dafür LibreOffice.
-// Das ist teuer genug, um es gesondert zu begrenzen.
+// Exporte starten LibreOffice.
 const exportLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 60,
@@ -44,8 +33,7 @@ const exportLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Anmeldung: Vertippen darf niemanden aussperren, erfolgreiche Logins zählen
-// nicht mit — gebremst wird nur das Durchprobieren.
+// Erfolgreiche Logins zählen nicht mit.
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 20,
@@ -72,11 +60,7 @@ const resetLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Instanz-Verzeichnis: ohne Anmeldung aus dem ganzen Internet erreichbar,
-// aber inhaltlich harmlos (statische Liste, keine Datenbank, keine Personen-
-// daten). Deshalb großzügig — die App fragt beim Start einmal, ein Wechsel des
-// Kirchenkreises kostet einen weiteren Abruf. Das Limit soll nur verhindern,
-// dass jemand den Endpunkt als Dauerlast benutzt.
+// Großzügig, das Verzeichnis ist öffentlich, aber harmlos.
 const instanzLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 120,
@@ -85,16 +69,7 @@ const instanzLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Passwortwechsel: Hier wird das ALTE Passwort geprueft — also dieselbe Art
-// Rateversuch wie beim Login, nur hinter einer bestehenden Anmeldung. Vorher
-// galt nur das allgemeine Schreiblimit (200 in 5 Minuten), waehrend der Login
-// bei 20 in 10 Minuten bremst. Wer ein fremdes Token in die Finger bekam,
-// konnte damit bequem das Passwort durchprobieren.
-//
-// Gezaehlt wird pro Konto, nicht pro IP: Die Anfragen kommen von angemeldeten
-// Nutzer:innen, und mehrere hinter demselben Anschluss sollen sich nicht
-// gegenseitig aussperren. Fehlt die Anmeldung wider Erwarten, faellt der
-// Schluessel auf die IP zurueck.
+// Passwortwechsel prüft das alte Passwort, also wie der Login begrenzen; je Konto, sonst nach IP.
 const passwortLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 10,
@@ -105,18 +80,7 @@ const passwortLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Routen, die eine Mail an eine frei waehlbare Adresse schicken.
-//
-// `POST /api/users/resend-verification` nimmt den Empfaenger aus dem Rumpf,
-// nicht aus dem angemeldeten Konto. Bisher galt nur das allgemeine
-// Schreiblimit: 200 Mails in 5 Minuten an eine beliebige fremde Adresse —
-// abgeschickt vom Mailserver der Kirche, was dessen Ruf kostet. Jede Anfrage
-// legt zusaetzlich eine Zeile in email_verifications an.
-//
-// Pro Konto gezaehlt wie beim Passwortlimit: Der Versand setzt eine Anmeldung
-// voraus, und mehrere Nutzer:innen hinter demselben Anschluss sollen sich
-// nicht gegenseitig aussperren. Fuenf Mails in der Stunde decken jede echte
-// Nutzung ab — normal ist eine.
+// Mails an frei wählbare Adressen: fünf je Stunde und Konto.
 const mailLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,

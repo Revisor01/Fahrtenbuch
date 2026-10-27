@@ -1,14 +1,7 @@
 import React from 'react';
 import Sheet from './Sheet';
 
-// Ein Muster fuer alle Listen (Traeger, Orte, Favoriten, API-Keys, Fahrten):
-// Ein Tipp auf die Zeile oeffnet dieses Sheet statt Buttons in der Zeile
-// unterzubringen. Oben stehen die Daten gross und lesbar - auf dem Handy war
-// genau das in den engen Listenzeilen das Problem -, darunter die Aktionen als
-// volle Zeilen mit ausreichend grosser Trefferflaeche.
-//
-// aktionen: [{ id, label, icon: LucideIcon, onClick, variant?: 'gefahr', hinweis? }]
-// zeilen:   [{ label, wert }] - die Detailangaben oben
+// Ein Tipp auf eine Listenzeile öffnet dieses Sheet: oben die Daten, darunter Aktionen mit großer Trefferfläche. aktionen: [{ id, label, icon, onClick, variant?: 'gefahr', hinweis? }], zeilen: [{ label, wert }]
 function AktionsSheet({ isOpen, onClose, titel, untertitel, zeilen = [], aktionen = [] }) {
   return (
     <Sheet isOpen={isOpen} onClose={onClose} ariaLabel={titel}>

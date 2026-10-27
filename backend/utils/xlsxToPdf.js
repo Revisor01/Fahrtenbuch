@@ -4,29 +4,15 @@ const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 
-// LibreOffice headless: Konvertierung einer fertigen Arbeitsmappe nach PDF.
-// Das PDF ist damit exakt das, was beim Drucken der Excel-Datei herauskäme —
-// das offizielle Formular bleibt die einzige Layout-Wahrheit.
+// LibreOffice headless wandelt die fertige Mappe nach PDF.
 
 const SOFFICE_BIN = process.env.SOFFICE_BIN || 'soffice';
 const CONVERT_TIMEOUT_MS = parseInt(process.env.SOFFICE_TIMEOUT_MS || '60000', 10);
 
-// Wie viele LibreOffice-Prozesse gleichzeitig laufen duerfen.
-//
-// Auf dem Produktionsserver gemessen (23.09.2026, im Backend-Container):
-//   1 Konvertierung  = 4,74 s, 209 MB Spitzenspeicher, 4,37 CPU-Sekunden
-//   2 parallel       = 7,4/7,8 s (+60 %), zusammen 287 MB
-// Der Server hat 2 Kerne und 6,3 GB frei. Ohne Grenze durfte ein einzelner
-// angemeldeter Nutzer 60 Exporte in 10 Minuten ausloesen (Rate-Limit begrenzt
-// die Anzahl, nicht die Gleichzeitigkeit) — bei 60 parallelen Laeufen waeren
-// das rund 12,6 GB. Dann greift der OOM-Killer, und der groesste Prozess auf
-// der Maschine ist mysqld: Ein Export haette die Datenbank mitgerissen.
-//
-// 2 passt zu den 2 Kernen: mehr bringt keinen Durchsatz, nur Speicher.
+// Höchstens 2 parallel, passend zu 2 Kernen; ein Lauf braucht 209 MB, ohne Grenze riss ein OOM mysqld mit.
 const MAX_GLEICHZEITIG = parseInt(process.env.SOFFICE_MAX_PARALLEL || '2', 10);
 
-// Wie lange ein Auftrag auf einen freien Platz wartet, bevor er aufgibt.
-// Lieber eine klare Fehlermeldung als eine Anfrage, die ewig haengt.
+// Lieber eine klare Fehlermeldung als eine hängende Anfrage.
 const WARTE_TIMEOUT_MS = parseInt(process.env.SOFFICE_QUEUE_TIMEOUT_MS || '120000', 10);
 
 let laufend = 0;
@@ -87,20 +73,9 @@ function runSoffice(args, cwd, env) {
   });
 }
 
-/**
- * Konvertiert eine XLSX-Arbeitsmappe (Buffer) via LibreOffice headless nach PDF.
- *
- * Jeder Aufruf bekommt ein eigenes temporäres Verzeichnis samt eigenem
- * UserInstallation-Profil, damit parallele Aufrufe sich nicht blockieren.
- *
- * @param {Buffer} xlsxBuffer  Inhalt der XLSX-Datei
- * @param {string} [basename]  Basisname ohne Endung (nur für die temporäre Datei)
- * @returns {Promise<Buffer>}  PDF-Inhalt
- */
+/** Wandelt eine XLSX-Mappe per LibreOffice in ein PDF, je Aufruf mit eigenem Profil. */
 async function convertXlsxBufferToPdf(xlsxBuffer, basename = 'export') {
-  // Platz in der Warteschlange holen, BEVOR irgendetwas angelegt wird —
-  // sonst liegen bei Andrang Dutzende temporaere Verzeichnisse herum,
-  // waehrend die Auftraege warten.
+  // Erst den Platz holen, dann Verzeichnisse anlegen.
   await platzAnfordern();
   try {
     return await konvertiere(xlsxBuffer, basename);
@@ -126,9 +101,7 @@ async function konvertiere(xlsxBuffer, basename) {
   try {
     await fs.writeFile(xlsxPath, xlsxBuffer);
 
-    // LibreOffice braucht ein beschreibbares HOME, sonst scheitert der erste
-    // Aufruf im Container ("javaldx"/Profil-Fehler). Das temporäre Verzeichnis
-    // dient hier zugleich als HOME und als UserInstallation.
+  // Beschreibbares HOME, sonst scheitert der erste Aufruf im Container.
     const env = {
       ...process.env,
       HOME: tmpDir,

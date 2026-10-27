@@ -5,17 +5,14 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
-# Konfiguriert wird zur Laufzeit ueber docker-entrypoint.sh (config.js), nicht
-# zur Build-Zeit — deshalb braucht der Build keine Argumente. Die Version aus
-# package.json backt vite.config.js ein (Anzeige im Info-Dialog).
+# Konfiguration erst zur Laufzeit über docker-entrypoint.sh, der Build braucht keine Argumente.
 RUN npm run build
 
 # Production stage
 FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-# Die Sicherheits-Kopfzeilen liegen getrennt, weil jeder location-Block sie
-# einzeln einbinden muss (nginx vererbt add_header nicht).
+# Getrennt, weil jeder location-Block sie einzeln einbinden muss.
 COPY ./security-headers.conf /etc/nginx/security-headers.conf
 COPY ./docker-entrypoint.sh /docker-entrypoint-fahrtenbuch.sh
 RUN chmod +x /docker-entrypoint-fahrtenbuch.sh

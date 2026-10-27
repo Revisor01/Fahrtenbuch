@@ -1,15 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
-// Toast-System nach Design-Spec (Redesign 2026):
-// - Fläche --text, Text --bg (invertiert in beiden Modi)
-// - links Statuskreis 22px (--ok bzw. --danger), Meldung 15px/600,
-//   rechts Aktions-Button 16px/600 in --brand-strong
-// - Einblenden translateY(12px)+opacity 300ms ease (Keyframe toast-in)
-// - Standzeit 5 s; Toasts mit Aktion („Rückgängig") bleiben bis zum Klick
-// - aria-live="polite"-Region, Aktion ist ein echter Button
-//
-// API: toast.success(msg, { undo: fn }) · toast.error(msg)
-//      generisch: { actionLabel, onAction } für andere Aktionen als Rückgängig
+// Toast-System: toast.success(msg, { undo }), toast.error(msg), allgemein { actionLabel, onAction }.
 
 const ToastContext = createContext(null);
 
@@ -33,14 +24,7 @@ export function ToastProvider({ children }) {
     const actionLabel = options.undo ? 'Rückgängig' : options.actionLabel || null;
     const bleibt = options.bleibt === true;
     setToasts((prev) => [...prev, { id, variant, message, actionLabel, onAction, bleibt }]);
-    // Standzeit 5 s; Toasts mit Aktion („Rückgängig") bekommen 8 s.
-    // (Abweichung von der Spec „bis zum Klick": dauerhaft stehende Toasts
-    // stapelten sich in der Praxis — User-Feedback vom 07.08.2026.)
-    //
-    // Ausnahme: Ein Fehler-Toast, dessen Aktion die einzige Rettung für nicht
-    // gespeicherte Eingaben ist, bleibt stehen. Wer wegschaut, während die
-    // Sekunden ablaufen, hätte sonst die ganze Fahrt verloren. Solche Toasts
-    // stapeln sich nicht, weil sie nur im Fehlerfall entstehen.
+    // 5 s, mit Aktion 8 s, weil dauerhafte Toasts sich stapelten; nur Fehler-Toasts mit Rettungsaktion bleiben stehen.
     if (!bleibt) {
       timers.current[id] = setTimeout(() => dismiss(id), onAction ? 8000 : 5000);
     }
@@ -62,9 +46,7 @@ export function ToastProvider({ children }) {
             key={t.id}
             className="toast"
             role="status"
-            // Bleibende Toasts nicht per Flächentipp schließen: Der Daumen
-            // landet dort beim Greifen des Telefons, und mit dem Toast wäre
-            // die einzige Wiederholen-Möglichkeit weg.
+            // Nicht per Flächentipp schließen, der Daumen landet dort beim Greifen.
             onClick={t.bleibt ? undefined : () => dismiss(t.id)}
           >
             <span

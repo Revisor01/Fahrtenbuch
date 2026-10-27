@@ -1,16 +1,4 @@
-// Punkt 14 (Zugaenglichkeit) und die verbliebenen Betriebspunkte aus 12.
-//
-// Zielgruppe dieser App sind kirchliche Mitarbeitende quer durch alle
-// Altersgruppen — Beschriftungen und Trefferflaechen sind hier keine
-// Formsache.
-//
-// Der Healthcheck-Befund wurde nachgemessen: `mysqladmin ping -h localhost`
-// ohne Zugangsdaten antwortet „Access denied for user 'root'@'localhost'"
-// und beendet sich trotzdem mit Exit-Code 0. Der Container galt damit als
-// gesund, sobald das Netz stand — und das Backend startet ueber
-// `depends_on: service_healthy` genau darauf hin.
-//
-// Laeuft ohne Test-Framework: `node test/zugaenglichkeitUndBetrieb.test.js`.
+// Beschriftungen, Trefferflächen und ein DB-Healthcheck, der wirklich prüft. Aufruf: node test/zugaenglichkeitUndBetrieb.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -46,9 +34,7 @@ pruefe('die Felder im Ort-Speichern-Fenster ebenso', () => {
 });
 
 pruefe('kein <label> vor einem Eingabefeld bleibt unverbunden', () => {
-  // Nur echte <label>-Elemente pruefen: In InfoModal und NewFeaturesModal
-  // traegt die Klasse form-label reine <div>-Ueberschriften, zu denen es
-  // kein Feld gibt.
+  // Nur echte <label>-Elemente.
   const dateien = ['frontend/src/MitfahrerModal.js', 'frontend/src/FahrtForm.js',
                    'frontend/src/components/einstellungen/FavoritenBereich.js',
                    'frontend/src/components/einstellungen/SatzBausteine.js'];
@@ -81,8 +67,7 @@ pruefe('die drei kleinen Knoepfe bekommen eine groessere Flaeche', () => {
 });
 
 pruefe('das Aussehen bleibt unveraendert', () => {
-  // Die sichtbaren Groessen sind Teil des Entwurfs — nur die Flaeche waechst,
-  // ueber ein unsichtbares Pseudoelement.
+  // Nur die Fläche wächst, über ein unsichtbares Pseudoelement.
   assert.ok(/\.dash-uw-btn \{[^}]*width: 34px/s.test(css), 'dash-uw-btn bleibt 34px');
   assert.ok(/\.set-action \{[^}]*width: 36px/s.test(css), 'set-action bleibt 36px');
   const block = css.split('.dash-uw-btn::after,')[1].split('}')[0];
@@ -90,18 +75,14 @@ pruefe('das Aussehen bleibt unveraendert', () => {
 });
 
 pruefe('die Knoepfe sind positioniert, sonst greift das Pseudoelement nicht', () => {
-  // Auf den Regelblock selbst pruefen, nicht auf den Text: „position:
-  // relative" steht auch im erklaerenden Kommentar darueber.
+  // Auf den Regelblock prüfen, nicht auf den Text.
   const regel = css.match(/\.dash-uw-btn,\s*\n\.set-action,\s*\n\.set-grip \{([^}]*)\}/);
   assert.ok(regel, 'der gemeinsame Regelblock fehlt');
   assert.ok(/position:\s*relative/.test(regel[1]));
 });
 
 pruefe('der Sortiergriff waechst nur in der Breite', () => {
-  // In der Hoehe lagen die Flaechen benachbarter Listenzeilen sonst
-  // uebereinander, und ein Zug an der Grenze erwischte die falsche Zeile.
-  // Die eigene Regel steht NACH dem gemeinsamen Block und ueberschreibt ihn
-  // — deshalb den letzten Treffer nehmen, nicht den ersten.
+  // Die eigene Regel steht nach dem gemeinsamen Block, deshalb den letzten Treffer.
   const block = css.split('.set-grip::after {').pop().split('}')[0];
   assert.ok(/min-height: 0/.test(block),
     'ohne das liegen die Flaechen benachbarter Zeilen uebereinander');

@@ -6,8 +6,7 @@ const validate = (schema) => (req, res, next) => {
     next();
   } catch (error) {
     if (error instanceof ZodError) {
-      // Zod 4 liefert die Fehlerliste als `issues`; `errors` existiert dort
-      // nicht mehr — ohne Fallback stürzt dieser Handler selbst ab (500).
+      // Zod 4 liefert `issues`, ohne Rückfall gäbe es einen 500er.
       const issues = error.issues || error.errors || [];
       return res.status(400).json({
         message: 'Validierungsfehler',
@@ -21,14 +20,7 @@ const validate = (schema) => (req, res, next) => {
   }
 };
 
-// Dasselbe fuer Pfad-Parameter. Noetig, weil die Export- und Report-Routen
-// ihre Zeitraeume ausschliesslich ueber den Pfad bekommen und ungeprueft in
-// eine Monatsschleife liefen.
-//
-// Die geprueften Werte werden einzeln zurueckgeschrieben statt req.params zu
-// ersetzen: Express legt dort einen eigenen Trager an, und ein Austausch des
-// ganzen Objekts geht je nach Router-Verschachtelung verloren. Nach dem
-// Schreiben stehen dort Zahlen statt Strings — die Handler parsen ohnehin.
+// Pfad-Parameter prüfen; einzeln zurückschreiben, weil ein Austausch von req.params verloren gehen kann.
 const validateParams = (schema) => (req, res, next) => {
   try {
     const geprueft = schema.parse(req.params);

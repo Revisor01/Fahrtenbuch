@@ -24,8 +24,7 @@ const { apiLimiter, schreibLimiter, exportLimiter } = require('./middleware/rate
 
 const app = express();
 
-// Pflichtvariablen beim Start pruefen statt beim ersten Login zu scheitern.
-// Ohne JWT_SECRET laeuft die App an und wirft erst beim Anmelden einen 500er.
+// Ohne JWT_SECRET liefe die App an und scheiterte erst beim Login.
 const PFLICHT_VARIABLEN = ['JWT_SECRET', 'DB_HOST', 'DB_USER', 'DB_NAME'];
 const fehlend = PFLICHT_VARIABLEN.filter((v) => !process.env[v]);
 if (fehlend.length > 0) {
@@ -34,14 +33,7 @@ if (fehlend.length > 0) {
     process.exit(1);
 }
 
-// Ein kurzes JWT_SECRET laesst sich durchprobieren, und wer es hat, stellt
-// sich beliebige Anmeldungen aus.
-//
-// Bewusst nur eine Warnung, kein Abbruch: Was in der Produktion steht, ist
-// von hier aus nicht einsehbar. Ein process.exit() liesse den Server beim
-// naechsten Deploy einfach nicht mehr hochkommen — ein Ausfall als Antwort
-// auf ein Risiko, das seit Monaten besteht. Die Warnung steht im Log, das
-// Secret kann in Ruhe getauscht werden (das meldet alle Geraete einmal ab).
+// Nur eine Warnung, ein Abbruch ließe den Server beim nächsten Deploy nicht hochkommen.
 const JWT_MINDESTLAENGE = 32;
 if (process.env.JWT_SECRET.length < JWT_MINDESTLAENGE) {
     console.warn(
@@ -51,49 +43,29 @@ if (process.env.JWT_SECRET.length < JWT_MINDESTLAENGE) {
     );
 }
 
-// Hinter dem Reverse Proxy (Caddy) tragen alle Requests dieselbe Quell-IP.
-// Ohne trust proxy teilen sich alle Nutzenden einen Rate-Limit-Zaehler: 20
-// Fehlversuche eines Einzelnen sperren den Login fuer alle.
+// Hinter Caddy, sonst teilen sich alle einen Rate-Limit-Zähler.
 app.set('trust proxy', 1);
 
-// CORS_ORIGIN gilt immer, wenn gesetzt - die frühere Logik hing an NODE_ENV
-// und nagelte die Testumgebung auf die Produktionsdomain fest. Ohne die
-// Variable bleibt es bei der Produktionsdomain (kein '*'-Fallback).
-// Kommaseparierte Liste möglich; ein Einzelwert funktioniert unverändert.
+// CORS_ORIGIN gilt immer, wenn gesetzt (kommasepariert), sonst die Produktionsdomain, nie '*'.
 const konfigurierteOrigins = (process.env.CORS_ORIGIN || 'https://kkd-fahrtenbuch.de')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
 
-// Die mobilen Apps laufen als WebView und schicken feste, herstellerseitig
-// vergebene Origins: iOS 'capacitor://localhost', Android je nach
-// androidScheme 'https://localhost' (Standard) oder 'http://localhost'.
-// Beide Android-Varianten stehen drin, damit ein Wechsel des Schemas die App
-// nicht aussperrt. Feste Eintraege statt Wildcard, damit die Web-Absicherung
-// unangetastet bleibt.
-//
-// Unbedenklich trotz 'localhost': Die API authentifiziert ueber den
-// Authorization-Header, nicht ueber Cookies. Eine boesartige lokale Seite
-// koennte zwar Anfragen senden, haette aber kein gueltiges Token.
+// Feste Origins der WebView-Apps statt Wildcard; unbedenklich, weil ohne Cookies authentifiziert wird.
 const APP_ORIGINS = ['capacitor://localhost', 'https://localhost', 'http://localhost'];
 
 const erlaubteOrigins = [...new Set([...konfigurierteOrigins, ...APP_ORIGINS])];
 
 app.use(cors({
-    // Funktion statt Array: Anfragen ohne Origin-Header (native HTTP-Clients,
-    // curl, Server-zu-Server, Health-Checks) sollen weiterhin durchgehen — sie
-    // unterliegen keiner Same-Origin-Policy, CORS schützt dort nichts.
-    // Fremde Origins werden abgelehnt: Der Callback liefert kein Fehlerobjekt,
-    // sondern `false`. Damit fehlt der Access-Control-Allow-Origin-Header und
-    // der Browser blockt — statt eines 500ers aus dem Fehler-Handler.
+    // Ohne Origin durchlassen (native Clients, curl); fremde mit `false` ablehnen statt mit einem 500er.
     origin: (origin, callback) => {
         if (!origin || erlaubteOrigins.includes(origin)) {
             return callback(null, true);
         }
         return callback(null, false);
     },
-    // Cookies werden nicht genutzt (Token steckt im Authorization-Header),
-    // aber explizit gesetzt, damit der Preflight konsistent beantwortet wird.
+    // Keine Cookies, aber explizit, damit der Preflight konsistent ist.
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
@@ -104,16 +76,10 @@ app.use(cors({
         'Authorization',
         'X-API-Key'  // Hier den neuen Header hinzufügen
     ],
-    // Ohne exposedHeaders bleibt der Header fuer den Browser unsichtbar: er
-    // kaeme zwar an, waere aus JavaScript aber nicht lesbar — die gleitende
-    // Sitzung wuerde stillschweigend nicht funktionieren.
+    // Sonst ist der Header aus JavaScript nicht lesbar und die gleitende Sitzung fällt still aus.
     exposedHeaders: [ERNEUERUNGS_HEADER]
 }));
-// API-Dokumentation vor helmet: Swagger braucht eigene Inline-Styles und
-// -Skripte, die die strenge Standard-CSP unten blockieren wuerde. Die Route
-// bringt ihre eigene, passend enge CSP mit und liegt hinter einer Anmeldung.
-// Ausserdem vor den /api-Limitern — sonst zaehlt jeder Doku-Aufruf gegen das
-// Kontingent der eigentlichen Schnittstelle (/api-docs beginnt mit /api).
+// Vor helmet wegen eigener CSP und vor den /api-Limitern, sonst zählen Doku-Aufrufe mit.
 app.use(['/api-docs', '/api-docs.json'], helmet({
   contentSecurityPolicy: {
     directives: {
@@ -135,9 +101,7 @@ dokuEinhaengen(app);
 
 app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
-// Express 5 laesst req.body ohne Anfragekoerper undefined (4 setzte {}).
-// Validierung und Controller lesen daraus; ohne diese Zeile wird z. B. aus
-// einem leeren PUT /api/profile ein 400 statt der bisherigen Antwort.
+// Express 5 lässt req.body ohne Körper undefined.
 app.use((req, res, next) => {
     if (req.body === undefined) req.body = {};
     next();
@@ -149,9 +113,7 @@ const reactBuildPath = path.join(__dirname, '../frontend/public');
 // Static files for React app
 app.use(express.static(reactBuildPath));
 
-// Rate-Limiting fuer die Datenrouten. Anmeldung und Passwort-Reset sind
-// ausgenommen: sie tragen eigene, engere Limits, und wer sich anmelden will,
-// darf nicht daran scheitern, dass jemand anderes die API ausgelastet hat.
+// Anmeldung und Passwort-Reset haben eigene, engere Limits.
 const OHNE_GLOBALES_LIMIT = ['/api/auth/', '/api/users/reset-password', '/api/users/set-password', '/api/users/verify-email', '/api/instanzen', '/api/konfig'];
 const istAuthPfad = (req) => OHNE_GLOBALES_LIMIT.some((p) => req.originalUrl.startsWith(p));
 
@@ -164,8 +126,7 @@ app.use('/api/fahrten/export-range', exportLimiter);
 app.use('/api/fahrten/export-pdf', exportLimiter);
 app.use('/api/fahrten/export-pdf-range', exportLimiter);
 
-// API routes
-// Instanz-Verzeichnis ohne authMiddleware: die App braucht es vor dem Login.
+// Instanz-Verzeichnis ohne authMiddleware, die App braucht es vor dem Login.
 app.use('/api/instanzen', instanzenRoutes);
 app.use('/api/konfig', konfigRoutes);
 app.use('/api/auth', authRoutes);
@@ -185,10 +146,7 @@ app.use('/api', (req, res) => {
     res.status(404).json({ message: 'Endpunkt nicht gefunden' });
 });
 
-// Catch-all route for SPAs. Im Container liegt kein Frontend-Build (nginx
-// liefert ihn aus), deshalb hier ein sauberer Fallback statt eines ENOENT,
-// das frueher im Express-Default-Handler als HTML-Stacktrace landete.
-// Express 5 (path-to-regexp 8): ein blosses '*' ist kein gueltiger Pfad mehr.
+// Kein Frontend im Container, deshalb ein Fallback statt ENOENT; '*' ist in Express 5 kein Pfad mehr.
 app.get('/{*rest}', (req, res) => {
     const indexPfad = path.join(reactBuildPath, 'index.html');
     res.sendFile(indexPfad, (err) => {
@@ -198,9 +156,7 @@ app.get('/{*rest}', (req, res) => {
     });
 });
 
-// Globaler Fehler-Handler: ohne ihn beantwortet Express Fehler mit einem
-// HTML-Stacktrace, solange NODE_ENV nicht 'production' ist - inklusive
-// Dateipfaden und interner Struktur.
+// Sonst antwortet Express mit HTML-Stacktrace samt Dateipfaden.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
     console.error('Unbehandelter Fehler:', err);

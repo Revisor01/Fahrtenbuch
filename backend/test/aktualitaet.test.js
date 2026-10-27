@@ -1,15 +1,4 @@
-// Punkt 15 der Pre-Launch-Liste, Teilbefund „Veraltete Daten".
-//
-// Nach einer Namensaenderung im Profil blieb die Begruessung auf der
-// Startseite alt: handleProfileUpdate rief fetchProfile (fuellt nur das
-// Formular), aber nicht fetchCurrentUser (haelt `user` im Context). Der
-// alte Name stand dort bis zum naechsten Start der App.
-//
-// Dazu sechs Aufrufe von fetchOrte/fetchDistanzen ohne await: Die Funktion
-// kehrte zurueck, bevor die neue Liste stand — die Oberflaeche zeigte kurz
-// den Stand von vorher.
-//
-// Laeuft ohne Test-Framework: `node test/aktualitaet.test.js`.
+// Profil-Update lädt den Nutzer neu, fetchOrte/fetchDistanzen werden abgewartet. Aufruf: node test/aktualitaet.test.js
 
 const assert = require('assert');
 const fs = require('fs');

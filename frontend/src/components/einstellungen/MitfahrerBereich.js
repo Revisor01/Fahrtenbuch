@@ -6,8 +6,7 @@ import { useToast } from '../ui/Toast';
 import BereichKopf from './BereichKopf';
 import { SatzSheet, SatzListe } from './SatzBausteine';
 
-// Bereich „Mitfahrer": der Erstattungssatz für Mitfahrer:innen.
-// (Mitfahrer selbst hängen an der einzelnen Fahrt und werden dort erfasst.)
+// Erstattungssatz für Mitfahrer:innen; die Personen selbst hängen an der Fahrt.
 function MitfahrerBereich() {
   const { refreshAllData } = useContext(AppContext);
   const toast = useToast();
@@ -46,10 +45,7 @@ function MitfahrerBereich() {
       await refreshAllData();
     } catch (error) {
       logFehler('Fehler beim Speichern des Mitfahrer-Satzes:', error);
-      // Der Server antwortet bei einem doppelten Stichtag mit 409 und
-      // einer fertigen Meldung. Frueher stand hier eine Suche nach
-      // „Duplicate entry" in einem `error`-Feld, das gar nicht gesendet
-      // wurde — die Meldung konnte nie erscheinen.
+      // Doppelter Stichtag kommt als 409 mit fertiger Meldung.
       if (error.response?.status === 409) {
         toast.error('Für dieses Datum existiert bereits ein Satz.');
       } else {
@@ -58,8 +54,7 @@ function MitfahrerBereich() {
     }
   };
 
-  // Löschen ohne Rückfrage (Design-Spec) — kein Undo, da der Satz
-  // jederzeit neu angelegt werden kann
+  // Ohne Rückfrage, ein Satz lässt sich jederzeit neu anlegen.
   const handleDelete = async (satz) => {
     try {
       await axios.delete(`/api/mitfahrer-erstattung/${satz.id}`);

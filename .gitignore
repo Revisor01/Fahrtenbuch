@@ -86,9 +86,6 @@ dist
 
 # Gatsby files
 .cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
 
 # vuepress build output
 .vuepress/dist
@@ -116,9 +113,7 @@ dist
 .pnp.*
 /backend/templates/~$fahrtenabrechnung_vorlage.xlsx
 
-# Generierte Frontend-Builds gehoeren nicht ins Repository: der Dockerfile
-# baut selbst (RUN npm run build). Eingecheckt erzeugten sie nur Rauschen in
-# Diffs und in der statischen Analyse.
+# Frontend-Builds erzeugt der Dockerfile selbst.
 frontend/build/
 backend/build/
 
@@ -131,21 +126,17 @@ stack.env
 # Testartefakte
 .playwright-mcp/
 
-# Arbeitsdateien mit echten Personendaten (Namen, IBANs, Fahrten) — duerfen
-# nie ins Repository
+# Arbeitsdateien mit echten Personendaten, nie ins Repository
 *.xlsx
 Dienstfahrtenabrechnung*.pdf
 *.png
 !frontend/public/**/*.png
 !frontend/src/**/*.png
-# App-Icons und Splash-Screens der nativen Projekte. Ohne diese Ausnahmen
-# verschluckt die *.png-Regel oben sie stillschweigend und der Build laesst
-# sich auf keiner anderen Maschine reproduzieren.
+# App-Icons und Splash-Screens, sonst verschluckt sie die *.png-Regel oben.
 !frontend/ios/**/*.png
 !frontend/android/**/*.png
 
-# --- Capacitor ---
-# Kopierte Web-Assets: Duplikat von frontend/build/, gehoert nicht ins Repo.
+# --- Capacitor: kopierte Web-Assets ---
 frontend/ios/App/public/
 frontend/android/app/src/main/assets/public/
 frontend/ios/App/App/capacitor.config.json
@@ -174,9 +165,7 @@ frontend/android/.idea/
 *.p8
 *.p12
 *.mobileprovision
-# .jks und keystore.properties fehlten: build.gradle liest genau diese
-# Dateien (Pfad und Passwoerter im Klartext), sie lagen also nur zufaellig
-# nicht im Repository.
+# Keystore und Passwortdatei, die build.gradle liest
 *.jks
 keystore.properties
 

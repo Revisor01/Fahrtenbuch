@@ -1,24 +1,10 @@
 import { IST_NATIVE } from './plattform';
 
-// Farbe der Systemraender (Statusleiste oben, Home-Anzeige unten) in der
-// nativen Huelle.
-//
-// WARUM ueberhaupt noetig: Die WebView zeichnet unter Statusleiste und
-// Home-Anzeige. Was dort durchscheint, ist die Flaeche des <html>-Elements —
-// nicht die des gerade sichtbaren Bildschirms. Steht dort die App-Flaeche,
-// waehrend vorne die Anmeldung in Petrol liegt, bleiben oben und unten helle
-// bzw. dunkle Streifen stehen. Deshalb meldet jeder Bildschirm, welche Flaeche
-// er traegt, und <html> uebernimmt sie.
-//
-// Im Browser passiert hier nichts: das Attribut wird nur in der nativen Huelle
-// gesetzt, die Weboberflaeche bleibt unveraendert.
+// <html> uebernimmt die Flaeche des Bildschirms, weil sie unter Status- und Home-Leiste durchscheint.
 
-// 'brand'  — ganzflaechig Petrol (Startbildschirm, Anmeldung, Instanz-Wahl)
-// 'app'    — normale App-Flaeche (angemeldete Ansicht)
 const STANDARD_FLAECHE = 'app';
 
-// Statusleisten-Symbole: 'light' = helle Symbole (fuer dunklen Untergrund),
-// 'dark' = dunkle Symbole (fuer hellen Untergrund).
+// 'light' = helle Symbole, 'dark' = dunkle Symbole.
 let statusBarModul = null;
 
 async function ladeStatusBar() {
@@ -29,8 +15,6 @@ async function ladeStatusBar() {
   return statusBarModul;
 }
 
-// Zuletzt gesetzter Stil — spart ueberfluessige Bruecken-Aufrufe, wenn sich
-// beim Neurendern nichts geaendert hat.
 let letzterStil = null;
 
 async function setzeStatusleistenStil(hellerText) {
@@ -43,41 +27,22 @@ async function setzeStatusleistenStil(hellerText) {
     const modul = await ladeStatusBar();
     if (!modul) return;
     const { StatusBar, Style } = modul;
-    // Achtung Namensfalle: Style.Light bedeutet bei Capacitor "heller
-    // Hintergrund, also DUNKLE Symbole". Style.Dark ist der umgekehrte Fall.
-    // Wir denken hier in Symbolfarben, deshalb die Umkehrung.
-    // Bewusst NUR der Stil: Android erzwingt ab Version 15 Edge-to-Edge, eine
-    // Hintergrundfarbe der Systemleiste laesst sich dort nicht mehr setzen.
-    // Die Flaeche kommt in beiden Faellen aus dem CSS (data-flaeche), nicht aus
-    // dem Plugin — so gibt es nur eine Farbquelle.
+    // Capacitor-Style.Light heisst dunkle Symbole, daher umgekehrt; nur der Stil, Android 15 erzwingt Edge-to-Edge.
     await StatusBar.setStyle({ style: hellerText ? Style.Dark : Style.Light });
   } catch (error) {
-    // Die Statusleiste ist Beiwerk: ein Fehler hier darf den Start nicht
-    // aufhalten. In der App gibt es keine Konsole, deshalb nur loggen.
+    // Die Statusleiste darf den Start nicht aufhalten.
     console.error('Statusleiste liess sich nicht setzen:', error);
   }
 }
 
-// Setzt die Flaeche des aktuellen Bildschirms und den dazu passenden
-// Statusleisten-Stil.
-//
-// Die Symbolfarbe folgt derselben Regel wie --on-brand bzw. --text im
-// Token-System, damit es keine zweite Quelle fuer denselben Kontrast gibt:
-//   Markenflaeche hell  (#0F5257, dunkles Petrol) -> helle Symbole
-//   Markenflaeche dunkel (#35B6AA, helles Petrol) -> dunkle Symbole
-//   App-Flaeche hell     (#EFF3F3)                -> dunkle Symbole
-//   App-Flaeche dunkel   (#071214)                -> helle Symbole
-// Auf der Markenflaeche laeuft es damit genau andersherum als auf der
-// App-Flaeche — daher die Umkehrung von `dunkelmodus`.
+// Symbolfarbe folgt --on-brand bzw. --text; auf der Markenflaeche umgekehrt zum Dunkelmodus.
 export function setzeSystemflaeche(flaeche, dunkelmodus) {
   if (!IST_NATIVE) return;
 
   const wert = flaeche === 'brand' ? 'brand' : STANDARD_FLAECHE;
   document.documentElement.setAttribute('data-flaeche', wert);
 
-  // Petrol im hellen Modus ist dunkel -> helle Symbole. Im dunklen Modus ist
-  // die Markenflaeche hell (#35B6AA), aber --on-brand ist dort dunkel, also
-  // brauchen auch die Symbole dunkle Farbe.
+  // Im Dunkelmodus ist die Markenflaeche hell, --on-brand dunkel.
   const hellerText = wert === 'brand' ? !dunkelmodus : dunkelmodus;
   setzeStatusleistenStil(hellerText);
 }

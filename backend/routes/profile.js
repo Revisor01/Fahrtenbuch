@@ -16,9 +16,7 @@ router.get('/', profileController.getProfile);
 router.put('/', validate(updateProfileSchema), profileController.updateProfile);
 router.put('/change-password', passwortLimiter, validate(changePasswordSchema), profileController.changePassword);
 
-// Eigenes Konto loeschen — Pflicht fuer App Store und Play Store.
-// Derselbe Limiter wie beim Passwortwechsel: Die Route prueft ein Passwort
-// und waere sonst ein Weg, Passwoerter durchzuprobieren.
+// Konto löschen, mit dem Passwort-Limiter, weil die Route ein Passwort prüft.
 router.delete('/', passwortLimiter, validate(deleteAccountSchema), profileController.deleteAccount);
 
 module.exports = router;

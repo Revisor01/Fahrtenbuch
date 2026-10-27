@@ -5,15 +5,10 @@ import { AuthLogo } from './components/LoginPage';
 import { appConfigValue } from './utils/appConfig';
 import fehlerText from './utils/fehlerText';
 
-// Muss zu backend/schemas/userSchemas.js passen. Steht als Konstante hier,
-// damit Pruefliste, Vorab-Pruefung und Meldung denselben Wert nennen — sie
-// liefen einmal auseinander, und der Nutzer sah „Validierungsfehler",
-// obwohl die Liste alles gruen zeigte.
+// Wie backend/schemas/userSchemas.js, damit Prüfliste und Server denselben Wert nennen.
 const PASSWORT_MINDESTLAENGE = 8;
 
-// Passwort setzen/zurücksetzen im Anmelde-Layout (Spec Screen 8):
-// Vollfläche --brand, zentrierte Formularkarte. Bedient beide Routen —
-// /set-password (Erstvergabe) und /reset-password (Reset-Link).
+// Passwort setzen und zurücksetzen für /set-password und /reset-password.
 export default function SetPassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,8 +30,7 @@ export default function SetPassword() {
     e.preventDefault();
 
     if (password.length < PASSWORT_MINDESTLAENGE) {
-      // Vor dem Absenden pruefen: Der Server weist es sonst mit
-      // „Validierungsfehler" ab, und der Nutzer sieht nicht, woran es lag.
+      // Vorab prüfen, sonst kommt nur „Validierungsfehler“ zurück.
       setStatus({
         type: 'error',
         message: `Das Passwort muss mindestens ${PASSWORT_MINDESTLAENGE} Zeichen lang sein.`,
@@ -65,9 +59,7 @@ export default function SetPassword() {
     } catch (error) {
       setStatus({
         type: 'error',
-        // fehlerText loest auch Zod-Fehler auf: Die Middleware sendet
-        // `message: 'Validierungsfehler'` und die Einzelheiten in `errors[]`.
-        // Ohne das stand hier woertlich „Validierungsfehler".
+        // fehlerText löst auch die Zod-Einzelheiten aus `errors[]` auf.
         message: fehlerText(error, 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.'),
       });
     }

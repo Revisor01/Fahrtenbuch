@@ -1,7 +1,4 @@
-// Xcode Cloud baut den iOS-Release. Das Skript nach dem Klonen bereitet Web-Build,
-// Plugins und Build-Nummer vor und darf die feste Signierung nur im Klon umstellen.
-//
-// Laeuft ohne Test-Framework: `node test/xcodeCloud.test.js`.
+// Xcode Cloud stellt die feste Signierung nur im Klon um. Aufruf: node test/xcodeCloud.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -61,8 +58,7 @@ pruefe('das Schema App ist geteilt und archiviert Release', () => {
 });
 
 pruefe('die App erklaert sich frei von meldepflichtiger Verschluesselung', () => {
-  // Ohne die Angabe bleibt jeder Build auf MISSING_EXPORT_COMPLIANCE und laesst
-  // sich keiner internen Testgruppe zuordnen (Build 33, 27.10.2026).
+  // Ohne die Angabe bleibt jeder Build auf MISSING_EXPORT_COMPLIANCE.
   const plist = fs.readFileSync(path.join(ios, 'App/Info.plist'), 'utf8');
   assert.ok(/<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/.test(plist));
 });

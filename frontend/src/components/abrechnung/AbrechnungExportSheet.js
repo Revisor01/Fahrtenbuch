@@ -7,18 +7,7 @@ import { useFahrtenExport } from '../fahrten/useFahrtenExport';
 import { formatBetrag } from '../fahrten/zeitraumUtils';
 import { monatKategorien, monatLabel } from './abrechnungUtils';
 
-// Export-Sheet der Abrechnung (Phase R6) — je Träger Excel / PDF / Beide,
-// gleiche Zeilenform wie das Export-Sheet der Fahrtenliste.
-// Zwei Betriebsarten:
-//   monat gesetzt  → fester Einzelmonat (Download-Button einer Monatskarte)
-//   monat null     → Zeitraum-Export mit Von-/Bis-Wahl über alle Monate
-//                    mit Daten
-//
-// Statuswechsel: Beim Einzelmonat passiert keiner — der läuft über
-// „Einreichen". Beim Zeitraum (Von ≠ Bis) setzt dagegen das Backend selbst
-// jeden Monat auf „eingereicht" (setzeZeitraumStatus in
-// backend/utils/excelExport.js). Deshalb steht darüber ein Hinweis; die
-// frühere pauschale Zusage „ohne Statuswechsel" war dort falsch.
+// Export-Sheet je Träger, Einzelmonat ohne Statuswechsel, Zeitraum setzt jeden Monat auf „eingereicht“.
 function AbrechnungExportSheet({ isOpen, onClose, monat }) {
   const { monthlyData, abrechnungstraeger } = useContext(AppContext);
   const { exportExcel, exportPdf, exportBeides } = useFahrtenExport();
@@ -33,8 +22,7 @@ function AbrechnungExportSheet({ isOpen, onClose, monat }) {
   const [von, setVon] = useState(neuester);
   const [bis, setBis] = useState(neuester);
 
-  // Zeitraum-Grenzen nachziehen, wenn das Sheet ohne festen Monat öffnet
-  // und noch kein gültiger Wert gesetzt ist
+  // Ohne festen Monat die Grenzen nachziehen.
   const vonEff = monat ? monat.yearMonth : (von || neuester);
   const bisEff = monat ? monat.yearMonth : (bis || neuester);
   const gueltig = !!vonEff && !!bisEff && vonEff <= bisEff;
@@ -73,9 +61,7 @@ function AbrechnungExportSheet({ isOpen, onClose, monat }) {
   // Welcher Knopf gerade wartet: "<traeger>:<format>" oder null.
   const [laeuft, setLaeuft] = useState(null);
 
-  // Auf den Export warten statt sofort schliessen — Begruendung wie im
-  // Export-Sheet der Fahrtenliste: Der PDF-Export braucht gemessene ~4,3 s,
-  // und ohne Rueckmeldung wirkte der Knopf tot.
+  // Auf den Export warten, sonst wirkt der Knopf tot.
   const starte = async (fn, key, format) => {
     if (!gueltig || laeuft) return;
     setLaeuft(`${key}:${format}`);

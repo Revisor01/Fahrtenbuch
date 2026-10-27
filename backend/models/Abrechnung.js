@@ -26,11 +26,7 @@ class Abrechnung {
 
     static async updateStatus(userId, jahr, monat, typ, aktion, datum) {
         try {
-            // `abrechnungen.typ` ist VARCHAR und enthält gemischt Träger-IDs
-            // und den Sonderwert 'mitfahrer'. Wird ein numerischer Wert
-            // gebunden, castet MySQL die ganze Spalte auf DOUBLE und bricht
-            // an der Zeile 'mitfahrer' ab (ER_TRUNCATED_WRONG_VALUE).
-            // Daher IMMER als String vergleichen/schreiben.
+            // `typ` ist VARCHAR mit Träger-IDs und 'mitfahrer', ein numerischer Bind castet die Spalte und bricht ab.
             const istMitfahrer = String(typ) === 'mitfahrer';
             const typForDb = istMitfahrer ? 'mitfahrer' : String(parseInt(typ, 10));
 
@@ -89,22 +85,10 @@ class Abrechnung {
         }
     }
     
-    // Alle Monate eines Zeitraums in EINER Transaktion auf „eingereicht"
-    // setzen.
-    //
-    // Der Zeitraum-Export rief bisher updateStatus pro Monat auf, jeweils mit
-    // eigenem Autocommit — und das mitten im Bauen der Datei, also bevor
-    // feststand, dass ueberhaupt eine Datei herauskommt. Brach der Lauf bei
-    // Monat 3 von 6 ab (oder spaeter LibreOffice mit 60-s-Timeout), standen
-    // zwei Monate auf „eingereicht", vier nicht, und der Nutzer hatte nichts
-    // in der Hand. Zurueckgenommen werden musste das von Hand.
-    //
-    // Entweder alle Monate oder keiner. Aufgerufen wird das erst, wenn die
-    // Datei beim Nutzer ist.
+    // Alle Monate eines Zeitraums in einer Transaktion auf „eingereicht“, erst wenn die Datei beim Nutzer ist.
     static async markiereZeitraumEingereicht({ userId, startYear, startMonth, endYear, endMonth, typ, datum }) {
         const istMitfahrer = String(typ) === 'mitfahrer';
-        // Dieselbe Falle wie in updateStatus: `abrechnungen.typ` ist VARCHAR
-        // mit gemischtem Inhalt, ein numerischer Bind castet die Spalte.
+        // Als String binden, siehe updateStatus.
         const typForDb = istMitfahrer ? 'mitfahrer' : String(parseInt(typ, 10));
 
         if (!istMitfahrer) {
@@ -150,11 +134,7 @@ class Abrechnung {
         }
     }
 
-    // Status aller Monate in EINER Abfrage, gruppiert als
-    // { "2026-08": { "1": { eingereicht_am, erhalten_am } } }.
-    //
-    // Fuer die Monatsuebersicht: Die holte sich bisher 28 Einzelberichte,
-    // jeder mit eigener Status-Abfrage. Hier reicht eine.
+    // Status aller Monate in einer Abfrage: { "2026-08": { "1": { eingereicht_am, erhalten_am } } }.
     static async getStatusNachMonat(userId) {
         const [rows] = await db.execute(
             'SELECT jahr, monat, typ, eingereicht_am, erhalten_am FROM abrechnungen WHERE user_id = ?',

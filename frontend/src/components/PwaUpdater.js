@@ -2,15 +2,10 @@ import { useEffect, useRef } from 'react';
 import { useToast } from './ui/Toast';
 import { registerServiceWorker } from '../pwa/registerServiceWorker';
 
-// Verbindet den Service Worker mit dem bestehenden Toast-System:
-// - neue Version verfuegbar -> Toast mit Aktion „Neu laden"
-// - Verbindung weg / wieder da -> kurzer Hinweis
-//
-// Rendert nichts. Haengt bewusst innerhalb des ToastProviders.
+// Service Worker an die Toasts: neue Version, offline, wieder online; innerhalb des ToastProviders.
 function PwaUpdater() {
   const toast = useToast();
-  // Refs, damit der Effekt nur einmal laeuft und trotzdem die aktuelle
-  // Toast-Instanz nutzt (StrictMode montiert Effekte im Dev doppelt).
+  // Refs, damit der Effekt einmal läuft und die aktuelle Toast-Instanz nutzt.
   const toastRef = useRef(toast);
   toastRef.current = toast;
   const registriert = useRef(false);
@@ -30,9 +25,7 @@ function PwaUpdater() {
   }, []);
 
   useEffect(() => {
-    // Der Offline-Hinweis ist wichtiger als die Abrechnungsdaten selbst:
-    // die App zeigt bewusst keine gecachten Fahrten, deshalb muss klar sein,
-    // warum gerade nichts laedt.
+    // Ohne gecachte Fahrten muss klar sein, warum nichts lädt.
     const beiOffline = () => {
       toastRef.current.error('Keine Verbindung. Daten werden nicht aktualisiert.');
     };

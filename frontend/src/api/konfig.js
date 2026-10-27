@@ -2,21 +2,12 @@ import { apiUrl } from './client';
 import { setServerKonfig } from '../utils/appConfig';
 import logFehler from '../utils/logFehler';
 
-// Holt die oeffentliche Konfiguration der gewaehlten Instanz (/api/konfig).
-//
-// Gebraucht wird das nur in der App: Im Web schreibt der Container-Entrypoint
-// dieselben Werte in config.js, dort bleibt diese Datei ungenutzt.
+// Öffentliche Konfiguration der Instanz, nur in der App gebraucht.
 
-// Ein haengender Aufruf darf die Anmeldung nicht blockieren — dieselbe
-// Ueberlegung wie beim sicheren Speicher (utils/tokenSpeicher.js): Ein Fehler
-// laesst sich fangen, ein Aufruf ohne Antwort nicht. Lieber mit den bisherigen
-// Werten weiter als eine App, die auf dem Startbildschirm stehen bleibt.
+// Ein hängender Aufruf darf die Anmeldung nicht blockieren.
 const KONFIG_TIMEOUT_MS = 2500;
 
-// Die Werte muessen exakt so aussehen wie die aus config.js, weil sie an
-// denselben Stellen ausgewertet werden: dort steht 'true' als Zeichenkette.
-// Ein boolesches true vom Server wuerde am Vergleich vorbeilaufen und die
-// Registrierung stumm ausblenden.
+// Als Zeichenkette 'true' wie in config.js, sonst fällt die Registrierung still weg.
 function normalisiere(daten) {
   const werte = {};
   if (typeof daten.appTitle === 'string') werte.appTitle = daten.appTitle;
@@ -26,8 +17,7 @@ function normalisiere(daten) {
   if (typeof daten.allowedEmailDomains === 'string') {
     werte.allowedEmailDomains = daten.allowedEmailDomains;
   }
-  // Hier bleibt der boolesche Wert: die Auswertung kennt beide Formen, und
-  // 'false' als Zeichenkette waere wahr.
+  // Boolesch, weil 'false' als Zeichenkette wahr wäre.
   if (daten.registrationCodeRequired !== undefined) {
     werte.registrationCodeRequired =
       daten.registrationCodeRequired === true || daten.registrationCodeRequired === 'true';
@@ -35,10 +25,7 @@ function normalisiere(daten) {
   return werte;
 }
 
-// Bewusst fetch statt axios: Der Aufruf laeuft vor der Anmeldung und ohne die
-// Interceptoren des angemeldeten Clients. Der AbortController deckt auch den
-// Fall ab, dass der Server annimmt, aber nie antwortet — AbortSignal.timeout
-// waere kuerzer, kennen aeltere WebViews aber nicht.
+// fetch ohne die Interceptoren, mit AbortController, weil ältere WebViews AbortSignal.timeout nicht kennen.
 export async function ladeServerKonfig() {
   const abbruch = new AbortController();
   const wecker = setTimeout(() => abbruch.abort(), KONFIG_TIMEOUT_MS);
@@ -56,8 +43,7 @@ export async function ladeServerKonfig() {
     setServerKonfig(werte);
     return werte;
   } catch (error) {
-    // Aeltere Backends kennen /api/konfig nicht, und ohne Netz kommt gar nichts:
-    // beides ist kein Grund zum Abbruch — dann gelten die Werte aus dem Bundle.
+    // Ohne /api/konfig oder Netz gelten die Werte aus dem Bundle.
     logFehler('Konfiguration der Instanz nicht abrufbar:', error);
     return null;
   } finally {

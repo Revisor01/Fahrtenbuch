@@ -5,10 +5,7 @@ import { readFileSync } from 'node:fs';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
-// Der Bestand nutzt durchgaengig .js fuer JSX (57 Dateien). Vite parst .js
-// standardmaessig ohne JSX und bricht ab. Statt 57 Dateien umzubenennen,
-// laeuft Oxc mit lang 'jsx' vor der Import-Analyse — 'pre' ist
-// noetig, damit der Hook vor vite:build-import-analysis greift.
+// Der Bestand nutzt .js fuer JSX; 'pre', damit Oxc vor der Import-Analyse greift.
 const jsxInJs = {
   name: 'jsx-in-js',
   enforce: 'pre',
@@ -21,47 +18,28 @@ const jsxInJs = {
   },
 };
 
-// Service Worker. Bewusst konservativ: die App zeigt Abrechnungsdaten, veraltete
-// Zahlen waeren schlimmer als eine ehrliche Fehlermeldung. Deshalb wird nur die
-// App-Huelle vorgehalten, keine Nutzdaten.
+// Nur die App-Huelle vorhalten, nie Abrechnungsdaten.
 const pwa = VitePWA({
   registerType: 'prompt',
-  // Registrierung passiert von Hand in src/pwa/registerServiceWorker.js, damit
-  // sie in der spaeteren Capacitor-Huelle uebersprungen werden kann.
+  // Von Hand registriert, damit die Capacitor-Huelle es ueberspringen kann.
   injectRegister: null,
   manifest: false, // public/manifest.json wird unveraendert ausgeliefert
   includeAssets: [],
   workbox: {
-    // config.js traegt die instanzspezifische Laufzeit-Konfiguration und wird
-    // beim Containerstart neu geschrieben. Landet sie im Precache, bekaemen
-    // Nutzer:innen nach einem Deploy die alte Konfiguration — deshalb raus.
+    // config.js wird beim Containerstart neu geschrieben und darf nicht in den Precache.
     globPatterns: ['**/*.{js,css,html,woff2,ico,png,svg}'],
     globIgnores: ['**/config.js', '**/node_modules/**'],
     // Nur die App-Huelle. Grosse Assets gehoeren nicht in den Precache.
     maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
-    // Offline oeffnet die App-Huelle aus dem Precache; die React-App meldet
-    // dann selbst, dass keine Daten geladen werden koennen.
-    //
-    // (Fruehere Fassung nannte hier offline.html als Auffang, falls die
-    // Huelle fehlt. Die Datei lag zwar im Precache, wurde aber von nichts
-    // referenziert — ohne index.html gibt es auch keinen Weg zu ihr. Sie ist
-    // deshalb entfernt.)
     navigateFallback: '/index.html',
-    // Diese Pfade duerfen nie ueber den Navigations-Fallback laufen:
-    //  - /api/…      sonst bekaeme fetch() HTML statt JSON
-    //  - /config.js  die Laufzeit-Konfiguration
-    //  - /api-docs   die Swagger-Oberflaeche kommt vom Backend. Ohne diesen
-    //    Eintrag lieferte der Service Worker dort die React-Huelle aus dem
-    //    Precache, und die Doku war fuer alle mit installierter App nicht
-    //    mehr erreichbar.
+    // Nie ueber den Navigations-Fallback: API, Laufzeit-Konfiguration, Swagger-Doku.
     navigateFallbackDenylist: [/^\/api\//, /^\/api-docs/, /^\/config\.js$/],
     cleanupOutdatedCaches: true,
     clientsClaim: false, // erst nach bestaetigtem Update uebernehmen
     skipWaiting: false,
     runtimeCaching: [
       {
-        // config.js immer frisch vom Netz. Der Cache dient nur als Notnagel,
-        // damit die App im Offline-Start nicht ohne Konfiguration dasteht.
+        // Cache nur als Notnagel fuer den Offline-Start.
         urlPattern: ({ url }) => url.pathname === '/config.js',
         handler: 'NetworkFirst',
         options: {
@@ -71,9 +49,7 @@ const pwa = VitePWA({
         },
       },
       {
-        // API bewusst OHNE Cache: Fahrten, Abrechnungen und Erstattungssaetze
-        // duerfen nie aus einem alten Stand kommen. Offline schlaegt der
-        // Request fehl und die App zeigt ihre normale Fehlermeldung.
+        // API ohne Cache: Zahlen duerfen nie veraltet sein.
         urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
         handler: 'NetworkOnly',
       },
@@ -95,8 +71,6 @@ export default defineConfig({
   },
 
   define: {
-    // Ersetzt REACT_APP_VERSION aus dem alten Build-Skript ($npm_package_version).
-    // Wird im Info-Dialog angezeigt.
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
 
@@ -107,14 +81,7 @@ export default defineConfig({
 
     rolldownOptions: {
       output: {
-        // Ein einziges 584-KB-Buendel hiess: Die WebView muss alles geladen
-        // und geparst haben, bevor das erste Pixel erscheint — auf dem Geraet
-        // mehrere Sekunden schwarz (Simon 16.08.: „schneller starten").
-        //
-        // Aufgeteilt laedt der Browser die Teile parallel und beginnt frueher
-        // zu rendern. Die Grenzen sind nach Aenderungshaeufigkeit gezogen:
-        // React aendert sich fast nie und bleibt so ueber Deploys hinweg im
-        // Cache, waehrend der App-Code neu geladen wird.
+        // Aufgeteilt nach Aenderungshaeufigkeit, damit React ueber Deploys im Cache bleibt.
         codeSplitting: { groups: [{ name(id) {
           if (!id.includes('node_modules')) return null;
           if (id.includes('react-dom') || /node_modules\/react\//.test(id)) {
@@ -122,13 +89,7 @@ export default defineConfig({
           }
           if (id.includes('react-router')) return 'router';
           if (id.includes('lucide-react')) return 'icons';
-          // Dynamisch geladene Pakete NICHT nach `vendor` ziehen: Wer hier
-          // einen Namen zurueckgibt, hebelt den Lazy-Import aus — Rolldown legt
-          // das Modul dann in den benannten Brocken, und der laedt beim
-          // Start. jszip und pako braucht nur der ZIP-Export, die
-          // Capacitor-Plugins nur die App; im Browser werden sie nie
-          // angefordert. Mit `null` entscheidet Rolldown selbst und legt
-          // sie in eigene Dateien.
+          // Lazy geladene Pakete nicht nach `vendor` ziehen, sonst laden sie beim Start.
           if (/node_modules\/(jszip|pako|@capacitor|@capgo|@aparajita)\//.test(id)) return null;
           return 'vendor';
         } }] },

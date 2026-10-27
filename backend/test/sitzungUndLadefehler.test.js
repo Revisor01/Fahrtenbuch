@@ -1,23 +1,4 @@
-// Punkte 5 und 8 der Pre-Launch-Liste. Sie haengen zusammen und wurden
-// deshalb gemeinsam behoben.
-//
-// Punkt 5: Schlug das Laden der Fahrten fehl, setzte der catch-Zweig
-// `setFahrten([])` und schwieg. Die Liste zeigte dann „Noch keine Fahrten im
-// September" — der gefaehrlichste Fall in dieser App: Die Nutzer:in erfasst
-// die Fahrten ein zweites Mal und rechnet sie doppelt ab.
-//
-// Punkt 8: Der erzwungene Logout (abgelaufene Sitzung) kam wortlos, mitten
-// im Formular. Dazu stand ein offenes Erfassungs-Sheet danach ueber der
-// Anmeldemaske, weil es nicht von AppContent gerendert wird.
-//
-// Reihenfolge war wichtig: Der `isLoggingOut`-Guard wurde in `logout()`
-// selbst zurueckgesetzt. Weil logout() synchron durchlaeuft, war das Flag
-// beim zweiten der ~35 parallelen 401-Fehler schon wieder false. Ohne
-// Meldung fiel das nicht auf (logout ist idempotent) — mit der Meldung aus
-// Punkt 8 waeren es 35 Toasts uebereinander gewesen. Der Guard musste also
-// VOR dem Toast repariert werden.
-//
-// Laeuft ohne Test-Framework: `node test/sitzungUndLadefehler.test.js`.
+// Ladefehler zeigen keine leere Liste, der erzwungene Logout meldet sich einmal und schließt offene Sheets. Aufruf: node test/sitzungUndLadefehler.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -86,8 +67,7 @@ pruefe('der 60-s-Timer gibt den Grund mit — in beiden Zweigen', () => {
 });
 
 pruefe('das bewusste Abmelden laeuft ohne Grund', () => {
-  // onClick={logout} haette das Click-Event als { grund } uebergeben —
-  // zufaellig richtig, aber nicht erkennbar. Jetzt explizit.
+  // Grund explizit statt des Click-Events.
   assert.ok(!/onClick=\{logout\}/.test(appContent),
     'logout darf nicht direkt als Handler haengen');
   const einst = lies('components/einstellungen/EinstellungenView.js');
@@ -111,8 +91,7 @@ pruefe('der ErfassungProvider schliesst beim Abmelden', () => {
 });
 
 pruefe('der Zugriff auf den Context ist abgesichert', () => {
-  // Der ErfassungProvider ist zwar ein Kind des AppProviders, aber ein
-  // fehlender Context darf hier nicht zum TypeError werden.
+  // Ein fehlender Context darf kein TypeError werden.
   assert.ok(/useContext\(AppContext\) \|\| \{\}/.test(erfCtx));
 });
 
@@ -159,8 +138,7 @@ pruefe('die Liste unterscheidet Fehler von „keine Fahrten"', () => {
 
 pruefe('der alte Leertext steht nur noch im Leerfall', () => {
   const stelleFehler = liste.indexOf('sortierteFahrten.length === 0 && fahrtenFehler');
-  // Auf den JSX-Ausdruck pruefen, nicht auf den Satz: Der steht auch im
-  // erklaerenden Kommentar darueber.
+  // Auf den JSX-Ausdruck prüfen, nicht auf den Satz.
   const stelleLeer = liste.indexOf('`Noch keine Fahrten im ${monatLabel');
   assert.ok(stelleFehler > -1 && stelleLeer > stelleFehler,
     'der Leertext darf erst nach der Fehlerpruefung kommen');

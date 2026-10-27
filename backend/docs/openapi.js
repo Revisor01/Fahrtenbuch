@@ -1,11 +1,4 @@
-// OpenAPI-3.1-Beschreibung der Fahrtenbuch-API.
-//
-// Bewusst als JS-Modul und nicht als YAML: Titel, Server-URL und Beschreibung
-// kommen aus der Umgebung, damit dieselbe Datei bei jedem Kirchenkreis die
-// richtige Adresse zeigt.
-//
-// Gepflegt wird sie zusammen mit den Routen — eine neue Route gehoert hier
-// hinein, im selben Commit.
+// OpenAPI 3.1 als JS-Modul, damit Titel und Server-URL aus der Umgebung kommen; neue Routen im selben Commit eintragen.
 
 const ANTWORT = (beschreibung, beispiel) => ({
   description: beschreibung,
@@ -14,8 +7,7 @@ const ANTWORT = (beschreibung, beispiel) => ({
 
 const MELDUNG = (text) => ANTWORT(text, { message: text });
 
-// Wiederkehrende Fehlerantworten. Sie gelten fuer nahezu jeden Endpunkt und
-// stehen deshalb einmal zentral.
+// Wiederkehrende Fehlerantworten.
 const FEHLER = {
   401: ANTWORT('Nicht angemeldet oder Token abgelaufen', { message: 'Keine Authentifizierung vorhanden' }),
   403: MELDUNG('Keine Berechtigung für diese Aktion'),

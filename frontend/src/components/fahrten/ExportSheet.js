@@ -9,10 +9,7 @@ import {
   offeneMonateImZeitraum,
 } from './zeitraumUtils';
 
-// Kompaktes Export-Sheet (öffnet über „Export" in der Summenzeile):
-// je Abrechnungsträger die drei Formate Excel / PDF / Beide (ZIP).
-// Im Zeitraum-Modus erscheinen nur Träger mit offenen Monaten —
-// wie bisher; vollständig eingereichte/erstattete brauchen keinen Export.
+// Export-Sheet je Träger; im Zeitraum nur Träger mit offenen Monaten.
 function ExportSheet({ isOpen, onClose }) {
   const { summary, abrechnungstraeger, selectedMonth, selectedVonMonth } = useContext(AppContext);
   const { exportExcel, exportPdf, exportBeides } = useFahrtenExport();
@@ -45,16 +42,7 @@ function ExportSheet({ isOpen, onClose }) {
   // Welcher Knopf gerade wartet: "<traeger>:<format>" oder null.
   const [laeuft, setLaeuft] = useState(null);
 
-  // Auf den Export WARTEN, statt das Sheet sofort zu schliessen.
-  //
-  // Der PDF-Export dauert gemessene ~4,3 s (LibreOffice auf dem Server).
-  // Bisher verschwand das Sheet beim Klick und bis zum Toast passierte
-  // sichtbar nichts — nicht zu unterscheiden von „Knopf hat nicht
-  // reagiert". Jetzt bleibt das Sheet stehen, der Knopf zeigt den Lauf,
-  // und geschlossen wird erst, wenn die Datei da ist.
-  //
-  // Bei einem Fehler bleibt das Sheet offen: Der Fehler-Toast kommt aus
-  // dem Export-Hook, und der naechste Versuch ist einen Tipp entfernt.
+  // Auf den Export warten, ein PDF dauert etwa 4,3 s; bei Fehler bleibt das Sheet offen.
   const starte = async (fn, key, format) => {
     if (laeuft) return;
     setLaeuft(`${key}:${format}`);

@@ -29,8 +29,7 @@ import {
   offenenKurzbefehlAbholenAsync,
 } from '../utils/kurzbefehle';
 
-// Das Zeichen: offener Ring (die gefahrene Strecke), um −45° gedreht.
-// Ab 32px Darstellungsgröße trägt der Ring allein (ohne Akzent-Punkt).
+// Das Zeichen: offener Ring, um −45° gedreht; ab 32 px ohne Akzent-Punkt.
 function LogoMark({ size = 26 }) {
   return (
     <svg viewBox="0 0 512 512" width={size} height={size} aria-hidden="true">
@@ -53,12 +52,7 @@ const NAV_ITEMS = [
   { id: 'einstellungen', label: 'Einstellungen', icon: Settings },
 ];
 
-// Erfassen ist in der nativen Huelle KEIN Tab mit eigenem Screen, sondern eine
-// Aktion: Das Plugin setzt `role: 'prominent'` als abgesetzten runden Knopf
-// neben der Kapsel der Floating-Tabbar. Damit sitzt der Einstieg dort, wo das
-// System ihn erwartet, statt als freischwebender Knopf ueber der Leiste zu
-// haengen (User-Feedback 14.08.: „haengt einfach random rum").
-// Im Web bleibt es beim bisherigen Weg — dort gibt es keine native Leiste.
+// Erfassen ist in der nativen Leiste ein abgesetzter Aktionsknopf (`role: 'prominent'`), im Web bleibt es beim bisherigen Weg.
 const ERFASSEN_ID = 'erfassen';
 
 const NATIVE_NAV_ITEMS = [
@@ -76,35 +70,21 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [settingsSubTab, setSettingsSubTab] = useState(null);
 
-  // Nur die native App braucht eine Instanz-Wahl: Sie laeuft von einem lokalen
-  // Bundle und kennt ohne Auswahl keinen Server. Im Web bleibt das Gate
-  // dauerhaft aus — dort loesen relative Pfade gegen den eigenen Host auf.
+  // Nur die App braucht eine Instanz-Wahl.
   const [instanzGewaehlt, setInstanzGewaehlt] = useState(
     () => !IST_NATIVE || Boolean(getApiBaseUrl())
   );
 
-  // Die App kennt ihre Instanz-Konfiguration (Titel, Registrierung, erlaubte
-  // Domains) erst, wenn der Server gefragt wurde — im Web liefert sie die
-  // config.js des Deployments, dort ist hier nichts zu tun.
+  // In der App erst nach Abfrage des Servers bekannt, im Web aus config.js.
   const [konfigGeladen, setKonfigGeladen] = useState(!IST_NATIVE);
 
-  // Die aktuelle Basis-URL als Ausloeser: Sie aendert sich sowohl bei der
-  // ersten Wahl als auch beim spaeteren Wechsel in den Einstellungen (der nur
-  // abmeldet, ohne die Auswahl neu zu oeffnen). Sonst zeigte die Anmeldung
-  // nach einem Wechsel noch die Angaben des vorherigen Kirchenkreises.
+  // An der Basis-URL, damit auch ein späterer Wechsel die Angaben neu lädt.
   const aktuelleApiUrl = getApiBaseUrl();
 
   useEffect(() => {
     if (!IST_NATIVE || !instanzGewaehlt) return undefined;
     let abgemeldet = false;
-    // Bewusst KEIN Zuruecksetzen auf "laedt": Der Effekt laeuft auch beim
-    // Start erneut, sobald die Basis-URL feststeht. Wurde hier zurueckgesetzt,
-    // erschien der Startbildschirm ein zweites Mal — fuer die volle Dauer der
-    // Anfrage. Wer angemeldet ist, sieht das Ergebnis ohnehin nie; die
-    // Anmeldemaske ergaenzt sich, sobald die Werte eintreffen.
-    // Der Aufruf faengt seine Fehler selbst und hat eine eigene Zeitgrenze:
-    // ohne Antwort gelten die Werte aus dem Bundle, die Anmeldung erscheint
-    // trotzdem.
+    // Nicht auf „lädt“ zurücksetzen, sonst erscheint der Startbildschirm ein zweites Mal; ohne Antwort gelten die Bundle-Werte.
     ladeServerKonfig().finally(() => {
       if (!abgemeldet) setKonfigGeladen(true);
     });
@@ -125,8 +105,7 @@ function AppContent() {
     }
   };
 
-  // Fällige Monate: Vormonate, in denen mindestens ein Träger mit Erstattung
-  // weder eingereicht noch erstattet ist
+  // Fällig: Vormonate mit Erstattung, die weder eingereicht noch erstattet sind.
   const faelligeMonate = useMemo(() => {
     const currentYearMonth = aktuellerMonat();
     return monthlyData.filter((md) => {
@@ -139,11 +118,7 @@ function AppContent() {
     }).length;
   }, [monthlyData]);
 
-  // Token Check Effect
-  //
-  // Quelle ist der Token aus dem Context statt localStorage: in der App liegt
-  // er im Systemspeicher und waere hier nur asynchron erreichbar. Der Context
-  // haelt ohnehin denselben Wert.
+  // Token aus dem Context, der Systemspeicher wäre hier nur asynchron erreichbar.
   useEffect(() => {
     const checkTokenExpiration = () => {
       if (!token) return;
@@ -154,9 +129,7 @@ function AppContent() {
           logout({ grund: 'abgelaufen' });
         }
       } catch (error) {
-        // Ein defekter Token darf die App nicht zerlegen: die Exception lief
-        // bisher aus dem useEffect heraus, React warf den Baum weg (weisse
-        // Seite) und der kaputte Wert blieb liegen - jeder Reload crashte neu.
+        // Ein defekter Token darf die App nicht zerlegen.
         console.error('Token unlesbar, wird verworfen:', error);
         logout({ grund: 'abgelaufen' });
       }
@@ -167,28 +140,17 @@ function AppContent() {
     return () => clearInterval(interval);
   }, [logout, token]);
 
-  // Muss vor den fruehen Returns stehen (Hook-Reihenfolge) und ist ausserhalb
-  // von Android ohnehin ein No-Op.
+  // Vor den frühen Returns wegen der Hook-Reihenfolge.
   useZurueckButton({
     startTab: 'dashboard',
     activeTab,
     onNavigate: handleNavigate,
   });
 
-  // Tastaturhoehe als CSS-Variable bereitstellen: Sheets richten ihre Hoehe
-  // daran aus, sonst liegen ihre Eingabefelder unter der Tastatur.
+  // Sonst liegen die Eingabefelder der Sheets unter der Tastatur.
   useEffect(() => tastaturBeobachten(), []);
 
-  // Kurzbefehle (langes Tippen auf das App-Symbol).
-  //
-  // Der Effekt haengt an `isLoggedIn`: Ohne Anmeldung gibt es keinen
-  // Erfassungsflow, und den Kurzbefehl in die Anmeldemaske hinein zu oeffnen
-  // waere eine leere Geste. Er bleibt so lange gepuffert, bis die Anmeldung
-  // steht — genau das ist der Zweck des Puffers auf der nativen Seite.
-  //
-  // Bewusst ohne `fahrten` in den Abhaengigkeiten: Der Listener wuerde sonst
-  // bei jeder Datenaktualisierung neu anmelden, und der Griff auf die letzte
-  // Fahrt geschieht ohnehin erst im Moment des Tippens. Deshalb eine Ref.
+  // Kurzbefehle erst nach der Anmeldung, bis dahin puffert die native Seite; `fahrten` als Ref, damit der Listener nicht ständig neu anmeldet.
   const fahrtenRef = useRef(fahrten);
   fahrtenRef.current = fahrten;
 
@@ -197,9 +159,7 @@ function AppContent() {
 
     const ausfuehren = (typ) => {
       if (typ === KURZBEFEHL_WIEDERHOLEN) {
-        // Jüngstes Datum, bei Gleichstand die zuletzt erfasste (hoechste ID):
-        // `findAll` sortiert nur nach Datum, mehrere Fahrten am selben Tag
-        // kaemen sonst in beliebiger Reihenfolge.
+        // Jüngstes Datum, bei Gleichstand die höchste ID.
         const letzte = (fahrtenRef.current || []).reduce((beste, f) => {
           if (!beste) return f;
           const a = (f.datum || '').slice(0, 10);
@@ -209,8 +169,7 @@ function AppContent() {
         }, null);
 
         if (letzte) {
-          // Datum absichtlich NICHT vorbelegt: Wiederholen heisst „dieselbe
-          // Strecke, heute" — genau wie der Knopf in der Fahrtenliste.
+          // Datum bewusst leer: Wiederholen heißt „dieselbe Strecke, heute“.
           erfassung.open({
             vonOrtId: letzte.von_ort_id,
             nachOrtId: letzte.nach_ort_id,
@@ -219,18 +178,14 @@ function AppContent() {
           });
           return;
         }
-        // Keine Fahrt vorhanden (neues Konto): der leere Flow ist die
-        // ehrlichere Antwort als gar keine Reaktion auf den Kurzbefehl.
+        // Ohne Fahrt der leere Flow statt gar keiner Reaktion.
       }
       erfassung.open();
     };
 
     const abmelden = aufKurzbefehlHoeren(ausfuehren);
 
-    // Beim Kaltstart hat die native Seite den Typ hinterlegt, bevor dieser
-    // Listener stand — der Wert liegt dann bereit und wird hier abgeholt.
-    // Auf iOS synchron aus window.__kurzbefehl, auf Android ueber die
-    // Bruecke; deshalb async, mit Abbruch falls der Effekt schon weg ist.
+    // Beim Kaltstart liegt der Typ schon bereit (iOS window.__kurzbefehl, Android über die Brücke).
     let abgeraeumt = false;
     offenenKurzbefehlAbholenAsync().then((offener) => {
       if (!abgeraeumt && offener) ausfuehren(offener);
@@ -242,12 +197,7 @@ function AppContent() {
     };
   }, [isLoggedIn, erfassung]);
 
-  // Welche Flaeche traegt der gerade sichtbare Bildschirm? Startbildschirm,
-  // Kirchenkreis-Wahl und Anmeldung sind ganzflaechig Petrol, die angemeldete
-  // Ansicht traegt die normale App-Flaeche. Davon haengen in der App die
-  // Farbe der Systemraender und die Symbolfarbe der Statusleiste ab.
-  // Muss vor den fruehen Returns stehen (Hook-Reihenfolge); im Web ist der
-  // Aufruf ein No-Op.
+  // Ganzflächig Petrol oder normale App-Fläche, davon hängen Systemränder und Statusleiste ab; vor den frühen Returns.
   const markenflaeche =
     !instanzGewaehlt || !anmeldungGeladen || !isLoggedIn;
 
@@ -264,34 +214,14 @@ function AppContent() {
     );
   }
 
-  // Erst wenn die gespeicherte Anmeldung gelesen ist, steht fest, ob die
-  // Anmeldemaske gehoert wird. Ohne dieses Gate blitzte sie beim Start der App
-  // Ein einziger Ladezustand bis feststeht, was tatsaechlich zu zeigen ist.
-  //
-  // Zuvor gab es zwei aufeinanderfolgende Bedingungen: erst die gespeicherte
-  // Anmeldung, dann die Instanz-Konfiguration. Dazwischen lag ein Moment, in
-  // dem die Anmeldemaske schon gerendert wurde, obwohl gleich darauf das
-  // Dashboard kam — sie blitzte sichtbar auf.
-  //
-  // Auf die Konfiguration wird weiterhin nur gewartet, wenn die Anmeldemaske
-  // wirklich gebraucht wird: Wer angemeldet ist, sieht ihr Ergebnis nie.
-  // Es wird nur auf die gespeicherte Anmeldung gewartet — sie entscheidet, ob
-  // ueberhaupt die Anmeldemaske gebraucht wird.
-  //
-  // Auf die Instanz-Konfiguration wird bewusst NICHT gewartet: Sie steuert nur
-  // Feinheiten der Anmeldemaske (etwa ob eine Registrierung angeboten wird)
-  // und traf frueher hier ein zweites Mal den Startbildschirm — sichtbar als
-  // sekundenlange Verzoegerung. Sie laedt jetzt nebenher; die Anmeldemaske
-  // ergaenzt sich, sobald die Werte da sind.
+  // Nur auf die gespeicherte Anmeldung warten, nicht auf die Instanz-Konfiguration, sonst blitzt die Anmeldemaske oder der Start dauert.
   if (!anmeldungGeladen) {
     return <Startbildschirm />;
   }
 
   if (!isLoggedIn) {
     return (
-      // Zurueck zur Kirchenkreis-Wahl nur in der App: Im Web gibt es keine
-      // Auswahl, dort steht der Server fest. Die gemerkte Instanz muss dabei
-      // weg, sonst startet die App gleich wieder mit derselben.
+      // Zurück zur Kirchenkreis-Wahl nur in der App; die gemerkte Instanz muss weg.
       <LoginPage
         onInstanzWechsel={
           IST_NATIVE
@@ -309,30 +239,24 @@ function AppContent() {
   const initials = (user?.username || '?').slice(0, 2).toUpperCase();
   const roleLabel = isAdmin ? 'Administrator' : 'Nutzer:in';
 
-  // Verwaltung hat in der Sidebar einen eigenen Eintrag — mobil (ohne eigenen
-  // Eintrag) markiert „Einstellungen" auch die Verwaltung als aktiv
+  // Mobil markiert „Einstellungen“ auch die Verwaltung.
   const isNavItemActive = (id, mobil = false) =>
     activeTab === id || (mobil && id === 'einstellungen' && activeTab === 'verwaltung');
 
   const handleNavClick = (id) => {
-    // Der prominente Knopf ist eine Aktion, kein Ziel: Er oeffnet den
-    // Erfassungsflow und laesst den sichtbaren Tab stehen. Wuerde er activeTab
-    // setzen, staende die App nach dem Schliessen des Sheets auf einem Screen,
-    // den es nicht gibt.
+    // Der prominente Knopf öffnet nur den Flow und setzt keinen Tab.
     if (id === ERFASSEN_ID) {
       if (IST_NATIVE) auswahlHaptik();
       erfassung.open();
       return;
     }
-    // Haptik nur beim tatsaechlichen Wechsel: erneutes Tippen auf den offenen
-    // Tab soll sich nicht nach einer Aktion anfuehlen. Im Web passiert nichts.
+    // Haptik nur bei echtem Wechsel.
     if (IST_NATIVE && id !== activeTab) auswahlHaptik();
     setActiveTab(id);
     setSettingsSubTab(null);
   };
 
-  // Der native Nav-Balken kennt keinen Verwaltungs-Eintrag — wie mobil im Web
-  // markiert dort „Einstellungen" auch die Verwaltung.
+  // Auch nativ markiert „Einstellungen“ die Verwaltung.
   const nativAktivId = activeTab === 'verwaltung' ? 'einstellungen' : activeTab;
 
   return (

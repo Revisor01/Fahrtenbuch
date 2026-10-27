@@ -1,8 +1,4 @@
-// Punkt 11 der Pre-Launch-Liste (Backend, MITTEL) und zwei Teilbefunde aus
-// Punkt 15. Alle vorher gegen den Code geprueft; die Zeilenangaben der Liste
-// waren teils veraltet.
-//
-// Laeuft ohne Test-Framework: `node test/backendHaertung.test.js`.
+// Backend-Härtung ohne Datenbank. Aufruf: node test/backendHaertung.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -156,9 +152,7 @@ pruefe('ein kurzes JWT_SECRET wird gemeldet', () => {
 });
 
 pruefe('der Start bricht deswegen NICHT ab', () => {
-  // Ein process.exit() liesse den Server beim naechsten Deploy nicht mehr
-  // hochkommen, falls das Produktions-Secret kurz ist — ein Ausfall als
-  // Antwort auf ein Risiko, das seit Monaten besteht.
+  // Ein Abbruch ließe den Server beim nächsten Deploy nicht hochkommen.
   const block = app.split('JWT_MINDESTLAENGE')[1].split('\n}')[0];
   assert.ok(!/process\.exit/.test(block));
 });
@@ -180,10 +174,7 @@ pruefe('Passwoerter brauchen bei Neuvergabe 8 Zeichen', () => {
 });
 
 pruefe('Server und Oberflaeche fordern denselben Wert', () => {
-  // Der eigentliche Fehler war nicht die Zahl, sondern dass sie auseinander
-  // lief: Die Pruefliste zeigte „Mindestens 8 Zeichen" gruen, der Server
-  // verlangte 10 und wies mit „Validierungsfehler" ab. Wer eine Seite
-  // aendert, muss die andere mitziehen — das faengt diese Pruefung ab.
+  // Server und Prüfliste müssen dieselbe Mindestlänge fordern.
   const serverWert = lies('schemas/userSchemas.js').match(/min\((\d+), 'Passwort muss/);
   assert.ok(serverWert, 'Mindestlaenge im Server-Schema nicht gefunden');
 
@@ -248,14 +239,11 @@ for (const [name, datei] of [
 }
 
 pruefe('das Frontend prueft auf 409, nicht auf einen Meldungstext', () => {
-  // Frueher suchte es „Duplicate entry" in einem `error`-Feld, das gar nicht
-  // gesendet wurde — die Meldung konnte nie erscheinen.
   for (const p of ['MitfahrerBereich', 'ErstattungBereich']) {
     const inhalt = fs.readFileSync(
       `${__dirname}/../../frontend/src/components/einstellungen/${p}.js`, 'utf8');
     assert.ok(/error\.response\?\.status === 409/.test(inhalt), p);
-    // Auf den Code pruefen, nicht auf das Wort: Es steht weiterhin im
-    // erklaerenden Kommentar darueber.
+    // Auf den Code prüfen, nicht auf das Wort.
     assert.ok(!/data\?\.error\?\.includes/.test(inhalt),
       `${p} liest noch das nicht gesendete error-Feld`);
   }

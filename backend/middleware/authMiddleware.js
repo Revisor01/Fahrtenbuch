@@ -14,9 +14,7 @@ const authMiddleware = async (req, res, next) => {
         const user = await User.findById(keyData.user_id);
         if (user) {
           req.user = user;
-          // Kennzeichnen, welcher Weg die Anmeldung getragen hat: Ein
-          // API-Schluessel hat kein Ausstellungsdatum, fuer ihn gibt es also
-          // weder eine gleitende Sitzung noch ein Erneuerungs-Token.
+          // API-Schlüssel haben kein Ausstellungsdatum, also keine gleitende Sitzung.
           req.mitApiSchluessel = true;
           await ApiKey.updateLastUsed(keyData.api_key_id);
           return next();
@@ -37,11 +35,7 @@ const authMiddleware = async (req, res, next) => {
   const token = authHeader.replace('Bearer ', '');
   
   try {
-    // algorithms festnageln: Bei einem String-Secret ist der Verwechslungs-
-    // Angriff (RS256-Token gegen HS256-Pruefung) zwar nicht moeglich und
-    // jsonwebtoken >=9 lehnt `alg: none` ohnehin ab — aber die Annahme steht
-    // dann im Code und nicht nur in der Bibliotheksversion. Signiert wird in
-    // authController ohne Angabe, also bereits HS256.
+    // Algorithmus festlegen, damit die Annahme im Code steht.
     const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     
     // Lade aktuelle User-Daten aus der Datenbank
@@ -50,15 +44,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Benutzer nicht gefunden' });
     }
 
-    // Wurde das Passwort geaendert, nachdem dieses Token ausgestellt wurde?
-    // Dann gilt es nicht mehr. Vorher blieben alte Anmeldungen bestehen: Wer
-    // ein Token abgegriffen hatte, behielt den Zugang trotz neuem Passwort —
-    // und genau davor soll ein Passwortwechsel schuetzen (24.08.).
-    //
-    // decoded.iat ist die Ausstellungszeit in Sekunden. Eine Sekunde Toleranz,
-    // weil iat abgerundet wird: Ohne sie flog ein Token, das im selben Moment
-    // wie die Aenderung entstand, sofort wieder raus — etwa das frische Token
-    // direkt nach dem Setzen eines neuen Passworts.
+    // Token vor dem letzten Passwortwechsel gelten nicht; 1 s Toleranz, weil iat abgerundet wird.
     if (user.passwort_geaendert_am && decoded.iat) {
       const geaendert = Math.floor(new Date(user.passwort_geaendert_am).getTime() / 1000);
       if (Number.isFinite(geaendert) && decoded.iat < geaendert - 1) {
@@ -69,15 +55,12 @@ const authMiddleware = async (req, res, next) => {
     // Füge vollständige User-Informationen zum Request hinzu
     req.user = user;
 
-    // Gleitende Sitzung: Bei Nutzung laeuft die Anmeldung nicht ab. Ein neues
-    // Token geht ueber einen Antwort-Header zurueck, sobald die halbe Laufzeit
-    // vorbei ist. Nur fuer JWT — API-Schluessel haben eigene Gueltigkeit.
+    // Gleitende Sitzung: neues Token im Antwort-Header ab halber Laufzeit, nur für JWT.
     erneuereBeiBedarf(decoded, res);
 
     next();
   } catch (error) {
-    // Details nur ins Log, nicht an den Client: "invalid signature" vs.
-    // "jwt expired" verraet Angreifern, woran ihr Token scheitert.
+    // Details nur ins Log, sonst erfahren Angreifer, woran ihr Token scheitert.
     console.error('Token verification failed:', error.message);
     res.status(401).json({ message: 'Ungültige Authentifizierung' });
   }
@@ -107,11 +90,7 @@ const requireAdminOrSelf = (paramName = 'id') => {
 
     const roh = req.params[paramName];
 
-    // Nur reine Ziffernfolgen. parseInt allein reichte nicht: parseInt('2e1')
-    // ist 2, die Abfragen bekamen aber den Rohwert, und MySQL liest '2e1' im
-    // Vergleich mit einer INT-Spalte als Double = 20. Nutzer 2 erreichte so
-    // die Konten 20–29 (gemessen auf Produktion: SELECT 20 = '2e1' -> 1).
-    // Dasselbe gilt fuer '+2', ' 2', '2.0' und '0x2'.
+    // Nur reine Ziffern, MySQL liest '2e1' als 20.
     if (typeof roh !== 'string' || !/^\d+$/.test(roh)) {
       return res.status(400).json({ message: 'Ungültige ID' });
     }
@@ -125,8 +104,7 @@ const requireAdminOrSelf = (paramName = 'id') => {
       return res.status(403).json({ message: 'Keine Berechtigung für diese Aktion' });
     }
 
-    // Normalisiert zurueckschreiben, damit nachgelagerte Abfragen nie den
-    // Rohwert sehen — auch wenn spaeter jemand eine Stelle uebersieht.
+    // Normalisiert zurückschreiben, damit nachgelagerte Abfragen nie den Rohwert sehen.
     req.params[paramName] = String(requestedId);
 
     next();

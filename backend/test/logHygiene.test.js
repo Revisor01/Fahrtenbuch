@@ -1,17 +1,4 @@
-// Punkt 15 der Pre-Launch-Liste: Token im Geraetelog.
-//
-// `console.error('…', error)` mit einem AxiosError schreibt das ganze Objekt
-// ins Log — darin stecken `config.headers.Authorization` (das Bearer-Token)
-// und `config.data` (bei der Anmeldung Benutzername und Passwort im
-// Klartext). Im Browser bleibt das in der Entwicklerkonsole; in der App
-// landet es im Geraetelog, das sich ueber Console.app oder `adb logcat` von
-// aussen mitlesen laesst.
-//
-// Die Liste schaetzte ~60 Stellen, es waren 111. Umgestellt sind die 87 mit
-// API-Bezug; die uebrigen protokollieren Speicher- und Plattformfehler, in
-// denen kein Anfrageobjekt steckt.
-//
-// Laeuft ohne Test-Framework: `node test/logHygiene.test.js`.
+// AxiosError nie ganz ins Log, darin stecken Token und Passwort. Aufruf: node test/logHygiene.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -115,8 +102,7 @@ pruefe('keine Datei mit axios protokolliert noch ein rohes Fehlerobjekt', () => 
     if (!/from 'axios'|from "axios"/.test(inhalt)) continue;
     if (muster.test(inhalt)) uebrig.push(path.relative(frontend, datei));
   }
-  // client.js und tokenSpeicher.js protokollieren Speicherfehler
-  // (localStorage, Keychain) — dort gibt es kein Anfrageobjekt.
+  // Speicherfehler ohne Anfrageobjekt.
   const erlaubt = ['src/api/client.js', 'src/utils/tokenSpeicher.js'];
   const unerwartet = uebrig.filter((d) => !erlaubt.includes(d));
   assert.deepStrictEqual(unerwartet, [],

@@ -27,10 +27,7 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      # Ohne LibreOffice ueberspringt der PDF-Test die Umwandlung stillschweigend.
-      # Der Azure-Paketspiegel liefert die rund 94 MB zeitweise nur mit
-      # wenigen KB/s. Deshalb liegen die Pakete im Actions-Cache (eine Woche
-      # gueltig), und bei einem Fehlversuch wechselt apt auf den Ubuntu-Spiegel.
+      # Ohne LibreOffice überspringt der PDF-Test still; Pakete im Cache, weil der Azure-Spiegel zeitweise nur KB/s liefert.
       - name: Cache-Schluessel fuer LibreOffice
         id: lo-woche
         run: echo "woche=$(date +%G-%V)" >> "$GITHUB_OUTPUT"
@@ -85,10 +82,7 @@ jobs:
         working-directory: backend
         run: npm test
 
-  # Antwortformen sind ein Vertrag mit den Apps im Store: Dieselbe
-  # Anfragefolge laeuft gegen den Basis-Branch und gegen den PR, jeweils mit
-  # frischer Datenbank. Status, Inhaltstyp und jede alte Form muessen
-  # bleiben; neue Felder sind erlaubt.
+  # Antwortformen sind ein Vertrag mit den Store-Apps: dieselbe Anfragefolge gegen Basis und PR, neue Felder erlaubt.
   api-vertrag:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04

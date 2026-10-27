@@ -1,9 +1,4 @@
-// Vergleicht zwei Protokolle aus anfragefolge.js: alt (Basis-Branch) und neu.
-// Gleich bleiben muessen Status, Inhaltstyp und jede Form, die alt lieferte.
-// Neue Felder sind erlaubt, wegfallende oder anders getypte nicht: die Apps
-// im Store lesen die alte Form.
-//
-// Aufruf: node test/vertrag/vergleich.js <alt.json> <neu.json>
+// Vergleicht alt und neu: Status, Inhaltstyp und alte Formen bleiben, neue Felder sind erlaubt. Aufruf: node test/vertrag/vergleich.js <alt.json> <neu.json>
 
 const fs = require('fs');
 
@@ -29,10 +24,7 @@ function abweichungen(a, b, ort) {
   return [`${ort}: ${JSON.stringify(a)} -> ${JSON.stringify(b)}`];
 }
 
-// Bewusste Aenderungen eines PRs: Schritt, alter und neuer Status, Grund.
-// Sie werden ausgewiesen statt als Fehler gezaehlt. Nur Wechsel weg von
-// einem 5xx gehoeren hierher; eine Erfolgsantwort darf sich nie aendern.
-// Ein Eintrag wirkt nur, solange der Basis-Branch noch den 5xx liefert.
+// Bewusste Wechsel weg von einem 5xx, ausgewiesen statt gezählt, solange die Basis noch 5xx liefert.
 const bewusst = JSON.parse(fs.readFileSync(__dirname + '/bewusst.json', 'utf8'));
 
 const fehler = [];
