@@ -28,6 +28,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - README, Vorlagen und Hinweise gibt es nur noch auf Deutsch.
 - Die iOS-App wird auf einem neuen Weg gebaut und ausgeliefert. Für Nutzende ändert sich nichts
 - Eine Hilfsbibliothek für Kennungen mit bekannter Sicherheitslücke auf die neueste Fassung gehoben. Für Nutzende ändert sich nichts
+- Die Oberfläche läuft auf den neuen Hauptversionen von React, Vite und der Symbolbibliothek. Aussehen und Bedienung bleiben gleich
 
 ### Behoben
 - Ein langer Reisezweck oder eine lange Anschrift, die im Formular auf zwei Zeilen umbricht, lief in die Zeile darüber und war kaum lesbar. Solche Zeilen werden jetzt entsprechend höher, das Blatt passt weiter auf eine Seite
