@@ -271,7 +271,7 @@ const paths = {
         type: 'object', required: ['name'],
         properties: {
           name: { type: 'string', example: 'Anna Beispiel' },
-          arbeitsstaette: { type: ['string', 'null'], example: 'Kirchenkreisamt' },
+          arbeitsstaette: { type: ['string', 'null'], example: 'Kirchenkreisamt', description: 'Fehlt sie oder ist sie null, wird leerer Text gespeichert (seit 27.10.2026; vorher 500).' },
           richtung: { type: 'string', enum: ['hin', 'rueck', 'hin_rueck'], default: 'hin' },
         },
       } } } },
@@ -287,7 +287,7 @@ const paths = {
       ],
       requestBody: { required: true, content: { 'application/json': { schema: {
         type: 'object', required: ['name'],
-        properties: { name: { type: 'string' }, arbeitsstaette: { type: ['string', 'null'] }, richtung: { type: 'string', enum: ['hin', 'rueck', 'hin_rueck'] } },
+        properties: { name: { type: 'string' }, arbeitsstaette: { type: ['string', 'null'], description: 'Fehlt sie oder ist sie null, wird leerer Text gespeichert (seit 27.10.2026; vorher 500).' }, richtung: { type: 'string', enum: ['hin', 'rueck', 'hin_rueck'] } },
       } } } },
       responses: { 200: MELDUNG('Mitfahrer erfolgreich aktualisiert'), 400: VALIDIERUNG, 401: FEHLER[401], 404: MELDUNG('Fahrt oder Mitfahrer nicht gefunden'), 500: FEHLER[500] },
     },
@@ -653,7 +653,7 @@ const paths = {
     get: { tags: ['Profil'], summary: 'Eigenes Profil abrufen', responses: { 200: ANTWORT('Stammdaten samt Wohn- und Dienstort', { username: 'musterfrau', email: 'person@example.org', full_name: 'Vorname Nachname', iban: 'DE00…', kirchengemeinde: 'Beispielgemeinde', wohnort: 'Zuhause', dienstort: 'Büro' }), 401: FEHLER[401], 404: MELDUNG('Profil nicht gefunden'), 500: FEHLER[500] } },
     put: {
       tags: ['Profil'], summary: 'Profil ändern',
-      description: 'Bei geänderter E-Mail-Adresse wird eine Bestätigungsmail verschickt und die Adresse gilt bis dahin als unbestätigt. Es empfiehlt sich, alle Felder mitzuschicken — fehlende werden geleert.',
+      description: 'Bei geänderter E-Mail-Adresse wird eine Bestätigungsmail verschickt und die Adresse gilt bis dahin als unbestätigt. Nicht gesendete Felder bleiben wie gespeichert, `null` leert ein Feld. (Geändert 27.10.2026: Teilangaben endeten vorher mit 500.)',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string', format: 'email' }, fullName: { type: ['string', 'null'] }, iban: { type: ['string', 'null'] }, kirchengemeinde: { type: ['string', 'null'] }, kirchspiel: { type: ['string', 'null'] }, kirchenkreis: { type: ['string', 'null'] } } } } } },
       responses: { 200: MELDUNG('Profil erfolgreich aktualisiert.'), 400: VALIDIERUNG, 401: FEHLER[401], 500: FEHLER[500] },
     },

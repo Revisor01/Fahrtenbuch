@@ -33,6 +33,8 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Gestaltung wird mit der neuen Hauptversion des CSS-Werkzeugs gebaut. Die Oberfläche sieht aus wie bisher
 
 ### Behoben
+- Ein Profil, bei dem nur ein Teil der Angaben mitgeschickt wird, lässt sich jetzt speichern; nicht gesendete Angaben bleiben wie sie waren
+- Mitfahrer:innen ohne Arbeitsstätte lassen sich jetzt speichern, etwa über Kurzbefehle
 - Ein langer Reisezweck oder eine lange Anschrift, die im Formular auf zwei Zeilen umbricht, lief in die Zeile darüber und war kaum lesbar. Solche Zeilen werden jetzt entsprechend höher, das Blatt passt weiter auf eine Seite
 - Reichte eine Monatsabrechnung über mehr als ein Formularblatt, war im PDF ab der zweiten Seite die Tabelle zerschossen: Adressen und Reisezweck standen zusammengequetscht und übereinander, statt des Datums erschien „###“. Die Folgeseiten sehen jetzt aus wie die erste
 - iPhone: Die App meldet sich jetzt als deutschsprachig; Datumsauswahl und Systemknöpfe erscheinen auf Deutsch, der App Store nennt Deutsch als Sprache
