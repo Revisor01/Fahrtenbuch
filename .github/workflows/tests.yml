@@ -110,6 +110,9 @@ jobs:
       INITIAL_ADMIN_USERNAME: vertragsadmin
       INITIAL_ADMIN_PASSWORD: vertrag-passwort-1
       INITIAL_ADMIN_EMAIL: admin@example.org
+      DEFAULT_ERSTATTUNG_TRAEGER: "0.30"
+      DEFAULT_ERSTATTUNG_MITFAHRER: "0.05"
+      DEFAULT_ERSTATTUNG_DATUM: "2024-01-01"
       CORS_ORIGIN: http://localhost
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
