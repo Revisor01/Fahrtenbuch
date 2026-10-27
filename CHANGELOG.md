@@ -27,6 +27,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die Oberfläche wird jetzt mit den üblichen Schutz-Kopfzeilen ausgeliefert, und der Server-Dienst läuft nicht mehr mit vollen Rechten. Für Nutzende ändert sich nichts
 - README, Vorlagen und Hinweise gibt es nur noch auf Deutsch.
 - Die iOS-App wird auf einem neuen Weg gebaut und ausgeliefert. Für Nutzende ändert sich nichts
+- Eine Hilfsbibliothek für Kennungen mit bekannter Sicherheitslücke auf die neueste Fassung gehoben. Für Nutzende ändert sich nichts
 
 ### Behoben
 - Ein langer Reisezweck oder eine lange Anschrift, die im Formular auf zwei Zeilen umbricht, lief in die Zeile darüber und war kaum lesbar. Solche Zeilen werden jetzt entsprechend höher, das Blatt passt weiter auf eine Seite
