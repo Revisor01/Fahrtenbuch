@@ -1,4 +1,6 @@
-FROM node:24
+# Bookworm wie bisher: node:26 ohne Zusatz ist Trixie und brächte ein anderes
+# LibreOffice, dessen PDF-Ausgabe erst gegen das Formular zu prüfen wäre.
+FROM node:26-bookworm
 
 # LibreOffice Calc (headless) für den PDF-Export: Die fertige Excel-Arbeitsmappe
 # wird nach PDF konvertiert, damit der Ausdruck 1:1 dem offiziellen Formular

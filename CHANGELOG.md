@@ -32,6 +32,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Der Server läuft auf der neuen Hauptversion seines Web-Frameworks. Die Antworten an Browser und Apps bleiben gleich; eine neue Prüfung stellt das bei jeder Änderung sicher
 - Die Oberfläche läuft auf den neuen Hauptversionen von React, Vite und der Symbolbibliothek. Aussehen und Bedienung bleiben gleich
 - Die Gestaltung wird mit der neuen Hauptversion des CSS-Werkzeugs gebaut. Die Oberfläche sieht aus wie bisher
+- Laufzeitumgebung von Server, Web-Oberfläche und iOS-Bau auf die aktuelle Langzeit-Version gehoben
 
 ### Behoben
 - Ein Profil, bei dem nur ein Teil der Angaben mitgeschickt wird, lässt sich jetzt speichern; nicht gesendete Angaben bleiben wie sie waren

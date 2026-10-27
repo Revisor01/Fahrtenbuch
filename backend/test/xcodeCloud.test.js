@@ -31,7 +31,7 @@ pruefe('liegt neben dem Projekt, ist ausfuehrbar und bricht bei jedem Fehler ab'
 });
 
 pruefe('geht die Schritte in dieser Reihenfolge', () => {
-  const schritte = ['brew install node@22', 'CI_BUILD_NUMBER', 'npm ci', 'npm run build', 'npx cap sync ios',
+  const schritte = ['brew install node@26', 'CI_BUILD_NUMBER', 'npm ci', 'npm run build', 'npx cap sync ios',
     'xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App', 'CODE_SIGN_STYLE = Automatic;'];
   const stellen = schritte.map((s) => text.indexOf(s));
   schritte.forEach((s, i) => assert.ok(stellen[i] > -1, s));

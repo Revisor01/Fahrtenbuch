@@ -12,10 +12,10 @@ RESOLVED="$IOS/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.re
 
 # Die Capacitor-CLI verlangt mindestens Node 22.
 export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1
-brew install node@22
-NODE_PREFIX=$(brew --prefix node@22)
+brew install node@26
+NODE_PREFIX=$(brew --prefix node@26)
 export PATH="$NODE_PREFIX/bin:$PATH"
-[ "$(node -p 'process.versions.node.split(".")[0]')" = 22 ] || { echo "FEHLER: Node 22 erwartet."; exit 1; }
+[ "$(node -p 'process.versions.node.split(".")[0]')" = 26 ] || { echo "FEHLER: Node 26 erwartet."; exit 1; }
 
 # Xcode Cloud vergibt die Build-Nummer. Sie ersetzt CURRENT_PROJECT_VERSION im
 # Projekt, der Versionsquelle des Repos; kleiner als die dort stehende darf sie
