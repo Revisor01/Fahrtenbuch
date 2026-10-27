@@ -365,4 +365,16 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 ### Added
 - Initial Release: Digitales Fahrtenbuch mit Fahrten-Erfassung, Orten, Distanzen, Abrechnungsträgern und Excel-Export
 
-[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.1...HEAD
+[Unreleased]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.1...v2.2.0
+[2.1.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v2.0...v2.1
+[2.0.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.6.0...v2.0
+[1.6.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/Revisor01/Fahrtenbuch/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/Revisor01/Fahrtenbuch/releases/tag/v1.0.0
