@@ -90,6 +90,7 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
   await anfrage('profil', 'GET', '/api/profile');
   await anfrage('profil-aendern', 'PUT', '/api/profile', { body: { email: 'admin@example.org', fullName: 'Vertrag Test', iban: null, kirchengemeinde: 'Heide', kirchspiel: null, kirchenkreis: 'Dithmarschen' } });
   await anfrage('profil-ohne-koerper', 'PUT', '/api/profile');
+  await anfrage('profil-teilweise', 'PUT', '/api/profile', { body: { kirchspiel: 'West' } });
   await anfrage('konto-loeschen-ohne-koerper', 'DELETE', '/api/profile');
   await anfrage('benutzer', 'GET', '/api/users');
 
@@ -147,6 +148,7 @@ async function anfrage(schritt, methode, pfad, { body, ohneToken, kopf = {}, roh
     mitfahrer: [{ name: 'Erika Muster', arbeitsstaette: 'Heide', richtung: 'hin_rueck' }],
   } });
   const m = await anfrage('mitfahrer', 'POST', `/api/fahrten/${fahrtId}/mitfahrer`, { body: { name: 'Max Muster', arbeitsstaette: 'Meldorf', richtung: 'hin' } });
+  await anfrage('mitfahrer-ohne-arbeitsstaette', 'POST', `/api/fahrten/${fahrtId}/mitfahrer`, { body: { name: 'Ohne Ort', richtung: 'hin' } });
   if (m && m.id) await anfrage('mitfahrer-aendern', 'PUT', `/api/fahrten/${fahrtId}/mitfahrer/${m.id}`, { body: { name: 'Max Muster', arbeitsstaette: 'Meldorf', richtung: 'rueck' } });
   await anfrage('bericht', 'GET', '/api/fahrten/report/2026/10');
   await anfrage('bericht-fehler', 'GET', '/api/fahrten/report/1999/13');
