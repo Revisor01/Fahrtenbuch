@@ -1,16 +1,10 @@
 import axios from 'axios';
 import { appConfigValue } from '../utils/appConfig';
 
-// Basis-URL der API-Instanz. Alle Aufrufe im Frontend nutzen relative Pfade
-// ('/api/...'), die axios gegen diese Basis aufloest. Leer = gleicher Host wie
-// das Frontend — genau das bisherige Verhalten der Web-App.
-//
-// Die App (Capacitor) laeuft dagegen von einem lokalen Bundle und hat keinen
-// Backend-Host: sie muss die Instanz ihres Kirchenkreises hier setzen.
+// Basis-URL der Instanz, leer heißt gleicher Host; die App setzt die ihres Kirchenkreises.
 const STORAGE_KEY = 'apiBaseUrl';
 
-// Der Prefix in '/api/...' bleibt an den Aufrufstellen stehen, deshalb darf die
-// Basis keinen eigenen Pfad-Slash am Ende mitbringen.
+// Ohne Slash am Ende, der Prefix '/api' steht an den Aufrufstellen.
 function normalisiere(url) {
   if (!url) return '';
   return String(url).trim().replace(/\/+$/, '');
@@ -31,22 +25,14 @@ function ermittleStartwert() {
 let apiBaseUrl = ermittleStartwert();
 axios.defaults.baseURL = apiBaseUrl;
 
-// Zeitgrenze fuer JEDE Anfrage. Ohne sie bleibt ein Request bei haengender
-// Verbindung minutenlang offen: Das Erfassungs-Sheet steht auf „Speichert …",
-// optimistisch angelegte Fahrten bleiben gesperrt in der Liste, und der
-// Nutzer kann nur schliessen — und verliert die Eingabe.
-//
-// 20 s statt 15: Der PDF-Export braucht auf dem Server gemessene ~4,3 s, bei
-// mehreren Traegern hintereinander mehr. Zu knapp gesetzt bricht die
-// Zeitgrenze einen Export ab, der noch laeuft.
+// Zeitgrenze für jede Anfrage, 20 s, weil PDF-Exporte länger brauchen können.
 axios.defaults.timeout = 20000;
 
 export function getApiBaseUrl() {
   return apiBaseUrl;
 }
 
-// Setzt die Instanz zur Laufzeit. `persistieren: false` erlaubt ein Setzen auf
-// Probe (z. B. Erreichbarkeitspruefung vor der Uebernahme).
+// `persistieren: false` setzt nur auf Probe.
 export function setApiBaseUrl(url, { persistieren = true } = {}) {
   apiBaseUrl = normalisiere(url);
   axios.defaults.baseURL = apiBaseUrl;
@@ -66,13 +52,11 @@ export function setApiBaseUrl(url, { persistieren = true } = {}) {
   return apiBaseUrl;
 }
 
-// Absolute URL zu einem API-Pfad — fuer Faelle ausserhalb von axios
-// (z. B. Downloads oder fetch).
+// Absolute URL für Fälle außerhalb von axios.
 export function apiUrl(pfad = '') {
   const rest = pfad.startsWith('/') ? pfad : `/${pfad}`;
   return `${apiBaseUrl}${rest}`;
 }
 
-// Der bisherige Pfad-Prefix. Bleibt relativ, damit er sich mit
-// axios.defaults.baseURL kombiniert statt sie zu umgehen.
+// Relativ, damit er sich mit axios.defaults.baseURL kombiniert.
 export const API_BASE_URL = '/api';

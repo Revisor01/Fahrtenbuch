@@ -4,8 +4,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import Sheet from '../ui/Sheet';
 import AktionsSheet from '../ui/AktionsSheet';
 
-// Gemeinsame Bausteine für Erstattungssätze (Träger + Mitfahrer):
-// Sheet mit Betrag/Gültig-ab und die Historien-Zeilenliste.
+// Bausteine für Erstattungssätze: Sheet und Historie.
 
 export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
   const [betrag, setBetrag] = useState(satz ? String(satz.betrag) : '');
@@ -15,11 +14,7 @@ export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
       : heuteISO()
   );
 
-  // Sperre gegen den zweiten Klick. Beim Mitfahrer-Satz legte er bis zur
-  // Migration 0013 tatsaechlich zwei Saetze mit demselben Stichtag an —
-  // welcher dann galt, entschied die Sortierung. Die Regel in der Datenbank
-  // faengt das jetzt ab, aber der Nutzer soll den Fehler gar nicht erst
-  // ausloesen.
+  // Sperre gegen den zweiten Klick.
   const [speichert, setSpeichert] = useState(false);
   const montiertRef = useRef(true);
   useEffect(() => () => { montiertRef.current = false; }, []);
@@ -31,14 +26,9 @@ export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
     if (Number.isNaN(wert) || wert <= 0) return;
     setSpeichert(true);
     try {
-      // onSave ist bei beiden Aufrufern async; await wartet auch auf eine
-      // gewoehnliche Rueckgabe gefahrlos.
       await onSave({ betrag: wert, gueltig_ab: gueltigAb });
     } finally {
-      // Nur setzen, wenn es die Komponente noch gibt: Bei Erfolg schliessen
-      // beide Aufrufer das Sheet (setSheet(null)), die Komponente ist dann
-      // schon weg. React 18 verzeiht das zwar stillschweigend, aber darauf
-      // soll sich der Code nicht verlassen.
+      // Nur setzen, wenn die Komponente noch existiert.
       if (montiertRef.current) setSpeichert(false);
     }
   };
@@ -84,8 +74,7 @@ export function SatzSheet({ offen, titel, satz, kinder, onClose, onSave }) {
 }
 
 export function SatzListe({ saetze, onEdit, onDelete, leerText }) {
-  // Ein Tipp auf die Zeile oeffnet Details + Aktionen (gleiches Muster wie in
-  // den uebrigen Listen), statt zwei kleiner Icon-Buttons in der Zeile.
+  // Tipp auf die Zeile öffnet Details und Aktionen.
   const [aktionen, setAktionen] = useState(null);
 
   return (

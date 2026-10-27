@@ -1,9 +1,7 @@
 const db = require('../config/database');
 const Mitfahrer = require('./Mitfahrer');
 
-// Erster Tag des Monats und erster Tag des Folgemonats — die Grenzen fuer
-// `datum >= von AND datum < bis`. Bewusst exklusiv am Ende: So faellt kein
-// Tag heraus und keiner doppelt sich, unabhaengig von der Monatslaenge.
+// Monatsgrenzen für `datum >= von AND datum < bis`, am Ende exklusiv.
 function monatsGrenzen(year, month) {
   const j = parseInt(year, 10);
   const m = parseInt(month, 10);
@@ -17,12 +15,7 @@ function monatsGrenzen(year, month) {
 }
 
 class Fahrt {
-  // mitfahrer wird in derselben Transaktion angelegt: zuvor lief das INSERT der
-  // Fahrt allein in einer Transaktion und die Mitfahrer danach ungeschuetzt -
-  // ein Fehler dort hinterliess eine Fahrt ohne (oder mit halben) Mitfahrern.
-  // partnerFahrtId: Gegenfahrt desselben Hin-und-Rueck-Paares. Die Verknuepfung
-  // laeuft in derselben Transaktion — sonst entstuende bei einem Fehler eine
-  // Rueckfahrt ohne Verbindung zur Hinfahrt.
+  // Mitfahrer und Paar-Verknüpfung in derselben Transaktion wie die Fahrt.
   static async create(fahrtData, details, userId, mitfahrer = [], partnerFahrtId = null) {
     const conn = await db.getConnection();
     try {
@@ -65,11 +58,7 @@ class Fahrt {
       if (partnerFahrtId) {
         const verknuepft = await Fahrt.verknuepfePaar(conn, fahrtId, partnerFahrtId, userId);
         if (verknuepft) {
-          // Die Mitfahrer der Hinfahrt, die fuer beide Richtungen gelten, auf
-          // die neue Rueckfahrt uebernehmen. Sonst muesste man sie dort von
-          // Hand nachtragen, obwohl "Hin- und Rueckfahrt" schon dransteht.
-          // Ohne geloeschte Eintraege (leere Liste): Beim Anlegen wird nur
-          // ergaenzt, hier darf am Partner nichts verschwinden.
+          // Mitfahrer für beide Richtungen auf die neue Rückfahrt übernehmen, am Partner verschwindet nichts.
           await Mitfahrer.spiegleAufPartner(conn, partnerFahrtId, []);
         }
       }
@@ -84,15 +73,7 @@ class Fahrt {
     }
   }
   
-  /**
-   * Verknuepft zwei Fahrten wechselseitig als Hin-und-Rueck-Paar.
-   * Beide Fahrten muessen dem Nutzer gehoeren — sonst liesse sich eine fremde
-   * Fahrt an die eigene haengen und waere ueber die Partnerabfrage sichtbar.
-   * Eine bestehende Verknuepfung der beiden wird dabei geloest.
-   *
-   * @param {object} conn - offene Verbindung (die Verknuepfung gehoert in
-   *                        dieselbe Transaktion wie das Anlegen der Fahrt)
-   */
+  /** Verknüpft zwei eigene Fahrten wechselseitig als Paar, in der Transaktion von [conn]. */
   static async verknuepfePaar(conn, fahrtId, partnerId, userId) {
     if (!fahrtId || !partnerId || fahrtId === partnerId) return false;
 
@@ -118,12 +99,7 @@ class Fahrt {
     return true;
   }
 
-  /**
-   * Loest die Verknuepfung einer Fahrt — beidseitig.
-   * Der FK steht auf ON DELETE SET NULL, beim Loeschen raeumt die DB also
-   * selbst auf. Fuer alles andere (Fahrt bearbeiten, Paar trennen) braucht es
-   * diesen Weg.
-   */
+  /** Löst die Verknüpfung beidseitig; beim Löschen übernimmt das der Fremdschlüssel. */
   static async loesePaar(conn, fahrtId, userId) {
     const [rows] = await conn.execute(
       'SELECT partner_fahrt_id FROM fahrten WHERE id = ? AND user_id = ?',
@@ -225,10 +201,7 @@ class Fahrt {
     return result.affectedRows;
   }
   
-  // Loescht eine Fahrt und raeumt die gespiegelten Mitfahrer der Partnerfahrt
-  // mit ab. Ohne das blieben nach dem Loeschen der Rueckfahrt die dortigen
-  // "Hin- und Rueckfahrt"-Eintraege bestehen und wuerden weiter erstattet.
-  // Die Fahrt selbst bleibt erhalten — geloescht wird nur, was zum Paar gehoert.
+  // Löscht eine Fahrt samt gespiegelter Mitfahrer am Partner, sonst würden sie weiter erstattet.
   static async delete(id, userId) {
     if (id === undefined || id === null) {
       throw new Error('Ungültige ID für delete');
@@ -245,10 +218,7 @@ class Fahrt {
       const partnerId = rows[0]?.partner_fahrt_id || null;
 
       if (partnerId) {
-        // Die Partnerfahrt bleibt bestehen — ihre Mitfahrer duerfen deshalb
-        // NICHT verschwinden. Wer dort auf 'hin_rueck' steht, ist ab jetzt nur
-        // noch fuer die verbleibende Richtung dabei: Ist die Partnerfahrt die
-        // Hinfahrt (kleinere ID), wird daraus 'hin', sonst 'rueck'.
+        // Am verbleibenden Partner wird 'hin_rueck' zu 'hin' oder 'rueck', die kleinere ID ist die Hinfahrt.
         const richtungDanach = partnerId < id ? 'hin' : 'rueck';
         await conn.execute(
           `UPDATE mitfahrer SET richtung = ?
@@ -272,11 +242,6 @@ class Fahrt {
     }
   }
 
-  // Entfernt: getMonthlySummary() aggregierte ohne user_id-Filter ueber ALLE
-  // Nutzer. Die Methode hatte keinen Aufrufer (der gleichnamige Controller
-  // bringt eine eigene, korrekt gescopte Query mit), waere bei Nutzung aber
-  // sofort ein Datenleck gewesen.
-
   static async getMonthlyReport(year, month, userId) {
     try {
       const query = `
@@ -296,10 +261,7 @@ class Fahrt {
       LEFT JOIN mitfahrer m ON m.fahrt_id = f.id
       WHERE f.user_id = ? AND f.datum >= ? AND f.datum < ?
     `;
-      // Datumsbereich statt YEAR()/MONTH(): Um eine Spalte gelegte Funktionen
-      // machen jeden Index darauf unbrauchbar. Gemessen an 50.000 Zeilen
-      // (MySQL 8.4): 1.250 gepruefte Zeilen und 0,56 ms mit YEAR/MONTH gegen
-      // 28 Zeilen und 0,06 ms mit Bereich und idx_fahrten_user_datum.
+      // Datumsbereich statt YEAR()/MONTH(), damit der Index greift.
       const [von, bis] = monatsGrenzen(year, month);
       const [rows] = await db.execute(query, [userId, von, bis]);
       
@@ -346,10 +308,6 @@ class Fahrt {
     }
   }
 
-  // Entfernt: getYearSummary() gruppierte nach satz.kennzeichen, einer Spalte,
-  // die die Abfrage gar nicht selektiert - alle Saetze landeten unter
-  // undefined, das Ergebnis war immer 0. Ohne Aufrufer; der Controller hat
-  // eine eigene Implementierung.
 }
 
 module.exports = Fahrt;

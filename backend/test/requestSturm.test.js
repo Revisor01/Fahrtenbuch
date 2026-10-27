@@ -1,23 +1,4 @@
-// Punkt 12 der Pre-Launch-Liste, Teilbefund „Frontend-Request-Sturm".
-//
-// updateAbrechnungsStatus laedt nach jedem Statuswechsel Fahrten UND
-// Monatsdaten neu (refresh-Parameter, Vorgabe true). In den beiden
-// Zeitraum-Schleifen lief das je Monat: bei zwoelf Monaten 24 Abrufe, von
-// denen 22 sofort veraltet waren — direkt danach wird ohnehin einmal alles
-// geholt. Das Rate-Limit liegt bei 600 Anfragen in fuenf Minuten, und wer
-// eine Woche nachtraegt, lief hinein.
-//
-// Beide Schleifen geben jetzt refresh=false mit. An der Vorgabe aendert
-// sich nichts — Einzelaufrufe ausserhalb einer Schleife sollen weiterhin
-// aktualisieren.
-//
-// NICHT umgebaut: die 28 parallelen Monatsabrufe in fetchMonthlyData. Die
-// vorhandene Sammel-Route /api/fahrten/monthly-summary liefert weder
-// abrechnungsStatus noch kmProTraeger noch fahrtenCount; sie dafuer zu
-// erweitern hiesse, eine Antwortform zu aendern, die ausgelieferte Apps
-// lesen. Das gehoert in einen eigenen, geprueften Schritt.
-//
-// Laeuft ohne Test-Framework: `node test/requestSturm.test.js`.
+// Statuswechsel in Zeitraum-Schleifen laden nicht je Monat nach (refresh=false). Aufruf: node test/requestSturm.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -90,8 +71,7 @@ pruefe('und aktualisiert danach einmal', () => {
 console.log('\n3 — Alle Schleifen erfasst:');
 
 pruefe('kein Aufruf in einer Schleife laedt mehr nach', () => {
-  // Jeder updateAbrechnungsStatus-Aufruf mit sechs Argumenten (also ohne
-  // refresh-Angabe) waere ein Kandidat. Erlaubt sind nur Einzelaufrufe.
+  // Ohne refresh-Angabe nur Einzelaufrufe.
   const dateien = {
     'contexts/AppContext.js': ctx,
     'components/fahrten/useFahrtenExport.js': exportHook,
@@ -102,8 +82,7 @@ pruefe('kein Aufruf in einer Schleife laedt mehr nach', () => {
     for (const zeile of inhalt.split('\n')) {
       if (!zeile.includes('updateAbrechnungsStatus(')) continue;
       if (zeile.includes('const updateAbrechnungsStatus')) continue;
-      // Der letzte Parameter ist refresh. Ein Aufruf, der auf `, true)`
-      // endet, hat ihn nicht gesetzt und laedt nach.
+      // Endet der Aufruf auf `, true)`, lädt er nach.
       assert.ok(!/, true\);?\s*$/.test(zeile.trim()),
         `${name}: Aufruf ohne refresh=false — ${zeile.trim().slice(0, 70)}`);
     }

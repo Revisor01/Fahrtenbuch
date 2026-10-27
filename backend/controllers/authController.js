@@ -6,17 +6,10 @@ const crypto = require('crypto');
 const mailService = require('../services/mailService');
 const { TOKEN_LAUFZEIT } = require('../utils/tokenLaufzeit');
 
-// Vergleichshash fuer nicht existierende Konten (siehe login). Beim Start
-// einmal mit derselben Kostenstufe erzeugt, die auch echte Passwoerter
-// nutzen (bcrypt.genSalt(10) in userController) — so bleibt die Rechenzeit
-// gleich, auch wenn die Stufe spaeter steigt. Der Klartext ist bedeutungslos
-// und passt zu keinem Konto.
+// Vergleichshash für unbekannte Konten, mit derselben Kostenstufe wie echte Passwörter.
 const DUMMY_HASH = bcrypt.hashSync('kein-konto-mit-diesem-namen', 10);
 
-// Fehler aus dem Mailversand von echten Serverfehlern unterscheiden.
-// nodemailer setzt einen SMTP-Code (EAUTH bei falschen Zugangsdaten,
-// ECONNECTION/ETIMEDOUT wenn der Server nicht erreichbar ist) oder liefert
-// eine responseCode aus der SMTP-Antwort.
+// Mailfehler (SMTP-Code oder responseCode) von echten Serverfehlern unterscheiden.
 const MAIL_FEHLERCODES = new Set([
   'EAUTH', 'ECONNECTION', 'ETIMEDOUT', 'ESOCKET', 'EENVELOPE', 'EMESSAGE', 'EDNS',
 ]);
@@ -41,11 +34,7 @@ exports.login = async (req, res) => {
           [username, username]
       );
         
-      // Auch bei unbekanntem Namen einen Hash vergleichen, damit beide Faelle
-      // gleich lange dauern. Sonst antwortete der unbekannte Name in wenigen
-      // Millisekunden und der bekannte erst nach dem bcrypt-Lauf (~100 ms) —
-      // an dem Unterschied liess sich ablesen, welche Konten es gibt.
-      // Die Meldung war schon immer fuer beide Faelle dieselbe.
+      // Auch bei unbekanntem Namen vergleichen, sonst verrät die Laufzeit, welche Konten es gibt.
       if (rows.length === 0) {
           await bcrypt.compare(password, DUMMY_HASH);
           return res.status(401).json({ message: 'Ungültige Anmeldeinformationen' });
@@ -84,8 +73,7 @@ exports.register = async (req, res) => {
   const { username, email, registrationCode } = req.body;
 
   try {
-    // Serverseitige Registrierungs-Gates (abwärtskompatibel: greifen nur bei gesetzter,
-    // nicht-leerer Env-Variable — Docker-Compose liefert für unset Variablen Leerstrings)
+    // Gates nur bei nicht-leerer Variable, Compose liefert Leerstrings.
     if (!registrierungErlaubt()) {
       return res.status(403).json({ message: 'Registrierung ist deaktiviert' });
     }
@@ -124,9 +112,7 @@ exports.register = async (req, res) => {
     try {
       await connection.beginTransaction();
       
-      // Passwort-Platzhalter: bcrypt.compare gegen '' schlaegt immer fehl, ein
-      // Login ist also erst nach dem Setzen per Token moeglich.
-      // Token 7 Tage gueltig (siehe setPassword).
+      // Leeres Passwort, Login erst nach dem Setzen per Token (7 Tage).
       const [userResult] = await connection.execute(
         `INSERT INTO users (username, verification_token, verification_token_expires, role, password)
          VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY), "user", ?)`,
@@ -139,11 +125,7 @@ exports.register = async (req, res) => {
         [userResult.insertId, email]
       );
       
-      // Erst senden, dann festschreiben. Vorher lief der Commit zuerst: Schlug
-      // der Versand fehl (z. B. SMTP nicht erreichbar), lief das rollback() ins
-      // Leere — der Nutzer war bereits dauerhaft angelegt, aber ohne Passwort
-      // und ohne Link. Ein zweiter Versuch scheiterte dann an „Name bereits
-      // vergeben", die Person kam nicht mehr weiter.
+      // Erst senden, dann festschreiben, sonst bleibt ein Konto ohne Passwort und Link.
       await mailService.sendWelcomeEmail(email, username, verificationToken);
 
       await connection.commit();
@@ -161,9 +143,7 @@ exports.register = async (req, res) => {
 
   } catch (error) {
     console.error('Registration error:', error);
-    // Scheitert der Mailversand, wurde nichts angelegt — das ist kein
-    // Serverfehler im Sinne von „kaputt", sondern ein voruebergehendes
-    // Problem, das die Person durch einen neuen Versuch loesen kann.
+    // Mailfehler: nichts angelegt, ein neuer Versuch hilft.
     if (istMailFehler(error)) {
       return res.status(502).json({
         message: 'Die Bestätigungsmail konnte nicht versendet werden. Bitte versuchen Sie es später erneut.'

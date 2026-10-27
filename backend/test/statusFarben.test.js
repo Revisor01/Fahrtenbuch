@@ -1,9 +1,4 @@
-// Statusfarben für Punkt und Wort („Erfasst“, „Eingereicht“, „Erstattet“):
-// Zuordnungstabelle mit festen Klassennamen (Unbekanntes neutral), Regeln im
-// CSS und Kontrast nach WCAG 2.2 (mindestens 4,5:1) in hell und dunkel, auch
-// in erstatteten Monatskarten mit verminderter Deckkraft.
-//
-// Läuft ohne Test-Framework: `node test/statusFarben.test.js`.
+// Statusfarben: feste Klassen, Regeln im CSS, Kontrast ≥ 4,5:1 hell und dunkel. Aufruf: node test/statusFarben.test.js
 
 const assert = require('assert');
 const fs = require('fs');

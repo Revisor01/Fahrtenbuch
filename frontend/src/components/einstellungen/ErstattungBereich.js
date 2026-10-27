@@ -7,8 +7,7 @@ import BereichKopf from './BereichKopf';
 import { SatzSheet, SatzListe } from './SatzBausteine';
 import MitfahrerBereich from './MitfahrerBereich';
 
-// Erstattungssätze der Abrechnungsträger. Der Mitfahrer-Satz hat seit R7
-// einen eigenen Bereich („Mitfahrer").
+// Erstattungssätze der Träger; der Mitfahrer-Satz hat einen eigenen Bereich.
 function ErstattungBereich() {
   const { refreshAllData } = useContext(AppContext);
   const toast = useToast();
@@ -20,9 +19,7 @@ function ErstattungBereich() {
   const fetchSaetze = async () => {
     try {
       const response = await axios.get('/api/abrechnungstraeger');
-      // Meldet der Endpunkt einen Fehler, steht im Rumpf ein Objekt statt
-      // einer Liste — .map warf dann einen TypeError und die Einstellungen
-      // blieben leer, ohne Hinweis. Gleiches gilt fuer die Historie.
+      // Bei Fehlern kommt ein Objekt statt einer Liste.
       const traegerListe = Array.isArray(response.data) ? response.data : [];
       const mitHistorie = await Promise.all(
         traegerListe.map(async (traeger) => {
@@ -69,10 +66,7 @@ function ErstattungBereich() {
       await refreshAllData();
     } catch (error) {
       logFehler('Fehler beim Speichern des Erstattungssatzes:', error);
-      // Der Server antwortet bei einem doppelten Stichtag mit 409 und
-      // einer fertigen Meldung. Frueher stand hier eine Suche nach
-      // „Duplicate entry" in einem `error`-Feld, das gar nicht gesendet
-      // wurde — die Meldung konnte nie erscheinen.
+      // Doppelter Stichtag kommt als 409 mit fertiger Meldung.
       if (error.response?.status === 409) {
         toast.error('Für dieses Datum existiert bereits ein Satz.');
       } else {
@@ -81,8 +75,7 @@ function ErstattungBereich() {
     }
   };
 
-  // Löschen ohne Rückfrage (Design-Spec) — kein Undo, da Betrag und
-  // Gültigkeitsdatum jederzeit neu angelegt werden können
+  // Ohne Rückfrage, ein Satz lässt sich jederzeit neu anlegen.
   const handleDelete = async (traegerId, satz) => {
     try {
       await axios.delete(`/api/abrechnungstraeger/${traegerId}/erstattung/${satz.id}`);

@@ -1,21 +1,4 @@
-// Punkt 9 der Pre-Launch-Liste: Die Fehlergrenze umschloss nur AppContent.
-//
-// Sie stand als Element der Route `/*`. Alles darueber war ungeschuetzt:
-// PwaUpdater, ErfassungsFlow und StatusDatumSheet (die rendern ihre
-// Provider, nicht App.js), die oeffentlichen Routen /help, /rechtliches,
-// /verify-email, /reset-password, /set-password — und die Provider-Ruempfe
-// selbst. Ein Render-Fehler dort ergab eine weisse Seite.
-//
-// /rechtliches ist der heikelste Fall: Apple-Pruefer:innen rufen sie ohne
-// Konto auf (Apple 5.1.1 (i), Kommentar in App.js).
-//
-// Ausserdem bot die Anzeige keinen Ausweg — nur den Satz „Bitte die App
-// einmal schliessen und neu oeffnen", der im Browser nicht weiterhilft.
-//
-// Geprueft wird die Verschachtelung per Quelltext: Es gibt kein
-// Frontend-Testframework im Repo, und ein Render-Test brauchte React-DOM.
-//
-// Laeuft ohne Test-Framework: `node test/fehlergrenze.test.js`.
+// Die Fehlergrenze umschließt alle Routen und Provider und bietet einen Ausweg. Aufruf: node test/fehlergrenze.test.js
 
 const assert = require('assert');
 const fs = require('fs');

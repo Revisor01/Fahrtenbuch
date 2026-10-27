@@ -20,25 +20,18 @@ import {
 } from '../utils/tokenSpeicher';
 import { getApiBaseUrl } from '../api/client';
 
-// Header, ueber den der Server ein erneuertes Token zurueckgibt. Axios
-// normalisiert Header-Namen auf Kleinbuchstaben.
+// axios normalisiert Header-Namen auf Kleinbuchstaben.
 const ERNEUERUNGS_HEADER = 'x-token-erneuert';
 
 export const AppContext = createContext();
 
 function AppProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // Merkt, dass das Laden der Fahrten fehlgeschlagen ist. Ohne diese
-  // Unterscheidung sah ein Netzfehler wie „keine Fahrten in diesem Monat"
-  // aus — der gefaehrlichste Fall in dieser App, weil die Nutzer:in die
-  // Fahrten dann ein zweites Mal erfasst und doppelt abrechnet.
+  // Ladefehler unterscheiden, sonst sieht ein Netzfehler wie ein leerer Monat aus und Fahrten werden doppelt erfasst.
   const [fahrtenFehler, setFahrtenFehler] = useState(null);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  // Solange die gespeicherte Anmeldung noch nicht gelesen ist, darf die App
-  // nichts entscheiden: der sichere Speicher der App antwortet nur asynchron,
-  // und ohne diesen Zustand blitzte beim Start kurz die Anmeldung auf, obwohl
-  // der Nutzer angemeldet ist.
+  // Bis die Anmeldung gelesen ist, nichts entscheiden, sonst blitzt die Anmeldemaske.
   const [anmeldungGeladen, setAnmeldungGeladen] = useState(false);
   const [orte, setOrte] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
@@ -46,38 +39,20 @@ function AppProvider({ children }) {
   const [fahrten, setFahrten] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(aktuellerMonat());
   const [selectedVonMonth, setSelectedVonMonth] = useState(''); // '' = Einzelmonat-Modus
-  // gesamtKirchenkreis/gesamtGemeinde entfernt: die Setter wurden nie
-  // aufgerufen, die Werte blieben immer 0 und niemand las sie aus.
   const [abrechnungstraeger, setAbrechnungstraeger] = useState([]);
   const [summary, setSummary] = useState({});
   const isLoggingOut = useRef(false);
-  // Laufende Nummer je Fahrten-Abruf. Der sitzungsZaehler daneben steigt nur
-  // bei An- und Abmeldung und hilft hier nicht: Wer schnell zwischen Monaten
-  // wechselt, loest zwei Abrufe derselben Sitzung aus. Antwortete der aeltere
-  // spaeter, standen die Fahrten von Monat A unter der Ueberschrift von
-  // Monat B — in einer Abrechnungs-App die falscheste Zahl an der
-  // sichtbarsten Stelle.
+  // Nummer je Fahrten-Abruf, damit eine ältere Antwort nicht die Fahrten eines anderen Monats zeigt.
   const fahrtenAbrufNr = useRef(0);
-  // Zaehlt jede Abmeldung mit. Eine Antwort auf /users/me, die erst nach dem
-  // Abmelden eintrifft, darf die geloeschten Nutzerdaten nicht zurueckschreiben
-  // — beim Kirchenkreis-Wechsel waeren das sogar die Daten des alten Servers.
+  // Nach dem Abmelden darf eine späte /users/me-Antwort nichts zurückschreiben.
   const sitzungsZaehler = useRef(0);
 
-  // Wurde seit dem Start dieser Anfrage abgemeldet oder der Kirchenkreis
-  // gewechselt? Dann darf ihre Antwort nichts mehr setzen.
-  //
-  // Bisher prueften das nur die Nutzerdaten. Alle anderen Abrufe schrieben
-  // blind — und behielten dabei Basis-URL und Header von A, weil axios die
-  // Vorgaben beim Aufruf mischt, nicht beim Versand. Wer bei A eine Fahrt
-  // anlegt (rund 30 Anfragen), sofort wechselt und sich bei B anmeldet, sah
-  // danach A's Daten unter B's Anmeldung, bis zum naechsten Nachladen. Auf
-  // Mobilfunk ist das kein Randfall.
+  // Nach Abmeldung oder Kirchenkreiswechsel darf keine Antwort mehr etwas setzen.
   const sitzungVorbei = (sitzung) => sitzung !== sitzungsZaehler.current;
   const toast = useToast();
 
   const [favoriten, setFavoriten] = useState([]);
-  // Gespeicherte Anlaesse (Stammdaten wie Orte/Traeger). Leer, solange die
-  // Instanz den Endpunkt noch nicht kennt — Freitext bleibt davon unberuehrt.
+  // Leer, solange die Instanz den Endpunkt nicht kennt.
   const [anlaesse, setAnlaesse] = useState([]);
 
   const [abrechnungsStatusModal, setAbrechnungsStatusModal] = useState({
@@ -140,9 +115,7 @@ function AppProvider({ children }) {
     return daten;
   };
 
-  // Legt einen Anlass an und gibt ihn zurueck. Der POST ist idempotent — ein
-  // bekannter Name liefert den vorhandenen Eintrag. Fehler werden nach oben
-  // gereicht, damit der Aufrufer seine optimistische Anzeige zuruecknehmen kann.
+  // POST ist idempotent; Fehler gehen nach oben, damit der Aufrufer zurücknehmen kann.
   const addAnlass = async (name) => {
     const angelegt = await legeAnlassAn(name);
     await fetchAnlaesse();
@@ -164,9 +137,7 @@ function AppProvider({ children }) {
       // Anlässe ebenso: fehlt der Endpunkt, bleibt die Liste leer
       fetchAnlaesse().catch(() => {});
 
-      // fetchFahrten/fetchOrte/fetchDistanzen setzen ihren State selbst und
-      // liefern nichts zurueck — die Zuweisungen hier greifen nur, wenn eine
-      // Funktion tatsaechlich Daten liefert (aktuell fetchMonthlyData).
+      // Nur fetchMonthlyData liefert Daten zurück.
       if (Array.isArray(fahrtenRes)) setFahrten(fahrtenRes);
       if (Array.isArray(monthlyDataRes)) setMonthlyData(monthlyDataRes);
       if (Array.isArray(orteRes)) setOrte(orteRes);
@@ -190,9 +161,7 @@ function AppProvider({ children }) {
     }
   };
 
-  // Brücke für Bestandscode: reine Erfolgs-/Fehler-/Hinweismeldungen laufen
-  // als Toast. Bestätigungs-Flows wurden auf direkte Ausführung + Toast mit
-  // „Rückgängig" umgebaut — kein Modal für Bestätigungen (Design-Spec).
+  // Brücke für Bestandscode: Meldungen laufen als Toast.
   const showNotification = (title, message) => {
     if (title === 'Fehler') {
       toast.error(message);
@@ -205,42 +174,25 @@ function AppProvider({ children }) {
     const sitzung = sitzungsZaehler.current;
     try {
       const response = await axios.get('/api/users/me');
-      // Zwischenzeitlich abgemeldet: Antwort verwerfen, sonst kaeme der
-      // abgemeldete Nutzer ueber diesen Weg wieder in den Speicher zurueck.
+      // Zwischenzeitlich abgemeldet: Antwort verwerfen.
       if (sitzung !== sitzungsZaehler.current) return;
       const userData = response.data;
       setUser(userData);
-      // Ohne await, aus demselben Grund wie beim Token: Das Merken fuer den
-      // naechsten Start darf die laufende Anmeldung nicht aufhalten.
+      // Ohne await, das Merken darf die Anmeldung nicht aufhalten.
       schreibeWert(SCHLUESSEL_USER, JSON.stringify(userData));
     } catch (error) {
       logFehler('Error fetching user data:', error);
-      // Nur abmelden, wenn die Sitzung noch dieselbe ist — sonst wuerde ein
-      // spaeter eintreffender Fehler eine frisch begonnene Sitzung beenden.
+      // Nur bei derselben Sitzung abmelden.
       if (sitzung === sitzungsZaehler.current) logout();
     }
   };
 
-  // Gespeicherte Anmeldung einmalig beim Start einlesen. Erst danach steht
-  // fest, ob der Nutzer angemeldet ist — bis dahin rendert die App einen
-  // Ladezustand statt der Anmeldemaske.
+  // Gespeicherte Anmeldung einmal beim Start lesen.
   useEffect(() => {
-    // Notbremse: Antwortet der Systemspeicher gar nicht — etwa weil das
-    // Geraet gesperrt ist oder das Plugin nicht laedt —, stuende die App
-    // sonst dauerhaft im Ladezustand und man kaeme nie zur Anmeldung.
-    // Lieber ohne gespeicherte Anmeldung weiter als gar nicht.
-    // Sie darf erst greifen, wenn der Speicher seine eigenen Zeitgrenzen
-    // ausgeschoepft hat (3 Zugriffe à 800ms = 2400ms), sonst feuert sie in
-    // einen Start hinein, der gleich mit gueltigem Token zurueckkehrt: Die
-    // Anmeldemaske erschien dann kurz und wurde sofort vom Dashboard
-    // abgeloest — sichtbar als Blitzen (Simon 16.08.). Grosszuegiger Abstand
-    // darauf; wer wirklich keinen Speicher hat, wartet lieber einen Moment
-    // laenger als jemand angemeldetes die Maske zu sehen bekommt.
+    // Notbremse, falls der Systemspeicher nie antwortet; erst nach dessen eigenen Zeitgrenzen (3 × 800 ms), sonst blitzt die Anmeldemaske.
     let speicherHatGeantwortet = false;
     const notbremse = setTimeout(() => {
-      // Nicht hineinfeuern, wenn der Speicher gerade zurueckkehrt: Sonst
-      // stuende einen Moment „geladen, nicht angemeldet" — die Anmeldemaske
-      // erschien kurz und wurde sofort vom Dashboard abgeloest.
+      // Nicht feuern, wenn der Speicher gerade zurückkehrt.
       if (speicherHatGeantwortet) return;
       console.error('Anmeldedaten nicht rechtzeitig lesbar — weiter zur Anmeldung.');
       setAnmeldungGeladen(true);
@@ -248,27 +200,21 @@ function AppProvider({ children }) {
 
     (async () => {
       try {
-      // Vor dem ersten Lesen: Bestand aus localStorage in den sicheren
-      // Speicher uebernehmen (nur nativ, im Web ein No-Op).
+      // localStorage-Bestand in den sicheren Speicher übernehmen, nur nativ.
       await migriereAusLocalStorage();
 
-      // Die Anmeldung nur uebernehmen, wenn sie zur aktuell gewaehlten
-      // Instanz gehoert. Sonst wuerde das Token von Kirchenkreis A an Server
-      // B gehen — siehe SCHLUESSEL_INSTANZ in utils/tokenSpeicher.js.
+      // Nur eine Anmeldung der gewählten Instanz übernehmen (SCHLUESSEL_INSTANZ in utils/tokenSpeicher.js).
       const anmeldung = await leseAnmeldungFuer(getApiBaseUrl());
       if (anmeldung.verworfen) {
         console.warn('Gespeicherte Anmeldung gehoerte zu einem anderen Kirchenkreis und wurde verworfen.');
       }
       const gespeicherterToken = anmeldung.token;
       const gespeicherterUser = anmeldung.user ? JSON.stringify(anmeldung.user) : null;
-      // Ab hier steht die Antwort fest — die Notbremse darf nicht mehr
-      // dazwischenfunken.
+      // Ab hier darf die Notbremse nicht mehr greifen.
       speicherHatGeantwortet = true;
 
       let userDaten = null;
-      // Ein korrupter Eintrag darf den App-Start nicht verhindern: die
-      // Exception aus JSON.parse fuehrte hier zur weissen Seite, und weil der
-      // Wert liegen blieb, auch bei jedem weiteren Aufruf.
+      // Ein korrupter Eintrag darf den Start nicht verhindern.
       try {
         userDaten = gespeicherterUser ? JSON.parse(gespeicherterUser) : null;
       } catch (error) {
@@ -276,29 +222,16 @@ function AppProvider({ children }) {
         await loescheWert(SCHLUESSEL_USER);
       }
 
-      // Kein vorzeitiges return bei `abgebrochen`: React ruft den Effekt im
-      // Strict Mode zweimal auf und raeumt den ersten Durchlauf dazwischen ab.
-      // Kehrte der erste hier zurueck, bliebe `anmeldungGeladen` in genau dem
-      // Fall false, in dem der zweite Durchlauf noch laeuft — die App haenge
-      // dann dauerhaft im Ladezustand. Im Web fiel das nie auf, weil
-      // localStorage synchron antwortet; der Systemspeicher der App braucht
-      // dagegen einen Moment und trifft dieses Zeitfenster.
+      // Kein vorzeitiges return, sonst hängt die App im Strict Mode im Ladezustand.
       if (gespeicherterToken) {
-        // Header und isLoggedIn hier direkt mitsetzen statt sie dem
-        // token-Effekt zu ueberlassen: der laeuft erst einen Render spaeter,
-        // und genau in diesem einen Render waere die Anmeldung schon "geladen",
-        // der Nutzer aber noch "nicht angemeldet" — die Anmeldemaske blitzte
-        // auf. Der token-Effekt bleibt fuer den Login-Weg zustaendig und setzt
-        // hier nur denselben Wert noch einmal.
+        // Direkt mitsetzen, sonst blitzt einen Render lang die Anmeldemaske.
         axios.defaults.headers.common['Authorization'] = `Bearer ${gespeicherterToken}`;
         setToken(gespeicherterToken);
         setIsLoggedIn(true);
       }
       if (userDaten) setUser(userDaten);
       } catch (error) {
-        // Ein Fehler beim Lesen darf nicht dazu fuehren, dass die App im
-        // Ladezustand stehen bleibt. Ohne gespeicherte Anmeldung landet man
-        // auf der Anmeldemaske — das ist der richtige Ausgang.
+        // Ein Lesefehler führt zur Anmeldemaske, nicht zum Hängen.
         logFehler('Anmeldedaten konnten nicht gelesen werden:', error);
       } finally {
         clearTimeout(notbremse);
@@ -318,20 +251,15 @@ function AppProvider({ children }) {
         fetchCurrentUser();
       }
     }
-    // fetchCurrentUser/user bewusst nicht in den Abhaengigkeiten: der Effekt
-    // soll nur auf einen Token-Wechsel reagieren, sonst laedt er sich im Kreis.
+    // Nur auf Token-Wechsel reagieren, sonst lädt es sich im Kreis.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Interceptor genau einmal registrieren und beim Unmount wieder entfernen.
-  // Frueher lief das im token-Effekt: jeder Login stapelte einen weiteren
-  // Interceptor auf den vorigen, ohne den alten je zu entfernen.
+  // Interceptor einmal registrieren, sonst stapelt jeder Login einen weiteren.
   useEffect(() => {
     const id = axios.interceptors.response.use(
       (response) => {
-        // Gleitende Sitzung: Der Server schickt bei Nutzung ein frisches
-        // Token, sobald die halbe Laufzeit vorbei ist. Wer regelmaessig
-        // arbeitet, muss sich damit nie neu anmelden.
+        // Gleitende Sitzung: frisches Token aus dem Antwort-Header übernehmen.
         const erneuert = response.headers?.[ERNEUERUNGS_HEADER];
         if (erneuert) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${erneuert}`;
@@ -359,8 +287,7 @@ function AppProvider({ children }) {
     if (isLoggedIn) {
       refreshAllData();
     }
-    // refreshAllData wird bei jedem Render neu erzeugt - als Abhaengigkeit
-    // wuerde es eine Endlosschleife ausloesen.
+    // refreshAllData ist bei jedem Render neu und löste eine Endlosschleife aus.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
@@ -368,70 +295,38 @@ function AppProvider({ children }) {
     try {
       const response = await axios.post('/api/auth/login', { username, password });
       const { token } = response.data;
-      // Neue Sitzung: noch laufende Aufrufe der vorigen Anmeldung duerfen
-      // weder ihre Nutzerdaten schreiben noch diese Anmeldung wieder beenden.
+      // Neue Sitzung, ältere Aufrufe dürfen nichts mehr schreiben.
       sitzungsZaehler.current += 1;
       // Hier statt in logout(): siehe Begruendung dort.
       isLoggingOut.current = false;
       setToken(token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Ohne await: Das Speichern entscheidet nur darueber, ob die Anmeldung
-      // den naechsten Start ueberdauert — fuer diese Sitzung ist der Token
-      // bereits gesetzt. Wartete die Anmeldung darauf, bliebe sie bei einem
-      // stockenden Systemspeicher haengen und der Knopf taete scheinbar nichts.
+      // Ohne await, sonst hinge die Anmeldung an einem stockenden Systemspeicher.
       schreibeWert(SCHLUESSEL_TOKEN, token);
-      // Festhalten, zu welcher Instanz diese Anmeldung gehoert. Ohne die
-      // Notiz wuerde sie beim naechsten Start als "fremd" verworfen — und
-      // ohne die Pruefung ginge das Token bei einem Wechsel an den falschen
-      // Server (siehe utils/tokenSpeicher.js).
+      // Instanz zur Anmeldung merken, damit das Token nie an einen fremden Server geht.
       schreibeWert(SCHLUESSEL_INSTANZ, String(getApiBaseUrl() || ''));
-      // Ohne await: Der Effekt auf `token` laedt die Nutzerdaten ohnehin.
-      // Wurde hier zusaetzlich gewartet, lief die Anfrage doppelt und die
-      // Anmeldung stand solange still — auf dem Geraet spuerbar als
-      // sekundenlange Verzoegerung nach dem Antippen.
+      // Ohne await, der token-Effekt lädt die Nutzerdaten ohnehin.
       fetchCurrentUser();
       setIsLoggedIn(true);
     } catch (error) {
-      // Bewusst nur der Status: Ein AxiosError traegt error.config.data —
-      // bei der Anmeldung also Benutzername UND Passwort im Klartext. In der
-      // App landet console.error im Geraetelog (Console.app, adb logcat,
-      // sysdiagnose), im Browser in der Konsole.
+      // Nur der Status, error.config.data enthält Benutzername und Passwort.
       console.error('Anmeldung fehlgeschlagen:', error.response?.status || error.code || 'Netzfehler');
       throw error;
     }
   };
 
-  // Bleibt bewusst synchron in der Wirkung: der 401-Interceptor und der
-  // Kirchenkreis-Wechsel rufen logout() ohne await auf, deshalb muss der State
-  // sofort fallen. Das Loeschen im Speicher laeuft daneben — die App zeigt
-  // schon die Anmeldung, waehrend der Systemspeicher aufraeumt.
-  // grund: 'abgelaufen' fuer den erzwungenen Logout (Token abgelaufen oder
-  // vom Server abgewiesen), sonst das bewusste Abmelden ueber den Knopf.
+  // Wirkt synchron, weil 401-Interceptor und Kirchenkreiswechsel ohne await rufen; grund 'abgelaufen' für den erzwungenen Logout.
   const logout = ({ grund } = {}) => {
     sitzungsZaehler.current += 1;
     setToken(null);
     setUser(null);
     setIsLoggedIn(false);
-    // isLoggingOut wird hier BEWUSST nicht zurueckgesetzt, sondern erst beim
-    // naechsten Login. logout() laeuft synchron durch; stuende die
-    // Ruecksetzung hier, waere das Flag beim zweiten der ~35 parallelen
-    // 401-Fehler schon wieder false und logout() liefe fuer jeden einzelnen
-    // erneut. Ohne Meldung fiel das nicht auf (logout ist idempotent) — mit
-    // der Meldung unten waeren es 35 Toasts uebereinander.
-    // Ein offenes Erfassungs-Sheet oder Status-Fenster steht sonst nach dem
-    // Zwangs-Logout ueber der Anmeldemaske: Beide werden von ihren Providern
-    // gerendert, nicht von AppContent, und ueberleben dessen Wechsel.
+    // isLoggingOut erst beim nächsten Login zurücksetzen, sonst kämen 35 Toasts; offene Sheets der Provider schließen.
     setAbrechnungsStatusModal({ open: false });
-    // Der Header muss mit fallen, sonst schickt der naechste Request noch den
-    // Token des abgemeldeten Kontos mit.
+    // Sonst schickt der nächste Request noch das alte Token.
     delete axios.defaults.headers.common['Authorization'];
 
-    // Alle geladenen Daten mit leeren. Bisher blieben sie stehen: Nach einem
-    // Wechsel des Kirchenkreises zeigten Dashboard, Fahrtenliste und die
-    // Erfassung so lange die Daten von A, bis B geantwortet hatte — und
-    // dauerhaft, wenn B's Abruf scheiterte (die catch-Zweige setzen nichts
-    // zurueck). Damit saehe man unter der Anmeldung von B die Fahrten,
-    // Adressen und Traeger eines anderen Kirchenkreises.
+    // Alle Daten leeren, sonst sieht man nach einem Wechsel die Daten des anderen Kirchenkreises.
     setOrte([]);
     setFahrten([]);
     setMonthlyData([]);
@@ -445,8 +340,7 @@ function AppProvider({ children }) {
       logFehler('Abmeldedaten konnten nicht entfernt werden:', error);
     });
 
-    // Der erzwungene Logout kam bisher wortlos: Wer mitten im Formular sass,
-    // stand ploetzlich vor der Anmeldung, ohne zu wissen warum.
+    // Den erzwungenen Logout erklären.
     if (grund === 'abgelaufen') {
       toast.error('Die Sitzung ist abgelaufen. Bitte erneut anmelden.');
     }
@@ -463,9 +357,7 @@ function AppProvider({ children }) {
     }
   };
 
-  // silent = true: kein eigener Toast (für Mehrfach-Updates in Schleifen)
-  // refresh = false: keine Fetches — der Aufrufer lädt am Ende selbst nach
-  // (fetchMonthlyData feuert ~28 Requests; in Schleifen wäre das ein Sturm)
+  // silent: kein eigener Toast, refresh = false: der Aufrufer lädt am Ende selbst nach.
   const updateAbrechnungsStatus = async (jahr, monat, typ, aktion, datum, silent = false, refresh = true) => {
     try {
       await axios.post(`${API_BASE_URL}/fahrten/abrechnungsstatus`, {
@@ -521,8 +413,7 @@ function AppProvider({ children }) {
         response = await axios.get(`${API_BASE_URL}/fahrten/report/${bisYear}/${bisMonth}`);
       }
 
-      // Meldet der Endpunkt einen Fehler, fehlt fahrten/summary im Body —
-      // ohne Absicherung warf .map einen TypeError
+      // Bei Fehlern fehlen fahrten/summary im Body.
       const geladeneFahrten = Array.isArray(response?.data?.fahrten)
         ? response.data.fahrten
         : [];
@@ -535,13 +426,11 @@ function AppProvider({ children }) {
       setFahrtenFehler(null);
     } catch (error) {
       logFehler('Fehler beim Abrufen der Fahrten:', error);
-      // Auch den Fehler verwerfen, wenn ein neuerer Abruf laeuft: Sonst
-      // leert der alte die Liste, die der neue gerade fuellt.
+      // Auch Fehler verwerfen, wenn ein neuerer Abruf läuft.
       if (sitzungVorbei(sitzung) || ueberholt()) return;
       setFahrten([]);
       setSummary({});
-      // Bei 401 meldet der Interceptor bereits ab und zeigt seine eigene
-      // Meldung — hier kaeme sonst ein zweiter Toast obendrauf.
+      // Bei 401 meldet der Interceptor schon.
       if (error?.response?.status !== 401) {
         setFahrtenFehler(fehlerText(error, 'Die Fahrten konnten nicht geladen werden.'));
         toast.error(fehlerText(error, 'Die Fahrten konnten nicht geladen werden.'));
@@ -622,9 +511,7 @@ function AppProvider({ children }) {
         while (current <= end) {
           const y = current.getFullYear().toString();
           const m = (current.getMonth() + 1).toString().padStart(2, '0');
-          // refresh=false: Sonst laedt jeder Monat der Schleife Fahrten und
-          // Monatsdaten neu — bei zwoelf Monaten 24 Abrufe, von denen 22
-          // sofort veraltet sind. Aktualisiert wird einmal danach.
+          // refresh=false in der Schleife, einmal danach aktualisiert.
           await updateAbrechnungsStatus(y, m, traegerId, aktion, datum, true, false);
           current.setMonth(current.getMonth() + 1);
         }
@@ -649,21 +536,7 @@ function AppProvider({ children }) {
   const fetchMonthlyData = async () => {
     const sitzung = sitzungsZaehler.current;
     try {
-      // EIN Abruf statt 28. Vorher holte diese Funktion fuer jeden der 28
-      // betrachteten Monate einen eigenen Monatsbericht — beim App-Start,
-      // nach jedem Speichern und nach jedem Statuswechsel. Zusammen mit den
-      // uebrigen Abrufen kam der Start auf rund 40 Anfragen, waehrend das
-      // Rate-Limit bei 600 in fuenf Minuten liegt.
-      //
-      // /api/fahrten/monthly-summary liefert seit dem 24.09. zusaetzlich
-      // abrechnungsStatus, kmProTraeger, fahrtenCount, totalKm und
-      // gesamtErstattung je Monat — damit reicht dieser eine Aufruf. Die
-      // bisherigen Felder der Route sind unveraendert geblieben.
-      //
-      // Die Route liefert alle Monate mit Fahrten, nicht nur die 28 aus dem
-      // alten Fenster. Das ist kein Nachteil: Gefiltert wird ohnehin auf
-      // Monate mit Inhalt, und aeltere Jahrgaenge fehlten bisher in der
-      // Auswahl, obwohl es sie gab.
+      // Ein Abruf über /api/fahrten/monthly-summary statt 28 Monatsberichte.
       const response = await axios.get(`${API_BASE_URL}/fahrten/monthly-summary`);
       if (sitzungVorbei(sitzung)) return [];
 
@@ -678,11 +551,7 @@ function AppProvider({ children }) {
             monthName: datum.toLocaleString('default', { month: 'long' }),
             year: Number(jahr),
             monatNr: Number(monat),
-            // WICHTIG: Die Sammel-Route liefert je Traeger ein Objekt
-            // { kilometer, erstattung }, der frueher genutzte Monatsbericht
-            // dagegen eine blosse Zahl. Dashboard und Abrechnung rechnen mit
-            // der Zahl (`Number(erstattungen[id])`, `b > 0`) — ohne diese
-            // Umwandlung stuenden dort ueberall 0 € und NaN.
+            // Die Sammel-Route liefert { kilometer, erstattung }, Dashboard und Abrechnung rechnen mit der Zahl.
             erstattungen: Object.fromEntries(
               Object.entries(eintrag.erstattungen || {})
                 .map(([schluessel, wert]) => [
@@ -690,8 +559,7 @@ function AppProvider({ children }) {
                   Number(wert?.erstattung ?? wert) || 0,
                 ])
             ),
-            // Die Kilometer je Traeger stecken in derselben Struktur und
-            // ergaenzen kmProTraeger, falls die Route es nicht mitliefert.
+            // Ergänzt kmProTraeger, falls die Route es nicht liefert.
             kilometerJeTraeger: Object.fromEntries(
               Object.entries(eintrag.erstattungen || {})
                 .map(([schluessel, wert]) => [
@@ -717,17 +585,14 @@ function AppProvider({ children }) {
       setMonthlyData(data);
       return data;
     } catch (error) {
-      // 404 heisst hier „noch keine Fahrten erfasst" — kein Fehler, den man
-      // melden muesste. Die Route antwortet so seit jeher, der Vertrag
-      // bleibt unangetastet.
+      // 404 heißt noch keine Fahrten, kein Fehler.
       if (error?.response?.status === 404) {
         if (sitzungVorbei(sitzung)) return [];
         setMonthlyData([]);
         return [];
       }
       logFehler('Fehler beim Abrufen der monatlichen Übersicht:', error);
-      // Leere Liste statt des alten Standes: Komponenten iterieren darueber,
-      // ein undefined liesse die Oberflaeche beim naechsten Rendern abstuerzen
+      // Leere Liste, ein undefined ließe die Oberfläche abstürzen.
       if (sitzungVorbei(sitzung)) return [];
       setMonthlyData([]);
       return [];
@@ -821,8 +686,7 @@ function AppProvider({ children }) {
       summary,
       setSummary,
       updateAbrechnungsStatus,
-      // Kein Bestätigungs-Modal mehr aktiv — konstante Rückgabe für
-      // Bestandskonsumenten (Modal.js)
+      // Konstante Rückgabe für Bestandscode (Modal.js).
       hasActiveNotification: false,
       showNotification,
       setFahrten,

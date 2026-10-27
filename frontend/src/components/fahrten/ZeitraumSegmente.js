@@ -2,14 +2,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { AppContext } from '../../contexts/AppContext';
 
-// Segmented Control der Fahrtenliste (Design-Spec Screen 3):
-// aktueller Monat / Vormonat / „Zeitraum". Die Segmente steuern die
-// bestehende Zeitraum-Logik im AppContext (selectedMonth/selectedVonMonth);
-// die Datenladung bleibt unverändert (Effect in FahrtenListe).
-//
-// „Zeitraum" klappt eine kompakte Von-/Bis-Monatswahl unter dem Control
-// aus (kein Sheet — die Auswahl bleibt sichtbar, solange man sie braucht,
-// und funktioniert mobil wie desktop identisch). Von „—" = einzelner Monat.
+// Zeitraumwahl der Fahrtenliste; „Zeitraum“ klappt die Von-/Bis-Wahl aus, Von „—“ heißt ein Monat.
 
 const ymOf = (date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -46,8 +39,7 @@ function ZeitraumSegmente() {
   const [panelOffen, setPanelOffen] = useState(datenSegment === 'zeitraum');
   const aktivesSegment = panelOffen ? 'zeitraum' : datenSegment;
 
-  // Offene Monate (mind. ein Träger weder eingereicht noch erstattet)
-  // für den Schnellfilter „Offene anzeigen"
+  // Offene Monate für „Offene anzeigen“.
   const offenerZeitraum = useMemo(() => {
     const offeneMonate = monthlyData
       .filter((md) =>

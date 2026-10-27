@@ -1,7 +1,6 @@
 import React from 'react';
 
-// Bereichskopf nach Spec Screen 7: Titel 17px/600 + erklärender Satz 14px,
-// rechts optional Primärbutton „+ {Ding}"
+// Bereichskopf mit Titel, Satz und optionalem Primärbutton.
 function BereichKopf({ titel, satz, aktion, onAktion }) {
   return (
     <div className="set-head">

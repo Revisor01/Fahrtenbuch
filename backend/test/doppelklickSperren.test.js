@@ -1,27 +1,4 @@
-// Punkt 15 der Pre-Launch-Liste, Teilbefund „fehlende Doppelklick-Sperren".
-//
-// Von fuenf genannten Stellen erzeugten zwei echte Duplikate:
-//
-//  - Mitfahrer-Satz: `mitfahrer_erstattung` hatte als einzige der
-//    Erstattungstabellen KEINE Eindeutigkeitsregel. Zwei Saetze mit
-//    demselben Stichtag standen danach nebeneinander; welcher galt,
-//    entschied die Sortierung. Die Oberflaeche zeigte fuer genau diesen
-//    Fall die Meldung „Fuer dieses Datum existiert bereits ein Satz",
-//    ausgeloest durch „Duplicate entry" — die konnte nie erscheinen. Toter
-//    Code, der Sicherheit vortaeuschte.
-//  - Favoriten: `favoriten_fahrten` hat ebenfalls keine Regel, der
-//    Doppelklick legte den Favoriten zweimal an.
-//
-// Die drei uebrigen sind harmlos: FahrtForm sendet ein idempotentes PUT,
-// der Traeger-Satz haengt an idx_traeger_datum, und Benutzernamen sind
-// UNIQUE.
-//
-// Die Migration 0013 wurde gegen eine echte MySQL 8.4 gemessen: Duplikate
-// werden bereinigt (der juengste Satz bleibt), der Index steht danach, ein
-// zweiter Lauf laeuft fehlerfrei durch, und ein doppelter INSERT scheitert
-// anschliessend mit Duplicate entry.
-//
-// Laeuft ohne Test-Framework: `node test/doppelklickSperren.test.js`.
+// Doppelklicks bei Mitfahrer-Sätzen und Favoriten dürfen keine Duplikate erzeugen. Aufruf: node test/doppelklickSperren.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -58,8 +35,7 @@ pruefe('von Duplikaten bleibt der zuletzt angelegte Satz', () => {
 });
 
 pruefe('die Migration ist wiederholbar', () => {
-  // DDL committet implizit; scheitert ein spaeteres Statement, laeuft die
-  // Datei beim naechsten Start erneut.
+  // DDL committet implizit, die Datei muss wiederholbar sein.
   assert.ok(/information_schema\.STATISTICS/.test(migration),
     'der Index braucht eine Existenzpruefung — MySQL kennt kein IF NOT EXISTS');
   assert.ok(/PREPARE stmt FROM @sql/.test(migration));

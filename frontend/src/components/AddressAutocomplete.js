@@ -2,9 +2,7 @@ import React, { useState, useRef, useEffect, useId } from 'react';
 import { MapPin } from 'lucide-react';
 import { useAdressSuche } from './useAdressSuche';
 
-// Adressfeld mit Live-Vorschlaegen (Photon). Die Suchlogik liegt in
-// useAdressSuche, damit der Erfassungsflow dieselben Treffer direkt in seine
-// Ortsliste mischen kann.
+// Adressfeld mit Photon-Vorschlägen; die Suche liegt in useAdressSuche.
 function AddressAutocomplete({
   value,
   onChange,
@@ -16,9 +14,7 @@ function AddressAutocomplete({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   const listenId = useId();
-  // Nach einer Auswahl steht die gewaehlte Adresse im Feld und loest prompt
-  // eine neue Suche aus. Ohne diese Sperre klappte die Liste dadurch sofort
-  // wieder auf.
+  // Sonst klappt die Liste nach der Auswahl sofort wieder auf.
   const gewaehlt = useRef(null);
   const { vorschlaege, zuruecksetzen } = useAdressSuche(value, {
     aktiv: value !== gewaehlt.current,

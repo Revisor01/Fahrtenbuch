@@ -13,11 +13,7 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
     <title>Fahrtenbuch</title>
-    <!-- Grundfarbe direkt im Dokument, nicht erst im Stylesheet: Die WebView
-         zeigt das leere Dokument, sobald es geparst ist — bis das externe CSS
-         geladen war, blitzte dort zwei Sekunden lang Weiss auf, mitten im
-         Start (gemessen 16.08.). Petrol wie die native Startflaeche, damit
-         der Uebergang nicht auffaellt. -->
+    <!-- Grundfarbe im Dokument, sonst blitzt bis zum Laden des CSS Weiß auf. -->
     <style>
       html, body { margin: 0; background: #0F5257; }
     </style>
@@ -25,9 +21,7 @@
   <body>
     <noscript>Für diese App muss JavaScript aktiviert sein.</noscript>
     <div id="root"></div>
-    <!-- Laufzeit-Konfiguration: wird vom Container-Entrypoint ueberschrieben.
-         Muss vor dem App-Bundle laufen — klassisches Script ohne defer wird
-         ausgefuehrt, bevor das Modul-Bundle startet. -->
+    <!-- Vom Entrypoint überschrieben; ohne defer, damit es vor dem Bundle läuft. -->
     <script src="/config.js"></script>
     <script type="module" src="/src/index.js"></script>
   </body>

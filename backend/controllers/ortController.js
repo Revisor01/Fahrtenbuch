@@ -11,9 +11,7 @@ exports.createOrt = async (req, res) => {
       return res.status(400).json({ message: 'Name und Adresse sind erforderlich' });
     }
     
-    // Standardwerte setzen, falls nicht angegeben. Die normalisierten Werte
-    // wurden bisher berechnet, aber nicht weitergereicht - Ort.create bekam
-    // die ungeprueften Originalwerte (undefined statt false).
+    // Normalisierte Werte weiterreichen.
     const wohnort = istWohnort === undefined ? false : !!istWohnort;
     const dienstort = istDienstort === undefined ? false : !!istDienstort;
     const kirchspiel = istKirchspiel === undefined ? false : !!istKirchspiel;
@@ -41,9 +39,7 @@ exports.deleteOrt = async (req, res) => {
       res.status(404).json({ message: 'Ort nicht gefunden' });
     }
   } catch (error) {
-    // Haengt noch eine Distanz am Ort, blockiert der Fremdschluessel das DELETE.
-    // Das ist der Normalfall bei genutzten Orten und braucht eine Erklaerung
-    // statt eines nackten 500ers.
+    // Eine Distanz blockiert per Fremdschlüssel, das braucht eine Erklärung.
     if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
       return res.status(400).json({
         message: 'Ort kann nicht gelöscht werden, da noch Distanzen zu ihm gepflegt sind. Bitte zuerst die Distanzen entfernen.'
@@ -54,9 +50,7 @@ exports.deleteOrt = async (req, res) => {
   }
 };
 
-/**
- * Bulk-Umsortierung per Drag & Drop, analog zu den Abrechnungstraegern.
- */
+/** Bulk-Umsortierung per Drag & Drop. */
 exports.updateSortOrder = async (req, res) => {
   try {
     const { sortOrder } = req.body;

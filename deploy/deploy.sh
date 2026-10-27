@@ -1,30 +1,12 @@
 #!/usr/bin/env bash
-#
-# Fahrtenbuch ausrollen.
-#
-#   ./deploy/deploy.sh test                 Testinstanz (baut aus dem Repo)
-#   ./deploy/deploy.sh dithmarschen         Referenzinstanz (zieht Images)
-#   ./deploy/deploy.sh alle                 alle ausser test und dithmarschen
-#   ./deploy/deploy.sh <name> --pruefen     nur nachsehen, nichts aendern
-#
-# Warum ein Skript und kein Webhook: Die CI rief bis 17.08.2026 einen
-# Portainer-Webhook, aber auf dem KKD-Server laeuft kein Portainer. Der Aufruf
-# ging ins Leere, ohne Fehler — auf dem Server lagen Images von vor 26 Stunden,
-# obwohl dreimal erfolgreich gebaut worden war. Ein Deploy, der nicht
-# nachprueft, ob er gewirkt hat, ist kein Deploy.
-#
-# Dieses Skript prueft deshalb nach jedem Schritt und bricht ab, sobald etwas
-# nicht stimmt. Bei Instanzen mit echten Daten sichert es vorher die Datenbank.
-#
-# Instanzen stehen in deploy/instanzen/*.env — dort steht, WO etwas laeuft,
-# niemals Zugangsdaten. Die bleiben in der stack.env auf dem jeweiligen Server.
+# Fahrtenbuch ausrollen: ./deploy/deploy.sh test|dithmarschen|alle|<name> [--pruefen]
+# Deploy-Skript statt Portainer-Webhook: auf dem Zielserver laeuft kein Portainer.
 
 set -euo pipefail
 
 HIER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTANZ_VERZEICHNIS="$HIER/instanzen"
-# Hosts und Zugangsdaten kommen aus der Umgebung, optional aus deploy/lokal.env
-# (ignoriert, siehe deploy/README.md).
+# Hosts und Zugangsdaten aus der Umgebung oder deploy/lokal.env.
 [[ -f "$HIER/lokal.env" ]] && source "$HIER/lokal.env"
 
 ROT=$'\033[0;31m'; GRUEN=$'\033[0;32m'; GELB=$'\033[0;33m'; GRAU=$'\033[0;90m'; AUS=$'\033[0m'
@@ -39,8 +21,7 @@ abbruch() { fehler "$1"; exit 1; }
 
 # ---------------------------------------------------------------- Hilfsmittel
 
-# SSH mit Passwort (KKD) oder Schluessel (alle anderen). Das Passwort kommt aus
-# der Umgebung, steht also nie in einer Datei im Repo.
+# Passwort nur aus der Umgebung.
 fern() {
   local host="$1"; shift
   if [[ -n "${KKD_SSH_HOST:-}" && "$host" == *"$KKD_SSH_HOST"* && -n "${KKD_SSH_PASS:-}" ]]; then
@@ -50,8 +31,7 @@ fern() {
   fi
 }
 
-# Antwortet die Instanz? Prueft die Startseite und die API, denn ein laufender
-# Webserver allein sagt noch nicht, dass das Backend erreichbar ist.
+# Startseite und API, ein laufender Webserver allein sagt nichts.
 erreichbar() {
   local url="$1"
   local start api
@@ -78,8 +58,7 @@ instanz_laden() {
 
 # ------------------------------------------------------------------- Aktionen
 
-# Datenbank sichern, bevor etwas angefasst wird. Nur bei Instanzen, die
-# DB_CONTAINER gesetzt haben — die Testinstanz braucht das nicht.
+# Nur bei Instanzen mit DB_CONTAINER.
 datenbank_sichern() {
   [[ -n "$DB_CONTAINER" ]] || return 0
 
@@ -90,9 +69,7 @@ datenbank_sichern() {
     set -e
     mkdir -p $ziel
     datei=$ziel/${DB_NAME}_vor-deploy_\$(date +%Y%m%d-%H%M%S).sql.gz
-    # Zugangsdaten aus der stack.env des Servers, nicht aus dem Repo. Bewusst
-    # DB_USER statt root: fuer einen Dump der eigenen Datenbank genuegt das,
-    # und ein Root-Passwort muss dafuer nirgends herumliegen.
+    # DB_USER statt root, fuer den Dump der eigenen Datenbank genuegt das.
     nutzer=\$(grep -m1 '^DB_USER=' $PFAD/stack.env | cut -d= -f2-)
     kennwort=\$(grep -m1 '^DB_PASSWORD=' $PFAD/stack.env | cut -d= -f2-)
     docker exec $DB_CONTAINER mysqldump -u \"\$nutzer\" -p\"\$kennwort\" \
@@ -107,8 +84,7 @@ datenbank_sichern() {
   gut "gesichert: $stand"
 }
 
-# Zaehlt Fahrten und Nutzer. Vor und nach dem Deploy verglichen: Der Deploy
-# darf keine Daten anfassen; wenn sich die Zahlen aendern, stimmt etwas nicht.
+# Vorher und nachher verglichen, der Deploy darf keine Daten anfassen.
 datenstand() {
   [[ -n "$DB_CONTAINER" ]] || { echo ""; return 0; }
   fern "$HOST" "
@@ -126,8 +102,7 @@ ausrollen() {
   melde ""
   melde "── $NAME ──────────────────────────────"
 
-  # Vorher: Laeuft die Instanz ueberhaupt? Wenn sie schon vorher aus war, ist
-  # ein "laeuft nicht" danach kein Hinweis auf diesen Deploy.
+  # War sie vorher schon aus, sagt ein Ausfall danach nichts ueber den Deploy.
   local lief_vorher="nein"
   erreichbar "$URL" && lief_vorher="ja"
   schritt "Zustand vorher: $([ "$lief_vorher" = ja ] && echo "laeuft" || echo "antwortet nicht")"
@@ -159,15 +134,7 @@ ausrollen() {
     " || abbruch "Images ziehen fehlgeschlagen"
   fi
 
-  # --force-recreate ist hier keine Vorsicht, sondern noetig: Compose meldete
-  # bei einem frisch gebauten Image sonst „is up-to-date" und liess die
-  # Container mit dem alten Stand weiterlaufen (beobachtet 17.08.2026 auf der
-  # Testinstanz — Image von 07:22, Container von 05:23). Der Deploy haette
-  # Erfolg gemeldet, ohne etwas auszurollen.
-  #
-  # Beide Server fahren seit 17.08.2026 Compose v2; der frueher noetige
-  # Sonderweg fuer das alte Python-Compose (down/up statt up -d, wegen
-  # „KeyError: ContainerConfig") ist damit entfallen.
+  # --force-recreate, sonst meldet Compose bei frischem Image „is up-to-date“ und laesst den alten Container laufen.
   schritt "Container neu erstellen"
   fern "$HOST" "
     set -e
@@ -175,8 +142,7 @@ ausrollen() {
     $COMPOSE_BEFEHL -f $COMPOSE_DATEI up -d --force-recreate 2>&1 | tail -6
   " || abbruch "Neustart fehlgeschlagen"
 
-  # Warten, bis die Instanz antwortet. Ohne diese Pruefung meldet ein Deploy
-  # Erfolg, waehrend der Container in einer Neustartschleife haengt.
+  # Sonst meldet der Deploy Erfolg, waehrend der Container in einer Neustartschleife haengt.
   schritt "Warten, bis die Instanz antwortet"
   local versuch=0
   until erreichbar "$URL"; do
@@ -190,22 +156,10 @@ ausrollen() {
   done
   gut "antwortet: $URL"
 
-  # Laeuft auch wirklich der neue Stand? „Container laeuft" und „Container
-  # laeuft mit dem gerade gebauten Image" sind zweierlei — genau daran ist der
-  # erste Testlauf vorbeigelaufen. Deshalb wird verglichen, ob der Container
-  # spaeter gestartet wurde als sein Image gebaut wurde.
-  # Laeuft auch wirklich der neue Stand? Verglichen wird, ob der Container
-  # spaeter gestartet wurde, als sein Image gebaut wurde.
-  #
-  # ACHTUNG beim Nachpruefen von Hand: Docker gibt `StartedAt` in UTC aus,
-  # `Created` beim Image dagegen in Ortszeit. Die Uhrzeiten nebeneinander
-  # gelesen sehen zwei Stunden falsch aus. `date +%s` rechnet beide korrekt in
-  # denselben Zeitpunkt um — deshalb hier der Vergleich in Sekunden.
+  # Container muss nach dem Bau seines Images gestartet sein; in Sekunden verglichen, weil Docker StartedAt in UTC und Created in Ortszeit ausgibt.
   schritt "Pruefen, ob der neue Stand laeuft"
   local alt
-  # Das Skript geht ueber stdin an die ferne Shell, statt es in eine
-  # Kommandozeile zu falten: So wertet die lokale Shell nichts aus, was erst
-  # drueben ausgewertet werden soll.
+  # Ueber stdin, damit die lokale Shell nichts auswertet, was drueben ausgewertet werden soll.
   alt=$(fern "$HOST" 'bash -s' <<'FERNSKRIPT' 2>/dev/null || echo ""
 for c in $(docker ps --format '{{.Names}}' | grep -i fahrtenbuch | grep -vi db); do
   img=$(docker inspect "$c" --format '{{.Image}}')
@@ -283,8 +237,7 @@ if [[ "$MODUS_ARG" == "--pruefen" ]]; then
 fi
 
 if [[ "$ZIEL" == "alle" ]]; then
-  # „alle" meint die uebrigen Kirchenkreise — Test und Dithmarschen werden
-  # bewusst einzeln und in dieser Reihenfolge ausgerollt.
+  # Test und Dithmarschen laufen bewusst einzeln und vorab.
   for i in $(alle_instanzen); do
     [[ "$i" == "test" || "$i" == "dithmarschen" ]] && continue
     ausrollen "$i"

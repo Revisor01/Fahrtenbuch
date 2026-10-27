@@ -8,10 +8,7 @@ import EmptyState from './components/ui/EmptyState';
 import BereichKopf from './components/einstellungen/BereichKopf';
 import { Pencil, Trash2, Users } from 'lucide-react';
 
-// Verwaltung (Admin) nach Design-Spec Screen 7: Benutzer als Tabelle
-// (Kopf 11px/700 uppercase auf --bg, Zeilen mit --line-Trennung, Hover
-// --surface-2, Aktions-Icons 36×36) statt Kacheln; mobil gestapelte
-// Zeilen (.set-row). Formulare öffnen als Sheet.
+// Benutzerverwaltung als Tabelle, mobil gestapelt; Formulare als Sheet.
 
 const FELDER = [
   { name: 'email', label: 'E-Mail', type: 'email', required: true },
@@ -110,15 +107,11 @@ export default function UserManagement() {
   const [users, setUsers] = useState([]);
   // null | { mode: 'neu' } | { mode: 'edit', user }
   const [sheet, setSheet] = useState(null);
-  // Inline-Zweischritt statt Bestätigungs-Modal: erster Klick „scharf",
-  // zweiter Klick löscht (kein Undo möglich — Nutzerkonto samt Daten)
+  // Zweimal klicken statt Bestätigungsdialog, kein Undo.
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
   const confirmTimer = useRef(null);
 
-  // Nur noch aus dem Context: die Nutzerdaten liegen in der App im sicheren
-  // Systemspeicher und waeren hier nur asynchron erreichbar. Der Context haelt
-  // denselben Wert und ist bis hierher immer geladen — diese Ansicht ist erst
-  // nach der Anmeldung erreichbar.
+  // Aus dem Context, der sichere Speicher wäre hier nur asynchron erreichbar.
   const currentUserId = currentUser?.id;
 
   const requestDelete = (userId) => {

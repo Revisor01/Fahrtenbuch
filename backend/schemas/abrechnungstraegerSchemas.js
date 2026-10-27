@@ -1,10 +1,6 @@
 const { z } = require('zod');
 
-// Farbe des Traegers. Controller und Model verarbeiten das Feld laengst und die
-// DB-Spalte gibt es auch (varchar(7)) — nur im Schema fehlte es, und Zod
-// entfernt unbekannte Felder stillschweigend. Ueber die API liess sich deshalb
-// nie eine Farbe setzen, sie blieb immer NULL (24.08.).
-// Format wie in der Spalte vorgesehen: #RRGGBB.
+// Farbe #RRGGBB, ohne Schema-Eintrag entfernte Zod das Feld still.
 const farbeSchema = z
   .string()
   .regex(/^#[0-9a-fA-F]{6}$/, 'Farbe muss im Format #RRGGBB angegeben werden')

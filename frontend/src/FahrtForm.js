@@ -8,20 +8,14 @@ import Sheet from './components/ui/Sheet';
 import AddressAutocomplete from './components/AddressAutocomplete';
 import DatumsFeld from './components/ui/DatumsFeld';
 
-// Klartext statt der internen Schluessel ('hin_rueck' sagt niemandem etwas)
-// Auch vom Erfassungsflow genutzt — eine Quelle, damit die Beschriftung der
-// Mitfahrer-Eintraege ueberall gleich lautet
+// Klartext statt interner Schlüssel, auch im Erfassungsflow.
 export const RICHTUNG_TEXT = {
   hin: 'Hinfahrt',
   rueck: 'Rückfahrt',
   hin_rueck: 'Hin- und Rückfahrt',
 };
 
-// Bearbeiten einer bestehenden Fahrt (Edit-Modal). Das Anlegen neuer Fahrten
-// läuft seit dem Redesign 2026 ausschließlich über den zweistufigen
-// Erfassungsflow (components/erfassung/ErfassungsFlow.js, useErfassung()).
-// Bedienkonzept hier bewusst identisch zum Flow: aufklappende Ortsliste,
-// Ein-Tap-Datum, Traeger-/Anlasszeile statt <select>.
+// Bearbeiten einer Fahrt, Bedienung wie im Erfassungsflow; angelegt wird nur dort.
 function FahrtForm({ editData, onUpdate, onCancel }) {
   const {
     orte,
@@ -60,8 +54,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
   const [useEinmaligenVonOrt, setUseEinmaligenVonOrt] = useState(false);
   const [useEinmaligenNachOrt, setUseEinmaligenNachOrt] = useState(false);
 
-  // Aufklappzustaende der Zeilen (wie im Erfassungsflow inline, nicht als
-  // eigener Screen — sonst gehen Scrollposition und Rueckweg verloren)
+  // Inline aufklappen, sonst gehen Scrollposition und Rückweg verloren.
   const [vonAuswahlOffen, setVonAuswahlOffen] = useState(false);
   const [nachAuswahlOffen, setNachAuswahlOffen] = useState(false);
   const [traegerAuswahlOffen, setTraegerAuswahlOffen] = useState(false);
@@ -69,15 +62,13 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
   const [vonSuche, setVonSuche] = useState('');
   const [nachSuche, setNachSuche] = useState('');
   const [anlassSuche, setAnlassSuche] = useState('');
-  // Freitext-Anlass: bewusst getrennt von der Liste, damit der Unterschied
-  // zwischen „einmalig eintippen" und „dauerhaft merken" sichtbar bleibt
+  // Getrennt, damit „einmalig eintippen“ und „dauerhaft merken“ unterscheidbar bleiben.
   const [freiAnlassAktiv, setFreiAnlassAktiv] = useState(false);
   const [anlassSpeichert, setAnlassSpeichert] = useState(false);
   // Frisch angelegte Anlaesse sofort zeigen, auch vor dem Context-Refresh
   const [neueAnlaesse, setNeueAnlaesse] = useState([]);
   const anlassInputRef = useRef(null);
-  // Kilometerfeld: nur sichtbar, wenn keine Distanz bekannt ist oder der
-  // Nutzer den Stift antippt (ausdruecklicher Wunsch — wie im Flow)
+  // Nur ohne bekannte Distanz oder nach Tipp auf den Stift.
   const [kmEdit, setKmEdit] = useState(false);
 
   // Pre-fill form when editData is provided (edit mode)
@@ -99,8 +90,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     }
   }, [editData]);
 
-  // Die Strecke, mit der die Fahrt geladen wurde. Solange von- und Zielort
-  // unveraendert sind, bleiben die gespeicherten Kilometer stehen.
+  // Solange Start und Ziel gleich bleiben, bleiben die gespeicherten Kilometer.
   const ausgangsStrecke = useMemo(
     () => ({
       von: editData?.von_ort_id ? String(editData.von_ort_id) : '',
@@ -127,12 +117,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
           });
           if (response.data.distanz) {
             setGepflegteDistanz(response.data.distanz.toString());
-            // Bugfix: Beim Oeffnen einer bestehenden Fahrt duerfen die
-            // gespeicherten Kilometer NICHT durch die gepflegte Distanz
-            // ersetzt werden. Wer einen Umweg von Hand eingetragen hat,
-            // verlor ihn sonst durch blosses Oeffnen und Speichern. Erst
-            // wenn Start- oder Zielort tatsaechlich gewechselt haben, zieht
-            // die gepflegte Distanz.
+            // Gespeicherte Kilometer beim Öffnen nicht ersetzen, sonst ginge ein eingetragener Umweg verloren.
             if (!unveraendert) {
               setFormData(prev => ({
                 ...prev,
@@ -174,27 +159,18 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     if (freiAnlassAktiv) anlassInputRef.current?.focus();
   }, [freiAnlassAktiv]);
 
-  // Der Wert im Feld weicht von der gepflegten Distanz ab — typisch fuer eine
-  // Fahrt mit Umweg, die von Hand korrigiert wurde. Der Hinweis muss das
-  // sagen, sonst behauptet er etwas Falsches.
+  // Weicht der Wert ab, ist es meist ein Umweg, und der Hinweis muss das sagen.
   const kmWeichtAb =
     isKilometerLocked &&
     gepflegteDistanz !== null &&
     String(formData.manuelleKilometer) !== String(gepflegteDistanz);
 
-  // Ohne bekannte Distanz muss das Feld sichtbar bleiben — sonst gaebe es
-  // keinen Weg, die Kilometer ueberhaupt einzutragen.
+  // Ohne Distanz bliebe sonst kein Weg, Kilometer einzutragen.
   const kmFeldSichtbar = !isKilometerLocked || kmEdit;
 
-  // Bugfix Redesign R3: Der frühere Mount-Effect setzte den Abrechnungsträger
-  // asynchron auf den Default und überschrieb damit im Edit-Modus den
-  // bestehenden Wert der Fahrt. Die Trägerliste kommt aus dem AppContext
-  // (refreshAllData) — hier wird kein Default mehr gesetzt.
+  // Kein Default-Träger, sonst überschriebe er im Bearbeiten den Wert der Fahrt.
 
-  // Nur aktive Traeger zur Auswahl — wie im Erfassungsflow. Der aktuell an
-  // der Fahrt haengende Traeger bleibt aber drin, auch wenn er inzwischen
-  // stillgelegt wurde: Sonst stuende das Feld beim Oeffnen leer da und die
-  // Fahrt liesse sich nicht mehr unveraendert speichern.
+  // Nur aktive Träger plus den der Fahrt, sonst ließe sie sich nicht unverändert speichern.
   const waehlbareTraeger = useMemo(() => {
     const liste = (abrechnungstraeger || []).filter(
       (t) => t.active !== 0 && t.active !== false
@@ -222,9 +198,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     });
   }, [orte]);
 
-  // Treffer ab dem ersten Buchstaben; ohne Eingabe bleibt die Liste leer —
-  // wie im Erfassungsflow. Die Vorabliste aller Orte schob die restlichen
-  // Felder aus dem Bild, ohne beim Finden zu helfen.
+  // Treffer erst ab dem ersten Buchstaben.
   const filterOrte = (suche) => {
     const q = suche.trim().toLowerCase();
     if (!q) return [];
@@ -248,9 +222,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     ? nachOrt.name
     : 'Zielort wählen';
 
-  // Gespeicherte Anlaesse: haeufig genutzte oben, dann alphabetisch. Frisch
-  // angelegte kommen dazu, solange der Context-Refresh noch laeuft.
-  // Defensiv: fehlt die Liste, bleibt sie leer und der Freitext traegt.
+  // Häufige oben, dann alphabetisch; fehlt die Liste, trägt der Freitext.
   const alleAnlaesse = useMemo(() => {
     const nachName = new Map();
     [...(anlaesse || []), ...neueAnlaesse].forEach((a) => {
@@ -261,9 +233,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
         nachName.set(name.toLowerCase(), { ...a, name });
       }
     });
-    // Gleiche Reihenfolge wie im Erfassungsflow: gepflegtes sort_order vor
-    // Nutzungshaeufigkeit, sonst zeigten beide Ansichten dieselbe Liste
-    // unterschiedlich sortiert.
+    // Gleiche Reihenfolge wie im Erfassungsflow.
     return [...nachName.values()].sort((a, b) => {
       const rang = (a.sort_order ?? 0) - (b.sort_order ?? 0);
       if (rang !== 0) return rang;
@@ -287,14 +257,12 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     [alleAnlaesse, anlassSucheClean]
   );
 
-  // Neuen Anlass aus der aufgeklappten Liste heraus anlegen: optimistisch
-  // auswaehlen und zuklappen, bei Fehler den Eintrag zuruecknehmen.
+  // Optimistisch auswählen, bei Fehler zurücknehmen.
   const handleAnlassAnlegen = async (name) => {
     const sauber = name.trim();
     if (!sauber || anlassSpeichert || typeof addAnlass !== 'function') return;
     setAnlassSpeichert(true);
-    // Siehe ErfassungsFlow: neue Anlaesse haengt das Backend ans Ende, der
-    // Platzhalter muss dieselbe Position vorwegnehmen.
+    // Neue Anlässe hängt das Backend ans Ende.
     const platzhalter = {
       id: `neu-${Date.now()}`,
       name: sauber,
@@ -390,10 +358,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
       anlass: formData.anlass,
       kilometer: parseFloat(formData.manuelleKilometer),
       abrechnung: parseInt(formData.abrechnung),
-      // Alle Mitfahrer senden. Frueher filterte diese Zeile auf 'hin' und
-      // 'hin_rueck' - Mitfahrer mit Richtung 'rueck' wurden damit beim
-      // Bearbeiten der Fahrt aus der Datenbank geloescht, samt ihrem
-      // Erstattungsanspruch.
+      // Alle Mitfahrer senden, sonst löscht das Backend die mit Richtung 'rueck'.
       mitfahrer
     };
 
@@ -430,9 +395,7 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
     setMitfahrer(updatedMitfahrer);
   };
 
-  // Eine Ortszeile (Start oder Ziel) — Label klein oben, Wert gross darunter,
-  // Klick klappt die Liste inline auf. Freitext-Adresse als Option UNTER der
-  // Liste statt als separate Checkbox.
+  // Ortszeile, die inline aufklappt; Freitext-Adresse unter der Liste.
   const renderOrtBlock = ({
     label,
     offen,
@@ -654,8 +617,6 @@ function FahrtForm({ editData, onUpdate, onCancel }) {
         <button
         type="button"
         onClick={() => {
-          // „Distanz übernehmen": gepflegten Wert wieder eintragen.
-          // „Ändern": Feld freigeben, Wert bleibt stehen.
           if ((kmEntsperrt || kmWeichtAb) && gepflegteDistanz) {
             setFormData(prev => ({ ...prev, manuelleKilometer: gepflegteDistanz }));
             setKmEntsperrt(false);

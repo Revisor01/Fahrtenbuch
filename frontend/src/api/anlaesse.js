@@ -2,10 +2,7 @@ import axios from 'axios';
 import { API_BASE_URL } from './client';
 import logFehler from '../utils/logFehler';
 
-// Gespeicherte Anlaesse (user-scoped Stammdaten). Die Endpunkte sind neu —
-// solange eine Instanz sie noch nicht kennt, darf die Erfassung nicht
-// stehenbleiben: dann bleibt die Liste leer und Anlaesse laufen wie bisher
-// als Freitext.
+// Kennt eine Instanz die Endpunkte noch nicht, bleibt die Liste leer und Anlässe laufen als Freitext.
 
 // Backend-Felder: id, name, sort_order, nutzung_anzahl
 export async function ladeAnlaesse() {
@@ -24,8 +21,7 @@ export async function ladeAnlaesse() {
   }
 }
 
-// POST ist idempotent: ein bereits vorhandener Name liefert den bestehenden
-// Eintrag zurueck statt eines Fehlers.
+// POST ist idempotent.
 export async function legeAnlassAn(name) {
   const response = await axios.post(`${API_BASE_URL}/anlaesse`, { name });
   return Array.isArray(response.data) ? response.data[0] : response.data?.data ?? response.data;

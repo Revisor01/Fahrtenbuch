@@ -1,13 +1,4 @@
-// Tests zum PDF-Export mehrblättriger Abrechnungen (Rückmeldung 28.08.).
-//
-// Reicht eine Abrechnung über mehr als ein Formularblatt (ab 30 Fahrten im
-// Monat), lieferte der PDF-Export eine ZIP mit einer PDF je Blatt — das
-// Frontend speicherte sie unverändert als .pdf, die sich nicht öffnen ließ.
-// Seitdem führt der PDF-Export die Blätter zu einer Datei zusammen.
-//
-// Läuft ohne Test-Framework: `node test/pdfMehrblatt.test.js`.
-// Die Umwandlung nach PDF braucht LibreOffice und wird nur ausgeführt, wenn
-// `soffice` erreichbar ist (im Container immer, lokal je nach Installation).
+// Mehrblättrige Abrechnungen als eine PDF; die Umwandlung läuft nur mit erreichbarem `soffice`. Aufruf: node test/pdfMehrblatt.test.js
 
 const assert = require('assert');
 const path = require('path');
@@ -27,8 +18,7 @@ const pruefe = async (beschreibung, fn) => {
   console.log('  ok  ' + beschreibung);
 };
 
-// Baut eine Teil-Mappe so, wie der Export sie je Formularblatt erzeugt:
-// Deckblatt „Vorlage" plus genau ein befülltes Quartalsblatt.
+// Teil-Mappe wie im Export: Deckblatt plus ein Quartalsblatt.
 async function teilMappe(markierung) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(TEMPLATE);
@@ -38,8 +28,7 @@ async function teilMappe(markierung) {
   });
   const blatt = workbook.getWorksheet(QUARTAL);
   blatt.getCell('A8').value = markierung;
-  // Das echte Formular enthält Datumswerte — Fahrtdatum und
-  // Ausstellungsdatum. Sie müssen die Zusammenführung als Date überstehen.
+  // Datumswerte müssen die Zusammenführung als Date überstehen.
   blatt.getCell('A9').value = new Date(2026, 7, 25);
   blatt.getCell('B40').value = new Date(2026, 7, 28);
   return workbook;
@@ -76,9 +65,7 @@ async function main() {
     assert.strictEqual(workbook.getWorksheet(`${QUARTAL} (2)`).getCell('A8').value, 'ZWEITES BLATT');
   });
 
-  // Regression: über JSON geklonte Blätter machten aus Datumswerten
-  // Zeichenketten — der Export brach beim Schreiben ab
-  // („d.getTime is not a function"), sobald echte Fahrten drinstanden.
+  // Über JSON geklont wurden Datumswerte zu Strings.
   await pruefe('Datumswerte bleiben Datumswerte', async () => {
     const dateien = [
       { dateiname: 'abrechnung_1', workbook: await teilMappe('ERSTES BLATT') },
@@ -95,9 +82,7 @@ async function main() {
       'das Ausstellungsdatum muss ein Date bleiben');
   });
 
-  // Regression (Rückmeldung 30.09.): ExcelJS liefert Zellverbünde im Modell
-  // als `merges`, liest sie beim Setzen aber aus `mergeCells`. Ohne sie
-  // stand auf jedem Folgeblatt der Text gequetscht in einzelnen Spalten.
+  // ExcelJS liefert `merges`, liest aber `mergeCells`.
   await pruefe('Zellverbünde des Formulars bleiben auf Folgeblättern erhalten', async () => {
     const dateien = [
       { dateiname: 'abrechnung_1', workbook: await teilMappe('ERSTES BLATT') },
@@ -129,8 +114,7 @@ async function main() {
     assert.strictEqual(puffer.subarray(0, 2).toString('latin1'), 'PK');
   });
 
-  // Das Deckblatt steckt in jeder Teil-Mappe identisch drin und darf im
-  // fertigen PDF nur einmal auftauchen
+  // Das Deckblatt nur einmal.
   await pruefe('das Deckblatt kommt nur einmal vor', async () => {
     const dateien = [
       { dateiname: 'abrechnung_1', workbook: await teilMappe('ERSTES BLATT') },
@@ -144,8 +128,7 @@ async function main() {
     assert.strictEqual(deckblaetter.length, 1);
   });
 
-  // Die Mitnahmeentschädigung ist kein Fahrten-Blatt und wird nicht
-  // aufgeteilt — sie darf sich beim Zusammenführen nicht vervielfachen
+  // Die Mitnahmeentschädigung darf sich nicht vervielfachen.
   await pruefe('die Mitnahmeentschädigung kommt nur einmal vor', async () => {
     const dateien = [
       { dateiname: 'abrechnung_1', workbook: await teilMappe('ERSTES BLATT') },
@@ -211,9 +194,7 @@ async function main() {
       assert.strictEqual(pdf.subarray(0, 4).toString('latin1'), '%PDF',
         'das Ergebnis muss ein PDF sein — vorher kam hier eine ZIP an ("PK")');
 
-      // Deckblatt + zwei Formularblätter + Mitnahmeentschädigung.
-      // Im echten Export fliegt ein leeres Mitnahmeblatt vorher raus
-      // (entferneLeereBlaetter) — hier steht die Vorlage unverändert.
+      // Deckblatt, zwei Formularblätter, Mitnahmeentschädigung.
       const seiten = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
       assert.strictEqual(seiten, 4);
     });

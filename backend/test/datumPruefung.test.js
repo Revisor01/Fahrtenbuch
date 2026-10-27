@@ -1,15 +1,4 @@
-// Datumspruefung beim Erfassen und Bearbeiten (24.09.2026).
-//
-// Befund der Pre-Launch-Pruefung: `datum` wurde nur mit z.string().min(1)
-// geprueft — kein Format, kein Bereich. In der Produktionsdatenbank stehen
-// dadurch Fahrten mit Jahreszahlen wie 0024, 0206 und 0525 (Tippfehler:
-// eine Null zu viel oder Ziffern vertauscht). Sie tauchen in KEINER Monats-,
-// Jahres- oder Zeitraumansicht auf und wurden nie abgerechnet — gemessen
-// am 24.09.2026: sechs Fahrten (drei Hin-/Rueck-Paare), zwei davon aus den
-// letzten fuenf Monaten, ohne korrigierte Zweitfassung.
-//
-// Die vorhandenen Datensaetze werden bewusst nicht angefasst (Entscheidung
-// Simon). Hier geht es nur darum, dass nichts Neues dazukommt.
+// Datumsprüfung beim Erfassen; vorhandene Datensätze bleiben unangetastet.
 
 const assert = require('assert');
 const {
@@ -65,9 +54,7 @@ pruefe('VERBOTEN: weit in der Zukunft', () => {
   assert.strictEqual(e.success, false, 'Fahrten zwei Jahre voraus sind ein Tippfehler');
 });
 
-// --- 3. Was weiterhin erlaubt sein MUSS -----------------------------------
-// Wichtiger als die Abweisung: Niemand darf beim Nachtragen ausgesperrt
-// werden. Das Fahrtenbuch wird oft rueckwirkend gefuehrt.
+// --- Was erlaubt bleiben muss: rückwirkendes Nachtragen ---
 console.log('\n3 — Nachtragen bleibt moeglich:');
 
 pruefe('ERLAUBT: heute', () => {

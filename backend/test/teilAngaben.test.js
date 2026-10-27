@@ -1,12 +1,4 @@
-// Teilangaben ohne Serverfehler (27.10.2026).
-//
-// Gefunden mit der API-Vertragspruefung: Ein Profil mit nur einem Teil der
-// Felder und ein Mitfahrer ohne Arbeitsstaette endeten in einem 500, weil
-// undefined als SQL-Parameter an mysql2 ging (und arbeitsstaette NOT NULL
-// ist). Die Apps senden alle Felder, Kurzbefehle und API-Nutzer nicht
-// unbedingt.
-//
-// Laeuft ohne Test-Framework und ohne Datenbank: `node test/teilAngaben.test.js`.
+// Teilangaben von Kurzbefehlen und API-Nutzern ohne 500. Aufruf: node test/teilAngaben.test.js
 
 const assert = require('assert');
 const path = require('path');

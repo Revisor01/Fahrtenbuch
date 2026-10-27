@@ -273,9 +273,7 @@ exports.addErstattungssatz = async (req, res) => {
         
         res.status(201).json({ message: 'Erstattungssatz erfolgreich hinzugefügt' });
     } catch (error) {
-        // idx_traeger_datum laesst je Traeger und Stichtag nur einen Satz zu.
-        // Das ist ein Bedienfehler, kein Serverfehler — und die Oberflaeche
-        // hat dafuer eine eigene Meldung, die bisher nie ankam.
+        // Ein Satz je Träger und Stichtag; ein Bedienfehler mit eigener Meldung.
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({
                 message: 'Für dieses Datum existiert bereits ein Satz'
@@ -308,10 +306,7 @@ exports.deleteAbrechnungstraeger = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Der Guard existierte, wurde aber nie aufgerufen: geloeschte Traeger
-        // hinterliessen Fahrten mit toter Referenz, die in Auswertungen und im
-        // Export mit 0,00 EUR erscheinen. fahrten.abrechnung ist VARCHAR ohne
-        // Fremdschluessel, die DB bremst also auch nicht.
+        // fahrten.abrechnung hat keinen Fremdschlüssel, sonst blieben Fahrten mit toter Referenz.
         const inVerwendung = await AbrechnungsTraeger.checkForFahrten(id, req.user.id);
         if (inVerwendung) {
             return res.status(400).json({

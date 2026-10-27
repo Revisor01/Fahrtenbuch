@@ -3,17 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { ImpressumInhalt, DatenschutzInhalt } from './InfoModal';
 
-// Impressum und Datenschutzerklaerung als oeffentliche Seite.
-//
-// Beides stand bisher nur im InfoModal, und das haengt im angemeldeten Teil
-// der App: Wer kein Konto hat, kam nie hin. Apple verlangt unter 5.1.1 (i)
-// aber, dass die Datenschutzerklaerung "easily accessible within the app"
-// ist — eine Pruefer:in ohne Konto haette sie nicht gefunden und die
-// Einreichung abgelehnt.
-//
-// Die Inhalte kommen als Komponenten aus InfoModal.js, damit der Text an
-// genau einer Stelle gepflegt wird. Sie liegen im Bundle, die Seite
-// funktioniert also auch ohne Netz.
+// Impressum und Datenschutz öffentlich und offline, weil Apple sie ohne Konto erreichbar verlangt; Inhalte aus InfoModal.js.
 function RechtlichesSeite() {
   return (
     <div className="help-root">

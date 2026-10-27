@@ -4,13 +4,7 @@ import TraegerZeile from './TraegerZeile';
 import { formatBetrag, rundeKilometer } from '../fahrten/zeitraumUtils';
 import { monatSumme, monatLabel } from './abrechnungUtils';
 
-// Desktop-Abrechnung (Spec Screen 6): Matrix Monat × Abrechnungsträger.
-// Spalten 150px / 1fr je Träger / 118px Summe / 130px Aktion; Trägerzellen
-// Statuspunkt + Wort (StatusBadge dot), kein Vorgang → „—". Aktion:
-// „Einreichen →" bei fälligen, „Details" sonst, „läuft" beim laufenden
-// Monat. Ab fünf Trägern scrollt die Matrix horizontal, die Monatsspalte
-// klebt. „Details" klappt die Zeile inline auf (Trägerzeilen + Aktionen,
-// gleiche Bausteine wie mobil).
+// Desktop-Abrechnung als Matrix Monat × Träger; ab fünf Trägern horizontal scrollend, Details klappen inline auf.
 function AbrechnungsMatrix({ rows, spalten, expandedMonths, onToggle, aktionen, onExport }) {
   const gridStyle = {
     gridTemplateColumns: `160px repeat(${spalten.length}, minmax(150px, 1fr)) 118px 140px`,

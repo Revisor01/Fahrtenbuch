@@ -12,10 +12,7 @@ import BereichKopf from './BereichKopf';
 import useSortierbareListe from './useSortierbareListe';
 import fehlerText from '../../utils/fehlerText';
 
-// Standard-Anlässe der eigenen Person. Muster wie bei Orten und Trägern:
-// Liste + Sheet zum Anlegen/Umbenennen, Tipp auf die Zeile öffnet die
-// Aktionen. Die Reihenfolge steuert, was im Erfassungs-Modal oben steht —
-// sortiert wird per Drag & Drop am Griff, wie bei den Abrechnungsträgern.
+// Standard-Anlässe, Reihenfolge per Drag & Drop bestimmt, was im Erfassungs-Modal oben steht.
 
 // Umbenennen und Anlegen teilen sich dasselbe Formular.
 function AnlassSheet({ offen, anlass, onClose, onSave }) {
@@ -77,9 +74,7 @@ function AnlassBereich() {
   // Verhindert doppeltes Verschieben, solange der PUT noch läuft
   const [sortiert, setSortiert] = useState(false);
 
-  // Der POST ist idempotent: ein bekannter Name ist kein Fehler, sondern
-  // liefert den vorhandenen Eintrag. Das soll sich für Nutzende auch so
-  // anfühlen — ruhiger Hinweis statt roter Meldung.
+  // Ein bekannter Name ist kein Fehler, also ruhiger Hinweis.
   const anlegen = async (name) => {
     const sauber = (name || '').trim();
     if (!sauber) return false;
@@ -130,10 +125,7 @@ function AnlassBereich() {
     }
   };
 
-  // Reihenfolge: Ziehen am Griff, Muster wie beim Abrechnungsträger.
-  // Die Liste liegt im AppContext, deshalb hält `reihenfolge` waehrend des
-  // Requests eine optimistische Kopie — sonst springt die Zeile zurueck,
-  // bis fetchAnlaesse geantwortet hat.
+  // Optimistische Kopie während des Requests, sonst springt die Zeile zurück.
   const [reihenfolge, setReihenfolge] = useState(null);
   const liste = reihenfolge || anlaesse;
 
@@ -160,8 +152,7 @@ function AnlassBereich() {
     }
   };
 
-  // Ziehen (Maus, Finger, Stift) und Tastatur (Pfeil hoch/runter auf dem
-  // fokussierten Griff) kommen aus dem gemeinsamen Hook.
+  // Maus, Finger, Stift und Tastatur aus dem gemeinsamen Hook.
   const sortierenHook = useSortierbareListe({
     anzahl: liste.length,
     onReorder: handleReorder,

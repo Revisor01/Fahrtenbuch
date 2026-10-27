@@ -1,19 +1,4 @@
-// Swagger-Oberflaeche unter /api-docs, geschuetzt durch eine eigene Anmeldeseite.
-//
-// Warum geschuetzt: Die Doku listet jeden Endpunkt samt Admin-Routen,
-// Berechtigungen und Rate-Limits auf. Das ist keine Geheimhaltung — die API
-// selbst bleibt gesichert —, aber es muss nicht offen im Netz stehen und von
-// Scannern eingesammelt werden.
-//
-// Warum kein Basic-Auth: Der Browser-Dialog laesst sich nicht gestalten, passt
-// nicht zum Rest der App und bietet keinen Weg, sich wieder abzumelden. Hier
-// steht stattdessen eine eigene Seite; die Anmeldung haelt ein signiertes
-// Cookie fuer acht Stunden.
-//
-// Die Swagger-Oberflaeche selbst bleibt bewusst im Standard-Aussehen.
-//
-// Zugang ueber DOKU_USER und DOKU_PASSWORT. Fehlt eines von beiden, bleibt die
-// Doku komplett abgeschaltet: lieber gar keine Doku als eine offene.
+// Swagger unter /api-docs hinter eigener Anmeldeseite (DOKU_USER, DOKU_PASSWORT); fehlt eins, bleibt die Doku aus.
 
 const crypto = require('crypto');
 const swaggerUi = require('swagger-ui-express');
@@ -22,8 +7,7 @@ const { baueSpezifikation } = require('./openapi');
 const COOKIE_NAME = 'fb_doku';
 const SITZUNG_SEKUNDEN = 8 * 60 * 60; // acht Stunden
 
-// Zeitkonstanter Vergleich. Ein einfaches === verraet ueber die Laufzeit, wie
-// viele Zeichen stimmen — bei einem Passwort ist das vermeidbar.
+// Zeitkonstanter Vergleich.
 function gleich(a, b) {
   const pufferA = Buffer.from(String(a));
   const pufferB = Buffer.from(String(b));
@@ -35,9 +19,7 @@ function gleich(a, b) {
   return crypto.timingSafeEqual(pufferA, pufferB);
 }
 
-// --- Sitzung --------------------------------------------------------------
-// Ein eigenes kleines Token statt jsonwebtoken: Hier steht nur ein Ablauf-
-// zeitpunkt drin, und die Pruefung soll ohne Umweg lesbar bleiben.
+// --- Sitzung: eigenes Token nur mit Ablaufzeit ---
 
 function tokenErzeugen(geheimnis) {
   const laeuftAb = Math.floor(Date.now() / 1000) + SITZUNG_SEKUNDEN;
@@ -56,8 +38,7 @@ function tokenGueltig(token, geheimnis) {
   return Number.isFinite(laeuftAb) && laeuftAb > Math.floor(Date.now() / 1000);
 }
 
-// Cookies aus dem Header lesen. cookie-parser waere eine weitere Abhaengigkeit
-// fuer genau einen Wert.
+// Ohne cookie-parser für einen einzigen Wert.
 function cookieLesen(req, name) {
   const kopf = req.headers.cookie;
   if (!kopf) return null;
@@ -71,9 +52,7 @@ function cookieLesen(req, name) {
   return null;
 }
 
-// --- Anmeldeseite ---------------------------------------------------------
-// Eigenstaendige Seite in den Farben der App. Sie laedt nichts nach, damit sie
-// unter der strengen CSP dieser Route funktioniert.
+// --- Anmeldeseite, lädt nichts nach wegen der strengen CSP ---
 
 function anmeldeSeite({ titel, fehler }) {
   const hinweis = fehler
@@ -181,8 +160,7 @@ function dokuEinhaengen(app) {
     return false;
   }
 
-  // Eigenes Geheimnis fuer die Cookie-Signatur, abgeleitet aus JWT_SECRET.
-  // So kann ein Doku-Cookie nie als Sitzungstoken der App durchgehen.
+  // Aus JWT_SECRET abgeleitet, damit ein Doku-Cookie nie als App-Token durchgeht.
   const geheimnis = crypto
     .createHash('sha256')
     .update(String(process.env.JWT_SECRET || '') + '|doku')
@@ -192,8 +170,7 @@ function dokuEinhaengen(app) {
   const spezifikation = baueSpezifikation();
   const angemeldet = (req) => tokenGueltig(cookieLesen(req, COOKIE_NAME), geheimnis);
 
-  // Formularauswertung nur fuer diese eine Route — express.urlencoded global
-  // einzuschalten waere eine Aenderung an der ganzen App.
+  // Formularauswertung nur für diese Route.
   const formular = require('express').urlencoded({ extended: false });
 
   app.post('/api-docs/anmelden', formular, (req, res) => {
@@ -231,13 +208,7 @@ function dokuEinhaengen(app) {
     res.status(401).type('text/html; charset=utf-8').send(anmeldeSeite({ titel, fehler: false }));
   };
 
-  // Die reine Beschreibung — fuer Postman, Insomnia oder Client-Generatoren.
-  // Hier antwortet JSON statt einer Anmeldeseite, sonst bekaeme ein Skript HTML.
-  //
-  // Sie liegt UNTERHALB von /api-docs, nicht daneben: Das Sitzungs-Cookie gilt
-  // fuer den Pfad /api-docs, und ein Browser schickt es an /api-docs.json nicht
-  // mit — die Datei blieb damit auch nach der Anmeldung unerreichbar
-  // (gemessen auf Produktion, 24.08.).
+  // JSON für Skripte; unterhalb von /api-docs, weil das Cookie nur dort gilt.
   const spezifikationSenden = (req, res) => {
     if (!angemeldet(req)) {
       return res.status(401).json({ message: 'Bitte zuerst unter /api-docs anmelden.' });
@@ -247,8 +218,7 @@ function dokuEinhaengen(app) {
 
   app.get('/api-docs/spezifikation.json', spezifikationSenden);
 
-  // Alte Adresse: fuer angemeldete Aufrufe weiterleiten, fuer Skripte mit
-  // eigenem Cookie-Umgang direkt ausliefern.
+  // Alte Adresse: angemeldet weiterleiten, sonst direkt ausliefern.
   app.get('/api-docs.json', (req, res) => {
     if (angemeldet(req)) return spezifikationSenden(req, res);
     res.redirect(307, '/api-docs/spezifikation.json');

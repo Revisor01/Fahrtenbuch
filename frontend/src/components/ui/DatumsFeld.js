@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 
-// Lokales Datum, nicht UTC: toISOString() liefert zwischen Mitternacht und
-// 2 Uhr (Sommerzeit) noch den Vortag.
+// Lokales Datum, toISOString() liefert nachts noch den Vortag.
 export const heute = () => {
   const d = new Date();
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -21,16 +20,12 @@ export function formatDatumZeile(datum) {
   return datum === heute() ? `heute, ${label}` : label;
 }
 
-// Touch-Geraete oeffnen den nativen Picker bei einem Tap irgendwo auf das
-// Feld. Auf dem Desktop tut ein unsichtbares Feld das nicht: Chrome und
-// Firefox oeffnen den Kalender nur ueber das Icon, und das ist bei
-// opacity: 0 nicht zu treffen. Darum dort ein sichtbares Feld.
+// Auf dem Desktop ein sichtbares Feld, weil Chrome und Firefox den Kalender nur über das Icon öffnen.
 const istTouch =
   typeof window !== 'undefined' &&
   (window.matchMedia?.('(pointer: coarse)').matches ?? false);
 
-// Ein-Tap-Datumswahl auf Touch: das native Datumsfeld liegt unsichtbar
-// ueber dem Knopf. Vorher brauchte es zwei Taps.
+// Auf Touch liegt das native Feld unsichtbar über dem Knopf, ein Tap genügt.
 function DatumsFeld({
   datum,
   setDatum,
@@ -57,8 +52,7 @@ function DatumsFeld({
           try {
             feldRef.current?.showPicker?.();
           } catch {
-            // showPicker wirft, wenn der Klick nicht als Nutzergeste zaehlt —
-            // dann bleibt die Tastatureingabe, das Feld ist ja sichtbar.
+            // showPicker wirft ohne Nutzergeste, dann bleibt die Tastatureingabe.
           }
         }}
         aria-label="Datum ändern"

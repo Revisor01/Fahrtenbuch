@@ -13,8 +13,7 @@ function FavoritSheet({ offen, orte, abrechnungstraeger, onClose, onSave }) {
 
   const sortierteOrte = [...orte].sort((a, b) => a.name.localeCompare(b.name));
 
-  // Sperre gegen den zweiten Klick: favoriten_fahrten hat keine
-  // Eindeutigkeitsregel, der Doppelklick legte den Favoriten zweimal an.
+  // favoriten_fahrten hat keine Eindeutigkeitsregel.
   const [speichert, setSpeichert] = useState(false);
   const montiertRef = useRef(true);
   useEffect(() => () => { montiertRef.current = false; }, []);
@@ -26,8 +25,7 @@ function FavoritSheet({ offen, orte, abrechnungstraeger, onClose, onSave }) {
     try {
       await onSave(form);
     } finally {
-      // Bei Erfolg schliesst der Aufrufer das Sheet, die Komponente ist dann
-      // schon weg.
+      // Bei Erfolg ist die Komponente schon weg.
       if (montiertRef.current) setSpeichert(false);
     }
   };

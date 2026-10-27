@@ -13,17 +13,8 @@ import {
 } from 'lucide-react';
 import Sheet from './ui/Sheet';
 
-// Neuigkeiten-Sheet nach Design-Spec (Redesign 2026): Abschnitts-Labels
-// 12px/700 uppercase (--text-3), Feature-Zeilen 14px mit Petrol-Häkchen
-// (--brand), Bestätigen als Primärbutton 48px.
-//
-// Zwei Neuerungen betreffen die Abrechnung unmittelbar (Formular des
-// Kirchenkreises, Kostenstellen) und stehen deshalb als hervorgehobene
-// Karten oben — nicht als Häkchen-Zeile zwischen allem anderen.
+// Neuigkeiten-Sheet; die zwei Neuerungen zur Abrechnung stehen als Karten oben.
 
-// Fast alles hier stand auf einem Wunschzettel aus dem Kollegium. Deshalb
-// stehen die grossen Punkte als Karten oben statt als Haekchen-Zeile
-// irgendwo dazwischen.
 const HIGHLIGHTS = [
   {
     icon: FileSpreadsheet,
@@ -67,8 +58,7 @@ const HIGHLIGHTS = [
   },
 ];
 
-// Alles Weitere darunter — ohne die Punkte zu wiederholen, die oben schon
-// als Karte stehen.
+// Alles Weitere, ohne die Karten zu wiederholen.
 const FEATURES = [
   {
     titel: 'Startseite',

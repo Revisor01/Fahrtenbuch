@@ -1,21 +1,9 @@
 const db = require('../config/database');
 
-// Fallback, falls für einen Träger gar kein Erstattungssatz in der DB existiert
-// (bisheriges hartkodiertes Verhalten — kein Formular mit 0 € produzieren).
+// Rückfall ohne Satz in der DB, damit kein Formular mit 0 € entsteht.
 const FALLBACK_SATZ = 0.30;
 
-/**
- * Ermittelt den zum Stichtag gültigen Erstattungssatz (€/km) eines Abrechnungsträgers.
- * Gleiche Fallback-Logik wie fahrtController.getMonthlyReport:
- * - neuester Satz mit gueltig_ab <= stichtag
- * - wenn keiner passt: der älteste vorhandene Satz
- * - wenn gar kein Satz existiert: FALLBACK_SATZ (0,30 €)
- *
- * @param {number|string} traegerId - ID des Abrechnungsträgers
- * @param {number} userId - User-ID (Ownership-Scoping)
- * @param {Date|string} stichtag - letzter Tag des Abrechnungszeitraums
- * @returns {Promise<number>} Erstattungssatz als Number
- */
+/** Zum Stichtag gültiger Satz eines Trägers: neuester bis Stichtag, sonst ältester, sonst FALLBACK_SATZ. */
 async function getErstattungssatzFuerTraeger(traegerId, userId, stichtag) {
   const [rows] = await db.execute(
     `SELECT eb.betrag, eb.gueltig_ab
@@ -43,10 +31,7 @@ async function getErstattungssatzFuerTraeger(traegerId, userId, stichtag) {
   return Number.isFinite(betrag) ? betrag : FALLBACK_SATZ;
 }
 
-/**
- * Lädt alle Erstattungssätze eines Trägers, absteigend nach Gültigkeitsdatum.
- * Für die Abrechnung pro Fahrtdatum (statt einem Satz für den ganzen Zeitraum).
- */
+/** Alle Sätze eines Trägers absteigend nach Gültigkeit. */
 async function ladeSaetzeFuerTraeger(traegerId, userId) {
   const [rows] = await db.execute(
     `SELECT eb.betrag, eb.gueltig_ab
@@ -59,10 +44,7 @@ async function ladeSaetzeFuerTraeger(traegerId, userId) {
   return rows;
 }
 
-/**
- * Satz, der an einem bestimmten Fahrtdatum galt — gleiche Fallback-Kette wie
- * getErstattungssatzFuerTraeger, nur ohne erneute DB-Abfrage pro Fahrt.
- */
+/** Satz an einem Fahrtdatum, gleiche Kette ohne erneute Abfrage. */
 function satzAmDatum(saetze, datum) {
   if (!saetze || saetze.length === 0) return FALLBACK_SATZ;
   const d = new Date(datum);
@@ -72,13 +54,7 @@ function satzAmDatum(saetze, datum) {
   return Number.isFinite(betrag) ? betrag : FALLBACK_SATZ;
 }
 
-/**
- * Erstattung über alle Fahrten, jede mit dem an ihrem Datum gültigen Satz.
- * Gibt zusätzlich zurück, ob im Zeitraum überhaupt mehrere Sätze griffen —
- * dann kann das Formular nicht mit einer einzigen "km x Satz"-Zeile auskommen.
- *
- * @returns {{betrag:number, saetze:number[], gemischt:boolean, effektivSatz:number}}
- */
+/** Erstattung je Fahrt mit dem Satz ihres Datums; `gemischt`, wenn mehrere Sätze griffen. */
 function berechneErstattung(fahrten, saetze) {
   let summe = 0;
   let kmGesamt = 0;
@@ -104,25 +80,9 @@ function berechneErstattung(fahrten, saetze) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Gemeinsame Basis fuer die vier Report-Funktionen in fahrtController.
-//
-// Vorher rechnete jede von ihnen selbst, zwei davon falsch: Monats- und
-// Jahresuebersicht multiplizierten die Mitfahrer-Anzahl eines ganzen Zeitraums
-// mit dessen Kilometersumme. An echten Daten ergab das bis zum 40-fachen des
-// richtigen Betrags (ein Nutzer, 2025-04: 29,20 € statt 0,70 €).
-// Richtig ist immer: je Fahrt die Mitfahrer dieser Fahrt mal deren Kilometer.
-//
-// Anders als getErstattungssatzFuerTraeger (Export, ein Traeger je Aufruf)
-// laedt ladeErstattungssaetze alle Saetze eines Nutzers auf einmal — inklusive
-// des Mitfahrer-Satzes unter dem Schluessel 'mitfahrer'.
-// ---------------------------------------------------------------------------
+// ── Gemeinsame Basis der Reports: je Fahrt Mitfahrer dieser Fahrt mal deren Kilometer ──
 
-/**
- * Alle Erstattungssaetze eines Nutzers, gruppiert nach Traeger-ID.
- * Rueckgabe: { traegerId: [{ betrag, gueltig_ab }], mitfahrer: [...] },
- * je Gruppe absteigend nach gueltig_ab.
- */
+/** Alle Sätze eines Nutzers je Träger-ID und 'mitfahrer', absteigend. */
 async function ladeErstattungssaetze(userId) {
   const [saetze] = await db.execute(`
     SELECT
@@ -153,13 +113,7 @@ async function ladeErstattungssaetze(userId) {
   return proTraeger;
 }
 
-/**
- * Der zum Fahrtdatum passende Satz: der juengste, der am Datum schon galt.
- * Fallback auf den aeltesten Satz, damit Fahrten vor dem ersten gueltig_ab
- * nicht mit 0 € erscheinen. Kein Satz vorhanden -> 0 (nicht FALLBACK_SATZ:
- * in den Reports ist "kein Traeger" ein echter Nullfall, kein fehlendes
- * Formular).
- */
+/** Satz am Fahrtdatum, sonst ältester, ohne Satz 0, weil „kein Träger“ in Reports ein echter Nullfall ist. */
 function findeSatz(saetzeProTraeger, id, datum) {
   const saetze = saetzeProTraeger[id];
   if (!saetze || saetze.length === 0) return 0;
@@ -171,19 +125,14 @@ function findeSatz(saetzeProTraeger, id, datum) {
   return Number.isFinite(betrag) ? betrag : 0;
 }
 
-/**
- * Erstattung der Fahrt selbst (Traegersatz mal Kilometer).
- */
+/** Erstattung der Fahrt selbst. */
 function berechneFahrtErstattung(saetzeProTraeger, abrechnung, kilometer, datum) {
   const km = parseFloat(kilometer);
   if (!Number.isFinite(km)) return 0;
   return km * findeSatz(saetzeProTraeger, abrechnung, datum);
 }
 
-/**
- * Mitfahrer-Erstattung einer EINZELNEN Fahrt.
- * anzahl = Mitfahrer dieser Fahrt, kilometer = Kilometer dieser Fahrt.
- */
+/** Mitfahrer-Erstattung einer einzelnen Fahrt. */
 function berechneMitfahrerErstattung(saetzeProTraeger, anzahl, kilometer, datum) {
   if (!anzahl || anzahl <= 0) return 0;
   const km = parseFloat(kilometer);

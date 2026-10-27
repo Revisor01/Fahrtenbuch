@@ -12,21 +12,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = bridgeController
         window?.makeKeyAndVisible()
 
-        // Kaltstart ueber einen Kurzbefehl: Der Typ wird gepuffert, die WebView
-        // hat hier noch keinen Inhalt. Gesendet wird, sobald sie steht.
+        // Kaltstart über einen Kurzbefehl: puffern, bis die WebView steht.
         if let kurzbefehl = connectionOptions.shortcutItem {
             Kurzbefehle.melde(kurzbefehl.type)
         }
 
-        // Die WebView entsteht erst mit der View des Controllers — `loadView`
-        // anstossen, sonst ist `webView` hier noch nil.
+        // `loadView` anstoßen, sonst ist `webView` noch nil.
         bridgeController.loadViewIfNeeded()
         Kurzbefehle.verbinde(bridgeController.webView)
 
-        // Beim Kaltstart braucht die React-Seite nach dem Laden einen Moment,
-        // bis ihr Listener steht. Ein zweiter Versuch nach kurzer Zeit kostet
-        // nichts und deckt genau dieses Fenster ab; der Wert wird nur einmal
-        // zugestellt.
+        // Zweiter Versuch, bis der React-Listener steht; zugestellt wird nur einmal.
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             Kurzbefehle.erneutVersuchen()
         }
@@ -34,8 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
     }
 
-    // Die App lief bereits (Vorder- oder Hintergrund) — die WebView steht, das
-    // Ereignis geht sofort raus.
+    // Die App lief schon, das Ereignis geht sofort raus.
     func windowScene(_ windowScene: UIWindowScene,
                      performActionFor shortcutItem: UIApplicationShortcutItem,
                      completionHandler: @escaping (Bool) -> Void) {

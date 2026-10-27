@@ -1,7 +1,4 @@
-// Testet die Doku-Route ohne Datenbank: eine Mini-App mit derselben Route.
-//
-// Geprueft wird der Weg, den ein Mensch im Browser geht: Anmeldeseite sehen,
-// Formular abschicken, Cookie bekommen, Swagger sehen, abmelden.
+// Doku-Route ohne Datenbank, auf dem Weg eines Menschen im Browser.
 
 process.env.DOKU_USER = 'testnutzer';
 process.env.DOKU_PASSWORT = 'testpasswort';
@@ -92,9 +89,7 @@ const server = app.listen(0, async () => {
   pruefe('abgelaufenes Cookie wird abgewiesen', abgelaufen.status === 401, 'war ' + abgelaufen.status);
 
   console.log('\nSpezifikation als JSON:');
-  // Die Adresse muss UNTERHALB von /api-docs liegen: Das Cookie ist auf diesen
-  // Pfad begrenzt, ein Browser schickt es an /api-docs.json nicht mit. Genau
-  // daran scheiterte die Datei zuerst auf Produktion.
+  // Unterhalb von /api-docs, weil das Cookie auf diesen Pfad begrenzt ist.
   const spezPfad = '/api-docs/spezifikation.json';
   pruefe('Adresse liegt unter /api-docs (Cookie-Pfad)', spezPfad.startsWith('/api-docs/'), spezPfad);
 

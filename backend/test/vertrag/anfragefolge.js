@@ -1,10 +1,4 @@
-// Feste Anfragefolge gegen ein laufendes Backend mit frischer Datenbank.
-// Schreibt je Schritt Status und Form der Antwort (Typen und Schluessel,
-// keine Werte) als JSON. vergleich.js prueft damit, dass eine neue Fassung
-// die Antworten so liefert, wie die ausgelieferten Apps sie lesen.
-//
-// Aufruf: node test/vertrag/anfragefolge.js <basis-url> <ausgabe.json>
-// Erwartet den Erst-Admin aus INITIAL_ADMIN_USERNAME / INITIAL_ADMIN_PASSWORD.
+// Feste Anfragefolge, schreibt Status und Antwortform als JSON; braucht INITIAL_ADMIN_USERNAME/PASSWORD. Aufruf: node test/vertrag/anfragefolge.js <basis-url> <ausgabe.json>
 
 const fs = require('fs');
 
@@ -42,8 +36,7 @@ function vereinige(a, b) {
 }
 
 const protokoll = [];
-// Mit VERTRAG_INHALT=<datei> zusaetzlich die vollen Antworten, etwa als
-// Testdaten fuer Oberflaechenvergleiche ohne Datenbank.
+// VERTRAG_INHALT=<datei> schreibt zusätzlich die vollen Antworten.
 const inhalte = [];
 let token = null;
 

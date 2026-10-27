@@ -7,8 +7,7 @@ import { monateImZeitraum } from './zeitraumUtils';
 import { IST_NATIVE } from '../../utils/plattform';
 import logFehler from '../../utils/logFehler';
 
-// Filesystem erwartet reines Base64 ohne den "data:...;base64,"-Kopf, den
-// readAsDataURL voranstellt.
+// Filesystem erwartet Base64 ohne data:-Kopf.
 function blobZuBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -21,27 +20,13 @@ function blobZuBase64(blob) {
   });
 }
 
-// Das Teilen-Blatt meldet den Abbruch je nach Plattform unterschiedlich —
-// iOS/Android liefern hier keine einheitliche Fehlerklasse, deshalb der
-// Textvergleich.
+// Den Abbruch melden die Plattformen unterschiedlich, daher der Textvergleich.
 function istAbbruch(error) {
   const text = String(error?.message || error || '').toLowerCase();
   return text.includes('canceled') || text.includes('cancelled') || text.includes('abort');
 }
 
-// Export-Logik der Fahrtenliste (Excel / PDF / Beide als ZIP je Träger).
-// Verhalten unverändert aus dem Bestand: Einzelmonat- vs. Zeitraum-Routen,
-// Dateiname aus Content-Disposition, danach Erfolgs-Toast mit der Aktion
-// „Als eingereicht markieren" (nur für offene Monate, bleibt bis zum Klick).
-//
-// Seit Phase R6 nimmt jede Export-Funktion optional Optionen:
-//   { von, bis }   Monats-Keys "YYYY-MM" — überschreiben den Kontext-Zeitraum
-//                  (von === bis → Einzelmonat-Route). Für die Abrechnung,
-//                  die unabhängig vom Fahrten-Tab exportiert.
-//   { erfolg }     'aktion' (Default: Toast mit „Als eingereicht markieren"),
-//                  'einfach' (nur „Export erstellt."), 'keiner' (kein Toast —
-//                  der Aufrufer übernimmt, z. B. der Einreichen-Flow).
-// Rückgabe: true bei Erfolg, false bei Fehler (Fehler-Toast kommt von hier).
+// Export der Fahrtenliste; Optionen { von, bis } und { erfolg: 'aktion' | 'einfach' | 'keiner' }, Rückgabe true oder false.
 export function useFahrtenExport() {
   const {
     selectedMonth,
@@ -68,8 +53,7 @@ export function useFahrtenExport() {
     return true;
   };
 
-  // URL-Teile: Einzelmonat "jahr/monat", Zeitraum "vonJahr/vonMonat/bisJahr/bisMonat".
-  // Mit opts.von/opts.bis wird der Kontext-Zeitraum überschrieben.
+  // Einzelmonat "jahr/monat", Zeitraum "vonJahr/vonMonat/bisJahr/bisMonat".
   const pfadTeile = (opts = {}) => {
     const von = opts.von && opts.bis ? opts.von : (istZeitraum ? selectedVonMonth : selectedMonth);
     const bis = opts.von && opts.bis ? opts.bis : selectedMonth;
@@ -87,8 +71,7 @@ export function useFahrtenExport() {
     };
   };
 
-  // Erfolgs-Meldung je nach opts.erfolg; Zeitraum-Overrides bekommen nie den
-  // „Als eingereicht markieren"-Toast (der hängt an den Kontext-Daten des Tabs)
+  // Zeitraum-Overrides bekommen nie den Einreichen-Toast.
   const erfolgsToast = (type, opts = {}) => {
     if (opts.erfolg === 'keiner') return;
     if (opts.erfolg === 'einfach' || (opts.von && opts.bis)) {
@@ -98,12 +81,7 @@ export function useFahrtenExport() {
     markAlsEingereichtToast(type);
   };
 
-  // Web: unveraendert der bisherige <a download>-Klick.
-  //
-  // App: In WKWebView (iOS) tut derselbe Klick schlicht nichts — kein Fehler,
-  // keine Datei. Deshalb schreibt der native Zweig die Datei in den Cache und
-  // reicht sie ans System-Teilen-Blatt weiter. Directory.Cache braucht keine
-  // Berechtigung, und das System raeumt selbst auf.
+  // Im Web <a download>, in der App über Cache und Teilen-Blatt, weil WKWebView den Klick ignoriert.
   const downloadBlob = async (blob, filename) => {
     if (!IST_NATIVE) {
       const url = window.URL.createObjectURL(blob);
@@ -127,34 +105,18 @@ export function useFahrtenExport() {
     try {
       await Share.share({ title: filename, files: [uri] });
     } catch (error) {
-      // Abbruch des Teilen-Blatts ist eine normale Nutzerentscheidung und darf
-      // nicht als fehlgeschlagener Export gemeldet werden. Die Datei liegt
-      // geschrieben im Cache — der Export selbst hat funktioniert.
+      // Abbruch ist kein fehlgeschlagener Export.
       if (istAbbruch(error)) return;
       throw error;
     }
   };
 
-  // Warten, bis das System-Blatt wirklich oben liegt.
-  //
-  // Share.share() kehrt zurueck, sobald der Teilen-Vorgang abgeschlossen ist —
-  // nicht, sobald das Blatt sichtbar wird. In der Luecke dazwischen war das
-  // Export-Sheet bereits geschlossen und die Vorschau noch nicht da: einen
-  // Wimpernschlag lang stand die nackte Liste da (Simon 22.09.).
-  //
-  // appStateChange mit isActive=false ist der Moment, in dem die App den
-  // Vordergrund abgibt — also genau dann, wenn das Blatt uebernimmt. Die
-  // Zeitgrenze haelt den Ablauf frei, falls die Meldung ausbleibt (etwa weil
-  // das Blatt gar nicht erscheint); gewartet wird hoechstens kurz.
+  // Auf appStateChange warten, bis das Blatt oben liegt, sonst blitzt die nackte Liste auf; kurze Zeitgrenze.
   const wartenBisVerdeckt = async () => {
     if (!IST_NATIVE) return;
     const { App } = await import('@capacitor/app');
 
-    // Listener ZUERST anmelden und per await holen, nicht per .then():
-    // addListener liefert ein Proxy-behaftetes Objekt, auf dem `.then` als
-    // Bruecken-Aufruf landet und nie aufloest. Genau daran blieb der Spinner
-    // haengen (beobachtet 22.09.) — derselbe Fallstrick wie beim sicheren
-    // Speicher.
+    // Listener per await holen, `.then` auf dem Proxy löst nie auf.
     let melden = null;
     const warten = new Promise((fertig) => {
       melden = fertig;
@@ -170,9 +132,7 @@ export function useFahrtenExport() {
     }
 
     try {
-      // Zeitgrenze, falls die Meldung ausbleibt: etwa wenn das Teilen-Blatt
-      // abgebrochen wurde ("Share canceled") und die App im Vordergrund
-      // bleibt. Dann gibt es nichts zu verdecken.
+      // Etwa nach Abbruch bleibt die App im Vordergrund.
       await Promise.race([warten, new Promise((f) => setTimeout(f, 600))]);
     } finally {
       try {
@@ -198,9 +158,7 @@ export function useFahrtenExport() {
     }
   };
 
-  // Erfolgs-Toast mit „Als eingereicht markieren" — im Zeitraum-Modus nur
-  // für die offenen Monate des Trägers (bereits eingereichte/erstattete
-  // bleiben unangetastet)
+  // Im Zeitraum nur für die offenen Monate.
   const markAlsEingereichtToast = (type) => {
     const [bisYear, bisMonth] = selectedMonth.split('-');
     const formattedBisMonth = bisMonth.padStart(2, '0');
@@ -210,9 +168,7 @@ export function useFahrtenExport() {
       const traegerStatus = summary.abrechnungsStatus?.[type] || {};
       const betraegeProMonat = summary.erstattungenProMonat?.[type] || {};
       exportedMonths = monateImZeitraum(selectedVonMonth, selectedMonth).filter((mk) => {
-        // Monate ohne Fahrten dieses Trägers überspringen: Sie standen sonst
-        // dauerhaft als „eingereicht" in der Übersicht, obwohl es dort nichts
-        // einzureichen gab — und liessen sich nie abschliessen.
+        // Monate ohne Fahrten überspringen, sonst stünden sie dauerhaft auf „eingereicht“.
         if (!(betraegeProMonat[mk] > 0)) return false;
         const sd = traegerStatus[mk];
         return !sd?.eingereicht_am && !sd?.erhalten_am;
@@ -236,11 +192,7 @@ export function useFahrtenExport() {
       onAction: async () => {
         try {
           const today = heuteISO();
-          // refresh=false in der Schleife: Sonst laedt JEDER Monat Fahrten
-          // und Monatsdaten neu — bei zwoelf Monaten 24 Abrufe, von denen 22
-          // sofort veraltet sind. Das Rate-Limit liegt bei 600 in fuenf
-          // Minuten, und wer eine Woche nachtraegt, lief hinein.
-          // Einmal aktualisiert wird unten, nach der Schleife.
+          // refresh=false in der Schleife, aktualisiert wird einmal danach.
           if (istZeitraum) {
             for (const mk of exportedMonths) {
               const [y, m] = mk.split('-');
@@ -298,8 +250,7 @@ export function useFahrtenExport() {
       const route = range ? 'export-pdf-range' : 'export-pdf';
       const response = await axios.get(`/api/fahrten/${route}/${type}/${pfad}`, { responseType: 'blob' });
 
-      // Der PDF-Export liefert immer genau eine Datei: reicht die Abrechnung
-      // über mehrere Formularblätter, stehen sie als Seiten darin.
+      // Immer eine Datei.
       let filename = dateinameAusHeader(response, `fahrtenabrechnung_${type}_${dateiname}.pdf`);
       if (!filename.endsWith('.pdf')) filename = `${filename}.pdf`;
 
@@ -330,15 +281,10 @@ export function useFahrtenExport() {
         axios.get(pdfUrl, { responseType: 'blob' }),
       ]);
 
-      // Erst hier laden statt beim Start: JSZip wird nur fuer „Beides" als
-      // ZIP gebraucht und lag sonst im Startbuendel, das die App vor dem
-      // ersten Bild komplett parsen muss (Simon 16.08.: schneller starten).
+      // JSZip erst hier laden, nicht im Startbündel.
       const { default: JSZip } = await import('jszip');
       const zip = new JSZip();
-      // Reicht die Abrechnung über mehrere Formularblätter, ist die
-      // Excel-Antwort selbst schon ein ZIP mit einer Mappe je Blatt. Dann
-      // wandert die Endung mit, sonst läge hier eine .xlsx, die sich nicht
-      // öffnen lässt. Das PDF ist immer genau eine Datei.
+      // Bei mehreren Blättern ist die Excel-Antwort schon ein ZIP, dann wandert die Endung mit.
       const istZip = excelRes.headers['content-type'] === 'application/zip';
       zip.file(`${baseFilename}.${istZip ? 'zip' : 'xlsx'}`, excelRes.data);
       zip.file(`${baseFilename}.pdf`, pdfRes.data);

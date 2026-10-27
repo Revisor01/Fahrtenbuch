@@ -2,21 +2,7 @@ import React from 'react';
 import StatusBadge from '../ui/StatusBadge';
 import { formatBetrag, rundeKilometer } from './zeitraumUtils';
 
-// Fahrt-Zeile mobil (< 768px).
-//
-// Layout nach dem Vorbild der Dashboard-Liste „Zuletzt" (User-Feedback 14.08.):
-// dort steht der Anlass zuoberst, darunter die Route, darunter eine leise
-// Zeile aus Datum und Traeger — km rechts. Die frueheren Einzelkarten
-// wiederholten dieselben Angaben in vier Zeilen mit eigenem Rahmen: mehr
-// Flaeche, weniger Uebersicht.
-//
-// Anders als das Dashboard traegt die Fahrtenliste zusaetzlich Status, Betrag,
-// Mitfahrer und den Hin-/Rueckfahrt-Hinweis. Die kommen in dieselbe leise
-// Zeile bzw. rechts unter die Kilometer, statt eigene Zeilen zu belegen.
-//
-// Ein Tipp oeffnet das Aktions-Sheet (Details + Bearbeiten/Loeschen). Eine
-// Wischgeste gibt es hier bewusst nicht — sie konkurrierte mit dem Scrollen
-// und war nicht auffindbar.
+// Mobile Fahrtzeile wie „Zuletzt“ im Dashboard; Tipp öffnet die Aktionen, bewusst ohne Wischgeste.
 
 const WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
@@ -28,10 +14,7 @@ const datumKurz = (datum) => {
   return `${WOCHENTAGE[d.getDay()]} ${dd}.${mm}.`;
 };
 
-// `gesperrt`: Solange eine gerade angelegte Fahrt nur optimistisch in der
-// Liste steht, hat sie noch keine Server-ID. Das Aktions-Sheet bietet aber
-// „Rueckfahrt hinzufuegen" und „Wiederholen" an — beides braeuchte sie. Bis
-// die Antwort da ist, bleibt die Karte deshalb nicht antippbar.
+// Ohne Server-ID nicht antippbar.
 function FahrtKarte({ fahrt, status, onOeffnen, gesperrt = false }) {
   const ziel = fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
   const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';

@@ -40,11 +40,7 @@ class Migrator {
         content = content.replace(/\${STANDARD_ORT_2_NAME}/g, process.env.STANDARD_ORT_2_NAME || '');
         content = content.replace(/\${STANDARD_ORT_2_ADRESSE}/g, process.env.STANDARD_ORT_2_ADRESSE || '');
         
-        // Split into statements, handling semicolons inside triggers.
-        // Ein Trigger zaehlt nur dann als mehrzeilig, wenn er tatsaechlich einen
-        // BEGIN-Block oeffnet - sonst beendet ihn wie jedes andere Statement das
-        // erste Semikolon. Frueher blieb der Parser bei Single-Statement-Triggern
-        // bis zum Dateiende im Trigger-Modus und verwarf alles Folgende still.
+        // Ein Trigger ist nur mit BEGIN-Block mehrzeilig, sonst endet er am ersten Semikolon.
         const statements = [];
         let buffer = '';
         let inTrigger = false;
@@ -78,8 +74,7 @@ class Migrator {
             }
         }
 
-        // Rest nicht verwerfen: ein unvollstaendiges Statement muss auffallen,
-        // nicht stillschweigend verschwinden.
+        // Ein unvollständiges Statement muss auffallen.
         if (buffer.trim()) {
             statements.push(buffer.trim());
         }
@@ -89,10 +84,7 @@ class Migrator {
             try {
                 await connection.query(statement);
             } catch (error) {
-                // Kein Statement-Inhalt ins Log: die Statements enthalten
-                // eingesetzte Umgebungsvariablen (Admin-Mail, Startpasswort) -
-                // auch in der ersten Zeile. Zum Auffinden reichen die Position
-                // und die DB-Meldung, die den Spalten-/Tabellennamen nennt.
+                // Kein Statement-Inhalt ins Log, darin stehen eingesetzte Umgebungswerte.
                 const nummer = statements.indexOf(statement) + 1;
                 console.error(
                     `Fehler bei SQL-Statement ${nummer} von ${statements.length}:`,

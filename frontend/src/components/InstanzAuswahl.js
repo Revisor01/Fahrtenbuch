@@ -6,15 +6,9 @@ import { ladeInstanzen } from '../api/instanzen';
 import { setApiBaseUrl } from '../api/client';
 import { splashAusblenden } from '../utils/splash';
 
-// Erster Start der App: Auswahl des Kirchenkreises, gegen dessen Server die
-// Anmeldung laeuft. Erscheint ausschliesslich in der nativen Huelle — im Web
-// kennt die App ihren Server bereits (relative Pfade).
-//
-// Layout bewusst im bestehenden Auth-Look (Petrol-Vollflaeche + Karte), damit
-// der Uebergang zur direkt folgenden Anmeldung nicht springt.
+// Kirchenkreis-Wahl beim ersten Start, nur in der App, im Look der Anmeldung.
 function InstanzAuswahl({ onGewaehlt, aktuelleUrl }) {
-  // Loest den nativen Startbildschirm ab: Beim allerersten Start ist dies der
-  // erste eigene Bildschirm, nicht der Startbildschirm.
+  // Beim ersten Start der erste eigene Bildschirm.
   useEffect(() => { splashAusblenden(); }, []);
 
   const [instanzen, setInstanzen] = useState([]);
@@ -28,8 +22,7 @@ function InstanzAuswahl({ onGewaehlt, aktuelleUrl }) {
       .then(({ instanzen: liste, quelle: woher }) => {
         setInstanzen(liste);
         setQuelle(woher);
-        // Bei genau einer Instanz ist die Wahl offensichtlich — vorauswaehlen,
-        // damit nur noch bestaetigt werden muss.
+        // Bei genau einer Instanz vorauswählen.
         setAusgewaehlt((vorher) => vorher ?? (liste.length === 1 ? liste[0].id : null));
       })
       .catch((error) => {

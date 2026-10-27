@@ -1,9 +1,4 @@
-// Verständliche Fehlermeldung aus einer fehlgeschlagenen Axios-Anfrage.
-//
-// Das Backend liefert bei erwartbaren Fällen eine erklärende Meldung mit
-// (z. B. „Ort kann nicht gelöscht werden, da noch Distanzen gepflegt sind").
-// Die ist für Nutzende wertvoller als ein generisches „hat nicht geklappt" —
-// aber nur, wenn sie auch angezeigt wird.
+// Verständliche Fehlermeldung aus einer Axios-Anfrage, bevorzugt die des Backends.
 export default function fehlerText(error, fallback = 'Das hat nicht geklappt.') {
   const daten = error?.response?.data;
 
@@ -18,10 +13,7 @@ export default function fehlerText(error, fallback = 'Das hat nicht geklappt.') 
     if (typeof erster?.message === 'string') return erster.message;
   }
 
-  // Zeitgrenze erreicht (axios.defaults.timeout in api/client.js). Das ist
-  // etwas anderes als „keine Verbindung": Der Server ist erreichbar, hat aber
-  // nicht rechtzeitig geantwortet. Ein Hinweis auf die Internetverbindung
-  // waere hier irrefuehrend.
+  // Zeitgrenze erreicht: Server erreichbar, aber zu langsam, kein Verbindungsproblem.
   if (error?.code === 'ECONNABORTED' || error?.code === 'ETIMEDOUT') {
     return 'Der Server antwortet nicht. Bitte erneut versuchen.';
   }

@@ -1,15 +1,6 @@
 import React from 'react';
 
-// Kleiner Ladekreis fuer Knoepfe und Zeilen.
-//
-// Kein Text, keine Prozentzahl: Der PDF-Export dauert gemessene ~4,3 s, und
-// die Zeit steckt vollstaendig im Start von LibreOffice — unabhaengig davon,
-// wie viele Fahrten drin sind (5 Zeilen: 4538 ms, 150 Zeilen: 4515 ms).
-// Ein Balken mit Prozentwerten waere damit erfunden; er kann nur laufen,
-// nicht fortschreiten.
-//
-// aria-hidden, weil die Beschriftung daneben („Erstellt …") die Lage bereits
-// ansagt — sonst meldete die Sprachausgabe dasselbe zweimal.
+// Ladekreis ohne Prozent, weil die Exportzeit am LibreOffice-Start hängt, nicht an der Menge; aria-hidden, die Beschriftung daneben sagt es an.
 function Spinner({ size = 16, className = '' }) {
   return (
     <svg

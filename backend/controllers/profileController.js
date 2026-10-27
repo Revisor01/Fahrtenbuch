@@ -58,10 +58,7 @@ exports.updateProfile = async (req, res) => {
 
             // Bei E-Mail-Änderung Verifikation starten
             if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
-                 // Gehoert die Adresse schon jemand anderem? Sonst liesse sich
-                 // das eigene Profil auf eine fremde, vergebene Adresse
-                 // umziehen — die andere Person verlöre ihren Zugang ueber
-                 // "Passwort vergessen" (24.08.).
+                 // Eine fremde, vergebene Adresse nähme der anderen Person den Passwort-Reset.
                  const [belegt] = await connection.execute(
                     'SELECT user_id FROM user_profiles WHERE email = ? AND user_id != ?',
                     [email, userId]
@@ -90,8 +87,7 @@ exports.updateProfile = async (req, res) => {
               await mailService.sendEmailVerification(email, user[0].username, verificationToken);
              }
 
-            // Nicht gesendete Felder bleiben wie gespeichert (neu: null); null
-            // leert ein Feld. undefined bricht in mysql2 als Parameter ab.
+            // Nicht gesendete Felder bleiben, null leert; undefined bricht in mysql2 ab.
             const alt = existingProfile[0] || {};
             const wert = (neu, gespeichert) => (neu === undefined ? (gespeichert ?? null) : neu);
             const felder = [
@@ -156,15 +152,10 @@ exports.changePassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        // passwort_geaendert_am mitschreiben: Die Auth-Middleware wirft damit alle
-        // Anmeldungen ab, die vor diesem Wechsel ausgestellt wurden.
+        // Damit fallen alle älteren Anmeldungen weg.
         await db.execute('UPDATE users SET password = ?, passwort_geaendert_am = NOW() WHERE id = ?', [hashedPassword, req.user.id]);
 
-        // Frisches Token ueber denselben Header, den die gleitende Sitzung
-        // nutzt — sonst wuerde die Middleware die eigene Anmeldung im naechsten
-        // Aufruf abweisen: Wer sein Passwort aendert, flöge sofort raus.
-        // Andere Geraete mit aelteren Token verlieren den Zugang, genau so ist
-        // es gemeint. Nur bei JWT: Ein API-Schluessel hat kein Ausstellungsdatum.
+        // Frisches Token für dieses Gerät, sonst fliegt man selbst raus; nur bei JWT.
         if (!req.mitApiSchluessel) {
           const neuesToken = jwt.sign(
             { id: req.user.id, role: req.user.role, email_verified: req.user.email_verified },
@@ -180,17 +171,7 @@ exports.changePassword = async (req, res) => {
         res.status(500).json({ message: 'Serverfehler beim Ändern des Passworts' });
     }
 };
-// Eigenes Konto endgueltig loeschen.
-//
-// Pflicht fuer die App-Stores: Wo man ein Konto anlegen kann, muss man es auch
-// wieder loeschen koennen (Apple 5.1.1 v, Google Play). Bisher ging das nur
-// ueber eine Administratorin — Apple lehnt eine Einreichung deswegen ab.
-//
-// Geloescht wird ueber User.delete: eine Transaktion, die Abrechnungen,
-// Erstattungsbetraege, Traeger, Fahrten, Distanzen, Orte, Mitfahrer-Saetze und
-// E-Mail-Verifikationen mitnimmt; Profil und API-Schluessel haengen per
-// CASCADE am Konto. Der Schutz des letzten Administrators bleibt bestehen —
-// sonst waere das Fahrtenbuch danach nicht mehr verwaltbar.
+// Eigenes Konto löschen, Pflicht in den Stores; der letzte Admin bleibt geschützt.
 exports.deleteAccount = async (req, res) => {
     const { password } = req.body;
 
@@ -200,8 +181,7 @@ exports.deleteAccount = async (req, res) => {
             return res.status(404).json({ message: 'Benutzer nicht gefunden' });
         }
 
-        // Passwort pruefen, auch wenn die Anfrage mit einem API-Schluessel
-        // kommt: Das Loeschen ist nicht umkehrbar.
+        // Auch mit API-Schlüssel, das Löschen ist nicht umkehrbar.
         const stimmt = await bcrypt.compare(password, users[0].password);
         if (!stimmt) {
             return res.status(400).json({ message: 'Passwort ist falsch' });

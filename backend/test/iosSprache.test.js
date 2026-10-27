@@ -1,8 +1,4 @@
-// Die iOS-App meldete Englisch als einzige Sprache (Capacitor-Vorgabe). iOS
-// zeigte deshalb Datumsauswahl und Systemknoepfe englisch, und App Store
-// Connect nannte Englisch. Die App ist nur deutsch (27.10.2026).
-//
-// Laeuft ohne Test-Framework: `node test/iosSprache.test.js`.
+// Die iOS-App meldet Deutsch als Sprache. Aufruf: node test/iosSprache.test.js
 
 const assert = require('assert');
 const fs = require('fs');

@@ -1,17 +1,4 @@
-// Punkt 3 der Pre-Launch-Liste: Der Zeitraum-Export setzte den Status auf
-// „eingereicht", bevor die Datei existierte.
-//
-// `setzeZeitraumStatus` lief INNERHALB von `baueZeitraumWorkbooks`, also vor
-// dem Senden — beim PDF sogar vor der LibreOffice-Konvertierung (60-s-
-// Timeout). Brach der Lauf bei Monat 3 von 6 ab, standen zwei Monate auf
-// „eingereicht", vier nicht, und es gab keine Datei. Jedes updateStatus war
-// ein eigenes Autocommit, also auch kein gemeinsames Zurueckrollen.
-//
-// Geprueft wird die Reihenfolge (Status NACH dem Senden) und die
-// Transaktion (alle Monate oder keiner) — beides ohne Datenbank, mit einer
-// nachgebauten Verbindung.
-//
-// Laeuft ohne Test-Framework: `node test/zeitraumStatus.test.js`.
+// Zeitraum-Export setzt „eingereicht“ erst nach dem Senden und für alle Monate oder keinen. Aufruf: node test/zeitraumStatus.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -70,9 +57,7 @@ pruefe('die Einzelmonats-Exporte markieren weiterhin nichts', () => {
   assert.ok(!/markiereZeitraum/.test(monat));
 });
 
-// --- 2. Die Transaktion ---------------------------------------------------
-// markiereZeitraumEingereicht wird mit einer nachgebauten Verbindung
-// geprueft: entweder alle Monate oder keiner.
+// --- 2. Transaktion mit nachgebauter Verbindung ---
 console.log('\n2 — Alle Monate oder keiner:');
 
 function ladeAbrechnungMitFakeDb(verbindungsVerhalten) {
@@ -96,9 +81,7 @@ function ladeAbrechnungMitFakeDb(verbindungsVerhalten) {
     async getConnection() { return connection; },
   };
 
-  // config/database durch die Attrappe ersetzen und das Modell frisch laden.
-  // So laeuft die echte Transaktionslogik, nur gegen eine Verbindung, die
-  // wir steuern koennen — ohne MySQL im Test.
+  // Attrappe statt MySQL, die echte Transaktionslogik läuft.
   const pfad = require.resolve('../config/database');
   const modellPfad = require.resolve('../models/Abrechnung');
   delete require.cache[modellPfad];
@@ -182,8 +165,7 @@ laeuft.push(async () => {
 console.log('\n3 — Nach dem Senden darf nichts mehr werfen:');
 
 laeuft.push(async () => {
-  // Die Antwort ist raus; ein Wurf hier wuerde im Handler-catch landen und
-  // ein res.status(500) auf eine bereits gesendete Antwort versuchen.
+  // Die Antwort ist raus, ein Wurf versuchte einen zweiten Status.
   const quelle = excel.split('async function markiereZeitraum')[1].split('\n}')[0];
   assert.ok(/try\s*\{/.test(quelle) && /catch/.test(quelle),
     'markiereZeitraum muss seine Fehler selbst abfangen');

@@ -22,7 +22,18 @@ arbeitet, hält sich an die folgenden Regeln.
 
 ## Kommentare
 
-Ein Kommentar sagt, warum etwas so ist, nicht was der Code tut oder wie es
-früher war. Höchstens drei Zeilen; was mehr braucht, gehört in die
-Commit-Nachricht oder nach `docs/`. Keine Hostnamen, IPs oder Serverdetails,
-kein `TODO` ohne Issue-Nummer, kein auskommentierter Code.
+> **Kommentare.** Ein Kommentar ist eine Zeile und sagt, warum etwas so ist.
+> Nicht, was der Code tut, nicht, wie es dazu kam, keine Merksätze, keine
+> Erklärprosa. So reicht es: „Deploy-Skript statt Portainer-Webhook: auf dem
+> Zielserver läuft kein Portainer.“ Zwei Zeilen nur, wenn sonst ein Fehler
+> droht; Vorgeschichte gehört in die Commit-Nachricht. Ein Dateikopf nennt in
+> einer Zeile, was die Datei ist, dazu höchstens der Aufruf. Der Quelltext ist
+> zum Veröffentlichen geschrieben: keine Hostnamen, IPs, Server- oder
+> Proxy-Aufbau, Stack- oder Registry-IDs, Auftragsnummern, Befundkennungen,
+> Agenten, Namen außer dem Autor, keine wörtlichen Zitate von Entscheidungen,
+> kein Verweis auf die Werkstatt. Kein `TODO` ohne Issue-Nummer, kein
+> auskommentierter Code. Wer einen Kommentar anfasst, kürzt ihn auf diese
+> Regel. Gegenprobe vor jedem Merge: der Prüf-Scan des Repos meldet „Prüfung
+> ohne Treffer"; wo es einen Quelltext-Export gibt, ist das `node
+> scripts/quelltext-export/export.mjs HEAD`, sonst gitleaks mit der
+> Konfiguration der Werkstatt.

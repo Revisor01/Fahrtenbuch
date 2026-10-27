@@ -1,12 +1,7 @@
 import React, { useEffect } from 'react';
 import { splashAusblenden } from '../utils/splash';
 
-// Zeigt Zeichen und Namen, waehrend die gespeicherte Anmeldung gelesen wird.
-//
-// Loest den nativen Startbildschirm ab, sobald diese Flaeche wirklich steht.
-// Frueher auszublenden hiesse, beide nacheinander zu sehen: Der native traegt
-// nur das Zeichen, dieser zusaetzlich den Namen. So bleibt es ein einziger
-// Startbildschirm, bei dem lediglich der Text erscheint.
+// Startbildschirm mit Zeichen und Namen, löst den nativen erst ab, wenn er steht.
 function Startbildschirm() {
   useEffect(() => {
     splashAusblenden();

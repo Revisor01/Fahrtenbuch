@@ -42,8 +42,7 @@ function OrtSheet({ offen, ort, orte, onClose, onSave }) {
 
   const hatWohnort = orte.some((o) => o.ist_wohnort && o.id !== ort?.id);
 
-  // Sperre gegen Doppel-Tap: das Sheet bleibt waehrend des Requests offen,
-  // ein zweiter Klick legte sonst denselben Ort ein zweites Mal an.
+  // Gegen Doppel-Tap, das Sheet bleibt während des Requests offen.
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (laeuft) return;
@@ -242,9 +241,7 @@ function OrteDistanzenBereich() {
     return d ? d.distanz : null;
   };
 
-  // Reihenfolge der Orte: manuell per Ziehen am Griff, wie bei den
-  // Abrechnungstraegern. Ohne gepflegte sort_order (Altbestand) faellt die
-  // Sortierung auf den Namen zurueck, damit die Liste nie willkuerlich wirkt.
+  // Manuelle Reihenfolge, ohne sort_order nach Name.
   const nachReihenfolge = (liste) =>
     [...liste].sort((a, b) => {
       const av = a.sort_order ?? null;
@@ -256,8 +253,7 @@ function OrteDistanzenBereich() {
       return a.name.localeCompare(b.name);
     });
 
-  // Waehrend der PUT laeuft, haelt `reihenfolge` die optimistische Kopie —
-  // die Liste selbst liegt im AppContext und antwortet erst spaeter.
+  // Optimistische Kopie während des PUT.
   const [reihenfolge, setReihenfolge] = useState(null);
   const [sortiertLaeuft, setSortiertLaeuft] = useState(false);
 
@@ -278,8 +274,7 @@ function OrteDistanzenBereich() {
   }, [orteSortiert, suche, sucheAktiv]);
 
   const handleReorder = async (von, nach) => {
-    // Bei aktiver Suche zeigt die Liste nur einen Ausschnitt — die Indizes
-    // passen dann nicht zur Gesamtreihenfolge, also gar nicht erst sortieren.
+    // Bei aktiver Suche passen die Indizes nicht zur Gesamtliste.
     if (sucheAktiv || sortiertLaeuft) return;
     if (von === null || nach === null || von === nach) return;
     if (von < 0 || nach < 0 || von >= orteSortiert.length || nach >= orteSortiert.length) return;
@@ -302,11 +297,7 @@ function OrteDistanzenBereich() {
     }
   };
 
-  // Ziehen (Maus, Finger, Stift) und Tastatur kommen aus dem gemeinsamen
-  // Hook. Desktop-Tabelle und mobile Liste zeigen dieselbe Reihenfolge und
-  // teilen sich denselben Ziehzustand — sichtbar ist immer nur eine der
-  // beiden. Bei aktiver Suche ist der Griff gesperrt, weil die Indizes des
-  // Ausschnitts nicht zur Gesamtliste passen.
+  // Tabelle und Liste teilen einen Ziehzustand; bei Suche ist der Griff gesperrt.
   const sortieren = useSortierbareListe({
     anzahl: orteSortiert.length,
     onReorder: handleReorder,
@@ -378,9 +369,6 @@ function OrteDistanzenBereich() {
       });
     } catch (error) {
       logFehler('Fehler beim Löschen des Ortes:', error);
-      // Das Backend unterscheidet inzwischen zwischen "in Fahrten verwendet"
-      // und "Distanzen gepflegt" - diese Meldung ist hilfreicher als eine
-      // pauschale.
       toast.error(fehlerText(error, 'Dieser Ort kann nicht gelöscht werden — er wird noch verwendet.'));
     }
   };
@@ -430,8 +418,7 @@ function OrteDistanzenBereich() {
     }
   };
 
-  // Ein Tipp auf die Zeile oeffnet Details + Aktionen — statt Icon-Buttons,
-  // die in der Zeile kaum zu lesen und schwer zu treffen waren.
+  // Tipp auf die Zeile öffnet Details und Aktionen statt kleiner Icon-Buttons.
   const ortAktionsSheet = (ort) => ({
     titel: ort.name,
     untertitel: getOrtTypLabel(ort) || undefined,
@@ -526,8 +513,7 @@ function OrteDistanzenBereich() {
           {gefilterteOrte.map((ort, index) => {
             const km = distanzAbDienstort(ort);
             return (
-              // Der Griff ist ein eigener Button — deshalb traegt die Zeile
-              // hier einen Wrapper statt selbst ein Button zu sein.
+              // Der Griff ist ein eigener Button, die Zeile daher ein Wrapper.
               <div
                 key={ort.id}
                 className={`set-tr-drag${sortieren.zeilenKlasse(index)}`}

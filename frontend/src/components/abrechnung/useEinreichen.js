@@ -6,16 +6,7 @@ import { useFahrtenExport } from '../fahrten/useFahrtenExport';
 import { monatLabel } from './abrechnungUtils';
 import { heuteISO } from '../../utils/datum';
 
-// Statusaktionen der Abrechnung (Phase R6) — alle ohne Bestätigungs-Modal:
-// direkt ausführen, Toast mit „Rückgängig" (Design-Spec).
-//
-// Einreichen folgt der bestehenden Export-Reihenfolge (erst Export-Download,
-// dann Status — wie der Erfolgs-Toast der Fahrtenliste, nur ohne Zwischenklick):
-// je offenem Träger ein Excel-Export, danach alle Status auf „eingereicht"
-// mit heutigem Datum. Undo setzt genau diese Träger per Reset zurück.
-//
-// Alle Status-Calls laufen mit refresh=false; am Ende lädt genau ein
-// refresh() nach (fetchMonthlyData wäre sonst ein Request-Sturm je Schleife).
+// Statusaktionen ohne Bestätigungsdialog, mit Undo; am Ende genau ein refresh(), sonst ein Request-Sturm.
 export function useEinreichen() {
   const {
     updateAbrechnungsStatus,
@@ -26,8 +17,7 @@ export function useEinreichen() {
   const { exportExcel, exportPdf, exportBeides } = useFahrtenExport();
   const toast = useToast();
 
-  // Laufender Mehrfach-Export beim Einreichen: { fertig, gesamt } oder null.
-  // Die Oberflaeche zeigt daraus „Erstellt 2 von 3 …".
+  // { fertig, gesamt } oder null, für „Erstellt 2 von 3 …“.
   const [fortschritt, setFortschritt] = useState(null);
 
   const refresh = async () => {
@@ -42,10 +32,7 @@ export function useEinreichen() {
 
   const jahrMonat = (month) => [month.year.toString(), String(month.monatNr).padStart(2, '0')];
 
-  // Einreichen: alle übergebenen Kategorien mit Status „Erfasst" exportieren
-  // und auf „eingereicht" setzen. Das Format wählt der Aufrufer (Rückfrage
-  // im Sheet — User-Feedback 07.08.); Standard bleibt Excel.
-  // Für die Zeilen-Aktion einzelner Träger einfach [kategorie] übergeben.
+  // Alle Kategorien mit „Erfasst“ exportieren und einreichen; Format vom Aufrufer, Standard Excel.
   const einreichen = async (month, kategorien, format = 'excel') => {
     const offene = (kategorien || []).filter((k) => k.status === 'offen');
     if (offene.length === 0) return;
@@ -54,11 +41,7 @@ export function useEinreichen() {
     const exportFn =
       format === 'pdf' ? exportPdf : format === 'beides' ? exportBeides : exportExcel;
 
-    // 1. Export-Downloads anstoßen (sequentiell, je Träger eine Datei)
-    //
-    // Hier ist ein Zähler angebracht — anders als beim einzelnen Export gibt
-    // es echte Schritte. Ein PDF dauert gemessene ~4,3 s; bei drei Trägern
-    // wartet man über 13 s, und ohne Anzeige wirkte die App eingefroren.
+    // 1. Exporte nacheinander mit Zähler, ein PDF dauert etwa 4,3 s.
     const exportiert = [];
     setFortschritt({ fertig: 0, gesamt: offene.length });
     try {
@@ -110,11 +93,7 @@ export function useEinreichen() {
     }
   };
 
-  // Erfasst → Eingereicht OHNE Export. „Einreichen" oben koppelt den
-  // Statuswechsel bewusst an einen Export — wer die Abrechnung schon auf
-  // anderem Weg abgegeben hat, braucht sie aber nicht noch einmal
-  // herunterzuladen. Diesen Weg gab es bis 16.08. nur in der Erstattungs-Karte
-  // des Fahrten-Tabs; mit ihrem Wegfall gehoert er hierher (Simon 16.08.).
+  // Einreichen ohne Export, für schon anders abgegebene Abrechnungen.
   const alsEingereichtMarkieren = async (month, kategorie) => {
     const [jahr, monat] = jahrMonat(month);
     try {
@@ -138,8 +117,7 @@ export function useEinreichen() {
     }
   };
 
-  // Eingereicht → Erstattet (heute). Undo stellt „Eingereicht" mit dem
-  // alten Datum wieder her (erhalten_am lässt sich nur per Reset löschen).
+  // Undo stellt „Eingereicht“ mit dem alten Datum wieder her.
   const alsErstattetMarkieren = async (month, kategorie) => {
     const [jahr, monat] = jahrMonat(month);
     const eingereichtAm = datumsTeil(kategorie.statusData?.eingereicht_am);
@@ -198,8 +176,7 @@ export function useEinreichen() {
     }
   };
 
-  // Nachträgliches Ändern des Einreich-/Erstattungsdatums — öffnet den
-  // Datums-Dialog (einziger verbliebener Einsatz des Status-Dialogs)
+  // Öffnet den Datums-Dialog.
   const datumAendern = (month, kategorie) => {
     const [jahr, monat] = jahrMonat(month);
     setAbrechnungsStatusModal({
@@ -212,8 +189,7 @@ export function useEinreichen() {
     });
   };
 
-  // Vor dem Einreichen nach dem Format fragen (Excel / PDF / Beide) —
-  // der Aufrufer öffnet damit ein Sheet, bestätigt wird über `bestaetigen`.
+  // Vor dem Einreichen nach dem Format fragen.
   const [formatFrage, setFormatFrage] = useState(null);
 
   const einreichenFragen = (month, kategorien) => {

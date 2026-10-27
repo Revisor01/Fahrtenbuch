@@ -1,11 +1,4 @@
-// Tests zu den Befunden der API-Analyse vom 24.08.
-//
-// Diese Tests pruefen Logik, die ohne Datenbank auskommt: Fehlerpfade,
-// Modulstruktur und Schema-Verhalten. Was zwingend eine DB braucht (z. B. das
-// tatsaechliche Passwort-Update), ist hier bewusst nicht abgedeckt und wurde
-// stattdessen gegen die laufende Instanz gemessen.
-//
-// Laeuft ohne Test-Framework: `node test/befunde.test.js`.
+// Fehlerpfade, Modulstruktur und Schemas ohne Datenbank. Aufruf: node test/befunde.test.js
 
 const assert = require('assert');
 const { z } = require('zod');
@@ -17,9 +10,7 @@ function pruefe(beschreibung, fn) {
   console.log('  ok  ' + beschreibung);
 }
 
-// --- Befund 1: Passwort-Hash wird gezielt geladen -------------------------
-// findById darf den Hash NICHT liefern (steckt sonst in req.user),
-// findByIdMitPasswort muss ihn liefern.
+// --- Passwort-Hash nur über findByIdMitPasswort ---
 console.log('\nBefund 1 — Passwort-Hash:');
 
 const userQuellcode = require('fs').readFileSync(__dirname + '/../models/User.js', 'utf8');
@@ -48,8 +39,7 @@ pruefe('changePassword nutzt nicht mehr findById fuer den Hash', () => {
     'darf den Hash nicht mehr aus findById erwarten');
 });
 
-// --- Befund 2: Zod-4-Fehlerpfad bei Favoriten -----------------------------
-// error.errors gibt es in Zod 4 nicht mehr; der Handler muss issues nutzen.
+// --- Zod 4: Favoriten-Fehlerpfad über issues ---
 console.log('\nBefund 2 — Zod-4-Fehlerliste:');
 
 pruefe('Zod 4 liefert issues, nicht errors', () => {

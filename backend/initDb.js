@@ -15,8 +15,7 @@ async function initializeDatabase() {
         // Warte auf Migrationen
         await migrator.runMigrations();
 
-        // Initial-Passwort nur beim Erstlauf setzen: Migration 0002_admin_user.sql legt
-        // den Admin mit dem Literal 'PLACEHOLDER_PASSWORD_HASH' an — nur dann hashen/setzen.
+        // Nur beim Erstlauf, erkennbar am Platzhalter aus 0002_admin_user.sql.
         const [existingUsers] = await connection.execute('SELECT id, password FROM users WHERE username = ?', [process.env.INITIAL_ADMIN_USERNAME]);
         if (existingUsers.length > 0) {
             if (existingUsers[0].password === 'PLACEHOLDER_PASSWORD_HASH') {

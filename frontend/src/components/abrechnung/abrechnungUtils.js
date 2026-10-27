@@ -9,9 +9,7 @@ export function aktuellerYearMonth() {
   return aktuellerMonat();
 }
 
-// Kategorien eines Monats mit Erstattung > 0: konfigurierte Träger in
-// App-Reihenfolge, Mitfahrer:innen am Ende.
-// → [{ key, name, betrag, km, statusData, status }]
+// Kategorien eines Monats mit Erstattung > 0, Mitfahrer:innen am Ende: [{ key, name, betrag, km, statusData, status }].
 export function monatKategorien(month, abrechnungstraeger) {
   const kategorien = [];
   (abrechnungstraeger || []).forEach((traeger) => {

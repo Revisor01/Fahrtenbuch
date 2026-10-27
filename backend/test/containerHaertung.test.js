@@ -1,19 +1,4 @@
-// Punkte 4 und 7 der Pre-Launch-Liste: Container-Nutzer und Sicherheits-
-// Kopfzeilen.
-//
-// Punkt 4: Das Backend lief als root. In genau diesem Container rendert
-// LibreOffice Texte, die Nutzer:innen eingegeben haben (Anlass, Ortsnamen) —
-// der Prozess mit den weitesten Rechten verarbeitet die am wenigsten
-// vertrauenswuerdigen Daten.
-//
-// Punkt 7: frontend/nginx.conf setzte nur Cache-Kopfzeilen. helmet() im
-// Backend deckt die API ab, nicht die ausgelieferte Oberflaeche.
-//
-// Die nginx-Konfiguration wurde zusaetzlich gegen ein echtes Image gemessen
-// (alle sieben Pfade liefern CSP und X-Frame-Options, die Cache-Kopfzeilen
-// bleiben unveraendert). Hier steht, was sich ohne Docker pruefen laesst.
-//
-// Laeuft ohne Test-Framework: `node test/containerHaertung.test.js`.
+// Container-Nutzer und Sicherheits-Kopfzeilen, ohne Docker prüfbar. Aufruf: node test/containerHaertung.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -75,8 +60,7 @@ pruefe('package-lock.json passt zu package.json — sonst bricht npm ci', () => 
 });
 
 pruefe('die Entwicklungs-Compose setzt user: root wegen des Bind-Mounts', () => {
-  // ./backend:/app gehoert dem Host; ohne diese Zeile koennte node dort
-  // nicht lesen und die Entwicklungsumgebung startete nicht mehr.
+  // ./backend:/app gehört dem Host.
   assert.ok(/user: root/.test(composeDev));
   assert.ok(/\.\/backend:\/app/.test(composeDev));
 });
@@ -115,9 +99,7 @@ pruefe('jede Kopfzeile traegt always', () => {
 });
 
 pruefe('JEDER location-Block bindet die Kopfzeilen ein', () => {
-  // Der eigentliche Fallstrick: nginx vererbt add_header nicht, sobald ein
-  // location-Block selbst eines setzt — und fuenf Bloecke tun das fuer die
-  // Cache-Steuerung.
+  // nginx vererbt add_header nicht, sobald ein location-Block eigene setzt.
   const bloecke = nginx.split('location ').slice(1);
   assert.ok(bloecke.length >= 6, `nur ${bloecke.length} location-Bloecke gefunden`);
   for (const b of bloecke) {
@@ -159,8 +141,7 @@ pruefe('das Instanz-Verzeichnis ist erlaubt', () => {
 });
 
 pruefe('alle externen Ziele des Frontends stehen in connect-src', () => {
-  // Gegenprobe gegen den Quelltext: Was dort aufgerufen wird, muss erlaubt
-  // sein — sonst bricht die CSP genau die Funktion, die sie schuetzen soll.
+  // Was der Quelltext aufruft, muss die CSP erlauben.
   const quellen = ['src/components/useAdressSuche.js', 'src/api/instanzen.js']
     .map((p) => lies('frontend/' + p)).join('\n');
   const ziele = new Set((quellen.match(/https:\/\/[a-zA-Z0-9.-]+/g) || []));

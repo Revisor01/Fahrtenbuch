@@ -1,18 +1,10 @@
 const db = require('../config/database');
 
-// Praefix "Rueckfahrt: " aus Altdaten. Hin- und Rueckfahrt tragen denselben
-// Anlass, deshalb zaehlen sie fuer die Nutzungshaeufigkeit als einer.
-// REGEXP_REPLACE statt fester Zeichenkette, damit auch Gross-/Kleinschreibung
-// und mehrere Leerzeichen greifen.
+// Präfix "Rueckfahrt: " aus Altdaten, Hin- und Rückfahrt zählen als ein Anlass.
 const ANLASS_OHNE_PRAEFIX = "TRIM(REGEXP_REPLACE(f.anlass, '^R.ckfahrt:[[:space:]]*', ''))";
 
 class Anlass {
-  /**
-   * Alle Anlaesse des Nutzers samt Nutzungshaeufigkeit aus fahrten.
-   * Die Zaehlung laeuft ueber eine Subquery statt ueber einen JOIN mit
-   * GROUP BY: so bleiben Anlaesse ohne jede Fahrt (frisch angelegt) mit
-   * nutzung_anzahl = 0 in der Liste stehen.
-   */
+  /** Alle Anlässe mit Nutzungshäufigkeit, per Subquery, damit unbenutzte mit 0 erscheinen. */
   static async findAll(userId) {
     const [rows] = await db.execute(
       `SELECT
@@ -47,12 +39,7 @@ class Anlass {
     return rows[0];
   }
 
-  /**
-   * Legt einen Anlass an. Idempotent gegenueber dem UNIQUE-Schluessel
-   * (user_id, name): existiert der Name bereits, wird der vorhandene Eintrag
-   * zurueckgegeben. Das Frontend legt Anlaesse aus dem Erfassungs-Modal heraus
-   * an - ein Duplikat ist dort kein Fehlerfall, sondern der Normalfall.
-   */
+  /** Legt einen Anlass an oder gibt den vorhandenen zurück, ein Duplikat ist im Modal der Normalfall. */
   static async create(userId, name, sortOrder = null) {
     const sauber = String(name).trim();
 
@@ -61,10 +48,7 @@ class Anlass {
       return { anlass: vorhanden, neu: false };
     }
 
-    // Ohne ausdrueckliche Vorgabe ans Ende der Liste. Eine feste 0 haette den
-    // frisch angelegten Anlass ueber alle eingespielten gehoben - die tragen
-    // aus der Migration ihren Haeufigkeitsrang, und ein gerade erst erfundener
-    // Anlass ist selten der wichtigste.
+    // Ohne Vorgabe ans Ende der Liste.
     let rang = sortOrder;
     if (rang === null || rang === undefined) {
       const [zeilen] = await db.execute(
@@ -82,9 +66,7 @@ class Anlass {
       const anlass = await Anlass.findById(result.insertId, userId);
       return { anlass, neu: true };
     } catch (error) {
-      // Zwei parallele Anfragen koennen die Pruefung oben gleichzeitig
-      // passieren. Der UNIQUE-Schluessel faengt das ab - dann gilt der
-      // Eintrag des anderen Laufs.
+      // Bei parallelen Anfragen fängt der UNIQUE-Schlüssel ab, dann gilt der andere Eintrag.
       if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
         const bestehend = await Anlass.findByName(userId, sauber);
         if (bestehend) {
@@ -96,10 +78,7 @@ class Anlass {
     }
   }
 
-  /**
-   * Aktualisiert Name, Sortierung und Aktiv-Flag. Nur uebergebene Felder
-   * werden angefasst, damit ein reines Umsortieren den Namen nicht loescht.
-   */
+  /** Aktualisiert nur übergebene Felder, damit Umsortieren den Namen nicht löscht. */
   static async update(id, userId, daten) {
     const felder = [];
     const werte = [];
@@ -129,13 +108,7 @@ class Anlass {
     return result.affectedRows > 0;
   }
 
-  /**
-   * Schreibt die Reihenfolge mehrerer Anlaesse in einem Rutsch.
-   * Bisher schickte das Frontend fuer jede Verschiebung einzelne PUTs - bei
-   * einer laengeren Liste ein Schwall Anfragen, bei dem eine fehlgeschlagene
-   * eine luekenhafte Reihenfolge hinterliess. Die Transaktion macht daraus
-   * ein Alles-oder-nichts.
-   */
+  /** Schreibt die Reihenfolge mehrerer Anlässe in einer Transaktion. */
   static async updateSortOrder(userId, sortOrder) {
     const connection = await db.getConnection();
     try {
@@ -155,11 +128,7 @@ class Anlass {
     }
   }
 
-  /**
-   * Loescht einen Anlass. Bestehende Fahrten behalten ihren Text:
-   * fahrten.anlass ist ein VARCHAR ohne Fremdschluessel auf diese Tabelle,
-   * hier kaskadiert bewusst nichts.
-   */
+  /** Löscht einen Anlass; Fahrten behalten ihren Text. */
   static async delete(id, userId) {
     const [result] = await db.execute(
       'DELETE FROM anlaesse WHERE id = ? AND user_id = ?',

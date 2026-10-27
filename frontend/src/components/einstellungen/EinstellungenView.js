@@ -17,14 +17,7 @@ import ApiBereich from './ApiBereich';
 import InstanzBereich from './InstanzBereich';
 import { IST_NATIVE } from '../../utils/plattform';
 
-// Einstellungen nach Spec Screen 7: Desktop Liste links (212px) + Inhalt
-// rechts in einer Karte; mobil Vollbild-Liste mit Drilldown.
-// Reihenfolge nach Nutzungshäufigkeit (Spec) — „API-Zugriff" als
-// zusätzlicher Punkt am Ende, „Verwaltung" (Admin) mobil in der Liste,
-// desktop über den Sidebar-Eintrag.
-// Reihenfolge nach dem, was zuerst gebraucht wird: Profil (dort stehen Name,
-// IBAN und der Wohnort — ohne die stimmt die Abrechnung nicht), dann die
-// Stammdaten, zuletzt Selteneres.
+// Einstellungen: Desktop Liste und Inhalt, mobil Drilldown; zuerst Profil, weil ohne Name, IBAN und Wohnort die Abrechnung nicht stimmt.
 const BEREICHE = [
   { id: 'profil', label: 'Profil & Passwort', Icon: User, Component: ProfilBereich },
   { id: 'orte', label: 'Orte & Distanzen', Icon: MapPin, Component: OrteDistanzenBereich },
@@ -34,8 +27,7 @@ const BEREICHE = [
   { id: 'favoriten', label: 'Favoriten', Icon: Star, Component: FavoritenBereich },
   { id: 'darstellung', label: 'Darstellung', Icon: SunMoon, Component: DarstellungBereich },
   { id: 'api', label: 'API-Zugriff', Icon: Key, Component: ApiBereich },
-  // Nur in der App: Im Web ist der Server durch die Adresse der Seite gesetzt
-  // und gar nicht wechselbar.
+  // Nur in der App, im Web ist der Server fest.
   { id: 'instanz', label: 'Kirchenkreis', Icon: Globe, Component: InstanzBereich, nurNativ: true },
   { id: 'verwaltung', label: 'Verwaltung', Icon: Users, Component: UserManagement, adminOnly: true, mobileOnly: true },
 ];
@@ -65,8 +57,7 @@ function EinstellungenView({ initialTab, onShowInfo, onShowNewFeatures }) {
   useEffect(() => {
     if (!initialTab) return;
     const ziel = LEGACY_MAP[initialTab] || initialTab;
-    // Gegen die gefilterte Liste pruefen: ein Deeplink darf keinen Bereich
-    // oeffnen, den diese Plattform oder Rolle gar nicht anbietet.
+    // Ein Deeplink darf keinen Bereich öffnen, den Plattform oder Rolle nicht anbieten.
     if (bereiche.some((b) => b.id === ziel)) {
       setAktiv(ziel);
       setDrilldown(true);

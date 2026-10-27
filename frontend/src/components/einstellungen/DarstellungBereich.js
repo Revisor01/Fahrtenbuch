@@ -3,8 +3,7 @@ import { Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme } from '../../ThemeContext';
 import BereichKopf from './BereichKopf';
 
-// „Darstellung" enthält genau drei Optionen: Hell / Dunkel / System.
-// Keine Farbwahl (Spec Screen 7). Radio-Semantik, Auswahl trägt Form + Wort.
+// Hell, Dunkel oder System, keine Farbwahl.
 const OPTIONEN = [
   { id: 'light', titel: 'Hell', text: 'Immer das helle Design', Icon: Sun },
   { id: 'dark', titel: 'Dunkel', text: 'Immer das dunkle Design', Icon: Moon },

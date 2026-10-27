@@ -16,13 +16,7 @@ import { statusFromAbrechnung, statusLabel } from '../utils/statusLabels';
 import { formatBetrag, rundeKilometer, kategorienMitErstattung } from './fahrten/zeitraumUtils';
 import usePassendeGroesse from './fahrten/usePassendeGroesse';
 
-// Fahrtenliste (Phase R5, Design-Spec Screen 3):
-// Titel + Segmented Control (aktueller Monat / Vormonat / Zeitraum) +
-// Summenzeile mit Export, darunter die Fahrten — mobil als Karten mit
-// Swipe-Aktionen. Bearbeiten öffnet das bestehende FahrtForm im Sheet,
-// Löschen läuft ohne Rückfrage mit Toast + „Rückgängig" (R2-Muster).
-// Der scrollende Bereich ist die App-Shell (.app-content, flex:1 /
-// min-height:0 / overflow-y:auto) — kein zweiter Scroll-Container.
+// Fahrtenliste mit Zeitraumwahl, Summenzeile und Export; die App-Shell scrollt, kein zweiter Scroll-Container.
 function FahrtenListe() {
   const {
     fahrten,
@@ -62,10 +56,7 @@ function FahrtenListe() {
     [fahrten]
   );
 
-  // Die Traeger, die im Zeitraum tatsaechlich etwas erstatten — nicht die
-  // konfigurierten. „Mitfahrer:innen" steht als eigener Posten mit drin, weil
-  // der Betrag auch getrennt ausgezahlt wird.
-  // Schrift der drei Werte: so gross wie moeglich, so klein wie noetig.
+  // Träger, die im Zeitraum tatsächlich erstatten, Mitfahrer:innen als eigener Posten.
   const { setzeRef: setzeWertRef, groesse: wertGroesse } = usePassendeGroesse(
     [sortierteFahrten.length, kmGesamt, summary?.gesamtErstattung]
   );
@@ -75,8 +66,7 @@ function FahrtenListe() {
     [summary, abrechnungstraeger]
   );
 
-  // Status je Fahrt: Monatsstatus ihres Trägers (im Zeitraum-Modus liegt
-  // der Status je Monat unter dem Monats-Key der Fahrt)
+  // Status je Fahrt aus dem Monatsstatus ihres Trägers.
   const statusFuer = (fahrt) => {
     const st = summary?.abrechnungsStatus?.[String(fahrt.abrechnung)];
     return statusFromAbrechnung(
@@ -87,30 +77,24 @@ function FahrtenListe() {
   const traegerNameFuer = (fahrt) =>
     abrechnungstraeger?.find((t) => t.id === parseInt(fahrt.abrechnung))?.name || 'Unbekannt';
 
-  // Gegenfahrt eines Hin-und-Rueck-Paares. Sie liegt nur dann vor, wenn sie im
-  // geladenen Zeitraum enthalten ist — bei Monatswechseln (Hinfahrt 31.,
-  // Rueckfahrt 1.) kann sie fehlen, dann zeigen wir nur den Hinweis.
+  // Gegenfahrt nur, wenn sie im geladenen Zeitraum liegt, sonst nur der Hinweis.
   const partnerVon = (fahrt) =>
     fahrt?.partner_fahrt_id
       ? fahrten.find((f) => f.id === fahrt.partner_fahrt_id) || null
       : null;
 
-  // Welche Richtung ist diese Fahrt im Paar? Die kleinere ID wurde zuerst
-  // erfasst — dieselbe Regel wie im Export.
+  // Die kleinere ID ist die Hinfahrt, wie im Export.
   const istHinfahrt = (fahrt) =>
     fahrt?.partner_fahrt_id ? fahrt.id < fahrt.partner_fahrt_id : null;
 
-  // Löschen mit Rückfrage (User-Feedback 07.08.) — Fahrten sind Belege,
-  // das versehentliche Wegwischen soll nicht unbemerkt passieren.
+  // Mit Rückfrage, Fahrten sind Belege.
   const [loeschFrage, setLoeschFrage] = useState(null);
 
   const fragenObLoeschen = (fahrt) => {
     setLoeschFrage(fahrt);
   };
 
-  // auchPartner: bei verknuepften Fahrten beide Richtungen auf einmal loeschen.
-  // Die Gegenfahrt zuerst, damit die Spiegelung der Mitfahrer noch greift —
-  // beim Loeschen der zweiten gibt es keinen Partner mehr aufzuraeumen.
+  // Gegenfahrt zuerst, damit die Spiegelung der Mitfahrer noch greift.
   const handleDelete = async (fahrt, auchPartner = false) => {
     setLoeschFrage(null);
     const partner = auchPartner ? partnerVon(fahrt) : null;
@@ -156,8 +140,7 @@ function FahrtenListe() {
     setEditingFahrt(fahrt);
   };
 
-  // „Wiederholen": Erfassungsflow mit Prefill, startet dank nachOrtId direkt
-  // in Schritt 2 — Datum heute
+  // Flow mit Prefill, startet dank nachOrtId in Schritt 2.
   const handleWiederholen = (fahrt) => {
     erfassung.open({
       vonOrtId: fahrt.von_ort_id,
@@ -167,8 +150,7 @@ function FahrtenListe() {
     });
   };
 
-  // Rückfahrt: dieselbe Strecke rückwärts, am selben Tag. Der häufigste Fall
-  // nach einer Hinfahrt — deshalb direkt anlegen statt über den Erfassungsflow.
+  // Rückfahrt am selben Tag direkt anlegen, der häufigste Fall.
   const handleRueckfahrt = async (fahrt) => {
     try {
       await addFahrt({
@@ -181,8 +163,7 @@ function FahrtenListe() {
         kilometer: fahrt.kilometer,
         abrechnung: fahrt.abrechnung,
         mitfahrer: [],
-        // Beide Fahrten als Paar verknüpfen — Mitfahrer mit „Hin- und
-        // Rückfahrt" gelten dann für beide
+        // Als Paar verknüpfen, damit „Hin- und Rückfahrt“-Mitfahrer für beide gelten.
         partnerFahrtId: fahrt.id,
       });
       fetchMonthlyData();
@@ -306,9 +287,7 @@ function FahrtenListe() {
                 fahrt={fahrt}
                 status={statusFuer(fahrt)}
                 onOeffnen={setAktionsFahrt}
-                // Frisch angelegte Fahrten haben noch keine Server-ID.
-                // Bearbeiten, Löschen und Rückfahrt liefen sonst mit der
-                // Temp-ID gegen die API und schlugen fehl.
+                // Ohne Server-ID liefen die Aktionen mit der Temp-ID gegen die API.
                 gesperrt={!!fahrt._optimistisch}
               />
             ))}
@@ -353,9 +332,7 @@ function FahrtenListe() {
             year: 'numeric',
           })}
           zeilen={[
-            // Der Anlass steht zwar im Titel — dort aber nur, WENN es einen
-            // gibt; sonst rutscht das Ziel in den Titel. Als eigene Zeile ist
-            // die Angabe eindeutig.
+            // Eigene Zeile, im Titel steht der Anlass nur, wenn es einen gibt.
             { label: 'Anlass', wert: aktionsFahrt.anlass || '—' },
             {
               label: 'Strecke',
@@ -370,8 +347,6 @@ function FahrtenListe() {
             ...(aktionsFahrt.mitfahrer?.length
               ? [{ label: 'Mitfahrer', wert: aktionsFahrt.mitfahrer.map((m) => m.name).join(', ') }]
               : []),
-            // Gegenfahrt mit ihren Werten — sonst muesste man sie in der Liste
-            // suchen, um zu sehen, was dort steht
             ...(aktionsFahrt.partner_fahrt_id
               ? [
                   {
@@ -397,9 +372,7 @@ function FahrtenListe() {
               icon: Pencil,
               onClick: () => handleEdit(aktionsFahrt),
             },
-            // Nur anbieten, solange es keine Gegenfahrt gibt — sonst entstuenden
-            // Doppelungen. Wird die Gegenfahrt geloescht, faellt
-            // partner_fahrt_id auf NULL und die Aktion erscheint wieder.
+            // Nur ohne Gegenfahrt, sonst entstünden Doppelungen.
             ...(aktionsFahrt.partner_fahrt_id
               ? []
               : [
@@ -411,9 +384,7 @@ function FahrtenListe() {
                     onClick: () => handleRueckfahrt(aktionsFahrt),
                   },
                 ]),
-            // Nur bei gespeicherten Orten: Der Erfassungsflow kennt keine
-            // einmaligen Adressen als Prefill — man landete sonst in einem
-            // fast leeren Schritt 1.
+            // Nur bei gespeicherten Orten, der Flow kennt keine einmaligen Adressen als Prefill.
             ...(aktionsFahrt.nach_ort_id
               ? [
                   {

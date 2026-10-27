@@ -15,12 +15,7 @@ import {
   istFaellig,
 } from './abrechnung/abrechnungUtils';
 
-// Abrechnung (Phase R6, Redesign 2026).
-// Mobil (<768px): Monatskarten — fällige Monate aufgeklappt mit
-// Fortschrittsleiste, Einreichen-Button und Download; übrige eingeklappt
-// mit Statuspunkt + Datum, antippbar für Trägerzeilen + Aktionen.
-// Ab 768px: Matrix Monat × Träger (Spec Screen 6) mit Kopf-Aktionen
-// „Zeitraum-Export" und „{ältester fälliger Monat} einreichen".
+// Abrechnung: mobil Monatskarten, ab 768 px Matrix Monat × Träger.
 function MonthlyOverview() {
   const { monthlyData, fetchMonthlyData, abrechnungstraeger } = useContext(AppContext);
   const currentYear = new Date().getFullYear().toString();
@@ -59,8 +54,7 @@ function MonthlyOverview() {
     [monthlyData, selectedYear, abrechnungstraeger, currentYM]
   );
 
-  // Alle Monate mit Kategorien/Fälligkeit — Basis für Unterzeile,
-  // Kopf-Button und die automatische Jahresvorwahl
+  // Alle Monate mit Kategorien und Fälligkeit.
   const alleMonate = useMemo(
     () =>
       monthlyData.map((m) => {
@@ -74,8 +68,7 @@ function MonthlyOverview() {
     [monthlyData, abrechnungstraeger, currentYM]
   );
 
-  // Fällige Monate über alle Jahre — konsistent zum Zähler der Navigation,
-  // ältester zuerst (für den Kopf-Button und die Unterzeile)
+  // Fällige Monate über alle Jahre, ältester zuerst.
   const alleFaelligen = useMemo(
     () =>
       alleMonate
@@ -84,9 +77,7 @@ function MonthlyOverview() {
     [alleMonate]
   );
 
-  // Liegt ein fälliger Monat außerhalb des vorgewählten Jahres (z. B.
-  // Dezember des Vorjahres), weite die Ansicht einmalig auf „Alle Jahre" —
-  // sonst ist der Monat, den der Kopf-Button nennt, in der Liste unsichtbar.
+  // Einmalig auf „Alle Jahre“, wenn ein fälliger Monat außerhalb liegt, sonst wäre er unsichtbar.
   const autoYearDone = React.useRef(false);
   useEffect(() => {
     if (autoYearDone.current || monthlyData.length === 0) return;

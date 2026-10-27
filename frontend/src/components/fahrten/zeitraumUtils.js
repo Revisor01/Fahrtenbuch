@@ -1,5 +1,4 @@
-// Gemeinsame Helfer der Fahrtenliste (Phase R5): Zeitraum-Monate,
-// Kategorien mit Erstattung, Zahlformatierung.
+// Helfer der Fahrtenliste: Zeitraum-Monate, Kategorien, Zahlformat.
 
 // Alle Monats-Keys ("YYYY-MM") von `von` bis `bis` (inklusive).
 export function monateImZeitraum(von, bis) {
@@ -17,9 +16,7 @@ export function monateImZeitraum(von, bis) {
   return monate;
 }
 
-// Offene Monate eines Trägers im Zeitraum (weder eingereicht noch erstattet).
-// traegerStatus = summary.abrechnungsStatus[traegerId] im Zeitraum-Modus:
-// { "YYYY-MM": { eingereicht_am, erhalten_am } }
+// Offene Monate eines Trägers; traegerStatus: { "YYYY-MM": { eingereicht_am, erhalten_am } }.
 export function offeneMonateImZeitraum(traegerStatus, von, bis) {
   return monateImZeitraum(von, bis).filter((monthKey) => {
     const statusData = traegerStatus?.[monthKey];
@@ -27,8 +24,7 @@ export function offeneMonateImZeitraum(traegerStatus, von, bis) {
   });
 }
 
-// Kategorien mit Erstattung > 0: sortierte Träger zuerst,
-// Mitfahrer:innen am Ende. → [{ key, name, betrag }]
+// Kategorien mit Erstattung > 0, Mitfahrer:innen am Ende: [{ key, name, betrag }].
 export function kategorienMitErstattung(summary, abrechnungstraeger) {
   const erstattungen = summary?.erstattungen || {};
   const kategorien = [];

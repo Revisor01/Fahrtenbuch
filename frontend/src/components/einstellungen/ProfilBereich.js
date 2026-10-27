@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import logFehler from '../../utils/logFehler';
 
-// Muss zu backend/schemas/profileSchemas.js passen — und zu SetPassword.js.
-// Der Wert stand hier auf 8, waehrend der Server kurzzeitig 10 verlangte:
-// Die Pruefliste zeigte einen gruenen Punkt, und das Speichern scheiterte
-// trotzdem mit „Validierungsfehler". Jetzt fordern beide Seiten 8.
+// Wie backend/schemas/profileSchemas.js und SetPassword.js.
 const PASSWORT_MINDESTLAENGE = 8;
 import axios from 'axios';
 import { Home, AlertTriangle, Trash2 } from 'lucide-react';
@@ -15,8 +12,7 @@ import Spinner from '../ui/Spinner';
 import fehlerText from '../../utils/fehlerText';
 import BereichKopf from './BereichKopf';
 
-// Profil & Passwort: persönliche Daten für die Abrechnung + Passwortwechsel.
-// Formulare bleiben Seiteninhalt (mehrfeldrig, kein Sheet).
+// Profil und Passwort als Seiteninhalt.
 function ProfilBereich() {
   const { setUser, refreshAllData, orte, updateOrt, logout, fetchCurrentUser } = useContext(AppContext);
   const toast = useToast();
@@ -34,15 +30,13 @@ function ProfilBereich() {
     setLoeschPasswort('');
   };
 
-  // Konto endgueltig loeschen. Der Server prueft das Passwort noch einmal und
-  // raeumt in einer Transaktion alles ab, was am Konto haengt.
+  // Der Server prüft das Passwort erneut und löscht in einer Transaktion.
   const loescheKonto = async () => {
     if (!loeschPasswort || loeschenLaeuft) return;
     setLoeschenLaeuft(true);
     try {
       await axios.delete('/api/profile', { data: { password: loeschPasswort } });
-      // Erst abmelden, dann melden: Ohne Konto wuerde jeder weitere Abruf in
-      // ein 401 laufen und die Oberflaeche in einen unklaren Zustand bringen.
+      // Erst abmelden, sonst laufen weitere Abrufe in 401.
       schliesseLoeschen();
       logout();
       toast.success('Konto und alle Daten wurden gelöscht.');
@@ -60,9 +54,7 @@ function ProfilBereich() {
   const wohnort = (orte || []).find((o) => o.ist_wohnort);
   const orteOhneWohnort = (orte || []).filter((o) => !o.ist_wohnort);
 
-  // Der Server erzwingt keinen einzelnen Wohnort — ohne das Zuruecksetzen des
-  // alten gaebe es zwei, und der Excel-Export nimmt dann einen beliebigen
-  // davon als Anschrift.
+  // Alten Wohnort zurücksetzen, sonst nimmt der Export einen beliebigen.
   const handleWohnortSetzen = async (ortId) => {
     const ort = (orte || []).find((o) => String(o.id) === String(ortId));
     if (!ort) return;
@@ -122,14 +114,7 @@ function ProfilBereich() {
 
       await axios.put('/api/profile', cleanProfile);
       toast.success('Profil aktualisiert.');
-      // fetchProfile fuellt nur dieses Formular; den Namen fuer die
-      // Begruessung auf der Startseite haelt `user` im Context. Ohne
-      // fetchCurrentUser stand dort nach einer Namensaenderung bis zum
-      // naechsten Start der alte Name.
-      //
-      // Mit await: Sonst laeuft der Abruf neben refreshAllData weiter, und
-      // ein Wechsel der Ansicht unmittelbar danach zeigt noch den alten
-      // Stand.
+      // Auch den Nutzer im Context neu laden und abwarten, sonst steht der alte Name auf der Startseite.
       await Promise.all([fetchProfile(), fetchCurrentUser()]);
       await refreshAllData();
     } catch (error) {
@@ -155,8 +140,7 @@ function ProfilBereich() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      // Nur der Status — error.config.data enthaelt hier altes UND neues
-      // Passwort im Klartext und landet sonst im Geraetelog.
+      // Nur der Status, error.config.data enthält beide Passwörter.
       console.error(
         'Passwortwechsel fehlgeschlagen:',
         error.response?.status || error.code || 'Netzfehler'

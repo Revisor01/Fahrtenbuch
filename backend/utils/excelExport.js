@@ -60,16 +60,12 @@ const MAX_ROWS_PER_SHEET = 29;
 
 const TEMPLATE_PATH = path.join(__dirname, '..', 'templates', 'fahrtenabrechnung_vorlage.xlsx');
 
-// Anschrift und Reisezweck stehen in verbundenen Zellen; deren Zeilenhöhe
-// passen weder Excel noch LibreOffice an, umgebrochener Text läuft sonst in
-// die Nachbarzeile. Gemessen in H:J (Breite 37) am 27.10.2026: 41 Zeichen
-// mit Arial, 48 mit DejaVu Sans im Container; 1,0 liegt darunter.
+// Zeilenhöhe verbundener Zellen selbst setzen; in H:J passen 41 Zeichen Arial bzw. 48 DejaVu Sans (27.10.2026).
 const TEXTSPALTEN = [['B', 'E'], ['F', 'G'], ['H', 'J']];
 const ZEICHEN_JE_BREITE = 1.0;
 const ZEILENHOEHE = 13;
 
-// Zählt die Zeilen bei Umbruch an Leerzeichen; großzügig gerechnet, eine
-// Zeile zu viel kostet nur etwas Platz.
+// Lieber eine Zeile zu viel.
 function benoetigteZeilen(text, breite) {
  const proZeile = Math.max(1, Math.floor(breite * ZEICHEN_JE_BREITE));
  let zeilen = 1;
@@ -99,12 +95,10 @@ function passeZeilenhoeheAn(worksheet, excelRow) {
  if (zeilen > 1 && hoehe > (excelRow.height || 0)) excelRow.height = hoehe;
 }
 
-// Mitnahmeentschädigung: im offiziellen Formular fest mit 0,05 €/km vorgegeben
-// (Beschriftung "km x 0,05 € =" steht statisch in F42).
+// Fest 0,05 €/km laut Formular (F42).
 const MITNAHME_SATZ = 0.05;
 
-// Der mitfahrer-JOIN in getMonthlyReport/getDateRangeReport liefert pro Mitfahrer
-// eine Row — für den normalen Export je Fahrt genau eine Zeile behalten.
+// Je Fahrt genau eine Zeile.
 function dedupeByFahrtId(rows) {
   const seen = new Set();
   return rows.filter(r => {
@@ -124,11 +118,7 @@ function fillVorlageSheet(worksheet, year, kostentraeger, kostenstelle, userProf
  worksheet.getCell('C14').value = formatIBAN(userProfile.iban);
 }
 
-// Das Quartalsblatt zieht Jahr, Kostenträger, Name, Anschrift und IBAN im
-// Template per Querverweis aus dem Vorlage-Blatt (z. B. G2 = Vorlage!C12).
-// ExcelJS schreibt solche Formeln ohne belastbaren Cache-Wert zurück, weshalb
-// LibreOffice beim PDF-Export dort 0 anzeigt. Deshalb werden die Kopffelder
-// hier mit echten Werten überschrieben — im Excel wie im PDF identisch.
+// Kopffelder mit echten Werten, weil LibreOffice die Querverweise ohne Cache als 0 zeigt.
 function fillQuartalHeader(worksheet, year, kostentraeger, kostenstelle, userProfile) {
  worksheet.getCell('B2').value = parseInt(year);
  worksheet.getCell('B3').value = kostenstelle
@@ -143,8 +133,7 @@ function fillQuartalSheet(worksheet, data, year, satz, saetze) {
  // Update year
  worksheet.getCell('B2').value = parseInt(year);
 
- // Fill data rows (starting at row 8, max 29 rows)
- // Only set values — styles are already correct in the template
+ // Ab Zeile 8, höchstens 29, nur Werte, die Stile stehen in der Vorlage.
  data.forEach((row, rowIndex) => {
    if (rowIndex >= MAX_ROWS_PER_SHEET) return;
    const excelRow = worksheet.getRow(rowIndex + 8);
@@ -166,16 +155,11 @@ function fillQuartalSheet(worksheet, data, year, satz, saetze) {
  worksheet.getCell('B40').value = new Date();
  worksheet.getCell('B40').numFmt = 'DD.MM.YYYY';
 
- // Erstattungsberechnung in Zeile 40 — Satz aus der DB (Template enthält
- // statisch "km x 0,30 € =" in I40 und Formel H40*0.3 in J40, beides überschreiben).
- // Jede Fahrt wird mit dem an IHREM Datum gueltigen Satz gerechnet. Frueher galt
- // ein einziger Stichtagssatz fuer den gesamten Zeitraum - bei einer
- // Satzaenderung standen dadurch falsche Betraege im eingereichten Formular.
+ // Zeile 40 mit dem Satz je Fahrtdatum, die Vorlage enthält statisch 0,30 €.
  const { betrag, gemischt, effektivSatz } = berechneErstattung(data, saetze);
 
  worksheet.getCell('H40').value = gesamtKm;
- // Bei Satzwechsel im Zeitraum passt keine einzelne "km x Satz"-Zeile; der
- // Mischsatz macht den Betrag nachvollziehbar statt ihn zu verschleiern.
+ // Bei Satzwechsel macht der Mischsatz den Betrag nachvollziehbar.
  worksheet.getCell('I40').value = gemischt
    ? `km, Mischsatz ${effektivSatz.toFixed(4).replace('.', ',')} € =`
    : `km x ${satz.toFixed(2).replace('.', ',')} € =`;
@@ -230,21 +214,7 @@ function prepareFormattedData(fahrten, type) {
 }
 
 function prepareMitfahrerData(fahrten) {
- // Ein Eintrag fuellt GENAU EINE Spalte — die der Fahrt, an der er haengt.
- //
- // Frueher fuellte ein 'hin_rueck'-Eintrag beide Spalten und rechnete die
- // Kilometer trotzdem nur einmal. Das war stimmig, solange so ein Eintrag an
- // genau einer Fahrt hing. Seit die Haelften auf beide Fahrten eines Paares
- // gespiegelt werden, gaebe es zwei Eintraege: zweimal beide Spalten und
- // zweimal volle Kilometer — der Kirchenkreis zahlte doppelt.
- //
- // Jetzt liefert jede Fahrt ihre eigene Zeile mit ihren eigenen Kilometern.
- // Bei einem verknuepften Paar ergibt das zwei Zeilen (Hinweg, Rueckweg) mit
- // je einfacher Strecke — in der Summe unveraendert.
- //
- // Ist die Fahrt NICHT Teil eines Paares, bleibt es beim bisherigen Verhalten:
- // ein 'hin_rueck'-Eintrag fuellt beide Spalten, damit Bestandsdaten und
- // einzeln erfasste Fahrten weiter wie bisher im Formular erscheinen.
+ // Ein Eintrag füllt die Spalte seiner Fahrt; nur ohne Paar füllt 'hin_rueck' beide, sonst zahlte der Kirchenkreis doppelt.
  const mitfahrerData = fahrten.map(fahrt => {
    if (fahrt.mitfahrer_id) {
      const hin = `${fahrt.von_ort_name}-${fahrt.nach_ort_name}`;
@@ -259,9 +229,7 @@ function prepareMitfahrerData(fahrten) {
        rueckweg = zurueck;
      } else if (fahrt.richtung === 'hin_rueck') {
        if (imPaar) {
-         // Die Gegenfahrt liefert die andere Spalte selbst. Welche der beiden
-         // die Hinfahrt ist, entscheidet die kleinere ID: Sie wurde zuerst
-         // erfasst, die Rueckfahrt entsteht immer danach.
+         // Die Gegenfahrt füllt die andere Spalte, die kleinere ID ist die Hinfahrt.
          const istHinfahrt = (fahrt.id ?? fahrt.fahrt_id) < fahrt.partner_fahrt_id;
          if (istHinfahrt) {
            hinweg = hin;
@@ -278,8 +246,7 @@ function prepareMitfahrerData(fahrten) {
        // fahrt_id/mitfahrer_id nur zum Entduplizieren, nicht fuers Formular
        _fahrtId: fahrt.id ?? fahrt.fahrt_id,
        _mitfahrerId: fahrt.mitfahrer_id,
-       // Rohdatum fuer die Satzermittlung: `datum` ist fuer das Formular schon
-       // auf dd.mm.yyyy formatiert und taugt nicht mehr zum Vergleichen.
+       // Rohdatum zum Vergleichen, `datum` ist schon formatiert.
        _datum: fahrt.datum,
        datum: formatDate(fahrt.datum),
        anlass: fahrt.anlass,
@@ -293,10 +260,7 @@ function prepareMitfahrerData(fahrten) {
    return null;
  }).filter(Boolean);
 
- // Echte Duplikate aus dem JOIN entfernen — also dieselbe Person auf derselben
- // Fahrt. Frueher lief der Filter ueber (Datum, Name) und verwarf damit die
- // zweite Fahrt einer Person am selben Tag: bei getrennt erfasster Hin- und
- // Rueckfahrt fiel die Rueckfahrt still aus der Mitnahmeentschaedigung.
+ // Nur echte Duplikate, dieselbe Person auf derselben Fahrt.
  const gesehen = new Set();
  return mitfahrerData.filter((m) => {
    const schluessel = `${m._fahrtId}|${m._mitfahrerId}`;
@@ -306,16 +270,7 @@ function prepareMitfahrerData(fahrten) {
  });
 }
 
-/**
- * Alle Mitnahmesaetze des Nutzers, juengster zuerst.
- *
- * Frueher holte diese Funktion per "ORDER BY gueltig_ab DESC LIMIT 1" nur den
- * neuesten Satz — ohne Bezug zum Fahrtdatum und ohne "gueltig_ab <= Stichtag".
- * Steigt der Satz zum 01.07., rechnete ein Export ueber Mai bis Juli auch die
- * Mai- und Juni-Fahrten mit dem neuen Wert, und ein erst kuenftig gueltiger
- * Satz schlug schon heute durch. Das Formular wich damit von der Anzeige in
- * der App ab, die je Fahrtdatum rechnet — und wies zu hohe Betraege aus.
- */
+/** Alle Mitnahmesätze, jüngster zuerst, damit je Fahrtdatum gerechnet wird. */
 async function ladeMitnahmeSaetze(userId) {
  try {
    const [rows] = await db.execute(
@@ -329,11 +284,7 @@ async function ladeMitnahmeSaetze(userId) {
  }
 }
 
-/**
- * Satz, der an einem Fahrtdatum galt: der juengste, dessen gueltig_ab nicht in
- * der Zukunft liegt. Faellt eine Fahrt vor den ersten gepflegten Satz, gilt der
- * aelteste — wie in erstattung.js, damit Formular und App dieselbe Kette haben.
- */
+/** Satz an einem Fahrtdatum, sonst der älteste, wie in erstattung.js. */
 function mitnahmeSatzAmDatum(saetze, datum) {
  if (!saetze || saetze.length === 0) return MITNAHME_SATZ;
  const d = new Date(datum);
@@ -342,12 +293,7 @@ function mitnahmeSatzAmDatum(saetze, datum) {
  return Number.isFinite(betrag) ? betrag : MITNAHME_SATZ;
 }
 
-/**
- * Mitnahmeentschaedigung ueber alle Zeilen, jede mit dem an ihrem Datum
- * gueltigen Satz. Meldet mit, ob im Zeitraum mehrere Saetze griffen: dann
- * passt die statische Formularzeile "km x 0,05 €" rechnerisch nicht mehr und
- * die Beschriftung muss den tatsaechlich erreichten Mischsatz nennen.
- */
+/** Mitnahmeentschädigung je Zeile mit ihrem Satz; meldet, ob mehrere Sätze griffen. */
 function berechneMitnahme(mitfahrerData, saetze) {
  let summe = 0;
  let kmGesamt = 0;
@@ -404,15 +350,13 @@ async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfah
    mitnahmeWorksheet.getCell('B2').value = parseInt(jahr);
    mitnahmeWorksheet.getCell('D2').value = zeitraumHeader;
 
-   // Wie im Quartalsblatt: Querverweise auf das Vorlage-Blatt durch echte
-   // Werte ersetzen (E2/E4/E6 sind die Anker der verbundenen Zellen).
+   // Querverweise durch echte Werte ersetzen (E2/E4/E6).
    mitnahmeWorksheet.getCell('E2').value = userProfile.full_name;
    mitnahmeWorksheet.getCell('E4').value = userProfile.home_address;
    mitnahmeWorksheet.getCell('E6').value = formatIBAN(userProfile.iban);
    mitnahmeWorksheet.getCell('B4').value = 'Mitfahrer:innen';
 
-   // Der Aufrufer chunkt bereits auf MAX_ROWS_PER_SHEET — hier wird genau
-   // geschrieben, was ankommt. Frueher wurde ab Zeile 30 still verworfen.
+   // Der Aufrufer teilt schon auf MAX_ROWS_PER_SHEET auf.
    mitfahrerData.forEach((mitfahrer, index) => {
      const row = mitnahmeWorksheet.getRow(index + 10);
      row.getCell('A').value = mitfahrer.datum;
@@ -424,19 +368,13 @@ async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfah
      row.getCell('G').value = mitfahrer.kilometer;
    });
 
-   // Summen- und Erstattungszeile (Template: SUM-Formeln ohne Cache-Wert).
-   // Jede Zeile mit dem Satz ihres eigenen Datums — bei einem Satzwechsel
-   // mitten im Zeitraum waere "Gesamt-km x neuester Satz" zu hoch.
+   // Jede Zeile mit dem Satz ihres Datums.
    const { betrag, kmGesamt, gemischt, effektivSatz } = berechneMitnahme(mitfahrerData, saetze);
    mitnahmeWorksheet.getCell('G39').value = kmGesamt;
    mitnahmeWorksheet.getCell('B42').value = new Date();
    mitnahmeWorksheet.getCell('B42').numFmt = 'DD.MM.YYYY';
    mitnahmeWorksheet.getCell('E42').value = kmGesamt;
-   // Das Template beschriftet die Zeile statisch mit "km x 0,05 €". Weicht der
-   // Satz ab, muss die Beschriftung mitziehen, sonst passt sie nicht zum
-   // Betrag daneben. Bei mehreren Saetzen im Zeitraum steht dort der
-   // rechnerische Mischsatz plus Hinweis — eine einzelne Zahl kann den
-   // Zeitraum sonst nicht ehrlich abbilden.
+   // Weicht der Satz von 0,05 € ab, zieht die Beschriftung mit, bei mehreren mit Mischsatz.
    if (gemischt) {
      mitnahmeWorksheet.getCell('F42').value =
        `km x ${effektivSatz.toFixed(4).replace('.', ',')} € (gemischte Saetze) =`;
@@ -449,10 +387,7 @@ async function baueMitfahrerWorkbook({ jahr, zeitraumHeader, userProfile, mitfah
  return workbook;
 }
 
-/**
- * Baut die Mitfahrer-Mappen. Ab 30 Zeilen entstehen mehrere Formulare —
- * wie bei den normalen Abrechnungen auch.
- */
+/** Mitfahrer-Mappen, ab 30 Zeilen mehrere Formulare. */
 async function baueMitfahrerWorkbooks({ jahr, zeitraumHeader, userProfile, mitfahrerData, saetze }) {
  const chunks = chunkFormattedData(mitfahrerData);
  return Promise.all(
@@ -485,11 +420,7 @@ async function baueQuartalWorkbooks({ chunkedData, jahr, quartalSheetName, zeitr
  }));
 }
 
-/**
- * Baut die Arbeitsmappen für einen Monatsexport.
- * Liefert entweder { notFound: true } oder { dateien: [{ dateiname, workbook }], zipName }.
- * Der Dateiname ist ohne Endung — Excel- und PDF-Export hängen ihre eigene an.
- */
+/** Arbeitsmappen eines Monatsexports: { notFound: true } oder { dateien: [{ dateiname, workbook }], zipName }, Dateinamen ohne Endung. */
 async function baueMonatsWorkbooks({ year, month, type, userId }) {
  const correctedMonth = month.split('-')[1] || month;
 
@@ -565,11 +496,7 @@ async function baueMonatsWorkbooks({ year, month, type, userId }) {
  };
 }
 
-/**
- * Baut die Arbeitsmappen für einen Zeitraumexport.
- * Setzt zusätzlich den Abrechnungsstatus jedes Monats im Zeitraum auf
- * "eingereicht" — dieses Verhalten stammt aus dem bisherigen Excel-Export.
- */
+/** Arbeitsmappen eines Zeitraumexports. */
 async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth, type, userId }) {
  const fahrten = await Fahrt.getDateRangeReport(startYear, startMonth, endYear, endMonth, userId);
  const userProfile = await getUserProfile(userId);
@@ -583,8 +510,7 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
  if (type === 'mitfahrer') {
    const mitfahrerData = prepareMitfahrerData(fahrten);
 
-   // Ohne Daten kein leeres Formular - und vor allem kein Statuswechsel auf
-   // "eingereicht" fuer Monate, in denen gar nichts abzurechnen war.
+   // Ohne Daten weder Formular noch Statuswechsel.
    if (mitfahrerData.length === 0) {
      return { notFound: true };
    }
@@ -605,8 +531,7 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
        workbook
      })),
      zipName: `mitfahrer_${startYear}_${startMonth}_bis_${endYear}_${endMonth}`,
-     // Nicht hier setzen: Der Status gehoert erst gesetzt, wenn die Datei
-     // beim Nutzer ist (siehe markiereZeitraum unten).
+     // Status erst, wenn die Datei beim Nutzer ist.
      zeitraumStatus: { startYear, startMonth, endYear, endMonth, type, userId }
    };
  }
@@ -618,9 +543,7 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
  }
 
  const chunkedData = chunkFormattedData(formattedData);
- // Das Formular kennt nur feste Quartalsblaetter. Bei einem Zeitraum ueber
- // Quartalsgrenzen passt keins exakt — die Kopfzeile D2 nennt aber den echten
- // Zeitraum, deshalb bleibt das Startquartal als Traegerblatt.
+ // Über Quartalsgrenzen bleibt das Startquartal, D2 nennt den echten Zeitraum.
  const quartalSheetName = getQuartalSheet(startMonth);
 
  const [abrechnungstraeger] = await db.execute(
@@ -657,17 +580,7 @@ async function baueZeitraumWorkbooks({ startYear, startMonth, endYear, endMonth,
  };
 }
 
-// Zeitraum als eingereicht markieren — NACH dem Senden der Datei.
-//
-// Frueher lief das mitten im Bauen der Workbooks, pro Monat ein eigenes
-// Autocommit. Brach der Lauf danach ab (beim PDF folgt noch LibreOffice mit
-// 60-s-Timeout), standen einzelne Monate auf „eingereicht", ohne dass es
-// eine Datei gab. Jetzt: alle Monate in einer Transaktion, und erst, wenn
-// der Nutzer die Datei hat.
-//
-// Scheitert die Markierung, ist die Datei bereits raus — dann bleibt nur
-// das Protokoll. Der Nutzer kann den Status im Frontend selbst setzen
-// („Als eingereicht markieren").
+// Zeitraum als eingereicht markieren, erst nach dem Senden und in einer Transaktion; scheitert es, setzt der Nutzer den Status selbst.
 async function markiereZeitraum(zeitraumStatus) {
  if (!zeitraumStatus) return;
  const { startYear, startMonth, endYear, endMonth, type, userId } = zeitraumStatus;
@@ -734,8 +647,7 @@ exports.exportToExcelRange = async (req, res) => {
    }
 
    await sendeExcelAntwort(res, ergebnis);
-   // Erst jetzt: Die Datei ist raus. Schlaegt das Bauen oder Senden fehl,
-   // steht kein Monat auf „eingereicht", zu dem es keine Datei gibt.
+   // Erst jetzt, die Datei ist raus.
    await markiereZeitraum(ergebnis.zeitraumStatus);
    return;
  } catch (error) {

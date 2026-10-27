@@ -5,23 +5,14 @@ import TraegerZeile from './TraegerZeile';
 import { formatBetrag } from '../fahrten/zeitraumUtils';
 import { monatsStatus, monatSumme, formatDatumKurz, monatLabel } from './abrechnungUtils';
 
-// Monatskarte der mobilen Abrechnung (Spec „Abrechnung mobil"):
-// - fälliger Monat: aufgeklappt, Rand 1,5px --accent-line, Kopf --accent-soft
-//   mit „Fällig — noch nicht eingereicht", Fortschrittsleiste im Kopf,
-//   Trägerzeilen, Fußzeile „Einreichen" (48px) + Download 48×48
-//   (Export ohne Statuswechsel)
-// - übrige Monate: eingeklappt (--surface) mit Statuspunkt + „Eingereicht
-//   am {Datum}" / „Erstattet am {Datum}"; erstattete opacity .72;
-//   Antippen klappt Trägerzeilen + Aktionen auf
-// - laufender Monat: sichtbar, aber nicht fällig — „Läuft · noch nicht fällig"
+// Monatskarte der mobilen Abrechnung: fällige aufgeklappt, übrige eingeklappt, laufender Monat nicht fällig.
 
 // Statuszeile der eingeklappten Karte
 function KarteStatuszeile({ laufend, status, kategorien }) {
   if (laufend) {
     return <span className="abr-karte-laeuft">Läuft · noch nicht fällig</span>;
   }
-  // Datum des Monatsstatus: der späteste Träger bestimmt, wann der Monat
-  // komplett eingereicht/erstattet war
+  // Der späteste Träger bestimmt das Monatsdatum.
   const feld = status === 'erhalten' ? 'erhalten_am' : 'eingereicht_am';
   const daten = kategorien
     .map((k) => k.statusData?.[feld])
@@ -42,11 +33,7 @@ function MonatKarte({ row, expanded, onToggle, aktionen, onExport }) {
   const summe = monatSumme(kategorien);
   const istOffen = faellig || expanded;
   const erstattet = !laufend && status === 'erhalten';
-  // Einreichen steht ueberall, wo noch etwas offen ist — nicht nur bei
-  // faelligen Monaten. Im laufenden Monat und in bereits teilweise
-  // eingereichten gab es unten nur „Exportieren", also einen Download ohne
-  // Statuswechsel; wer den Monat abschliessen wollte, musste jede
-  // Traegerzeile einzeln antippen (Simon 23.08.).
+  // Einreichen überall, wo etwas offen ist, nicht nur bei fälligen Monaten.
   const offeneAnzahl = kategorien.filter((k) => k.status === 'offen').length;
 
   // Kopfinhalt: Titel, Summe und Fortschrittsleiste

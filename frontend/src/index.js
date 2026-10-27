@@ -7,9 +7,7 @@ import './api/client';
 import { PLATTFORM } from './utils/plattform';
 import App from './App';
 
-// Plattform-Schalter fuer das CSS. Bewusst vor dem ersten Rendern und nur in
-// der nativen Huelle: im Browser bleibt das Attribut ungesetzt, damit keine
-// einzige Regel der Weboberflaeche anders greift als bisher.
+// Plattform-Attribut vor dem ersten Rendern, nur nativ.
 if (PLATTFORM !== 'web') {
   document.documentElement.setAttribute('data-platform', PLATTFORM);
 }

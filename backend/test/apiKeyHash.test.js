@@ -1,20 +1,4 @@
-// Punkt 11 der Pre-Launch-Liste: API-Schluessel lagen im Klartext.
-//
-// `api_keys.api_key` enthielt den Schluessel so, wie ihn der Kurzbefehl auf
-// dem iPhone mitschickt. Wer ein Datenbank-Backup in die Haende bekam, hatte
-// damit dauerhaft nutzbare Zugaenge — die Schluessel laufen nicht ab.
-//
-// Der heikle Punkt war die Umstellung: Ein harter Schnitt haette alle
-// bestehenden Kurzbefehle auf einen Schlag ungueltig gemacht, und der
-// Klartext liesse sich nirgends wiederbeschaffen. Migration 0015 ueberfuehrt
-// sie deshalb per SHA2 in Hashes, statt sie zu loeschen.
-//
-// Gegen eine echte MySQL 8.4 gemessen: Nach der Migration findet ein
-// BESTEHENDER Schluessel weiterhin sein Konto, ein falscher wird abgewiesen,
-// neue Schluessel entstehen ohne Klartext, und ein zweiter Lauf der
-// Migration geht fehlerfrei durch.
-//
-// Laeuft ohne Test-Framework: `node test/apiKeyHash.test.js`.
+// API-Schlüssel als Hash, bestehende bleiben nach Migration 0015 gültig. Aufruf: node test/apiKeyHash.test.js
 
 const assert = require('assert');
 const crypto = require('crypto');
@@ -53,9 +37,7 @@ pruefe('validate sucht ueber den Hash', () => {
 });
 
 pruefe('validate faellt waehrend der Umstellung auf den Klartext zurueck', () => {
-  // Zwischen Deploy und Migrationslauf steht der Hash noch nicht. Ohne den
-  // Rueckfall faenden bestehende Kurzbefehle in diesem Moment ihr Konto
-  // nicht mehr.
+  // Rückfall für die Zeit zwischen Deploy und Migration.
   const fn = modell.split('static async validate(')[1].split('\n    }')[0];
   assert.ok(/api_key_hash IS NULL AND ak\.api_key = \?/.test(fn));
 });
@@ -89,11 +71,7 @@ pruefe('der Hash ist 64 Zeichen lang und stabil', () => {
 });
 
 pruefe('er stimmt mit SHA2(..., 256) aus MySQL ueberein', () => {
-  // Die Migration fuellt die Spalte mit SHA2(api_key, 256). Weichen die
-  // Verfahren ab, findet nach der Migration KEIN bestehender Schluessel mehr
-  // sein Konto. Gegengeprueft an MySQL 8.4:
-  //   SELECT SHA2('test-schluessel-123', 256)
-  //   -> 906c6b3bb8db7932749f522615fec6807b1696d788199780446b25b57d7bb8fb
+  // Muss SHA2(api_key, 256) der Migration entsprechen.
   assert.strictEqual(
     hashe('test-schluessel-123'),
     '906c6b3bb8db7932749f522615fec6807b1696d788199780446b25b57d7bb8fb'
@@ -119,8 +97,7 @@ pruefe('der Klartext wird erst nach dem Uebernehmen geleert', () => {
 });
 
 pruefe('die Spalte wird NULL-faehig, BEVOR sie geleert wird', () => {
-  // Sie ist als NOT NULL angelegt. In der ersten Fassung stand das Leeren
-  // davor — MySQL 8.4 brach mit „Column 'api_key' cannot be null" ab.
+  // NOT NULL zuerst lösen, sonst bricht das Leeren ab.
   assert.ok(migration.indexOf('MODIFY COLUMN api_key VARCHAR(64) NULL')
     < migration.indexOf('SET api_key = NULL'));
 });

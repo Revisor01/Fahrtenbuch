@@ -1,25 +1,4 @@
-// Punkt 12 der Pre-Launch-Liste: YEAR()/MONTH() statt Datumsbereich, und ein
-// Index in der falschen Reihenfolge.
-//
-// `WHERE YEAR(datum) = ? AND MONTH(datum) = ?` legt eine Funktion um die
-// Spalte — damit ist jeder Index auf `datum` unbrauchbar. Der vorhandene
-// `idx_fahrten_datum_user (datum, user_id)` stand ausserdem verkehrt herum:
-// Jede Abfrage dieser App fragt „ein Nutzer, ein Zeitraum".
-//
-// Gemessen an 50.000 Zeilen (MySQL 8.4 im Container, 40 Nutzer, fuenf
-// Jahrgaenge), Abfrage „ein Monat eines Nutzers":
-//
-//   YEAR()/MONTH(), alter Index:      1.250 gepruefte Zeilen, 0,56 ms
-//   Datumsbereich, alter Index:          812 gepruefte Zeilen, 0,55 ms
-//   Datumsbereich, idx_fahrten_user_datum: 28 gepruefte Zeilen, 0,06 ms
-//
-// An der echten Modellabfrage (mit den beiden JOINs) derselbe Sprung:
-// 1.250 -> 28 gepruefte Zeilen.
-//
-// Beides gehoert zusammen — der Index allein haette nichts gebracht, weil
-// YEAR() ihn nicht nutzen kann.
-//
-// Laeuft ohne Test-Framework: `node test/datumsIndex.test.js`.
+// Datumsbereich statt YEAR()/MONTH() und Index (user_id, datum). Aufruf: node test/datumsIndex.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -77,8 +56,7 @@ pruefe('der Dezember laeuft ins Folgejahr', () => {
 });
 
 pruefe('der Februar bleibt korrekt — auch im Schaltjahr', () => {
-  // Die obere Grenze ist der 1. Maerz, exklusiv. Damit ist die Monatslaenge
-  // egal, und der 29. Februar faellt nicht heraus.
+  // Obere Grenze exklusiv, die Monatslänge ist egal.
   assert.deepStrictEqual(monatsGrenzen(2024, 2), ['2024-02-01', '2024-03-01']);
   assert.deepStrictEqual(monatsGrenzen(2026, 2), ['2026-02-01', '2026-03-01']);
 });
@@ -89,8 +67,7 @@ pruefe('nullgepolsterte Monate aus dem Pfad funktionieren', () => {
 });
 
 pruefe('die obere Grenze ist exklusiv, nicht der Monatsletzte', () => {
-  // Mit `datum <= '2026-09-30'` fiele eine Fahrt mit Uhrzeit heraus, sobald
-  // die Spalte je auf DATETIME wechselt. Mit `< 2026-10-01` nicht.
+  // `<` statt `<=`, damit eine Uhrzeit nie herausfällt.
   const [, bis] = monatsGrenzen(2026, 9);
   assert.strictEqual(bis, '2026-10-01');
 });
@@ -112,10 +89,7 @@ pruefe('die Migration ist wiederholbar', () => {
 });
 
 pruefe('sie haelt sich an die Grenzen des Migrators', () => {
-  // Der Migrator (utils/Migrator.js) trennt Statements an Zeilen, die AUF
-  // ein Semikolon enden, und kennt nur --Kommentare. Eine Kommentarzeile,
-  // die so endet, wuerde ein halbes Statement abschneiden. Ein Semikolon
-  // mitten im Satz ist dagegen harmlos — 0008 hat eines und laeuft.
+  // Eine Kommentarzeile, die auf ein Semikolon endet, schnitte im Migrator ein Statement ab.
   assert.ok(!/\/\*/.test(migration), 'kein Blockkommentar');
   for (const zeile of migration.split('\n')) {
     const t = zeile.trim();
@@ -127,8 +101,7 @@ pruefe('sie haelt sich an die Grenzen des Migrators', () => {
 });
 
 pruefe('der alte Index wird nicht im selben Zug entfernt', () => {
-  // Er kostet wenig und bleibt als Rueckfallweg, falls eine Abfrage
-  // uebersehen wurde.
+  // Bleibt als Rückfallweg.
   assert.ok(!/DROP INDEX/.test(migration));
 });
 

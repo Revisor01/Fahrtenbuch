@@ -4,9 +4,7 @@ services:
     ports:
       - "9642:80"
     environment:
-      # Laufzeit-Konfiguration (docker-entrypoint.sh schreibt config.js).
-      # REACT_APP_REGISTRATION_CODE steuert nur, OB das Codefeld erscheint —
-      # der Wert selbst wird nie ins Frontend geschrieben.
+      # Laufzeit-Konfiguration; REACT_APP_REGISTRATION_CODE steuert nur, ob das Codefeld erscheint.
       - REACT_APP_TITLE=${REACT_APP_TITLE}
       - REACT_APP_ALLOW_REGISTRATION=${REACT_APP_ALLOW_REGISTRATION}
       - REACT_APP_ALLOWED_EMAIL_DOMAINS=${REACT_APP_ALLOWED_EMAIL_DOMAINS}
@@ -17,17 +15,10 @@ services:
 
   backend:
     image: ghcr.io/revisor01/fahrtenbuch-server:latest
-    # Nur lokal veröffentlichen — der Reverse Proxy (Caddy) spricht das
-    # Backend über den Host an. Ohne Bindung an 127.0.0.1 wäre die API ohne
-    # TLS direkt aus dem Internet erreichbar.
+    # Nur lokal, sonst wäre die API ohne TLS aus dem Internet erreichbar.
     ports:
       - "127.0.0.1:5000:5000"
-    # Obergrenze für den Speicher. Der PDF-Export startet LibreOffice, das
-    # pro Lauf rund 210 MB braucht (gemessen auf dem Produktionsserver).
-    # Die Anwendung begrenzt die Gleichzeitigkeit selbst auf zwei Läufe
-    # (SOFFICE_MAX_PARALLEL); dieses Limit ist die zweite Sicherung, damit
-    # ein Fehler dort nicht den ganzen Server mitnimmt — ohne Grenze trifft
-    # der OOM-Killer sonst den größten Prozess, und das ist die Datenbank.
+    # Zweite Sicherung neben SOFFICE_MAX_PARALLEL, sonst trifft der OOM-Killer die Datenbank.
     mem_limit: 1g
     environment:
       # Ohne production liefert Express im Fehlerfall HTML-Stacktraces aus
@@ -37,24 +28,19 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - JWT_SECRET=${JWT_SECRET}
-      # Gueltigkeit der Anmeldung; ohne Angabe 14 Tage. Wird bei Nutzung
-      # gleitend erneuert, laeuft also nur bei Inaktivitaet ab.
+      # Ohne Angabe 14 Tage, bei Nutzung gleitend erneuert.
       - TOKEN_LAUFZEIT=${TOKEN_LAUFZEIT:-14d}
       # API-Dokumentation unter /api-docs. Ohne beide Werte bleibt sie aus.
       - DOKU_USER=${DOKU_USER:-}
       - DOKU_PASSWORT=${DOKU_PASSWORT:-}
-      # Kommaseparierte Allowlist erlaubter Web-Origins; ein Einzelwert
-      # funktioniert unverändert. Die Origins der mobilen Apps
-      # (capacitor://localhost sowie https://localhost und http://localhost)
-      # sind fest eingebaut.
+      # Kommaseparierte Web-Origins; die App-Origins sind fest eingebaut.
       - CORS_ORIGIN=${CORS_ORIGIN}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_SECURE=${SMTP_SECURE}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
-      # SMTP_DEBUG=true schreibt den kompletten Mailverkehr inklusive
-      # Passwort-Reset-Links in die Container-Logs — nur zur Fehlersuche.
+      # SMTP_DEBUG=true schreibt Reset-Links in die Logs, nur zur Fehlersuche.
       - SMTP_DEBUG=${SMTP_DEBUG}
       - MAIL_FROM=${MAIL_FROM}
       - FRONTEND_URL=${FRONTEND_URL}
@@ -64,28 +50,21 @@ services:
       - DEFAULT_ERSTATTUNG_TRAEGER=${DEFAULT_ERSTATTUNG_TRAEGER}
       - DEFAULT_ERSTATTUNG_MITFAHRER=${DEFAULT_ERSTATTUNG_MITFAHRER}
       - DEFAULT_ERSTATTUNG_DATUM=${DEFAULT_ERSTATTUNG_DATUM}
-      # Serverseitige Registrierungs-Gates — Pendants zu den REACT_APP_-Frontend-Variablen
-      # (die Frontend-Variablen steuern nur die UI-Anzeige, die Durchsetzung passiert hier).
-      # Unset = abwärtskompatibel: Registrierung offen, keine Domain-/Code-Pflicht.
+      # Serverseitige Registrierungs-Gates; leer heißt offen ohne Domain- oder Code-Pflicht.
       - ALLOW_REGISTRATION=${ALLOW_REGISTRATION}
       - ALLOWED_EMAIL_DOMAINS=${ALLOWED_EMAIL_DOMAINS}
       - REGISTRATION_CODE=${REGISTRATION_CODE}
-      # Instanz-Verzeichnis für die mobilen Apps: JSON-Array mit id, name und
-      # apiUrl je Kirchenkreis, ausgeliefert über GET /api/instanzen (ohne
-      # Anmeldung). Unset = nur Dithmarschen. apiUrl muss https sein.
-      # Beispiel:
+      # Instanz-Verzeichnis für die Apps (id, name, https-apiUrl), leer heißt nur Dithmarschen.
       # INSTANZEN='[{"id":"dithmarschen","name":"Kirchenkreis Dithmarschen","apiUrl":"https://kkd-fahrtenbuch.de"}]'
       - INSTANZEN=${INSTANZEN}
     restart: unless-stopped
     depends_on:
       db:
-        # Ohne diese Bedingung startet das Backend vor MySQL, stürzt ab und
-        # wird nur durch die Restart-Policy wieder eingefangen.
+        # Sonst startet das Backend vor MySQL und stürzt ab.
         condition: service_healthy
 
   db:
-    # Auf 8.4 festgelegt statt `mysql:8`: Der bewegliche Tag holt beim
-    # naechsten Pull ungefragt den naechsten Hauptstand ins Produktionssystem.
+    # Fest 8.4, sonst zieht ein Pull ungefragt den nächsten Hauptstand.
     image: mysql:8.4
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
@@ -94,29 +73,15 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_INIT_COMMAND: "SET GLOBAL log_bin_trust_function_creators = 1;"
     volumes:
-      # Eigenes Volume: früher teilten sich Backend und MySQL dasselbe
-      # (fahrtenbuch_data), das Backend hatte damit Rohzugriff auf die
-      # MySQL-Dateien.
+    # Eigenes Volume, damit das Backend keinen Rohzugriff auf die MySQL-Dateien hat.
       - fahrtenbuch_db:/var/lib/mysql
-    # Kein Port-Mapping: MySQL ist nur im Compose-Netz erreichbar. Ein
-    # veröffentlichter Port 3306 umginge die Host-Firewall (Docker schreibt
-    # eigene iptables-Regeln).
+    # Kein Port-Mapping, ein veröffentlichter Port umginge die Host-Firewall.
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --log_bin_trust_function_creators=1
     healthcheck:
-      # Mit Zugangsdaten. Ohne sie antwortete mysqladmin „Access denied" —
-      # und beendete sich trotzdem mit 0 (nachgemessen). Der Container galt
-      # damit als gesund, sobald das Netz stand, nicht wenn die Datenbank
-      # bereit war. Das Backend startet ueber depends_on: service_healthy
-      # genau darauf hin.
-      #
-      # Nebenwirkung der abgewiesenen Versuche: Sie zaehlen als
-      # Aborted_connects — daher die 88.046 von 88.352 in der Statistik.
-      #
-      # $$ statt $: Compose ersetzt sonst die Variable schon beim Lesen der
-      # Datei, statt sie an den Container weiterzureichen.
+      # Mit Zugangsdaten, ohne endet mysqladmin trotz „Access denied“ mit 0; $$, damit Compose die Variable durchreicht.
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
       timeout: 5s
       retries: 10

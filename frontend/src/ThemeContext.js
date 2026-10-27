@@ -15,9 +15,7 @@ function readInitialMode() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (VALID_MODES.includes(saved)) return saved;
 
-  // Migration alter Einstellungen: 'darkMode' (bool) + 'theme'
-  // (neun Farbthemes). Die Farbthemes entfallen ersatzlos;
-  // eine explizite Hell/Dunkel-Wahl bleibt erhalten.
+  // Alte Einstellungen übernehmen: Farbthemes entfallen, Hell/Dunkel bleibt.
   const legacyDark = localStorage.getItem('darkMode');
   localStorage.removeItem('darkMode');
   localStorage.removeItem('theme');
@@ -69,8 +67,7 @@ export function ThemeProvider({ children }) {
     if (VALID_MODES.includes(next)) setModeState(next);
   };
 
-  // toggleDarkMode bleibt für Bestandsaufrufer erhalten:
-  // schaltet explizit zwischen hell und dunkel um
+  // Für Bestandsaufrufer.
   const toggleDarkMode = () => setModeState(isDark ? 'light' : 'dark');
 
   return (

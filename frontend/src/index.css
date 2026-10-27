@@ -1,14 +1,11 @@
-/* Quellen wie bisher nur aus content in tailwind.config.js (src, index.html),
-   nicht aus dem ganzen Ordner. */
+/* Quellen nur aus content in tailwind.config.js, nicht aus dem ganzen Ordner. */
 @import 'tailwindcss' source(none);
 @config '../tailwind.config.js';
 
-/* Zur Laufzeit zusammengesetzte Klassen (status-progress-${state}); v4 kennt
-   safelist aus der JS-Konfiguration nicht mehr. */
+/* Zur Laufzeit zusammengesetzte Klassen, v4 kennt keine safelist aus der JS-Konfiguration. */
 @source inline("status-progress-{done,current,open} status-progress-line-{done,open} status-progress-label-open");
 
-/* v4 setzt Rahmenfarbe currentcolor, Platzhalter halbtransparent und
-   Buttons ohne Zeiger; hier wie in v3. */
+/* Rahmen, Platzhalter und Button-Zeiger wie in v3. */
 @layer base {
   *,
   ::after,
@@ -27,13 +24,9 @@
   }
 }
 
-/* ============================================================
-   Basis-Typografie & Grundfläche (Redesign 2026)
-   ============================================================ */
+/* ===== Basis-Typografie und Grundfläche ===== */
 
-/* html braucht eine eigene Flaeche: Ohne sie faellt der Bereich ausserhalb
-   des body — sichtbar beim Ueberscrollen und unter der Home-Anzeige in der
-   App — auf das weisse Standard-Weiss zurueck, auch im dunklen Modus. */
+/* Eigene Fläche für html, sonst wird es beim Überscrollen weiß, auch dunkel. */
 html {
   background-color: var(--bg);
 }
@@ -52,8 +45,7 @@ code {
   font-family: 'JetBrains Mono', ui-monospace, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Zahlen: Kilometer, Beträge, Daten, Uhrzeiten — immer Mono mit
-   Tabellenziffern, damit Spalten bündig laufen. */
+/* Zahlen immer Mono mit Tabellenziffern, damit Spalten bündig laufen. */
 .num {
   font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   font-variant-numeric: tabular-nums;
@@ -89,10 +81,7 @@ code {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    /* Abstand zwischen Symbol und Beschriftung. Gehoert hierher und nicht in
-       einzelne Regeln: Ohne gap kleben Symbol und Text aneinander, und das
-       fiel nur dort nicht auf, wo ein Container (.fl-export-btns) zufaellig
-       selbst einen gap mitbringt. */
+    /* Abstand zwischen Symbol und Beschriftung hier, nicht je Regel. */
     gap: 6px;
     height: var(--control-h);
     min-height: var(--tap-min);
@@ -214,8 +203,7 @@ code {
   .form-select:focus {
     outline: none;
     border-color: var(--brand);
-    /* Rand wächst optisch 1 → 1,5 px: 0,5 px über box-shadow kompensiert,
-       kein Layout-Sprung */
+    /* Rand 1 → 1,5 px über box-shadow, ohne Layout-Sprung. */
     box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
   }
 
@@ -240,11 +228,7 @@ code {
     color: var(--danger);
   }
 
-  /* Auswahlfelder brauchen rechts Platz fuer den Pfeil, den das System selbst
-     zeichnet. Mit dem geerbten 16px-Padding lief der Text darunter — lange
-     Traegernamen im Fahrt-Dialog wirkten dadurch angeschnitten
-     (User-Feedback 14.08.). text-overflow greift bei <select> nicht auf allen
-     Systemen, deshalb loest hier allein der Platz das Problem. */
+  /* Rechts Platz für den Systempfeil, text-overflow greift bei <select> nicht überall. */
   .form-select {
     padding-right: 40px;
     text-overflow: ellipsis;
@@ -290,8 +274,7 @@ code {
     border: 1px solid var(--accent-line);
   }
 
-  /* Erstattet: Grün — Alias .status-badge-primary bleibt für die
-     Mitfahrer-Pills in FahrtForm (fliegt mit deren Phase) */
+  /* Erstattet: Grün; .status-badge-primary bleibt für die Mitfahrer-Pills in FahrtForm. */
   .status-erstattet,
   .status-badge-primary {
     background-color: var(--ok-soft);
@@ -331,8 +314,7 @@ code {
     color: var(--ok-soft);
   }
 
-  /* ---------- Status als Punkt + Wort (dichte Listen/Tabellen) ----------
-     Wortfarbe wie in der Pille, Kontrast >= 4,5:1 (statusFarben.test.js). */
+  /* ---------- Status als Punkt und Wort, Kontrast >= 4,5:1 (statusFarben.test.js) ---------- */
   .status-dot {
     display: inline-flex;
     align-items: center;
@@ -399,11 +381,7 @@ code {
     line-height: 1;
   }
 
-  /* KEIN @apply, aber bewusst hier belassen: Diese Klassen entstehen erst zur
-     Laufzeit (`status-progress-${state}`), Tailwinds Scanner findet sie im
-     Quelltext nicht und warf sie aus dem Build — Kreise und Linien der
-     Fortschrittsleiste waren dadurch unsichtbar. Die Safelist in
-     tailwind.config.js haelt sie jetzt drin (gefunden 16.08.). */
+  /* Klassen entstehen zur Laufzeit (`status-progress-${state}`), die Safelist in tailwind.config.js hält sie im Build. */
   .status-progress-done {
     background-color: var(--ok);
     color: var(--ok-soft);
@@ -601,11 +579,7 @@ code {
     animation: toast-in 300ms ease;
   }
 
-  /* Der Toast ist invertiert (Flaeche = --text), deshalb gilt hier --bg als
-     Textfarbe. --brand-strong ergab auf dieser Flaeche nur 1,38:1 - der
-     „Rueckgaengig"-Knopf war praktisch unsichtbar. Mit --bg sind es 17:1
-     (hell) bzw. 15:1 (dunkel); die Unterstreichung macht ihn als Aktion
-     erkennbar, ohne auf Farbe allein zu setzen. */
+  /* Toast invertiert, daher --bg als Textfarbe; --brand-strong ergab nur 1,38:1. */
   .toast-action {
     font-size: 16px;
     font-weight: 700;
@@ -655,11 +629,7 @@ code {
 
 }
 
-/* ============================================================
-   App-Shell: Bottom-Nav (<768px) / Sidebar (≥768px)
-   Inhaltsbereich scrollt selbst (flex:1; min-height:0), damit
-   die Navigation nie aus dem Bild geschoben wird.
-   ============================================================ */
+/* ===== App-Shell: Bottom-Nav (<768px) / Sidebar (≥768px); der Inhalt scrollt selbst, damit die Navigation stehen bleibt ===== */
 .app-shell {
   display: flex;
   height: 100vh;
@@ -947,31 +917,8 @@ code {
   background-color: var(--accent);
 }
 
-/* ============================================================
-   Sheet: mobil Bottom-Sheet, ab 768px zentriertes Modal-Panel
-   ============================================================ */
-/* Der Rahmen endet dort, wo die Tastatur anfaengt.
- *
- * Das war der eigentliche Fehler (nachgemessen im Simulator, iPhone 17):
- * Frueher schrumpfte nur das Panel per max-height, der Rahmen blieb aber
- * `inset: 0`. Weil das Panel unten ausgerichtet ist, klebte seine Unterkante
- * damit weiter am unteren BILDSCHIRMrand — es wurde von OBEN kuerzer statt
- * nach oben zu ruecken. Gemessen bei 335px Tastatur: Panel t=383 b=874,
- * Koerper t=461 b=808 — von 347px Koerper waren nur 78px zu sehen, der Rest
- * lag hinter der Tastatur. Genau das meldete Simon: "das Feld, in das ich
- * tippe, ist verdeckt".
- *
- * `bottom` statt `inset: 0` loest es an der Wurzel: Der Rahmen hoert an der
- * Tastaturkante auf, das unten ausgerichtete Panel sitzt darauf. Das Panel
- * braucht seine Tastatur-Rechnung dann nicht mehr — eine Instanz regelt die
- * Hoehe, nicht zwei gegeneinander.
- *
- * Warum nicht `resize: "native"` in capacitor.config.json: Das verkleinert
- * die WebView selbst und damit auch die App-Shell mit der nativen
- * Navigationsleiste. Hier soll sich nur das Sheet bewegen. `resize: "body"`
- * setzt ausserdem nur `document.body.style.height` (nachgelesen in
- * Keyboard.m) — auf `position: fixed`-Ebenen wie diese wirkt das gar nicht,
- * deshalb greift die Variable und nicht das Plugin. */
+/* ===== Sheet: mobil Bottom-Sheet, ab 768px zentriertes Panel ===== */
+/* Der Rahmen endet an der Tastaturkante (`bottom` statt `inset: 0`), sonst liegt das Feld hinter der Tastatur; resize im Plugin wirkt auf fixed-Ebenen nicht. */
 .sheet-root {
   position: fixed;
   top: 0;
@@ -984,10 +931,7 @@ code {
   justify-content: center;
 }
 
-/* Der Ueberzug deckt weiter den ganzen Bildschirm ab: Er darf nicht an der
-   Tastaturkante aufhoeren, sonst entstuende beim Schliessen der Tastatur
-   kurz ein heller Streifen. Negativer Versatz nach unten gleicht die
-   verkuerzte Hoehe des Rahmens wieder aus. */
+/* Der Überzug deckt weiter den ganzen Bildschirm, sonst blitzt beim Schließen der Tastatur ein Streifen. */
 .sheet-overlay {
   position: absolute;
   top: 0;
@@ -997,28 +941,15 @@ code {
   background-color: rgba(8, 32, 31, 0.42);
 }
 
-/* Etwas Luft nach unten fuer bequemes Tippen am unteren Rand. Das Sheet liegt
-   per Portal am body und damit ueber der Navigationsleiste — ein groesseres
-   Polster als Ausgleich ist nicht mehr noetig. */
-/* Kopf und Koerper sind getrennt: Das Panel selbst scrollt NICHT mehr, es ist
-   eine Spalte aus stehendem Kopf und scrollendem Koerper. Vorher lag das
-   overflow-y auf dem Panel — bei langen Formularen (Fahrt bearbeiten) scrollten
-   Griff, Titel und die Schaltflaechen am Ende gemeinsam weg, und das Sheet war
-   weder per Geste noch per Knopf zu schliessen. */
+/* Kopf steht, nur der Körper scrollt, sonst scrollten Griff und Knöpfe weg und das Sheet ließ sich nicht schließen. */
 .sheet-panel {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* Bezugsgroesse ist der Rahmen, nicht der Bildschirm: `.sheet-root` endet
-     bereits an der Tastaturkante. `100%` zieht die Tastatur damit genau
-     einmal ab — `100dvh` haette sie ein zweites Mal abgezogen, weil iOS in
-     der WebView weiterhin die volle Viewport-Hoehe meldet (gemessen: 874px
-     bei 335px Tastatur, `visualViewport` meldet die Tastatur gar nicht). */
+  /* 100% des Rahmens statt 100dvh, sonst ginge die Tastatur doppelt ab. */
   max-height: calc(100% - 48px);
-  /* Nicht nur max-height: iOS meldet in der WebView zeitweise groessere
-     Viewport-Hoehen, waehrend das native Tastatur- oder Datumsrad schon Platz
-     wegnimmt. min-height 0 laesst die Spalte in jedem Fall schrumpfen. */
+  /* min-height 0, weil iOS zeitweise zu große Viewport-Höhen meldet. */
   min-height: 0;
   overflow: hidden;
   background-color: var(--surface);
@@ -1029,24 +960,18 @@ code {
   outline: none;
 }
 
-/* Bei offener Tastatur sitzt die Unterkante des Fensters auf der Tastatur.
-   Der Sicherheitsabstand des Geraets liegt dann dahinter und wuerde als
-   zusaetzlicher Leerraum unter dem letzten Feld stehen — auf dem iPhone gut
-   34px. Nur der eigene Innenabstand bleibt. */
+/* Bei offener Tastatur ohne den Sicherheitsabstand des Geräts. */
 html[data-tastatur] .sheet-panel {
   padding-bottom: 20px;
 }
 
-/* Zurueckfedern nach einem zu kurzen Zug. Waehrend der Geste sitzt das
-   transform inline und wird ohne Transition sofort uebernommen; erst beim
-   Loslassen faellt es weg und diese Transition traegt das Sheet zurueck. */
+/* Zurückfedern nach zu kurzem Zug; während der Geste sitzt das transform inline. */
 .sheet-panel {
   transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sheet-panel-zieht {
-  /* Der Finger fuehrt: waehrend des Ziehens keine Verzoegerung, und die
-     Einblend-Animation darf das transform nicht ueberschreiben. */
+  /* Während des Ziehens ohne Verzögerung und ohne Einblend-Animation. */
   transition: none;
   animation: none;
 }
@@ -1059,17 +984,12 @@ html[data-tastatur] .sheet-panel {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  /* Sanftes Nachfedern innerhalb des Inhalts, aber nicht ueber den Rand
-     hinaus — sonst zieht iOS das ganze Sheet mit. */
+  /* Nicht über den Rand, sonst zieht iOS das ganze Sheet mit. */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
-/* Keine sichtbare Scrollleiste in Fenstern. Auf dem Rand des Sheets sass
-   rechts ein grauer Balken, der dort nichts zu suchen hat — gescrollt wird
-   mit dem Finger, die Leiste ist nur Ballast. Gilt fuer den Koerper selbst
-   und fuer die Listen, die darin eine eigene Scrollflaeche haben.
-   Das Scrollen bleibt unveraendert, nur die Anzeige verschwindet. */
+/* Keine sichtbare Scrollleiste in Fenstern, gescrollt wird mit dem Finger. */
 .sheet-koerper,
 .sheet-koerper .erf-ort-liste,
 .sheet-koerper .adr-liste {
@@ -1109,8 +1029,7 @@ html[data-tastatur] .sheet-panel {
   }
 }
 
-/* prefers-reduced-motion: ohne Transform einblenden
-   (zusätzlich zur globalen Regel, die Animationen verkürzt) */
+/* Reduzierte Bewegung: ohne Transform einblenden. */
 @media (prefers-reduced-motion: reduce) {
   .sheet-panel {
     animation: sheet-fade-in 0.01ms linear;
@@ -1134,11 +1053,7 @@ html[data-tastatur] .sheet-panel {
 
   .sheet-panel {
     max-width: 480px;
-    /* Der Rand des Roots (24px oben und unten) geht ab, sonst stoesst das
-       Panel auf hohen Formularen unten an. Wie mobil bezieht sich `100%` auf
-       den Rahmen, der bereits an der Tastaturkante endet — die Tastatur geht
-       also genau einmal ab. Ab dieser Breite ist das Panel zentriert, es
-       rueckt damit von selbst mit nach oben. */
+    /* Der Rand des Roots geht ab; 100% bezieht sich auf den Rahmen an der Tastaturkante. */
     max-height: calc(100% - 48px);
     border-radius: var(--r-card);
     padding: 24px;
@@ -1277,8 +1192,7 @@ html[data-tastatur] .sheet-panel {
   flex: 1;
 }
 
-/* Kilometer-Diagramm auf dem Handy: dieselben Balken wie im Desktop-Raster,
-   in der Kartenfläche der uebrigen mobilen Abschnitte. */
+/* Kilometer-Diagramm mobil in der Kartenfläche. */
 .dash-chart-karte {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -1293,12 +1207,7 @@ html[data-tastatur] .sheet-panel {
   }
 }
 
-/* Toast-Viewport: unten, über der Navigationsleiste. Desktop unten rechts.
-   Sie standen zwischenzeitlich oben, weil sie unten hinter der Leiste
-   verschwanden — deren Höhe war im Web nur geschätzt. In der App meldet die
-   Plattform sie jetzt selbst (--cap-native-tabbar-height), im Web deckt der
-   Sockel unten die Bottom-Nav. Damit ist der alte Grund weg, und die
-   Meldungen stehen wieder dort, wo die Hand ohnehin ist (Simon 16.08.). */
+/* Toasts unten über der Navigationsleiste, Desktop unten rechts. */
 .toast-viewport {
   position: fixed;
   left: 16px;
@@ -1311,16 +1220,13 @@ html[data-tastatur] .sheet-panel {
   pointer-events: none;
 }
 
-/* In der App die tatsaechlich gemeldete Leistenhoehe. max() faengt den
-   Moment ab, in dem das Plugin sie als 0px meldet (offener Dialog) — sonst
-   saesse die Meldung genau dann auf der Leiste. */
+/* In der App die gemeldete Leistenhöhe; max(), weil das Plugin bei offenem Dialog 0px meldet. */
 [data-platform="ios"] .toast-viewport,
 [data-platform="android"] .toast-viewport {
   bottom: calc(max(var(--cap-native-tabbar-height, 0px), 72px) + 12px);
 }
 
-/* Bei offener Tastatur sitzt die Meldung ueber der Tastatur statt ueber der
-   Stelle, an der die Leiste waere — der Mindestsockel gilt hier nicht. */
+/* Bei offener Tastatur über der Tastatur, ohne Mindestsockel. */
 html[data-platform="ios"][data-tastatur] .toast-viewport,
 html[data-platform="android"][data-tastatur] .toast-viewport {
   bottom: calc(var(--tastatur, 0px) + 12px);
@@ -1363,10 +1269,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 
 /* Mobile Optimierungen */
 
-/* ============================================================
-   Erfassungsflow (Sheet Schritt 1 „Wohin?" + Schritt 2 „Bestätigen")
-   Maße/Farben exakt nach Design-Spec Screen 2
-   ============================================================ */
+/* ===== Erfassungsflow ===== */
 
 
 /* Suchfeld 52px, Fläche --bg, Rand --line, Placeholder 17px --text-3 */
@@ -1404,8 +1307,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   font-size: 17px;
 }
 
-/* Ortsliste: Zeilen 14/16px, --r-btn, Rand --line;
-   ausgewählt: Rand 1,5px --brand + Fläche --brand-soft (Padding kompensiert) */
+/* Ortsliste; ausgewählt mit 1,5px-Rand, Padding kompensiert. */
 .erf-ort-liste {
   display: flex;
   flex-direction: column;
@@ -1413,10 +1315,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin-bottom: 20px;
 }
 
-/* Mobil laeuft die Liste im Sheet-Fluss mit: eine eigene Scrollflaeche im
-   ohnehin scrollenden .sheet-koerper fing Wischgesten ab und fuehlte sich
-   hakelig an. Nur auf dem Desktop, wo das Sheet nicht die volle Hoehe hat,
-   bleibt die Liste gedeckelt, damit die Knoepfe darunter sichtbar bleiben. */
+/* Mobil ohne eigene Scrollfläche, die fing Wischgesten ab; nur Desktop gedeckelt. */
 @media (min-width: 768px) {
   .erf-ort-liste {
     max-height: 44vh;
@@ -1727,10 +1626,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   cursor: not-allowed;
 }
 
-/* Schritt 2: Kopf „{Start} → {Ziel}" + Mono-Zeile, rechts Stift 44×44px */
-/* Zurueck zur Zielauswahl. Bewusst schlicht und ueber dem Kopf: Der Weg
-   zurueck war vorher nur ueber einen Klick auf die Route erreichbar und damit
-   praktisch unsichtbar. */
+/* Zurück zur Zielauswahl, sichtbar über dem Kopf. */
 .erf-zurueck {
   display: inline-flex;
   align-items: center;
@@ -1918,9 +1814,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   transform: translateX(21px);
 }
 
-/* Abrechnungsträger als eigene Zeile: Optik wie .erf-row, aber antippbar.
-   Der Trägername ist die Information — er darf umbrechen statt zu kürzen,
-   sonst bleibt von „Ev.-Luth. Kirchenkreis Dithmarschen" nichts übrig. */
+/* Abrechnungsträger als Zeile; der Name darf umbrechen statt zu kürzen. */
 .erf-traeger-zeile {
   display: flex;
   align-items: center;
@@ -1961,8 +1855,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   white-space: normal;
 }
 
-/* Sagt unter einem ausgegrauten Knopf, was noch fehlt — leise, aber lesbar
-   (Textfarbe statt opacity, damit der Kontrast auch dunkel stimmt) */
+/* Was unter einem ausgegrauten Knopf noch fehlt, mit Textfarbe statt opacity für den Kontrast. */
 .erf-fehlt-hinweis {
   margin-top: 8px;
   font-size: 13px;
@@ -1970,11 +1863,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-2);
 }
 
-/* ============================================================
-   Dashboard (Phase R4) — mobil nach Design-Spec Screen 1,
-   Desktop nach Screen 5 (< 768 mobil, ab 768 Desktop-Layout,
-   volles Zweispalten-Raster erst ab 1024)
-   ============================================================ */
+/* ===== Dashboard: mobil < 768, Desktop ab 768, Zweispalten-Raster ab 1024 ===== */
 
 /* Shell-Padding mobil ist 16px; +4px ergibt die geforderten 20px Ränder */
 @media (max-width: 767px) {
@@ -2021,10 +1910,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   width: 40px;
   height: 40px;
   border-radius: var(--r-pill);
-  /* Kraeftiger als das fruehere --surface-2/--text-2: Der Knopf verschwand
-     oben rechts fast im Hintergrund (Simon 23.08.). Markenton statt Grau,
-     dazu ein Rand — sichtbar, aber leiser als die Hero-Karte darunter, die
-     die volle Markenflaeche traegt. */
+  /* Markenton mit Rand, sonst verschwand der Knopf im Hintergrund. */
   background: var(--brand-soft);
   color: var(--brand);
   border: 1px solid var(--brand);
@@ -2159,12 +2045,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--brand-strong);
 }
 
-/* „Ein Tipp genügt" als eigene Flaeche.
-   Die Kacheln standen als weisse Kaesten zwischen weissen Karten und waren
-   als Schnellzugriff nicht zu erkennen (Simon 21.08.). Ein ruhiger
-   --brand-soft-Grund fasst den Abschnitt zusammen und hebt ihn von Status-
-   Karte und „Zuletzt" ab, ohne die Seite laut zu machen. Groesserer Abstand
-   nach oben und unten setzt ihn zusaetzlich frei. */
+/* „Ein Tipp genügt“ auf --brand-soft, damit die Kacheln als Schnellzugriff erkennbar sind. */
 .dash-favsektion {
   margin: 26px 0;
   padding: 16px 14px;
@@ -2177,21 +2058,18 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin-bottom: 12px;
 }
 
-/* Abschnittstitel kraeftiger als die uebrigen Labels: Markenfarbe statt
-   --text-3, damit der Abschnitt eine eigene Ueberschrift hat. */
+/* Abschnittstitel in Markenfarbe. */
 .dash-favsektion-label {
   color: var(--brand);
 }
 
-/* Auf der getoenten Flaeche traegt der leere Zustand keinen zweiten Rahmen —
-   die Sektion selbst ist schon die Umrandung. */
+/* Auf der getönten Fläche ohne zweiten Rahmen. */
 .dash-favsektion .empty-state {
   border: none;
   padding: 4px 4px 8px;
 }
 
-/* Die Icon-Flaeche ist sonst ebenfalls --brand-soft und verschwaende im
-   Untergrund; auf der Sektion steht sie hell wie die Kacheln. */
+/* Icon-Fläche hell wie die Kacheln, sonst verschwände sie im Untergrund. */
 .dash-favsektion .empty-state-icon {
   background-color: var(--surface);
 }
@@ -2257,8 +2135,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* Kacheln auf der getoenten Flaeche: weisse Karte mit --line-strong-Rand —
-   sie lesen sich dadurch als antippbare Flaechen, nicht als Textbloecke. */
+/* Weiße Kacheln mit Rand, damit sie antippbar wirken. */
 .dash-fav-tile {
   background: var(--surface);
   border: 1px solid var(--line-strong);
@@ -2309,9 +2186,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin-top: 2px;
 }
 
-/* Frisch angelegte (optimistische) Eintraege: 1,5px --brand-Rand. Steht seit
-   16.08. an .fl-zeile — „Zuletzt" und die Fahrtenliste teilen sich dieselbe
-   Karte (FahrtKarte), damit sie nicht wieder auseinanderlaufen. */
+/* Optimistische Einträge mit 1,5px-Rand, an .fl-zeile, die „Zuletzt“ und Fahrtenliste teilen. */
 .fl-zeile.is-neu {
   box-shadow: inset 0 0 0 1.5px var(--brand);
 }
@@ -2349,8 +2224,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* FAB 62×62px über der Bottom-Nav — nur mobil; auf Dashboard UND Fahrtenliste
-   der Einstieg in den Erfassungsflow */
+/* FAB über der Bottom-Nav, nur mobil. */
 .dash-fab {
   position: fixed;
   right: 20px;
@@ -2597,9 +2471,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   padding: 18px 20px;
 }
 
-/* Kacheln einer Rasterzeile sind gleich hoch (align-items: stretch ist
-   Grid-Standard) — die scrollende Kachel darf die Zeile nicht aufziehen:
-   sie scrollt innerhalb ihrer Höhe. */
+/* Die scrollende Kachel darf die Rasterzeile nicht aufziehen. */
 .dash-d-tile-scroll {
   min-height: 0;
 }
@@ -2737,8 +2609,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 }
 
 
-/* Balkenhöhen kommen in px (max. 150) inline aus dem Monats-km-Anteil;
-   die Monatsinitiale sitzt unterhalb, daher keine feste Container-Höhe */
+/* Balkenhöhen kommen inline, daher keine feste Container-Höhe. */
 .dash-chart-bars {
   display: flex;
   align-items: flex-end;
@@ -2789,11 +2660,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   flex-shrink: 0;
 }
 
-/* ============================================================
-   Fahrtenliste (Phase R5) — mobil Karten mit Swipe-Aktionen
-   nach Design-Spec Screen 3; Kopf mit Segmented Control und
-   Summenzeile gilt für alle Breakpoints
-   ============================================================ */
+/* ===== Fahrtenliste ===== */
 
 .fl-titelzeile {
   display: flex;
@@ -2816,8 +2683,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-3);
 }
 
-/* „+ Neue Fahrt" in der Titelzeile: rechtsbündig, nur Desktop —
-   mobil übernimmt der FAB (wie auf dem Dashboard) */
+/* „+ Neue Fahrt“ nur Desktop, mobil der FAB. */
 .fl-neu-btn {
   display: none;
   margin-left: auto;
@@ -2830,8 +2696,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   }
 }
 
-/* Segmented Control: --surface-2, --r-btn, 4px Padding, Segmente 40px,
-   aktiv --surface + --shadow, 15px/600 */
+/* Segmented Control. */
 .seg-control {
   display: flex;
   background: var(--surface-2);
@@ -2928,11 +2793,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* Summenzeile: Mono 15px/600 „km · €", rechts „Export" in --brand/600 */
-/* Zusammenfassung des Zeitraums als eigene Flaeche: Frei zwischen Monatswahl
-   und Liste standen die Zahlen verloren (Simon 16.08.). Der Fahrten-Tab
-   beantwortet damit „was steht hier drin", die Abrechnung „was ist damit zu
-   tun". */
+/* Zusammenfassung des Zeitraums als eigene Fläche. */
 .fl-summe-karte {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -2941,32 +2802,15 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin-bottom: 16px;
 }
 
-/* Drei Spalten mit eigener Beschriftung: Nebeneinander ohne Label klebten
-   „46 km" und „13,80 €" zusammen und lasen sich wie eine einzige Zahl
-   (Simon 16.08.). */
-/* Grid statt Flex: Die Spalten sollen sich am laengsten Wert bemessen, den sie
-   tatsaechlich tragen — „Fahrten" braucht zwei Stellen, die Erstattung im
-   Jahreszeitraum bis zu „4.368,00 €". Flex verteilte den Platz starr und liess
-   den Betrag aus seiner Spalte laufen, waehrend die Fahrten-Spalte Platz
-   verschenkte. */
-/* Linksbuendig beieinander statt ueber die Kartenbreite verteilt: Die drei
-   Zahlen gehoeren zusammen und sollen als eine Gruppe gelesen werden. Bis zum
-   rechten Rand auseinandergezogen standen sie ohne Bezug zueinander.
-   Die letzte Spalte (Erstattung) reicht bis zum rechten Rand und steht
-   rechtsbuendig — so sitzt die Summe sauber ueber den Traegerbetraegen
-   darunter, die ebenfalls rechts stehen (Simon 16.08.). */
+/* Drei beschriftete Spalten im Grid, die letzte rechtsbündig über den Trägerbeträgen. */
 .fl-summe-werte {
   display: grid;
-  /* Drei gleich breite Spalten: Nur so steht die mittlere („Kilometer")
-     tatsaechlich in der Mitte der Karte — nach Inhalt bemessen sass sie 37px
-     links davon (Simon 16.08.). Gleiche Breiten fangen ausserdem dreistellige
-     Werte ab, ohne dass die Spalten springen. */
+  /* Gleich breite Spalten, damit „Kilometer“ wirklich mittig steht. */
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
-/* Mitte zentriert, aussen die Raender: Alle drei linksbuendig wirkten wie
-   drei einzelne Angaben; so bilden sie eine Zeile mit Achse (Simon 16.08.). */
+/* Mitte zentriert, außen die Ränder. */
 .fl-summe-spalte:nth-child(2) {
   text-align: center;
 }
@@ -2988,19 +2832,14 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-3, var(--text-2));
-  /* Die Beschriftung darf die Spaltenbreite nicht bestimmen: „ERSTATTUNG" ist
-     breiter als „14,95 €" und zwang die Spalte auf Labelbreite — der Platz
-     fehlte dann dem laengsten Wert nebenan. Notfalls kuerzt das Label,
-     die Zahl darunter bleibt vollstaendig. */
+  /* Das Label darf die Spaltenbreite nicht bestimmen, notfalls kürzt es. */
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Traeger je Zeile, Name links, Betrag rechts — klein gesetzt, weil die
-   Gesamtsumme oben die Hauptaussage bleibt und diese Zeilen sie nur
-   aufschluesseln. */
+/* Träger je Zeile, klein, weil die Gesamtsumme die Hauptaussage ist. */
 .fl-summe-traeger {
   list-style: none;
   margin: 12px 0 0;
@@ -3019,8 +2858,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   gap: 12px;
 }
 
-/* Lange Traegernamen kuerzen statt umbrechen: Der Betrag rechts muss auf
-   jeder Zeile an derselben Stelle stehen. */
+/* Lange Namen kürzen, damit der Betrag immer an derselben Stelle steht. */
 .fl-summe-traeger-name {
   min-width: 0;
   overflow: hidden;
@@ -3034,13 +2872,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text);
 }
 
-/* 20px statt 22px, seit die Karte drei statt zwei Spalten traegt: zusammen mit
-   der Gewichtung der Spalten oben passt damit auch ein Jahreszeitraum
-   („4.368,00 €", „12.480 km") auf einem schmalen iPhone in eine Zeile. */
-/* Groesse kommt von usePassendeGroesse: 20px, solange die Werte passen, sonst
-   genau so viel kleiner, wie der laengste es verlangt (Simon 16.08.). Fest
-   klein waere fuer den Normalfall schade, Kuerzen bei Betraegen keine Option
-   — deshalb erbt der Wert die gemessene Groesse von `.fl-summe-werte`. */
+/* Größe von usePassendeGroesse, geerbt von `.fl-summe-werte`. */
 .fl-summe-wert {
   font-size: inherit;
   font-weight: 600;
@@ -3049,24 +2881,19 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   white-space: nowrap;
 }
 
-/* Sehr schmale Geraete (iPhone SE, 320px): Bei drei Spalten und einem
-   Jahreszeitraum („12.480 km", „4.368,00 €") fehlen genau die 24px der beiden
-   Luecken — der Text selbst passt. Deshalb die Luecken kuerzen und eine Stufe
-   kleiner setzen, statt die Zahlen auf allen Geraeten zu verkleinern. */
+/* Sehr schmale Geräte: Lücken kürzen und eine Stufe kleiner. */
 @media (max-width: 360px) {
   .fl-summe-werte {
     gap: 8px;
   }
 
-  /* Der weite Buchstabenabstand macht „ERSTATTUNG" breiter als den Betrag
-     darunter und nahm der Spalte die letzten Pixel. */
+  /* Der weite Buchstabenabstand nahm der Spalte die letzten Pixel. */
   .fl-summe-label {
     letter-spacing: 0.02em;
   }
 }
 
-/* Export unten rechts, abgesetzt durch eine Linie — die Karte nennt erst die
-   Zahlen, dann was man damit tun kann. */
+/* Export unten rechts, abgesetzt durch eine Linie. */
 .fl-summe-fuss {
   display: flex;
   justify-content: flex-end;
@@ -3203,8 +3030,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background: var(--surface-2);
 }
 
-/* Statusfarbene Chips (User-Feedback 07.08.): Fläche und Rand folgen dem
-   Status — Erfasst bleibt neutral mit gestricheltem Rand (Statussystem) */
+/* Statusfarbene Chips, Erfasst neutral mit gestricheltem Rand. */
 .fl-monat-chip-offen {
   background: transparent;
   border-style: dashed;
@@ -3269,14 +3095,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text);
 }
 
-/* ---------- Fahrten-Liste mobil (< 768px) ----------
-   Muster der Dashboard-Liste „Zuletzt": EINE Karte, darin Zeilen mit
-   Trennlinie statt einzeln schwebender Karten (User-Feedback 14.08.).
-   Die Einzelkarten kosteten Rahmen und Luecke je Fahrt und zerlegten die
-   Liste optisch — bei 30 Fahrten im Monat war kaum noch Uebersicht da. */
-/* Jede Fahrt eine eigene Karte statt eines durchgehenden Blocks mit
-   Trennlinien: Der Block las sich wie eine Tabelle, nicht wie eine Liste von
-   Belegen (Simon 16.08.). */
+/* ---------- Fahrtenliste mobil: jede Fahrt eine eigene Karte ---------- */
 .fl-cards {
   display: flex;
   flex-direction: column;
@@ -3294,11 +3113,9 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 .fl-zeile {
   position: relative;
   display: flex;
-  /* Oben ausgerichtet, damit die Zahlen rechts auf Hoehe des Anlasses
-     beginnen statt mittig zwischen den Zeilen zu haengen. */
+  /* Oben ausgerichtet, damit die Zahlen auf Höhe des Anlasses beginnen. */
   align-items: flex-start;
-  /* 10px: Bei drei Spalten (Datum — Text — Zahlen) kosteten 12px den Anlass
-     die letzten Pixel, sodass er kuerzte (Simon 16.08.). */
+  /* 10px, 12px kosteten den Anlass die letzten Pixel. */
   gap: 10px;
   width: 100%;
   padding: 14px;
@@ -3327,9 +3144,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   min-width: 0;
 }
 
-/* In Lesegroesse, unten in der Karte — keine eigene Spalte (Simon 16.08.):
-   Als feste Spalte links nahm das Datum dem Anlass die Breite, klein gesetzt
-   verschwand es. Hier hat es Platz, ohne etwas zu verdraengen. */
+/* Datum in Lesegröße unten in der Karte, als Spalte nahm es dem Anlass die Breite. */
 .fl-zeile-datum {
   flex: 0 0 auto;
   font-size: 14px;
@@ -3337,8 +3152,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-2);
 }
 
-/* Oberste Zeile: Datum, Mitfahrer, abweichender Status. Das Datum fuehrt die
-   Karte an — es ist beim Durchsehen der Orientierungsmarker (Simon 16.08.). */
+/* Oberste Zeile: Datum, Mitfahrer, abweichender Status. */
 .fl-zeile-kopf {
   display: flex;
   align-items: baseline;
@@ -3347,13 +3161,11 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   min-width: 0;
 }
 
-/* Traegt den Anlass und das Rueckfahrt-Zeichen. Der Titel darin kuerzt, das
-   Zeichen behaelt seine Groesse und klebt am Titel. */
+/* Der Titel kürzt, das Rückfahrt-Zeichen behält seine Größe. */
 .fl-zeile-titel {
   display: flex;
   align-items: baseline;
-  /* Kein gap: .fl-paar-hinweis bringt seinen eigenen margin-left mit, sonst
-     stuende der Abstand doppelt. */
+  /* Kein gap, .fl-paar-hinweis bringt margin-left mit. */
   min-width: 0;
 }
 
@@ -3367,8 +3179,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   white-space: nowrap;
 }
 
-/* Mitfahrer:innen mit Namen statt als blosse Zahl. Sie duerfen kuerzen —
-   die Datumszeile darf daran nicht wachsen. */
+/* Mitfahrer:innen mit Namen, sie dürfen kürzen. */
 .fl-zeile-mf {
   min-width: 0;
   font-size: 12px;
@@ -3379,12 +3190,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   white-space: nowrap;
 }
 
-/* Route auf zwei Zeilen unter dem Kopf — Start oben, Ziel darunter. Ohne
-   „von"/„nach": Der Pfeil vor der zweiten Zeile zeigt die Richtung, und die
-   26px der Marken gehoeren den Adressen (Simon 16.08.). */
-/* Der Weg in einer Zeile: „Hennstedt → Wesselburen" braucht 160 von 256px,
-   zwei Zeilen waren dafuer Verschwendung (Simon 16.08.). Nur volle Adressen
-   kuerzen mit „…" — dort steht das Wesentliche vorn. */
+/* Der Weg in einer Zeile, nur volle Adressen kürzen. */
 .fl-zeile-route {
   display: block;
   min-width: 0;
@@ -3404,24 +3210,18 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   flex-shrink: 0;
 }
 
-/* Zahlen als eigene Spalte rechts: Kilometer oben, Betrag darunter, beide
-   rechtsbuendig und nie umbrechend. Nebeneinander in der Titelzeile nahmen
-   sie dem Anlass die Breite, bis von ihm „Die…" uebrig blieb (Simon 16.08.).
-   Die Mindestbreite haelt die Spalte ueber alle Karten hinweg buendig. */
+/* Zahlen als eigene Spalte rechts, sonst nahmen sie dem Anlass die Breite. */
 .fl-zeile-werte {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
   flex-shrink: 0;
-  /* Keine Mindestbreite: Sie kostete den Anlass die letzten Pixel, obwohl
-     „6,90 €" schmaler ist. Buendig stehen die Betraege ueber die Karten
-     hinweg trotzdem, weil sie rechtsbuendig an derselben Kante enden. */
+  /* Keine Mindestbreite, rechtsbündig stehen die Beträge trotzdem bündig. */
   align-self: flex-start;
 }
 
-/* Kilometer als unterste Ebene der Zahlenspalte — leise, weil der Betrag
-   darueber die Zahl traegt, auf die es bei einer Abrechnung ankommt. */
+/* Kilometer leise, der Betrag darüber zählt. */
 .fl-zeile-km {
   font-size: 13px;
   color: var(--text-2);
@@ -3466,10 +3266,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text);
 }
 
-/* Die drei Formate teilen sich die Breite zu gleichen Teilen, statt
-   umzubrechen und unterschiedlich breit dazustehen. flex-basis: 0 sorgt
-   dafuer, dass der laengere Text („Erstellt …") die Aufteilung nicht
-   verschiebt — sonst sprang die Zeile, sobald ein Knopf zu laden begann. */
+/* Drei gleich breite Formate, flex-basis 0, damit „Erstellt …“ die Zeile nicht verschiebt. */
 .fl-export-btns {
   display: flex;
   gap: 8px;
@@ -3483,10 +3280,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   white-space: nowrap;
 }
 
-/* Laufender Kreis fuer Knoepfe, die auf den Server warten (PDF-Export:
-   gemessen ~4,3 s). Dreht sich nur, zeigt keinen Fortschritt — es gibt
-   keinen: Die Zeit steckt im Start von LibreOffice, nicht in der Menge
-   der Fahrten. */
+/* Drehender Kreis ohne Fortschritt, die Zeit steckt im LibreOffice-Start. */
 .spinner {
   animation: spinner-dreh 0.9s linear infinite;
   flex-shrink: 0;
@@ -3498,9 +3292,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   }
 }
 
-/* Wer Bewegung abgestellt hat, bekommt statt der Drehung ein ruhiges
-   Pulsieren — ganz ohne Rueckmeldung bliebe sonst unklar, ob noch etwas
-   passiert. */
+/* Bei reduzierter Bewegung ein ruhiges Pulsieren. */
 @media (prefers-reduced-motion: reduce) {
   .spinner {
     animation: spinner-puls 1.4s ease-in-out infinite;
@@ -3517,8 +3309,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   }
 }
 
-/* Der wartende Knopf behaelt seine Breite, damit die Zeile beim Wechsel
-   von „PDF" auf „Erstellt …" nicht springt. */
+/* Der wartende Knopf behält seine Breite. */
 .fl-export-btns button:disabled {
   cursor: progress;
 }
@@ -3539,11 +3330,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin-bottom: 16px;
 }
 
-/* Hinweis im Zeitraum-Export: Der Server setzt dabei jeden Monat auf
-   „eingereicht" — das muss vor dem Tippen zu sehen sein.
-   accent-soft statt eigener Warnfarbe: Das Token gibt es bereits in beiden
-   Designs, und dieselbe Farbe markiert in der Abrechnung schon die faelligen
-   Monate. */
+/* Hinweis, dass der Zeitraum-Export jeden Monat einreicht, in accent-soft wie fällige Monate. */
 .abr-export-warnung {
   padding: 10px 12px;
   margin-bottom: 12px;
@@ -3554,8 +3341,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   line-height: 1.4;
 }
 
-/* ---------- Fahrtenliste desktop (≥ 768px): Tabelle nach dem
-   Dashboard-Tabellen-Muster (Spec Screen 5) ---------- */
+/* ---------- Fahrtenliste desktop (≥ 768px) als Tabelle ---------- */
 .fl-tablecard {
   display: none;
 }
@@ -3577,9 +3363,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 .fl-tablehead,
 .fl-tablerow {
   display: grid;
-  /* Spaltenbreiten wie in der Dashboard-Tabelle, nur die Datumsspalte breiter
-     (dort ohne Jahr, hier mit). Die frueheren Icon-Buttons und der Chevron
-     danach sind entfallen (Simon 16.08.); die Zeile endet mit dem Status. */
+  /* Spalten wie in der Dashboard-Tabelle, Datum mit Jahr breiter; die Zeile endet mit dem Status. */
   grid-template-columns: 92px 1fr 140px 52px 88px 106px;
   min-width: 620px;
   align-items: center;
@@ -3641,8 +3425,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   white-space: nowrap;
 }
 
-/* Traeger darf umbrechen statt abzuschneiden - wie in der Dashboard-Tabelle.
-   „Kirchenkreis Dithm…" half niemandem. */
+/* Träger darf umbrechen statt abzuschneiden. */
 .fl-td-traeger {
   font-size: 13px;
   line-height: 1.3;
@@ -3662,8 +3445,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   justify-content: flex-end;
 }
 
-/* Aktions-Icon-Buttons 36×36 (Spec: Tabellen-Aktionen in den
-   Einstellungen), Löschen in --danger */
+/* Aktions-Icon-Buttons 36×36, Löschen in --danger. */
 .fl-aktion-btn {
   width: 36px;
   height: 36px;
@@ -3695,10 +3477,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background: var(--danger-soft);
 }
 
-/* ============================================================
-   Abrechnung (Phase R6) — mobil Monatskarten nach Spec Screen 4,
-   Desktop Matrix Monat × Träger nach Screen 6
-   ============================================================ */
+/* ===== Abrechnung: mobil Monatskarten, Desktop Matrix Monat × Träger ===== */
 
 /* Shell-Padding mobil ist 16px; +4px ergibt die geforderten 20px Ränder */
 @media (max-width: 767px) {
@@ -3707,8 +3486,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   }
 }
 
-/* < 768 Monatskarten, ab 768 Matrix (konsistent zur App-Shell; zwischen
-   768 und 1023 scrollt die Matrix bei Bedarf horizontal in der Karte) */
+/* Zwischen 768 und 1023 scrollt die Matrix bei Bedarf horizontal. */
 .abr-mobile {
   display: block;
 }
@@ -3753,11 +3531,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   width: auto;
   min-width: 96px;
   flex-shrink: 0;
-  /* Enger als ein normales Auswahlfeld: Die 40px, die `.form-select` rechts
-     fuer den Systempfeil freihaelt, sind bei einer vierstelligen Jahreszahl zu
-     viel — der Pfeil stand sichtbar zu weit vom rechten Rand weg
-     (Simon 23.08.). 28px reichen fuer das Dreieck, ohne dass der Text
-     darunter laeuft. */
+  /* 28px reichen für den Pfeil bei einer Jahreszahl. */
   padding-left: 12px;
   padding-right: 28px;
 }
@@ -3786,8 +3560,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   opacity: 0.72;
 }
 
-/* Unter der Deckkraft fiele das grüne Wort unter 4,5:1; es bleibt in
-   Textfarbe, Punkt und Wort tragen den Status. */
+/* Unter der Deckkraft fiele grün unter 4,5:1, daher Textfarbe. */
 .abr-karte-erstattet .status-dot {
   color: var(--text);
 }
@@ -3918,9 +3691,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 .abr-traeger-aktionen {
   display: flex;
   flex-wrap: wrap;
-  /* Kein Zeilenabstand: Jeder Knopf traegt schon min-height 44px als
-     Tippziel — zusaetzliche 4px rissen die Aktionen bei Umbruch weit
-     auseinander. */
+  /* Kein Zeilenabstand, die Knöpfe haben schon 44px Mindesthöhe. */
   gap: 0 20px;
 }
 
@@ -3949,8 +3720,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   border-radius: 4px;
 }
 
-/* Nebenweg: gleiche Groesse, aber weder Markenfarbe noch Fettung — sonst
-   stehen Haupt- und Nebenaktion gleichrangig nebeneinander. */
+/* Nebenweg ohne Markenfarbe und Fettung. */
 .abr-link-leise {
   color: var(--text-2);
   font-weight: 500;
@@ -3998,8 +3768,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* ---------- Desktop-Kopf: Titel 30px/600 + Untertitel, rechts
-   Jahr-Wahl, „Zeitraum-Export" und „{Monat} einreichen" ---------- */
+/* ---------- Desktop-Kopf der Abrechnung ---------- */
 .abr-d-kopf {
   display: flex;
   align-items: flex-end;
@@ -4087,8 +3856,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   border-bottom: none;
 }
 
-/* Klebende Monatsspalte: streckt sich über die Zeilenhöhe und trägt
-   den Zeilen-Hintergrund, damit beim Scrollen nichts durchscheint */
+/* Klebende Monatsspalte mit Zeilenhintergrund, damit nichts durchscheint. */
 .abr-td-monat {
   position: sticky;
   left: 0;
@@ -4154,10 +3922,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-3);
 }
 
-/* Aufgeklappte Detail-Zeile („Details"): Trägerzeilen + Aktionen; klebt
-   links, damit sie beim horizontalen Scrollen lesbar bleibt */
-/* Detail als gestapelte Trägerliste über die volle Zeilenbreite;
-   sticky-left hält sie beim horizontalen Scrollen der Matrix im Bild */
+/* Detail als Trägerliste über die volle Breite, sticky-left beim horizontalen Scrollen. */
 .abr-matrix-detail {
   border-bottom: 1px solid var(--line);
   background: var(--bg);
@@ -4166,8 +3931,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 .abr-matrix-detail-inner {
   position: sticky;
   left: 0;
-  /* rechts so einrücken, dass die Trägerbeträge unter der Summen-Spalte
-     enden (Aktionsspalte 140px + Spaltenabstand 12px + Randpadding 24px) */
+  /* Einrücken, damit die Beträge unter der Summen-Spalte enden (140 + 12 + 24 px). */
   padding: 0 176px 8px 24px;
 }
 
@@ -4189,10 +3953,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin-right: -152px;
 }
 
-/* ---------- Export-Sheet: Zeitraum-Wahl + Betrag je Träger ---------- */
-/* Von und Bis stehen untereinander, jedes ueber die volle Breite:
-   nebeneinander war „September 2026" auf dem Handy abgeschnitten, sodass
-   sich Monat und Jahr nicht mehr lesen liessen. */
+/* ---------- Export-Sheet: Von und Bis untereinander, sonst war der Monat abgeschnitten ---------- */
 .abr-export-zeitraum {
   display: flex;
   flex-direction: column;
@@ -4235,11 +3996,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   gap: 10px;
 }
 
-/* ============================================================
-   Einstellungen (Phase R7) — Screen 7:
-   Desktop: Liste links 212px + Inhalt rechts in einer Karte.
-   Mobil (<768px): Vollbild-Liste mit Drilldown, kein Tab-Streifen.
-   ============================================================ */
+/* ===== Einstellungen: Desktop Liste und Inhalt, mobil Drilldown ===== */
 
 .set-layout {
   display: flex;
@@ -4295,9 +4052,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   display: none; /* Chevron nur in der mobilen Drilldown-Liste */
 }
 
-/* Sekundäraktionen (Neuigkeiten/Info/Hilfe/Abmelden) unter der Liste —
-   nur mobil: ab 768px wohnen sie in der Sidebar (Werkzeugleiste + Abmelden
-   an der Nutzerzeile); der Desktop-Footer wurde zudem abgeschnitten */
+/* Sekundäraktionen nur mobil, ab 768px in der Sidebar. */
 .set-nav-foot {
   margin-top: 16px;
   padding-top: 12px;
@@ -4552,9 +4307,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-3);
 }
 
-/* Spaltenraster nach Spec („Orte": 1fr 1.4fr 96px 96px) */
-/* Kopfzeile der Orte-Tabelle: leere Spalte fuer den Griff (32px + 12px gap),
-   danach dieselben Spalten wie der Zeileninhalt. */
+/* Kopfzeile der Orte-Tabelle mit leerer Griff-Spalte. */
 .set-grid-orte {
   grid-template-columns: 32px 1fr 1.4fr 96px;
 }
@@ -4564,11 +4317,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   grid-template-columns: 1fr 1.4fr 96px;
 }
 
-/* Desktop-Ortszeile: Griff links, antippbarer Inhalt rechts daneben.
-   Die Griff-Spalte ist 18px Rand + 32px Griff breit; der Inhalts-Button
-   bringt seine eigenen 18px Padding mit, deshalb startet er 6px frueher
-   als die Kopfzeile es sonst taete — das gleicht der negative Versatz aus,
-   damit "Ort" in Kopf und Zeile buendig steht. */
+/* Desktop-Ortszeile: Griff links, Inhalt rechts; der negative Versatz hält „Ort“ bündig mit dem Kopf. */
 .set-tr-drag {
   display: grid;
   grid-template-columns: 44px 1fr;
@@ -4581,8 +4330,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   border-top: 1px solid var(--line);
 }
 
-/* Zeile hat kein eigenes Padding — der Inhalts-Button bringt seins mit.
-   Der Griff sitzt links davon und uebernimmt den linken Zeilenrand. */
+/* Kein eigenes Padding, der Griff übernimmt den linken Rand. */
 .set-tr-drag .set-grip {
   margin-left: 12px;
 }
@@ -4946,14 +4694,8 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin: 8px 0 12px;
 }
 
-/* ============================================================
-   Anmeldung (Phase R7) — Screen 8: zentrierte Karte auf --brand
-   ============================================================ */
-/* Die Anmeldung ist kein Sheet, hatte aber denselben Fehler: Die Box sitzt
-   mittig in der vollen Bildschirmhoehe, waehrend die Tastatur davor liegt —
-   Benutzername und Passwort rutschten dahinter. Die Tastaturhoehe geht
-   deshalb auch hier ab, damit die Mitte die Mitte des freien Bereichs ist.
-   Im Browser ist --tastatur 0px, dort aendert sich nichts. */
+/* ===== Anmeldung ===== */
+/* Die Tastaturhöhe geht ab, sonst rutschen die Felder hinter die Tastatur; im Browser ist --tastatur 0px. */
 .auth-page {
   min-height: 100vh;
   min-height: calc(100dvh - var(--tastatur, 0px));
@@ -4980,9 +4722,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin-bottom: 24px;
 }
 
-/* Ring und Punkt wie im App-Icon. Der Punkt bleibt sandfarben, weil er das
-   Zeichen unverwechselbar macht; im dunklen Design steht das Logo auf hellem
-   Petrol, dort traegt nur der dunklere Sandton. */
+/* Ring und Punkt wie im App-Icon; im dunklen Design trägt nur der dunklere Sandton. */
 .auth-logo-ring {
   stroke: var(--on-brand);
 }
@@ -5107,8 +4847,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   margin: -8px 0 16px;
 }
 
-/* Unterabschnitt innerhalb eines Einstellungen-Bereichs (z. B. Mitfahrer-Satz
-   unter den Erstattungssätzen) */
+/* Unterabschnitt innerhalb eines Einstellungen-Bereichs. */
 .set-subbereich {
   margin-top: 32px;
   padding-top: 24px;
@@ -5155,9 +4894,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   text-align: left;
 }
 
-/* Auf dem Rechner reicht Hover; auf dem Handy gibt es das nicht — dort setzt
-   ein Tipp `.is-offen` und oeffnet damit dasselbe Popover (Simon 16.08.).
-   Ohne das blieb der Balken mobil eine Farbe ohne Zahl. */
+/* Am Handy öffnet ein Tipp per `.is-offen` dasselbe Popover wie Hover. */
 .dash-chart-col:hover .dash-chart-pop,
 .dash-chart-col:focus-within .dash-chart-pop,
 .dash-chart-col:focus .dash-chart-pop,
@@ -5167,9 +4904,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   gap: 2px;
 }
 
-/* Die letzten beiden Saeulen: Ihr Popover ragte mittig ausgerichtet ueber den
-   rechten Bildrand (34px bei 390px Breite). Es haengt dort deshalb am rechten
-   Rand der Saeule statt an ihrer Mitte — dasselbe spiegelbildlich links. */
+/* Die äußeren Säulen hängen ihr Popover an den Rand, sonst ragt es aus dem Bild. */
 .dash-chart-col:nth-last-child(-n + 2) .dash-chart-pop {
   left: auto;
   right: 0;
@@ -5182,11 +4917,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   transform: none;
 }
 
-/* Die Saeule ist jetzt ein Knopf — Systemstil abstreifen. */
-/* Die Saeule ist seit 16.08. ein <button> (Tippen oeffnet die Werte) —
-   Systemstil abstreifen. `flex-basis: 0` ist dabei entscheidend: Buttons
-   bekommen mit `flex: 1` allein keine Breite und blieben samt Popover auf
-   0px. */
+/* Die Säule ist ein <button>; flex-basis 0, sonst bleibt sie samt Popover 0px breit. */
 .dash-chart-col {
   flex: 1 1 0;
   min-width: 0;
@@ -5202,16 +4933,13 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   cursor: default;
 }
 
-/* Der offene Balken bleibt sichtbar hervorgehoben, solange sein Popover
-   steht. */
+/* Der offene Balken bleibt hervorgehoben. */
 .dash-chart-col.is-offen .dash-chart-bar {
   outline: 2px solid var(--brand);
   outline-offset: 1px;
 }
 
-/* display:block, weil die Zeilen seit 16.08. <span> sind (das Popover steckt
-   in einem <button>, und der darf keine <div> enthalten). Ohne das hatte das
-   Popover keine Hoehe. */
+/* display:block, weil die Zeilen im <button> <span> sind. */
 .dash-chart-pop-titel {
   display: block;
   font-size: 14px;
@@ -5252,9 +4980,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   cursor: grabbing;
 }
 
-/* Der Griff gehoert der Zieh-Geste, nicht dem Scroll. Ohne das scrollt
-   Mobile Safari beim Wisch die Seite und der Zug kommt nie an. Der Rest
-   der Zeile bleibt unangetastet — dort scrollt die Liste wie immer. */
+/* Der Griff gehört der Zieh-Geste, sonst scrollt Mobile Safari die Seite. */
 .set-grip {
   touch-action: none;
   -webkit-user-select: none;
@@ -5284,8 +5010,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: inset 0 -2px 0 var(--brand);
 }
 
-/* Die gezogene Zeile bleibt sichtbar, hebt sich aber ab — so ist waehrend
-   des Zugs klar, welche Zeile am Haken haengt. */
+/* Die gezogene Zeile bleibt sichtbar und hebt sich ab. */
 .set-row.is-dragging,
 .set-tr-drag.is-dragging {
   background: var(--brand-soft);
@@ -5384,11 +5109,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background-color: transparent;
 }
 
-/* Der Strich sitzt auf der Zeile, auf der man gerade ist — bei jeder Fahrt,
-   nicht nur bei verknuepften. Gehoert eine Gegenfahrt dazu, wird die nur
-   hinterlegt (gleicher Ton wie der Hover, ohne Strich): Man sieht sofort, wo
-   man ist und was dazugehoert. Nur am Rechner wirksam — mit dem Finger gibt
-   es kein Hover. */
+/* Strich auf der aktuellen Zeile, die Gegenfahrt nur hinterlegt; nur mit Maus. */
 .fl-tablerow-tap.fl-zeile-aktiv,
 .dash-d-tablerow-tap.fl-zeile-aktiv {
   box-shadow: inset 3px 0 0 var(--brand);
@@ -5399,9 +5120,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background: var(--surface-2);
 }
 
-/* Hin-und-Rueck-Paar: dezenter Doppelpfeil neben der Route. Gleiche gedeckte
-   Farbe wie der Mitfahrer-Hinweis — die Kennzeichnung soll die Zeile nicht
-   dominieren, sondern beim Suchen helfen. */
+/* Hin-und-Rück-Paar als dezenter Doppelpfeil. */
 .fl-paar-hinweis {
   display: inline-flex;
   align-items: center;
@@ -5424,11 +5143,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-3);
 }
 
-/* ============================================================
-   Hilfeseite /help (LandingPage) — Redesign 2026
-   Eigenständiger Screen außerhalb der App-Shell: eigener
-   Kopf/Fuß, mittige Spalte, Accordion-FAQ auf den Tokens.
-   ============================================================ */
+/* ===== Hilfeseite /help außerhalb der App-Shell ===== */
 
 .help-root {
   min-height: 100vh;
@@ -5768,9 +5483,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
 
 /* --- Legacy-Modal (Mitfahrer, „Ort speichern") --------------------------- */
 
-/* Overlay: die Tailwind-Klasse bg-primary-950/30 wurde nie erzeugt, weil die
-   Farbtokens fertige Farbwerte ohne <alpha-value> sind — die Dialoge oeffneten
-   dadurch ohne jede Abdunklung. */
+/* Overlay von Hand, bg-primary-950/30 entstand nie, weil die Tokens kein <alpha-value> haben. */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -5783,8 +5496,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background: rgba(0, 0, 0, 0.55);
 }
 
-/* Kopf lag auf gray-800 statt auf der Kartenfarbe — im Dunkelmodus ein
-   sichtbarer blaugrauer Streifen beim Scrollen. */
+/* Kopf in Kartenfarbe, sonst blaugrauer Streifen im Dunkelmodus. */
 .modal-kopf {
   background: var(--surface);
 }
@@ -5794,10 +5506,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background: var(--line);
 }
 
-/* --- Touch-Ziele mobil ---------------------------------------------------- */
-/* Auf dem Desktop reichen 36px (Mauszeiger trifft genau). Mit dem Finger sind
-   44px der Richtwert — betrifft Bearbeiten/Loeschen in allen Einstellungslisten,
-   den Drag-Griff und das Schliesskreuz im Modal. */
+/* --- Touch-Ziele mobil: 44px statt 36px --- */
 @media (max-width: 767px) {
   .set-action {
     width: var(--tap-min);
@@ -5825,31 +5534,23 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   }
 }
 
-/* Die frühere Sonderregel schob den Toast mobil über den Plus-Button. Seit die
-   Meldungen mobil oben stehen, ist sie hinfällig — bottom hier würde die
-   Positionierung wieder nach unten ziehen. */
+/* Keine Sonderregel mehr, bottom zöge die Toasts wieder nach unten. */
 
-/* Fahrtenliste hatte als einzige View keinen mobilen Seitenrand — der Inhalt
-   sprang beim Tabwechsel um 4px */
+/* Mobiler Seitenrand auch für die Fahrtenliste, sonst springt der Inhalt beim Tabwechsel. */
 @media (max-width: 767px) {
   .fahrtenliste {
     padding: 0 4px;
   }
 }
 
-/* Schreibgeschuetztes Feld (z. B. uebernommene Adresse im „Ort speichern"-
-   Dialog): die Tailwind-Dunkelvariante wurde nie erzeugt */
+/* Schreibgeschütztes Feld, die Tailwind-Dunkelvariante entstand nie. */
 .form-input-readonly {
   background: var(--surface-2);
   color: var(--text-2);
   cursor: default;
 }
 
-/* ==========================================================================
-   Aktions-Sheet: ein Muster fuer alle Listen
-   Ein Tipp auf die Zeile oeffnet Details + Aktionen, statt Buttons in der
-   engen Zeile unterzubringen (auf dem Handy kaum lesbar und schwer zu treffen).
-   ========================================================================== */
+/* ===== Aktions-Sheet für alle Listen ===== */
 
 .aktions-kopf {
   padding: 0 4px 4px;
@@ -6033,9 +5734,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: inset 0 0 0 2px var(--brand);
 }
 
-/* ==========================================================================
-   Neuigkeiten: hervorgehobene Karten fuer die wichtigsten Neuerungen
-   ========================================================================== */
+/* ===== Neuigkeiten: hervorgehobene Karten ===== */
 
 .neu-highlights {
   display: flex;
@@ -6053,9 +5752,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background: var(--brand-soft);
 }
 
-/* Breite Kachel ueber den Highlights — liegt ausserhalb des Rasters und ist
-   dadurch auch auf dem Desktop volle Breite. Rahmen in der Markenfarbe, weil
-   sie die wichtigste Neuerung traegt. */
+/* Breite Kachel außerhalb des Rasters, Rahmen in Markenfarbe. */
 .neu-highlight-breit {
   margin-bottom: 10px;
   border-color: var(--brand);
@@ -6092,11 +5789,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-2);
 }
 
-/* ==========================================================================
-   Einstellungen (mobil): Fusszeile mit beschrifteten Eintraegen
-   Vorher drei unbeschriftete Icon-Buttons plus Spacer plus Abmelden in einer
-   Zeile - verschoben und nicht selbsterklaerend.
-   ========================================================================== */
+/* ===== Einstellungen mobil: Fußzeile mit beschrifteten Einträgen ===== */
 
 .set-nav-foot-links {
   display: flex;
@@ -6162,8 +5855,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--danger);
 }
 
-/* Listenzeile in den Einstellungen: der Textbereich ist der Auslöser fuer das
-   Aktions-Sheet, der Sortiergriff bleibt daneben eigenstaendig bedienbar. */
+/* Der Textbereich öffnet das Aktions-Sheet, der Griff bleibt eigenständig. */
 .set-row-tap {
   display: flex;
   flex-direction: column;
@@ -6224,8 +5916,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   justify-content: flex-end;
 }
 
-/* Fahrten-Tabellenzeile (Desktop) als Ganzes antippbar — oeffnet dasselbe
-   Aktions-Sheet wie die Karte auf dem Handy. */
+/* Desktop-Tabellenzeile öffnet dasselbe Aktions-Sheet. */
 .fl-tablerow-tap {
   border: none;
   border-bottom: 1px solid var(--line);
@@ -6258,11 +5949,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   min-width: 0;
 }
 
-/* ==========================================================================
-   Profil: Wohnort-Hinweis
-   Der Wohnort liefert die Anschrift fuer das Abrechnungsformular. Fehlt er,
-   bleibt das Feld dort leer - deshalb steht er oben und faellt auf.
-   ========================================================================== */
+/* ===== Profil: Wohnort-Hinweis, er liefert die Anschrift fürs Formular ===== */
 
 .profil-wohnort {
   display: flex;
@@ -6274,8 +5961,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background: var(--brand-soft);
 }
 
-/* Fehlt der Wohnort, ist das ein Problem fuer die Abrechnung - nicht nur ein
-   Hinweis. */
+/* Fehlender Wohnort ist ein Problem für die Abrechnung. */
 .profil-wohnort.is-fehlt {
   border-color: var(--accent, var(--danger));
   background: var(--accent-soft, var(--danger-soft));
@@ -6327,10 +6013,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   color: var(--text-3) !important;
 }
 
-/* Dashboard: Tabellenzeile als Ganzes antippbar. Nur die seitlichen Raender
-   entfernen - die Trennlinie zwischen den Fahrten bleibt (wie in der
-   Fahrtenliste). Die Liste „Zuletzt" traegt seit 16.08. FahrtKarte und
-   braucht diese Regeln nicht mehr. */
+/* Dashboard-Tabellenzeile antippbar, nur die seitlichen Ränder weg. */
 .dash-d-tablerow-tap {
   border-top: none;
   border-left: none;
@@ -6373,8 +6056,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   justify-content: flex-end;
 }
 
-/* Sieben Highlight-Karten untereinander wuerden den Dialog sehr lang machen -
-   ab 640px zweispaltig. */
+/* Ab 640px zweispaltig. */
 @media (min-width: 640px) {
   .neu-highlights {
     display: grid;
@@ -6383,10 +6065,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   }
 }
 
-/* Lange Sheets (Neuigkeiten, Info) fangen oben an.
-   Als Bottom-Sheet lag ihr Anfang unterhalb des Bildschirms - man landete
-   mitten im Text und musste erst nach oben scrollen. Kurze Sheets bleiben
-   unten, dort ist der Daumen. */
+/* Lange Sheets fangen oben an, kurze bleiben unten beim Daumen. */
 @media (max-width: 767px) {
   .sheet-root-wide {
     align-items: flex-start;
@@ -6399,12 +6078,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   }
 }
 
-/* ==========================================================================
-   Mitfahrer:innen im Fahrt-Formular
-   Frueher Status-Chips (status-badge-primary) unterhalb von „Fahrt speichern" -
-   ein Statusabzeichen fuer etwas, das keinen Status hat, an einer Stelle, wo
-   es niemand vermutet. Jetzt ein Feld wie Anlass oder Kilometer.
-   ========================================================================== */
+/* ===== Mitfahrer:innen im Fahrt-Formular als Feld ===== */
 
 .mitfahrer-feld {
   display: flex;
@@ -6493,8 +6167,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: inset 0 0 0 2px var(--danger);
 }
 
-/* Hinzufuegen: gestrichelt, damit es als „hier kommt noch was" lesbar ist
-   und sich von den bestehenden Eintraegen unterscheidet */
+/* Hinzufügen gestrichelt, abgesetzt von bestehenden Einträgen. */
 .mitfahrer-add {
   display: inline-flex;
   align-items: center;
@@ -6524,23 +6197,19 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   box-shadow: 0 0 0 0.5px var(--brand), 0 0 0 3px var(--brand-soft);
 }
 
-/* Die Mitfahrer-Erstattung gehoert in eine eigene Zeile unter den Betrag.
-   Beim Umbau der Zeilen auf <button> wurden die inneren <div> zu <span> -
-   dadurch stand sie ploetzlich daneben statt darunter. */
+/* Mitfahrer-Erstattung in eigener Zeile unter dem Betrag. */
 .fl-tablerow-tap .fl-mf-betrag,
 .dash-d-tablerow-tap .fl-mf-betrag {
   display: block;
 }
 
-/* Abstand zwischen den Spalten der Fahrten-Tabelle: ohne column-gap klebten
-   Betrag und Status aneinander (die Dashboard-Tabelle hatte ihn bereits). */
+/* Spaltenabstand, sonst kleben Betrag und Status aneinander. */
 .fl-tablehead,
 .fl-tablerow {
   column-gap: 12px;
 }
 
-/* Betrag und Status brauchen etwas mehr Luft als der Rest - der Betrag fuellt
-   seine Spalte fast aus, und darunter steht ggf. noch die Mitfahrer-Zeile. */
+/* Mehr Luft für Betrag und Status. */
 .fl-tablehead > *:nth-child(5),
 .fl-tablerow > *:nth-child(5),
 .dash-d-tablehead > *:nth-child(5),
@@ -6548,35 +6217,13 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   padding-right: 8px;
 }
 
-/* ============================================================
-   Plattform-Navigation (nur native Huelle)
-   ------------------------------------------------------------
-   Greift ausschliesslich unter [data-platform="ios"] bzw.
-   [data-platform="android"]. Das Attribut wird nur gesetzt, wenn die
-   Capacitor-Bruecke aktiv ist — im Browser und in der PWA bleibt jede Regel
-   hier wirkungslos, die Weboberflaeche veraendert sich nicht.
-
-   Safe-Area defensiv: aeltere Android-WebViews (vor Chromium 140) liefern
-   env(safe-area-inset-*) unzuverlaessig oder 0. max() gegen eine eigene
-   Variable laesst sich notfalls nativ befuellen, ohne das CSS anzufassen.
-   ============================================================ */
+/* ===== Plattform-Navigation, nur unter [data-platform]; Safe-Area defensiv per max() für ältere Android-WebViews ===== */
 :root {
   --safe-area-inset-bottom: 0px;
   --safe-area-inset-top: 0px;
 }
 
-/* ---------- Systemraender einfaerben (nur native Huelle) ----------
-   Die WebView zeichnet unter Statusleiste und Home-Anzeige. Sichtbar wird dort
-   die Flaeche des <html>-Elements — nicht die des vordersten Bildschirms.
-   Bisher stand dort immer --bg; auf der Anmeldung und dem Startbildschirm
-   (beide ganzflaechig Petrol) blieben deshalb helle bzw. im Dunkelmodus
-   schwarze Streifen stehen.
-
-   Loesung: Der sichtbare Bildschirm meldet seine Flaeche als data-flaeche an
-   <html> (siehe utils/systemflaeche.js), und <html> uebernimmt sie. Beide
-   Attribute sitzen am selben Element, deshalb ohne Nachfahren-Kombinator.
-   Im Browser wird data-platform nie gesetzt — die Weboberflaeche bleibt
-   unveraendert. */
+/* ---------- Systemränder: <html> übernimmt die Fläche des sichtbaren Bildschirms (data-flaeche, utils/systemflaeche.js) ---------- */
 [data-platform="ios"][data-flaeche="brand"],
 [data-platform="android"][data-flaeche="brand"] {
   background-color: var(--brand);
@@ -6587,20 +6234,13 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background-color: var(--bg);
 }
 
-/* Der body deckt html sonst wieder mit --bg zu: Er ist zwar nur so hoch wie
-   sein Inhalt, faerbt aber bei .auth-page (min-height 100dvh) genau den
-   Bereich, um den es geht. Auf der Markenflaeche muss er durchsichtig sein. */
+/* body durchsichtig auf der Markenfläche, sonst deckt er html wieder zu. */
 [data-platform="ios"][data-flaeche="brand"] body,
 [data-platform="android"][data-flaeche="brand"] body {
   background-color: transparent;
 }
 
-/* Die ganzflaechigen Bildschirme decken selbst den kompletten Bildschirm ab.
-   Zuvor hingen sie an `min-height: 100dvh` — das schliesst den Bereich unter
-   der Home-Anzeige NICHT ein, und dort blieb ein weisser Streifen stehen
-   (nachgemessen im Simulator: unten 255,255,255 statt Petrol).
-   `position: fixed` mit `inset: 0` deckt dagegen alles ab, unabhaengig davon,
-   wie die WebView ihre Hoehe meldet. Der Inhalt scrollt innerhalb. */
+/* position: fixed mit inset 0, weil 100dvh den Bereich unter der Home-Anzeige nicht einschließt. */
 [data-platform="ios"] .auth-page,
 [data-platform="android"] .auth-page,
 [data-platform="ios"] .startbildschirm,
@@ -6611,16 +6251,10 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background-color: var(--brand);
 }
 
-/* Die App-Shell laesst oben Platz fuer die Statusleiste. Ohne diesen Abstand
-   liefe der Inhalt unter die Uhr — mit ihm scheint dort die Flaeche von <html>
-   durch, und die stimmt jetzt. 100dvh bleibt: die Shell fuellt den Bildschirm,
-   der Abstand geht innen ab.
-   Nur oben und seitlich: Der untere Rand gehoert der Navigationsleiste. */
+/* Platz für die Statusleiste oben und seitlich, unten gehört der Navigationsleiste. */
 [data-platform="ios"] .app-shell,
 [data-platform="android"] .app-shell {
-  /* Deckt den gesamten Bildschirm, nicht nur den Viewport: Die WebView reicht
-     seit contentInset "never" bis in die Systemraender, und dort muss die
-     App-Flaeche weitergehen. Der Abstand fuer die Uhr geht innen ab. */
+  /* Ganzer Bildschirm, weil die WebView bis in die Systemränder reicht. */
   position: fixed;
   inset: 0;
   padding-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top));
@@ -6630,11 +6264,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   background-color: var(--bg);
 }
 
-/* Anmeldung und Startbildschirm reichen bewusst BIS in die Systemraender —
-   die Markenflaeche soll durchlaufen. Der Inhalt haelt trotzdem Abstand,
-   sonst klebt die Karte unter der Uhr.
-   Hier auch unten: Diese Bildschirme erscheinen vor der Anmeldung, es gibt
-   also noch keine Navigationsleiste, die den unteren Rand abdeckt. */
+/* Anmeldung und Startbildschirm laufen bis in die Ränder, der Inhalt hält Abstand, auch unten. */
 [data-platform="ios"] .auth-page,
 [data-platform="android"] .auth-page,
 [data-platform="ios"] .startbildschirm,
@@ -6645,24 +6275,7 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   padding-right: calc(24px + env(safe-area-inset-right, 0px));
 }
 
-/* ---------- Platz fuer die native Navigationsleiste ----------
-   Die Leiste ist keine Flaeche im Dokument mehr, sondern eine echte
-   Systemleiste UEBER der WebView. Ihre Hoehe kann das CSS deshalb nicht
-   kennen — feste Werte plus env(safe-area-inset-bottom) waren immer nur eine
-   Schaetzung und passten je nach Geraet nicht.
-
-   Die Plattform meldet die tatsaechliche Hoehe stattdessen selbst als
-   --cap-native-tabbar-height an <html> (contentInsetMode: 'css'). Der Wert
-   enthaelt die Safe Area und den Abstand der schwebenden Leiste bereits.
-
-   Zwei Fallen, die je eine halb verdeckte letzte Zeile gekostet haben:
-
-   1. --cap-native-navigation-bottom traegt DIESELBE Zahl wie
-      --cap-native-tabbar-height. Beide zu addieren verdoppelte den Sockel.
-   2. Solange ein Dialog offen ist, meldet das Plugin die Hoehe als 0px
-      (NativeNav setzt 'hidden'). Ein Fallback im var() greift dann nicht —
-      die Variable ist ja gesetzt, nur eben null. Deshalb max(): der
-      Mindestsockel traegt den Inhalt auch in diesem Moment. */
+/* ---------- Platz für die native Leiste aus --cap-native-tabbar-height; nicht mit --cap-native-navigation-bottom addieren, max() für 0px bei offenem Dialog ---------- */
 [data-platform="ios"] .app-content-inner,
 [data-platform="android"] .app-content-inner {
   padding-bottom: calc(
@@ -6670,67 +6283,35 @@ html[data-platform="android"][data-tastatur] .toast-viewport {
   );
 }
 
-/* 3. Bei offener Tastatur gilt der Mindestsockel NICHT. Die Leiste ist dann
-   ebenfalls versteckt, aber anders als beim Dialog kommt nichts nach: Die
-   72px staenden als leerer Streifen zwischen Eingabefeld und Tastatur
-   (Simon, Build 22). Das Kennzeichen setzt utils/tastatur.js. */
+/* Bei offener Tastatur ohne Mindestsockel, sonst ein leerer Streifen über der Tastatur (Kennzeichen aus utils/tastatur.js). */
 html[data-platform="ios"][data-tastatur] .app-content-inner,
 html[data-platform="android"][data-tastatur] .app-content-inner {
   padding-bottom: calc(var(--cap-native-tabbar-height, 0px) + 16px);
 }
 
-/* In der nativen Huelle uebernimmt der prominente Knopf der Systemleiste das
-   Erfassen (NAV_ITEMS: role 'prominent'). Der schwebende Knopf entfaellt
-   deshalb dort ganz — zwei Einstiege nebeneinander waeren doppelt, und er sass
-   ohne Bezug zur Leiste ueber dem Inhalt (User-Feedback 14.08.).
-   Im Web bleibt er unveraendert der Einstieg. */
+/* Nativ übernimmt der prominente Knopf der Leiste, der schwebende entfällt. */
 [data-platform="ios"] .dash-fab,
 [data-platform="android"] .dash-fab {
   display: none;
 }
 
-/* ---------- entfernt: CSS-Nachbau der Leisten ----------
-   Die frueheren Bloecke .ios-tabbar* und .md-navbar* zeichneten die Leiste in
-   der WebView nach. Das uebernehmen jetzt UIKit (Liquid Glass) und Material 3
-   selbst. Ebenfalls entfallen ist der Scroll-Edge-Effekt (.app-content::before):
-   Er war die zweite von hoechstens zwei erlaubten Glasflaechen — mit der
-   nativen Leiste braucht die WebView gar keine mehr. */
-
-/* ---------- Crash-Schutz: keine Glasflaeche in der WebView ----------
-   In der nativen Huelle darf KEIN Element unscharf hinterlegt sein: mehrere
-   gleichzeitige backdrop-filter bringen Capacitor-iOS-Apps zum Absturz, und
-   das Glas der Navigationsleiste zeichnet ohnehin das System. Das
-   Legacy-Modal-Overlay behaelt seine Abdunklung, verliert aber die
-   Unschaerfe — im Browser bleibt es unveraendert. */
+/* ---------- Keine Glasfläche in der WebView, mehrere backdrop-filter lassen Capacitor-iOS abstürzen ---------- */
 [data-platform="ios"] .modal-backdrop,
 [data-platform="android"] .modal-backdrop {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
-/* ---------- Startbildschirm ----------
-   Erscheint, waehrend die gespeicherte Anmeldung gelesen wird. Bewusst
-   dieselbe Markenflaeche wie die Anmeldeseite: so springt der Uebergang
-   nicht, wenn danach die Anmeldung erscheint.
-   In der App loest diese Flaeche zugleich den nativen Startbildschirm ab,
-   der dieselbe Farbe traegt — der Wechsel ist dadurch unsichtbar. */
+/* ---------- Startbildschirm in derselben Markenfläche wie Anmeldung und nativer Start ---------- */
 .startbildschirm {
-  /* Fest ueber dem gesamten Viewport statt nur 100dvh hoch: Bei
-     ausgeblendeter Adressleiste und unter der Home-Anzeige blieb sonst ein
-     Streifen frei, durch den das weisse Standard-Dokument schien. Die
-     Markenflaeche muss bis in die Safe Areas reichen — der Abstand zum Rand
-     gehoert an den Inhalt, nicht an die Flaeche. */
+  /* Fest über dem ganzen Viewport, sonst scheint unter der Home-Anzeige Weiß durch. */
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  /* Fest #0F5257 statt var(--brand): Die Marke kippt im dunklen Design ins
-     Helle, die native Startflaeche darunter bleibt aber immer Petrol. Beide
-     muessen dieselbe Farbe tragen, sonst sieht man den Uebergang als
-     Farbsprung. Der Startbildschirm ist ein Markenmoment, keine
-     Themenflaeche (Simon 16.08.). */
+  /* Fest #0F5257, weil --brand im dunklen Design kippt und die native Startfläche Petrol bleibt. */
   background: #0F5257;
   z-index: 1;
 }
@@ -6740,15 +6321,11 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  /* Ruhiges Erscheinen statt hartem Aufblitzen. Kurz genug, dass es bei
-     schnellem Start nicht als Verzoegerung wahrgenommen wird. */
+  /* Ruhig einblenden, kurz genug für einen schnellen Start. */
   animation: startbildschirm-auf 420ms ease-out both;
 }
 
-/* Weiss fest verdrahtet, nicht var(--on-brand): Die Variable kippt im dunklen
-   Design auf dunkles Gruen — gedacht fuer die helle Markenflaeche dort. Der
-   Startbildschirm bleibt aber in beiden Designs Petrol, dunkler Text waere
-   darauf kaum lesbar. */
+/* Fest Weiß, --on-brand kippt im dunklen Design. */
 .startbildschirm-logo {
   display: flex;
   color: #FFFFFF;
@@ -6773,10 +6350,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   to   { opacity: 1; transform: none; }
 }
 
-/* Ladeanzeige: Das Zeichen selbst dreht sich, solange gewartet wird — der
-   offene Ring mit dem Punkt zeigt die Drehung deutlich (Simon 16.08.).
-   Erst nach kurzer Verzoegerung, damit ein schneller Start ruhig bleibt und
-   die Drehung nicht bloss aufblitzt. */
+/* Das Zeichen dreht sich erst nach kurzer Verzögerung. */
 .startbildschirm-laedt svg {
   animation: startbildschirm-dreht 1100ms linear 400ms infinite;
   transform-origin: 50% 50%;
@@ -6796,14 +6370,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   .startbildschirm-inhalt { animation-duration: 1ms; }
 }
 
-/* Fehlermeldung auf dem Startbildschirm. Bewusst schmal und lesbar: In der
-   App gibt es keine Entwicklerkonsole, das ist die einzige Stelle, an der
-   ein Fehler ueberhaupt sichtbar wird. */
-/* „Neu laden" in der Fehlergrenze. Weisser Knopf auf der Markenflaeche.
-   Farben fest verdrahtet wie bei Logo und Name darueber: Die Flaeche bleibt
-   in beiden Designs Petrol, var(--brand-strong) kippt im dunklen aber ins
-   Helle — heller Text auf weissem Knopf waere unlesbar.
-   Trefferflaeche ueber --tap-min, weil das hier der einzige Ausweg ist. */
+/* Fehlermeldung und „Neu laden“ auf der Markenfläche, Farben fest, weil die Fläche in beiden Designs Petrol bleibt. */
 .startbildschirm-knopf {
   margin-top: 4px;
   min-height: var(--tap-min);
@@ -6836,10 +6403,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   text-align: left;
 }
 
-/* Kein Ueberscrollen am Rand: In der App zog das elastische Nachfedern von
-   iOS die Flaeche vom Rand weg, und darunter blitzte das Weiss des Dokuments
-   auf — oben wie unten, je nach Wischrichtung. Im Browser bleibt das
-   gewohnte Verhalten, die Regel haengt an data-platform. */
+/* Kein Überscrollen in der App, sonst blitzt am Rand Weiß auf. */
 [data-platform="ios"],
 [data-platform="android"] {
   overscroll-behavior: none;
@@ -6848,27 +6412,11 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
 [data-platform="ios"] body,
 [data-platform="android"] body {
   overscroll-behavior: none;
-  /* Petrol statt --bg: Zwischen dem geladenen Stylesheet und dem ersten
-     Rendern von React liegt ein Moment, in dem nur die Dokumentflaeche zu
-     sehen ist. Mit --bg blitzte dort Helles auf, direkt nach der nativen
-     Startflaeche (gemessen 16.08.). Der Startbildschirm liegt ohnehin fest
-     ueber allem, die angemeldete Ansicht bringt ihre eigene Flaeche mit —
-     diese Farbe sieht man nur in genau dieser Luecke. */
+  /* Petrol statt --bg für den Moment vor dem ersten Rendern. */
   background-color: #0F5257;
 }
 
-/* ---------- Datumsfeld in der App ----------
-   Safari auf iOS rendert input[type=date] nicht als schlichtes Textfeld,
-   sondern als eigenes Bedienelement. Ohne feste Groesse wuchs es im Sheet
-   „Fahrt bearbeiten" ueber die Feldhoehe hinaus und blaehte damit das ganze
-   Sheet auf — der Schliessen-Knopf lag danach ausserhalb des Bildschirms.
-
-   -webkit-appearance: none nimmt dem Feld die Eigengroesse; die Hoehe kommt
-   dann wie bei jedem anderen Feld aus --field-h. Das native Auswahlrad
-   erscheint weiterhin, aber als Overlay des Systems ueber der Seite, nicht
-   mehr als Teil des Dokumentflusses.
-
-   Nur unter data-platform: Im Browser bleibt das Datumsfeld unveraendert. */
+/* ---------- Datumsfeld in der App: -webkit-appearance none, sonst blähte iOS das Sheet auf ---------- */
 [data-platform="ios"] input[type="date"].form-input,
 [data-platform="ios"] input[type="date"].form-select,
 [data-platform="android"] input[type="date"].form-input,
@@ -6878,8 +6426,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   height: var(--field-h);
   min-height: var(--field-h);
   max-height: var(--field-h);
-  /* Ohne diese Angabe zentriert iOS den Text nicht senkrecht im Feld,
-     sobald die Eigengroesse weg ist. */
+  /* Sonst zentriert iOS den Text nicht senkrecht. */
   display: flex;
   align-items: center;
   /* Das Feld darf die Formularspalte nie sprengen. */
@@ -6887,8 +6434,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   box-sizing: border-box;
 }
 
-/* Der innere Container des Rades bringt auf iOS eigene Abstaende mit, die das
-   Feld trotz fester Hoehe optisch verschieben. */
+/* Der innere Container bringt auf iOS eigene Abstände mit. */
 [data-platform="ios"] input[type="date"].form-input::-webkit-date-and-time-value,
 [data-platform="ios"] input[type="date"].form-select::-webkit-date-and-time-value {
   text-align: left;
@@ -6902,13 +6448,9 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   padding: 0;
 }
 
-/* ============================================================
-   Anlass-Auswahl im Erfassungsflow (aufklappende Liste statt Chips)
-   ============================================================ */
+/* ===== Anlass-Auswahl im Erfassungsflow ===== */
 
-/* „Einmaligen Anlass frei eingeben…" und „… als neuen Anlass anlegen" sind
-   keine bestehenden Einträge, sondern Aktionen — gestrichelt wie die
-   Live-Adressen in der Zielauswahl. */
+/* Aktionen statt Einträge, gestrichelt wie die Live-Adressen. */
 .erf-ort-row-frei {
   border-style: dashed;
 }
@@ -6928,14 +6470,9 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   margin-top: -6px;
 }
 
-/* ============================================================
-   Fahrt bearbeiten (FahrtForm) — gleiche Bausteine wie der
-   Erfassungsflow, nur im Formular-Kontext
-   ============================================================ */
+/* ===== Fahrt bearbeiten mit den Bausteinen des Erfassungsflows ===== */
 
-/* Der Merken-Knopf ist hier eine sofortige Aktion („anlegen"), kein
-   Vorher-Nachher-Schalter — das Plus-Zeichen muss deshalb auch auf der
-   neutralen Fläche lesbar sein. */
+/* Sofortige Aktion, das Plus muss auf der neutralen Fläche lesbar sein. */
 .fahrtform .erf-merken .erf-merken-box {
   color: var(--text-2);
 }
@@ -6945,8 +6482,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   cursor: default;
 }
 
-/* Kein space-y mehr am Formular: die erf-Bausteine bringen ihre Abstände
-   selbst mit, nur die beiden Rest-Blöcke brauchen noch welche. */
+/* Die erf-Bausteine bringen ihre Abstände mit. */
 .fahrtform > .form-group {
   margin-bottom: 20px;
 }
@@ -6955,34 +6491,24 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   margin-top: 24px;
 }
 
-/* Die Route ist hier reine Anzeige — der Wechsel läuft über die Zeilen
-   darunter, nicht über einen Klick auf die Überschrift. */
+/* Die Route ist hier reine Anzeige. */
 .fahrtform .erf-route-btn {
   cursor: default;
   overflow-wrap: anywhere;
 }
 
-/* ========================================================================
-   Anlässe (Einstellungen)
-   ======================================================================== */
+/* ===== Anlässe (Einstellungen) ===== */
 
-/* Frueher Hoch/Runter je Zeile — inzwischen wird per Griff gezogen.
-   Die Klasse bleibt fuer den Fall, dass wieder Aktionen rechts stehen. */
+/* Bleibt für Aktionen rechts in der Zeile. */
 .set-anlass-sortier {
   display: flex;
   gap: 6px;
   flex-shrink: 0;
 }
 
-/* ============================================================
-   Datumsfeld auf dem Desktop
-   ============================================================ */
+/* ===== Datumsfeld auf dem Desktop ===== */
 
-/* Auf Touch liegt das Datumsfeld unsichtbar über einem Knopf — ein Tipp
-   öffnet dort den nativen Picker. Auf dem Desktop geht das nicht: Chrome
-   und Firefox öffnen den Kalender nur über das Icon, und ein Feld mit
-   opacity: 0 hat keins zum Treffen. Dort steht deshalb ein sichtbares
-   Feld, das wie der Knopf aussieht und sich auch tippen lässt. */
+/* Sichtbares Feld, weil Chrome und Firefox den Kalender nur über das Icon öffnen. */
 .datum-feld {
   width: 100%;
   appearance: none;
@@ -7003,18 +6529,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   filter: invert(1);
 }
 
-/* Trefferflaechen auf --tap-min (44px) bringen, ohne das Aussehen zu aendern.
- *
- * Diese drei Knoepfe sind bewusst klein gezeichnet (34-36px) und sollen es
- * bleiben — sie stehen in dichten Listenzeilen. Zu klein ist aber nur die
- * FLAECHE, nicht das Bild: Ein unsichtbares ::after zentriert ueber dem
- * Knopf faengt den Daumen ab, der danebentrifft.
- *
- * Der Knopf braucht dafuer position: relative; das Pseudoelement liegt
- * ausserhalb und darf den Inhalt nicht ueberdecken (kein eigener Hintergrund).
- * Die Regel steht am Ende der Datei, damit sie die Basisregeln oben ergaenzt
- * statt mit ihnen zu ringen.
- */
+/* Trefferflächen auf 44px über ein unsichtbares ::after, ohne das Aussehen zu ändern; am Ende der Datei, damit sie ergänzt. */
 .dash-uw-btn,
 .set-action,
 .set-grip {
@@ -7035,10 +6550,7 @@ html[data-platform="android"][data-tastatur] .app-content-inner {
   height: 100%;
 }
 
-/* Der Sortiergriff bekommt nur in der Breite mehr: In der Hoehe liegen die
- * Griffe benachbarter Listenzeilen sonst uebereinander, und ein Zug an der
- * Grenze erwischte die falsche Zeile. Die Zeilen sind knapp 48px hoch —
- * die volle Zeilenhoehe ist als Ziel gross genug. */
+/* Der Sortiergriff wächst nur in der Breite, sonst überlappen benachbarte Zeilen. */
 .set-grip::after {
   min-height: 0;
   height: 100%;

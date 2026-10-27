@@ -1,8 +1,5 @@
 #!/bin/sh
-# Laufzeit-Konfiguration: ersetzt die DEFAULT_*-Platzhalter in config.js durch
-# die Werte der Container-Umgebung. Dadurch lassen sich Titel und
-# Registrierungsregeln pro Instanz setzen, ohne das Image neu zu bauen —
-# wichtig für mehrere Kirchenkreise auf demselben Image.
+# Ersetzt die DEFAULT_*-Platzhalter in config.js durch die Umgebung, damit ein Image fuer mehrere Kirchenkreise dient.
 set -e
 
 CONFIG=/usr/share/nginx/html/config.js

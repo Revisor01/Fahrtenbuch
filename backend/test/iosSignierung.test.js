@@ -1,9 +1,4 @@
-// Die Release-Konfiguration signiert fest mit Distribution-Zertifikat und
-// Profil, damit Xcode sich nirgends selbst Zertifikate anlegt (das Limit gilt
-// fuer das ganze Konto). Gebaut wird in Xcode Cloud; das Skript nach dem Klonen
-// stellt nur im Klon auf automatisch um und erwartet genau diese Zeilen.
-//
-// Laeuft ohne Test-Framework: `node test/iosSignierung.test.js`.
+// Release signiert fest, damit Xcode keine Zertifikate anlegt; Xcode Cloud stellt nur im Klon um. Aufruf: node test/iosSignierung.test.js
 
 const assert = require('assert');
 const fs = require('fs');
@@ -20,8 +15,7 @@ const workflow = fs.readFileSync(wurzel + '.github/workflows/ios-release.yml', '
 const pbx = fs.readFileSync(
   wurzel + 'frontend/ios/App/App.xcodeproj/project.pbxproj', 'utf8');
 
-// Die Bloecke sind ueber `name = Debug;` / `name = Release;` am Ende
-// unterscheidbar. Fuer jede Fundstelle den naechstfolgenden Namen suchen.
+// Blöcke an `name = Debug;` / `name = Release;` unterscheiden.
 function konfigurationVon(quelle, index) {
   const rest = quelle.slice(index);
   const treffer = rest.match(/name = (Debug|Release);/);
@@ -75,10 +69,7 @@ pruefe('Release nennt ein Profil beim Namen', () => {
 });
 
 pruefe('der Profilname ist der, den es im Konto gibt', () => {
-  // Am 24.09. ueber die ASC-API geprueft: „Fahrtenbuch AppStore", ACTIVE,
-  // IOS_APP_STORE, Bundle-ID de.godsapp.fahrtenbuch. Ein „…CI"-Suffix wie
-  // bei Konfi Quest gibt es hier NICHT — ein erfundener Name liesse den
-  // Build bei manueller Signierung hart abbrechen.
+  // Profilname wie in App Store Connect, ein falscher bricht die Signierung ab.
   const treffer = stellen(pbx, 'PROVISIONING_PROFILE_SPECIFIER = "[^"]+";')
     .filter((t) => t.konfig === 'Release');
   assert.ok(/"Fahrtenbuch AppStore"/.test(treffer[0].text),

@@ -1,15 +1,7 @@
 import React from 'react';
 import { STATUS_ORDER, statusKlassen, statusLabel } from '../../utils/statusLabels';
 
-// Statussystem (Redesign 2026): drei Zustände, drei Darstellungsformen.
-// Jeder Status trägt Form + Wort + Farbe — die Form allein genügt zur
-// Unterscheidung (WCAG 1.4.1).
-//
-//   variant="badge"    Pille 6/12px, Icon 16px (Detailansichten, Monatsköpfe)
-//   variant="dot"      Punkt 9px + Wort 13px/600 (dichte Listen, Tabellen)
-//   variant="progress" drei Stationen 26px, 2px Verbindungslinie (Monatskopf)
-//
-// status: 'offen' | 'eingereicht' | 'erhalten' (DB-Werte; Anzeige gemappt)
+// Status mit Form, Wort und Farbe (WCAG 1.4.1); variant badge, dot oder progress; status 'offen' | 'eingereicht' | 'erhalten'.
 
 // Icon 16px innerhalb der Badge-Pille
 function BadgeIcon({ status }) {
@@ -46,8 +38,7 @@ function Dot({ status, className }) {
   );
 }
 
-// Fortschrittsleiste: erledigte Stationen --ok, aktuelle --accent,
-// offene gestrichelt
+// Fortschritt: erledigt --ok, aktuell --accent, offen gestrichelt.
 function Progress({ status, className }) {
   const currentIndex = Math.max(STATUS_ORDER.indexOf(status), 0);
 

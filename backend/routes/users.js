@@ -11,9 +11,7 @@ const { resetLimiter, passwortLimiter, mailLimiter } = require('../middleware/ra
 const { createUserSchema, updateUserSchema, resetPasswordRequestSchema, resetPasswordSchema, setPasswordSchema, verifyEmailSchema, resendVerificationSchema, changePasswordSchema } = require('../schemas/userSchemas');
 
 
-// Public routes first — alle ohne Anmeldung erreichbar und deshalb begrenzt.
-// Das Einloesen eines Tokens war bisher unbegrenzt: genau der Weg, ueber den
-// sich Tokens haetten durchprobieren lassen.
+// Öffentliche Routen, alle begrenzt, auch das Einlösen von Tokens.
 router.post('/reset-password/request', resetLimiter, validate(resetPasswordRequestSchema), userController.requestPasswordReset);
 router.post('/reset-password/verify', resetLimiter, validate(resetPasswordSchema), userController.resetPassword);
 router.post('/set-password', resetLimiter, validate(setPasswordSchema), userController.setPassword);
@@ -23,9 +21,7 @@ router.post('/verify-email', resetLimiter, validate(verifyEmailSchema), userCont
 router.get('/me', authMiddleware, userController.getCurrentUser);
 router.post('/resend-verification', authMiddleware, mailLimiter, validate(resendVerificationSchema), userController.resendVerification);
 
-// Admin or self routes
-// passwortLimiter NACH authMiddleware: Er zaehlt pro Konto, und dafuer muss
-// req.user schon stehen — davor faellt er auf die IP zurueck.
+// passwortLimiter nach authMiddleware, weil er je Konto zählt.
 router.put('/:id/password', authMiddleware, passwortLimiter, requireAdminOrSelf('id'), validate(changePasswordSchema), userController.changePassword);
 router.put('/:id', authMiddleware, requireAdminOrSelf('id'), validate(updateUserSchema), userController.updateUser);
 

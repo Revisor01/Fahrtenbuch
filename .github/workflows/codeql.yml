@@ -1,9 +1,6 @@
 name: CodeQL
 
-# Statische Sicherheitsanalyse für Frontend und Backend.
-# Läuft bei Änderungen an master und am aktiven Feature-Branch, bei Pull
-# Requests dorthin, sowie einmal wöchentlich — so werden auch neu
-# veröffentlichte Regeln auf unverändertem Code angewendet.
+# Statische Sicherheitsanalyse, auch wöchentlich, damit neue Regeln auf unverändertem Code greifen.
 
 on:
   push:
@@ -38,8 +35,7 @@ jobs:
         uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           languages: ${{ matrix.language }}
-          # security-and-quality findet zusätzlich Wartbarkeitsprobleme;
-          # die reine security-extended-Suite wäre die engere Alternative.
+          # security-and-quality findet zusätzlich Wartbarkeitsprobleme.
           queries: security-and-quality
 
       - name: Analyse

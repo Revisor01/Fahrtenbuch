@@ -1,10 +1,4 @@
-// Regressionstest zum Kurzbefehl-Fehler vom 23.08.: Der iOS-Kurzbefehl sendet
-// `kilometer` immer mit — bei zwei gespeicherten Orten als leeren Text. Das
-// alte `z.coerce.number().positive()` machte daraus die Zahl 0 und wies sie ab,
-// die Fahrt scheiterte mit einem Validierungsfehler, obwohl die Distanz
-// hinterlegt war. Leer/0 muss zu null werden, damit der Controller rechnet.
-//
-// Laeuft ohne Test-Framework: `node test/fahrtSchemas.test.js`.
+// Leere Kilometer vom iOS-Kurzbefehl werden null, damit der Controller rechnet. Aufruf: node test/fahrtSchemas.test.js
 
 const assert = require('assert');
 const { createFahrtSchema, updateFahrtSchema } = require('../schemas/fahrtSchemas');
@@ -101,9 +95,7 @@ for (const [name, schema] of [['createFahrtSchema', createFahrtSchema], ['update
   });
 }
 
-// --- Ort-IDs: dieselbe Falle wie bei den Kilometern (24.08.) -------------
-// Der Kurzbefehl sendet vonOrtId/nachOrtId immer mit; bei manuell
-// eingegebenem Ort als leeren Text. Vorher: 400 "vonOrtId too small".
+// --- Ort-IDs: leerer Text vom Kurzbefehl ---
 console.log('\nOrt-IDs und Partnerverweis:');
 
 function parseMitOrten(schema, felder) {
@@ -148,8 +140,7 @@ for (const [name, schema] of [['createFahrtSchema', createFahrtSchema], ['update
   });
 }
 
-// partnerFahrtId gibt es nur beim Anlegen — der Kurzbefehl verknuepft damit
-// Hin- und Rueckfahrt. Leer bedeutet: keine Gegenfahrt.
+// partnerFahrtId nur beim Anlegen, leer heißt keine Gegenfahrt.
 pruefe('createFahrtSchema: leere partnerFahrtId wird zu null', () => {
   const r = parseMitOrten(createFahrtSchema, { vonOrtId: 7, nachOrtId: 8, partnerFahrtId: '' });
   assert.strictEqual(r.success, true);

@@ -1,12 +1,4 @@
-// Tests zur Zeilenhöhe im Abrechnungsformular (Rückmeldung 30.09.).
-//
-// Anschrift und Reisezweck stehen in verbundenen Zellen. Deren Zeilenhöhe
-// passen weder Excel noch LibreOffice an: Ein zweizeiliger Reisezweck lief im
-// PDF in die Nachbarzeile. Der Export setzt die Höhe deshalb selbst.
-//
-// Läuft ohne Test-Framework: `node test/zeilenhoehe.test.js`.
-// Die Umwandlung nach PDF braucht LibreOffice und wird nur ausgeführt, wenn
-// `soffice` erreichbar ist.
+// Zeilenhöhe verbundener Zellen setzt der Export selbst; PDF nur mit erreichbarem `soffice`. Aufruf: node test/zeilenhoehe.test.js
 
 const assert = require('assert');
 const path = require('path');
@@ -99,8 +91,7 @@ async function main() {
   } else {
     const { convertXlsxBufferToPdf } = require('../utils/xlsxToPdf');
 
-    // Das Blatt ist auf eine Seite skaliert; höhere Zeilen dürfen das
-    // Formular nicht auf eine zweite Seite schieben.
+    // Das Formular muss auf einer Seite bleiben.
     await pruefe('29 zweizeilige Fahrten passen weiter auf eine Seite', async () => {
       const fahrten = Array.from({ length: 29 }, () =>
         fahrt('Fahrt in die Gemeinde, Kirchenbüro, Geburtstagscafe'));

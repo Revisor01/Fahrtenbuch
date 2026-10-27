@@ -15,13 +15,7 @@ import { statusFromAbrechnung } from '../utils/statusLabels';
 import { Star, Pencil, RotateCw, ArrowLeftRight } from 'lucide-react';
 import { API_BASE_URL } from '../api/client';
 
-// Dashboard (Redesign 2026, Phase R4).
-//
-// KRITISCH: Das Dashboard hängt NICHT am Monatsfilter des Fahrten-Tabs —
-// `fahrten`/`summary` aus dem AppContext sind tab-gefiltert und werden hier
-// bewusst nicht verwendet. Alle Daten kommen aus `monthlyData` (ungefilterte
-// Monats-Aggregate) plus einem eigenen Abruf der jüngsten Monatsreports für
-// die „Zuletzt"-Liste (liefert Erstattung + Mitfahrer je Fahrt).
+// Dashboard; hängt nicht am Monatsfilter, alle Daten aus `monthlyData` und eigenem Abruf der jüngsten Monate.
 
 const formatEuro = (betrag) => (Number(betrag) || 0).toFixed(2).replace('.', ',');
 
@@ -37,9 +31,7 @@ const monatName = (ym) => {
 
 const monatJahr = (ym) => `${monatName(ym)} ${ym.slice(0, 4)}`;
 
-// Monatsstatus = Minimum der Trägerstatus (offen < eingereicht < erhalten).
-// Träger ohne Erstattung zählen nicht; Monat mit Fahrten aber ohne
-// Erstattungen gilt als „Erfasst".
+// Monatsstatus = Minimum der Trägerstatus; Monate ohne Erstattung gelten als „Erfasst“.
 const STATUS_RANG = { offen: 0, eingereicht: 1, erhalten: 2 };
 
 function monatsStatus(md) {
@@ -63,8 +55,7 @@ function offeneTraeger(md) {
   });
 }
 
-// Träger-Kürzel für die Favoriten-Kachel: Mehrwort-Namen → Initialen (max. 3),
-// Einzelwort → erste zwei Buchstaben („Kirchenkreis Dithmarschen" → „KD")
+// Kürzel: Initialen (höchstens 3) oder die ersten zwei Buchstaben.
 function traegerKuerzel(name) {
   if (!name) return '';
   const teile = String(name).split(/[\s-]+/).filter((w) => w.length > 1);
@@ -104,8 +95,7 @@ function Dashboard({ onNavigate }) {
     return t ? t.name : `Träger ${id}`;
   };
 
-  // ---- Hero: ältester nicht eingereichter (abgeschlossener) Monat ---------
-  // Der laufende Monat zählt nicht — er ist noch nicht fällig.
+  // ---- Hero: ältester abgeschlossener, nicht eingereichter Monat ----
   const hero = useMemo(() => {
     const kandidaten = monthlyData
       .filter((md) => md.yearMonth < currentYM && offeneTraeger(md).length > 0)
@@ -129,12 +119,10 @@ function Dashboard({ onNavigate }) {
     fahrten: aktuellerMonat?.fahrtenCount || 0,
     betrag: aktuellerMonat?.totalErstattung || 0,
   };
-  // Mitfahrer-Anteil getrennt ausweisen — KEIN gemischter €/km-Satz
-  // (0,30 €/km Fahrt + 0,05 €/km Mitfahrer dürfen nicht verschmelzen)
+  // Mitfahrer getrennt, Fahrt- und Mitfahrersatz dürfen nicht verschmelzen.
   const bisherMitfahrer = Number(aktuellerMonat?.erstattungen?.mitfahrer || 0);
 
-  // ---- „Unterwegs" (Desktop): ALLE eingereichten, nicht erstatteten Monate —
-  // jeder mit Schnellaktion „erhalten" (User-Feedback 07.08.)
+  // ---- „Unterwegs“: alle eingereichten, nicht erstatteten Monate ----
   const unterwegsListe = useMemo(() => {
     const istUnterwegs = (md, id) => {
       const status = md.abrechnungsStatus?.[id];
@@ -176,8 +164,7 @@ function Dashboard({ onNavigate }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthlyData, abrechnungstraeger]);
 
-  // Schnellaktion: alle eingereichten Träger eines Monats als erstattet
-  // markieren — direkt mit Undo-Toast, ein Refresh (Muster aus useEinreichen)
+  // Alle eingereichten Träger eines Monats als erstattet, mit Undo-Toast.
   const monatErhalten = async (u) => {
     const [jahr, monat] = u.ym.split('-');
     const heute = heuteISO();
@@ -239,9 +226,7 @@ function Dashboard({ onNavigate }) {
   }, [byYM]);
   const chartMax = Math.max(...chart.map((c) => c.km), 1);
 
-  // ---- „Zuletzt"/„Letzte Fahrten": eigener, ungefilterter Abruf -----------
-  // Die jüngsten Monate mit Fahrten (aus monthlyData), bis ≥ 5 Fahrten
-  // abgedeckt sind — die Monatsreports liefern Erstattung + Mitfahrer je Fahrt.
+  // ---- „Zuletzt“: eigener, ungefilterter Abruf, bis mindestens 5 Fahrten ----
   const [recent, setRecent] = useState(null); // null = lädt
 
   useEffect(() => {
@@ -306,8 +291,7 @@ function Dashboard({ onNavigate }) {
     setRecent((prev) => (prev || []).filter((f) => f.id !== tempId));
   };
 
-  // Favoriten-Tipp: kurze Rückfrage „mit Rückfahrt?" (User-Feedback 07.08.),
-  // danach sofortige Anlage mit Undo-Toast.
+  // Kurze Rückfrage „mit Rückfahrt?“, dann sofort anlegen mit Undo.
   const [favFrage, setFavFrage] = useState(null);
   // Angetippte Fahrt in „Zuletzt": zeigt Details + Aktionen
   const [aktionsFahrt, setAktionsFahrt] = useState(null);
@@ -377,8 +361,7 @@ function Dashboard({ onNavigate }) {
     })();
   };
 
-  // „Wiederholen" schreibt SOFORT eine neue Fahrt mit heutigem Datum und
-  // denselben Daten — INKLUSIVE Mitfahrer (das alte „Nochmal" verlor sie).
+  // Sofort neu anlegen mit heutigem Datum, samt Mitfahrern.
   const handleWiederholen = (fahrt) => {
     const tempId = `optimistisch-wdh-${Date.now()}`;
     setRecent((prev) => [
@@ -441,9 +424,7 @@ function Dashboard({ onNavigate }) {
     })();
   };
 
-  // Rückfahrt: dieselbe Strecke rückwärts, am Tag der Hinfahrt. Ohne
-  // optimistische Zeile — die Fahrt liegt in der Vergangenheit und muss nicht
-  // sofort oben in „Zuletzt" erscheinen.
+  // Rückfahrt am Tag der Hinfahrt, ohne optimistische Zeile.
   const handleRueckfahrt = async (fahrt) => {
     try {
       const res = await axios.post(`${API_BASE_URL}/fahrten`, {
@@ -456,12 +437,9 @@ function Dashboard({ onNavigate }) {
         kilometer: parseFloat(fahrt.kilometer) || 0,
         abrechnung: fahrt.abrechnung,
         mitfahrer: [],
-        // Beide Fahrten als Paar verknüpfen — Mitfahrer mit „Hin- und
-        // Rückfahrt" gelten dann für beide
+        // Als Paar verknüpfen, damit „Hin- und Rückfahrt“-Mitfahrer für beide gelten.
         partnerFahrtId: fahrt.id,
       });
-      // Die Rückfahrt in „Zuletzt" nachziehen: von/nach getauscht, gleiches
-      // Datum wie die Hinfahrt.
       const neueId = res.data?.id ?? `rueck-${fahrt.id}`;
       setRecent((prev) => [
         {
@@ -475,8 +453,7 @@ function Dashboard({ onNavigate }) {
           einmaliger_nach_ort: fahrt.einmaliger_von_ort,
           anlass: fahrt.anlass ? `Rückfahrt: ${fahrt.anlass}` : 'Rückfahrt',
           mitfahrer: [],
-          // Beide Seiten sofort als Paar kennzeichnen — sonst erscheint der
-          // Doppelpfeil erst nach dem nächsten Laden
+          // Sofort als Paar kennzeichnen, sonst kommt der Doppelpfeil erst nach dem Laden.
           partner_fahrt_id: fahrt.id,
         },
         ...(prev || []).map((f) =>
@@ -493,8 +470,7 @@ function Dashboard({ onNavigate }) {
 
   // ---- Kopfdaten -----------------------------------------------------------
 
-  // Begrüßung tageszeitabhängig — Grenzen: 5–10 Uhr Morgen, 11–17 Uhr Tag,
-  // sonst Abend
+  // Begrüßung: 5–10 Uhr Morgen, 11–17 Uhr Tag, sonst Abend.
   const stunde = new Date().getHours();
   const gruss = stunde >= 5 && stunde < 11
     ? 'Guten Morgen'
@@ -521,8 +497,7 @@ function Dashboard({ onNavigate }) {
   // Route unter dem Anlass: „von → nach"
   const vonName = (fahrt) => fahrt.von_ort_name || fahrt.einmaliger_von_ort || '';
 
-  // Einzeilig fuer das Aktions-Sheet: dort steht die Strecke als Wert neben
-  // einem Label, nicht als Listenzeile.
+  // Einzeilig für das Aktions-Sheet.
   const routeText = (fahrt) => {
     const von = vonName(fahrt);
     const nach = zielName(fahrt);
@@ -531,8 +506,7 @@ function Dashboard({ onNavigate }) {
 
   // ---- Wiederverwendete Teilstücke ----------------------------------------
 
-  // Erfolgszustand: nichts fällig — aber eingereichte Monate, die noch auf
-  // die Erstattung warten, werden ehrlich benannt (User-Feedback 07.08.)
+  // Nichts fällig, aber wartende Erstattungen werden genannt.
   const nUnterwegs = unterwegsListe.length;
   const heroErfolg = (
     <section
@@ -653,11 +627,7 @@ function Dashboard({ onNavigate }) {
             onAction={() => erfassung.open()}
           />
         ) : (
-          // Dieselbe Komponente wie die Fahrtenliste, nicht nur dasselbe
-          // Aussehen (Simon 16.08.): „Zuletzt" hatte die Struktur bis dahin
-          // nachgebaut, wodurch beide Listen bei jeder Aenderung wieder
-          // auseinanderliefen — zuletzt fehlten hier Betrag, Mitfahrer und
-          // Status. Eine Karte je Fahrt statt Zeilen in einer gemeinsamen Karte.
+          // Dieselbe Komponente wie die Fahrtenliste, damit beide nicht auseinanderlaufen.
           <div className="fl-cards">
             {recent === null ? (
               <div className="dash-zuletzt-laden">Fahrten werden geladen…</div>

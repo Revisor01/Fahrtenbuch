@@ -2,17 +2,7 @@ import React from 'react';
 import StatusBadge from '../ui/StatusBadge';
 import { formatBetrag, rundeKilometer } from './zeitraumUtils';
 
-// Fahrtenliste desktop (≥ 768px) als Tabelle nach dem Tabellen-Muster von
-// Dashboard Desktop (Spec Screen 5): Kopf 8/22px auf --bg, 11px/700
-// uppercase; Zeilen 13/22px mit Trennlinie und Hover --surface-2; Zahlen
-// Mono rechtsbündig; Status als Punkt + Wort. Der Prototyp zeigt keine
-// eigene Desktop-Fahrtenliste — die Spalten Datum / Anlass·Route / Träger /
-// km / Betrag / Status sind aus dem Muster abgeleitet, plus Aktionen
-// (Icon-Buttons 36px wie in den Einstellungs-Tabellen der Spec).
-//
-// „Wiederholen" öffnet den Erfassungsflow mit Prefill (Schritt 2) und
-// erscheint nur bei Fahrten mit gespeicherten Orten — einmalige Adressen
-// kennt der Schnell-Flow nicht.
+// Desktop-Fahrtenliste als Tabelle; „Wiederholen“ nur bei gespeicherten Orten.
 
 const datumLang = (datum) => {
   const d = new Date(datum);
@@ -22,9 +12,7 @@ const datumLang = (datum) => {
 };
 
 function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
-  // Der Strich markiert immer die Zeile, auf der man gerade ist — auch bei
-  // Fahrten ohne Gegenstück. Gehört eine Gegenfahrt dazu, wird die zusätzlich
-  // hinterlegt (ohne Strich), damit das Paar sofort ins Auge fällt.
+  // Strich auf der aktuellen Zeile, die Gegenfahrt nur hinterlegt.
   const [aktiveId, setAktiveId] = React.useState(null);
   const [paarId, setPaarId] = React.useState(null);
 
@@ -52,10 +40,7 @@ function FahrtenTabelle({ fahrten, statusFuer, traegerNameFuer, onOeffnen }) {
           const von = fahrt.von_ort_name || fahrt.einmaliger_von_ort || '—';
           const nach = fahrt.nach_ort_name || fahrt.einmaliger_nach_ort || '—';
           const mitfahrer = fahrt.mitfahrer || [];
-          // Eine gerade angelegte Fahrt steht nur optimistisch in der Liste
-          // und hat noch keine Server-ID. Bearbeiten, Löschen und Rückfahrt
-          // liefen mit der Temp-ID gegen die API und schlugen fehl — bis die
-          // Antwort da ist, bleibt die Zeile deshalb nicht antippbar.
+          // Ohne Server-ID nicht antippbar.
           const gesperrt = !!fahrt._optimistisch;
           return (
             <button

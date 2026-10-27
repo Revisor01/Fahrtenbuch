@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import Sheet from './ui/Sheet';
 
-// Info-Sheet nach Design-Spec (Redesign 2026): ein Sheet (mobil Bottom-Sheet,
-// desktop zentriertes Panel) mit internen Unteransichten für Impressum und
-// Datenschutz — statt gestapelter Modals. Abschnitts-Labels 12px/700
-// uppercase (--text-3), Fließtext 14px (--text-2), Links in --brand.
+// Info-Sheet mit Unteransichten für Impressum und Datenschutz statt gestapelter Modals.
 
 const TITEL = {
   info: 'Information',
@@ -143,10 +140,7 @@ export const DatenschutzInhalt = () => (
   </>
 );
 
-// Version aus dem eigenen Build (package.json, via __APP_VERSION__ zur
-// Build-Zeit eingebacken). Der frühere Live-Abruf des letzten GitHub-Releases
-// zeigte den Stand des letzten *Releases* — und war offline/bei Ratelimit
-// schlicht falsch („v1.0.0"-Fallback).
+// Version aus dem eigenen Build (__APP_VERSION__), nicht vom letzten Release.
 const APP_VERSION = __APP_VERSION__ || null;
 
 const InfoModal = ({ isOpen, onClose }) => {

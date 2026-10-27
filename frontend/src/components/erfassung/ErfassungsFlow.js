@@ -10,19 +10,11 @@ import MitfahrerModal from '../../MitfahrerModal';
 import { RICHTUNG_TEXT } from '../../FahrtForm';
 import DatumsFeld from '../ui/DatumsFeld';
 
-// Zweistufiger Erfassungsflow nach Design-Spec (Redesign 2026, Screen 2):
-// Schritt 1 „Wohin?" — Startort/Datum vorbelegt und antippbar, Ortsliste nach
-// Häufigkeit sortiert (Distanz vom Startort rechts), „Anderes Ziel eingeben".
-// Schritt 2 „Bestätigen" — Route + „km · €" (Erstattungssatz des Trägers),
-// Anlass-Chips aus dem Verlauf für dieses Ziel, Rückfahrt-Switch,
-// Abrechnungsträger-Zeile, mitzählender Speichern-Button.
-// Speichern läuft optimistisch: Sheet schließt sofort, Toast mit „Rückgängig";
-// bei API-Fehler Fehler-Toast und Rollback der optimistischen Einträge.
+// Zweistufiger Erfassungsflow, speichert optimistisch mit Undo und Rollback bei Fehlern.
 
 const STANDARD_SATZ = 0.3; // Fallback, wenn kein Erstattungssatz gepflegt ist
 
-// Lokales Datum, nicht UTC: toISOString() liefert zwischen Mitternacht und
-// 2 Uhr (Sommerzeit) noch den Vortag und wuerde Fahrten falsch datieren.
+// Lokales Datum, toISOString() liefert nachts noch den Vortag.
 const heute = () => {
   const d = new Date();
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -58,23 +50,15 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
   // prefill mit Ziel springt direkt in Schritt 2 („Wiederholen"-Signatur)
   const [step, setStep] = useState(prefill?.nachOrtId ? 2 : 1);
-  // Wer in Schritt 1 startet, hat das Datum dort schon gesetzt — dann muss es
-  // in Schritt 2 nicht noch einmal stehen (Simon 23.08.). Nur der Einstieg
-  // ueber „Wiederholen" ueberspringt Schritt 1 und braucht die Zeile, sonst
-  // liefe die Fahrt ungesehen auf das heutige Datum. Der Merker haelt fest,
-  // wie der Flow begonnen hat: Wer aus Schritt 2 zurueckgeht und wiederkommt,
-  // hat das Datum inzwischen gesehen.
+  // Datumszeile in Schritt 2 nur beim Einstieg über „Wiederholen“, sonst ist das Datum schon gesetzt.
   const startetInSchritt2 = useRef(!!prefill?.nachOrtId);
   useEffect(() => {
-    // Sobald Schritt 1 einmal sichtbar war, ist das Datum gesetzt worden —
-    // danach entfaellt die Zeile in Schritt 2 auch beim Wiederholen-Einstieg.
     if (step === 1) startetInSchritt2.current = false;
   }, [step]);
   const [startOrtId, setStartOrtId] = useState(prefill?.vonOrtId ? String(prefill.vonOrtId) : null);
   const [datum, setDatum] = useState(prefill?.datum || heute());
   const [zielOrtId, setZielOrtId] = useState(prefill?.nachOrtId ? String(prefill.nachOrtId) : null);
-  // Bei „Wiederholen" ist ein Ziel vorbelegt - dann gehoert sein Name auch
-  // ins Suchfeld, sonst stuende dort nichts, obwohl ein Ziel gewaehlt ist.
+  // Bei „Wiederholen“ den Zielnamen ins Suchfeld.
   const [suche, setSuche] = useState(() => {
     if (!prefill?.nachOrtId) return '';
     const treffer = orte?.find?.((o) => String(o.id) === String(prefill.nachOrtId));
@@ -84,13 +68,11 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   // Anlass-Auswahl klappt wie die Trägerliste in der Zeile auf
   const [anlassAuswahlOffen, setAnlassAuswahlOffen] = useState(false);
   const [anlassSuche, setAnlassSuche] = useState('');
-  // Freitext: bewusst getrennt von der Liste, damit der Unterschied zwischen
-  // „einmalig eintippen" und „dauerhaft merken" sichtbar bleibt
+  // Getrennt, damit „einmalig eintippen“ und „dauerhaft merken“ unterscheidbar bleiben.
   const [freiAnlassAktiv, setFreiAnlassAktiv] = useState(false);
   const [anlassMerken, setAnlassMerken] = useState(false);
   const [anlassSpeichert, setAnlassSpeichert] = useState(false);
-  // Frisch angelegte Anlässe sofort in der Liste zeigen, auch bevor der
-  // Context-Refresh durch ist
+  // Frisch angelegte Anlässe vor dem Context-Refresh zeigen.
   const [neueAnlaesse, setNeueAnlaesse] = useState([]);
   // null = automatisch (Heuristik/Verlauf), Nutzerwahl überschreibt
   const [rueckfahrtWahl, setRueckfahrtWahl] = useState(
@@ -100,8 +82,6 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     prefill?.abrechnung ? String(prefill.abrechnung) : null
   );
   const [traegerAuswahlOffen, setTraegerAuswahlOffen] = useState(false);
-  // Mitfahrer:innen direkt beim Erfassen — vorher liessen sie sich nur
-  // nachtraeglich ueber „Bearbeiten" eintragen
   const [mitfahrer, setMitfahrer] = useState([]);
   const [mitfahrerDialog, setMitfahrerDialog] = useState(false);
   const [mitfahrerEditIndex, setMitfahrerEditIndex] = useState(null);
@@ -124,9 +104,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   const zielSucheRef = useRef(null);
   const anlassInputRef = useRef(null);
 
-  // Verlauf (alle Fahrten) und Träger inkl. heute gültigem Erstattungssatz —
-  // je ein GET beim Öffnen; Context-`fahrten` ist auf den gewählten Monat
-  // beschränkt und taugt nicht als Historie.
+  // Eigene GETs, weil die Context-Fahrten auf den Monat beschränkt sind.
   const [historie, setHistorie] = useState(null);
   const [traegerVoll, setTraegerVoll] = useState(null);
 
@@ -209,8 +187,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     });
   }, [orte, historie, effStartOrtId]);
 
-  // Startorte: Wohnort, dann Dienstort, dann alphabetisch — die beiden sind
-  // in der Praxis fast immer der Ausgangspunkt
+  // Wohnort, Dienstort, dann alphabetisch.
   const sortierteStartorte = useMemo(() => {
     const rang = (o) => (o.ist_wohnort ? 0 : o.ist_dienstort ? 1 : 2);
     return [...orte].sort((a, b) => {
@@ -219,8 +196,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     });
   }, [orte]);
 
-  // Die Ortsliste erscheint erst beim Tippen — eine Vorabliste aller Orte
-  // stand nur im Weg und schob Datum/Startort aus dem Bild.
+  // Erst beim Tippen, eine Vorabliste schob Datum und Startort aus dem Bild.
   const zielSucheClean = suche.trim();
 
   const gefilterteZiele = useMemo(() => {
@@ -233,8 +209,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     );
   }, [sortierteZiele, zielSucheClean]);
 
-  // Startorte werden ebenfalls erst getippt gesucht; ohne Eingabe bleibt die
-  // Liste leer, damit das Suchfeld nicht in einer Wand aus Orten untergeht.
+  // Auch Startorte erst beim Tippen.
   const gefilterteStartorte = useMemo(() => {
     const q = startSuche.trim().toLowerCase();
     if (!q) return [];
@@ -245,8 +220,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     );
   }, [sortierteStartorte, startSuche]);
 
-  // Live-Adressen zusätzlich zur eigenen Ortsliste — kein Chip-Klick nötig.
-  // Erst ab 3 Zeichen und nur, wenn die eigenen Orte wenig hergeben.
+  // Live-Adressen ab 3 Zeichen, wenn die eigenen Orte wenig hergeben.
   const { vorschlaege: adressTreffer, laedt: adressenLaden, zuruecksetzen: adressenLeeren } =
     useAdressSuche(suche, { aktiv: !zielAdresse });
 
@@ -258,8 +232,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     return adressTreffer.filter((a) => !bekannt.has(a.text.toLowerCase()));
   }, [adressTreffer, orte]);
 
-  // Anlass-Vorschläge aus dem Verlauf für DIESES Ziel (häufigste zuerst).
-  // „Rückfahrt: "-Präfixe aus Altdaten werden für die Vorschläge entfernt.
+  // Anlässe aus dem Verlauf dieses Ziels, ohne „Rückfahrt: “-Präfix.
   const anlassVorschlaege = useMemo(() => {
     if (!historie || !zielOrtId) return [];
     const counts = new Map();
@@ -276,8 +249,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       .map(([a]) => a);
   }, [historie, zielOrtId]);
 
-  // Gespeicherte Anlässe: häufig genutzte oben, dann alphabetisch. Frisch
-  // angelegte kommen dazu, solange der Context-Refresh noch läuft.
+  // Häufige oben, dann alphabetisch.
   const alleAnlaesse = useMemo(() => {
     const nachName = new Map();
     [...(anlaesse || []), ...neueAnlaesse].forEach((a) => {
@@ -289,10 +261,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         nachName.set(name.toLowerCase(), { ...a, name });
       }
     });
-    // Gepflegte Reihenfolge zuerst: die Migration belegt sort_order mit dem
-    // Haeufigkeitsrang, spaeter darf der Nutzer sie umsortieren — dann muss
-    // seine Reihenfolge die Nutzungszahl schlagen. Bei gleichem Rang (etwa
-    // frisch angelegte Anlaesse) entscheidet weiter die Haeufigkeit.
+    // Gepflegte Reihenfolge vor Häufigkeit.
     return [...nachName.values()].sort((a, b) => {
       const rang = (a.sort_order ?? 0) - (b.sort_order ?? 0);
       if (rang !== 0) return rang;
@@ -301,8 +270,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     });
   }, [anlaesse, neueAnlaesse]);
 
-  // Ziel-Vorschläge stehen abgesetzt oben — sie dürfen in der Hauptliste
-  // nicht ein zweites Mal auftauchen.
+  // Ziel-Vorschläge nicht doppelt in der Hauptliste.
   const vorschlagSet = useMemo(
     () => new Set(anlassVorschlaege.map((a) => a.toLowerCase())),
     [anlassVorschlaege]
@@ -334,8 +302,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     [alleAnlaesse, vorschlagSet, anlassSucheClean]
   );
 
-  // Rückfahrt-Default: an, wenn das Ziel bisher überwiegend mit gleichtägiger
-  // Gegenrichtung erfasst wurde; ohne Verlauf: an.
+  // Rückfahrt an, wenn das Ziel meist mit gleichtägiger Gegenrichtung erfasst wurde.
   const rueckfahrtDefault = useMemo(() => {
     if (!historie || !zielOrtId || !effStartOrtId) return true;
     const hin = historie.filter(
@@ -430,9 +397,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
 
   // ---- Aktionen ----------------------------------------------------------
 
-  // Standort -> exakte Adresse (Reverse-Geocoding). Ein gespeicherter Ort wird
-  // nur übernommen, wenn er praktisch am selben Punkt liegt (~60 m, also
-  // Nachbarhausnummer); sonst zählt die tatsächlich ermittelte Adresse.
+  // Gespeicherter Ort nur bis etwa 60 m Abstand, sonst die ermittelte Adresse.
   const handleStandort = () => {
     if (!navigator.geolocation) {
       setOrtenStatus('fehler');
@@ -470,23 +435,18 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     );
   };
 
-  // km-Feld haengt allein an kmManuell. Beim Oeffnen einmalig mit der
-  // bekannten Distanz vorbelegen - sonst schnappt das Feld beim Leeren
-  // sofort wieder auf die Distanz zurueck.
+  // Einmalig vorbelegen, sonst schnappt das Feld beim Leeren zurück.
   const oeffneKmEdit = () => {
     setKmManuell((v) => (v !== '' ? v : distanzKm !== null && distanzKm !== undefined ? String(distanzKm) : ''));
     setKmEdit(true);
   };
 
-  // Neuen Anlass aus der aufgeklappten Liste heraus anlegen: optimistisch
-  // auswählen und zuklappen, bei Fehler den Eintrag wieder zurücknehmen.
+  // Optimistisch auswählen, bei Fehler zurücknehmen.
   const handleAnlassAnlegen = async (name) => {
     const sauber = name.trim();
     if (!sauber || anlassSpeichert) return;
     setAnlassSpeichert(true);
-    // sort_order bewusst hoch: das Backend haengt neue Anlaesse ans Ende der
-    // Liste. Ohne den Wert stuende der Eintrag bis zum Refresh ganz oben und
-    // sprungt danach nach unten.
+    // Hoch, weil das Backend neue Anlässe ans Ende hängt.
     const platzhalter = {
       id: `neu-${Date.now()}`,
       name: sauber,
@@ -547,16 +507,14 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
   };
 
   const handleSpeichern = async () => {
-    // Der Ort-POST laeuft vor dem Schliessen des Sheets - ohne Sperre legt ein
-    // zweiter Tap Fahrt und Ort ein zweites Mal an.
+    // Sonst legt ein zweiter Tap Fahrt und Ort doppelt an.
     if (speichertRef.current) return;
     speichertRef.current = true;
     setSpeichert(true);
 
     const anlassClean = anlass.trim();
 
-    // „Anlass merken": Freitext dauerhaft in die Liste übernehmen. Die Fahrt
-    // hängt nicht daran — schlägt es fehl, wird nur der Merker verworfen.
+    // Scheitert es, wird nur der Merker verworfen.
     if (freiAnlassAktiv && anlassMerken && anlassClean) {
       try {
         await addAnlass(anlassClean);
@@ -566,8 +524,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       }
     }
 
-    // „Ort dauerhaft speichern": Adresse vor der Fahrt als Ort anlegen, damit
-    // sie beim nächsten Mal in der eigenen Liste steht (inkl. Distanz).
+    // Adresse vor der Fahrt als Ort anlegen, samt Distanz.
     let gemerkteZielId = null;
     if (zielAdresse && zielMerken) {
       try {
@@ -593,23 +550,19 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       nachOrtId: zielId,
       einmaligerVonOrt: freierStart ? freierStart.text : null,
       einmaligerNachOrt: zielId ? null : zielAdresse?.text ?? null,
-      // Ohne Rückfahrt gehören alle an diese eine Fahrt. Mit Rückfahrt bleiben
-      // die reinen „nur zurück"-Einträge der Gegenfahrt vorbehalten.
+      // Mit Rückfahrt bleiben „nur zurück“-Einträge der Gegenfahrt.
       mitfahrer: rueckfahrt ? mitfahrer.filter((m) => m.richtung !== 'rueck') : mitfahrer,
     };
     const trips = [hinfahrt];
     if (rueckfahrt) {
-      // Rückfahrt = zweite, eigenständige Fahrt: vertauschte Orte,
-      // gleiches Datum, gleicher Träger. Die Verknüpfung als Paar setzt der
-      // POST-Lauf unten, sobald die ID der Hinfahrt bekannt ist.
+      // Die Paar-Verknüpfung setzt der POST-Lauf, sobald die Hinfahrt eine ID hat.
       trips.push({
         ...hinfahrt,
         vonOrtId: hinfahrt.nachOrtId,
         nachOrtId: hinfahrt.vonOrtId,
         einmaligerVonOrt: hinfahrt.einmaligerNachOrt,
         einmaligerNachOrt: hinfahrt.einmaligerVonOrt,
-        // Mitfahrer nicht doppelt anlegen: Wer für beide Richtungen gilt, wird
-        // vom Backend auf die Partnerfahrt gespiegelt
+        // Beide Richtungen spiegelt das Backend.
         mitfahrer: mitfahrer.filter((m) => m.richtung === 'rueck'),
       });
     }
@@ -638,24 +591,14 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
     }));
     setFahrten((prev) => [...optimistisch, ...prev]);
 
-    // Undo funktioniert auch, wenn die POSTs noch laufen: Flag + spätere Löschung
-    // waisen: Fahrten, die angelegt wurden, deren Löschung beim Aufräumen aber
-    // selbst scheiterte (Timeout, den der Server doch verarbeitet hat). Sie
-    // stehen bewusst NICHT in ids — diese Liste steuert die Partner-
-    // Verknüpfung. Der nächste Sendelauf räumt sie zuerst weg.
+    // Undo auch während der POSTs; Waisen stehen nicht in ids, weil diese die Partner-Verknüpfung steuert.
     const op = { abgebrochen: false, ids: [], waisen: [], laeuft: null };
     const entferneAngelegte = async () => {
-      // Laeuft schon ein Aufraeumen, auf dieses warten statt ein zweites zu
-      // starten. Frueher lief "Rückgängig" mitten in den POSTs und der
-      // Abschluss der Schleife gleichzeitig: der zweite Lauf traf auf bereits
-      // geloeschte IDs, brach am 404 ab, und was danach kam blieb stehen.
+      // Auf ein laufendes Aufräumen warten statt ein zweites zu starten.
       if (op.laeuft) return op.laeuft;
       op.laeuft = (async () => {
       try {
-        // So lange loeschen, bis nichts mehr nachkommt: Ein POST, der waehrend
-        // des Aufraeumens noch durchlaeuft, haengt seine ID an die geleerte
-        // Liste. Genau die Fahrt sollte der Abbruch verhindern - ohne diese
-        // Schleife bliebe sie unverknuepft stehen und liefe in die Abrechnung.
+        // Löschen, bis nichts nachkommt, sonst bliebe eine nachgereichte Fahrt stehen.
         while (op.ids.length > 0) {
           const zuLoeschen = [...op.ids];
           op.ids.length = 0;
@@ -668,8 +611,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
             }
           }
         }
-        // Auch den eigens angelegten Ort zuruecknehmen - sonst bleibt er nach
-        // "Rueckgaengig" als Waise in der Ortsliste stehen.
+        // Auch den eigens angelegten Ort zurücknehmen.
         if (gemerkteZielId) {
           try {
             await axios.delete(`/api/orte/${gemerkteZielId}`);
@@ -700,16 +642,11 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       },
     });
 
-    // Der Sendelauf als benannte Funktion: Scheitert er, hält die Closure
-    // `trips` weiterhin — das Sheet ist zwar zu und sein Zustand verworfen,
-    // die Nutzlast aber vollständig. „Erneut versuchen" ruft genau hier
-    // wieder herein, statt den Nutzer alles neu tippen zu lassen.
+    // Benannte Funktion, damit „Erneut versuchen“ mit derselben Nutzlast wieder hereinkommt.
     const sende = async () => {
       op.sendetGerade = true;
       try {
-        // Reste des vorigen Fehlversuchs zuerst wegräumen, sonst steht die
-        // halb angelegte Fahrt doppelt in der Abrechnung, sobald dieser Lauf
-        // gelingt. Was sich weiterhin nicht löschen lässt, bleibt gemerkt.
+        // Reste des vorigen Versuchs zuerst wegräumen.
         if (op.waisen.length > 0) {
           const bleibt = [];
           for (const id of op.waisen) {
@@ -723,22 +660,15 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
           op.waisen.push(...bleibt);
         }
         for (const t of trips) {
-          // Vor JEDEM POST pruefen, nicht erst nach allen: Wer waehrend des
-          // Speicherns "Rückgängig" tippt, bekam sonst die Rueckfahrt noch
-          // angelegt, nachdem die Hinfahrt bereits geloescht war — sie blieb
-          // unverknuepft zurueck und lief in die Abrechnung.
+          // Vor jedem POST prüfen, sonst entsteht nach einem Undo noch die Rückfahrt.
           if (op.abgebrochen) break;
-          // Die zweite Fahrt ist die Rückfahrt zur ersten — als Paar anlegen,
-          // damit „Hin- und Rückfahrt"-Mitfahrer für beide gelten und beim
-          // Löschen aufgeräumt wird
+          // Als Paar anlegen.
           const nutzlast = op.ids.length > 0 ? { ...t, partnerFahrtId: op.ids[0] } : t;
           const res = await axios.post('/api/fahrten', nutzlast);
           op.ids.push(res.data.id);
         }
         if (op.abgebrochen) {
-          // Erst ein laufendes Aufraeumen abwarten, dann pruefen, ob dieser
-          // Lauf noch eine ID nachgereicht hat. Die Sperre gibt sonst sofort
-          // zurueck, und die zuletzt angelegte Fahrt bliebe stehen.
+          // Erst ein laufendes Aufräumen abwarten.
           await entferneAngelegte();
           if (op.ids.length > 0) {
             op.laeuft = null;
@@ -752,31 +682,23 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         logFehler('Fehler beim Speichern der Fahrt(en):', error);
         // Rollback der optimistischen Einträge + bereits angelegter Fahrten
         setFahrten((prev) => prev.filter((f) => !tempIds.includes(f.id)));
-        // Teilerfolg zurücknehmen und erst dann die Liste leeren: Scheitert
-        // ein Delete (Timeout, den der Server doch verarbeitet hat), bleibt
-        // die ID stehen. Der nächste Versuch räumt sie mit auf, statt eine
-        // Waise auf dem Server zu hinterlassen.
+        // Teilerfolg zurücknehmen; was sich nicht löschen lässt, räumt der nächste Versuch auf.
         for (const id of op.ids) {
           try {
             await axios.delete(`/api/fahrten/${id}`);
           } catch (delErr) {
-            // Nicht in op.ids zurücklegen: Diese Liste steuert die
-            // Partner-Verknüpfung (op.ids[0]), eine Waise darin würde die
-            // neue Hinfahrt an eine fremde Fahrt hängen. Der nächste
-            // Versuch räumt sie über op.waisen auf.
+            // Nicht in op.ids, sonst hinge die neue Hinfahrt an einer fremden Fahrt.
             if (delErr?.response?.status !== 404) op.waisen.push(id);
           }
         }
         op.ids.length = 0;
         if (!op.abgebrochen) {
-          // Bleibt stehen, bis der Nutzer entscheidet — die Eingaben stecken
-          // nur noch in dieser Closure, ein ablaufender Toast verlöre sie.
+          // Bleibt stehen, die Eingaben stecken nur noch in dieser Closure.
           toast.error('Fahrt konnte nicht gespeichert werden.', {
             bleibt: true,
             actionLabel: 'Erneut versuchen',
             onAction: () => {
-              // Doppeltipp auf „Erneut versuchen" würde sonst zwei Läufe
-              // starten und die Fahrt doppelt anlegen.
+              // Gegen Doppeltipp.
               if (op.sendetGerade) return;
               setFahrten((prev) => [...optimistisch, ...prev]);
               sende();
@@ -785,8 +707,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         }
       } finally {
         op.sendetGerade = false;
-        // Sperre loesen: das Sheet ist zwar schon zu, wird es aber erneut
-        // geoeffnet (Wiederholen), muss Speichern wieder moeglich sein.
+        // Für das nächste Öffnen wieder freigeben.
         speichertRef.current = false;
         setSpeichert(false);
       }
@@ -805,8 +726,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
         isOpen={isOpen}
         onClose={onClose}
         title="Wohin?"
-        // In Schritt 1 nur schuetzen, wenn schon ein Ziel gewaehlt ist —
-        // ein leeres Sheet darf man beilaeufig wegtippen.
+        // In Schritt 1 nur mit gewähltem Ziel schützen.
         schutz={!!zielOrtId || !!zielAdresse}
       >
         {/* Datum zuerst — gleiche Reihenfolge wie im Bearbeiten-Formular */}
@@ -886,8 +806,7 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                 setZielAdresse(null);
                 setZielMerken(false);
               }
-              // Tippen hebt eine getroffene Wahl auf - sonst bliebe die
-              // Trefferliste zu und man kaeme an kein anderes Ziel.
+              // Tippen hebt die Wahl auf, sonst bliebe die Liste zu.
               if (zielOrtId) {
                 setZielOrtId(null);
                 setKmManuell('');
@@ -922,12 +841,9 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
                   setZielOrtId(String(o.id));
                   setZielAdresse(null);
                   setZielMerken(false);
-                  // Manuelle km gehoeren zum alten Ziel - sonst gilt eine
-                  // eingetippte Zahl stillschweigend auch fuers neue Ziel
+                  // Manuelle km gehören zum alten Ziel.
                   setKmManuell('');
-                  // Wie beim Startort: der gewaehlte Name steht im Feld und
-                  // die Trefferliste geht zu. Vorher blieb die Liste offen
-                  // und das Feld leer - man sah nicht, was gewaehlt war.
+                  // Gewählten Namen ins Feld, Liste zu.
                   setSuche(o.name);
                 }}
               >
@@ -1020,12 +936,9 @@ function ErfassungsFlow({ isOpen, onClose, prefill }) {
       isOpen={isOpen}
       onClose={onClose}
       ariaLabel="Fahrt bestätigen"
-      // Schritt 2 immer schuetzen: Hier stehen Ziel, Anlass, Kilometer und
-      // Mitfahrer. Ein Daumen aufs Overlay hat das bisher verworfen.
+      // Schritt 2 immer schützen.
       schutz
-      // Die Android-Zurueck-Taste (und Esc, und das Wischen) gehen von hier
-      // eine Ebene zurueck statt den ganzen Flow zu verwerfen — dasselbe,
-      // was der Zurueck-Pfeil im Sheet tut.
+      // Zurück-Taste, Esc und Wischen gehen eine Ebene zurück wie der Pfeil im Sheet.
       onZurueck={() => setStep(1)}
     >
       {/* Zurück zur Zielauswahl. Vorher war der Klick auf die Route der
@@ -1419,10 +1332,7 @@ function FehltHinweis({ text }) {
   );
 }
 
-// Startort-Suche: ein Feld für beides — eigene Orte und Live-Adressen. Die
-// Liste erscheint erst beim Tippen; ohne Eingabe steht nur der Hinweis da,
-// damit kein leerer Block entsteht. Autofokus, weil das Feld erst auf einen
-// Tap auf „Von" erscheint — der zweite Tap ins Feld wäre überflüssig.
+// Startort-Suche über eigene Orte und Live-Adressen; Autofokus, weil das Feld erst nach Tipp auf „Von“ erscheint.
 function StartSuche({ wert, setWert, orte, aktiveId, onOrt, onAdresse }) {
   const { vorschlaege, laedt } = useAdressSuche(wert);
   const feldRef = useRef(null);

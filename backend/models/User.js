@@ -25,8 +25,7 @@ class User {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(tempPassword, salt);
             
-            // Einladungslink 7 Tage gueltig - lang genug fuer Urlaub, aber nicht
-            // unbegrenzt (siehe setPassword).
+            // Einladungslink 7 Tage gültig.
             const [userResult] = await connection.execute(
                 `INSERT INTO users (username, password, role, verification_token, verification_token_expires)
                  VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))`,
@@ -53,9 +52,7 @@ class User {
     
     static async findById(id) {
         const [rows] = await db.execute(
-            // passwort_geaendert_am fuer die Token-Pruefung in der
-            // Auth-Middleware: Anmeldungen von vor dem letzten
-            // Passwortwechsel sollen nicht weitergelten.
+            // Für die Token-Prüfung in der Auth-Middleware.
             `SELECT u.id, u.username, u.role, u.email_verified, u.passwort_geaendert_am,
                 p.email, p.full_name, p.iban, 
                 p.kirchengemeinde, p.kirchspiel, p.kirchenkreis
@@ -67,10 +64,7 @@ class User {
         return rows[0];
     }
 
-    // Wie findById, liefert aber zusaetzlich den Passwort-Hash. Bewusst eine
-    // eigene Methode: findById wird an vielen Stellen benutzt (u. a. in der
-    // Auth-Middleware fuer req.user) und darf den Hash NICHT mitschleppen.
-    // Wer das Passwort pruefen muss, holt ihn hier gezielt.
+    // Wie findById mit Passwort-Hash; findById darf ihn nicht mitschleppen.
     static async findByIdMitPasswort(id) {
         const [rows] = await db.execute(
             'SELECT id, username, role, password FROM users WHERE id = ?',
@@ -91,11 +85,6 @@ class User {
         return rows[0];
     }
     
-
-    // Entfernt: updateProfile() schrieb auf users.email und users.full_name -
-    // beide Spalten liegen in user_profiles, nicht in users. Der Aufruf haette
-    // sofort ER_BAD_FIELD_ERROR geworfen. Ohne Aufrufer; das Aktualisieren
-    // laeuft ueber profileController.
 
     static async verifyEmail(token) {
         const connection = await db.getConnection();
@@ -177,10 +166,6 @@ class User {
 
         return result.affectedRows > 0;
     }
-
-    // Entfernt: getAllUsers() selektierte users.email - diese Spalte liegt in
-    // user_profiles. Ohne Aufrufer; userController hat eine eigene Abfrage mit
-    // korrektem JOIN.
 
     static async setPassword(id, newPassword) {
         const salt = await bcrypt.genSalt(10);

@@ -10,9 +10,7 @@ class MailService {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASSWORD
             },
-            // Nur auf ausdruecklichen Wunsch: der Debug-Modus schreibt den
-            // kompletten SMTP-Dialog inklusive Mailtext - und damit Passwort-
-            // Reset- und Einladungslinks im Klartext - in die Container-Logs.
+            // Nur auf Wunsch, der Debug-Modus schreibt Reset-Links in die Logs.
             logger: process.env.SMTP_DEBUG === 'true',
             debug: process.env.SMTP_DEBUG === 'true'
         });

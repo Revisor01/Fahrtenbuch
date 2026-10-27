@@ -1,12 +1,4 @@
-// Konto selbst loeschen (24.09.2026).
-//
-// Store-Blocker aus der Pre-Launch-Pruefung: Registrieren ging in der App,
-// Loeschen nur ueber eine Administratorin. Apple (5.1.1 v) und Google
-// verlangen beides in der App — eine Einreichung waere daran gescheitert.
-//
-// Geprueft wird, was ohne Datenbank pruefbar ist: Schema, Route, Absicherung
-// und die Vollstaendigkeit der Loeschkaskade. Der tatsaechliche Loeschvorgang
-// laeuft gegen die Instanz, nicht hier.
+// Konto selbst löschen: Schema, Route, Absicherung, Löschkaskade.
 
 const assert = require('assert');
 const fs = require('fs');

@@ -1,7 +1,5 @@
 #!/bin/bash
-# Xcode Cloud, nach dem Klonen: Web-Build, Capacitor-Sync, Swift-Pakete,
-# Build-Nummer und Signierung. Ohne sie fehlen dem Projekt Web-Buendel und
-# Plugin-Pakete.
+# Xcode Cloud nach dem Klonen: Web-Build, Capacitor-Sync, Swift-Pakete, Build-Nummer, Signierung.
 set -euo pipefail
 
 REPO="${CI_PRIMARY_REPOSITORY_PATH:?Nur fuer Xcode Cloud gedacht.}"
@@ -17,9 +15,7 @@ NODE_PREFIX=$(brew --prefix node@26)
 export PATH="$NODE_PREFIX/bin:$PATH"
 [ "$(node -p 'process.versions.node.split(".")[0]')" = 26 ] || { echo "FEHLER: Node 26 erwartet."; exit 1; }
 
-# Xcode Cloud vergibt die Build-Nummer. Sie ersetzt CURRENT_PROJECT_VERSION im
-# Projekt, der Versionsquelle des Repos; kleiner als die dort stehende darf sie
-# nicht sein.
+# Die Cloud-Build-Nummer ersetzt CURRENT_PROJECT_VERSION und darf nicht kleiner sein.
 # shellcheck disable=SC2016
 node -e '
 const fs = require("fs"); const datei = process.argv[1]; let pbx = fs.readFileSync(datei, "utf8");
@@ -37,15 +33,12 @@ npm ci --no-audit --no-fund
 npm run build
 npx cap sync ios
 
-# Xcode Cloud loest Swift-Pakete nicht selbst auf und verlangt eine passende
-# Package.resolved. cap sync kann die Capacitor-Version gerade geaendert haben.
+# Xcode Cloud braucht eine passende Package.resolved, cap sync kann die Version geaendert haben.
 cd "$IOS"
 xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
 [ -f "$RESOLVED" ] || { echo "FEHLER: Package.resolved fehlt nach der Paketaufloesung."; exit 1; }
 
-# Xcode Cloud signiert selbst und braucht dafuer automatisches Signieren. Die
-# Release-Konfiguration bleibt fest auf Profil und Distribution-Zertifikat, damit
-# Xcode anderswo keine Zertifikate anlegt; hier wird sie nur im Klon umgestellt.
+# Nur im Klon auf automatisches Signieren umstellen, sonst legt Xcode anderswo Zertifikate an.
 for paar in 'CODE_SIGN_STYLE = Manual;:1' 'CODE_SIGN_IDENTITY = "Apple Distribution";:2' 'PROVISIONING_PROFILE_SPECIFIER = "Fahrtenbuch AppStore";:1'; do
   zeile="${paar%:*}"; soll="${paar##*:}"
   [ "$(grep -cF "$zeile" "$PBXPROJ")" = "$soll" ] || { echo "FEHLER: '$zeile' steht nicht genau ${soll}-mal in project.pbxproj."; exit 1; }

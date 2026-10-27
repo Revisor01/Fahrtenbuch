@@ -1,17 +1,4 @@
-// Kontouebernahme ueber Exponentenschreibweise in der ID (23.09.2026).
-//
-// Befund: requireAdminOrSelf pruefte mit parseInt(req.params.id), die
-// SQL-Abfragen bekamen aber den ROHEN String. parseInt('2e1') ist 2 — MySQL
-// liest '2e1' im Vergleich mit einer INT-Spalte als Double und trifft 20.
-//
-// Auf Produktion gemessen (MySQL 8.4.11):
-//   SELECT 20 = '2e1'  ->  1
-//   SELECT 10 = '1e1'  ->  1
-//   SELECT CAST('2e1' AS UNSIGNED) -> 2
-//
-// Damit konnte Nutzer 2 per PUT /api/users/2e1 die E-Mail von Nutzer 20
-// ueberschreiben und sich danach per "Passwort vergessen" dessen Konto
-// aneignen — samt Fahrten, Adressen und IBAN.
+// IDs wie '2e1' dürfen kein fremdes Konto treffen, MySQL liest sie als 20.
 
 const assert = require('assert');
 const fs = require('fs');
@@ -138,12 +125,7 @@ pruefe('die Routen haengen an requireAdminOrSelf', () => {
 // --- 4. Passwort-Reset macht alte Sitzungen ungueltig ---------------------
 console.log('\n4 — Nach dem Zuruecksetzen gelten alte Token nicht mehr:');
 
-// Die Middleware wirft ein Token raus, dessen iat vor passwort_geaendert_am
-// liegt (authMiddleware.js:57-62). Das greift aber nur, wenn der Zeitstempel
-// beim Passwortwechsel auch gesetzt wird. setPassword im Controller schrieb
-// eigenes SQL am Model vorbei und liess ihn aus — ein gestohlenes Token blieb
-// nach "Passwort vergessen" bis zu 14 Tage gueltig und verlaengerte sich bei
-// Nutzung weiter.
+// setPassword muss passwort_geaendert_am setzen, sonst bleibt ein gestohlenes Token gültig.
 
 pruefe('setPassword-Controller setzt passwort_geaendert_am', () => {
   const quelle = lies('controllers/userController.js');

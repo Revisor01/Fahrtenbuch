@@ -13,15 +13,9 @@ class Ort {
         throw new Error('Ungültige Parameter für create');
       }
 
-      // Wohnort ist pro Nutzer eindeutig: Der Export zieht die Anschrift per
-      // LEFT JOIN auf ist_wohnort = 1 und nimmt bei zwei Treffern einen
-      // beliebigen. Das Frontend raeumt den alten ab — die API tat es nicht,
-      // ueber sie liess sich ein zweiter Wohnort setzen.
+      // Ein Wohnort je Nutzer, der Export nimmt sonst einen beliebigen.
       return await Ort.mitWohnortSperre(userId, istWohnort, async (connection) => {
-        // Neue Orte ans Ende der Liste - eine feste 0 haette sie ueber alle
-        // bestehenden gehoben und die vom Nutzer gezogene Reihenfolge
-        // durcheinandergebracht. Innerhalb derselben Transaktion gelesen,
-        // damit zwei parallele Anlagen nicht denselben Rang bekommen.
+        // Ans Ende der Liste, in der Transaktion gelesen gegen gleiche Ränge.
         const [zeilen] = await connection.execute(
           'SELECT COALESCE(MAX(sort_order), 0) + 1 AS naechster FROM orte WHERE user_id = ?',
           [userId]
@@ -40,24 +34,14 @@ class Ort {
     }
   }
 
-  /**
-   * Fuehrt eine schreibende Operation aus und stellt dabei sicher, dass danach
-   * hoechstens ein Ort des Nutzers als Wohnort markiert ist. Setzt der Aufruf
-   * keinen Wohnort, laeuft er unveraendert durch.
-   *
-   * @param {number} userId
-   * @param {boolean} setztWohnort - markiert dieser Schreibvorgang einen Wohnort?
-   * @param {(connection) => Promise<any>} arbeit - laeuft in derselben Transaktion
-   * @param {number|null} ausnahmeId - Ort, der seine Markierung behalten soll (Update)
-   */
+  /** Führt [arbeit] in einer Transaktion aus und hält höchstens einen Wohnort je Nutzer. */
   static async mitWohnortSperre(userId, setztWohnort, arbeit, ausnahmeId = null) {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
 
       if (setztWohnort) {
-        // Erst die alten Markierungen loeschen, dann schreiben — sonst
-        // entfernte das UPDATE die gerade gesetzte gleich wieder
+        // Erst die alten Markierungen löschen, dann schreiben.
         if (ausnahmeId === null) {
           await connection.execute(
             'UPDATE orte SET ist_wohnort = 0 WHERE user_id = ? AND ist_wohnort = 1',
@@ -82,18 +66,7 @@ class Ort {
     }
   }
 
-  /**
-   * Alle Orte des Nutzers in seiner selbst gewaehlten Reihenfolge.
-   *
-   * Bisher stand hier gar kein ORDER BY - die Reihenfolge war das, was die DB
-   * gerade hergab, und jede Ansicht sortierte im Frontend neu. Der Name als
-   * Zweitkriterium haelt frisch angelegte Orte mit gleicher sort_order
-   * beieinander.
-   *
-   * Wohnort und Dienstort werden hier bewusst NICHT vorgezogen: der
-   * Erfassungs-Flow sortiert sie im Frontend ohnehin selbst nach vorn, und in
-   * der Verwaltungsliste soll die vom Nutzer gezogene Reihenfolge gelten.
-   */
+  /** Alle Orte in der selbst gewählten Reihenfolge, Name als Zweitkriterium. */
   static async findAll(userId) {
     try {
       const [rows] = await db.query(
@@ -115,8 +88,7 @@ class Ort {
       if (userId === undefined || userId === null) {
         throw new Error('findById erfordert eine userId');
       }
-      // Ohne user_id-Filter lieferte diese Abfrage jedem angemeldeten Nutzer
-      // Name und Adresse fremder Orte.
+      // Mit user_id-Filter, sonst sähe jeder fremde Orte.
       const [rows] = await db.execute(
         'SELECT * FROM orte WHERE id = ? AND user_id = ?',
         [id, userId]
@@ -129,8 +101,7 @@ class Ort {
   }
 
   static async update(id, name, adresse, istWohnort, istDienstort, istKirchspiel, userId) {
-    // Wie in create: setzt dieser Ort den Wohnort, verlieren die anderen ihre
-    // Markierung — sonst haetten zwei Orte gleichzeitig ist_wohnort = 1
+    // Wie in create: höchstens ein Wohnort.
     return await Ort.mitWohnortSperre(userId, istWohnort, async (connection) => {
       const [result] = await connection.execute(
         'UPDATE orte SET name = ?, adresse = ?, ist_wohnort = ?, ist_dienstort = ?, ist_kirchspiel = ? WHERE id = ? AND user_id = ?',
@@ -141,11 +112,7 @@ class Ort {
   }
 
 
-  /**
-   * Schreibt die Reihenfolge mehrerer Orte in einem Rutsch (Drag & Drop).
-   * Transaktion: eine halb geschriebene Reihenfolge waere schlimmer als eine
-   * gar nicht geschriebene.
-   */
+  /** Schreibt die Reihenfolge mehrerer Orte in einer Transaktion. */
   static async updateSortOrder(userId, sortOrder) {
     const connection = await db.getConnection();
     try {
@@ -167,8 +134,7 @@ class Ort {
 
   static async isUsedInFahrten(id, userId) {
     try {
-      // Nur eigene Fahrten zaehlen - sonst haengt die Loeschentscheidung des
-      // Nutzers an Fahrten anderer Leute.
+      // Nur eigene Fahrten zählen.
       const [rows] = await db.execute(
         'SELECT COUNT(*) as count FROM fahrten WHERE (von_ort_id = ? OR nach_ort_id = ?) AND user_id = ?',
         [id, id, userId]
