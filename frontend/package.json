@@ -5,25 +5,25 @@
   "type": "module",
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^8.0.1",
-    "@capacitor/android": "^8.5.3",
+    "@capacitor/android": "^8.6.0",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3",
     "@capacitor/filesystem": "^8.1.5",
     "@capacitor/haptics": "^8.0.2",
-    "@capacitor/ios": "^8.5.3",
+    "@capacitor/ios": "^8.6.0",
     "@capacitor/keyboard": "^8.0.6",
     "@capacitor/network": "^8.0.1",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/share": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.4",
-    "@capgo/capacitor-native-navigation": "^8.15.1",
+    "@capgo/capacitor-native-navigation": "^8.16.0",
     "axios": "^1.21.0",
     "jszip": "^3.10.2",
-    "lucide-react": "^1.62.0",
+    "lucide-react": "^1.64.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.5"
   },
   "scripts": {
     "start": "vite",
@@ -43,7 +43,7 @@
     ]
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.3",
+    "@capacitor/cli": "^8.6.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.2",
     "postcss": "^8.5.32",
