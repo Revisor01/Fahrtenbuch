@@ -17,10 +17,10 @@
     "@capacitor/share": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.4",
-    "@capgo/capacitor-native-navigation": "^8.16.0",
+    "@capgo/capacitor-native-navigation": "^8.16.1",
     "axios": "^1.21.0",
     "jszip": "^3.10.2",
-    "lucide-react": "^1.64.0",
+    "lucide-react": "^1.69.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5"
@@ -44,11 +44,11 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",
-    "@tailwindcss/postcss": "^4.3.3",
-    "@vitejs/plugin-react": "^6.1.2",
+    "@tailwindcss/postcss": "^4.3.4",
+    "@vitejs/plugin-react": "^6.2.1",
     "postcss": "^8.5.32",
     "tailwindcss": "^4.3.3",
-    "vite": "^8.3.5",
+    "vite": "^8.3.6",
     "vite-plugin-pwa": "^2.0.0"
   },
   "overrides": {
