@@ -30,6 +30,9 @@
     "nodemon": "^3.1.14"
   },
   "overrides": {
-    "uuid": "^14.0.3"
+    "uuid": "^14.0.3",
+    "nodemon": {
+      "minimatch": "^11.0.9"
+    }
   }
 }
