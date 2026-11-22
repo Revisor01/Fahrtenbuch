@@ -642,10 +642,10 @@ const paths = {
 
   // ===================== Profil =====================
   '/api/profile': {
-    get: { tags: ['Profil'], summary: 'Eigenes Profil abrufen', responses: { 200: ANTWORT('Stammdaten samt Wohn- und Dienstort', { username: 'musterfrau', email: 'person@example.org', full_name: 'Vorname Nachname', iban: 'DE00…', kirchengemeinde: 'Beispielgemeinde', wohnort: 'Zuhause', dienstort: 'Büro' }), 401: FEHLER[401], 404: MELDUNG('Profil nicht gefunden'), 500: FEHLER[500] } },
+    get: { tags: ['Profil'], summary: 'Eigenes Profil abrufen', responses: { 200: ANTWORT('Stammdaten samt Wohn- und Dienstort; `email_ausstehend` nennt eine neue, noch nicht bestätigte Adresse oder ist null (neu 22.11.2026)', { username: 'musterfrau', email: 'person@example.org', email_ausstehend: null, full_name: 'Vorname Nachname', iban: 'DE00…', kirchengemeinde: 'Beispielgemeinde', wohnort: 'Zuhause', dienstort: 'Büro' }), 401: FEHLER[401], 404: MELDUNG('Profil nicht gefunden'), 500: FEHLER[500] } },
     put: {
       tags: ['Profil'], summary: 'Profil ändern',
-      description: 'Bei geänderter E-Mail-Adresse wird eine Bestätigungsmail verschickt und die Adresse gilt bis dahin als unbestätigt. Nicht gesendete Felder bleiben wie gespeichert, `null` leert ein Feld. (Geändert 27.10.2026: Teilangaben endeten vorher mit 500.)',
+      description: 'Bei geänderter E-Mail-Adresse geht eine Bestätigungsmail an die neue Adresse; gespeichert wird sie erst mit der Bestätigung, bis dahin bleibt die bisherige gültig. (Geändert 22.11.2026: vorher galt die neue Adresse sofort, ohne Bestätigung.) Nicht gesendete Felder bleiben wie gespeichert, `null` leert ein Feld. (Geändert 27.10.2026: Teilangaben endeten vorher mit 500.)',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string', format: 'email' }, fullName: { type: ['string', 'null'] }, iban: { type: ['string', 'null'] }, kirchengemeinde: { type: ['string', 'null'] }, kirchspiel: { type: ['string', 'null'] }, kirchenkreis: { type: ['string', 'null'] } } } } } },
       responses: { 200: MELDUNG('Profil erfolgreich aktualisiert.'), 400: VALIDIERUNG, 401: FEHLER[401], 500: FEHLER[500] },
     },
@@ -683,7 +683,7 @@ const paths = {
   '/api/users/{id}': {
     put: {
       tags: ['Benutzer'], summary: 'Konto ändern', parameters: [pfadId('ID des Kontos')],
-      description: 'Für Administratoren oder das eigene Konto. Die Rolle darf nur ein Administrator setzen. Kein Teil-Update — fehlende Felder werden geleert.',
+      description: 'Für Administratoren oder das eigene Konto. Die Rolle darf nur ein Administrator setzen. Kein Teil-Update — fehlende Felder werden geleert. Eine geänderte E-Mail-Adresse gilt erst nach Bestätigung über den Link an die neue Adresse (geändert 22.11.2026).',
       requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { username: { type: 'string', minLength: 3, maxLength: 50 }, email: { type: 'string', format: 'email' }, role: { type: 'string', enum: ['admin', 'user'] }, fullName: { type: ['string', 'null'] }, iban: { type: ['string', 'null'] }, kirchengemeinde: { type: ['string', 'null'] }, kirchspiel: { type: ['string', 'null'] }, kirchenkreis: { type: ['string', 'null'] } } } } } },
       responses: { 200: MELDUNG('Benutzerprofil erfolgreich aktualisiert'), 400: VALIDIERUNG, 401: FEHLER[401], 403: ANTWORT('Fremdes Konto oder Rollenwechsel ohne Adminrecht', { message: 'Keine Berechtigung, die Rolle zu ändern' }), 500: FEHLER[500] },
     },

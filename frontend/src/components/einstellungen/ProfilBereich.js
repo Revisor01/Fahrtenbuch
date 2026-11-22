@@ -111,6 +111,7 @@ function ProfilBereich() {
       delete cleanProfile.dienstort;
       delete cleanProfile.dienstort_adresse;
       delete cleanProfile.username;
+      delete cleanProfile.email_ausstehend;
 
       await axios.put('/api/profile', cleanProfile);
       toast.success('Profil aktualisiert.');
@@ -255,6 +256,11 @@ function ProfilBereich() {
               </span>
             )}
           </div>
+          {profile.email_ausstehend && profile.email_ausstehend !== profile.email && (
+            <p className="text-sm mt-1" style={{ color: 'var(--accent-text)' }}>
+              Die neue Adresse {profile.email_ausstehend} gilt, sobald du den Link in der Mail an sie bestätigst.
+            </p>
+          )}
         </div>
 
         <div>

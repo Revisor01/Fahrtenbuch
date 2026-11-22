@@ -210,8 +210,9 @@ exports.updateUser = async (req, res) => {
                 [id]
             );
             
-           // Bei E-Mail-Änderung Verifikation starten.
-           if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
+           // Eine neue Adresse gilt erst nach Bestätigung, sonst übernimmt ein gestohlenes Token per Passwort-Reset das Konto.
+           const emailWechsel = Boolean(email && existingProfile.length > 0 && email !== existingProfile[0].email);
+           if (emailWechsel) {
                 // Eine fremde, vergebene Adresse nähme der anderen Person den Passwort-Reset.
                 const [belegt] = await connection.execute(
                     'SELECT user_id FROM user_profiles WHERE email = ? AND user_id != ?',
@@ -222,12 +223,6 @@ exports.updateUser = async (req, res) => {
                     return res.status(400).json({ message: 'Diese E-Mail-Adresse wird bereits verwendet' });
                 }
 
-               // Email verifiziert Status wieder auf 0 setzen
-                 await connection.execute(
-                    'UPDATE users SET email_verified = FALSE WHERE id = ?',
-                    [id]
-                );
-              
                 const verificationToken = crypto.randomBytes(32).toString('hex');
                 await connection.execute(
                     'INSERT INTO email_verifications (user_id, new_email, verification_token, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))',
@@ -240,7 +235,7 @@ exports.updateUser = async (req, res) => {
             if (existingProfile.length > 0) {
                 await connection.execute(
                     'UPDATE user_profiles SET email = ?, full_name = ?, iban = ?, kirchengemeinde = ?, kirchspiel = ?, kirchenkreis = ? WHERE user_id = ?',
-                    [email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis, id]
+                    [emailWechsel ? existingProfile[0].email : email, fullName, iban, kirchengemeinde, kirchspiel, kirchenkreis, id]
                 );
             } else {
                 await connection.execute(
