@@ -64,7 +64,7 @@ for eintrag in "${INSTANZEN[@]}"; do
   fi
 
   datei="${db}_${STAND}.sql.gz"
-  docker exec "$container" mysqldump -u "$nutzer" -p"$kennwort" \
+  MYSQL_PWD="$kennwort" docker exec -e MYSQL_PWD "$container" mysqldump -u "$nutzer" \
     --single-transaction "$db" 2>/dev/null | gzip > "$ZIEL/$datei"
 
   # mysqldump kann scheitern, waehrend gzip eine leere Datei schreibt.
@@ -110,7 +110,7 @@ elif [[ ${#DATEIEN[@]} -gt 0 ]]; then
   done
   befehle+="quit\n"
 
-  if echo -e "$befehle" | sftp -o StrictHostKeyChecking=no -P 23 "$SFTP_ZIEL" >> "$LOG" 2>&1; then
+  if echo -e "$befehle" | sftp -o StrictHostKeyChecking=accept-new -P 23 "$SFTP_ZIEL" >> "$LOG" 2>&1; then
     notiz "OK auswaerts gesichert: ${#DATEIEN[@]} Datei(en)"
   else
     notiz "FEHLER beim Uebertragen zur Hetzner-Box"

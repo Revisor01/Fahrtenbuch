@@ -21,13 +21,13 @@ abbruch() { fehler "$1"; exit 1; }
 
 # ---------------------------------------------------------------- Hilfsmittel
 
-# Passwort nur aus der Umgebung.
+# Kennwort über SSHPASS, damit es nicht in der Prozessliste steht.
 fern() {
   local host="$1"; shift
   if [[ -n "${KKD_SSH_HOST:-}" && "$host" == *"$KKD_SSH_HOST"* && -n "${KKD_SSH_PASS:-}" ]]; then
-    sshpass -p "$KKD_SSH_PASS" ssh -o StrictHostKeyChecking=no "$host" "$@"
+    SSHPASS="$KKD_SSH_PASS" sshpass -e ssh -o StrictHostKeyChecking=accept-new "$host" "$@"
   else
-    ssh -o StrictHostKeyChecking=no "$host" "$@"
+    ssh -o StrictHostKeyChecking=accept-new "$host" "$@"
   fi
 }
 
@@ -72,7 +72,8 @@ datenbank_sichern() {
     # DB_USER statt root, fuer den Dump der eigenen Datenbank genuegt das.
     nutzer=\$(grep -m1 '^DB_USER=' $PFAD/stack.env | cut -d= -f2-)
     kennwort=\$(grep -m1 '^DB_PASSWORD=' $PFAD/stack.env | cut -d= -f2-)
-    docker exec $DB_CONTAINER mysqldump -u \"\$nutzer\" -p\"\$kennwort\" \
+    export MYSQL_PWD=\"\$kennwort\"
+    docker exec -e MYSQL_PWD $DB_CONTAINER mysqldump -u \"\$nutzer\" \
       --single-transaction $DB_NAME 2>/dev/null | gzip > \$datei
     # Ein Dump, der nichts enthaelt, ist schlimmer als keiner — er taeuscht.
     [ -s \$datei ] || { echo LEER; exit 1; }
@@ -90,7 +91,8 @@ datenstand() {
   fern "$HOST" "
     nutzer=\$(grep -m1 '^DB_USER=' $PFAD/stack.env | cut -d= -f2-)
     kennwort=\$(grep -m1 '^DB_PASSWORD=' $PFAD/stack.env | cut -d= -f2-)
-    docker exec $DB_CONTAINER mysql -u \"\$nutzer\" -p\"\$kennwort\" \
+    export MYSQL_PWD=\"\$kennwort\"
+    docker exec -e MYSQL_PWD $DB_CONTAINER mysql -u \"\$nutzer\" \
       -N -e 'SELECT CONCAT((SELECT COUNT(*) FROM $DB_NAME.users), \"/\", (SELECT COUNT(*) FROM $DB_NAME.fahrten));' 2>/dev/null
   " 2>/dev/null || echo ""
 }
