@@ -5,6 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const crypto = require('crypto');
 
 let geprueft = 0;
 function pruefe(beschreibung, fn) {
@@ -14,8 +15,8 @@ function pruefe(beschreibung, fn) {
 }
 
 const skript = path.join(__dirname, '../../deploy/backup.sh');
-const KENNWORT = 'db-kennwort-attrappe';
-const PASSPHRASE = 'passphrase-attrappe-1234567890';
+const KENNWORT = crypto.randomBytes(12).toString('hex');
+const PASSPHRASE = crypto.randomBytes(24).toString('hex');
 const STACK_ENV = `DB_USER=fahrtenbuch\nDB_PASSWORD=${KENNWORT}\nJWT_SECRET=jwt-attrappe\n`;
 
 function lauf({ mitPassphrase }) {
@@ -76,18 +77,18 @@ console.log('\nSicherung (Trockenlauf):');
 
 const gut = lauf({ mitPassphrase: true });
 
-pruefe('mit Passphrase: Lauf endet ohne Fehler', () => {
+pruefe('mit Schluesseldatei, Lauf endet ohne Fehler', () => {
   assert.strictEqual(gut.status, 0, gut.log);
   assert.ok(/abgeschlossen, alles in Ordnung/.test(gut.log));
 });
 
-pruefe('mit Passphrase: Dump und verschluesselte stack.env liegen im Ziel', () => {
+pruefe('mit Schluesseldatei, Dump und verschluesselte stack.env liegen im Ziel', () => {
   assert.strictEqual(gut.dateien.length, 2, gut.dateien.join(', '));
   assert.ok(/^fahrtenbuch_.*\.sql\.gz$/.test(gut.dateien[0]));
   assert.ok(/^secrets_.*\.tar\.gz\.enc$/.test(gut.dateien[1]));
 });
 
-pruefe('mit Passphrase: stack.env laesst sich mit der Passphrase zurueckholen', () => {
+pruefe('mit Schluesseldatei, stack.env laesst sich mit der Passphrase zurueckholen', () => {
   const enc = path.join(gut.ziel, gut.dateien[1]);
   assert.ok(!fs.readFileSync(enc).includes(KENNWORT), 'Kennwort im Klartext in der Sicherung');
   const aus = path.join(gut.wurzel, 'zurueck');
@@ -100,14 +101,14 @@ pruefe('mit Passphrase: stack.env laesst sich mit der Passphrase zurueckholen', 
   assert.strictEqual(fs.readFileSync(path.join(aus, stackRelativ), 'utf8'), STACK_ENV);
 });
 
-pruefe('mit Passphrase: falsche Passphrase entschluesselt nicht', () => {
+pruefe('mit Schluesseldatei, falsche Passphrase entschluesselt nicht', () => {
   const r = spawnSync('bash', ['-c',
-    'openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -pass pass:falsch | tar tzf - >/dev/null',
-    '_', path.join(gut.ziel, gut.dateien[1])], { encoding: 'utf8' });
+    'openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -pass env:FALSCH | tar tzf - >/dev/null',
+    '_', path.join(gut.ziel, gut.dateien[1])], { env: { ...process.env, FALSCH: crypto.randomBytes(24).toString('hex') }, encoding: 'utf8' });
   assert.notStrictEqual(r.status, 0);
 });
 
-pruefe('mit Passphrase: beide Dateien gehen auswaerts, die Passphrase nicht', () => {
+pruefe('mit Schluesseldatei, beide Dateien gehen auswaerts, die Passphrase nicht', () => {
   assert.strictEqual((gut.sftpBefehle.match(/^put /gm) || []).length, 2);
   assert.ok(gut.sftpBefehle.includes(gut.dateien[1]));
   assert.ok(!gut.sftpBefehle.includes('passphrase'));
@@ -130,7 +131,7 @@ pruefe('Protokoll enthaelt weder Kennwort noch Passphrase', () => {
 
 const ohne = lauf({ mitPassphrase: false });
 
-pruefe('ohne Passphrase: Lauf meldet Fehler, Dump wird trotzdem gesichert', () => {
+pruefe('ohne Schluesseldatei, Lauf meldet Fehler, Dump wird trotzdem gesichert', () => {
   assert.strictEqual(ohne.status, 1);
   assert.ok(/Secrets werden NICHT gesichert/.test(ohne.log));
   assert.strictEqual(ohne.dateien.length, 1, ohne.dateien.join(', '));
