@@ -13,6 +13,9 @@ exports.getProfile = async (req, res) => {
                 u.username, 
                 u.email_verified,
                 p.email, 
+                (SELECT ev.new_email FROM email_verifications ev
+                    WHERE ev.user_id = u.id AND ev.expires_at > NOW()
+                    ORDER BY ev.id DESC LIMIT 1) AS email_ausstehend,
                 p.full_name, 
                 p.iban, 
                 p.kirchengemeinde, 
@@ -56,8 +59,9 @@ exports.updateProfile = async (req, res) => {
                 [userId]
             );
 
-            // Bei E-Mail-Änderung Verifikation starten
-            if (email && existingProfile.length > 0 && email !== existingProfile[0].email) {
+            // Eine neue Adresse gilt erst nach Bestätigung, sonst übernimmt ein gestohlenes Token per Passwort-Reset das Konto.
+            const emailWechsel = Boolean(email && existingProfile.length > 0 && email !== existingProfile[0].email);
+            if (emailWechsel) {
                  // Eine fremde, vergebene Adresse nähme der anderen Person den Passwort-Reset.
                  const [belegt] = await connection.execute(
                     'SELECT user_id FROM user_profiles WHERE email = ? AND user_id != ?',
@@ -68,12 +72,6 @@ exports.updateProfile = async (req, res) => {
                     return res.status(400).json({ message: 'Diese E-Mail-Adresse wird bereits verwendet' });
                  }
 
-                 // email_verified wieder auf 0 setzen
-                  await connection.execute(
-                    'UPDATE users SET email_verified = FALSE WHERE id = ?',
-                    [userId]
-                 );
-                 
                  const verificationToken = crypto.randomBytes(32).toString('hex');
                 await connection.execute(
                     'INSERT INTO email_verifications (user_id, new_email, verification_token, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))',
@@ -91,7 +89,7 @@ exports.updateProfile = async (req, res) => {
             const alt = existingProfile[0] || {};
             const wert = (neu, gespeichert) => (neu === undefined ? (gespeichert ?? null) : neu);
             const felder = [
-                wert(email, alt.email),
+                emailWechsel ? alt.email : wert(email, alt.email),
                 wert(fullName, alt.full_name),
                 wert(iban, alt.iban),
                 wert(kirchengemeinde, alt.kirchengemeinde),

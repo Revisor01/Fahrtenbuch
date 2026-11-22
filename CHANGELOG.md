@@ -17,6 +17,9 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Die App startet im Browser schneller: Beim Start werden nur noch die Teile geladen, die sofort gebraucht werden. Was zum Erstellen von ZIP-Dateien oder allein in der Handy-App nötig ist, kommt erst bei Bedarf dazu — gemessen 164 kB statt 203 kB beim Start
 - Abrechnungen und Berichte prüfen jetzt den angefragten Zeitraum: Jahre von 2000 bis 2100, Monate 1 bis 12, höchstens zehn Jahre am Stück und nicht rückwärts laufend. An dem, was sich in der App auswählen lässt, ändert sich nichts — unsinnige Anfragen können den Server aber nicht mehr über Stunden beschäftigen
 
+### Sicherheit
+- Eine neue E-Mail-Adresse im Profil gilt erst, wenn der Link in der Mail an sie bestätigt ist. Bis dahin bleibt die bisherige Adresse gültig, und das Profil zeigt die wartende an.
+
 ### Sonstiges
 - Programmbibliotheken mit bekannten Sicherheitslücken aktualisiert, unter anderem für den Mailversand und die Handy-App. Für Nutzende ändert sich nichts
 - Veraltete Programmbibliotheken im Bauwerkzeug aktualisiert. An der Anwendung selbst ändert sich nichts
