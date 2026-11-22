@@ -21,6 +21,7 @@ die Versionierung folgt [SemVer](https://semver.org/lang/de/).
 - Eine neue E-Mail-Adresse im Profil gilt erst, wenn der Link in der Mail an sie bestätigt ist. Bis dahin bleibt die bisherige Adresse gültig, und das Profil zeigt die wartende an.
 
 ### Sonstiges
+- Die nächtliche Sicherung nimmt die Zugangsdaten des Servers verschlüsselt mit, damit eine Instanz nach einem Totalausfall aus der Sicherung allein wieder in Betrieb gehen kann
 - Programmbibliotheken mit bekannten Sicherheitslücken aktualisiert, unter anderem für den Mailversand und die Handy-App. Für Nutzende ändert sich nichts
 - Veraltete Programmbibliotheken im Bauwerkzeug aktualisiert. An der Anwendung selbst ändert sich nichts
 - API-Schlüssel für die Kurzbefehle liegen nicht mehr lesbar in der Datenbank. Bestehende Kurzbefehle funktionieren unverändert weiter — es muss nichts neu eingerichtet werden

@@ -12,6 +12,8 @@ INSTANZEN=(
 
 ZIEL="/opt/backups/fahrtenbuch"
 LOG="/opt/backups/fahrtenbuch-backup.log"
+# Passphrase bleibt auf dem Server und geht nie mit auswaerts.
+PASSPHRASE_DATEI="/root/.backup-passphrase"
 # Ziel als benutzer@host, aus der Umgebung oder aus backup.env neben dem Skript.
 [[ -f "$(dirname "$0")/backup.env" ]] && source "$(dirname "$0")/backup.env"
 SFTP_ZIEL="${BACKUP_SFTP_ZIEL:-}"
@@ -95,6 +97,43 @@ if [[ -d /opt/docker-mailserver/config ]]; then
   else
     notiz "FEHLER Mailserver-Konfiguration"
     FEHLER+=("Mailserver-Konfiguration")
+  fi
+fi
+
+# ------------------------------------------------ Secrets (verschluesselt)
+# Ohne die stack.env ist ein Dump nach einem Totalverlust nicht in Betrieb zu nehmen.
+
+STACK_ENVS=()
+for eintrag in "${INSTANZEN[@]}"; do
+  IFS='|' read -r _ pfad _ _ <<< "$eintrag"
+  [[ -f "$pfad/stack.env" ]] && STACK_ENVS+=("${pfad#/}/stack.env")
+done
+
+if [[ ! -r "$PASSPHRASE_DATEI" ]]; then
+  notiz "FEHLER $PASSPHRASE_DATEI fehlt — Secrets werden NICHT gesichert"
+  FEHLER+=("Secrets ohne Passphrase")
+elif [[ ${#STACK_ENVS[@]} -eq 0 ]]; then
+  notiz "FEHLER keine stack.env gefunden — Secrets werden NICHT gesichert"
+  FEHLER+=("Secrets: keine stack.env")
+else
+  secretdatei="secrets_${STAND}.tar.gz.enc"
+  if tar czf - -C / "${STACK_ENVS[@]}" 2>/dev/null \
+      | openssl enc -aes-256-cbc -pbkdf2 -salt -pass "file:$PASSPHRASE_DATEI" \
+        -out "$ZIEL/$secretdatei" 2>>"$LOG"; then
+    # Eine Sicherung, die sich nicht entschluesseln laesst, merkt man sonst erst im Ernstfall.
+    if openssl enc -d -aes-256-cbc -pbkdf2 -pass "file:$PASSPHRASE_DATEI" \
+        -in "$ZIEL/$secretdatei" 2>/dev/null | tar tzf - >/dev/null 2>&1; then
+      notiz "OK Secrets verschluesselt gesichert: $secretdatei"
+      DATEIEN+=("$secretdatei")
+    else
+      notiz "FEHLER Secrets: Ergebnis liess sich nicht zurueckentschluesseln"
+      FEHLER+=("Secrets nicht rueckholbar")
+      rm -f "$ZIEL/$secretdatei"
+    fi
+  else
+    notiz "FEHLER Secrets konnten nicht gesichert werden"
+    FEHLER+=("Secrets")
+    rm -f "$ZIEL/$secretdatei"
   fi
 fi
 
